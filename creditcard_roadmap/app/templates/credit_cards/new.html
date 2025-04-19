@@ -1,0 +1,319 @@
+{% extends 'base.html' %} {% block content %}
+<h1 class="mb-4">Add New Credit Card</h1>
+
+<form method="post" action="{{ url_for('credit_cards.new') }}">
+  <div class="card mb-4">
+    <div class="card-header">
+      <h5>Basic Information</h5>
+    </div>
+    <div class="card-body">
+      <div class="row mb-3">
+        <div class="col-md-6">
+          <label for="name" class="form-label">Card Name</label>
+          <input
+            type="text"
+            class="form-control"
+            id="name"
+            name="name"
+            required
+          />
+        </div>
+        <div class="col-md-6">
+          <label for="issuer" class="form-label">Card Issuer</label>
+          <input
+            type="text"
+            class="form-control"
+            id="issuer"
+            name="issuer"
+            required
+          />
+        </div>
+      </div>
+      <div class="row mb-3">
+        <div class="col-md-6">
+          <label for="annual_fee" class="form-label">Annual Fee</label>
+          <div class="input-group">
+            <span class="input-group-text">$</span>
+            <input
+              type="number"
+              step="0.01"
+              min="0"
+              class="form-control"
+              id="annual_fee"
+              name="annual_fee"
+              value="0"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card mb-4">
+    <div class="card-header">
+      <h5>Signup Bonus</h5>
+    </div>
+    <div class="card-body">
+      <div class="row mb-3">
+        <div class="col-md-6">
+          <label for="signup_bonus_points" class="form-label"
+            >Bonus Points</label
+          >
+          <input
+            type="number"
+            class="form-control"
+            id="signup_bonus_points"
+            name="signup_bonus_points"
+            value="0"
+          />
+        </div>
+        <div class="col-md-6">
+          <label for="signup_bonus_value" class="form-label"
+            >Estimated Value</label
+          >
+          <div class="input-group">
+            <span class="input-group-text">$</span>
+            <input
+              type="number"
+              step="0.01"
+              min="0"
+              class="form-control"
+              id="signup_bonus_value"
+              name="signup_bonus_value"
+              value="0"
+            />
+          </div>
+        </div>
+      </div>
+      <div class="row mb-3">
+        <div class="col-md-6">
+          <label for="signup_bonus_spend_requirement" class="form-label"
+            >Spend Requirement</label
+          >
+          <div class="input-group">
+            <span class="input-group-text">$</span>
+            <input
+              type="number"
+              step="0.01"
+              min="0"
+              class="form-control"
+              id="signup_bonus_spend_requirement"
+              name="signup_bonus_spend_requirement"
+              value="0"
+            />
+          </div>
+        </div>
+        <div class="col-md-6">
+          <label for="signup_bonus_time_period" class="form-label"
+            >Time Period (months)</label
+          >
+          <input
+            type="number"
+            min="1"
+            class="form-control"
+            id="signup_bonus_time_period"
+            name="signup_bonus_time_period"
+            value="3"
+          />
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <h5 class="mb-0">Reward Categories</h5>
+      <button
+        type="button"
+        class="btn btn-sm btn-outline-primary"
+        id="add-category"
+      >
+        Add Category
+      </button>
+    </div>
+    <div class="card-body">
+      <div id="categories-container">
+        <!-- Categories will be added here dynamically -->
+        <div class="row mb-3 category-row">
+          <div class="col-md-6">
+            <label class="form-label">Category</label>
+            <input
+              type="text"
+              class="form-control"
+              name="category_name_0"
+              placeholder="e.g., Gas, Groceries"
+            />
+          </div>
+          <div class="col-md-5">
+            <label class="form-label">Reward Percentage</label>
+            <div class="input-group">
+              <input
+                type="number"
+                step="0.1"
+                min="0"
+                class="form-control"
+                name="category_percentage_0"
+                value="0"
+              />
+              <span class="input-group-text">%</span>
+            </div>
+          </div>
+          <div class="col-md-1 d-flex align-items-end mb-2">
+            <button
+              type="button"
+              class="btn btn-sm btn-outline-danger remove-category"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <h5 class="mb-0">Card Offers</h5>
+      <button
+        type="button"
+        class="btn btn-sm btn-outline-primary"
+        id="add-offer"
+      >
+        Add Offer
+      </button>
+    </div>
+    <div class="card-body">
+      <div id="offers-container">
+        <!-- Offers will be added here dynamically -->
+        <div class="row mb-3 offer-row">
+          <div class="col-md-4">
+            <label class="form-label">Offer Type</label>
+            <input
+              type="text"
+              class="form-control"
+              name="offer_type_0"
+              placeholder="e.g., Travel Credit"
+            />
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">Amount</label>
+            <div class="input-group">
+              <span class="input-group-text">$</span>
+              <input
+                type="number"
+                step="0.01"
+                min="0"
+                class="form-control"
+                name="offer_amount_0"
+                value="0"
+              />
+            </div>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Frequency</label>
+            <select class="form-select" name="offer_frequency_0">
+              <option value="one_time">One Time</option>
+              <option value="annual">Annual</option>
+              <option value="monthly">Monthly</option>
+            </select>
+          </div>
+          <div class="col-md-1 d-flex align-items-end mb-2">
+            <button
+              type="button"
+              class="btn btn-sm btn-outline-danger remove-offer"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="mb-4">
+    <button type="submit" class="btn btn-primary">Add Credit Card</button>
+    <a href="{{ url_for('credit_cards.index') }}" class="btn btn-secondary ms-2"
+      >Cancel</a
+    >
+  </div>
+</form>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    // Add Category
+    document
+      .getElementById("add-category")
+      .addEventListener("click", function () {
+        const container = document.getElementById("categories-container");
+        const categoryCount =
+          container.querySelectorAll(".category-row").length;
+        const newRow = document.createElement("div");
+        newRow.className = "row mb-3 category-row";
+        newRow.innerHTML = `
+            <div class="col-md-6">
+                <label class="form-label">Category</label>
+                <input type="text" class="form-control" name="category_name_${categoryCount}" placeholder="e.g., Gas, Groceries">
+            </div>
+            <div class="col-md-5">
+                <label class="form-label">Reward Percentage</label>
+                <div class="input-group">
+                    <input type="number" step="0.1" min="0" class="form-control" name="category_percentage_${categoryCount}" value="0">
+                    <span class="input-group-text">%</span>
+                </div>
+            </div>
+            <div class="col-md-1 d-flex align-items-end mb-2">
+                <button type="button" class="btn btn-sm btn-outline-danger remove-category">✕</button>
+            </div>`;
+        container.appendChild(newRow);
+      });
+
+    // Remove Category
+    document.body.addEventListener("click", function (e) {
+      if (e.target.classList.contains("remove-category")) {
+        const categoryRow = e.target.closest(".category-row");
+        categoryRow.remove();
+      }
+    });
+
+    // Add Offer
+    document.getElementById("add-offer").addEventListener("click", function () {
+      const container = document.getElementById("offers-container");
+      const offerCount = container.querySelectorAll(".offer-row").length;
+      const newRow = document.createElement("div");
+      newRow.className = "row mb-3 offer-row";
+      newRow.innerHTML = `
+            <div class="col-md-4">
+                <label class="form-label">Offer Type</label>
+                <input type="text" class="form-control" name="offer_type_${offerCount}" placeholder="e.g., Travel Credit">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Amount</label>
+                <div class="input-group">
+                    <span class="input-group-text">$</span>
+                    <input type="number" step="0.01" min="0" class="form-control" name="offer_amount_${offerCount}" value="0">
+                </div>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Frequency</label>
+                <select class="form-select" name="offer_frequency_${offerCount}">
+                    <option value="one_time">One Time</option>
+                    <option value="annual">Annual</option>
+                    <option value="monthly">Monthly</option>
+                </select>
+            </div>
+            <div class="col-md-1 d-flex align-items-end mb-2">
+                <button type="button" class="btn btn-sm btn-outline-danger remove-offer">✕</button>
+            </div>`;
+      container.appendChild(newRow);
+    });
+
+    // Remove Offer
+    document.body.addEventListener("click", function (e) {
+      if (e.target.classList.contains("remove-offer")) {
+        const offerRow = e.target.closest(".offer-row");
+        offerRow.remove();
+      }
+    });
+  });
+</script>
+{% endblock %}

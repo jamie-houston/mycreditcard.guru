@@ -1,0 +1,180 @@
+{% extends 'base.html' %} {% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h1>Your Credit Card Roadmap</h1>
+  <div>
+    <a href="{{ url_for('recommendations.generate') }}" class="btn btn-primary"
+      >Regenerate Recommendations</a
+    >
+    <a
+      href="{{ url_for('user_data.profile') }}"
+      class="btn btn-outline-secondary ms-2"
+      >Edit Profile</a
+    >
+  </div>
+</div>
+
+<div class="alert alert-info">
+  <p>
+    Based on your spending habits and preferences, we've created a personalized
+    credit card roadmap for you. The cards below are arranged in the order you
+    should apply for them to maximize your rewards.
+  </p>
+  <p class="mb-0">
+    <strong>Total Estimated Value:</strong> ${{
+    "%.2f"|format(recommendation.total_estimated_value) }}
+  </p>
+</div>
+
+{% if card_details %}
+<div class="timeline mb-5">
+  {% for detail in card_details %}
+  <div class="row mb-4">
+    <div class="col-md-2 text-center timeline-marker">
+      <div class="month-marker">
+        <div class="month-circle bg-primary text-white">
+          {{ detail.signup_month }}
+        </div>
+        <div class="month-label">Month {{ detail.signup_month }}</div>
+      </div>
+    </div>
+    <div class="col-md-10">
+      <div class="card">
+        <div
+          class="card-header d-flex justify-content-between align-items-center"
+        >
+          <h5 class="mb-0">
+            {{ detail.card.name }}
+            <span class="text-muted">({{ detail.card.issuer }})</span>
+          </h5>
+          <span class="badge bg-success"
+            >Est. Value: ${{ "%.2f"|format(detail.estimated_value) }}</span
+          >
+        </div>
+        <div class="card-body">
+          <div class="row mb-3">
+            <div class="col-md-4">
+              <strong>Annual Fee:</strong> ${{
+              "%.2f"|format(detail.card.annual_fee) }}
+            </div>
+            <div class="col-md-4">
+              <strong>Signup Bonus:</strong> {{ detail.card.signup_bonus_points
+              }} points {% if detail.card.signup_bonus_value > 0 %} (Est. ${{
+              "%.2f"|format(detail.card.signup_bonus_value) }}) {% endif %}
+            </div>
+            <div class="col-md-4">
+              <strong>Spend Requirement:</strong> ${{
+              "%.2f"|format(detail.card.signup_bonus_spend_requirement) }} in {{
+              detail.card.signup_bonus_time_period }} months
+            </div>
+          </div>
+
+          <div class="d-flex justify-content-between">
+            <div>
+              <h6 class="mb-2">Strategy:</h6>
+              <ul class="mb-0">
+                <li>Apply in month {{ detail.signup_month }}</li>
+                {% if detail.cancel_month %}
+                <li>
+                  Consider canceling in month {{ detail.cancel_month }} (before
+                  annual fee renewal)
+                </li>
+                {% endif %}
+                <li>Focus spend to meet signup bonus requirement</li>
+              </ul>
+            </div>
+            <div>
+              <a
+                href="{{ url_for('credit_cards.show', id=detail.card.id) }}"
+                class="btn btn-outline-primary"
+                >View Card Details</a
+              >
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="alert alert-warning">
+  <p>
+    No credit card recommendations found. Please check your profile settings and
+    try again.
+  </p>
+</div>
+{% endif %}
+
+<div class="card mb-4">
+  <div class="card-header">
+    <h5>Your Profile Summary</h5>
+  </div>
+  <div class="card-body">
+    <div class="row">
+      <div class="col-md-6">
+        <h6>Monthly Spending:</h6>
+        <p>${{ "%.2f"|format(profile.total_monthly_spend) }}</p>
+
+        <h6>Spending Categories:</h6>
+        <ul>
+          {% for category, amount in category_spending.items() %}
+          <li>{{ category|title }}: ${{ "%.2f"|format(amount) }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+      <div class="col-md-6">
+        <h6>Reward Preferences:</h6>
+        <ul>
+          {% for preference in reward_preferences %}
+          <li>{{ preference|replace('_', ' ')|title }}</li>
+          {% endfor %}
+        </ul>
+
+        <h6>Constraints:</h6>
+        <ul>
+          <li>
+            Max Annual Fees: ${{ "%.2f"|format(profile.max_annual_fees) }}
+          </li>
+          <li>Max Cards: {{ profile.max_cards }}</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %} {% block head_extra %}
+<style>
+  .timeline-marker {
+    position: relative;
+  }
+  .timeline-marker::after {
+    content: "";
+    position: absolute;
+    top: 70px;
+    bottom: -30px;
+    left: 50%;
+    width: 2px;
+    background-color: #dee2e6;
+  }
+  .timeline .row:last-child .timeline-marker::after {
+    display: none;
+  }
+  .month-marker {
+    position: relative;
+    z-index: 1;
+  }
+  .month-circle {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+    font-weight: bold;
+  }
+  .month-label {
+    margin-top: 5px;
+    font-size: 0.85rem;
+  }
+</style>
+{% endblock %}

@@ -1,0 +1,142 @@
+{% extends 'base.html' %} {% block content %}
+<h1 class="mb-4">Your Spending Profile</h1>
+
+<form method="post" action="{{ url_for('user_data.profile') }}">
+  <div class="card mb-4">
+    <div class="card-header">
+      <h5>Monthly Spending</h5>
+    </div>
+    <div class="card-body">
+      <div class="row mb-3">
+        <div class="col-md-6">
+          <label for="total_monthly_spend" class="form-label"
+            >Total Monthly Spending</label
+          >
+          <div class="input-group">
+            <span class="input-group-text">$</span>
+            <input
+              type="number"
+              step="0.01"
+              min="0"
+              class="form-control"
+              id="total_monthly_spend"
+              name="total_monthly_spend"
+              value="{{ profile.total_monthly_spend if profile else 0 }}"
+              required
+            />
+          </div>
+        </div>
+      </div>
+
+      <h6 class="mt-4 mb-3">Spending by Category</h6>
+      <div class="row">
+        {% for category in categories %}
+        <div class="col-md-4 mb-3">
+          <label for="category_{{ category }}" class="form-label"
+            >{{ category|title }}</label
+          >
+          <div class="input-group">
+            <span class="input-group-text">$</span>
+            <input
+              type="number"
+              step="0.01"
+              min="0"
+              class="form-control"
+              id="category_{{ category }}"
+              name="category_{{ category }}"
+              value="{{ category_spending.get(category, 0) }}"
+            />
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <div class="card mb-4">
+    <div class="card-header">
+      <h5>Reward Preferences</h5>
+    </div>
+    <div class="card-body">
+      <p class="text-muted">
+        Select the types of rewards you're most interested in:
+      </p>
+      <div class="row">
+        {% for option in reward_options %}
+        <div class="col-md-4 mb-3">
+          <div class="form-check">
+            <input
+              class="form-check-input"
+              type="checkbox"
+              value="{{ option }}"
+              id="reward_{{ option }}"
+              name="reward_preferences"
+              {%
+              if
+              option
+              in
+              reward_preferences
+              %}checked{%
+              endif
+              %}
+            />
+            <label class="form-check-label" for="reward_{{ option }}">
+              {{ option|replace('_', ' ')|title }}
+            </label>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <div class="card mb-4">
+    <div class="card-header">
+      <h5>Constraints</h5>
+    </div>
+    <div class="card-body">
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label for="max_annual_fees" class="form-label"
+            >Maximum Annual Fees Willing to Pay</label
+          >
+          <div class="input-group">
+            <span class="input-group-text">$</span>
+            <input
+              type="number"
+              step="0.01"
+              min="0"
+              class="form-control"
+              id="max_annual_fees"
+              name="max_annual_fees"
+              value="{{ profile.max_annual_fees if profile else 0 }}"
+            />
+          </div>
+          <div class="form-text">Set to 0 for no limit</div>
+        </div>
+        <div class="col-md-6 mb-3">
+          <label for="max_cards" class="form-label"
+            >Maximum Number of Cards</label
+          >
+          <input
+            type="number"
+            min="1"
+            max="10"
+            class="form-control"
+            id="max_cards"
+            name="max_cards"
+            value="{{ profile.max_cards if profile else 5 }}"
+          />
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="mb-4">
+    <button type="submit" class="btn btn-primary">Save Profile</button>
+    <a href="{{ url_for('main.index') }}" class="btn btn-secondary ms-2"
+      >Cancel</a
+    >
+  </div>
+</form>
+{% endblock %}
