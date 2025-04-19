@@ -2,57 +2,75 @@ from app import db
 from datetime import datetime
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.ext.mutable import MutableDict, MutableList
+import json
 
 class UserProfile(db.Model):
+    """User profile model for storing spending data."""
     __tablename__ = 'user_profiles'
     
     id = db.Column(db.Integer, primary_key=True)
-    
-    # Link to user
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
-    
-    # User spending data
-    total_monthly_spend = db.Column(db.Float, default=0.0)
-    
-    # Category spending as JSON
-    # Format: {"gas": 200.0, "groceries": 500.0, "dining": 300.0, ...}
-    category_spending = db.Column(db.Text, default='{}')
-    
-    # Reward preferences as JSON
-    # Format: ["travel", "cash_back", ...]
-    reward_preferences = db.Column(db.Text, default='[]')
-    
-    # Additional user preferences
-    max_annual_fees = db.Column(db.Float, default=0.0)  # Maximum annual fees willing to pay
-    max_cards = db.Column(db.Integer, default=5)  # Maximum number of cards
-    
+    name = db.Column(db.String(100), nullable=False)
+    credit_score = db.Column(db.Integer, nullable=False)
+    income = db.Column(db.Float, nullable=False)
+    total_monthly_spend = db.Column(db.Float, nullable=False)
+    category_spending = db.Column(db.Text, nullable=False)  # JSON string
+    max_cards = db.Column(db.Integer, default=5)
+    max_annual_fees = db.Column(db.Float, default=1000.0)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
+    # Relationship with recommendations - without backref
+    recommendations = db.relationship('app.models.recommendation.Recommendation', lazy=True, 
+                                     foreign_keys='app.models.recommendation.Recommendation.profile_id')
+    
+    def get_category_spending(self):
+        """Parse and return the category spending as a dictionary."""
+        try:
+            return json.loads(self.category_spending)
+        except (json.JSONDecodeError, TypeError):
+            return {}
+    
+    def set_category_spending(self, spending_dict):
+        """Convert dictionary to JSON string and set category_spending."""
+        self.category_spending = json.dumps(spending_dict)
+    
+    def calculate_total_spend(self):
+        """Calculate the total monthly spend from category spending."""
+        spending = self.get_category_spending()
+        return sum(spending.values())
+    
     def __repr__(self):
-        return f'<UserProfile {self.id} with ${self.total_monthly_spend}/month spend>'
+        return f"<UserProfile {self.name}, Credit Score: {self.credit_score}>"
 
 class Recommendation(db.Model):
+    """Model for storing generated recommendations."""
     __tablename__ = 'recommendations'
     
     id = db.Column(db.Integer, primary_key=True)
     user_profile_id = db.Column(db.Integer, db.ForeignKey('user_profiles.id'), nullable=False)
-    
-    # Recommendation details as JSON
-    # Format: [
-    #   {
-    #     "card_id": 1, 
-    #     "signup_month": 1,
-    #     "cancel_month": 12,
-    #     "estimated_value": 1000.0
-    #   },
-    # ]
-    recommendation_data = db.Column(db.Text, nullable=False)
-    
-    total_estimated_value = db.Column(db.Float, default=0.0)
+    recommendation_data = db.Column(db.Text, nullable=False)  # JSON string
+    total_value = db.Column(db.Float, nullable=False)
+    total_annual_fees = db.Column(db.Float, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
-    user_profile = db.relationship('UserProfile', backref=db.backref('recommendations', lazy=True))
+    def get_recommendation_data(self):
+        """Parse and return the recommendation data as a dictionary."""
+        try:
+            return json.loads(self.recommendation_data)
+        except (json.JSONDecodeError, TypeError):
+            return {}
+    
+    def get_net_value(self):
+        """Calculate the net value (total value - annual fees)."""
+        return self.total_value - self.total_annual_fees
+    
+    def get_recommended_cards(self):
+        """Get the list of recommended card IDs."""
+        data = self.get_recommendation_data()
+        if data and 'card_details' in data:
+            return list(data['card_details'].keys())
+        return []
     
     def __repr__(self):
-        return f'<Recommendation {self.id} for user {self.user_profile_id}>' 
+        return f"<Recommendation {self.id}, Value: ${self.total_value:.2f}>" 

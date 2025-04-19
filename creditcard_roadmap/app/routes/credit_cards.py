@@ -283,4 +283,136 @@ def delete(id):
     db.session.commit()
     
     flash('Credit card deleted successfully!', 'success')
+    return redirect(url_for('credit_cards.index'))
+
+@credit_cards.route('/create', methods=['GET', 'POST'])
+def create():
+    """Create a new credit card."""
+    if request.method == 'POST':
+        try:
+            # Extract form data
+            name = request.form.get('name')
+            issuer = request.form.get('issuer')
+            annual_fee = float(request.form.get('annual_fee', 0))
+            point_value = float(request.form.get('point_value', 0.01))
+            signup_bonus_points = int(request.form.get('signup_bonus_points', 0))
+            signup_bonus_value = float(request.form.get('signup_bonus_value', 0))
+            signup_bonus_min_spend = float(request.form.get('signup_bonus_min_spend', 0))
+            signup_bonus_time_limit = int(request.form.get('signup_bonus_time_limit', 90))
+            
+            # Handle reward categories (convert form data to JSON)
+            reward_categories = []
+            category_names = request.form.getlist('category_name')
+            category_rates = request.form.getlist('category_rate')
+            
+            for i in range(len(category_names)):
+                if category_names[i] and category_rates[i]:
+                    reward_categories.append({
+                        'category': category_names[i],
+                        'rate': float(category_rates[i])
+                    })
+            
+            # Handle special offers
+            special_offers = []
+            offer_descriptions = request.form.getlist('offer_description')
+            
+            for desc in offer_descriptions:
+                if desc:
+                    special_offers.append({'description': desc})
+            
+            # Create new card
+            card = CreditCard(
+                name=name,
+                issuer=issuer,
+                annual_fee=annual_fee,
+                point_value=point_value,
+                signup_bonus_points=signup_bonus_points,
+                signup_bonus_value=signup_bonus_value,
+                signup_bonus_min_spend=signup_bonus_min_spend,
+                signup_bonus_time_limit=signup_bonus_time_limit,
+                reward_categories=json.dumps(reward_categories),
+                special_offers=json.dumps(special_offers)
+            )
+            
+            db.session.add(card)
+            db.session.commit()
+            
+            flash('Credit card added successfully!', 'success')
+            return redirect(url_for('credit_cards.index'))
+        
+        except Exception as e:
+            flash(f'Error adding credit card: {str(e)}', 'danger')
+            db.session.rollback()
+    
+    return render_template('credit_cards/create.html')
+
+@credit_cards.route('/<int:card_id>')
+def details(card_id):
+    """Show credit card details."""
+    card = CreditCard.query.get_or_404(card_id)
+    return render_template('credit_cards/details.html', card=card)
+
+@credit_cards.route('/<int:card_id>/edit', methods=['GET', 'POST'])
+def edit_card(card_id):
+    """Edit a credit card."""
+    card = CreditCard.query.get_or_404(card_id)
+    
+    if request.method == 'POST':
+        try:
+            # Update card details
+            card.name = request.form.get('name')
+            card.issuer = request.form.get('issuer')
+            card.annual_fee = float(request.form.get('annual_fee', 0))
+            card.point_value = float(request.form.get('point_value', 0.01))
+            card.signup_bonus_points = int(request.form.get('signup_bonus_points', 0))
+            card.signup_bonus_value = float(request.form.get('signup_bonus_value', 0))
+            card.signup_bonus_min_spend = float(request.form.get('signup_bonus_min_spend', 0))
+            card.signup_bonus_time_limit = int(request.form.get('signup_bonus_time_limit', 90))
+            
+            # Handle reward categories
+            reward_categories = []
+            category_names = request.form.getlist('category_name')
+            category_rates = request.form.getlist('category_rate')
+            
+            for i in range(len(category_names)):
+                if category_names[i] and category_rates[i]:
+                    reward_categories.append({
+                        'category': category_names[i],
+                        'rate': float(category_rates[i])
+                    })
+            
+            # Handle special offers
+            special_offers = []
+            offer_descriptions = request.form.getlist('offer_description')
+            
+            for desc in offer_descriptions:
+                if desc:
+                    special_offers.append({'description': desc})
+            
+            card.reward_categories = json.dumps(reward_categories)
+            card.special_offers = json.dumps(special_offers)
+            
+            db.session.commit()
+            flash('Credit card updated successfully!', 'success')
+            return redirect(url_for('credit_cards.details', card_id=card.id))
+        
+        except Exception as e:
+            flash(f'Error updating credit card: {str(e)}', 'danger')
+            db.session.rollback()
+    
+    return render_template('credit_cards/edit.html', card=card)
+
+@credit_cards.route('/<int:card_id>/delete', methods=['POST'])
+def delete_card(card_id):
+    """Delete a credit card."""
+    card = CreditCard.query.get_or_404(card_id)
+    
+    try:
+        db.session.delete(card)
+        db.session.commit()
+        flash('Credit card deleted successfully!', 'success')
+    except Exception as e:
+        flash(f'Error deleting credit card: {str(e)}', 'danger')
+        db.session.rollback()
+    
     return redirect(url_for('credit_cards.index')) 

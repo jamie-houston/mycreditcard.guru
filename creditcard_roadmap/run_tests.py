@@ -1,27 +1,43 @@
 #!/usr/bin/env python
 import unittest
+import coverage
 import sys
 import os
 
-# Add parent directory to path to ensure imports work
-sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
+# Configure code coverage
+COV = coverage.coverage(
+    branch=True,
+    include='app/*',
+    omit=[
+        'app/templates/*',
+        'app/static/*',
+        'app/*/__init__.py'
+    ]
+)
+COV.start()
 
-# Import test cases
-from tests.test_auth import AuthTestCase
+# Add the parent directory to the path
+sys.path.append(os.path.abspath(os.path.dirname(__file__)))
+
+# Import the TestLoader
+from unittest import TestLoader, TextTestRunner
 
 if __name__ == '__main__':
-    # Create a test loader
-    loader = unittest.TestLoader()
+    # Discover and run tests
+    tests = TestLoader().discover('tests')
+    result = TextTestRunner(verbosity=2).run(tests)
     
-    # Create a test suite
-    test_suite = unittest.TestSuite()
+    # Generate coverage report
+    COV.stop()
+    COV.save()
+    print('Coverage Summary:')
+    COV.report()
     
-    # Add test cases
-    test_suite.addTest(loader.loadTestsFromTestCase(AuthTestCase))
+    # Generate HTML report
+    basedir = os.path.abspath(os.path.dirname(__file__))
+    covdir = os.path.join(basedir, 'coverage')
+    if not os.path.exists(covdir):
+        os.makedirs(covdir)
+    COV.html_report(directory=covdir)
     
-    # Run the test suite
-    runner = unittest.TextTestRunner(verbosity=2)
-    result = runner.run(test_suite)
-    
-    # Return non-zero exit code if tests failed
     sys.exit(not result.wasSuccessful()) 

@@ -73,7 +73,7 @@ def profile():
             session['profile_id'] = profile.id
             
             flash('Profile data saved successfully!', 'success')
-            return redirect(url_for('recommendations.generate'))
+            return redirect(url_for('recommendations.list'))
         
         except ValidationError as e:
             flash('Validation error: ' + str(e.messages), 'danger')

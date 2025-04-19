@@ -16,6 +16,7 @@
   action="{{ url_for('user_data.profile') }}"
   id="profile-form"
 >
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
   <div class="card mb-4">
     <div class="card-header bg-primary text-white">
       <h5 class="mb-0">
@@ -209,7 +210,7 @@
 
     {% if profile %}
     <a
-      href="{{ url_for('recommendations.generate') }}"
+      href="{{ url_for('recommendations.create', profile_id=profile.id) }}"
       class="btn btn-success btn-lg"
     >
       <i class="fas fa-magic me-2"></i>Generate Recommendations
