@@ -1,141 +1,170 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{{ title }}</title>
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-    />
-    <link
-      rel="stylesheet"
-      href="{{ url_for('static', filename='css/styles.css') }}"
-    />
-  </head>
-  <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-      <div class="container">
-        <a class="navbar-brand" href="{{ url_for('main.index') }}"
-          >Credit Card Roadmap</a
-        >
-        <button
-          class="navbar-toggler"
-          type="button"
-          data-bs-toggle="collapse"
-          data-bs-target="#navbarNav"
-        >
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-          <ul class="navbar-nav">
-            <li class="nav-item">
-              <a class="nav-link" href="{{ url_for('main.index') }}">Home</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="{{ url_for('user_data.profile') }}"
-                >My Profile</a
-              >
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="{{ url_for('credit_cards.index') }}"
-                >Credit Cards</a
-              >
-            </li>
-          </ul>
-        </div>
+{% extends 'base.html' %} {% block content %}
+<div class="row">
+  <div class="col-lg-8">
+    <div class="card mb-4">
+      <div class="card-header bg-primary text-white">
+        <h2 class="mb-0">
+          <i class="fas fa-map-signs me-2"></i>Welcome to Credit Card Roadmap
+        </h2>
       </div>
-    </nav>
-
-    <div class="container mt-4">
-      {% with messages = get_flashed_messages(with_categories=true) %} {% if
-      messages %} {% for category, message in messages %}
-      <div class="alert alert-{{ category }}">{{ message }}</div>
-      {% endfor %} {% endif %} {% endwith %}
-
-      <div class="jumbotron">
-        <h1 class="display-4">Welcome to Credit Card Roadmap</h1>
+      <div class="card-body">
         <p class="lead">
-          Optimize your credit card strategy and maximize your rewards
+          Find the perfect credit card strategy based on your spending habits
+          and preferences.
         </p>
-        <hr class="my-4" />
-        <p>
-          We'll help you find the perfect credit cards based on your spending
-          habits and preferences.
-        </p>
-        <div class="mt-4">
+
+        <div class="alert alert-info">
+          <div class="d-flex">
+            <div class="me-3 fs-3">
+              <i class="fas fa-lightbulb"></i>
+            </div>
+            <div>
+              <h5>Did you know?</h5>
+              <p class="mb-0">
+                The average American household could earn an extra $400-$800 per
+                year in credit card rewards by optimizing their card strategy.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <h4 class="mt-4 mb-3">
+          <i class="fas fa-check-circle me-2"></i>How It Works
+        </h4>
+        <div class="row mb-4">
+          <div class="col-md-4 mb-3">
+            <div class="card h-100 border-primary">
+              <div class="card-body text-center">
+                <div class="display-4 text-primary mb-3">
+                  <i class="fas fa-user-edit"></i>
+                </div>
+                <h5>1. Create Your Profile</h5>
+                <p class="card-text">
+                  Enter your monthly spending by category and reward
+                  preferences.
+                </p>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4 mb-3">
+            <div class="card h-100 border-primary">
+              <div class="card-body text-center">
+                <div class="display-4 text-primary mb-3">
+                  <i class="fas fa-magic"></i>
+                </div>
+                <h5>2. Generate Roadmap</h5>
+                <p class="card-text">
+                  Our algorithm analyzes your data to recommend the optimal
+                  credit cards.
+                </p>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4 mb-3">
+            <div class="card h-100 border-primary">
+              <div class="card-body text-center">
+                <div class="display-4 text-primary mb-3">
+                  <i class="fas fa-chart-line"></i>
+                </div>
+                <h5>3. Maximize Rewards</h5>
+                <p class="card-text">
+                  Follow the roadmap to apply for cards at the right time and
+                  maximize your benefits.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="text-center mt-4">
           <a
             href="{{ url_for('user_data.profile') }}"
             class="btn btn-primary btn-lg"
-            >Get Started</a
           >
-          <a
-            href="{{ url_for('credit_cards.index') }}"
-            class="btn btn-secondary btn-lg ms-2"
-            >View Credit Cards</a
-          >
-        </div>
-      </div>
-
-      <div class="row mt-5">
-        <div class="col-md-4">
-          <div class="card">
-            <div class="card-body">
-              <h5 class="card-title">Enter Your Spending</h5>
-              <p class="card-text">
-                Tell us about your monthly spending habits across different
-                categories.
-              </p>
-              <a
-                href="{{ url_for('user_data.profile') }}"
-                class="btn btn-primary"
-                >Enter Spending</a
-              >
-            </div>
-          </div>
-        </div>
-        <div class="col-md-4">
-          <div class="card">
-            <div class="card-body">
-              <h5 class="card-title">Choose Preferences</h5>
-              <p class="card-text">
-                Let us know what types of rewards and benefits matter most to
-                you.
-              </p>
-              <a
-                href="{{ url_for('user_data.profile') }}"
-                class="btn btn-primary"
-                >Set Preferences</a
-              >
-            </div>
-          </div>
-        </div>
-        <div class="col-md-4">
-          <div class="card">
-            <div class="card-body">
-              <h5 class="card-title">Get Recommendations</h5>
-              <p class="card-text">
-                Receive a personalized roadmap of which credit cards to get and
-                when.
-              </p>
-              <a
-                href="{{ url_for('recommendations.generate') }}"
-                class="btn btn-primary"
-                >Get Roadmap</a
-              >
-            </div>
-          </div>
+            <i class="fas fa-rocket me-2"></i>Get Started
+          </a>
         </div>
       </div>
     </div>
+  </div>
 
-    <footer class="mt-5 py-3 bg-light">
-      <div class="container text-center">
-        <p>Credit Card Roadmap &copy; {{ now.year }}</p>
+  <div class="col-lg-4">
+    <div class="card mb-4">
+      <div class="card-header bg-success text-white">
+        <h5 class="mb-0"><i class="fas fa-star me-2"></i>Benefits</h5>
       </div>
-    </footer>
+      <div class="card-body">
+        <ul class="list-group list-group-flush">
+          <li class="list-group-item d-flex">
+            <div class="text-success me-3">
+              <i class="fas fa-dollar-sign"></i>
+            </div>
+            <div>
+              <strong>Maximize Cash Back</strong>
+              <p class="mb-0 text-muted small">
+                Optimize your rewards based on your actual spending patterns.
+              </p>
+            </div>
+          </li>
+          <li class="list-group-item d-flex">
+            <div class="text-success me-3"><i class="fas fa-plane"></i></div>
+            <div>
+              <strong>Travel Rewards</strong>
+              <p class="mb-0 text-muted small">
+                Get the most value from travel cards and signup bonuses.
+              </p>
+            </div>
+          </li>
+          <li class="list-group-item d-flex">
+            <div class="text-success me-3">
+              <i class="fas fa-calendar-alt"></i>
+            </div>
+            <div>
+              <strong>Strategic Timeline</strong>
+              <p class="mb-0 text-muted small">
+                Know exactly when to apply for each card to maximize benefits.
+              </p>
+            </div>
+          </li>
+          <li class="list-group-item d-flex">
+            <div class="text-success me-3">
+              <i class="fas fa-shield-alt"></i>
+            </div>
+            <div>
+              <strong>Protect Credit Score</strong>
+              <p class="mb-0 text-muted small">
+                Avoid frequent applications that can harm your credit.
+              </p>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
-  </body>
-</html>
+    {% if session.get('profile_id') %}
+    <div class="card mb-4">
+      <div class="card-header bg-primary text-white">
+        <h5 class="mb-0"><i class="fas fa-user me-2"></i>Your Profile</h5>
+      </div>
+      <div class="card-body">
+        <p>You already have a spending profile. You can:</p>
+        <div class="d-grid gap-2">
+          <a
+            href="{{ url_for('user_data.profile') }}"
+            class="btn btn-outline-primary"
+          >
+            <i class="fas fa-edit me-2"></i>Edit Your Profile
+          </a>
+          <a
+            href="{{ url_for('recommendations.generate') }}"
+            class="btn btn-success"
+          >
+            <i class="fas fa-magic me-2"></i>Generate Recommendations
+          </a>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

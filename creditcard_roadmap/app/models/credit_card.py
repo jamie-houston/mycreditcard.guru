@@ -11,6 +11,9 @@ class CreditCard(db.Model):
     issuer = db.Column(db.String(50), nullable=False)
     annual_fee = db.Column(db.Float, default=0.0)
     
+    # User relationship
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
+    
     # Reward categories (5% on gas, 3% on groceries, etc.)
     # Stored as JSON: [{"category": "gas", "percentage": 5}, ...]
     reward_categories = db.Column(db.Text, default='[]')

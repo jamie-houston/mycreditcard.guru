@@ -1,180 +1,273 @@
-{% extends 'base.html' %} {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-  <h1>Your Credit Card Roadmap</h1>
-  <div>
-    <a href="{{ url_for('recommendations.generate') }}" class="btn btn-primary"
-      >Regenerate Recommendations</a
-    >
-    <a
-      href="{{ url_for('user_data.profile') }}"
-      class="btn btn-outline-secondary ms-2"
-      >Edit Profile</a
-    >
-  </div>
+{% extends 'base.html' %} {% block head %}
+<!-- Add Chart.js for visualizations -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %} {% block content %}
+<div class="mb-4 d-flex justify-content-between align-items-center">
+  <h1><i class="fas fa-magic me-2"></i>Your Credit Card Roadmap</h1>
+  <a href="{{ url_for('user_data.profile') }}" class="btn btn-outline-primary">
+    <i class="fas fa-edit me-1"></i>Edit Profile
+  </a>
 </div>
 
-<div class="alert alert-info">
-  <p>
-    Based on your spending habits and preferences, we've created a personalized
-    credit card roadmap for you. The cards below are arranged in the order you
-    should apply for them to maximize your rewards.
-  </p>
-  <p class="mb-0">
-    <strong>Total Estimated Value:</strong> ${{
-    "%.2f"|format(recommendation.total_estimated_value) }}
-  </p>
+<div class="alert alert-info mb-4">
+  <i class="fas fa-info-circle me-2"></i>
+  Based on your spending profile, we've created a personalized credit card
+  recommendation plan. This roadmap is designed to maximize your rewards over
+  time.
 </div>
 
-{% if card_details %}
-<div class="timeline mb-5">
-  {% for detail in card_details %}
-  <div class="row mb-4">
-    <div class="col-md-2 text-center timeline-marker">
-      <div class="month-marker">
-        <div class="month-circle bg-primary text-white">
-          {{ detail.signup_month }}
-        </div>
-        <div class="month-label">Month {{ detail.signup_month }}</div>
-      </div>
-    </div>
-    <div class="col-md-10">
-      <div class="card">
-        <div
-          class="card-header d-flex justify-content-between align-items-center"
-        >
-          <h5 class="mb-0">
-            {{ detail.card.name }}
-            <span class="text-muted">({{ detail.card.issuer }})</span>
-          </h5>
-          <span class="badge bg-success"
-            >Est. Value: ${{ "%.2f"|format(detail.estimated_value) }}</span
-          >
-        </div>
-        <div class="card-body">
-          <div class="row mb-3">
-            <div class="col-md-4">
-              <strong>Annual Fee:</strong> ${{
-              "%.2f"|format(detail.card.annual_fee) }}
-            </div>
-            <div class="col-md-4">
-              <strong>Signup Bonus:</strong> {{ detail.card.signup_bonus_points
-              }} points {% if detail.card.signup_bonus_value > 0 %} (Est. ${{
-              "%.2f"|format(detail.card.signup_bonus_value) }}) {% endif %}
-            </div>
-            <div class="col-md-4">
-              <strong>Spend Requirement:</strong> ${{
-              "%.2f"|format(detail.card.signup_bonus_spend_requirement) }} in {{
-              detail.card.signup_bonus_time_period }} months
-            </div>
-          </div>
-
-          <div class="d-flex justify-content-between">
-            <div>
-              <h6 class="mb-2">Strategy:</h6>
-              <ul class="mb-0">
-                <li>Apply in month {{ detail.signup_month }}</li>
-                {% if detail.cancel_month %}
-                <li>
-                  Consider canceling in month {{ detail.cancel_month }} (before
-                  annual fee renewal)
-                </li>
-                {% endif %}
-                <li>Focus spend to meet signup bonus requirement</li>
-              </ul>
-            </div>
-            <div>
-              <a
-                href="{{ url_for('credit_cards.show', id=detail.card.id) }}"
-                class="btn btn-outline-primary"
-                >View Card Details</a
-              >
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-  {% endfor %}
-</div>
-{% else %}
-<div class="alert alert-warning">
-  <p>
-    No credit card recommendations found. Please check your profile settings and
-    try again.
-  </p>
-</div>
-{% endif %}
-
+<!-- Summary Card -->
 <div class="card mb-4">
-  <div class="card-header">
-    <h5>Your Profile Summary</h5>
+  <div class="card-header bg-success text-white">
+    <h5 class="mb-0"><i class="fas fa-chart-line me-2"></i>Summary</h5>
   </div>
   <div class="card-body">
     <div class="row">
       <div class="col-md-6">
-        <h6>Monthly Spending:</h6>
-        <p>${{ "%.2f"|format(profile.total_monthly_spend) }}</p>
+        <h6 class="fw-bold">Estimated Annual Value</h6>
+        <p class="display-4 text-success">
+          ${{ "%.2f"|format(recommendation.total_estimated_value) }}
+        </p>
+        <p class="text-muted">
+          Based on your spending of ${{
+          "%.2f"|format(profile.total_monthly_spend) }} per month
+        </p>
 
-        <h6>Spending Categories:</h6>
-        <ul>
-          {% for category, amount in category_spending.items() %}
-          <li>{{ category|title }}: ${{ "%.2f"|format(amount) }}</li>
-          {% endfor %}
+        <h6 class="fw-bold mt-3">Your Top Spending Categories</h6>
+        <ul class="list-group">
+          {% for category, amount in
+          category_spending.items()|sort(reverse=true, attribute='1')[:3] %} {%
+          if amount > 0 %}
+          <li
+            class="list-group-item d-flex justify-content-between align-items-center"
+          >
+            {{ category|title }}
+            <span class="badge bg-primary rounded-pill"
+              >${{ "%.2f"|format(amount) }}/month</span
+            >
+          </li>
+          {% endif %} {% endfor %}
         </ul>
       </div>
       <div class="col-md-6">
-        <h6>Reward Preferences:</h6>
-        <ul>
-          {% for preference in reward_preferences %}
-          <li>{{ preference|replace('_', ' ')|title }}</li>
-          {% endfor %}
-        </ul>
-
-        <h6>Constraints:</h6>
-        <ul>
-          <li>
-            Max Annual Fees: ${{ "%.2f"|format(profile.max_annual_fees) }}
-          </li>
-          <li>Max Cards: {{ profile.max_cards }}</li>
-        </ul>
+        <div class="card h-100">
+          <div class="card-body">
+            <canvas id="value-comparison-chart"></canvas>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 </div>
-{% endblock %} {% block head_extra %}
-<style>
-  .timeline-marker {
-    position: relative;
-  }
-  .timeline-marker::after {
-    content: "";
-    position: absolute;
-    top: 70px;
-    bottom: -30px;
-    left: 50%;
-    width: 2px;
-    background-color: #dee2e6;
-  }
-  .timeline .row:last-child .timeline-marker::after {
-    display: none;
-  }
-  .month-marker {
-    position: relative;
-    z-index: 1;
-  }
-  .month-circle {
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0 auto;
-    font-weight: bold;
-  }
-  .month-label {
-    margin-top: 5px;
-    font-size: 0.85rem;
-  }
-</style>
+
+<!-- Recommended Cards Timeline -->
+<div class="card mb-4">
+  <div class="card-header bg-primary text-white">
+    <h5 class="mb-0">
+      <i class="fas fa-calendar-alt me-2"></i>Application Timeline
+    </h5>
+  </div>
+  <div class="card-body">
+    {% if card_details %}
+    <div class="table-responsive">
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th>Month</th>
+            <th>Card</th>
+            <th>Annual Fee</th>
+            <th>Signup Bonus</th>
+            <th>Est. Annual Value</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in card_details|sort(attribute='signup_month') %}
+          <tr>
+            <td>{{ item.signup_month }}</td>
+            <td>
+              <strong>{{ item.card.name }}</strong><br />
+              <small class="text-muted">{{ item.card.issuer }}</small>
+            </td>
+            <td>${{ "%.2f"|format(item.card.annual_fee) }}</td>
+            <td>
+              {% if item.card.signup_bonus_points %} {{
+              "{:,}".format(item.card.signup_bonus_points) }} points
+              <small class="text-muted"
+                >${{ "%.2f"|format(item.card.signup_bonus_value) }}</small
+              >
+              {% else %} ${{ "%.2f"|format(item.card.signup_bonus_value) }} {%
+              endif %}
+            </td>
+            <td>${{ "%.2f"|format(item.estimated_value) }}</td>
+            <td>
+              <a
+                href="{{ url_for('credit_cards.show', id=item.card.id) }}"
+                class="btn btn-sm btn-outline-primary"
+              >
+                <i class="fas fa-eye me-1"></i>Details
+              </a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="alert alert-secondary mt-4">
+      <h6 class="fw-bold"><i class="fas fa-lightbulb me-2"></i>Tips</h6>
+      <ul class="mb-0">
+        <li>
+          Wait at least 3 months between card applications to avoid impacting
+          your credit score.
+        </li>
+        <li>
+          Meet minimum spend requirements by planning large purchases around new
+          card signups.
+        </li>
+        <li>
+          For cards with high annual fees, evaluate after 10-11 months whether
+          to keep or cancel.
+        </li>
+      </ul>
+    </div>
+    {% else %}
+    <div class="alert alert-warning">
+      <i class="fas fa-exclamation-triangle me-2"></i>
+      No card recommendations found. Please try updating your spending profile.
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Card Benefits Breakdown -->
+<div class="card mb-4">
+  <div class="card-header bg-primary text-white">
+    <h5 class="mb-0">
+      <i class="fas fa-list-check me-2"></i>Card Benefits Breakdown
+    </h5>
+  </div>
+  <div class="card-body">
+    {% if card_details %}
+    <div class="table-responsive">
+      <table class="table table-hover">
+        <thead>
+          <tr>
+            <th>Card</th>
+            <th>Best For</th>
+            <th>Key Benefits</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in card_details %}
+          <tr>
+            <td>{{ item.card.name }}</td>
+            <td>
+              {% set reward_cats = item.card.reward_categories|from_json %} {%
+              if reward_cats %}
+              <ul class="list-unstyled mb-0">
+                {% for cat in reward_cats|sort(reverse=true,
+                attribute='percentage')[:2] %}
+                <li>
+                  <span class="badge bg-success">{{ cat.percentage }}%</span>
+                  {{ cat.category|title }}
+                </li>
+                {% endfor %}
+              </ul>
+              {% else %}
+              <span class="text-muted">General spending</span>
+              {% endif %}
+            </td>
+            <td>
+              {% set offers = item.card.offers|from_json %} {% if offers %}
+              <ul class="list-unstyled mb-0">
+                {% for offer in offers %}
+                <li>
+                  <i class="fas fa-gift text-success me-1"></i>
+                  ${{ offer.amount }} {{ offer.type|replace('_', ' ') }} {% if
+                  offer.frequency == 'annual' %}(annual){% endif %}
+                </li>
+                {% endfor %}
+              </ul>
+              {% else %}
+              <span class="text-muted">No additional benefits</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="alert alert-warning">
+      <i class="fas fa-exclamation-triangle me-2"></i>
+      No cards found in the recommendation.
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %} {% block scripts %}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Value comparison chart
+    const ctx = document.getElementById('value-comparison-chart').getContext('2d');
+
+    new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: ['With Recommended Cards', 'Without Cards'],
+        datasets: [{
+          label: 'Annual Value',
+          data: [
+            {{ recommendation.total_estimated_value }},
+            0
+          ],
+          backgroundColor: [
+            'rgba(40, 167, 69, 0.8)',
+            'rgba(108, 117, 125, 0.8)'
+          ],
+          borderColor: [
+            'rgba(40, 167, 69, 1)',
+            'rgba(108, 117, 125, 1)'
+          ],
+          borderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: {
+            display: false
+          },
+          title: {
+            display: true,
+            text: 'Annual Value Comparison'
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: {
+              callback: function(value) {
+                return '$' + value;
+              }
+            }
+          }
+        }
+      }
+    });
+
+    // Custom filter to parse JSON strings in Jinja templates
+    if (!('from_json' in window.jinja_filters)) {
+      window.jinja_filters = window.jinja_filters || {};
+      window.jinja_filters.from_json = function(json_string) {
+        try {
+          return JSON.parse(json_string);
+        } catch (e) {
+          return [];
+        }
+      };
+    }
+  });
+</script>
 {% endblock %}

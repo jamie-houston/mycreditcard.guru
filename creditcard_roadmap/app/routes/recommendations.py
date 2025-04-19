@@ -84,4 +84,13 @@ def show(id):
                           card_details=card_details,
                           profile=recommendation.user_profile,
                           category_spending=category_spending,
-                          reward_preferences=reward_preferences) 
+                          reward_preferences=reward_preferences)
+
+# Custom template filter to parse JSON
+@recommendations.app_template_filter('from_json')
+def from_json_filter(json_string):
+    """Convert a JSON string to Python object in templates"""
+    try:
+        return json.loads(json_string)
+    except (json.JSONDecodeError, TypeError):
+        return [] 

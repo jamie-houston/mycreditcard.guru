@@ -1,10 +1,15 @@
 from app import db
 from datetime import datetime
+from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.ext.mutable import MutableDict, MutableList
 
 class UserProfile(db.Model):
     __tablename__ = 'user_profiles'
     
     id = db.Column(db.Integer, primary_key=True)
+    
+    # Link to user
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
     
     # User spending data
     total_monthly_spend = db.Column(db.Float, default=0.0)

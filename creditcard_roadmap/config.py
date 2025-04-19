@@ -1,12 +1,19 @@
 import os
-from dotenv import load_dotenv
+from datetime import timedelta
 
-load_dotenv()
+basedir = os.path.abspath(os.path.dirname(__file__))
 
 class Config:
-    SECRET_KEY = os.environ.get('SECRET_KEY') or 'dev-key-for-testing'
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or 'sqlite:///creditcard_roadmap.db'
+    SECRET_KEY = os.environ.get('SECRET_KEY') or 'hard-to-guess-string'
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
+        'sqlite:///' + os.path.join(basedir, 'app.db')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    
+    # Flask-Login config
+    REMEMBER_COOKIE_DURATION = timedelta(days=14)
+    
+    # Pagination
+    CARDS_PER_PAGE = 12
 
 class DevelopmentConfig(Config):
     DEBUG = True
