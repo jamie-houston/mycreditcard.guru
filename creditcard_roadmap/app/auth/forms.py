@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, BooleanField, SubmitField
 from wtforms.validators import DataRequired, Email, EqualTo, Length, ValidationError
-from creditcard_roadmap.app.models import User
+from app.models.user import User
 
 class LoginForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired()])
@@ -25,19 +25,19 @@ class RegistrationForm(FlaskForm):
     ])
     confirm_password = PasswordField('Confirm Password', validators=[
         DataRequired(),
-        EqualTo('password', message='Passwords must match')
+        EqualTo('password', message='Passwords must match.')
     ])
     submit = SubmitField('Register')
     
     def validate_username(self, username):
         user = User.query.filter_by(username=username.data).first()
         if user is not None:
-            raise ValidationError('Please use a different username.')
+            raise ValidationError('Username already taken. Please choose a different one.')
     
     def validate_email(self, email):
         user = User.query.filter_by(email=email.data).first()
         if user is not None:
-            raise ValidationError('Email address already registered.')
+            raise ValidationError('Email already registered. Please use a different email or login.')
 
 class ChangePasswordForm(FlaskForm):
     current_password = PasswordField('Current Password', validators=[DataRequired()])
@@ -47,6 +47,6 @@ class ChangePasswordForm(FlaskForm):
     ])
     confirm_password = PasswordField('Confirm New Password', validators=[
         DataRequired(),
-        EqualTo('new_password', message='Passwords must match')
+        EqualTo('new_password', message='Passwords must match.')
     ])
-    submit = SubmitField('Update Password') 
+    submit = SubmitField('Change Password') 

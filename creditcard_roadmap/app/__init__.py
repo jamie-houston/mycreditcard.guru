@@ -32,13 +32,11 @@ def create_app(config_name=None):
         return User.query.get(int(user_id))
     
     # Register blueprints
-    from app.routes.main import main_bp
-    from app.routes.profile import profile_bp
-    from app.routes.auth import auth_bp
+    from app.routes.main import main
+    from app.routes.auth import auth
     
-    app.register_blueprint(main_bp)
-    app.register_blueprint(profile_bp)
-    app.register_blueprint(auth_bp)
+    app.register_blueprint(main)
+    app.register_blueprint(auth)
     
     from app.routes.credit_cards import credit_cards as credit_cards_blueprint
     app.register_blueprint(credit_cards_blueprint, url_prefix='/cards')

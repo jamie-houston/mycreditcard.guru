@@ -18,11 +18,15 @@ class User(UserMixin, db.Model):
     # User role: 0 = standard user, 1 = admin
     role = db.Column(db.Integer, default=0)
     
-    # Relationships
-    profiles = db.relationship('CreditCardProfile', backref='user', lazy='dynamic', cascade='all, delete-orphan')
-    credit_cards = db.relationship('CreditCard', backref='owner', lazy='dynamic', cascade='all, delete-orphan')
-    categories = db.relationship('Category', backref='user', lazy='dynamic', cascade='all, delete-orphan')
-    goals = db.relationship('Goal', backref='user', lazy='dynamic', cascade='all, delete-orphan')
+    # Relationships - using strings to avoid circular imports
+    profiles = db.relationship('CreditCardProfile', backref='user', lazy='dynamic', 
+                              cascade='all, delete-orphan', foreign_keys='CreditCardProfile.user_id')
+    credit_cards = db.relationship('CreditCard', backref='owner', lazy='dynamic', 
+                                  cascade='all, delete-orphan', foreign_keys='CreditCard.user_id')
+    categories = db.relationship('Category', backref='user', lazy='dynamic', 
+                                cascade='all, delete-orphan', foreign_keys='Category.user_id')
+    goals = db.relationship('Goal', backref='user', lazy='dynamic', 
+                           cascade='all, delete-orphan', foreign_keys='Goal.user_id')
     
     # Profile information
     first_name = db.Column(db.String(50))

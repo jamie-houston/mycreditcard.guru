@@ -1,64 +1,68 @@
 from datetime import datetime
+from flask import current_app
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
-from creditcard_roadmap.app import db, login_manager
+from app import db, login_manager
 
 # Role Constants
 USER_ROLE = 0
 ADMIN_ROLE = 1
 
 @login_manager.user_loader
-def load_user(id):
-    return User.query.get(int(id))
+def load_user(user_id):
+    return User.query.get(int(user_id))
 
 class User(UserMixin, db.Model):
     __tablename__ = 'users'
     
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(64), index=True, unique=True, nullable=False)
-    email = db.Column(db.String(120), index=True, unique=True, nullable=False)
+    username = db.Column(db.String(64), unique=True, index=True, nullable=False)
+    email = db.Column(db.String(120), unique=True, index=True, nullable=False)
     password_hash = db.Column(db.String(128), nullable=False)
-    role = db.Column(db.Integer, default=USER_ROLE)
+    is_admin = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     last_login = db.Column(db.DateTime, default=datetime.utcnow)
-    active = db.Column(db.Boolean, default=True)
     
     # Relationships
     credit_cards = db.relationship('CreditCard', backref='owner', lazy='dynamic')
     goals = db.relationship('Goal', backref='user', lazy='dynamic')
     
-    def __repr__(self):
-        return f'<User {self.username}>'
-    
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
-    
+        
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
-    
+        
     def update_last_login(self):
         self.last_login = datetime.utcnow()
         db.session.commit()
     
-    @property
-    def is_admin(self):
-        return self.role == ADMIN_ROLE
+    def __repr__(self):
+        return f'<User {self.username}>'
 
 class CreditCard(db.Model):
     __tablename__ = 'credit_cards'
     
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), nullable=False)
-    bank = db.Column(db.String(100), nullable=False)
+    name = db.Column(db.String(64), nullable=False)
+    issuer = db.Column(db.String(64), nullable=False)
     annual_fee = db.Column(db.Float, default=0.0)
-    intro_offer = db.Column(db.String(255))
-    approval_date = db.Column(db.Date)
-    next_fee_date = db.Column(db.Date)
+    credit_limit = db.Column(db.Float)
+    interest_rate = db.Column(db.Float)
+    rewards_rate = db.Column(db.Float)
     active = db.Column(db.Boolean, default=True)
+    application_date = db.Column(db.Date)
+    approval_date = db.Column(db.Date)
+    cancellation_date = db.Column(db.Date)
+    notes = db.Column(db.Text)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Foreign keys
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     
     def __repr__(self):
-        return f'<CreditCard {self.name} - {self.bank}>'
+        return f'<CreditCard {self.name}>'
 
 class Transaction(db.Model):
     __tablename__ = 'transactions'
