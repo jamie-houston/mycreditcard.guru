@@ -47,4 +47,8 @@ def create_app(config_name=None):
     from app.routes.recommendations import recommendations as recommendations_blueprint
     app.register_blueprint(recommendations_blueprint, url_prefix='/recommendations')
     
+    # Initialize the database if it doesn't exist
+    with app.app_context():
+        db.create_all()
+    
     return app 

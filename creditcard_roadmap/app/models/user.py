@@ -18,16 +18,6 @@ class User(UserMixin, db.Model):
     # User role: 0 = standard user, 1 = admin
     role = db.Column(db.Integer, default=0)
     
-    # Relationships - using strings to avoid circular imports
-    profiles = db.relationship('CreditCardProfile', backref='user', lazy='dynamic', 
-                              cascade='all, delete-orphan', foreign_keys='CreditCardProfile.user_id')
-    credit_cards = db.relationship('CreditCard', backref='owner', lazy='dynamic', 
-                                  cascade='all, delete-orphan', foreign_keys='CreditCard.user_id')
-    categories = db.relationship('Category', backref='user', lazy='dynamic', 
-                                cascade='all, delete-orphan', foreign_keys='Category.user_id')
-    goals = db.relationship('Goal', backref='user', lazy='dynamic', 
-                           cascade='all, delete-orphan', foreign_keys='Goal.user_id')
-    
     # Profile information
     first_name = db.Column(db.String(50))
     last_name = db.Column(db.String(50))
@@ -37,7 +27,6 @@ class User(UserMixin, db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     last_login = db.Column(db.DateTime, default=datetime.utcnow)
-    is_admin = db.Column(db.Boolean, default=False)
     
     def __init__(self, username, email, password, is_admin=False):
         """Initialize a new user."""
@@ -45,7 +34,8 @@ class User(UserMixin, db.Model):
         self.username = username
         self.email = email
         self.set_password(password)
-        self.is_admin = is_admin
+        if is_admin:
+            self.role = 1
     
     @property
     def password(self):
@@ -54,6 +44,10 @@ class User(UserMixin, db.Model):
     
     @password.setter
     def password(self, password):
+        """Set the password hash from a plain text password."""
+        self.password_hash = generate_password_hash(password)
+        
+    def set_password(self, password):
         """Set the password hash from a plain text password."""
         self.password_hash = generate_password_hash(password)
     
@@ -81,8 +75,7 @@ class User(UserMixin, db.Model):
             'is_admin': self.is_admin,
             'is_active': self.is_active,
             'created_at': self.created_at.isoformat() if self.created_at else None,
-            'last_login': self.last_login.isoformat() if self.last_login else None,
-            'profile_count': len(self.profiles)
+            'last_login': self.last_login.isoformat() if self.last_login else None
         }
     
     @classmethod
