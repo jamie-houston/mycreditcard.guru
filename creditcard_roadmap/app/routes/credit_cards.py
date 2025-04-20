@@ -5,6 +5,7 @@ from marshmallow import Schema, fields, ValidationError
 from app.utils.card_scraper import scrape_credit_cards
 from app.utils.data_utils import map_scraped_card_to_model
 import json
+from datetime import datetime
 
 credit_cards = Blueprint('credit_cards', __name__)
 
@@ -35,10 +36,24 @@ def import_cards():
             # Scrape credit cards from the source
             cards_data = scrape_credit_cards(source)
             
+            # Set source URLs based on the source
+            source_urls = {
+                'nerdwallet': 'https://www.nerdwallet.com/the-best-credit-cards',
+                'creditcards.com': 'https://www.creditcards.com/best-credit-cards/',
+                'sample': 'Sample Data'
+            }
+            source_url = source_urls.get(source, '')
+            import_date = datetime.utcnow()
+            
             # Create new cards from the scraped data
             for card_data in cards_data:
                 # Map field names from scraper to model fields
                 mapped_data = map_scraped_card_to_model(card_data)
+                
+                # Add source information
+                mapped_data['source'] = source
+                mapped_data['source_url'] = source_url
+                mapped_data['import_date'] = import_date
                 
                 # Check if card already exists
                 existing_card = CreditCard.query.filter_by(name=mapped_data['name']).first()

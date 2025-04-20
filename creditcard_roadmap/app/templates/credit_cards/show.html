@@ -49,6 +49,32 @@
           </div>
         </div>
 
+        <!-- Source Information Section -->
+        {% if card.source %}
+        <h6 class="mt-4 mb-3">Source Information</h6>
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <strong>Source:</strong> {{ card.source }}
+          </div>
+          <div class="col-md-6 mb-3">
+            <strong>Import Date:</strong> {{
+            card.import_date.strftime('%Y-%m-%d') if card.import_date else 'N/A'
+            }}
+          </div>
+          {% if card.source_url %}
+          <div class="col-md-12 mb-3">
+            <strong>Source URL:</strong>
+            <a
+              href="{{ card.source_url }}"
+              target="_blank"
+              rel="noopener noreferrer"
+              >{{ card.source_url }}</a
+            >
+          </div>
+          {% endif %}
+        </div>
+        {% endif %}
+
         <!-- Reward Categories Section -->
         {% if reward_categories %}
         <h6 class="mt-4 mb-3">Reward Categories</h6>

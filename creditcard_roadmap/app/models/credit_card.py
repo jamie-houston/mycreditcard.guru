@@ -24,6 +24,11 @@ class CreditCard(db.Model):
     reward_categories = db.Column(db.Text, nullable=False)  # JSON string of category multipliers
     special_offers = db.Column(db.Text, nullable=True)  # JSON string of special offers
     
+    # Source information
+    source = db.Column(db.String(50), nullable=True)  # Source name (e.g., 'nerdwallet', 'creditcards.com')
+    source_url = db.Column(db.String(255), nullable=True)  # URL of the source page
+    import_date = db.Column(db.DateTime, nullable=True)  # Date when the card was imported
+    
     # Metadata
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
@@ -117,5 +122,8 @@ class CreditCard(db.Model):
             'signup_bonus_min_spend': self.signup_bonus_min_spend,
             'signup_bonus_time_limit': self.signup_bonus_time_limit,
             'reward_categories': self.get_reward_categories(),
-            'special_offers': self.get_special_offers()
+            'special_offers': self.get_special_offers(),
+            'source': self.source,
+            'source_url': self.source_url,
+            'import_date': self.import_date
         } 
