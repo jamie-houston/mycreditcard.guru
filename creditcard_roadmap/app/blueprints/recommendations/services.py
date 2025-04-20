@@ -1,0 +1,157 @@
+from app.models.credit_card import CreditCard
+from app.models.user_data import UserProfile as SpendingProfile
+from app.blueprints.recommendations.models import Recommendation, create_recommendation_from_profile
+from app import db
+
+class RecommendationService:
+    """Service for generating credit card recommendations based on user's spending profile."""
+    
+    @staticmethod
+    def calculate_card_value(card, monthly_spending):
+        """
+        Calculate the annual value of a credit card based on spending profile.
+        
+        Args:
+            card: CreditCard object
+            monthly_spending: Dictionary with spending categories as keys and monthly amounts as values
+        
+        Returns:
+            Dictionary with annual value breakdown
+        """
+        annual_value = 0
+        rewards_by_category = {}
+        
+        # Calculate rewards for each spending category
+        for category, monthly_amount in monthly_spending.items():
+            category_reward_rate = getattr(card, f"{category}_rewards_rate", 0)
+            annual_amount = monthly_amount * 12
+            category_value = annual_amount * (category_reward_rate / 100)
+            
+            rewards_by_category[category] = category_value
+            annual_value += category_value
+            
+        # Add sign-up bonus (we'll assume the user can meet the requirements)
+        if card.signup_bonus_value and card.signup_bonus_value > 0:
+            annual_value += card.signup_bonus_value
+            rewards_by_category['signup_bonus'] = card.signup_bonus_value
+            
+        return {
+            'annual_value': annual_value,
+            'annual_fee': card.annual_fee,
+            'net_value': annual_value - card.annual_fee,
+            'rewards_by_category': rewards_by_category
+        }
+    
+    @classmethod
+    def generate_recommendation(cls, user_id, profile_id):
+        """
+        Generate a credit card recommendation based on a user's spending profile.
+        
+        Args:
+            user_id: User ID
+            profile_id: Spending profile ID
+        
+        Returns:
+            Recommendation object
+        """
+        # Get spending profile
+        profile = SpendingProfile.query.get_or_404(profile_id)
+        
+        # Verify user owns the profile
+        if profile.user_id != user_id:
+            raise ValueError("User does not own this profile")
+        
+        # Get spending data
+        monthly_spending = {
+            'dining': profile.dining_spend,
+            'groceries': profile.groceries_spend,
+            'travel': profile.travel_spend,
+            'gas': profile.gas_spend,
+            'online_shopping': profile.online_shopping_spend,
+            'general': profile.general_spend
+        }
+        
+        # Get all credit cards
+        cards = CreditCard.query.all()
+        
+        # Calculate value for each card
+        card_values = {}
+        for card in cards:
+            card_values[card.id] = cls.calculate_card_value(card, monthly_spending)
+            card_values[card.id]['card_id'] = card.id
+            card_values[card.id]['card_name'] = card.name
+        
+        # Sort cards by net value (value - annual fee)
+        sorted_cards = sorted(
+            card_values.items(), 
+            key=lambda x: x[1]['net_value'], 
+            reverse=True
+        )
+        
+        # Get top 5 cards
+        top_cards = sorted_cards[:5]
+        top_card_ids = [card_id for card_id, _ in top_cards]
+        
+        # Convert to dictionary for storage
+        card_details = {str(card_id): details for card_id, details in dict(top_cards).items()}
+        
+        # Create monthly value projection
+        # This is simplified - in a real app, you might have more complex logic
+        monthly_values = []
+        for month in range(1, 13):
+            # Simplified: just divide annual value by 12
+            monthly_value = sum(details['annual_value'] for details in card_details.values()) / 12
+            
+            # Add signup bonuses only to the first month
+            if month == 1:
+                signup_value = sum(
+                    details['rewards_by_category'].get('signup_bonus', 0)
+                    for details in card_details.values()
+                )
+                monthly_value += signup_value
+                
+            monthly_values.append(monthly_value)
+            
+        # Create the recommendation
+        recommendation = create_recommendation_from_profile(
+            user_id=user_id,
+            profile_id=profile_id,
+            card_details=card_details,
+            sequence=top_card_ids,
+            monthly_values=monthly_values
+        )
+        
+        db.session.add(recommendation)
+        db.session.commit()
+        
+        return recommendation
+    
+    @staticmethod
+    def get_user_recommendations(user_id):
+        """Get all recommendations for a user."""
+        return Recommendation.query.filter_by(user_id=user_id).order_by(Recommendation.created_at.desc()).all()
+    
+    @staticmethod
+    def get_recommendation(recommendation_id, user_id):
+        """Get a specific recommendation for a user."""
+        recommendation = Recommendation.query.get_or_404(recommendation_id)
+        
+        # Verify user owns the recommendation
+        if recommendation.user_id != user_id:
+            raise ValueError("User does not own this recommendation")
+            
+        return recommendation
+    
+    @staticmethod
+    def delete_recommendation(recommendation_id, user_id):
+        """Delete a recommendation."""
+        recommendation = Recommendation.query.get_or_404(recommendation_id)
+        
+        # Verify user owns the recommendation
+        if recommendation.user_id != user_id:
+            raise ValueError("User does not own this recommendation")
+            
+        db.session.delete(recommendation)
+        db.session.commit()
+        
+        return True 

@@ -15,6 +15,7 @@ class UserProfile(db.Model):
     income = db.Column(db.Float, nullable=False)
     total_monthly_spend = db.Column(db.Float, nullable=False)
     category_spending = db.Column(db.Text, nullable=False)  # JSON string
+    reward_preferences = db.Column(db.Text, nullable=True)  # JSON string for reward preferences
     max_cards = db.Column(db.Integer, default=5)
     max_annual_fees = db.Column(db.Float, default=1000.0)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
@@ -34,6 +35,17 @@ class UserProfile(db.Model):
     def set_category_spending(self, spending_dict):
         """Convert dictionary to JSON string and set category_spending."""
         self.category_spending = json.dumps(spending_dict)
+    
+    def get_reward_preferences(self):
+        """Parse and return the reward preferences as a list."""
+        try:
+            return json.loads(self.reward_preferences)
+        except (json.JSONDecodeError, TypeError):
+            return []
+    
+    def set_reward_preferences(self, preferences_list):
+        """Convert list to JSON string and set reward_preferences."""
+        self.reward_preferences = json.dumps(preferences_list)
     
     def calculate_total_spend(self):
         """Calculate the total monthly spend from category spending."""
