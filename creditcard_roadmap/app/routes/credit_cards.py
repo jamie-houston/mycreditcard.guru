@@ -1,4 +1,5 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify
+from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, abort
+from flask_login import current_user, login_required
 from app import db
 from app.models.credit_card import CreditCard
 from marshmallow import Schema, fields, ValidationError
@@ -8,6 +9,16 @@ import json
 from datetime import datetime
 
 credit_cards = Blueprint('credit_cards', __name__)
+
+# Admin access decorator
+def admin_required(f):
+    def decorated_function(*args, **kwargs):
+        if not current_user.is_authenticated or not current_user.is_admin:
+            flash('You do not have permission to access this page.', 'danger')
+            return redirect(url_for('credit_cards.index'))
+        return f(*args, **kwargs)
+    decorated_function.__name__ = f.__name__
+    return decorated_function
 
 class CreditCardSchema(Schema):
     id = fields.Int(dump_only=True)
@@ -28,6 +39,8 @@ def index():
     return render_template('credit_cards/index.html', cards=cards)
 
 @credit_cards.route('/import', methods=['GET', 'POST'])
+@login_required
+@admin_required
 def import_cards():
     """Import credit cards from a data source"""
     if request.method == 'POST':
@@ -78,6 +91,8 @@ def import_cards():
     return render_template('credit_cards/import.html', sources=SOURCE_URLS)
 
 @credit_cards.route('/new', methods=['GET', 'POST'])
+@login_required
+@admin_required
 def new():
     """Add a new credit card."""
     if request.method == 'POST':
@@ -181,6 +196,8 @@ def show(id):
                           special_offers=special_offers)
 
 @credit_cards.route('/<int:id>/edit', methods=['GET', 'POST'])
+@login_required
+@admin_required
 def edit(id):
     """Edit a credit card."""
     card = CreditCard.query.get_or_404(id)
@@ -272,6 +289,8 @@ def edit(id):
                           special_offers=special_offers)
 
 @credit_cards.route('/<int:id>/delete', methods=['POST'])
+@login_required
+@admin_required
 def delete(id):
     """Delete a credit card."""
     card = CreditCard.query.get_or_404(id)
