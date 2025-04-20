@@ -1,0 +1,182 @@
+{% extends "base.html" %} {% block title %}Card Recommendation Details{%
+endblock %} {% block content %}
+<div class="container py-4">
+  <nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item">
+        <a href="{{ url_for('recommendations.list') }}">Recommendations</a>
+      </li>
+      <li class="breadcrumb-item active">Detail</li>
+    </ol>
+  </nav>
+
+  <div class="row mb-4">
+    <div class="col-md-8">
+      <h1 class="h2 mb-3">Card Recommendation</h1>
+      <p class="text-muted">
+        Created on {{ recommendation.created_at.strftime('%B %d, %Y') }}
+      </p>
+    </div>
+    <div class="col-md-4 text-end">
+      <a
+        href="{{ url_for('recommendations.delete', recommendation_id=recommendation.id) }}"
+        class="btn btn-outline-danger"
+        onclick="return confirm('Are you sure you want to delete this recommendation?');"
+      >
+        Delete Recommendation
+      </a>
+    </div>
+  </div>
+
+  <!-- Summary Card -->
+  <div class="card shadow mb-4">
+    <div class="card-header bg-primary bg-gradient text-white">
+      <h5 class="card-title mb-0">Recommendation Summary</h5>
+    </div>
+    <div class="card-body">
+      <div class="row">
+        <div class="col-md-4 mb-3 mb-md-0">
+          <div class="p-3 border rounded text-center">
+            <h3 class="text-primary fw-bold">
+              ${{ "%.2f"|format(recommendation.total_value) }}
+            </h3>
+            <p class="text-muted mb-0">Annual Value</p>
+          </div>
+        </div>
+        <div class="col-md-4 mb-3 mb-md-0">
+          <div class="p-3 border rounded text-center">
+            <h3 class="text-danger fw-bold">
+              ${{ "%.2f"|format(recommendation.total_annual_fees) }}
+            </h3>
+            <p class="text-muted mb-0">Annual Fees</p>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="p-3 border rounded text-center">
+            <h3 class="text-success fw-bold">
+              ${{ "%.2f"|format(recommendation.total_value -
+              recommendation.total_annual_fees) }}
+            </h3>
+            <p class="text-muted mb-0">Net Value</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Card Sequence -->
+  <div class="card shadow mb-4">
+    <div class="card-header bg-success bg-gradient text-white">
+      <h5 class="card-title mb-0">Recommended Application Sequence</h5>
+    </div>
+    <div class="card-body">
+      {% if recommendation.recommended_sequence %}
+      <ol class="list-group list-group-numbered mb-4">
+        {% for card_id in recommendation.recommended_sequence %} {% set card =
+        cards[card_id] %} {% set details =
+        recommendation.card_details[card_id|string] %}
+        <li
+          class="list-group-item d-flex justify-content-between align-items-start"
+        >
+          <div class="ms-2 me-auto">
+            <div class="fw-bold">{{ card.name }}</div>
+            <p class="mb-0">{{ card.issuer }}</p>
+            {% if card.annual_fee > 0 %}
+            <p class="text-danger mb-0">
+              Annual Fee: ${{ "%.2f"|format(card.annual_fee) }}
+            </p>
+            {% else %}
+            <p class="text-success mb-0">No Annual Fee</p>
+            {% endif %}
+          </div>
+          <span class="badge bg-primary rounded-pill fs-6"
+            >${{ "%.2f"|format(details.annual_value) }}</span
+          >
+        </li>
+        {% endfor %}
+      </ol>
+      {% else %}
+      <div class="alert alert-info">No cards in this recommendation.</div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Value Breakdown -->
+  <div class="card shadow mb-4">
+    <div class="card-header bg-info bg-gradient text-white">
+      <h5 class="card-title mb-0">Value Breakdown</h5>
+    </div>
+    <div class="card-body">
+      {% if recommendation.card_details %}
+      <h5 class="card-subtitle mb-3">Rewards Value by Card</h5>
+      <div class="table-responsive">
+        <table class="table table-striped table-bordered">
+          <thead class="table-light">
+            <tr>
+              <th>Card</th>
+              {% for category in ['dining', 'groceries', 'travel', 'gas',
+              'general', 'online_shopping'] %}
+              <th>{{ category|title }}</th>
+              {% endfor %}
+              <th>Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for card_id in recommendation.recommended_sequence %} {% set card
+            = cards[card_id] %} {% set details =
+            recommendation.card_details[card_id|string] %}
+            <tr>
+              <td><strong>{{ card.name }}</strong></td>
+              {% for category in ['dining', 'groceries', 'travel', 'gas',
+              'general', 'online_shopping'] %}
+              <td>
+                ${{ "%.2f"|format(details.rewards_by_category.get(category, 0))
+                }}
+              </td>
+              {% endfor %}
+              <td class="fw-bold text-primary">
+                ${{ "%.2f"|format(details.annual_value) }}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div class="alert alert-info">No detailed breakdown available.</div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Monthly Value Projection -->
+  <div class="card shadow">
+    <div class="card-header bg-warning bg-gradient text-dark">
+      <h5 class="card-title mb-0">Monthly Value Projection</h5>
+    </div>
+    <div class="card-body">
+      {% if recommendation.per_month_value %}
+      <div class="table-responsive">
+        <table class="table table-bordered">
+          <thead class="table-light">
+            <tr>
+              {% for month in range(1, 13) %}
+              <th>Month {{ month }}</th>
+              {% endfor %}
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              {% for month_value in recommendation.per_month_value %}
+              <td>${{ "%.2f"|format(month_value) }}</td>
+              {% endfor %}
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div class="alert alert-info">No monthly projection available.</div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

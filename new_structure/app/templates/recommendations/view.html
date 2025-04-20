@@ -1,0 +1,190 @@
+{% extends 'base.html' %} {% block title %}Card Recommendation Details{%
+endblock %} {% block content %}
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Card Recommendation Details</h1>
+    <div>
+      <a
+        href="{{ url_for('recommendations.list') }}"
+        class="btn btn-outline-secondary me-2"
+      >
+        <i class="bi bi-arrow-left"></i> Back to List
+      </a>
+    </div>
+  </div>
+
+  <div class="card shadow-sm mb-4">
+    <div class="card-body">
+      <h5 class="card-title">Recommendation Summary</h5>
+      <div class="row mb-4">
+        <div class="col-md-4">
+          <div class="card bg-light h-100">
+            <div class="card-body text-center">
+              <h3 class="text-success">
+                ${{ "%.2f"|format(recommendation.total_value) }}
+              </h3>
+              <p class="text-muted mb-0">Total First-Year Value</p>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card bg-light h-100">
+            <div class="card-body text-center">
+              <h3>${{ "%.2f"|format(recommendation.total_annual_fees) }}</h3>
+              <p class="text-muted mb-0">Total Annual Fees</p>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card bg-light h-100">
+            <div class="card-body text-center">
+              <h3>{{ recommendation.card_count }}</h3>
+              <p class="text-muted mb-0">Recommended Cards</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <h6 class="mt-4 mb-3">Value Over Time</h6>
+      <div class="chart-container" style="position: relative; height: 300px">
+        <canvas id="valueChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <h3 class="mb-3">Recommended Cards</h3>
+  <p class="text-muted mb-4">
+    Cards are listed in recommended application order
+  </p>
+
+  <div class="row">
+    {% for card_id in recommendation.recommended_sequence %} {% set card =
+    cards[card_id] %} {% set card_detail =
+    recommendation.card_details[card_id|string] %}
+    <div class="col-md-6 mb-4">
+      <div class="card shadow-sm h-100">
+        <div class="card-header d-flex justify-content-between">
+          <h5 class="mb-0">{{ card.name }}</h5>
+          <span class="badge bg-success">
+            +${{ "%.2f"|format(card_detail.annual_value) }} Value
+          </span>
+        </div>
+        <div class="card-body">
+          <div class="mb-3">
+            <small class="text-muted">Issuer:</small> {{ card.issuer }}
+          </div>
+
+          <hr />
+
+          <div class="row mb-3">
+            <div class="col-6">
+              <small class="text-muted d-block">Annual Fee</small>
+              <span class="fw-bold">${{ "%.2f"|format(card.annual_fee) }}</span>
+            </div>
+            <div class="col-6">
+              <small class="text-muted d-block">Sign-up Bonus</small>
+              <span class="fw-bold">
+                {% if card.signup_bonus_value %} ${{
+                "%.2f"|format(card.signup_bonus_value) }} {% else %} None {%
+                endif %}
+              </span>
+            </div>
+          </div>
+
+          <h6 class="mt-4 mb-3">Value Breakdown</h6>
+          <div class="table-responsive">
+            <table class="table table-sm">
+              <thead>
+                <tr>
+                  <th>Category</th>
+                  <th class="text-end">Value</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for category, value in
+                card_detail.rewards_by_category.items() %}
+                <tr>
+                  <td>{{ category|capitalize }}</td>
+                  <td class="text-end">${{ "%.2f"|format(value) }}</td>
+                </tr>
+                {% endfor %} {% if card.signup_bonus_value %}
+                <tr class="table-success">
+                  <td>Sign-up Bonus</td>
+                  <td class="text-end">
+                    ${{ "%.2f"|format(card.signup_bonus_value) }}
+                  </td>
+                </tr>
+                {% endif %}
+                <tr class="table-danger">
+                  <td>Annual Fee</td>
+                  <td class="text-end">
+                    -${{ "%.2f"|format(card.annual_fee) }}
+                  </td>
+                </tr>
+                <tr class="table-primary fw-bold">
+                  <td>Total Value</td>
+                  <td class="text-end">
+                    ${{ "%.2f"|format(card_detail.annual_value) }}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %} {% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+      const ctx = document.getElementById('valueChart').getContext('2d');
+      const monthlyValues = {{ recommendation.per_month_value|tojson }};
+      const labels = ['Month 1', 'Month 2', 'Month 3', 'Month 4', 'Month 5', 'Month 6',
+                       'Month 7', 'Month 8', 'Month 9', 'Month 10', 'Month 11', 'Month 12'];
+
+      const chart = new Chart(ctx, {
+          type: 'line',
+          data: {
+              labels: labels,
+              datasets: [{
+                  label: 'Cumulative Value ($)',
+                  data: monthlyValues,
+                  borderColor: 'rgb(54, 162, 235)',
+                  backgroundColor: 'rgba(54, 162, 235, 0.1)',
+                  tension: 0.1,
+                  fill: true
+              }]
+          },
+          options: {
+              responsive: true,
+              plugins: {
+                  title: {
+                      display: true,
+                      text: 'Cumulative Card Value Over First Year'
+                  },
+                  tooltip: {
+                      callbacks: {
+                          label: function(context) {
+                              return '$' + context.raw.toFixed(2);
+                          }
+                      }
+                  }
+              },
+              scales: {
+                  y: {
+                      beginAtZero: true,
+                      ticks: {
+                          callback: function(value) {
+                              return '$' + value;
+                          }
+                      }
+                  }
+              }
+          }
+      });
+  });
+</script>
+{% endblock %}

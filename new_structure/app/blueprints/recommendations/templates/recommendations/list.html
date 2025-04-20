@@ -1,0 +1,86 @@
+{% extends "base.html" %} {% block title %}Your Recommendations{% endblock %} {%
+block content %}
+<div class="container mt-4">
+  <h1 class="mb-4">Your Credit Card Recommendations</h1>
+
+  {% if recommendations %}
+  <div class="row">
+    {% for recommendation in recommendations %}
+    <div class="col-md-6 col-lg-4 mb-4">
+      <div class="card h-100">
+        <div class="card-header">
+          <h5 class="card-title mb-0">
+            Recommendation #{{ recommendation.id }}
+          </h5>
+        </div>
+        <div class="card-body">
+          <p>
+            <strong>Profile:</strong> {{
+            profiles[recommendation.profile_id].name }}
+          </p>
+          <p>
+            <strong>Created:</strong> {{
+            recommendation.created_at.strftime('%Y-%m-%d') }}
+          </p>
+          <p>
+            <strong>Total Value:</strong> ${{
+            '%.2f'|format(recommendation.total_value) }}
+          </p>
+          <p>
+            <strong>Annual Fees:</strong> ${{
+            '%.2f'|format(recommendation.total_annual_fees) }}
+          </p>
+          <p><strong>Cards:</strong> {{ recommendation.card_count }}</p>
+        </div>
+        <div class="card-footer d-flex justify-content-between">
+          <a
+            href="{{ url_for('recommendations.view', recommendation_id=recommendation.id) }}"
+            class="btn btn-primary"
+            >View Details</a
+          >
+          <a
+            href="{{ url_for('recommendations.delete', recommendation_id=recommendation.id) }}"
+            class="btn btn-danger"
+            onclick="return confirm('Are you sure you want to delete this recommendation?')"
+            >Delete</a
+          >
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="alert alert-info">
+    <h4>No recommendations yet!</h4>
+    <p>
+      Generate a credit card recommendation based on one of your spending
+      profiles:
+    </p>
+  </div>
+  {% endif %}
+
+  <div class="mt-4">
+    <h2>Generate New Recommendation</h2>
+    <p>Select a spending profile to generate recommendations:</p>
+
+    <div class="list-group">
+      {% for profile_id, profile in profiles.items() %}
+      <a
+        href="{{ url_for('recommendations.create', profile_id=profile_id) }}"
+        class="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
+      >
+        {{ profile.name }}
+        <span class="badge bg-primary rounded-pill">Generate</span>
+      </a>
+      {% else %}
+      <div class="alert alert-warning">
+        <p>You need to create a spending profile first!</p>
+        <a href="{{ url_for('user_data.add_profile') }}" class="btn btn-primary"
+          >Create Profile</a
+        >
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}

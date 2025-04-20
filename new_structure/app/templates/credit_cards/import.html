@@ -1,0 +1,59 @@
+{% extends 'base.html' %} {% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h1>Import Credit Cards</h1>
+  <a href="{{ url_for('credit_cards.index') }}" class="btn btn-secondary"
+    >Back to List</a
+  >
+</div>
+
+<div class="card mb-4">
+  <div class="card-header">
+    <h5>Import Options</h5>
+  </div>
+  <div class="card-body">
+    <form method="post" action="{{ url_for('credit_cards.import_cards') }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+      <div class="mb-3">
+        <label for="source" class="form-label">Data Source</label>
+        <select class="form-select" id="source" name="source">
+          {% for source, url in sources.items() %}
+          <option value="{{ source }}">{{ source|title }}</option>
+          {% endfor %}
+        </select>
+        <div class="form-text">
+          Select the website to scrape credit card data from.
+        </div>
+      </div>
+
+      <div class="alert alert-info">
+        <p><strong>Note:</strong> This process will:</p>
+        <ul>
+          <li>Scrape credit card data from the selected source</li>
+          <li>Add new cards to the database</li>
+          <li>Update existing cards if they already exist</li>
+        </ul>
+        <p>
+          This may take a few minutes to complete as it carefully retrieves data
+          without overloading the source website.
+        </p>
+      </div>
+
+      <button type="submit" class="btn btn-primary">Start Import</button>
+    </form>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <h5>Manual Options</h5>
+  </div>
+  <div class="card-body">
+    <p>
+      Prefer to add cards manually? You can add individual cards using the form.
+    </p>
+    <a href="{{ url_for('credit_cards.new') }}" class="btn btn-outline-primary"
+      >Add Credit Card Manually</a
+    >
+  </div>
+</div>
+{% endblock %}
