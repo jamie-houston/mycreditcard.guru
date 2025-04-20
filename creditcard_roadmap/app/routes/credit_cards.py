@@ -5,6 +5,7 @@ from app.models.credit_card import CreditCard
 from marshmallow import Schema, fields, ValidationError
 from app.utils.card_scraper import scrape_credit_cards, SOURCE_URLS
 from app.utils.data_utils import map_scraped_card_to_model
+from app.utils.compat import safe_query, safe_commit
 import json
 from datetime import datetime
 
@@ -35,7 +36,7 @@ class CreditCardSchema(Schema):
 @credit_cards.route('/')
 def index():
     """List all credit cards."""
-    cards = CreditCard.query.all()
+    cards = safe_query(CreditCard).all()
     return render_template('credit_cards/index.html', cards=cards)
 
 @credit_cards.route('/import', methods=['GET', 'POST'])
@@ -54,30 +55,30 @@ def import_cards():
             import_date = datetime.utcnow()
             
             # Create new cards from the scraped data
-            for card_data in cards_data:
-                # Map field names from scraper to model fields
-                mapped_data = map_scraped_card_to_model(card_data)
-                
-                # Add source information
-                mapped_data['source'] = source
-                mapped_data['source_url'] = source_url
-                mapped_data['import_date'] = import_date
-                
-                # Check if card already exists
-                existing_card = CreditCard.query.filter_by(name=mapped_data['name']).first()
-                if existing_card:
-                    # Update existing card
-                    for key, value in mapped_data.items():
-                        if key in ['reward_categories', 'special_offers'] and isinstance(value, list):
-                            setattr(existing_card, key, json.dumps(value))
-                        else:
-                            setattr(existing_card, key, value)
-                else:
-                    # Create new card
-                    new_card = CreditCard(**mapped_data)
-                    db.session.add(new_card)
+            with safe_commit():  # Use the safe commit context manager
+                for card_data in cards_data:
+                    # Map field names from scraper to model fields
+                    mapped_data = map_scraped_card_to_model(card_data)
+                    
+                    # Add source information
+                    mapped_data['source'] = source
+                    mapped_data['source_url'] = source_url
+                    mapped_data['import_date'] = import_date
+                    
+                    # Check if card already exists
+                    existing_card = safe_query(CreditCard).filter_by(name=mapped_data['name']).first()
+                    if existing_card:
+                        # Update existing card
+                        for key, value in mapped_data.items():
+                            if key in ['reward_categories', 'special_offers'] and isinstance(value, list):
+                                setattr(existing_card, key, json.dumps(value))
+                            else:
+                                setattr(existing_card, key, value)
+                    else:
+                        # Create new card
+                        new_card = CreditCard(**mapped_data)
+                        db.session.add(new_card)
             
-            db.session.commit()
             flash(f"Successfully imported {len(cards_data)} credit cards from {source}.", "success")
             return redirect(url_for('credit_cards.index'))
         
@@ -164,9 +165,10 @@ def new():
             schema = CreditCardSchema()
             validated_data = schema.load(data)
             
-            credit_card = CreditCard(**validated_data)
-            db.session.add(credit_card)
-            db.session.commit()
+            # Use the safe_commit context manager
+            with safe_commit():
+                credit_card = CreditCard(**validated_data)
+                db.session.add(credit_card)
             
             flash('Credit card added successfully!', 'success')
             return redirect(url_for('credit_cards.index'))
@@ -180,7 +182,7 @@ def new():
 @credit_cards.route('/<int:id>')
 def show(id):
     """Show a single credit card."""
-    card = CreditCard.query.get_or_404(id)
+    card = safe_query(CreditCard).get_or_404(id)
     
     # Parse JSON data
     try:
@@ -200,7 +202,7 @@ def show(id):
 @admin_required
 def edit(id):
     """Edit a credit card."""
-    card = CreditCard.query.get_or_404(id)
+    card = safe_query(CreditCard).get_or_404(id)
     
     # Parse JSON data for display
     try:
@@ -271,11 +273,12 @@ def edit(id):
             schema = CreditCardSchema()
             validated_data = schema.load(data)
             
-            # Update card with new data
-            for key, value in validated_data.items():
-                setattr(card, key, value)
+            # Use the safe_commit context manager
+            with safe_commit():
+                # Update card with new data
+                for key, value in validated_data.items():
+                    setattr(card, key, value)
             
-            db.session.commit()
             flash('Credit card updated successfully!', 'success')
             return redirect(url_for('credit_cards.show', id=id))
         except ValidationError as e:
@@ -293,9 +296,11 @@ def edit(id):
 @admin_required
 def delete(id):
     """Delete a credit card."""
-    card = CreditCard.query.get_or_404(id)
-    db.session.delete(card)
-    db.session.commit()
+    card = safe_query(CreditCard).get_or_404(id)
+    
+    # Use the safe_commit context manager
+    with safe_commit():
+        db.session.delete(card)
     
     flash('Credit card deleted successfully!', 'success')
     return redirect(url_for('credit_cards.index')) 
