@@ -12,99 +12,113 @@
 </div>
 
 {% if cards %}
-<div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
-  {% for card in cards %}
-  <div class="col">
-    <div class="card h-100">
-      <div
-        class="card-header d-flex justify-content-between align-items-center"
-      >
-        <h5 class="mb-0">{{ card.name }}</h5>
-        <span class="badge bg-secondary">{{ card.issuer }}</span>
-      </div>
-      <div class="card-body">
-        <p class="card-text">
-          <strong>Annual Fee:</strong> ${{ "%.2f"|format(card.annual_fee) }}
-        </p>
-        <p class="card-text">
-          <strong>Signup Bonus:</strong> {{ card.signup_bonus_points }} points
-          {% if card.signup_bonus_value > 0 %} (Est. ${{
-          "%.2f"|format(card.signup_bonus_value) }}) {% endif %}
-        </p>
-        <p class="card-text">
-          <strong>Spend Requirement:</strong> ${{
-          "%.2f"|format(card.signup_bonus_min_spend) }} in {{
+<div class="table-responsive">
+  <table class="table table-striped table-hover">
+    <thead class="table-dark">
+      <tr>
+        <th>Card Name</th>
+        <th>Issuer</th>
+        <th>Annual Fee</th>
+        <th>Signup Bonus</th>
+        <th>Spend Requirement</th>
+        <th>Source</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for card in cards %}
+      <tr>
+        <td>{{ card.name }}</td>
+        <td><span class="badge bg-secondary">{{ card.issuer }}</span></td>
+        <td>${{ "%.2f"|format(card.annual_fee) }}</td>
+        <td>
+          {{ card.signup_bonus_points }} points {% if card.signup_bonus_value >
+          0 %}
+          <br /><small class="text-muted"
+            >Est. ${{ "%.2f"|format(card.signup_bonus_value) }}</small
+          >
+          {% endif %}
+        </td>
+        <td>
+          ${{ "%.2f"|format(card.signup_bonus_min_spend) }} in {{
           card.signup_bonus_time_limit }} months
-        </p>
-      </div>
-      <div class="card-footer">
-        <div class="btn-group w-100">
-          <a
-            href="{{ url_for('credit_cards.show', id=card.id) }}"
-            class="btn btn-outline-primary"
-            >View</a
-          >
-          <a
-            href="{{ url_for('credit_cards.edit', id=card.id) }}"
-            class="btn btn-outline-secondary"
-            >Edit</a
-          >
-          <button
-            type="button"
-            class="btn btn-outline-danger"
-            data-bs-toggle="modal"
-            data-bs-target="#deleteModal{{ card.id }}"
-          >
-            Delete
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
+        </td>
+        <td>
+          {% if card.source %}
+          <small>{{ card.source }}</small>
+          {% else %}
+          <small class="text-muted">Manual entry</small>
+          {% endif %}
+        </td>
+        <td>
+          <div class="btn-group btn-group-sm">
+            <a
+              href="{{ url_for('credit_cards.show', id=card.id) }}"
+              class="btn btn-outline-primary"
+              >View</a
+            >
+            <a
+              href="{{ url_for('credit_cards.edit', id=card.id) }}"
+              class="btn btn-outline-secondary"
+              >Edit</a
+            >
+            <button
+              type="button"
+              class="btn btn-outline-danger"
+              data-bs-toggle="modal"
+              data-bs-target="#deleteModal{{ card.id }}"
+            >
+              Delete
+            </button>
+          </div>
+        </td>
+      </tr>
 
-  <!-- Delete Modal -->
-  <div
-    class="modal fade"
-    id="deleteModal{{ card.id }}"
-    tabindex="-1"
-    aria-labelledby="deleteModalLabel{{ card.id }}"
-    aria-hidden="true"
-  >
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="deleteModalLabel{{ card.id }}">
-            Confirm Delete
-          </h5>
-          <button
-            type="button"
-            class="btn-close"
-            data-bs-dismiss="modal"
-            aria-label="Close"
-          ></button>
-        </div>
-        <div class="modal-body">
-          Are you sure you want to delete {{ card.name }}?
-        </div>
-        <div class="modal-footer">
-          <button
-            type="button"
-            class="btn btn-secondary"
-            data-bs-dismiss="modal"
-          >
-            Cancel
-          </button>
-          <form
-            action="{{ url_for('credit_cards.delete', id=card.id) }}"
-            method="post"
-          >
-            <button type="submit" class="btn btn-danger">Delete</button>
-          </form>
+      <!-- Delete Modal -->
+      <div
+        class="modal fade"
+        id="deleteModal{{ card.id }}"
+        tabindex="-1"
+        aria-labelledby="deleteModalLabel{{ card.id }}"
+        aria-hidden="true"
+      >
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="deleteModalLabel{{ card.id }}">
+                Confirm Delete
+              </h5>
+              <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="modal"
+                aria-label="Close"
+              ></button>
+            </div>
+            <div class="modal-body">
+              Are you sure you want to delete {{ card.name }}?
+            </div>
+            <div class="modal-footer">
+              <button
+                type="button"
+                class="btn btn-secondary"
+                data-bs-dismiss="modal"
+              >
+                Cancel
+              </button>
+              <form
+                action="{{ url_for('credit_cards.delete', id=card.id) }}"
+                method="post"
+              >
+                <button type="submit" class="btn btn-danger">Delete</button>
+              </form>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
-  </div>
-  {% endfor %}
+      {% endfor %}
+    </tbody>
+  </table>
 </div>
 {% else %}
 <div class="alert alert-info">

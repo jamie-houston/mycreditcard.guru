@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash,
 from app import db
 from app.models.credit_card import CreditCard
 from marshmallow import Schema, fields, ValidationError
-from app.utils.card_scraper import scrape_credit_cards
+from app.utils.card_scraper import scrape_credit_cards, SOURCE_URLS
 from app.utils.data_utils import map_scraped_card_to_model
 import json
 from datetime import datetime
@@ -37,9 +37,7 @@ def import_cards():
             cards_data = scrape_credit_cards(source)
             
             # Set source URLs based on the source
-            from app.utils.card_scraper import SOURCE_URLS
-            source_urls = SOURCE_URLS
-            source_url = source_urls.get(source, '')
+            source_url = SOURCE_URLS.get(source, '')
             import_date = datetime.utcnow()
             
             # Create new cards from the scraped data
@@ -76,7 +74,8 @@ def import_cards():
             flash(error_message, "danger")
             print(error_message)
     
-    return render_template('credit_cards/import.html')
+    # Pass SOURCE_URLS dictionary to the template
+    return render_template('credit_cards/import.html', sources=SOURCE_URLS)
 
 @credit_cards.route('/new', methods=['GET', 'POST'])
 def new():

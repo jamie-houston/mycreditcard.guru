@@ -15,10 +15,10 @@ logger = logging.getLogger('card_scraper')
 # Source URLs for attribution
 SOURCE_URLS = {
     'creditcards.com': 'https://www.creditcards.com/best-credit-cards/',
-    'nerdwallet travel': 'https://www.nerdwallet.com/the-best-credit-cards/travel',
-    'nerdwallet cash back': 'https://www.nerdwallet.com/the-best-credit-cards/cash-back',
     'nerdwallet rewards': 'https://www.nerdwallet.com/the-best-credit-cards/rewards',
     'nerdwallet balance transfer': 'https://www.nerdwallet.com/the-best-credit-cards/balance-transfer',
+    'nerdwallet travel': 'https://www.nerdwallet.com/the-best-credit-cards/travel',
+    'nerdwallet cash back': 'https://www.nerdwallet.com/the-best-credit-cards/cash-back',
     'sample': 'Sample Data'
 }
 

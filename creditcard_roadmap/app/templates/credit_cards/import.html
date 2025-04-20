@@ -16,9 +16,9 @@
       <div class="mb-3">
         <label for="source" class="form-label">Data Source</label>
         <select class="form-select" id="source" name="source">
-          <option value="nerdwallet" selected>NerdWallet</option>
-          <option value="creditcards.com">CreditCards.com</option>
-          <option value="sample">Sample Data (Test)</option>
+          {% for source, url in sources.items() %}
+          <option value="{{ source }}">{{ source|title }}</option>
+          {% endfor %}
         </select>
         <div class="form-text">
           Select the website to scrape credit card data from.
