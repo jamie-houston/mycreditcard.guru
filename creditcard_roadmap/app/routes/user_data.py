@@ -8,6 +8,9 @@ user_data = Blueprint('user_data', __name__)
 
 class UserProfileSchema(Schema):
     id = fields.Int(dump_only=True)
+    name = fields.Str(required=True)
+    credit_score = fields.Int(required=True)
+    income = fields.Float(required=True)
     total_monthly_spend = fields.Float(required=True)
     category_spending = fields.Str(default='{}')
     reward_preferences = fields.Str(default='[]')
@@ -21,6 +24,9 @@ def profile():
         try:
             # Get form data and validate
             data = {
+                'name': request.form.get('profile_name', 'My Spending Profile'),
+                'credit_score': int(request.form.get('credit_score', 700)),
+                'income': float(request.form.get('income', 50000.0)),
                 'total_monthly_spend': float(request.form.get('total_monthly_spend', 0)),
                 'max_annual_fees': float(request.form.get('max_annual_fees', 0)),
                 'max_cards': int(request.form.get('max_cards', 5)),

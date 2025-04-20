@@ -1,5 +1,5 @@
 from app.models.credit_card import CreditCard
-from app.models.user_data import UserProfile as SpendingProfile
+from app.models.user_data import UserProfile
 from app.blueprints.recommendations.models import Recommendation, create_recommendation_from_profile
 from app import db
 
@@ -23,7 +23,27 @@ class RecommendationService:
         
         # Calculate rewards for each spending category
         for category, monthly_amount in monthly_spending.items():
-            category_reward_rate = getattr(card, f"{category}_rewards_rate", 0)
+            category_reward_rate = 0
+            
+            # Get the reward rate for this category from the card's reward categories
+            categories = card.get_reward_categories()
+            for cat_data in categories:
+                if cat_data['category'].lower() == category.lower():
+                    category_reward_rate = float(cat_data['rate'])
+                    break
+            
+            # Use base rate if no specific category rate found
+            if category_reward_rate == 0:
+                # Get base rate from the first category with 'base' or default to 1%
+                for cat_data in categories:
+                    if cat_data['category'].lower() == 'base' or cat_data['category'].lower() == 'all':
+                        category_reward_rate = float(cat_data['rate'])
+                        break
+                    
+                if category_reward_rate == 0:
+                    category_reward_rate = 1.0  # Default 1% if no base rate found
+            
+            # Calculate the annual value for this category
             annual_amount = monthly_amount * 12
             category_value = annual_amount * (category_reward_rate / 100)
             
@@ -55,21 +75,14 @@ class RecommendationService:
             Recommendation object
         """
         # Get spending profile
-        profile = SpendingProfile.query.get_or_404(profile_id)
+        profile = UserProfile.query.get_or_404(profile_id)
         
         # Verify user owns the profile
         if profile.user_id != user_id:
             raise ValueError("User does not own this profile")
         
-        # Get spending data
-        monthly_spending = {
-            'dining': profile.dining_spend,
-            'groceries': profile.groceries_spend,
-            'travel': profile.travel_spend,
-            'gas': profile.gas_spend,
-            'online_shopping': profile.online_shopping_spend,
-            'general': profile.general_spend
-        }
+        # Get spending data from the category_spending JSON
+        category_spending = profile.get_category_spending()
         
         # Get all credit cards
         cards = CreditCard.query.all()
@@ -77,7 +90,7 @@ class RecommendationService:
         # Calculate value for each card
         card_values = {}
         for card in cards:
-            card_values[card.id] = cls.calculate_card_value(card, monthly_spending)
+            card_values[card.id] = cls.calculate_card_value(card, category_spending)
             card_values[card.id]['card_id'] = card.id
             card_values[card.id]['card_name'] = card.name
         

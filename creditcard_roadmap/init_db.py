@@ -30,11 +30,22 @@ def init_db():
             is_admin=True
         )
         
+        # Create demo user
+        print("Creating demo user...")
+        demo = User(
+            username='demo',
+            email='demo@demo.com',
+            password='test1234',
+            is_admin=False
+        )
+        
         db.session.add(admin)
+        db.session.add(demo)
         db.session.commit()
         
         print("Database initialization completed successfully!")
         print(f"Admin user created. Username: admin, Password: admin123")
+        print(f"Demo user created. Username: demo, Email: demo@demo.com, Password: test1234")
 
 if __name__ == '__main__':
     init_db() 

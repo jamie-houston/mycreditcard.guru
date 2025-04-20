@@ -28,6 +28,10 @@ class User(UserMixin, db.Model):
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     last_login = db.Column(db.DateTime, default=datetime.utcnow)
     
+    # Relationships
+    spending_profiles = db.relationship('UserProfile', backref='user', lazy='dynamic', 
+                                       foreign_keys='UserProfile.user_id')
+    
     def __init__(self, username, email, password, is_admin=False):
         """Initialize a new user."""
         self.public_id = str(uuid.uuid4())

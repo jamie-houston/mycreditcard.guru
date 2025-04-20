@@ -106,7 +106,7 @@ class ModelsTestCase(unittest.TestCase):
         # Create a recommendation
         recommendation = Recommendation(
             user_id=user.id,
-            profile_id=profile.id,
+            user_profile_id=profile.id,
             _spending_profile='{"dining": 500, "travel": 1000, "groceries": 800}',
             _card_preferences='{}',
             _recommended_sequence='[1, 2, 3]',
@@ -122,7 +122,7 @@ class ModelsTestCase(unittest.TestCase):
         # Test retrieval
         retrieved_recommendation = Recommendation.query.filter_by(user_id=user.id).first()
         self.assertIsNotNone(retrieved_recommendation)
-        self.assertEqual(retrieved_recommendation.profile_id, profile.id)
+        self.assertEqual(retrieved_recommendation.user_profile_id, profile.id)
         
         # Test JSON properties
         self.assertEqual(len(retrieved_recommendation.recommended_sequence), 3)

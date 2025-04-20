@@ -59,18 +59,18 @@ class RoutesTestCase(unittest.TestCase):
         db.session.add(card1)
         db.session.add(card2)
         
-        # Create test recommendation
+        # Create a recommendation
         self.recommendation = Recommendation(
-            user_id=1,
-            profile_id=1,
+            user_id=self.user.id,
+            user_profile_id=self.profile.id,
             _spending_profile='{"dining": 500, "travel": 1000, "groceries": 800}',
             _card_preferences='{}',
-            _recommended_sequence='[1, 2]',
-            _card_details='{"1": {"annual_value": 500}, "2": {"annual_value": 300}}',
-            total_value=800.0,
+            _recommended_sequence='[1, 2, 3]',
+            _card_details='{"1": {"annual_value": 500}, "2": {"annual_value": 300}, "3": {"annual_value": 200}}',
+            total_value=1000.0,
             total_annual_fees=95.0,
-            _per_month_value='[66.67, 133.33, 200.0, 266.67, 333.33, 400.0, 466.67, 533.33, 600.0, 666.67, 733.33, 800.0]',
-            card_count=2
+            _per_month_value='[83.33, 166.67, 250.0, 333.33, 416.67, 500.0, 583.33, 666.67, 750.0, 833.33, 916.67, 1000.0]',
+            card_count=3
         )
         db.session.add(self.recommendation)
         

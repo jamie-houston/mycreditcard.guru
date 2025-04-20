@@ -3,18 +3,21 @@ from flask_login import login_required, current_user
 from app import db
 from app.blueprints.recommendations import bp
 from app.models.recommendation import Recommendation
-from app.models.user_profile import UserProfile
 from app.models.credit_card import CreditCard
 from datetime import datetime
 from app.blueprints.recommendations.services import RecommendationService
-from app.models.user_data import UserProfile as SpendingProfile
+from app.models.user_data import UserProfile
 
 @bp.route('/')
 @login_required
 def list():
     """List all recommendations for the current user."""
     user_recommendations = RecommendationService.get_user_recommendations(current_user.id)
-    profiles = {profile.id: profile for profile in current_user.spending_profiles}
+    
+    # Get all profiles for the current user
+    profiles = {}
+    for profile in UserProfile.query.filter_by(user_id=current_user.id).all():
+        profiles[profile.id] = profile
     
     return render_template(
         'recommendations/list.html',
@@ -28,7 +31,7 @@ def create(profile_id):
     """Create a new recommendation based on a spending profile."""
     try:
         # Verify profile exists and belongs to user
-        profile = SpendingProfile.query.get_or_404(profile_id)
+        profile = UserProfile.query.get_or_404(profile_id)
         if profile.user_id != current_user.id:
             flash('You do not have permission to access this profile.', 'danger')
             return redirect(url_for('recommendations.list'))

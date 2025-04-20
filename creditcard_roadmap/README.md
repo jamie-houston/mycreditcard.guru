@@ -1,53 +1,65 @@
 # Credit Card Roadmap
 
-A Flask application to help users optimize their credit card strategy based on spending habits and preferences.
+A Flask application to help users create a roadmap for credit card applications.
+
+## Setup
+
+1. Clone the repository
+2. Create a virtual environment and activate it:
+   ```
+   python -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   ```
+3. Install dependencies:
+   ```
+   pip install -r requirements.txt
+   ```
+
+## Database Initialization
+
+The database is automatically initialized when running the server through run.py. Alternatively, you can initialize it manually:
+
+```
+python init_db.py
+```
+
+This will create the following default users:
+- Admin: username `admin`, password `admin123`
+- Demo: username `demo`, password `test1234`
+
+## Running the Server
+
+There are several ways to run the server:
+
+### Standard Flask Run
+```
+flask --app run.py run --port 5001 --host 0.0.0.0
+```
+
+### Start with Health Check
+This will start the server and verify that it's running correctly:
+```
+./start_server.sh
+```
+
+### Checking Server Health
+To check if a running server is healthy:
+```
+./check_server.py
+```
 
 ## Features
 
-- Input your monthly spending across various categories
-- Specify reward preferences and constraints
-- Get personalized recommendations for which credit cards to apply for and when
-- View detailed information about each credit card
-- Calculate potential reward value based on your spending patterns
+- User authentication (login/registration)
+- Credit card recommendation engine
+- Spending profile management
+- Card application roadmap creation
 
-## Installation
+## Default Login
 
-1. Clone the repository:
-```
-git clone <repository-url>
-cd creditcard-roadmap
-```
-
-2. Create and activate a virtual environment:
-```
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-```
-
-3. Install dependencies:
-```
-pip install -r requirements.txt
-```
-
-4. Set up the database:
-```
-flask db init
-flask db migrate -m "Initial migration"
-flask db upgrade
-```
-
-## Usage
-
-1. Run the application:
-```
-python run.py
-```
-
-2. Open your browser and navigate to `http://localhost:5000`
-
-3. Enter your spending information and preferences in the user profile page
-
-4. View your personalized credit card roadmap recommendations
+The login page comes pre-filled with the demo user credentials:
+- Username: demo
+- Password: test1234
 
 ## Data Management
 
