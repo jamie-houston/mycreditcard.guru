@@ -24,7 +24,7 @@ class CreditCard(db.Model):
     reward_categories = db.Column(db.Text, nullable=False)  # JSON string of category multipliers
     special_offers = db.Column(db.Text, nullable=True)  # JSON string of special offers
     
-    # Source information
+    # 
     source = db.Column(db.String(50), nullable=True)  # Source name (e.g., 'nerdwallet', 'creditcards.com')
     source_url = db.Column(db.String(255), nullable=True)  # URL of the source page
     import_date = db.Column(db.DateTime, nullable=True)  # Date when the card was imported

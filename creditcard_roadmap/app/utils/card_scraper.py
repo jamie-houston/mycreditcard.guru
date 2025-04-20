@@ -12,13 +12,22 @@ from typing import List, Dict, Any, Optional, Union
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger('card_scraper')
 
+# Source URLs for attribution
+SOURCE_URLS = {
+    'creditcards.com': 'https://www.creditcards.com/best-credit-cards/',
+    'nerdwallet travel': 'https://www.nerdwallet.com/the-best-credit-cards/travel',
+    'nerdwallet cash back': 'https://www.nerdwallet.com/the-best-credit-cards/cash-back',
+    'nerdwallet rewards': 'https://www.nerdwallet.com/the-best-credit-cards/rewards',
+    'nerdwallet balance transfer': 'https://www.nerdwallet.com/the-best-credit-cards/balance-transfer',
+    'sample': 'Sample Data'
+}
+
 class NerdWalletScraper:
     """Scraper for NerdWallet credit card data"""
     
     def __init__(self, proxies: Optional[Dict[str, str]] = None, retry_count: int = 3):
-        self.base_url = "https://www.nerdwallet.com"
-        # Fixed correct URL
-        self.cards_list_url = "https://www.nerdwallet.com/the-best-credit-cards"
+        self.base_url = SOURCE_URLS['nerdwallet'].split('/the-best-credit-cards')[0]
+        self.cards_list_url = SOURCE_URLS['nerdwallet']
         self.headers = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
             'Accept-Language': 'en-US,en;q=0.9',

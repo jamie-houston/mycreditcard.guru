@@ -14,7 +14,8 @@ def map_scraped_card_to_model(scraped_data):
     field_mappings = {
         'signup_bonus_spend_requirement': 'signup_bonus_min_spend',
         'signup_bonus_time_period': 'signup_bonus_time_limit',
-        'offers': 'special_offers'
+        'offers': 'special_offers',
+        'category': None  # Field to be removed
     }
     
     # Create a new dictionary with mapped field names
@@ -22,7 +23,9 @@ def map_scraped_card_to_model(scraped_data):
     
     for key, value in scraped_data.items():
         if key in field_mappings:
-            mapped_data[field_mappings[key]] = value
+            # Skip keys that map to None (fields to be removed)
+            if field_mappings[key] is not None:
+                mapped_data[field_mappings[key]] = value
         else:
             mapped_data[key] = value
     

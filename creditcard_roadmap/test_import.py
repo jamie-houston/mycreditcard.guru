@@ -30,11 +30,8 @@ def main():
                 continue
             
             # Source URLs for attribution
-            source_urls = {
-                'nerdwallet': 'https://www.nerdwallet.com/the-best-credit-cards',
-                'creditcards.com': 'https://www.creditcards.com/best-credit-cards/',
-                'sample': 'Sample Data'
-            }
+            from app.utils.card_scraper import SOURCE_URLS
+            source_urls = SOURCE_URLS
             source_url = source_urls.get(source, '')
             import_date = datetime.utcnow()
             
