@@ -87,9 +87,10 @@
       </div>
       <div class="row mb-3">
         <div class="col-md-6">
-          <label for="signup_bonus_spend_requirement" class="form-label"
-            >Spend Requirement</label
-          >
+          <label for="signup_bonus_min_spend" class="form-label">
+            Spend Requirement
+            <span class="text-muted">(Minimum spend to qualify for bonus)</span>
+          </label>
           <div class="input-group">
             <span class="input-group-text">$</span>
             <input
@@ -97,22 +98,24 @@
               step="0.01"
               min="0"
               class="form-control"
-              id="signup_bonus_spend_requirement"
-              name="signup_bonus_spend_requirement"
-              value="0"
+              id="signup_bonus_min_spend"
+              name="signup_bonus_min_spend"
+              placeholder="e.g. 4000"
             />
           </div>
         </div>
         <div class="col-md-6">
-          <label for="signup_bonus_time_period" class="form-label"
-            >Time Period (months)</label
-          >
+          <label for="signup_bonus_time_limit" class="form-label">
+            Time Period
+            <span class="text-muted">(Months to meet spend requirement)</span>
+          </label>
           <input
             type="number"
             min="1"
             class="form-control"
-            id="signup_bonus_time_period"
-            name="signup_bonus_time_period"
+            id="signup_bonus_time_limit"
+            name="signup_bonus_time_limit"
+            placeholder="e.g. 3"
             value="3"
           />
         </div>

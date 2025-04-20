@@ -136,7 +136,7 @@ def view_card(app, card_id: int) -> None:
         print(f"Issuer: {card.issuer}")
         print(f"Annual Fee: ${card.annual_fee:.2f}")
         print(f"Signup Bonus: {card.signup_bonus_points:,} points (${card.signup_bonus_value:.2f})")
-        print(f"Signup Requirement: ${card.signup_bonus_spend_requirement:.2f} in {card.signup_bonus_time_period} months")
+        print(f"Signup Requirement: ${card.signup_bonus_min_spend:.2f} in {card.signup_bonus_time_limit} months")
         
         # Parse and display reward categories
         try:
@@ -211,8 +211,8 @@ def add_card(app, args) -> None:
             annual_fee=args.annual_fee,
             signup_bonus_points=args.signup_bonus_points,
             signup_bonus_value=args.signup_bonus_value,
-            signup_bonus_spend_requirement=args.signup_bonus_spend,
-            signup_bonus_time_period=args.signup_bonus_time,
+            signup_bonus_min_spend=args.signup_bonus_spend,
+            signup_bonus_time_limit=args.signup_bonus_time,
             reward_categories=json.dumps(reward_categories),
             offers=json.dumps(offers)
         )
@@ -243,9 +243,9 @@ def edit_card(app, args) -> None:
         if args.signup_bonus_value is not None:
             card.signup_bonus_value = args.signup_bonus_value
         if args.signup_bonus_spend is not None:
-            card.signup_bonus_spend_requirement = args.signup_bonus_spend
+            card.signup_bonus_min_spend = args.signup_bonus_spend
         if args.signup_bonus_time is not None:
-            card.signup_bonus_time_period = args.signup_bonus_time
+            card.signup_bonus_time_limit = args.signup_bonus_time
         
         # Update reward categories if provided
         if args.rewards:

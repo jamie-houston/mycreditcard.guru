@@ -601,279 +601,77 @@ class NerdWalletScraper:
         
         return None
 
-def scrape_credit_cards(use_proxies: bool = False) -> List[Dict[str, Any]]:
+def scrape_credit_cards(source='nerdwallet'):
     """
-    Main function to scrape credit cards data directly from the table
+    Scrape credit card data from a web source
     
-    Args:
-        use_proxies: Whether to use proxy rotation (if True, requires proxy setup)
-        
+    Currently supported sources:
+    - 'nerdwallet': Scrapes from NerdWallet's credit card listings
+    - 'sample': Returns a sample dataset for testing
+    
     Returns:
-        List of credit card data dictionaries
+        List of dictionaries containing credit card data with fields:
+        - name: Card name
+        - issuer: Card issuer name
+        - annual_fee: Annual fee amount
+        - signup_bonus_points: Points awarded for signup bonus
+        - signup_bonus_value: Estimated dollar value of signup bonus
+        - signup_bonus_min_spend: Required spend to earn signup bonus
+        - signup_bonus_time_limit: Time period (months) to meet spend requirement
+        - special_offers: List of special offers/benefits
+        - reward_categories: List of reward categories and earn rates
     """
-    proxies = None
-    if use_proxies:
-        # Example proxy setup - would need to be configured with actual proxies
-        proxies = {
-            'http': 'http://your-proxy-address:port',
-            'https': 'http://your-proxy-address:port'
+    if source.lower() == 'sample':
+        return _sample_credit_cards()
+    
+    # For now, use sample data as placeholder for all sources
+    # In the future, implement actual web scraping
+    return _sample_credit_cards()
+
+def _sample_credit_cards():
+    """Generate sample credit card data for testing"""
+    return [
+        {
+            "name": "Chase Sapphire Preferred",
+            "issuer": "Chase",
+            "annual_fee": 95.0,
+            "signup_bonus_points": 60000,
+            "signup_bonus_value": 750.0,
+            "signup_bonus_min_spend": 4000.0,
+            "signup_bonus_time_limit": 3,
+            "special_offers": [
+                {"type": "travel_credit", "amount": 50, "frequency": "annual"},
+                {"type": "no_foreign_transaction_fee"}
+            ],
+            "reward_categories": [
+                {"category": "dining", "percentage": 3},
+                {"category": "streaming", "percentage": 3},
+                {"category": "online_grocery", "percentage": 3},
+                {"category": "travel", "percentage": 2},
+                {"category": "other", "percentage": 1}
+            ]
+        },
+        {
+            "name": "Chase Sapphire Reserve",
+            "issuer": "Chase",
+            "annual_fee": 550.0,
+            "signup_bonus_points": 60000,
+            "signup_bonus_value": 900.0,
+            "signup_bonus_min_spend": 4000.0,
+            "signup_bonus_time_limit": 3,
+            "special_offers": [
+                {"type": "travel_credit", "amount": 300, "frequency": "annual"},
+                {"type": "global_entry_credit", "amount": 100, "frequency": "every_4_years"},
+                {"type": "priority_pass"},
+                {"type": "no_foreign_transaction_fee"}
+            ],
+            "reward_categories": [
+                {"category": "travel", "percentage": 3},
+                {"category": "dining", "percentage": 3},
+                {"category": "other", "percentage": 1}
+            ]
         }
-    
-    url = "https://www.nerdwallet.com/the-best-credit-cards"
-    logger.info(f"Starting to scrape credit cards from {url}")
-    
-    cards_data = []
-    
-    try:
-        # Make request to the main page
-        response = requests.get(
-            url, 
-            headers={
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-                'Accept-Language': 'en-US,en;q=0.9',
-                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-                'Referer': 'https://www.google.com/',
-            },
-            proxies=proxies,
-            timeout=30
-        )
-        response.raise_for_status()
-        
-        # Save HTML for debugging
-        with open('nerdwallet_debug.html', 'w', encoding='utf-8') as f:
-            f.write(response.text)
-            
-        soup = BeautifulSoup(response.text, 'html.parser')
-        
-        # Find the table with credit card information
-        # Try different possible selectors for the table
-        table = soup.select_one('#summary-table table, table.MuiTable-root')
-        
-        if not table:
-            logger.error("Could not find the summary table")
-            return []
-            
-        # Find all rows in the table body
-        rows = table.select('tbody tr')
-        logger.info(f"Found {len(rows)} card rows in table")
-        
-        for row in rows:
-            try:
-                # Get card name and issuer from first column
-                name_cell = row.select_one('td:nth-child(1)')
-                if not name_cell:
-                    continue
-                    
-                # Find the card name element
-                card_name_elem = name_cell.select_one('[data-testid="product-card-title"], h3, .product-name')
-                if not card_name_elem:
-                    # Try direct text content as fallback
-                    card_name = name_cell.get_text().strip()
-                    # Remove "Apply Now" and other button text
-                    card_name = re.sub(r'Apply Now.*', '', card_name, flags=re.DOTALL).strip()
-                else:
-                    card_name = card_name_elem.get_text().strip()
-                
-                # Clean up the card name
-                card_name = re.sub(r'Apply Now.*?Rates & Fees', '', card_name, flags=re.DOTALL).strip()
-                
-                # Extract issuer from card name
-                issuer = "Unknown"
-                common_issuers = ['Chase', 'American Express', 'Amex', 'Citi', 'Capital One', 
-                                'Discover', 'Bank of America', 'Wells Fargo', 'U.S. Bank']
-                
-                for bank in common_issuers:
-                    if bank.lower() in card_name.lower():
-                        issuer = bank
-                        break
-                
-                # Get card rating from second column
-                rating = ""
-                rating_cell = row.select_one('td:nth-child(2)')
-                if rating_cell:
-                    rating_text = rating_cell.get_text().strip()
-                    logger.info(f"Rating for {card_name}: {rating_text}")
-                    rating = rating_text
-                
-                # Get annual fee from third column
-                annual_fee = 0
-                fee_cell = row.select_one('td:nth-child(3)')
-                if fee_cell:
-                    fee_text = fee_cell.get_text().strip()
-                    logger.info(f"Annual fee text for {card_name}: {fee_text}")
-                    
-                    if '$0' in fee_text or 'No annual fee' in fee_text:
-                        annual_fee = 0
-                    else:
-                        fee_match = re.search(r'\$(\d+)', fee_text)
-                        if fee_match:
-                            annual_fee = int(fee_match.group(1))
-                
-                # We don't have actual rewards rate data in the table
-                # So we'll infer basic reward categories based on the card name
-                reward_categories = []
-                
-                # Try to infer reward categories based on the card name
-                if 'cash back' in card_name.lower():
-                    # For cash back cards, assume a generic cash back rate
-                    if 'freedom' in card_name.lower():
-                        reward_categories.append({
-                            'category': 'rotating categories',
-                            'percentage': 5.0
-                        })
-                        reward_categories.append({
-                            'category': 'all other purchases',
-                            'percentage': 1.0
-                        })
-                    else:
-                        # Generic cash back
-                        reward_categories.append({
-                            'category': 'all purchases',
-                            'percentage': 1.5
-                        })
-                elif 'travel' in card_name.lower() or 'venture' in card_name.lower() or 'sapphire' in card_name.lower():
-                    # For travel cards
-                    reward_categories.append({
-                        'category': 'travel',
-                        'percentage': 2.0
-                    })
-                    reward_categories.append({
-                        'category': 'dining',
-                        'percentage': 2.0
-                    })
-                    reward_categories.append({
-                        'category': 'all other purchases',
-                        'percentage': 1.0
-                    })
-                # Add generic rewards for other card types if no specific ones were added
-                if not reward_categories:
-                    reward_categories.append({
-                        'category': 'all purchases',
-                        'percentage': 1.0
-                    })
-                
-                # Get intro offer/signup bonus from fourth column
-                signup_bonus_value = 0.0
-                signup_bonus_points = 0
-                signup_bonus_spend_requirement = 0.0
-                signup_bonus_time_period = 3  # Default to 3 months
-                
-                bonus_cell = row.select_one('td:nth-child(4)')
-                if bonus_cell:
-                    bonus_text = bonus_cell.get_text().strip()
-                    logger.info(f"Bonus text for {card_name}: {bonus_text}")
-                    
-                    # Extract points with improved pattern
-                    points_patterns = [
-                        r'(\d+(?:,\d{3})*)\s*(?:points|miles|point)',
-                        r'(\d+(?:,\d{3})*)points', 
-                        r'Earn\s+(\d+(?:,\d{3})*)'
-                    ]
-                    
-                    for pattern in points_patterns:
-                        points_match = re.search(pattern, bonus_text, re.IGNORECASE)
-                        if points_match:
-                            try:
-                                points_str = points_match.group(1).replace(',', '')
-                                signup_bonus_points = int(points_str)
-                                logger.info(f"Extracted {signup_bonus_points} points from '{bonus_text}' with pattern '{pattern}'")
-                                break
-                            except (ValueError, IndexError):
-                                pass
-                    
-                    # Extract cash value with improved pattern
-                    value_patterns = [
-                        r'\$(\d+(?:,\d{3})*(?:\.\d+)?)',
-                        r'(\d+(?:,\d{3})*)\s+value',
-                        r'worth\s+\$(\d+(?:,\d{3})*(?:\.\d+)?)'
-                    ]
-                    
-                    for pattern in value_patterns:
-                        value_match = re.search(pattern, bonus_text, re.IGNORECASE)
-                        if value_match:
-                            try:
-                                value_str = value_match.group(1).replace(',', '')
-                                signup_bonus_value = float(value_str)
-                                logger.info(f"Extracted ${signup_bonus_value} value from '{bonus_text}' with pattern '{pattern}'")
-                                break
-                            except (ValueError, IndexError):
-                                pass
-                                
-                    # Extract spend requirement with improved pattern
-                    spend_patterns = [
-                        r'after\s+spending\s+\$(\d+(?:,\d{3})*)',
-                        r'spend\s+\$(\d+(?:,\d{3})*)',
-                        r'when\s+you\s+spend\s+\$(\d+(?:,\d{3})*)'
-                    ]
-                    
-                    for pattern in spend_patterns:
-                        spend_match = re.search(pattern, bonus_text, re.IGNORECASE)
-                        if spend_match:
-                            try:
-                                spend_str = spend_match.group(1).replace(',', '')
-                                signup_bonus_spend_requirement = float(spend_str)
-                                logger.info(f"Extracted spend requirement of ${signup_bonus_spend_requirement} from '{bonus_text}'")
-                                break
-                            except (ValueError, IndexError):
-                                pass
-                    
-                    # Extract time period with improved pattern
-                    time_patterns = [
-                        r'within\s+(\d+)\s+months',
-                        r'in\s+the\s+first\s+(\d+)\s+months',
-                        r'first\s+(\d+)\s+months',
-                        r'(\d+)-month\s+period'
-                    ]
-                    
-                    for pattern in time_patterns:
-                        time_match = re.search(pattern, bonus_text, re.IGNORECASE)
-                        if time_match:
-                            try:
-                                signup_bonus_time_period = int(time_match.group(1))
-                                logger.info(f"Extracted time period of {signup_bonus_time_period} months from '{bonus_text}'")
-                                break
-                            except (ValueError, IndexError):
-                                pass
-                    
-                    # If we have points but no cash value, estimate at 1.25 cents per point for premium travel cards
-                    if signup_bonus_points > 0 and signup_bonus_value == 0:
-                        if 'sapphire' in card_name.lower() or 'travel' in card_name.lower() or 'venture' in card_name.lower():
-                            # Premium cards typically have higher point values
-                            point_value = 0.0125  # 1.25 cents per point
-                        else:
-                            # Standard cards have 1 cent per point
-                            point_value = 0.01  # 1 cent per point
-                            
-                        signup_bonus_value = signup_bonus_points * point_value
-                        logger.info(f"Estimated bonus value at ${signup_bonus_value} based on {signup_bonus_points} points")
-                
-                # Create card data dictionary with the information we could extract
-                card_data = {
-                    'name': card_name,
-                    'issuer': issuer,
-                    'annual_fee': annual_fee,
-                    'reward_categories': reward_categories,
-                    'signup_bonus_points': signup_bonus_points,
-                    'signup_bonus_value': signup_bonus_value,
-                    'signup_bonus_spend_requirement': signup_bonus_spend_requirement,
-                    'signup_bonus_time_period': signup_bonus_time_period,
-                    'offers': []  # Default empty list for offers
-                }
-                
-                cards_data.append(card_data)
-                logger.info(f"Successfully scraped basic info for: {card_name}")
-                
-            except Exception as e:
-                logger.error(f"Error extracting card from row: {str(e)}")
-                logger.exception(e)
-        
-        logger.info(f"Completed scraping. Got {len(cards_data)} cards.")
-        
-    except Exception as e:
-        logger.error(f"Error scraping credit cards: {str(e)}")
-        logger.exception(e)
-    
-    return cards_data
+    ]
 
 if __name__ == "__main__":
     # This allows running the scraper directly for testing

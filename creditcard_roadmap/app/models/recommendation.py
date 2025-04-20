@@ -11,10 +11,10 @@ class Recommendation(db.Model):
     
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    profile_id = db.Column(db.Integer, db.ForeignKey('user_profiles.id'), nullable=False)
+    user_profile_id = db.Column(db.Integer, db.ForeignKey('user_profiles.id'), nullable=False)
     
     # Store spending profile as JSON string
-    _spending_profile = db.Column(db.Text, nullable=False)
+    _spending_profile = db.Column(db.Text, nullable=True)
     # Store card preferences as JSON string
     _card_preferences = db.Column(db.Text, nullable=True)
     
@@ -40,7 +40,7 @@ class Recommendation(db.Model):
     # Relationships with fully qualified paths
     user = db.relationship('app.models.user.User', backref=db.backref('user_recommendations', lazy=True))
 
-    profile = db.relationship('app.models.user_data.UserProfile', foreign_keys=[profile_id])
+    profile = db.relationship('app.models.user_data.UserProfile', foreign_keys=[user_profile_id], overlaps="recommendations")
     
     # Property accessors
     @property

@@ -11,7 +11,7 @@ def create_recommendation_from_profile(user_id, profile_id, card_details, sequen
     
     return Recommendation(
         user_id=user_id,
-        profile_id=profile_id,
+        user_profile_id=profile_id,
         card_details=card_details,
         recommended_sequence=sequence,
         per_month_value=monthly_values or [],

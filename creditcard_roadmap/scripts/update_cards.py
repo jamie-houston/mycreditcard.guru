@@ -46,7 +46,18 @@ def convert_list_dict_to_json(card_data: Dict[str, Any]) -> Dict[str, Any]:
         data_copy['reward_categories'] = json.dumps(data_copy['reward_categories'])
     
     if 'offers' in data_copy and isinstance(data_copy['offers'], list):
-        data_copy['offers'] = json.dumps(data_copy['offers'])
+        data_copy['special_offers'] = json.dumps(data_copy['offers'])
+        # Remove original field to avoid errors
+        del data_copy['offers']
+    
+    # Map field names to match model
+    if 'signup_bonus_spend_requirement' in data_copy:
+        data_copy['signup_bonus_min_spend'] = data_copy['signup_bonus_spend_requirement']
+        del data_copy['signup_bonus_spend_requirement']
+    
+    if 'signup_bonus_time_period' in data_copy:
+        data_copy['signup_bonus_time_limit'] = data_copy['signup_bonus_time_period']
+        del data_copy['signup_bonus_time_period']
     
     return data_copy
 
@@ -71,10 +82,15 @@ def compare_card_data(existing_card: CreditCard, new_data: Dict[str, Any]) -> Tu
         'annual_fee',
         'signup_bonus_points',
         'signup_bonus_value',
-        'signup_bonus_spend_requirement',
-        'signup_bonus_time_period'
     ]
     
+    # Map fields for comparison
+    field_mapping = {
+        'signup_bonus_spend_requirement': 'signup_bonus_min_spend',
+        'signup_bonus_time_period': 'signup_bonus_time_limit',
+    }
+    
+    # Add standard fields
     for field in fields_to_compare:
         old_value = getattr(existing_card, field)
         new_value = new_data.get(field)
@@ -82,6 +98,16 @@ def compare_card_data(existing_card: CreditCard, new_data: Dict[str, Any]) -> Tu
         if new_value is not None and old_value != new_value:
             changes[field] = (old_value, new_value)
             update_needed = True
+    
+    # Add mapped fields
+    for scraped_field, model_field in field_mapping.items():
+        if scraped_field in new_data:
+            old_value = getattr(existing_card, model_field)
+            new_value = new_data.get(scraped_field)
+            
+            if new_value is not None and old_value != new_value:
+                changes[model_field] = (old_value, new_value)
+                update_needed = True
     
     # Compare JSON fields
     try:
@@ -98,16 +124,16 @@ def compare_card_data(existing_card: CreditCard, new_data: Dict[str, Any]) -> Tu
         update_needed = True
     
     try:
-        existing_offers = json.loads(existing_card.offers)
+        existing_offers = json.loads(existing_card.special_offers)
         new_offers = new_data.get('offers', [])
         
         if sorted(existing_offers, key=lambda x: f"{x.get('type')}:{x.get('amount')}") != \
            sorted(new_offers, key=lambda x: f"{x.get('type')}:{x.get('amount')}"):
-            changes['offers'] = (existing_offers, new_offers)
+            changes['special_offers'] = (existing_offers, new_offers)
             update_needed = True
     except (json.JSONDecodeError, TypeError):
         # If there's an error parsing, assume they're different
-        changes['offers'] = ("Error parsing", new_data.get('offers', []))
+        changes['special_offers'] = ("Error parsing", new_data.get('offers', []))
         update_needed = True
     
     return update_needed, changes

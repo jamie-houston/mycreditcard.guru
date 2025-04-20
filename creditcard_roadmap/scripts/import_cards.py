@@ -75,17 +75,30 @@ def import_cards(use_proxies: bool = False, limit: int = 0, clear: bool = False)
                     logger.info(f"Removed rewards_rate '{rewards_rate}' from card data")
                 
                 # Filter out any other fields that don't match the model
-                valid_fields = ['name', 'issuer', 'annual_fee', 'reward_categories', 'offers', 
-                               'signup_bonus_points', 'signup_bonus_value', 'signup_bonus_spend_requirement',
-                               'signup_bonus_time_period', 'is_active']
+                valid_fields = ['name', 'issuer', 'annual_fee', 'reward_categories', 'special_offers', 
+                               'signup_bonus_points', 'signup_bonus_value', 'signup_bonus_min_spend', 
+                               'signup_bonus_time_limit', 'is_active']
                 
+                # Map scraper field names to model field names
+                field_mapping = {
+                    'signup_bonus_spend_requirement': 'signup_bonus_min_spend',
+                    'signup_bonus_time_period': 'signup_bonus_time_limit',
+                    'offers': 'special_offers'
+                }
+                
+                # Rename fields to match model
+                for scraper_field, model_field in field_mapping.items():
+                    if scraper_field in card_data and model_field in valid_fields:
+                        card_data[model_field] = card_data.pop(scraper_field)
+                
+                # Now filter the fields
                 filtered_card_data = {k: v for k, v in card_data.items() if k in valid_fields}
                 
                 # Convert list/dict fields to JSON strings
                 if 'reward_categories' in filtered_card_data:
                     filtered_card_data['reward_categories'] = json.dumps(filtered_card_data['reward_categories'])
-                if 'offers' in filtered_card_data:
-                    filtered_card_data['offers'] = json.dumps(filtered_card_data['offers'])
+                if 'special_offers' in filtered_card_data:
+                    filtered_card_data['special_offers'] = json.dumps(filtered_card_data['special_offers'])
                 
                 # Check if card already exists by name and issuer
                 existing_card = CreditCard.query.filter_by(
