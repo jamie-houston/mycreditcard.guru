@@ -17,7 +17,7 @@
         <label for="source" class="form-label">Data Source</label>
         <select class="form-select" id="source" name="source">
           {% for source, url in sources.items() %}
-          <option value="{{ source }}">{{ source|title }}</option>
+          <option value="{{ url }}">{{ source|title }}</option>
           {% endfor %}
         </select>
         <div class="form-text">
