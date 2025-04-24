@@ -1,0 +1,186 @@
+{% extends 'base.html' %} {% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h1>{{ card.name }}</h1>
+  <div>
+    <a
+      href="{{ url_for('credit_cards.edit', id=card.id) }}"
+      class="btn btn-primary"
+      >Edit Card</a
+    >
+    <a href="{{ url_for('credit_cards.index') }}" class="btn btn-secondary ms-2"
+      >Back to List</a
+    >
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-md-8">
+    <div class="card mb-4">
+      <div class="card-header">
+        <h5>Card Details</h5>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <strong>Issuer:</strong> {{ card.issuer }}
+          </div>
+          <div class="col-md-6 mb-3">
+            <strong>Annual Fee:</strong> ${{ "%.2f"|format(card.annual_fee) }}
+          </div>
+        </div>
+
+        <!-- Signup Bonus Section -->
+        <h6 class="mt-4 mb-3">Signup Bonus</h6>
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <strong>Points/Miles:</strong> {{ card.signup_bonus_points }}
+          </div>
+          <div class="col-md-6 mb-3">
+            <strong>Estimated Value:</strong> ${{
+            "%.2f"|format(card.signup_bonus_value) }}
+          </div>
+          <div class="col-md-6 mb-3">
+            <strong>Spend Requirement:</strong> ${{
+            "%.2f"|format(card.signup_bonus_min_spend) }}
+          </div>
+          <div class="col-md-6 mb-3">
+            <strong>Time Period:</strong> {{ card.signup_bonus_time_limit }}
+            months
+          </div>
+        </div>
+
+        <!-- Source Information Section -->
+        {% if card.source %}
+        <h6 class="mt-4 mb-3">Source Information</h6>
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <strong>Source:</strong> {{ card.source }}
+          </div>
+          <div class="col-md-6 mb-3">
+            <strong>Import Date:</strong> {{
+            card.import_date.strftime('%Y-%m-%d') if card.import_date else 'N/A'
+            }}
+          </div>
+          {% if card.source_url %}
+          <div class="col-md-12 mb-3">
+            <strong>Source URL:</strong>
+            <a
+              href="{{ card.source_url }}"
+              target="_blank"
+              rel="noopener noreferrer"
+              >{{ card.source_url }}</a
+            >
+          </div>
+          {% endif %}
+        </div>
+        {% endif %}
+
+        <!-- Reward Categories Section -->
+        {% if reward_categories %}
+        <h6 class="mt-4 mb-3">Reward Categories</h6>
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <th>Category</th>
+              <th>Reward Percentage</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for category in reward_categories %}
+            <tr>
+              <td>{{ category.category|title }}</td>
+              <td>{{ category.percentage }}%</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        {% endif %}
+
+        <!-- Card Offers Section -->
+        {% if offers %}
+        <h6 class="mt-4 mb-3">Card Offers</h6>
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <th>Offer Type</th>
+              <th>Amount</th>
+              <th>Frequency</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for offer in offers %}
+            <tr>
+              <td>{{ offer.type|replace('_', ' ')|title }}</td>
+              <td>${{ "%.2f"|format(offer.amount) }}</td>
+              <td>{{ offer.frequency|replace('_', ' ')|title }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-4">
+    <div class="card mb-4">
+      <div class="card-header bg-primary text-white">
+        <h5 class="mb-0">Quick Actions</h5>
+      </div>
+      <div class="card-body">
+        <a
+          href="{{ url_for('credit_cards.edit', id=card.id) }}"
+          class="btn btn-primary d-block mb-2"
+          >Edit Card</a
+        >
+        <button
+          type="button"
+          class="btn btn-danger d-block mb-2"
+          data-bs-toggle="modal"
+          data-bs-target="#deleteCardModal"
+        >
+          Delete Card
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Modal -->
+<div
+  class="modal fade"
+  id="deleteCardModal"
+  tabindex="-1"
+  aria-labelledby="deleteCardModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="deleteCardModalLabel">Confirm Delete</h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </div>
+      <div class="modal-body">
+        Are you sure you want to delete {{ card.name }}? This action cannot be
+        undone.
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          Cancel
+        </button>
+        <form
+          action="{{ url_for('credit_cards.delete', id=card.id) }}"
+          method="post"
+        >
+          <button type="submit" class="btn btn-danger">Delete</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
