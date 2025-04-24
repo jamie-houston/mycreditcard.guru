@@ -18,11 +18,10 @@ logger = logging.getLogger('card_scraper')
 # Source URLs for attribution
 SOURCE_URLS = {
     'creditcards.com': 'https://www.creditcards.com/best-credit-cards/',
-    'nerdwallet': 'https://www.nerdwallet.com/the-best-credit-cards',
-    'nerdwallet rewards': 'https://www.nerdwallet.com/the-best-credit-cards/rewards',
-    'nerdwallet balance transfer': 'https://www.nerdwallet.com/the-best-credit-cards/balance-transfer',
-    'nerdwallet travel': 'https://www.nerdwallet.com/the-best-credit-cards/travel',
-    'nerdwallet cash back': 'https://www.nerdwallet.com/the-best-credit-cards/cash-back',
+    'nerdwallet rewards': 'https://www.nerdwallet.com/best/credit-cards/rewards',
+    'nerdwallet balance transfer': 'https://www.nerdwallet.com/best/credit-cards/balance-transfer',
+    'nerdwallet travel': 'https://www.nerdwallet.com/best/credit-cards/travel',
+    'nerdwallet cash back': 'https://www.nerdwallet.com/best/credit-cards/cash-back',
     'sample': 'Sample Data'
 }
 
@@ -911,18 +910,14 @@ def scrape_credit_cards(source='nerdwallet', use_proxies=False):
         }
     
     # Use specialized scraper for NerdWallet
-    if source == 'nerdwallet' or source.startswith('nerdwallet '):
-        return scrape_nerdwallet_cards()
+    if 'nerdwallet' in source.lower():
+        # Pass the source URL to the specialized scraper
+        return scrape_nerdwallet_cards(source_url=source)
     
     # Choose the appropriate scraper based on the source
     if source == 'creditcards.com':
         scraper = CreditCardsComScraper(proxies=proxies)
         return scraper.scrape_cards()
-    elif source == 'nerdwallet':
-        # Legacy NerdWallet scraper - now we use the specialized one above
-        # This line is reached only if there's a duplicate check, which is redundant
-        # Just use our specialized scraper in both cases
-        return scrape_nerdwallet_cards()
     elif source == 'sample':
         return _sample_credit_cards()
     else:

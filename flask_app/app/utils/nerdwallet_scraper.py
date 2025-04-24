@@ -343,14 +343,26 @@ class NerdWalletScraper:
         return "Unknown Issuer"
 
 
-def scrape_nerdwallet_cards():
+def scrape_nerdwallet_cards(source_url=None):
     """
     Main function to scrape NerdWallet credit cards
+    
+    Args:
+        source_url (str, optional): The specific NerdWallet URL to scrape from.
+                                    If None, uses the default URL.
     
     Returns:
         List of credit card data dictionaries
     """
+    logger.info(f"Using specialized NerdWallet scraper with source_url: {source_url}")
+    
     scraper = NerdWalletScraper()
+    
+    # If a specific NerdWallet URL was provided, update the scraper's URL
+    if source_url and 'nerdwallet.com' in source_url:
+        scraper.cards_list_url = source_url
+        logger.info(f"Using custom NerdWallet URL: {source_url}")
+    
     return scraper.scrape_cards()
 
 
