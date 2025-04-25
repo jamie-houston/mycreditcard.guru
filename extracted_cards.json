@@ -1,0 +1,54 @@
+[
+  {
+    "name": "Capital One Venture",
+    "issuer": "Capital One",
+    "annual_fee": 0,
+    "reward_categories": {},
+    "ratings": {},
+    "credit_needed": "",
+    "intro_apr": "",
+    "regular_apr": "",
+    "intro_offer": "",
+    "card_type": "",
+    "card_network": ""
+  },
+  {
+    "name": "Chase Freedom",
+    "issuer": "Chase",
+    "annual_fee": 0,
+    "reward_categories": {},
+    "ratings": {},
+    "credit_needed": "",
+    "intro_apr": "",
+    "regular_apr": "",
+    "intro_offer": "",
+    "card_type": "",
+    "card_network": ""
+  },
+  {
+    "name": "Chase Sapphire",
+    "issuer": "Chase",
+    "annual_fee": 0,
+    "reward_categories": {},
+    "ratings": {},
+    "credit_needed": "",
+    "intro_apr": "",
+    "regular_apr": "",
+    "intro_offer": "",
+    "card_type": "",
+    "card_network": ""
+  },
+  {
+    "name": "Discover it",
+    "issuer": "Discover",
+    "annual_fee": 0,
+    "reward_categories": {},
+    "ratings": {},
+    "credit_needed": "",
+    "intro_apr": "",
+    "regular_apr": "",
+    "intro_offer": "",
+    "card_type": "",
+    "card_network": ""
+  }
+]
