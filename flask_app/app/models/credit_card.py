@@ -58,6 +58,38 @@ class CreditCard(db.Model):
                 return float(cat['rate'])
         return 1.0  # Default base rate
     
+    # Property for base reward rate (default reward rate)
+    @property
+    def base_reward_rate(self):
+        """Get the base reward rate for the card."""
+        return self.get_category_rate('base') 
+    
+    # Properties for category-specific reward rates
+    @property
+    def dining_reward_rate(self):
+        """Get the dining reward rate for the card."""
+        return self.get_category_rate('dining')
+    
+    @property
+    def travel_reward_rate(self):
+        """Get the travel reward rate for the card."""
+        return self.get_category_rate('travel')
+    
+    @property
+    def gas_reward_rate(self):
+        """Get the gas reward rate for the card."""
+        return self.get_category_rate('gas')
+    
+    @property
+    def grocery_reward_rate(self):
+        """Get the grocery reward rate for the card."""
+        return self.get_category_rate('groceries')
+    
+    @property
+    def entertainment_reward_rate(self):
+        """Get the entertainment reward rate for the card."""
+        return self.get_category_rate('entertainment')
+    
     def calculate_category_value(self, category_spend, category):
         """Calculate the value earned from spending in a specific category."""
         rate = self.get_category_rate(category)

@@ -96,6 +96,7 @@
               id="total_monthly_spend"
               name="total_monthly_spend"
               value="{{ profile.total_monthly_spend if profile else 0 }}"
+              readonly
               required
             />
           </div>
@@ -267,7 +268,7 @@
 
     {% if profile %}
     <a
-      href="{{ url_for('recommendations.create', profile_id=profile.id) }}"
+      href="/recommendations/create/{{ profile.id }}"
       class="btn btn-success btn-lg"
     >
       <i class="fas fa-magic me-2"></i>Generate Recommendations
@@ -280,90 +281,95 @@
 <script>
   document.addEventListener('DOMContentLoaded', function() {
     // Enable tooltips
-    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
     var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-      return new bootstrap.Tooltip(tooltipTriggerEl)
+      return new bootstrap.Tooltip(tooltipTriggerEl);
     });
 
-    // Spending validation
-    const totalInput = document.getElementById('total_monthly_spend');
-    const categoryInputs = document.querySelectorAll('.category-input');
-    const warningEl = document.getElementById('spending-warning');
-    const warningText = document.getElementById('spending-warning-text');
+    // Spending validation and auto-calculation
+    var totalInput = document.getElementById('total_monthly_spend');
+    var categoryInputs = document.querySelectorAll('input[id^="category_"]');
+    var warningEl = document.getElementById('spending-warning');
 
-    function validateSpending() {
-      let totalDeclared = parseFloat(totalInput.value) || 0;
-      let categoryTotal = 0;
+    function calculateTotal() {
+      var categoryTotal = 0;
 
-      categoryInputs.forEach(input => {
-        categoryTotal += parseFloat(input.value) || 0;
-      });
+      for (var i = 0; i < categoryInputs.length; i++) {
+        var input = categoryInputs[i];
+        var value = parseFloat(input.value) || 0;
+        categoryTotal += value;
+      }
 
-      if (categoryTotal > totalDeclared * 1.1) {
-        warningEl.style.display = 'block';
-        warningText.textContent = `Your category spending ($${categoryTotal.toFixed(2)}) exceeds your declared total ($${totalDeclared.toFixed(2)}).`;
-      } else if (categoryTotal < totalDeclared * 0.8 && categoryTotal > 0) {
-        warningEl.style.display = 'block';
-        warningText.textContent = `Your category spending ($${categoryTotal.toFixed(2)}) is much less than your declared total ($${totalDeclared.toFixed(2)}).`;
-      } else {
+      // Update the total field with the sum of categories
+      totalInput.value = categoryTotal.toFixed(2);
+
+      // Hide the warning since total is now always equal to sum of categories
+      if (warningEl) {
         warningEl.style.display = 'none';
       }
+
+      return categoryTotal;
     }
 
-    totalInput.addEventListener('change', validateSpending);
-    categoryInputs.forEach(input => {
-      input.addEventListener('change', validateSpending);
-    });
+    // Initial calculation when the page loads
+    calculateTotal();
 
-    // Initial validation
-    validateSpending();
+    // Add event listeners to category inputs
+    for (var i = 0; i < categoryInputs.length; i++) {
+      categoryInputs[i].addEventListener('input', calculateTotal);
+    }
 
     // Render spending chart if data exists
     {% if profile and category_spending %}
-    const ctx = document.getElementById('spending-chart').getContext('2d');
+    renderSpendingChart();
+    {% endif %}
 
-    // Get non-zero categories
-    const categories = [];
-    const values = [];
-    {% for category, value in category_spending.items() %}
-      {% if value > 0 %}
-      categories.push('{{ category|title }}');
-      values.push({{ value }});
-      {% endif %}
-    {% endfor %}
+    function renderSpendingChart() {
+      var ctx = document.getElementById('spending-chart').getContext('2d');
 
-    if (categories.length > 0) {
-      const chart = new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-          labels: categories,
-          datasets: [{
-            data: values,
-            backgroundColor: [
-              '#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b',
-              '#6f42c1', '#5a5c69', '#8fd19e', '#f8f9fc', '#858796'
-            ]
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: {
-              position: 'right',
-              labels: {
-                boxWidth: 12
+      // Get non-zero categories
+      var categories = [];
+      var values = [];
+
+      {% for category, value in category_spending.items() %}
+        {% if value > 0 %}
+        categories.push('{{ category|title }}');
+        values.push({{ value }});
+        {% endif %}
+      {% endfor %}
+
+      if (categories.length > 0) {
+        var chart = new Chart(ctx, {
+          type: 'doughnut',
+          data: {
+            labels: categories,
+            datasets: [{
+              data: values,
+              backgroundColor: [
+                '#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b',
+                '#6f42c1', '#5a5c69', '#8fd19e', '#f8f9fc', '#858796'
+              ]
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                position: 'right',
+                labels: {
+                  boxWidth: 12
+                }
+              },
+              title: {
+                display: true,
+                text: 'Your Spending Breakdown'
               }
-            },
-            title: {
-              display: true,
-              text: 'Your Spending Breakdown'
             }
           }
-        }
-      });
+        });
+      }
     }
-    {% endif %}
   });
 </script>
 {% endblock %}

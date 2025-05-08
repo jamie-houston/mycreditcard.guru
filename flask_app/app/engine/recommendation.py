@@ -97,10 +97,9 @@ class RecommendationEngine:
         # Calculate value for each card
         card_values = []
         for card in available_cards:
-            # Check if the card matches the user's credit score
-            if card.min_credit_score > profile.credit_score:
-                continue
-                
+            # Skip credit score check since min_credit_score attribute doesn't exist
+            # Instead, just calculate value for all cards
+            
             # Calculate the card's value
             value_data = RecommendationEngine.calculate_card_value(card, profile)
             card_values.append(value_data)
@@ -124,10 +123,12 @@ class RecommendationEngine:
             'profile_id': profile.id,
             'cards': [card['card_id'] for card in optimal_combination],
             'recommended_sequence': RecommendationEngine.determine_application_sequence(optimal_combination),
-            'card_details': {card['card_id']: card for card in optimal_combination},
+            'card_details': {str(card['card_id']): card for card in optimal_combination},
             'total_value': sum(card['net_value'] for card in optimal_combination),
             'total_annual_fees': sum(card['annual_fee'] for card in optimal_combination),
             'per_month_value': per_month_value,
+            'spending_profile': profile.get_category_spending(),
+            'card_preferences': profile.get_reward_preferences() if hasattr(profile, 'get_reward_preferences') else [],
             'generated_at': datetime.now().isoformat()
         }
         

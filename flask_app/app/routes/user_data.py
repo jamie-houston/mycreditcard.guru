@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash, session, jsonify
+from flask import Blueprint, render_template, request, redirect, url_for, flash, session, jsonify, current_app
 from flask_login import current_user
 from app import db
 from app.models.user_data import UserProfile
@@ -24,16 +24,6 @@ def profile():
     """User profile form to collect spending habits and preferences."""
     if request.method == 'POST':
         try:
-            # Get form data and validate
-            data = {
-                'name': request.form.get('profile_name', 'My Spending Profile'),
-                'credit_score': int(request.form.get('credit_score', 700)),
-                'income': float(request.form.get('income', 50000)),
-                'total_monthly_spend': float(request.form.get('total_monthly_spend', 0)),
-                'max_annual_fees': float(request.form.get('max_annual_fees', 0)),
-                'max_cards': int(request.form.get('max_cards', 5)),
-            }
-            
             # Process category spending from form
             category_spending = {}
             for key, value in request.form.items():
@@ -44,90 +34,72 @@ def profile():
                         if amount > 0:  # Only include non-zero values
                             category_spending[category] = amount
                     except ValueError:
-                        flash(f'Invalid value for {category}', 'danger')
-                        return render_template('user_data/profile.html')
+                        pass
+
+            # Process reward preferences from form
+            reward_preferences = request.form.getlist('reward_preferences')
             
-            data['category_spending'] = json.dumps(category_spending)
+            # Get other form data
+            profile_name = request.form.get('profile_name', 'My Spending Profile')
+            credit_score = int(request.form.get('credit_score', 700))
+            income = float(request.form.get('income', 50000))
+            total_monthly_spend = float(request.form.get('total_monthly_spend', 0))
+            max_cards = int(request.form.get('max_cards', 5))
+            max_annual_fees = float(request.form.get('max_annual_fees', 0))
             
-            # Process reward preferences
-            data['reward_preferences'] = json.dumps(request.form.getlist('reward_preferences'))
-            
-            # Calculate spending summary
-            total_categorized = sum(category_spending.values())
-            if total_categorized > data['total_monthly_spend'] * 1.1:
-                flash('Warning: Your category spending exceeds your total monthly spending. Please check your numbers.', 'warning')
-            elif total_categorized < data['total_monthly_spend'] * 0.5 and total_categorized > 0:
-                flash('Tip: You have a large portion of uncategorized spending. Adding more category details will improve your recommendations.', 'info')
-            
-            # Validate with schema
-            schema = UserProfileSchema()
-            validated_data = schema.load(data)
-            
-            # Set user_id or session_id depending on authentication status
+            # Create or update profile in the database
             if current_user.is_authenticated:
-                validated_data['user_id'] = current_user.id
+                # For logged-in users, get their existing profile or create a new one
+                profile = UserProfile.query.filter_by(user_id=current_user.id).first()
+                is_new_profile = profile is None
+                
+                if not profile:
+                    profile = UserProfile(user_id=current_user.id)
             else:
-                # For anonymous users, use a session ID
+                # For anonymous users, store a session ID and get/create profile for that session
                 if 'anonymous_user_id' not in session:
                     session['anonymous_user_id'] = str(uuid.uuid4())
-                validated_data['session_id'] = session['anonymous_user_id']
+                
+                session_id = session['anonymous_user_id']
+                profile = UserProfile.query.filter_by(session_id=session_id).first()
+                is_new_profile = profile is None
+                
+                if not profile:
+                    profile = UserProfile(session_id=session_id)
             
-            # Create or update user profile
-            profile_id = session.get('profile_id')
-            if profile_id:
-                profile = UserProfile.query.get(profile_id)
-                if profile:
-                    # Check if the profile belongs to the current user or session
-                    if (current_user.is_authenticated and profile.user_id == current_user.id) or \
-                       (not current_user.is_authenticated and profile.session_id == session.get('anonymous_user_id')):
-                        for key, value in validated_data.items():
-                            setattr(profile, key, value)
-                    else:
-                        # Create a new profile if the existing one doesn't belong to the user
-                        profile = UserProfile(**validated_data)
-                        db.session.add(profile)
-                else:
-                    profile = UserProfile(**validated_data)
-                    db.session.add(profile)
-            else:
-                profile = UserProfile(**validated_data)
-                db.session.add(profile)
+            # Update profile fields
+            profile.name = profile_name
+            profile.credit_score = credit_score
+            profile.income = income
+            profile.total_monthly_spend = total_monthly_spend
+            profile.category_spending = json.dumps(category_spending)
+            profile.reward_preferences = json.dumps(reward_preferences)
+            profile.max_cards = max_cards
+            profile.max_annual_fees = max_annual_fees
             
+            # Save to database
+            db.session.add(profile)
             db.session.commit()
-            session['profile_id'] = profile.id
             
-            flash('Profile data saved successfully!', 'success')
-            return redirect(url_for('recommendations.list'))
-        
-        except ValidationError as e:
-            flash('Validation error: ' + str(e.messages), 'danger')
-        except Exception as e:
-            flash(f'Error: {str(e)}', 'danger')
-    
-    # Check for existing profile
-    profile = None
-    profile_id = session.get('profile_id')
-    if profile_id:
-        profile = UserProfile.query.get(profile_id)
-        
-        # Verify the profile belongs to the current user or session
-        if profile:
-            if current_user.is_authenticated:
-                if profile.user_id != current_user.id:
-                    profile = None
-                    session.pop('profile_id', None)
+            if len(category_spending) > 0:
+                flash(f'Spending profile saved successfully! Click on "Generate Recommendations" to see your personalized credit card suggestions.', 'success')
             else:
-                if profile.session_id != session.get('anonymous_user_id'):
-                    profile = None
-                    session.pop('profile_id', None)
+                flash(f'Profile saved, but you need to enter some spending data to generate recommendations.', 'warning')
+                
+            return redirect(url_for('user_data.profile'))
+        except Exception as e:
+            db.session.rollback()
+            current_app.logger.error(f"Error saving profile: {str(e)}")
+            flash(f'Error saving profile: {str(e)}', 'danger')
     
-    # Define common spending categories for the form with descriptions
-    categories = [
+    # GET request - show the profile form
+    categories = current_app.config.get('SPENDING_CATEGORIES', [
         'groceries', 'dining', 'gas', 'travel', 'entertainment', 
-        'shopping', 'utilities', 'healthcare', 'transportation', 'education', 'other'
-    ]
+        'shopping', 'utilities', 'healthcare', 'transportation',
+        'education', 'other'
+    ])
     
-    category_descriptions = {
+    category_descriptions = current_app.config.get('CATEGORY_DESCRIPTIONS', {
         'groceries': 'Supermarkets, grocery stores, and specialty food shops',
         'dining': 'Restaurants, cafes, takeout, and food delivery services',
         'gas': 'Gas stations and fuel purchases',
@@ -138,39 +110,41 @@ def profile():
         'healthcare': 'Medical expenses, prescriptions, and insurance payments',
         'transportation': 'Public transit, rideshare services, and vehicle maintenance',
         'education': 'Tuition, books, courses, and education-related expenses',
-        'other': 'Any expenses that don\'t fit into the above categories'
-    }
+        'other': "Any expenses that don't fit into the above categories"
+    })
     
-    # Define reward preferences options with descriptions
-    reward_options = [
-        'cash_back', 'travel_points', 'airline_miles', 'hotel_points', 
-        'statement_credits', 'shopping_benefits'
-    ]
+    reward_options = current_app.config.get('REWARD_OPTIONS', [
+        'cash_back', 'travel_points', 'airline_miles', 
+        'hotel_points', 'statement_credits', 'shopping_benefits'
+    ])
     
-    reward_descriptions = {
+    reward_descriptions = current_app.config.get('REWARD_DESCRIPTIONS', {
         'cash_back': 'Direct cash rewards as statement credits or deposits',
         'travel_points': 'Flexible points that can be redeemed for travel bookings',
         'airline_miles': 'Miles that can be used for flight redemptions',
         'hotel_points': 'Points that can be redeemed for hotel stays',
         'statement_credits': 'Credits for specific categories like dining or travel',
         'shopping_benefits': 'Special discounts, extended warranties, and purchase protection'
-    }
+    })
     
-    # Parse stored JSON data if profile exists
-    category_spending = {}
-    reward_preferences = []
-    if profile:
-        try:
-            category_spending = json.loads(profile.category_spending)
-            reward_preferences = json.loads(profile.reward_preferences)
-        except (json.JSONDecodeError, TypeError):
-            pass
+    # Get the user's profile if they have one
+    if current_user.is_authenticated:
+        profile = UserProfile.query.filter_by(user_id=current_user.id).first()
+    else:
+        session_id = session.get('anonymous_user_id')
+        profile = UserProfile.query.filter_by(session_id=session_id).first() if session_id else None
     
-    return render_template('user_data/profile.html', 
-                          profile=profile, 
-                          categories=categories,
-                          category_descriptions=category_descriptions,
-                          reward_options=reward_options,
-                          reward_descriptions=reward_descriptions,
-                          category_spending=category_spending,
-                          reward_preferences=reward_preferences) 
+    # Parse category spending and reward preferences if profile exists
+    category_spending = json.loads(profile.category_spending) if profile else {}
+    reward_preferences = json.loads(profile.reward_preferences) if profile else []
+    
+    return render_template(
+        'user_data/profile.html',
+        profile=profile,
+        categories=categories,
+        category_descriptions=category_descriptions,
+        category_spending=category_spending,
+        reward_options=reward_options,
+        reward_descriptions=reward_descriptions,
+        reward_preferences=reward_preferences
+    ) 
