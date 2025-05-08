@@ -1,13 +1,14 @@
 import os
-from flask import Flask
+from flask import Flask, session, g
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
-from flask_login import LoginManager
+from flask_login import LoginManager, AnonymousUserMixin, current_user
 from config import Config
 from app.extensions import csrf
 from flask_wtf.csrf import CSRFProtect
 import json
 from datetime import datetime
+import uuid
 
 # Initialize extensions
 db = SQLAlchemy()
@@ -15,7 +16,32 @@ migrate = Migrate()
 login_manager = LoginManager()
 login_manager.login_view = 'auth.login'
 login_manager.login_message_category = 'info'
+login_manager.login_message = 'Please log in to access admin features.'
 csrf = CSRFProtect()
+
+# Create an anonymous user class with the same interface as User
+class AnonymousUser(AnonymousUserMixin):
+    id = None
+    username = 'Anonymous'
+    email = None
+    role = 0  # Standard user role
+    
+    @property
+    def is_anonymous(self):
+        return True
+    
+    @property
+    def is_admin(self):
+        return False
+    
+    def get_id(self):
+        # For anonymous users, use a session-based ID
+        if 'anonymous_user_id' not in session:
+            session['anonymous_user_id'] = str(uuid.uuid4())
+        return session['anonymous_user_id']
+
+# Set the anonymous user class
+login_manager.anonymous_user = AnonymousUser
 
 def create_app(config_name=None):
     if config_name is None:
@@ -80,7 +106,9 @@ def create_app(config_name=None):
     @app.context_processor
     def utility_processor():
         return {
-            'now': datetime.utcnow
+            'now': datetime.utcnow,
+            'is_admin': lambda: current_user.is_authenticated and getattr(current_user, 'role', 0) == 1,
+            'is_anonymous': lambda: current_user.is_anonymous,
         }
     
     # Initialize the database if it doesn't exist

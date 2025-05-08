@@ -10,7 +10,8 @@ class Recommendation(db.Model):
     __table_args__ = {'extend_existing': True}
     
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
+    session_id = db.Column(db.String(36), nullable=True, index=True)
     user_profile_id = db.Column(db.Integer, db.ForeignKey('user_profiles.id'), nullable=False)
     
     # Store spending profile as JSON string
@@ -118,5 +119,17 @@ class Recommendation(db.Model):
         else:
             self._per_month_value = json.dumps(value)
     
+    @classmethod
+    def get_for_user_or_session(cls, user_id=None, session_id=None):
+        """Get recommendations for either a logged-in user or anonymous session."""
+        if user_id:
+            return cls.query.filter_by(user_id=user_id).order_by(cls.created_at.desc()).all()
+        elif session_id:
+            return cls.query.filter_by(session_id=session_id).order_by(cls.created_at.desc()).all()
+        return []
+    
     def __repr__(self):
-        return f'<Recommendation {self.id} for User {self.user_id}>' 
+        if self.user_id:
+            return f'<Recommendation {self.id} for User {self.user_id}>'
+        else:
+            return f'<Recommendation {self.id} for Session {self.session_id}>' 

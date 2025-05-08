@@ -10,6 +10,7 @@ class UserProfile(db.Model):
     
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
+    session_id = db.Column(db.String(36), nullable=True, index=True)  # To link anonymous profiles
     name = db.Column(db.String(100), nullable=False)
     credit_score = db.Column(db.Integer, nullable=False)
     income = db.Column(db.Float, nullable=False)
@@ -51,6 +52,15 @@ class UserProfile(db.Model):
         """Calculate the total monthly spend from category spending."""
         spending = self.get_category_spending()
         return sum(spending.values())
+    
+    @classmethod
+    def get_profiles_for_user_or_session(cls, user_id=None, session_id=None):
+        """Get profiles for either a logged-in user or anonymous session."""
+        if user_id:
+            return cls.query.filter_by(user_id=user_id).all()
+        elif session_id:
+            return cls.query.filter_by(session_id=session_id).all()
+        return []
     
     def __repr__(self):
         return f"<UserProfile {self.name}, Credit Score: {self.credit_score}>"

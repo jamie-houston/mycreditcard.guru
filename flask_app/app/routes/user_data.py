@@ -1,8 +1,10 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session, jsonify
+from flask_login import current_user
 from app import db
 from app.models.user_data import UserProfile
 from marshmallow import Schema, fields, ValidationError
 import json
+import uuid
 
 user_data = Blueprint('user_data', __name__)
 
@@ -61,13 +63,29 @@ def profile():
             schema = UserProfileSchema()
             validated_data = schema.load(data)
             
+            # Set user_id or session_id depending on authentication status
+            if current_user.is_authenticated:
+                validated_data['user_id'] = current_user.id
+            else:
+                # For anonymous users, use a session ID
+                if 'anonymous_user_id' not in session:
+                    session['anonymous_user_id'] = str(uuid.uuid4())
+                validated_data['session_id'] = session['anonymous_user_id']
+            
             # Create or update user profile
             profile_id = session.get('profile_id')
             if profile_id:
                 profile = UserProfile.query.get(profile_id)
                 if profile:
-                    for key, value in validated_data.items():
-                        setattr(profile, key, value)
+                    # Check if the profile belongs to the current user or session
+                    if (current_user.is_authenticated and profile.user_id == current_user.id) or \
+                       (not current_user.is_authenticated and profile.session_id == session.get('anonymous_user_id')):
+                        for key, value in validated_data.items():
+                            setattr(profile, key, value)
+                    else:
+                        # Create a new profile if the existing one doesn't belong to the user
+                        profile = UserProfile(**validated_data)
+                        db.session.add(profile)
                 else:
                     profile = UserProfile(**validated_data)
                     db.session.add(profile)
@@ -91,6 +109,17 @@ def profile():
     profile_id = session.get('profile_id')
     if profile_id:
         profile = UserProfile.query.get(profile_id)
+        
+        # Verify the profile belongs to the current user or session
+        if profile:
+            if current_user.is_authenticated:
+                if profile.user_id != current_user.id:
+                    profile = None
+                    session.pop('profile_id', None)
+            else:
+                if profile.session_id != session.get('anonymous_user_id'):
+                    profile = None
+                    session.pop('profile_id', None)
     
     # Define common spending categories for the form with descriptions
     categories = [

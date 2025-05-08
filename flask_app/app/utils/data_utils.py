@@ -29,9 +29,9 @@ def map_scraped_card_to_model(scraped_data):
         else:
             mapped_data[key] = value
     
-    # Convert list fields to JSON strings if necessary
+    # Convert list or dict fields to JSON strings if necessary
     for field in ['reward_categories', 'special_offers']:
-        if field in mapped_data and isinstance(mapped_data[field], list):
+        if field in mapped_data and (isinstance(mapped_data[field], list) or isinstance(mapped_data[field], dict)):
             mapped_data[field] = json.dumps(mapped_data[field])
     
     return mapped_data 
