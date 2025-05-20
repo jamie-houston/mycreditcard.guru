@@ -177,6 +177,7 @@
           action="{{ url_for('credit_cards.delete', id=card.id) }}"
           method="post"
         >
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
           <button type="submit" class="btn btn-danger">Delete</button>
         </form>
       </div>

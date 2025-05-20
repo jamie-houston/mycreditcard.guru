@@ -55,7 +55,7 @@ class CreditCard(db.Model):
         categories = self.get_reward_categories()
         for cat in categories:
             if cat['category'].lower() == category.lower():
-                return float(cat['rate'])
+                return float(cat.get('rate', 1.0))
         return 1.0  # Default base rate
     
     # Property for base reward rate (default reward rate)

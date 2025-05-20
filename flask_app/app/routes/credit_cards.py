@@ -8,6 +8,7 @@ from app.utils.data_utils import map_scraped_card_to_model
 from app.utils.compat import safe_query, safe_commit
 import json
 from datetime import datetime
+from flask_wtf import FlaskForm
 
 credit_cards = Blueprint('credit_cards', __name__)
 
@@ -192,10 +193,14 @@ def show(id):
         reward_categories = []
         special_offers = []
     
+    class DummyForm(FlaskForm):
+        pass
+    form = DummyForm()
     return render_template('credit_cards/show.html', 
                           card=card, 
                           reward_categories=reward_categories,
-                          special_offers=special_offers)
+                          special_offers=special_offers,
+                          form=form)
 
 @credit_cards.route('/<int:id>/edit', methods=['GET', 'POST'])
 @login_required

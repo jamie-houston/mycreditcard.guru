@@ -18,7 +18,7 @@ This guide walks through deploying the Credit Card Roadmap application to Python
 2. Start a new Bash console
 3. Clone your repository:
    ```bash
-   git clone https://github.com/yourusername/creditcard-roadmap.git
+   git clone https://github.com/jamie-houston/creditcard-roadmap.git
    ```
    
    If using a private repository, set up an SSH key or use HTTPS with a personal access token.
@@ -35,27 +35,28 @@ This guide walks through deploying the Credit Card Roadmap application to Python
 2. Install dependencies:
    ```bash
    pip install -r requirements.txt
+   cd flask_app
+   pip install -r requirements.txt
    ```
 
 ### 4. Configure Web App
 
 1. Go back to the **Web** tab
 2. In the **Code** section:
-   - Set **Source code** to: `/home/yourusername/creditcard-roadmap`
-   - Set **Working directory** to: `/home/yourusername/creditcard-roadmap`
+   - Set **Source code** to: `/home/foresterh/creditcard-roadmap/flask_app` 
+   - Set **Working directory** to: `/home/foresterh/creditcard-roadmap/flask_app`
 
 3. In the **Virtualenv** section:
-   - Enter: `/home/yourusername/creditcard-roadmap/venv`
+   - Enter: `/home/foresterh/creditcard-roadmap/venv`
 
 4. In the **WSGI configuration file** section, click the link to edit the WSGI file
 
 5. Replace the contents with:
    ```python
    import sys
-   import os
    
    # Add the application to the path
-   path = '/home/yourusername/creditcard-roadmap'
+   path = '/home/foresterh/creditcard-roadmap'
    if path not in sys.path:
        sys.path.append(path)
    
@@ -68,7 +69,7 @@ This guide walks through deploying the Credit Card Roadmap application to Python
 1. In the Bash console, initialize the database:
    ```bash
    cd creditcard-roadmap
-   cd creditcard_roadmap
+   cd flask_app
    python reset_db.py
    ```
 
@@ -77,7 +78,7 @@ This guide walks through deploying the Credit Card Roadmap application to Python
 1. Go back to the **Web** tab
 2. In the **Static files** section, add:
    - URL: `/static/`
-   - Path: `/home/yourusername/creditcard-roadmap/creditcard_roadmap/app/static`
+   - Path: `/home/foresterh/creditcard-roadmap/creditcard_roadmap/app/static`
 
 ### 7. Environment Variables
 
@@ -89,7 +90,7 @@ This guide walks through deploying the Credit Card Roadmap application to Python
 ### 8. Reload and Test
 
 1. Click the **Reload** button to restart your web app
-2. Visit your site at `yourusername.pythonanywhere.com`
+2. Visit your site at `foresterh.pythonanywhere.com`
 
 ## Troubleshooting
 
@@ -102,13 +103,13 @@ This guide walks through deploying the Credit Card Roadmap application to Python
 
 - **Database migrations**: Run database migrations after code updates:
   ```bash
-  cd /home/yourusername/creditcard-roadmap/creditcard_roadmap
+  cd /home/foresterh/creditcard-roadmap/flask_app
   python -c "from app import db; db.create_all()"
   ```
   
 - **Code updates**: Pull the latest code and reload the web app:
   ```bash
-  cd /home/yourusername/creditcard-roadmap
+  cd /home/foresterh/creditcard-roadmap
   git pull
   # If dependencies changed, activate venv and run: pip install -r requirements.txt
   ```
