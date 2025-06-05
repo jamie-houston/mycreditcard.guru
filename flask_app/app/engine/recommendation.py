@@ -245,22 +245,37 @@ class RecommendationEngine:
         category_spending: Dict[str, float]
     ) -> float:
         """
-        Calculate the total value of a card combination.
-        
+        Calculate the total value of a card combination, only counting the highest value per category from the best card for that category.
         Args:
             cards: List of card value calculations
             category_spending: Dictionary of spending by category
-            
         Returns:
             The total value
         """
-        # Initialize variables
-        total_value = 0.0
-        
-        # Add up the values from each card
-        for card in cards:
-            total_value += card['net_value']
-        
+        # Guard clause for empty input
+        if not cards:
+            return 0.0
+
+        # For each category, find the card with the highest value for that category
+        total_category_value = 0.0
+        if cards and cards[0].get('category_values'):
+            categories = cards[0]['category_values'].keys()
+            for category in categories:
+                max_value = 0.0
+                for card in cards:
+                    value = card['category_values'].get(category, 0.0)
+                    if value > max_value:
+                        max_value = value
+                total_category_value += max_value
+
+        # Add signup bonuses and subtract annual fees for each card
+        total_signup_bonus = sum(card.get('signup_bonus_value', 0.0) for card in cards)
+        total_annual_fees = sum(card.get('annual_fee', 0.0) for card in cards)
+
+        # Annualize the category value (since category_values are monthly)
+        annual_category_value = total_category_value * 12
+
+        total_value = annual_category_value + total_signup_bonus - total_annual_fees
         return total_value
 
     @staticmethod

@@ -39,21 +39,22 @@ class RecommendationService:
                     if cat_data['category'].lower() == 'base' or cat_data['category'].lower() == 'all':
                         category_reward_rate = float(cat_data['rate'])
                         break
-                    
                 if category_reward_rate == 0:
                     category_reward_rate = 1.0  # Default 1% if no base rate found
             
             # Calculate the annual value for this category
             annual_amount = monthly_amount * 12
-            category_value = annual_amount * (category_reward_rate / 100)
+            # FIX: reward rates are now expected to be decimal (e.g., 0.01 for 1%)
+            category_value = annual_amount * category_reward_rate
             
             rewards_by_category[category] = category_value
             annual_value += category_value
             
-        # Add sign-up bonus (we'll assume the user can meet the requirements)
+        # Add sign-up bonus (convert points to dollars: 100 points = $1)
         if card.signup_bonus_value and card.signup_bonus_value > 0:
-            annual_value += card.signup_bonus_value
-            rewards_by_category['signup_bonus'] = card.signup_bonus_value
+            signup_bonus_dollars = card.signup_bonus_value / 100
+            annual_value += signup_bonus_dollars
+            rewards_by_category['signup_bonus'] = signup_bonus_dollars
             
         return {
             'annual_value': annual_value,

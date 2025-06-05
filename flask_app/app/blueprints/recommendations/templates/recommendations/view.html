@@ -38,7 +38,7 @@ endblock %} {% block content %}
         <div class="col-md-4 mb-3 mb-md-0">
           <div class="p-3 border rounded text-center">
             <h3 class="text-primary fw-bold">
-              ${{ "%.2f"|format(recommendation.total_value) }}
+              recommendation.total_value }} points
             </h3>
             <p class="text-muted mb-0">Annual Value</p>
           </div>
@@ -54,7 +54,7 @@ endblock %} {% block content %}
         <div class="col-md-4">
           <div class="p-3 border rounded text-center">
             <h3 class="text-success fw-bold">
-              ${{ "%.2f"|format(recommendation.total_value -
+              {{ (recommendation.total_value / 100) -
               recommendation.total_annual_fees) }}
             </h3>
             <p class="text-muted mb-0">Net Value</p>
@@ -90,7 +90,7 @@ endblock %} {% block content %}
             {% endif %}
           </div>
           <span class="badge bg-primary rounded-pill fs-6"
-            >${{ "%.2f"|format(details.annual_value) }}</span
+            >{{ details.annual_value }} points</span
           >
         </li>
         {% endfor %}
@@ -135,7 +135,7 @@ endblock %} {% block content %}
               </td>
               {% endfor %}
               <td class="fw-bold text-primary">
-                ${{ "%.2f"|format(details.annual_value) }}
+                {{ details.annual_value }} points
               </td>
             </tr>
             {% endfor %}
@@ -167,7 +167,7 @@ endblock %} {% block content %}
           <tbody>
             <tr>
               {% for month_value in recommendation.per_month_value %}
-              <td>${{ "%.2f"|format(month_value) }}</td>
+              <td>{{ month_value }} points</td>
               {% endfor %}
             </tr>
           </tbody>

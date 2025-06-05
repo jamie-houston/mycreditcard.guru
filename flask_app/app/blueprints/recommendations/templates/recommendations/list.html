@@ -23,8 +23,8 @@ block content %}
             recommendation.created_at.strftime('%Y-%m-%d') }}
           </p>
           <p>
-            <strong>Total Value:</strong> ${{
-            '%.2f'|format(recommendation.total_value) }}
+            <strong>Total Value:</strong> {{ recommendation.total_value }}
+            points
           </p>
           <p>
             <strong>Annual Fees:</strong> ${{
