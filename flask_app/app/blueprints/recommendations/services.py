@@ -29,7 +29,8 @@ class RecommendationService:
             categories = card.get_reward_categories()
             for cat_data in categories:
                 if cat_data['category'].lower() == category.lower():
-                    category_reward_rate = float(cat_data['rate'])
+                    # Handle both 'rate' and 'percentage' field names
+                    category_reward_rate = float(cat_data.get('rate', cat_data.get('percentage', 0)))
                     break
             
             # Use base rate if no specific category rate found
@@ -37,22 +38,23 @@ class RecommendationService:
                 # Get base rate from the first category with 'base' or default to 1%
                 for cat_data in categories:
                     if cat_data['category'].lower() == 'base' or cat_data['category'].lower() == 'all':
-                        category_reward_rate = float(cat_data['rate'])
+                        # Handle both 'rate' and 'percentage' field names
+                        category_reward_rate = float(cat_data.get('rate', cat_data.get('percentage', 0)))
                         break
                 if category_reward_rate == 0:
                     category_reward_rate = 1.0  # Default 1% if no base rate found
             
             # Calculate the annual value for this category
             annual_amount = monthly_amount * 12
-            # FIX: reward rates are now expected to be decimal (e.g., 0.01 for 1%)
-            category_value = annual_amount * category_reward_rate
+            # Convert percentage to decimal (e.g., 3.0% becomes 0.03)
+            category_value = annual_amount * (category_reward_rate / 100)
             
             rewards_by_category[category] = category_value
             annual_value += category_value
             
-        # Add sign-up bonus (convert points to dollars: 100 points = $1)
+        # Add sign-up bonus (already in dollars from the database)
         if card.signup_bonus_value and card.signup_bonus_value > 0:
-            signup_bonus_dollars = card.signup_bonus_value / 100
+            signup_bonus_dollars = card.signup_bonus_value
             annual_value += signup_bonus_dollars
             rewards_by_category['signup_bonus'] = signup_bonus_dollars
             
