@@ -38,20 +38,25 @@ class SpendingCategory(db.Model):
     __tablename__ = 'spending_categories'
     
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), nullable=False)
     monthly_spend = db.Column(db.Float, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
     # Foreign keys
     profile_id = db.Column(db.Integer, db.ForeignKey('user_profiles.id'), nullable=False)
+    category_id = db.Column(db.Integer, db.ForeignKey('categories.id'), nullable=False)
+    
+    # Relationships
+    category = db.relationship('Category', backref='spending_usages')
     
     def __repr__(self):
-        return f'<SpendingCategory {self.name}: ${self.monthly_spend}>'
+        return f'<SpendingCategory {self.category.name if self.category else "Unknown"}: ${self.monthly_spend}>'
     
     def to_dict(self):
         return {
             'id': self.id,
-            'name': self.name,
+            'category_id': self.category_id,
+            'category_name': self.category.name if self.category else None,
+            'category_display_name': self.category.display_name if self.category else None,
             'monthly_spend': self.monthly_spend,
             'created_at': self.created_at.isoformat()
         }

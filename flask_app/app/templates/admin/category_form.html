@@ -1,0 +1,404 @@
+{% extends "base.html" %} {% block title %}{{ title }} - {{ super() }}{%
+endblock %} {% block content %}
+<div class="container-fluid">
+  <div class="row">
+    <!-- Sidebar -->
+    <nav class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
+      <div class="position-sticky pt-3">
+        <h6
+          class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted"
+        >
+          <span>Administration</span>
+        </h6>
+        <ul class="nav flex-column">
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('admin.dashboard') }}">
+              <i class="fas fa-tachometer-alt"></i> Dashboard
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('admin.users') }}">
+              <i class="fas fa-users"></i> Users
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" href="{{ url_for('admin.categories') }}">
+              <i class="fas fa-tags"></i> Categories
+            </a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+
+    <!-- Main content -->
+    <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+      <div
+        class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom"
+      >
+        <h1 class="h2">
+          <i
+            class="fas fa-{% if category %}edit{% else %}plus{% endif %} me-2"
+          ></i
+          >{{ title }}
+        </h1>
+        <div class="btn-toolbar mb-2 mb-md-0">
+          <div class="btn-group me-2">
+            <a
+              href="{{ url_for('admin.categories') }}"
+              class="btn btn-sm btn-outline-secondary"
+            >
+              <i class="fas fa-arrow-left"></i> Back to Categories
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Flash messages -->
+      {% with messages = get_flashed_messages(with_categories=true) %} {% if
+      messages %} {% for category_type, message in messages %}
+      <div
+        class="alert alert-{{ 'danger' if category_type == 'error' else category_type }} alert-dismissible fade show"
+        role="alert"
+      >
+        {{ message }}
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="alert"
+          aria-label="Close"
+        ></button>
+      </div>
+      {% endfor %} {% endif %} {% endwith %}
+
+      <div class="row">
+        <div class="col-lg-8">
+          <div class="card">
+            <div class="card-header">
+              <h5 class="mb-0">Category Details</h5>
+            </div>
+            <div class="card-body">
+              <form method="POST" id="categoryForm">
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="mb-3">
+                      <label for="display_name" class="form-label"
+                        >Display Name <span class="text-danger">*</span></label
+                      >
+                      <input
+                        type="text"
+                        class="form-control"
+                        id="display_name"
+                        name="display_name"
+                        value="{{ category.display_name if category else '' }}"
+                        placeholder="e.g., Dining & Restaurants"
+                        required
+                      />
+                      <div class="form-text">
+                        The name shown to users in the interface
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="mb-3">
+                      <label for="name" class="form-label"
+                        >System Name <span class="text-danger">*</span></label
+                      >
+                      <input
+                        type="text"
+                        class="form-control"
+                        id="name"
+                        name="name"
+                        value="{{ category.name if category else '' }}"
+                        placeholder="e.g., dining"
+                        pattern="^[a-z][a-z0-9_]*$"
+                        required
+                      />
+                      <div class="form-text">
+                        Lowercase letters, numbers, and underscores only
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="mb-3">
+                  <label for="description" class="form-label"
+                    >Description</label
+                  >
+                  <textarea
+                    class="form-control"
+                    id="description"
+                    name="description"
+                    rows="3"
+                    placeholder="Optional description of what this category includes"
+                  >
+{{ category.description if category else '' }}</textarea
+                  >
+                </div>
+
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="mb-3">
+                      <label for="icon" class="form-label"
+                        >Icon (FontAwesome)</label
+                      >
+                      <div class="input-group">
+                        <span class="input-group-text">
+                          <i
+                            id="icon-preview"
+                            class="{{ category.icon if category else 'fas fa-tag' }}"
+                          ></i>
+                        </span>
+                        <input
+                          type="text"
+                          class="form-control"
+                          id="icon"
+                          name="icon"
+                          value="{{ category.icon if category else 'fas fa-tag' }}"
+                          placeholder="fas fa-tag"
+                        />
+                      </div>
+                      <div class="form-text">
+                        FontAwesome class (e.g., fas fa-utensils, fas fa-plane)
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="mb-3">
+                      <label for="sort_order" class="form-label"
+                        >Sort Order</label
+                      >
+                      <input
+                        type="number"
+                        class="form-control"
+                        id="sort_order"
+                        name="sort_order"
+                        value="{{ category.sort_order if category else 0 }}"
+                        min="0"
+                        max="999"
+                      />
+                      <div class="form-text">
+                        Lower numbers appear first (0-999)
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {% if category %}
+                <div class="mb-3">
+                  <div class="form-check">
+                    <input
+                      class="form-check-input"
+                      type="checkbox"
+                      id="is_active"
+                      name="is_active"
+                      {%
+                      if
+                      category.is_active
+                      %}checked{%
+                      endif
+                      %}
+                    />
+                    <label class="form-check-label" for="is_active">
+                      Category is active
+                    </label>
+                    <div class="form-text">
+                      Inactive categories won't appear in new selections but
+                      existing uses remain
+                    </div>
+                  </div>
+                </div>
+                {% endif %}
+
+                <div class="d-flex gap-2">
+                  <button type="submit" class="btn btn-success">
+                    <i class="fas fa-save"></i> {{ 'Update Category' if category
+                    else 'Create Category' }}
+                  </button>
+                  <a
+                    href="{{ url_for('admin.categories') }}"
+                    class="btn btn-secondary"
+                  >
+                    <i class="fas fa-times"></i> Cancel
+                  </a>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-lg-4">
+          <!-- Icon Suggestions -->
+          <div class="card">
+            <div class="card-header">
+              <h6 class="mb-0">Common Icons</h6>
+            </div>
+            <div class="card-body">
+              <div class="row g-2">
+                <div class="col-4 text-center">
+                  <button
+                    type="button"
+                    class="btn btn-outline-secondary btn-sm w-100 icon-btn"
+                    data-icon="fas fa-utensils"
+                  >
+                    <i class="fas fa-utensils"></i><br /><small>Dining</small>
+                  </button>
+                </div>
+                <div class="col-4 text-center">
+                  <button
+                    type="button"
+                    class="btn btn-outline-secondary btn-sm w-100 icon-btn"
+                    data-icon="fas fa-plane"
+                  >
+                    <i class="fas fa-plane"></i><br /><small>Travel</small>
+                  </button>
+                </div>
+                <div class="col-4 text-center">
+                  <button
+                    type="button"
+                    class="btn btn-outline-secondary btn-sm w-100 icon-btn"
+                    data-icon="fas fa-shopping-cart"
+                  >
+                    <i class="fas fa-shopping-cart"></i><br /><small
+                      >Groceries</small
+                    >
+                  </button>
+                </div>
+                <div class="col-4 text-center">
+                  <button
+                    type="button"
+                    class="btn btn-outline-secondary btn-sm w-100 icon-btn"
+                    data-icon="fas fa-gas-pump"
+                  >
+                    <i class="fas fa-gas-pump"></i><br /><small>Gas</small>
+                  </button>
+                </div>
+                <div class="col-4 text-center">
+                  <button
+                    type="button"
+                    class="btn btn-outline-secondary btn-sm w-100 icon-btn"
+                    data-icon="fas fa-film"
+                  >
+                    <i class="fas fa-film"></i><br /><small
+                      >Entertainment</small
+                    >
+                  </button>
+                </div>
+                <div class="col-4 text-center">
+                  <button
+                    type="button"
+                    class="btn btn-outline-secondary btn-sm w-100 icon-btn"
+                    data-icon="fas fa-shopping-bag"
+                  >
+                    <i class="fas fa-shopping-bag"></i><br /><small
+                      >Shopping</small
+                    >
+                  </button>
+                </div>
+                <div class="col-4 text-center">
+                  <button
+                    type="button"
+                    class="btn btn-outline-secondary btn-sm w-100 icon-btn"
+                    data-icon="fas fa-home"
+                  >
+                    <i class="fas fa-home"></i><br /><small>Home</small>
+                  </button>
+                </div>
+                <div class="col-4 text-center">
+                  <button
+                    type="button"
+                    class="btn btn-outline-secondary btn-sm w-100 icon-btn"
+                    data-icon="fas fa-car"
+                  >
+                    <i class="fas fa-car"></i><br /><small>Auto</small>
+                  </button>
+                </div>
+                <div class="col-4 text-center">
+                  <button
+                    type="button"
+                    class="btn btn-outline-secondary btn-sm w-100 icon-btn"
+                    data-icon="fas fa-tag"
+                  >
+                    <i class="fas fa-tag"></i><br /><small>General</small>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {% if category %}
+          <!-- Usage Information -->
+          <div class="card mt-3">
+            <div class="card-header">
+              <h6 class="mb-0">Usage Information</h6>
+            </div>
+            <div class="card-body">
+              <div class="row text-center">
+                <div class="col-6">
+                  <div class="border-end">
+                    <h4 class="text-primary">
+                      {{ category.card_rewards.count() }}
+                    </h4>
+                    <small class="text-muted">Credit Cards</small>
+                  </div>
+                </div>
+                <div class="col-6">
+                  <h4 class="text-success">
+                    {{ category.spending_usages.count() }}
+                  </h4>
+                  <small class="text-muted">Spending Profiles</small>
+                </div>
+              </div>
+              <hr />
+              <p class="small text-muted mb-0">
+                This category is currently being used in {{
+                category.card_rewards.count() + category.spending_usages.count()
+                }} places across the system.
+              </p>
+            </div>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    // Auto-generate system name from display name
+    const displayNameInput = document.getElementById("display_name");
+    const nameInput = document.getElementById("name");
+
+    displayNameInput.addEventListener("input", function () {
+      if (!nameInput.value || nameInput.value === nameInput.dataset.generated) {
+        const systemName = this.value
+          .toLowerCase()
+          .replace(/[^a-z0-9\s]/g, "") // Remove special chars
+          .replace(/\s+/g, "_") // Replace spaces with underscores
+          .replace(/_{2,}/g, "_") // Remove multiple underscores
+          .replace(/^_|_$/g, ""); // Remove leading/trailing underscores
+
+        nameInput.value = systemName;
+        nameInput.dataset.generated = systemName;
+      }
+    });
+
+    // Icon preview update
+    const iconInput = document.getElementById("icon");
+    const iconPreview = document.getElementById("icon-preview");
+
+    iconInput.addEventListener("input", function () {
+      iconPreview.className = this.value || "fas fa-tag";
+    });
+
+    // Icon selection buttons
+    document.querySelectorAll(".icon-btn").forEach((button) => {
+      button.addEventListener("click", function () {
+        const iconClass = this.dataset.icon;
+        iconInput.value = iconClass;
+        iconPreview.className = iconClass;
+      });
+    });
+  });
+</script>
+{% endblock %}

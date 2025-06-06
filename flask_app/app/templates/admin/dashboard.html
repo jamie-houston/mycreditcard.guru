@@ -1,0 +1,251 @@
+{% extends "base.html" %} {% block title %}Admin Dashboard - {{ super() }}{%
+endblock %} {% block content %}
+<div class="container-fluid">
+  <div class="row">
+    <!-- Sidebar -->
+    <nav class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
+      <div class="position-sticky pt-3">
+        <h6
+          class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted"
+        >
+          <span>Administration</span>
+        </h6>
+        <ul class="nav flex-column">
+          <li class="nav-item">
+            <a class="nav-link active" href="{{ url_for('admin.dashboard') }}">
+              <i class="fas fa-tachometer-alt"></i> Dashboard
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('admin.users') }}">
+              <i class="fas fa-users"></i> Users
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('admin.categories') }}">
+              <i class="fas fa-tags"></i> Categories
+            </a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+
+    <!-- Main content -->
+    <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+      <div
+        class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom"
+      >
+        <h1 class="h2">Admin Dashboard</h1>
+        <div class="btn-toolbar mb-2 mb-md-0">
+          <div class="btn-group me-2">
+            <button type="button" class="btn btn-sm btn-outline-secondary">
+              Export
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Statistics Cards -->
+      <div class="row mb-4">
+        <div class="col-xl-3 col-md-6">
+          <div class="card bg-primary text-white mb-4">
+            <div class="card-body">
+              <div class="d-flex justify-content-between">
+                <div>
+                  <div class="text-white-75 small">Total Users</div>
+                  <div class="text-lg font-weight-bold">{{ user_count }}</div>
+                </div>
+                <div class="text-white-25">
+                  <i class="fas fa-users fa-2x"></i>
+                </div>
+              </div>
+            </div>
+            <div
+              class="card-footer d-flex align-items-center justify-content-between"
+            >
+              <a
+                class="small text-white stretched-link"
+                href="{{ url_for('admin.users') }}"
+                >View Details</a
+              >
+              <div class="small text-white">
+                <i class="fas fa-angle-right"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+          <div class="card bg-success text-white mb-4">
+            <div class="card-body">
+              <div class="d-flex justify-content-between">
+                <div>
+                  <div class="text-white-75 small">Credit Cards</div>
+                  <div class="text-lg font-weight-bold">{{ card_count }}</div>
+                </div>
+                <div class="text-white-25">
+                  <i class="fas fa-credit-card fa-2x"></i>
+                </div>
+              </div>
+            </div>
+            <div
+              class="card-footer d-flex align-items-center justify-content-between"
+            >
+              <a
+                class="small text-white stretched-link"
+                href="{{ url_for('credit_cards.index') }}"
+                >View Details</a
+              >
+              <div class="small text-white">
+                <i class="fas fa-angle-right"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+          <div class="card bg-warning text-white mb-4">
+            <div class="card-body">
+              <div class="d-flex justify-content-between">
+                <div>
+                  <div class="text-white-75 small">Categories</div>
+                  <div class="text-lg font-weight-bold">
+                    {{ category_count }}
+                  </div>
+                </div>
+                <div class="text-white-25">
+                  <i class="fas fa-tags fa-2x"></i>
+                </div>
+              </div>
+            </div>
+            <div
+              class="card-footer d-flex align-items-center justify-content-between"
+            >
+              <a
+                class="small text-white stretched-link"
+                href="{{ url_for('admin.categories') }}"
+                >Manage Categories</a
+              >
+              <div class="small text-white">
+                <i class="fas fa-angle-right"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+          <div class="card bg-danger text-white mb-4">
+            <div class="card-body">
+              <div class="d-flex justify-content-between">
+                <div>
+                  <div class="text-white-75 small">System Status</div>
+                  <div class="text-lg font-weight-bold">Good</div>
+                </div>
+                <div class="text-white-25">
+                  <i class="fas fa-server fa-2x"></i>
+                </div>
+              </div>
+            </div>
+            <div
+              class="card-footer d-flex align-items-center justify-content-between"
+            >
+              <a class="small text-white stretched-link" href="#"
+                >View Details</a
+              >
+              <div class="small text-white">
+                <i class="fas fa-angle-right"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Users -->
+      <div class="row">
+        <div class="col-lg-6">
+          <div class="card">
+            <div class="card-header">
+              <i class="fas fa-users me-1"></i>
+              Recent Users
+            </div>
+            <div class="card-body">
+              {% if recent_users %}
+              <div class="table-responsive">
+                <table class="table table-sm">
+                  <thead>
+                    <tr>
+                      <th>Username</th>
+                      <th>Email</th>
+                      <th>Role</th>
+                      <th>Created</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for user in recent_users %}
+                    <tr>
+                      <td>{{ user.username }}</td>
+                      <td>{{ user.email }}</td>
+                      <td>
+                        {% if user.is_admin %}
+                        <span class="badge bg-danger">Admin</span>
+                        {% else %}
+                        <span class="badge bg-secondary">User</span>
+                        {% endif %}
+                      </td>
+                      <td>
+                        {{ user.created_at.strftime('%Y-%m-%d') if
+                        user.created_at else 'Unknown' }}
+                      </td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+              {% else %}
+              <p class="text-muted">No users found.</p>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-6">
+          <div class="card">
+            <div class="card-header">
+              <i class="fas fa-chart-area me-1"></i>
+              Quick Actions
+            </div>
+            <div class="card-body">
+              <div class="list-group list-group-flush">
+                <a
+                  href="{{ url_for('admin.category_new') }}"
+                  class="list-group-item list-group-item-action"
+                >
+                  <i class="fas fa-plus text-success me-2"></i>
+                  Add New Category
+                </a>
+                <a
+                  href="{{ url_for('admin.categories') }}"
+                  class="list-group-item list-group-item-action"
+                >
+                  <i class="fas fa-tags text-primary me-2"></i>
+                  Manage Categories
+                </a>
+                <a
+                  href="{{ url_for('admin.users') }}"
+                  class="list-group-item list-group-item-action"
+                >
+                  <i class="fas fa-users text-info me-2"></i>
+                  Manage Users
+                </a>
+                <a
+                  href="{{ url_for('credit_cards.import_cards') }}"
+                  class="list-group-item list-group-item-action"
+                >
+                  <i class="fas fa-download text-warning me-2"></i>
+                  Import Credit Cards
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+{% endblock %}

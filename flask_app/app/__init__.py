@@ -102,6 +102,10 @@ def create_app(config_name=None):
     from app.routes.recommendations import recommendations as recommendations_blueprint
     app.register_blueprint(recommendations_blueprint, url_prefix='/recommendations')
     
+    # Register admin blueprint
+    from app.blueprints.admin import admin_bp
+    app.register_blueprint(admin_bp)
+    
     # Add template context processors
     @app.context_processor
     def utility_processor():

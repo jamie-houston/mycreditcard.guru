@@ -185,12 +185,18 @@ def show(id):
     """Show a single credit card."""
     card = safe_query(CreditCard).get_or_404(id)
     
-    # Parse JSON data
+    # Get reward categories from the new CreditCardReward system
+    reward_categories = []
+    for reward in card.rewards:
+        reward_categories.append({
+            'category': reward.category.display_name,
+            'percentage': reward.reward_percent
+        })
+    
+    # Parse special offers (still using JSON for now)
     try:
-        reward_categories = json.loads(card.reward_categories)
         special_offers = json.loads(card.special_offers)
     except (json.JSONDecodeError, TypeError):
-        reward_categories = []
         special_offers = []
     
     class DummyForm(FlaskForm):

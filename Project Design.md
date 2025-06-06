@@ -22,3 +22,11 @@ Some examples of input are:
 The output will be a list of credit cards that the user should sign up for, and when they should sign up and (optionally) cancel them.
 
 
+
+### Tasks
+
+Change Category to a fixed list that I (admin user) can edit
+Categories are the same as the profile cateogories (spending by category).  If I add or modify categories, they change on the profile page and are used by credit cards.
+Add a page for admin user to list and modify categories.
+Each credit card has a property of "reward" which is a "category" and "percent".
+When importing cards, if it doesn't match an existing "category", don't add the category to the card (it defaults to "1" (percent))

@@ -52,34 +52,28 @@
                   <h6 class="mb-2">Reward Rates:</h6>
                   <ul class="list-unstyled">
                     <li>
-                      <small>Base: {{ card.base_reward_rate * 100 }}%</small>
+                      <small>Base: {{ card.base_reward_rate }}%</small>
                     </li>
                     {% if card.dining_reward_rate > 0 %}
                     <li>
-                      <small
-                        >Dining: {{ card.dining_reward_rate * 100 }}%</small
-                      >
+                      <small>Dining: {{ card.dining_reward_rate }}%</small>
                     </li>
                     {% endif %} {% if card.travel_reward_rate > 0 %}
                     <li>
-                      <small
-                        >Travel: {{ card.travel_reward_rate * 100 }}%</small
-                      >
+                      <small>Travel: {{ card.travel_reward_rate }}%</small>
                     </li>
                     {% endif %} {% if card.gas_reward_rate > 0 %}
                     <li>
-                      <small>Gas: {{ card.gas_reward_rate * 100 }}%</small>
+                      <small>Gas: {{ card.gas_reward_rate }}%</small>
                     </li>
                     {% endif %} {% if card.grocery_reward_rate > 0 %}
                     <li>
-                      <small
-                        >Grocery: {{ card.grocery_reward_rate * 100 }}%</small
-                      >
+                      <small>Grocery: {{ card.grocery_reward_rate }}%</small>
                     </li>
                     {% endif %} {% if card.entertainment_reward_rate > 0 %}
                     <li>
                       <small
-                        >Entertainment: {{ card.entertainment_reward_rate * 100
+                        >Entertainment: {{ card.entertainment_reward_rate
                         }}%</small
                       >
                     </li>
@@ -150,7 +144,11 @@
               action="{{ url_for('recommendations.save', profile_id=profile.id) }}"
               method="post"
             >
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+              <input
+                type="hidden"
+                name="csrf_token"
+                value="{{ csrf_token() }}"
+              />
               <button type="submit" class="btn btn-success w-100">
                 Save Recommendation
               </button>
@@ -161,10 +159,7 @@
             >
               Generate New Recommendation
             </a>
-            <a
-              href="{{ url_for('main.index') }}"
-              class="btn btn-secondary"
-            >
+            <a href="{{ url_for('main.index') }}" class="btn btn-secondary">
               Back to Dashboard
             </a>
           </div>

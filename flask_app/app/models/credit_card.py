@@ -20,11 +20,11 @@ class CreditCard(db.Model):
     signup_bonus_min_spend = db.Column(db.Float, default=0.0)
     signup_bonus_time_limit = db.Column(db.Integer, default=90)  # Days
     
-    # Categories and Offers (stored as JSON strings)
+    # Categories and Offers (stored as JSON strings) - DEPRECATED in favor of CreditCardReward model
     reward_categories = db.Column(db.Text, nullable=False)  # JSON string of category multipliers
     special_offers = db.Column(db.Text, nullable=True)  # JSON string of special offers
     
-    # 
+    # Source information for import tracking
     source = db.Column(db.String(50), nullable=True)  # Source name (e.g., 'nerdwallet', 'creditcards.com')
     source_url = db.Column(db.String(255), nullable=True)  # URL of the source page
     import_date = db.Column(db.DateTime, nullable=True)  # Date when the card was imported
@@ -33,30 +33,61 @@ class CreditCard(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
+    # Relationships
+    rewards = db.relationship('CreditCardReward', backref='credit_card', lazy='dynamic', cascade='all, delete-orphan')
+
     def __repr__(self):
         return f'<CreditCard {self.name}, Annual Fee: ${self.annual_fee}>'
     
-    def get_reward_categories(self):
-        """Parse and return reward categories as a list of dictionaries."""
-        try:
-            return json.loads(self.reward_categories)
-        except (json.JSONDecodeError, TypeError):
-            return []
-    
-    def get_special_offers(self):
-        """Parse and return special offers as a list of dictionaries."""
-        try:
-            return json.loads(self.special_offers)
-        except (json.JSONDecodeError, TypeError):
-            return []
-    
-    def get_category_rate(self, category):
-        """Get the reward rate for a specific category."""
-        categories = self.get_reward_categories()
-        for cat in categories:
-            if cat['category'].lower() == category.lower():
-                return float(cat.get('rate', 1.0))
+    def get_category_rate(self, category_name):
+        """Get the reward rate for a specific category using the new reward system."""
+        from app.models.category import Category
+        category = Category.get_by_name(category_name)
+        if category:
+            reward = self.rewards.filter_by(category_id=category.id).first()
+            if reward:
+                return reward.reward_percent
+        
         return 1.0  # Default base rate
+
+    def add_reward_category(self, category_name, reward_percent, is_bonus=False, notes=None):
+        """Add or update a reward category for this card."""
+        from app.models.category import Category, CreditCardReward
+        
+        category = Category.get_by_name(category_name)
+        if not category:
+            return False  # Category doesn't exist
+        
+        # Check if reward already exists
+        existing_reward = self.rewards.filter_by(category_id=category.id).first()
+        if existing_reward:
+            existing_reward.reward_percent = reward_percent
+            existing_reward.is_bonus_category = is_bonus
+            existing_reward.notes = notes
+        else:
+            new_reward = CreditCardReward(
+                credit_card_id=self.id,
+                category_id=category.id,
+                reward_percent=reward_percent,
+                is_bonus_category=is_bonus,
+                notes=notes
+            )
+            db.session.add(new_reward)
+        
+        return True
+
+    def get_all_rewards(self):
+        """Get all reward categories for this card."""
+        return [
+            {
+                'category': reward.category.name,
+                'display_name': reward.category.display_name,
+                'reward_percent': reward.reward_percent,
+                'is_bonus_category': reward.is_bonus_category,
+                'notes': reward.notes
+            }
+            for reward in self.rewards
+        ]
     
     # Property for base reward rate (default reward rate)
     @property
@@ -141,7 +172,7 @@ class CreditCard(db.Model):
         }
     
     def to_dict(self):
-        """Convert card to dictionary with parsed JSON fields."""
+        """Convert card to dictionary with new structured rewards."""
         return {
             'id': self.id,
             'name': self.name,
@@ -153,8 +184,7 @@ class CreditCard(db.Model):
             'signup_bonus_value': self.signup_bonus_value,
             'signup_bonus_min_spend': self.signup_bonus_min_spend,
             'signup_bonus_time_limit': self.signup_bonus_time_limit,
-            'reward_categories': self.get_reward_categories(),
-            'special_offers': self.get_special_offers(),
+            'rewards': self.get_all_rewards(),  # New structured rewards system
             'source': self.source,
             'source_url': self.source_url,
             'import_date': self.import_date
