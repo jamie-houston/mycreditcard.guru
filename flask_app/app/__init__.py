@@ -9,12 +9,13 @@ from flask_wtf.csrf import CSRFProtect
 import json
 from datetime import datetime
 import uuid
+from markupsafe import Markup
 
 # Initialize extensions
 db = SQLAlchemy()
 migrate = Migrate()
 login_manager = LoginManager()
-login_manager.login_view = 'auth.login'
+login_manager.login_view = 'auth.google_login'
 login_manager.login_message_category = 'info'
 login_manager.login_message = 'Please log in to access admin features.'
 csrf = CSRFProtect()
@@ -88,9 +89,11 @@ def create_app(config_name=None):
     
     # Register blueprints
     from app.routes.main import main
-    from app.routes.auth import auth
     
     app.register_blueprint(main)
+    
+    # Register auth blueprint
+    from app.blueprints.auth import auth
     app.register_blueprint(auth)
     
     from app.routes.credit_cards import credit_cards as credit_cards_blueprint

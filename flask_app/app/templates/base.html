@@ -73,14 +73,6 @@
                     <i class="fas fa-user me-1"></i> Profile
                   </a>
                 </li>
-                <li>
-                  <a
-                    class="dropdown-item"
-                    href="{{ url_for('auth.change_password') }}"
-                  >
-                    <i class="fas fa-key me-1"></i> Change Password
-                  </a>
-                </li>
                 <li><hr class="dropdown-divider" /></li>
                 <li>
                   <a class="dropdown-item" href="{{ url_for('auth.logout') }}">
@@ -92,18 +84,11 @@
             {% else %}
             <li class="nav-item">
               <a
-                class="nav-link {% if request.endpoint == 'auth.login' %}active{% endif %}"
-                href="{{ url_for('auth.login') }}"
+                class="nav-link {% if request.endpoint == 'auth.google_login' %}active{% endif %}"
+                href="{{ url_for('auth.google_login') }}"
               >
-                <i class="fas fa-sign-in-alt me-1"></i> Login
-              </a>
-            </li>
-            <li class="nav-item">
-              <a
-                class="nav-link {% if request.endpoint == 'auth.register' %}active{% endif %}"
-                href="{{ url_for('auth.register') }}"
-              >
-                <i class="fas fa-user-plus me-1"></i> Register
+                <i class="fab fa-google me-1"></i> Login with Google (no
+                passwords, no problem!)
               </a>
             </li>
             {% endif %}

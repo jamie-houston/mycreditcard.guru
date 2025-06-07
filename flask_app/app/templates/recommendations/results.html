@@ -16,7 +16,8 @@
                 <div class="card-body text-center">
                   <h6 class="card-title">Total First-Year Value</h6>
                   <h2 class="text-success mb-0">
-                    ${{ recommendation.total_value | round(2) }}
+                    ${{ (recommendation.total_value // 100) | round(0, 'floor')
+                    | int }}
                   </h2>
                 </div>
               </div>
@@ -26,7 +27,8 @@
                 <div class="card-body text-center">
                   <h6 class="card-title">Total Annual Fees</h6>
                   <h2 class="text-danger mb-0">
-                    ${{ recommendation.total_annual_fees | round(2) }}
+                    ${{ recommendation.total_annual_fees | round(0, 'floor') |
+                    int }}
                   </h2>
                 </div>
               </div>
@@ -82,9 +84,9 @@
 
                   {% if card.signup_bonus_value > 0 %}
                   <p class="mt-2">
-                    <strong>Sign-up Bonus:</strong> ${{ card.signup_bonus_value
-                    }} after spending ${{ card.signup_bonus_min_spend }} in {{
-                    card.signup_bonus_time_limit }} months
+                    <strong>Sign-up Bonus:</strong> ${{ (card.signup_bonus_value
+                    // 100) }} after spending ${{ card.signup_bonus_min_spend }}
+                    in {{ card.signup_bonus_time_limit }} months
                   </p>
                   {% endif %}
                 </div>
@@ -101,7 +103,7 @@
                     <div class="card-body text-center p-2">
                       <small class="d-block">Annual Value</small>
                       <strong class="text-success"
-                        >${{ details.annual_value | round(2) }}</strong
+                        >${{ (details.annual_value // 100) }}</strong
                       >
                     </div>
                   </div>
@@ -110,7 +112,7 @@
                     <div class="card-body text-center p-2">
                       <small class="d-block">Bonus Value</small>
                       <strong class="text-success"
-                        >${{ details.signup_bonus_value | round(2) }}</strong
+                        >${{ (details.signup_bonus_value // 100) }}</strong
                       >
                     </div>
                   </div>
@@ -176,7 +178,8 @@
     var ctx = document.getElementById('valueChart').getContext('2d');
 
     // Data for the chart
-    var monthlyValues = {{ recommendation.per_month_value | tojson }};
+    var rawMonthlyValues = {{ recommendation.per_month_value | tojson }};
+    var monthlyValues = rawMonthlyValues.map(function(val) { return Math.round(val / 100); });
     var months = Array.from({length: 12}, (_, i) => `Month ${i+1}`);
 
     // Create the chart
@@ -212,7 +215,7 @@
           tooltip: {
             callbacks: {
               label: function(context) {
-                return '$' + context.parsed.y.toFixed(2);
+                return '$' + Math.round(context.parsed.y);
               }
             }
           }
