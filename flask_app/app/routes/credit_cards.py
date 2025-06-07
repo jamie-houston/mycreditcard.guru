@@ -131,7 +131,10 @@ def new():
                         })
                     except ValueError:
                         flash(f'Invalid percentage for {category_name}', 'danger')
-                        return render_template('credit_cards/new.html')
+                        # Get active categories from database for error case
+                        from app.models.category import Category
+                        categories = Category.get_active_categories()
+                        return render_template('credit_cards/new.html', categories=categories)
             
             data['reward_categories'] = json.dumps(reward_categories)
             
@@ -158,7 +161,10 @@ def new():
                         })
                     except ValueError:
                         flash(f'Invalid amount for {offer_type}', 'danger')
-                        return render_template('credit_cards/new.html')
+                        # Get active categories from database for error case
+                        from app.models.category import Category
+                        categories = Category.get_active_categories()
+                        return render_template('credit_cards/new.html', categories=categories)
             
             data['special_offers'] = json.dumps(special_offers)
             
@@ -178,7 +184,11 @@ def new():
         except Exception as e:
             flash(f'Error: {str(e)}', 'danger')
     
-    return render_template('credit_cards/new.html')
+    # Get active categories from database
+    from app.models.category import Category
+    categories = Category.get_active_categories()
+    
+    return render_template('credit_cards/new.html', categories=categories)
 
 @credit_cards.route('/<int:id>')
 def show(id):

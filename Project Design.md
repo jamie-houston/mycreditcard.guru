@@ -30,3 +30,8 @@ Categories are the same as the profile cateogories (spending by category).  If I
 Add a page for admin user to list and modify categories.
 Each credit card has a property of "reward" which is a "category" and "percent".
 When importing cards, if it doesn't match an existing "category", don't add the category to the card (it defaults to "1" (percent))
+
+## Add credit card
+http://localhost:5001/credit_cards/new
+- [ ] Add credit card button broken - missing csrf token
+- [ ] Categories should be dropdown to choose from, not text form

@@ -1,6 +1,17 @@
 {% extends 'base.html' %} {% block content %}
 <h1 class="mb-4">Add New Credit Card</h1>
 
+<!-- Hidden categories data for JavaScript -->
+<div id="categories-data" style="display: none">
+  {% for category in categories %}
+  <div
+    class="category-item"
+    data-name="{{ category.name }}"
+    data-display-name="{{ category.display_name }}"
+  ></div>
+  {% endfor %}
+</div>
+
 <form method="post" action="{{ url_for('credit_cards.new') }}">
   <div class="card mb-4">
     <div class="card-header">
@@ -140,12 +151,14 @@
         <div class="row mb-3 category-row">
           <div class="col-md-6">
             <label class="form-label">Category</label>
-            <input
-              type="text"
-              class="form-control"
-              name="category_name_0"
-              placeholder="e.g., Gas, Groceries"
-            />
+            <select class="form-select" name="category_name_0">
+              <option value="">Select a category...</option>
+              {% for category in categories %}
+              <option value="{{ category.name }}">
+                {{ category.display_name }}
+              </option>
+              {% endfor %}
+            </select>
           </div>
           <div class="col-md-5">
             <label class="form-label">Reward Percentage</label>
@@ -243,6 +256,14 @@
 
 <script>
   document.addEventListener("DOMContentLoaded", function () {
+    // Get categories data from hidden div
+    const categoriesDiv = document.getElementById("categories-data");
+    const categoryItems = categoriesDiv.querySelectorAll(".category-item");
+    const categoriesData = Array.from(categoryItems).map((item) => ({
+      name: item.getAttribute("data-name"),
+      display_name: item.getAttribute("data-display-name"),
+    }));
+
     // Add Category
     document
       .getElementById("add-category")
@@ -252,10 +273,19 @@
           container.querySelectorAll(".category-row").length;
         const newRow = document.createElement("div");
         newRow.className = "row mb-3 category-row";
+        // Build the options string dynamically
+        let categoriesOptions =
+          '<option value="">Select a category...</option>';
+        categoriesData.forEach(function (category) {
+          categoriesOptions += `<option value="${category.name}">${category.display_name}</option>`;
+        });
+
         newRow.innerHTML = `
             <div class="col-md-6">
                 <label class="form-label">Category</label>
-                <input type="text" class="form-control" name="category_name_${categoryCount}" placeholder="e.g., Gas, Groceries">
+                <select class="form-select" name="category_name_${categoryCount}">
+                    ${categoriesOptions}
+                </select>
             </div>
             <div class="col-md-5">
                 <label class="form-label">Reward Percentage</label>
