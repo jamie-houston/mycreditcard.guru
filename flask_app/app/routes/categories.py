@@ -12,7 +12,34 @@ categories = Blueprint('categories', __name__, url_prefix='/categories')
 def index():
     """Show list of all active categories."""
     categories = Category.query.filter_by(is_active=True).order_by(Category.sort_order, Category.name).all()
-    return render_template('categories/index.html', categories=categories, CreditCardReward=CreditCardReward)
+    
+    # Get rewards data for each category, filtering for active cards only
+    category_rewards = {}
+    for category in categories:
+        # Join CreditCardReward with CreditCard to filter only active cards
+        rewards = db.session.query(CreditCardReward).join(
+            CreditCard, CreditCardReward.credit_card_id == CreditCard.id
+        ).filter(
+            CreditCardReward.category_id == category.id,
+            CreditCard.is_active == True
+        ).all()
+        
+        # Calculate max reward percentage
+        max_reward = 0
+        has_rewards = False
+        for reward in rewards:
+            if reward.reward_percent > max_reward:
+                max_reward = reward.reward_percent
+                has_rewards = True
+        
+        category_rewards[category.id] = {
+            'max_reward': max_reward,
+            'has_rewards': has_rewards
+        }
+    
+    return render_template('categories/index.html', 
+                           categories=categories, 
+                           category_rewards=category_rewards)
 
 @categories.route('/new', methods=['GET', 'POST'])
 @login_required
@@ -119,17 +146,22 @@ def show(id):
     """Show category details and cards that reward this category."""
     category = Category.query.filter_by(id=id, is_active=True).first_or_404()
     
-    # Get cards that reward this category, ordered by reward rate
+    # Get cards that reward this category, joined with active cards
     cards_with_rewards = []
-    card_rewards = CreditCardReward.query.filter_by(category_id=id).order_by(CreditCardReward.reward_percent.desc()).all()
     
-    for reward in card_rewards:
-        card = CreditCard.query.get(reward.credit_card_id)
-        if card and card.is_active:
-            cards_with_rewards.append({
-                'card': card,
-                'reward': reward
-            })
+    # Join query to get only active cards with their rewards for this category
+    rewards_query = db.session.query(CreditCardReward, CreditCard).join(
+        CreditCard, CreditCardReward.credit_card_id == CreditCard.id
+    ).filter(
+        CreditCardReward.category_id == id,
+        CreditCard.is_active == True
+    ).order_by(CreditCardReward.reward_percent.desc()).all()
+    
+    for reward, card in rewards_query:
+        cards_with_rewards.append({
+            'card': card,
+            'reward': reward
+        })
     
     # Get other active categories for the related categories section
     other_categories = Category.query.filter(

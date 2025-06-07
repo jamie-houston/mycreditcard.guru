@@ -36,6 +36,9 @@ def profile():
                     except ValueError:
                         pass
 
+            # Calculate total monthly spend from category spending
+            total_monthly_spend = sum(category_spending.values())
+
             # Process reward preferences from form
             reward_preferences = request.form.getlist('reward_preferences')
 
@@ -43,7 +46,6 @@ def profile():
             profile_name = request.form.get('profile_name', 'My Spending Profile')
             credit_score = int(request.form.get('credit_score', 700))
             income = float(request.form.get('income', 50000))
-            total_monthly_spend = float(request.form.get('total_monthly_spend', 0))
             max_cards = int(request.form.get('max_cards', 5))
             max_annual_fees = float(request.form.get('max_annual_fees', 0))
 

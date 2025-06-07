@@ -44,18 +44,13 @@
           </p>
           {% endif %}
 
-          <!-- Get max reward percentage for this category -->
-          {% set max_reward = 0 %} {% set has_rewards = false %} {% for reward
-          in CreditCardReward.query.filter_by(category_id=category.id).all() %}
-          {% if reward.reward_percent > max_reward %} {% set max_reward =
-          reward.reward_percent %} {% set has_rewards = true %} {% endif %} {%
-          endfor %}
-
           <div class="mt-3">
             <div class="d-flex justify-content-between">
               <span>Best Reward Rate:</span>
-              {% if has_rewards %}
-              <span class="badge bg-success">{{ max_reward }}%</span>
+              {% if category_rewards[category.id].has_rewards %}
+              <span class="badge bg-success"
+                >{{ category_rewards[category.id].max_reward }}%</span
+              >
               {% else %}
               <span class="badge bg-secondary">No cards</span>
               {% endif %}
