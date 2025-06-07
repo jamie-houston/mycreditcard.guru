@@ -74,9 +74,9 @@ def extract_card_names_from_html(soup: BeautifulSoup) -> List[str]:
     # Card pattern that matches common credit card naming patterns
     card_patterns = [
         # Pattern for cards like "Chase Sapphire Preferred® Card"
-        r'([A-Z][a-z]+ [A-Z][a-z]+ (?:Preferred|Reserve|Premier|Cash|Rewards|Plus|Gold|Platinum|Sapphire|Explorer|One|World|Elite)(?:\s[A-Z][a-z]+)? Card)',
+        # r'([A-Z][a-z]+ [A-Z][a-z]+ (?:Preferred|Reserve|Premier|Cash|Rewards|Plus|Gold|Platinum|Sapphire|Explorer|One|World|Elite)(?:\s[A-Z][a-z]+)? Card)',
         # Pattern for cards with Credit Card suffix
-        r'([A-Z][a-z]+ (?:Rewards|Cash|Travel|Platinum|Gold|Premier|Venture|Quicksilver|Freedom|Blue) Credit Card)',
+        # r'([A-Z][a-z]+ (?:Rewards|Cash|Travel|Platinum|Gold|Premier|Venture|Quicksilver|Freedom|Blue) Credit Card)',
         # Pattern for specific well-known cards
         r'(Capital One (?:Venture|Quicksilver|SavorOne))',
         r'(Chase (?:Sapphire|Freedom|Slate))',
