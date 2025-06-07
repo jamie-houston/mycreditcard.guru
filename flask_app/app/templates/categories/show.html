@@ -1,0 +1,206 @@
+{% extends "base.html" %} {% block title %}{{ category.display_name }} - Reward
+Category - {{ super() }}{% endblock %} {% block content %}
+<div class="container py-4">
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item">
+        <a href="{{ url_for('categories.index') }}">Categories</a>
+      </li>
+      <li class="breadcrumb-item active" aria-current="page">
+        {{ category.display_name }}
+      </li>
+    </ol>
+  </nav>
+
+  <!-- Flash messages -->
+  {% with messages = get_flashed_messages(with_categories=true) %} {% if
+  messages %} {% for category_type, message in messages %}
+  <div
+    class="alert alert-{{ 'danger' if category_type == 'error' else category_type }} alert-dismissible fade show"
+    role="alert"
+  >
+    {{ message }}
+    <button
+      type="button"
+      class="btn-close"
+      data-bs-dismiss="alert"
+      aria-label="Close"
+    ></button>
+  </div>
+  {% endfor %} {% endif %} {% endwith %}
+
+  <div class="row">
+    <!-- Category Info -->
+    <div class="col-md-4 mb-4">
+      <div class="card border-0 shadow-sm">
+        <div class="card-body text-center p-4">
+          <div class="display-1 mb-3 text-primary">
+            <i class="{{ category.icon }}"></i>
+          </div>
+          <h1 class="h2 mb-3">{{ category.display_name }}</h1>
+
+          {% if category.description %}
+          <p class="lead text-muted mb-4">{{ category.description }}</p>
+          {% endif %}
+
+          <div class="d-flex justify-content-center">
+            {% set card_count = cards_with_rewards|length %}
+            <div class="px-3 border-end">
+              <h4 class="text-primary mb-0">{{ card_count }}</h4>
+              <small class="text-muted">Card{{ 's' if card_count != 1 }}</small>
+            </div>
+
+            {% if cards_with_rewards %} {% set best_rate =
+            cards_with_rewards[0].reward.reward_percent %}
+            <div class="px-3">
+              <h4 class="text-success mb-0">{{ best_rate }}%</h4>
+              <small class="text-muted">Best Rate</small>
+            </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <!-- Related Categories (if you have this feature) -->
+      <div class="card border-0 shadow-sm mt-4">
+        <div class="card-header bg-transparent">
+          <h5 class="mb-0">Explore Other Categories</h5>
+        </div>
+        <div class="card-body">
+          <div class="d-flex flex-wrap gap-2">
+            {% for other_category in other_categories %}
+            <a
+              href="{{ url_for('categories.show', id=other_category.id) }}"
+              class="badge bg-light text-dark text-decoration-none p-2"
+            >
+              <i class="{{ other_category.icon }} me-1"></i>
+              {{ other_category.display_name }}
+            </a>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Credit Cards Rewarding This Category -->
+    <div class="col-md-8">
+      <div class="card border-0 shadow-sm">
+        <div class="card-header bg-transparent">
+          <h3 class="h5 mb-0">
+            <i class="fas fa-credit-card me-2"></i>
+            Credit Cards with {{ category.display_name }} Rewards
+          </h3>
+        </div>
+        <div class="card-body">
+          {% if cards_with_rewards %}
+          <div class="table-responsive">
+            <table class="table table-hover align-middle">
+              <thead>
+                <tr>
+                  <th>Card</th>
+                  <th>Issuer</th>
+                  <th>Reward Rate</th>
+                  <th>Annual Fee</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for item in cards_with_rewards %}
+                <tr>
+                  <td>
+                    <a
+                      href="{{ url_for('credit_cards.show', id=item.card.id) }}"
+                      class="text-decoration-none"
+                    >
+                      <strong>{{ item.card.name }}</strong>
+                    </a>
+                  </td>
+                  <td>{{ item.card.issuer }}</td>
+                  <td>
+                    <span class="badge bg-success p-2">
+                      {{ item.reward.reward_percent }}%
+                    </span>
+                    {% if item.reward.is_bonus_category %}
+                    <span class="badge bg-info p-2">Bonus</span>
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% if item.card.annual_fee > 0 %} ${{
+                    "%.0f"|format(item.card.annual_fee) }} {% else %}
+                    <span class="badge bg-secondary">No Fee</span>
+                    {% endif %}
+                  </td>
+                  <td>
+                    <a
+                      href="{{ url_for('credit_cards.show', id=item.card.id) }}"
+                      class="btn btn-sm btn-outline-primary"
+                    >
+                      <i class="fas fa-info-circle"></i> Details
+                    </a>
+                  </td>
+                </tr>
+
+                <!-- Optional: Display notes if available -->
+                {% if item.reward.notes %}
+                <tr class="table-light">
+                  <td colspan="5">
+                    <small class="text-muted">
+                      <i class="fas fa-info-circle me-1"></i>
+                      {{ item.reward.notes }}
+                    </small>
+                  </td>
+                </tr>
+                {% endif %} {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          {% else %}
+          <div class="text-center py-5">
+            <i class="fas fa-credit-card fa-3x text-muted mb-3"></i>
+            <h5>No Credit Cards Found</h5>
+            <p class="text-muted">
+              No credit cards currently offer rewards for this category.
+            </p>
+          </div>
+          {% endif %}
+        </div>
+        {% if cards_with_rewards %}
+        <div class="card-footer bg-transparent">
+          <small class="text-muted">
+            <i class="fas fa-info-circle me-1"></i>
+            Cards are sorted by reward rate from highest to lowest.
+          </small>
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- Tips Section -->
+      <div class="card border-0 shadow-sm mt-4">
+        <div class="card-header bg-transparent">
+          <h5 class="mb-0">
+            <i class="fas fa-lightbulb me-2 text-warning"></i>
+            Tips for Maximizing {{ category.display_name }} Rewards
+          </h5>
+        </div>
+        <div class="card-body">
+          <ul class="mb-0">
+            <li>
+              Compare annual fees against potential rewards based on your
+              spending in this category.
+            </li>
+            <li>
+              Look for cards with introductory bonus offers that can boost your
+              initial rewards.
+            </li>
+            <li>Check for any spending caps or limitations on reward rates.</li>
+            <li>
+              Consider how rewards are redeemed - some cards offer better value
+              for specific redemption options.
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

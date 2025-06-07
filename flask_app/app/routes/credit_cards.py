@@ -180,8 +180,27 @@ def new():
             
             # Use the safe_commit context manager
             with safe_commit():
-                credit_card = CreditCard(**validated_data)
-                db.session.add(credit_card)
+                card = CreditCard(**validated_data)
+                db.session.add(card)
+            
+            # Now add the actual reward categories using the CreditCardReward model
+            # No need to clear existing rewards for a new card
+            
+            # Add rewards from the form
+            for reward_data in reward_categories:
+                category_name = reward_data.get('category')
+                percentage = reward_data.get('percentage')
+                
+                if category_name and percentage:
+                    card.add_reward_category(
+                        category_name=category_name,
+                        reward_percent=float(percentage),
+                        is_bonus=(percentage > 1.0)  # Consider it a bonus if > 1%
+                    )
+            
+            # Commit the reward changes
+            with safe_commit():
+                pass
             
             flash('Credit card added successfully!', 'success')
             return redirect(url_for('credit_cards.index'))
@@ -209,7 +228,8 @@ def show(id):
     for reward in card.rewards:
         reward_categories.append({
             'category': reward.category.display_name,
-            'percentage': reward.reward_percent
+            'percentage': reward.reward_percent,
+            'id': reward.category_id
         })
     
     # Parse special offers (still using JSON for now)
@@ -325,6 +345,25 @@ def edit(id):
             
             with safe_commit():
                 db.session.add(card)
+            
+            # Now add the actual reward categories using the CreditCardReward model
+            # No need to clear existing rewards for a new card
+            
+            # Add rewards from the form
+            for reward_data in reward_categories:
+                category_name = reward_data.get('category')
+                percentage = reward_data.get('percentage')
+                
+                if category_name and percentage:
+                    card.add_reward_category(
+                        category_name=category_name,
+                        reward_percent=float(percentage),
+                        is_bonus=(percentage > 1.0)  # Consider it a bonus if > 1%
+                    )
+            
+            # Commit the reward changes
+            with safe_commit():
+                pass
             
             flash('Credit card updated successfully!', 'success')
             return redirect(url_for('credit_cards.show', id=card.id))

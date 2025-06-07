@@ -165,7 +165,7 @@
                 <select class="form-select" name="category_name_{{ loop.index0 }}">
                   <option value="">Select a category...</option>
                   {% for cat in categories %}
-                  <option value="{{ cat.name }}" {% if cat.display_name == category.category %}selected{% endif %}>
+                  <option value="{{ cat.name }}" {% if cat.name == category.category %}selected{% endif %}>
                     {{ cat.display_name }}
                   </option>
                   {% endfor %}

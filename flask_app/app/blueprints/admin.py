@@ -201,6 +201,36 @@ def category_toggle(id):
     flash(f'Category "{category.display_name}" {status} successfully!', 'success')
     return redirect(url_for('admin.categories'))
 
+@admin_bp.route('/categories/<int:id>')
+def category_detail(id):
+    """Show detailed information about a category."""
+    category = Category.query.get_or_404(id)
+    
+    # Get cards that use this category
+    cards_with_category = CreditCard.query.join(
+        CreditCardReward, CreditCard.id == CreditCardReward.credit_card_id
+    ).filter(
+        CreditCardReward.category_id == id
+    ).order_by(
+        CreditCardReward.reward_percent.desc()
+    ).all()
+    
+    # Get rewards for each card
+    cards_with_rewards = []
+    for card in cards_with_category:
+        reward = card.rewards.filter_by(category_id=id).first()
+        if reward:
+            cards_with_rewards.append({
+                'card': card,
+                'reward': reward
+            })
+    
+    return render_template(
+        'admin/category_detail.html',
+        category=category,
+        cards_with_rewards=cards_with_rewards
+    )
+
 @admin_bp.route('/api/categories')
 def api_categories():
     """API endpoint to get all active categories (for AJAX calls)."""

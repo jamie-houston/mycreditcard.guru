@@ -88,7 +88,14 @@
           <tbody>
             {% for category in reward_categories %}
             <tr>
-              <td>{{ category.category|title }}</td>
+              <td>
+                <a
+                  href="{{ url_for('categories.show', id=category.id) }}"
+                  class="text-decoration-none"
+                >
+                  {{ category.category|title }}
+                </a>
+              </td>
               <td>{{ category.percentage }}%</td>
             </tr>
             {% endfor %}

@@ -38,7 +38,12 @@ http://localhost:5001/credit_cards/new
 - [X] Can edit and new card page use the same template so changes to one will update the other?
 - [ ] Show categories on card details page
 - [ ] Edit card doesn't show selected category for each reward category
+- [ ] Rewards details should be saved for each credit card (for debugging or viewing seperate from database rewards values)
 
 Admin
 - [ ] Create CRUD pages for categories (view list, view detail, edit, delete).  Admin can edit, users can view category detail with list of cards and reward rate for that category.
-- [ ] 
+
+Profile
+- [ ] Total monthly spending should be read only, and updated based on the spending by categories
+- [ ] Annual income, credit score, maximum annual fees and maximum cards should be optional and blank by default
+- [ ] Let user specify which cards they have.

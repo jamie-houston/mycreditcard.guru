@@ -119,6 +119,10 @@ def create_app(config_name=None):
     from app.blueprints.admin import admin_bp
     app.register_blueprint(admin_bp)
     
+    # Register categories blueprint
+    from app.routes.categories import categories as categories_blueprint
+    app.register_blueprint(categories_blueprint)
+    
     # Add template context processors
     @app.context_processor
     def utility_processor():
