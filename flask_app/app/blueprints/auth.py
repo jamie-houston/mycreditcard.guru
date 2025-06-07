@@ -1,5 +1,5 @@
 from datetime import datetime
-from flask import Blueprint, render_template, redirect, url_for, flash, request
+from flask import Blueprint, render_template, redirect, url_for, flash, request, current_app
 from flask_login import login_user, logout_user, login_required, current_user
 from flask_dance.contrib.google import make_google_blueprint, google
 import os
@@ -14,19 +14,38 @@ auth = Blueprint('auth', __name__)
 logging.getLogger('flask_dance').setLevel(logging.ERROR)
 
 # Google OAuth blueprint
-os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'  # Only for local dev
+def create_oauth_blueprint():
+    # Configure OAuth for security
+    os.environ['OAUTHLIB_RELAX_TOKEN_SCOPE'] = '1'
+    
+    # Local development needs this for http://localhost
+    if os.environ.get('FLASK_ENV') == 'development':
+        os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'  
+    
+    # Set up redirect URL for PythonAnywhere
+    redirect_url = None
+    pythonanywhere_domain = os.environ.get('PYTHONANYWHERE_DOMAIN')
+    if pythonanywhere_domain:
+        # We're on PythonAnywhere, use HTTPS and the correct domain
+        redirect_url = f"https://{pythonanywhere_domain}/login/google/authorized"
+        print(f"Setting OAuth redirect URL to: {redirect_url}")
+    
+    # Create the blueprint with appropriate settings
+    blueprint = make_google_blueprint(
+        client_id=os.environ.get('GOOGLE_OAUTH_CLIENT_ID'),
+        client_secret=os.environ.get('GOOGLE_OAUTH_CLIENT_SECRET'),
+        scope=[
+            "https://www.googleapis.com/auth/userinfo.email",
+            "https://www.googleapis.com/auth/userinfo.profile",
+            "openid"
+        ],
+        redirect_to="auth.oauth_complete",
+        redirect_url=redirect_url
+    )
+    return blueprint
 
-google_bp = make_google_blueprint(
-    client_id=os.environ.get('GOOGLE_OAUTH_CLIENT_ID'),
-    client_secret=os.environ.get('GOOGLE_OAUTH_CLIENT_SECRET'),
-    scope=[
-        "https://www.googleapis.com/auth/userinfo.email",
-        "https://www.googleapis.com/auth/userinfo.profile",
-        "openid"
-    ],
-    redirect_to="auth.oauth_complete"
-)
-
+# Initialize the OAuth blueprint
+google_bp = create_oauth_blueprint()
 auth.register_blueprint(google_bp, url_prefix="/login")
 
 @auth.route('/oauth/complete')
@@ -71,6 +90,8 @@ def oauth_complete():
         return redirect(url_for('main.index'))
     
     except Exception as e:
+        if current_app:
+            current_app.logger.error(f"OAuth error: {str(e)}")
         flash("An error occurred during login. Please try again.", "danger")
         return redirect(url_for('main.index'))
 

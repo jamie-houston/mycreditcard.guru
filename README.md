@@ -80,4 +80,19 @@ When importing cards, the system will automatically handle duplicates by matchin
 - Add more data sources beyond NerdWallet
 - Implement more detailed reward calculations
 - Add user accounts and authentication
-- Create a more sophisticated recommendation algorithm 
+- Create a more sophisticated recommendation algorithm
+
+## Deploying to PythonAnywhere
+
+This application includes special handling for Google OAuth when deployed to PythonAnywhere. The key changes are:
+
+1. **WSGI File Configuration**: The `wsgi.py` file automatically detects when running on PythonAnywhere and sets the appropriate environment variables.
+
+2. **OAuth Redirect URLs**: The auth blueprint sets the correct redirect URL based on your PythonAnywhere domain.
+
+3. **Required Google OAuth Setup**: You must configure your Google OAuth credentials with the correct redirect URI:
+   ```
+   https://yourusername.pythonanywhere.com/login/google/authorized
+   ```
+
+See the [PythonAnywhere Deployment Guide](PYTHONANYWHERE_DEPLOY.md) for detailed instructions. 
