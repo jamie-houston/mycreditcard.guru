@@ -31,6 +31,12 @@ def extract_card_info(html_file: str) -> List[Dict[str, Any]]:
 
     soup = BeautifulSoup(html_content, 'html.parser')
     
+    # First try the enhanced NerdWallet extraction for valueTooltip data
+    nerdwallet_cards = extract_nerdwallet_card_data(html_content)
+    if nerdwallet_cards:
+        print(f"Found {len(nerdwallet_cards)} cards with category bonuses from NerdWallet valueTooltip data")
+        return nerdwallet_cards
+    
     # Look for embedded JSON data (common in modern React sites)
     cards_from_json = extract_cards_from_json(html_content)
     if cards_from_json:
@@ -203,8 +209,16 @@ def clean_card_json(card_json: Dict[str, Any]) -> Dict[str, Any]:
         elif isinstance(fee, str) and fee.isdigit():
             card['annual_fee'] = int(fee)
     
-    # Extract rewards rate
-    if 'rewardsRate' in card_json and card_json['rewardsRate']:
+    # Extract category bonuses from valueTooltip (prioritized for NerdWallet)
+    valueTooltip_bonuses = {}
+    if 'valueTooltip' in card_json and card_json['valueTooltip'] and card_json['valueTooltip'] != "$undefined":
+        valueTooltip_bonuses = parse_category_bonuses_from_tooltip(card_json['valueTooltip'])
+        if valueTooltip_bonuses:
+            card['reward_categories'].update(valueTooltip_bonuses)
+            card['valueTooltip'] = card_json['valueTooltip']  # Keep original for debugging
+    
+    # Extract rewards rate (fallback if no valueTooltip bonuses found)
+    if not valueTooltip_bonuses and 'rewardsRate' in card_json and card_json['rewardsRate']:
         card['rewards_rate'] = card_json['rewardsRate']
         
         # Try to parse rewards into categories
@@ -474,7 +488,7 @@ def is_valid_credit_card(name: str) -> bool:
     exclude_keywords = [
         'why trust', 'breakdown', 'details', 'take', 'faq', 'compare',
         'annual fee', 'credit-building', 'interest rate', 'sign-up bonus',
-        'perks', 'introductory', 'ongoing', 'rewards', 'what\'s the best',
+        'perks', 'introductory', 'ongoing', 'what\'s the best',
         'what\'s the easiest', 'contact us', 'legal', 'about', 'privacy',
         'terms', 'our partners', 'for cash back', 'for travel', 'for balance',
         'for college', 'for business', 'for credit-building', 'interest-saving'
@@ -599,6 +613,205 @@ common_issuers = [
     'Chase', 'American Express', 'Amex', 'Citi', 'Capital One', 
     'Discover', 'Bank of America', 'Wells Fargo', 'U.S. Bank'
 ]
+
+def parse_category_bonuses_from_tooltip(tooltip_text: str) -> Dict[str, float]:
+    """
+    Parse category bonuses from NerdWallet valueTooltip text.
+    
+    Handles patterns like:
+    "5x on travel purchased through Chase Travel℠, 3x on dining, select streaming services and online groceries, 2x on all other travel purchases, 1x on all other purchases."
+    
+    Returns a dictionary mapping standardized category names to their multipliers.
+    """
+    if not tooltip_text or tooltip_text == "$undefined":
+        return {}
+    
+    # Category mapping from various text descriptions to standardized names
+    category_mapping = {
+        # Dining variations
+        'dining': 'Dining & Restaurants',
+        'restaurants': 'Dining & Restaurants', 
+        'restaurant': 'Dining & Restaurants',
+        'dining at restaurants': 'Dining & Restaurants',
+        'takeout': 'Dining & Restaurants',
+        'delivery service': 'Dining & Restaurants',
+        
+        # Travel variations
+        'travel': 'Travel',
+        'travel purchases': 'Travel',
+        'travel purchased': 'Travel',
+        'other travel': 'Travel',
+        'travel booked': 'Travel',
+        'hotels': 'Travel',
+        'hotel': 'Travel',
+        'rental cars': 'Travel',
+        'car rentals': 'Travel',
+        'flights': 'Travel',
+        'airfare': 'Travel',
+        'attractions': 'Travel',
+        
+        # Groceries variations
+        'groceries': 'Groceries',
+        'grocery': 'Groceries',
+        'grocery stores': 'Groceries',
+        'supermarkets': 'Groceries',
+        'online groceries': 'Groceries',
+        'wholesale clubs': 'Groceries',
+        
+        # Streaming variations
+        'streaming': 'Streaming Services',
+        'streaming services': 'Streaming Services',
+        'select streaming services': 'Streaming Services',
+        'streaming subscriptions': 'Streaming Services',
+        
+        # Gas variations
+        'gas': 'Gas',
+        'gas stations': 'Gas',
+        'gasoline': 'Gas',
+        'fuel': 'Gas',
+        
+        # Other categories
+        'drugstore': 'Drugstores',
+        'drugstores': 'Drugstores',
+        'pharmacy': 'Drugstores',
+        'entertainment': 'Entertainment',
+        'transit': 'Transit',
+        'transportation': 'Transit',
+        'rideshare': 'Transit',
+        'parking': 'Transit',
+        'tolls': 'Transit',
+        'trains': 'Transit',
+        'buses': 'Transit',
+        'paypal': 'PayPal',
+        'amazon': 'Amazon',
+        'online retail': 'Online Shopping',
+        'online purchases': 'Online Shopping',
+    }
+    
+    categories = {}
+    
+    # Split text into segments based on rate patterns like "5x on", "3% on", etc.
+    # Use a more inclusive pattern that captures everything between rate patterns
+    segment_pattern = r'(\d+(?:\.\d+)?)[x%]?\s+(?:cash back\s+)?(?:on|at|for)\s+'
+    
+    # Find all positions where rate patterns start
+    rate_positions = []
+    for match in re.finditer(segment_pattern, tooltip_text, re.IGNORECASE):
+        rate_positions.append((match.start(), match.group(1)))
+    
+    # Process each segment between rate patterns
+    for i, (start_pos, rate_str) in enumerate(rate_positions):
+        try:
+            rate = float(rate_str)
+            
+            # Find the end of this segment (start of next rate pattern or end of string)
+            if i + 1 < len(rate_positions):
+                end_pos = rate_positions[i + 1][0]
+                segment = tooltip_text[start_pos:end_pos]
+            else:
+                segment = tooltip_text[start_pos:]
+            
+            # Extract category text (everything after "on/at/for" in this segment)
+            category_match = re.search(segment_pattern + r'(.+?)(?=\s*$|(?=\d+[x%]\s+(?:cash back\s+)?(?:on|at|for)))', segment, re.IGNORECASE | re.DOTALL)
+            
+            if category_match:
+                category_text = category_match.group(2).strip()
+                
+                # Clean up category text
+                category_text = re.sub(r'[℠®™]', '', category_text)  # Remove trademark symbols
+                category_text = re.sub(r'\s+', ' ', category_text)   # Normalize whitespace
+                category_text = category_text.rstrip('.,')          # Remove trailing punctuation
+                
+                # Skip generic "all other" categories unless it's travel
+                if 'all other' in category_text.lower() and 'travel' not in category_text.lower():
+                    continue
+                
+                # Find all categories mentioned in this segment
+                category_text_lower = category_text.lower()
+                found_categories = set()
+                
+                # Check each category mapping to see if it's mentioned
+                for key, standardized in category_mapping.items():
+                    if key in category_text_lower:
+                        found_categories.add(standardized)
+                
+                # Add all found categories with this rate
+                for category in found_categories:
+                    categories[category] = rate
+                    
+        except (ValueError, AttributeError):
+            continue
+    
+    return categories
+
+def extract_nerdwallet_card_data(html_content: str) -> List[Dict[str, Any]]:
+    """
+    Enhanced extraction specifically for NerdWallet's modern React-based structure.
+    Looks for JSON data with valueTooltip information.
+    """
+    cards = []
+    
+    # Find all valueTooltip instances with meaningful content
+    tooltip_pattern = r'"valueTooltip":\s*"([^"]+)"'
+    tooltip_matches = re.findall(tooltip_pattern, html_content)
+    
+    # For each tooltip, try to find the associated card name in the surrounding context
+    for tooltip in tooltip_matches:
+        if tooltip and tooltip != "$undefined":
+            # Parse category bonuses from the tooltip
+            category_bonuses = parse_category_bonuses_from_tooltip(tooltip)
+            
+            if category_bonuses:  # Only proceed if we found category bonuses
+                # Find the position of this tooltip in the HTML
+                tooltip_pos = html_content.find(f'"valueTooltip":"{tooltip}"')
+                
+                if tooltip_pos != -1:
+                    # Look for card name in a reasonable range around the tooltip
+                    # Look backwards and forwards from the tooltip position
+                    search_start = max(0, tooltip_pos - 5000)
+                    search_end = min(len(html_content), tooltip_pos + 1000)
+                    context = html_content[search_start:search_end]
+                    
+                    # Look for name patterns in the context
+                    name_patterns = [
+                        r'"name":\s*"([^"]*(?:Chase Sapphire Preferred|Capital One|Citi|American Express|Discover|Bank of America|Wells Fargo|U\.S\. Bank)[^"]*)"',
+                        r'"name":\s*"([^"]*Card[^"]*)"',  # Any name ending with "Card"
+                        r'"name":\s*"([^"]{20,})"',       # Any reasonably long name
+                    ]
+                    
+                    card_name = None
+                    for pattern in name_patterns:
+                        name_matches = re.findall(pattern, context, re.IGNORECASE)
+                        for name in name_matches:
+                            # Validate that this looks like a credit card name
+                            if is_valid_credit_card(name):
+                                card_name = name
+                                break
+                        if card_name:
+                            break
+                    
+                    if card_name:
+                        card = {
+                            'name': card_name,
+                            'issuer': extract_issuer_from_name(card_name),
+                            'annual_fee': 0,
+                            'reward_categories': category_bonuses,
+                            'valueTooltip': tooltip,  # Keep original for debugging
+                            'ratings': {},
+                            'credit_needed': '',
+                            'intro_apr': '',
+                            'regular_apr': '',
+                            'intro_offer': '',
+                            'card_type': '',
+                            'card_network': ''
+                        }
+                        
+                        # Check if we already have this card (avoid duplicates)
+                        existing_card = next((c for c in cards if c['name'].lower() == card_name.lower()), None)
+                        if not existing_card:
+                            cards.append(card)
+    
+    return cards
 
 if __name__ == "__main__":
     if len(sys.argv) > 1:

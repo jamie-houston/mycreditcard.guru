@@ -25,6 +25,7 @@ def parse_arguments():
     parser.add_argument('--use-proxies', action='store_true', help='Use proxy rotation for scraping')
     parser.add_argument('--limit', type=int, default=0, help='Limit the number of cards to import (0 for no limit)')
     parser.add_argument('--clear', action='store_true', help='Clear existing cards before import')
+    parser.add_argument('--json', type=str, help='Import cards from a JSON file instead of scraping')
     return parser.parse_args()
 
 def validate_and_process_reward_categories(reward_categories_data, card_name):
@@ -87,7 +88,18 @@ def create_card_rewards(card, valid_rewards):
             )
             db.session.add(new_reward)
 
-def import_cards(use_proxies: bool = False, limit: int = 0, clear: bool = False):
+def import_cards_from_json(json_file):
+    """Import credit cards from a JSON file."""
+    try:
+        with open(json_file, 'r', encoding='utf-8') as f:
+            cards_data = json.load(f)
+        logger.info(f"Loaded {len(cards_data)} cards from {json_file}")
+        return cards_data
+    except Exception as e:
+        logger.error(f"Error loading cards from JSON file: {e}")
+        return []
+
+def import_cards(use_proxies: bool = False, limit: int = 0, clear: bool = False, json_file: str = None):
     """Import credit cards from NerdWallet."""
     logger.info("Starting card import script")
     
@@ -105,8 +117,12 @@ def import_cards(use_proxies: bool = False, limit: int = 0, clear: bool = False)
                 logger.error(f"Error clearing existing cards: {e}")
                 return
         
-        # Scrape credit cards data directly from the main table
-        cards_data = scrape_credit_cards(use_proxies)
+        # Get card data from JSON file or by scraping
+        if json_file:
+            cards_data = import_cards_from_json(json_file)
+        else:
+            # Scrape credit cards data directly from the main table
+            cards_data = scrape_credit_cards(use_proxies)
         
         if not cards_data:
             logger.warning("No credit cards found to import")
@@ -169,13 +185,15 @@ def import_cards(use_proxies: bool = False, limit: int = 0, clear: bool = False)
                     filtered_card_data['special_offers'] = json.dumps(filtered_card_data['special_offers'])
                 
                 # Check if card already exists by name and issuer
+                # IMPORTANT: This is where we handle overwriting existing cards
+                # If a card with the same name and issuer exists, we update all its fields
                 existing_card = CreditCard.query.filter_by(
                     name=filtered_card_data['name'],
                     issuer=filtered_card_data['issuer']
                 ).first()
                 
                 if existing_card:
-                    # Update existing card
+                    # Update existing card - will overwrite all fields with new values
                     for key, value in filtered_card_data.items():
                         setattr(existing_card, key, value)
                     
@@ -219,4 +237,4 @@ def import_cards(use_proxies: bool = False, limit: int = 0, clear: bool = False)
 
 if __name__ == "__main__":
     args = parse_arguments()
-    import_cards(args.use_proxies, args.limit, args.clear) 
+    import_cards(args.use_proxies, args.limit, args.clear, args.json) 

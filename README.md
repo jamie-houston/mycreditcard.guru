@@ -53,6 +53,28 @@ The Credit Card Roadmap app allows users to:
 - `/scripts` - Management scripts
 - `/migrations` - Database migrations
 
+## Importing Credit Cards
+
+There are several ways to import credit card data:
+
+1. **From an HTML file**:
+   ```
+   python extract_card_info.py path/to/nerdwallet.html
+   ```
+
+2. **From a URL**:
+   ```
+   python integrate_card_data.py https://www.nerdwallet.com/best/credit-cards/
+   ```
+
+3. **From a JSON file**:
+   ```
+   cd flask_app
+   python -m scripts.import_cards --json path/to/cards.json
+   ```
+
+When importing cards, the system will automatically handle duplicates by matching on card name and issuer. If a card with the same name and issuer already exists in the database, all its fields will be overwritten with the new values, effectively updating the card information.
+
 ## Future Enhancements
 
 - Add more data sources beyond NerdWallet

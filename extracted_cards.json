@@ -1,7 +1,7 @@
 [
   {
-    "name": "Capital One Venture",
-    "issuer": "Capital One",
+    "name": "One Venture Rewards Credit Card",
+    "issuer": "Unknown Issuer",
     "annual_fee": 0,
     "reward_categories": {},
     "ratings": {},
@@ -13,8 +13,47 @@
     "card_network": ""
   },
   {
-    "name": "Chase Freedom",
-    "issuer": "Chase",
+    "name": "Best Travel Credit Card",
+    "issuer": "Unknown Issuer",
+    "annual_fee": 0,
+    "reward_categories": {},
+    "ratings": {},
+    "credit_needed": "",
+    "intro_apr": "",
+    "regular_apr": "",
+    "intro_offer": "",
+    "card_type": "",
+    "card_network": ""
+  },
+  {
+    "name": "Venture Rewards Credit Card",
+    "issuer": "Unknown Issuer",
+    "annual_fee": 0,
+    "reward_categories": {},
+    "ratings": {},
+    "credit_needed": "",
+    "intro_apr": "",
+    "regular_apr": "",
+    "intro_offer": "",
+    "card_type": "",
+    "card_network": ""
+  },
+  {
+    "name": "One Rewards Credit Card",
+    "issuer": "Unknown Issuer",
+    "annual_fee": 0,
+    "reward_categories": {},
+    "ratings": {},
+    "credit_needed": "",
+    "intro_apr": "",
+    "regular_apr": "",
+    "intro_offer": "",
+    "card_type": "",
+    "card_network": ""
+  },
+  {
+    "name": "Capital One Venture",
+    "issuer": "Capital One",
     "annual_fee": 0,
     "reward_categories": {},
     "ratings": {},
@@ -39,8 +78,8 @@
     "card_network": ""
   },
   {
-    "name": "Discover it",
-    "issuer": "Discover",
+    "name": "Chase Freedom",
+    "issuer": "Chase",
     "annual_fee": 0,
     "reward_categories": {},
     "ratings": {},

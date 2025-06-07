@@ -32,9 +32,20 @@ def integrate_card_data(html_file=None, url=None):
         scraped_cards = scrape_nerdwallet_cards(source_url=url)
         cards.extend(scraped_cards)
     
+    # Use a dictionary to track unique cards by name
+    # This ensures that if we find duplicate cards, the later one overwrites the earlier one
+    card_dict = {}
+    for card in cards:
+        # Use card name as the unique key
+        card_dict[card['name']] = card
+    
+    # Convert back to a list for final processing
+    unique_cards = list(card_dict.values())
+    print(f"Found {len(cards)} cards, {len(unique_cards)} unique after deduplication")
+    
     # Prepare cards for database import
     prepared_cards = []
-    for card in cards:
+    for card in unique_cards:
         # Ensure reward_categories is serialized to JSON string
         if isinstance(card.get('reward_categories'), dict):
             card['reward_categories'] = json.dumps(card['reward_categories'])

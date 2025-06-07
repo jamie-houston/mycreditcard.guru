@@ -33,5 +33,6 @@ When importing cards, if it doesn't match an existing "category", don't add the 
 
 ## Add credit card
 http://localhost:5001/credit_cards/new
-- [ ] Add credit card button broken - missing csrf token
-- [ ] Categories should be dropdown to choose from, not text form
+- [ ] Add/edit credit card button broken - missing csrf token.  Check for any other buttons missing it.
+- [ ] Categories should be dropdown to choose from, not text form - need to update edit page
+- [ ] Can edit and new card page use the same template so changes to one will update the other?
