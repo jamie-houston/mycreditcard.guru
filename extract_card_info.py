@@ -61,10 +61,19 @@ def extract_card_info(html_file: str) -> List[Dict[str, Any]]:
                 'card_type': '',
                 'card_network': ''
             })
+        
+        # Try to extract reward categories from HTML content
+        card_list = extract_reward_categories_from_html(soup, card_list)
+        
         return card_list
     
     # As a last resort, try to extract cards based on HTML structure
-    return extract_cards_from_html(soup)
+    cards = extract_cards_from_html(soup)
+    
+    # Try to extract reward categories from HTML content
+    cards = extract_reward_categories_from_html(soup, cards)
+    
+    return cards
 
 def extract_card_names_from_html(soup: BeautifulSoup) -> List[str]:
     """Find credit card names in the HTML text content"""
@@ -593,9 +602,18 @@ def filter_valid_cards(cards: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     
     # First normalize all card names
     for card in cards:
+        # Store the reward categories before normalization
+        reward_categories = card.get('reward_categories', {})
+        
+        # Normalize the card name
         card['name'] = normalize_card_name(card['name'])
+        
         # Re-extract issuer in case the name was normalized
         card['issuer'] = extract_issuer_from_name(card['name'])
+        
+        # Ensure reward categories are preserved
+        if not card.get('reward_categories') and reward_categories:
+            card['reward_categories'] = reward_categories
     
     # Then deduplicate based on normalized names
     for card in cards:
@@ -609,6 +627,11 @@ def filter_valid_cards(cards: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
             
             filtered_cards.append(card)
             seen_names.add(name_key_simple)
+        elif card['reward_categories'] and name_key_simple in seen_names:
+            # If we already have this card but this instance has reward categories, update the existing card
+            existing_card = next((c for c in filtered_cards if re.sub(r'[^a-z0-9]', '', c['name'].lower()) == name_key_simple), None)
+            if existing_card and not existing_card.get('reward_categories'):
+                existing_card['reward_categories'] = card['reward_categories']
     
     return filtered_cards
 
@@ -689,6 +712,8 @@ def parse_category_bonuses_from_tooltip(tooltip_text: str) -> Dict[str, float]:
     if not tooltip_text or tooltip_text == "$undefined":
         return {}
     
+    print(f"  Parsing tooltip: {tooltip_text}")
+    
     # Category mapping from various text descriptions to standardized names
     category_mapping = {
         # Dining variations
@@ -749,62 +774,93 @@ def parse_category_bonuses_from_tooltip(tooltip_text: str) -> Dict[str, float]:
         'amazon': 'Amazon',
         'online retail': 'Online Shopping',
         'online purchases': 'Online Shopping',
+        'all purchases': 'All Purchases',
+        'everything else': 'All Other Purchases',
+        'everything': 'All Purchases',
+        'all other purchases': 'All Other Purchases',
     }
     
     categories = {}
     
-    # Split text into segments based on rate patterns like "5x on", "3% on", etc.
-    # Use a more inclusive pattern that captures everything between rate patterns
-    segment_pattern = r'(\d+(?:\.\d+)?)[x%]?\s+(?:cash back\s+)?(?:on|at|for)\s+'
+    # Try different patterns to extract rewards info
     
-    # Find all positions where rate patterns start
-    rate_positions = []
-    for match in re.finditer(segment_pattern, tooltip_text, re.IGNORECASE):
-        rate_positions.append((match.start(), match.group(1)))
-    
-    # Process each segment between rate patterns
-    for i, (start_pos, rate_str) in enumerate(rate_positions):
+    # Pattern 1: Standard X% on Y pattern
+    pattern1 = r'(\d+(?:\.\d+)?)[x%]?\s+(?:cash ?back|rewards?|points?|miles?)?\s+(?:on|at|for)\s+([^,.;]+)'
+    for match in re.finditer(pattern1, tooltip_text, re.IGNORECASE):
         try:
-            rate = float(rate_str)
+            rate = float(match.group(1))
+            category_text = match.group(2).strip().lower()
             
-            # Find the end of this segment (start of next rate pattern or end of string)
-            if i + 1 < len(rate_positions):
-                end_pos = rate_positions[i + 1][0]
-                segment = tooltip_text[start_pos:end_pos]
-            else:
-                segment = tooltip_text[start_pos:]
-            
-            # Extract category text (everything after "on/at/for" in this segment)
-            category_match = re.search(segment_pattern + r'(.+?)(?=\s*$|(?=\d+[x%]\s+(?:cash back\s+)?(?:on|at|for)))', segment, re.IGNORECASE | re.DOTALL)
-            
-            if category_match:
-                category_text = category_match.group(2).strip()
+            # Validate rate is reasonable (less than 20%)
+            if rate > 20:
+                continue
                 
-                # Clean up category text
-                category_text = re.sub(r'[℠®™]', '', category_text)  # Remove trademark symbols
-                category_text = re.sub(r'\s+', ' ', category_text)   # Normalize whitespace
-                category_text = category_text.rstrip('.,')          # Remove trailing punctuation
+            # Skip generic "all other" categories unless it's the only one
+            if ('all other' in category_text or 'everything else' in category_text) and len(categories) > 0:
+                continue
                 
-                # Skip generic "all other" categories unless it's travel
-                if 'all other' in category_text.lower() and 'travel' not in category_text.lower():
-                    continue
-                
-                # Find all categories mentioned in this segment
-                category_text_lower = category_text.lower()
-                found_categories = set()
-                
-                # Check each category mapping to see if it's mentioned
-                for key, standardized in category_mapping.items():
-                    if key in category_text_lower:
-                        found_categories.add(standardized)
-                
-                # Add all found categories with this rate
-                for category in found_categories:
-                    categories[category] = rate
+            # Find matching standard category
+            found = False
+            for key, standardized in category_mapping.items():
+                if key in category_text:
+                    categories[standardized] = rate
+                    found = True
                     
+            # If no standard category matched, use the text as is
+            if not found and len(category_text) > 3:
+                categories[category_text.title()] = rate
+                
         except (ValueError, AttributeError):
-            continue
+            pass
     
+    # Pattern 2: Earn X points/miles/cashback on Y
+    pattern2 = r'earn\s+(\d+(?:\.\d+)?)[x%]?\s+(?:points?|miles?|cash ?back|rewards?)(?:\s+on|\s+for|\s+at)\s+([^,.;]+)'
+    for match in re.finditer(pattern2, tooltip_text, re.IGNORECASE):
+        try:
+            rate = float(match.group(1))
+            category_text = match.group(2).strip().lower()
+            
+            # Validate rate is reasonable (less than 20%)
+            if rate > 20:
+                continue
+                
+            # Find matching standard category
+            found = False
+            for key, standardized in category_mapping.items():
+                if key in category_text:
+                    categories[standardized] = rate
+                    found = True
+                    
+            # If no standard category matched, use the text as is
+            if not found and len(category_text) > 3:
+                categories[category_text.title()] = rate
+                
+        except (ValueError, AttributeError):
+            pass
+    
+    # If no categories found using the patterns, try a simple approach
+    if not categories:
+        # Just look for numbers followed by x/% and then some text
+        simple_pattern = r'(\d+)(?:x|%).*?((?:travel|dining|grocery|gas|restaurant|streaming|hotel|flight|rental)s?)'
+        for match in re.finditer(simple_pattern, tooltip_text, re.IGNORECASE):
+            try:
+                rate = float(match.group(1))
+                category_keyword = match.group(2).strip().lower()
+                
+                # Validate rate is reasonable (less than 20%)
+                if rate > 20:
+                    continue
+                    
+                # Find matching standard category
+                for key, standardized in category_mapping.items():
+                    if category_keyword in key:
+                        categories[standardized] = rate
+                        break
+                        
+            except (ValueError, AttributeError):
+                pass
+    
+    print(f"  Extracted categories: {categories}")
     return categories
 
 def extract_nerdwallet_card_data(html_content: str) -> List[Dict[str, Any]]:
@@ -814,17 +870,25 @@ def extract_nerdwallet_card_data(html_content: str) -> List[Dict[str, Any]]:
     """
     cards = []
     
+    # Debug: Look for valueTooltip content in HTML
+    print("\nSearching for valueTooltip data...")
+    
     # Find all valueTooltip instances with meaningful content
     tooltip_pattern = r'"valueTooltip":\s*"([^"]+)"'
     tooltip_matches = re.findall(tooltip_pattern, html_content)
     
+    print(f"Found {len(tooltip_matches)} valueTooltip instances")
+    
     # For each tooltip, try to find the associated card name in the surrounding context
-    for tooltip in tooltip_matches:
+    for i, tooltip in enumerate(tooltip_matches):
         if tooltip and tooltip != "$undefined":
+            print(f"\nTooltip {i+1}: {tooltip}")
+            
             # Parse category bonuses from the tooltip
             category_bonuses = parse_category_bonuses_from_tooltip(tooltip)
             
-            if category_bonuses:  # Only proceed if we found category bonuses
+            if category_bonuses:  
+                print(f"  Extracted categories: {category_bonuses}")
                 # Find the position of this tooltip in the HTML
                 tooltip_pos = html_content.find(f'"valueTooltip":"{tooltip}"')
                 
@@ -834,6 +898,18 @@ def extract_nerdwallet_card_data(html_content: str) -> List[Dict[str, Any]]:
                     search_start = max(0, tooltip_pos - 5000)
                     search_end = min(len(html_content), tooltip_pos + 1000)
                     context = html_content[search_start:search_end]
+                    
+                    # Try to find annual fee in the context
+                    annual_fee = 0
+                    fee_match = re.search(r'"annualFee":\s*"([^"]+)"', context)
+                    if fee_match:
+                        fee_text = fee_match.group(1)
+                        if '$0' in fee_text or 'No annual fee' in fee_text or 'no annual fee' in fee_text.lower():
+                            annual_fee = 0
+                        else:
+                            fee_digit_match = re.search(r'\$(\d+(?:,\d{3})*)', fee_text)
+                            if fee_digit_match:
+                                annual_fee = int(fee_digit_match.group(1).replace(',', ''))
                     
                     # Look for name patterns in the context
                     name_patterns = [
@@ -849,19 +925,32 @@ def extract_nerdwallet_card_data(html_content: str) -> List[Dict[str, Any]]:
                             # Validate that this looks like a credit card name
                             if is_valid_credit_card(name):
                                 card_name = name
+                                print(f"  Found card name: {name}")
                                 break
                         if card_name:
                             break
                     
                     if card_name:
+                        # Also look for credit needed and rewards rate
+                        credit_needed = ''
+                        credit_match = re.search(r'"creditNeeded":\s*"([^"]+)"', context)
+                        if credit_match:
+                            credit_needed = credit_match.group(1)
+                        
+                        rewards_rate = ''
+                        rewards_match = re.search(r'"rewardsRate":\s*"([^"]+)"', context)
+                        if rewards_match:
+                            rewards_rate = rewards_match.group(1)
+                        
                         card = {
                             'name': card_name,
                             'issuer': extract_issuer_from_name(card_name),
-                            'annual_fee': 0,
+                            'annual_fee': annual_fee,
                             'reward_categories': category_bonuses,
+                            'rewards_rate': rewards_rate,
                             'valueTooltip': tooltip,  # Keep original for debugging
                             'ratings': {},
-                            'credit_needed': '',
+                            'credit_needed': credit_needed,
                             'intro_apr': '',
                             'regular_apr': '',
                             'intro_offer': '',
@@ -873,7 +962,141 @@ def extract_nerdwallet_card_data(html_content: str) -> List[Dict[str, Any]]:
                         existing_card = next((c for c in cards if c['name'].lower() == card_name.lower()), None)
                         if not existing_card:
                             cards.append(card)
+                            print(f"  Added card with reward categories")
+                        elif not existing_card.get('reward_categories') and category_bonuses:
+                            # Update existing card with reward categories if it doesn't have any
+                            existing_card['reward_categories'] = category_bonuses
+                            print(f"  Updated existing card with reward categories")
+            else:
+                print(f"  No categories found in tooltip")
     
+    if not cards:
+        print("No cards with reward categories found from valueTooltip data")
+    
+    return cards
+
+def extract_reward_categories_from_html(soup: BeautifulSoup, cards: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """Extract reward categories from HTML content and add them to the cards"""
+    print("\nAttempting to extract reward categories from HTML content...")
+    
+    # Create a map of card names to their indices
+    card_name_map = {}
+    for i, card in enumerate(cards):
+        card_name = card['name'].lower()
+        card_name_map[card_name] = i
+        
+        # Also add simplified versions of the name (without "card" suffix, etc.)
+        simple_name = card_name.replace('card', '').replace('credit', '').strip()
+        if simple_name != card_name:
+            card_name_map[simple_name] = i
+            
+        # Add issuer-product combinations
+        issuer = card['issuer'].lower()
+        if ' ' in card_name:
+            product = card_name.split(' ')[-2]  # Usually the distinguishing feature like "Sapphire", "Freedom", etc.
+            if len(product) > 3:  # Meaningful product name
+                issuer_product = f"{issuer} {product}".lower()
+                card_name_map[issuer_product] = i
+    
+    # Find all text blocks that might contain rewards information
+    rewards_text_blocks = []
+    
+    # Look for elements with rewards-related class names
+    reward_elements = soup.select(
+        '.rewards-rate, .rewardsRate, [class*="reward"], [class*="cashback"], [class*="points"], [class*="miles"]'
+    )
+    
+    for element in reward_elements:
+        text = element.get_text().strip()
+        if len(text) > 10 and any(keyword in text.lower() for keyword in ['x on', '% on', 'cash back on', 'points on', 'miles on']):
+            rewards_text_blocks.append(text)
+    
+    # Also look for paragraphs with rewards information
+    paragraphs = soup.select('p')
+    for p in paragraphs:
+        text = p.get_text().strip()
+        if len(text) > 10 and any(keyword in text.lower() for keyword in ['x on', '% on', 'cash back on', 'points on', 'miles on']):
+            rewards_text_blocks.append(text)
+    
+    print(f"Found {len(rewards_text_blocks)} text blocks with potential reward information")
+    
+    # Map of text blocks to possible card matches (for better disambiguation)
+    text_block_card_matches = {}
+    
+    # First pass: identify all possible card matches for each text block
+    for i, rewards_text in enumerate(rewards_text_blocks):
+        rewards_text_lower = rewards_text.lower()
+        matches = []
+        
+        # Check for explicit card name mentions
+        for card_name, idx in card_name_map.items():
+            if card_name in rewards_text_lower:
+                matches.append(idx)
+        
+        text_block_card_matches[i] = matches
+    
+    # Second pass: extract and assign categories
+    cards_updated = 0
+    for i, rewards_text in enumerate(rewards_text_blocks):
+        print(f"\nAnalyzing rewards text block {i+1}:")
+        print(f"  {rewards_text[:100]}...")  # Print first 100 chars
+        
+        # Extract categories
+        categories = parse_category_bonuses_from_tooltip(rewards_text)
+        
+        if not categories:
+            continue
+            
+        # Get pre-identified matches
+        matches = text_block_card_matches[i]
+        
+        # If we have exactly one match, use it
+        if len(matches) == 1:
+            matched_card_idx = matches[0]
+        # If we have multiple matches, try to disambiguate
+        elif len(matches) > 1:
+            # First try to find an exact match for the full card name
+            exact_match = None
+            for idx in matches:
+                card_name = cards[idx]['name'].lower()
+                if f'"{card_name}"' in rewards_text.lower() or f"'{card_name}'" in rewards_text.lower():
+                    exact_match = idx
+                    break
+            
+            matched_card_idx = exact_match if exact_match is not None else matches[0]
+        # If no matches yet, try more advanced techniques
+        else:
+            matched_card_idx = None
+            
+            # Look for issuer mentions
+            issuer_matches = {}
+            for idx, card in enumerate(cards):
+                issuer = card['issuer'].lower()
+                if issuer in rewards_text.lower():
+                    if issuer not in issuer_matches:
+                        issuer_matches[issuer] = []
+                    issuer_matches[issuer].append(idx)
+            
+            # If we have only one issuer with cards mentioned, and only one card from that issuer
+            if len(issuer_matches) == 1:
+                issuer, indices = next(iter(issuer_matches.items()))
+                if len(indices) == 1:
+                    matched_card_idx = indices[0]
+            
+            # As a last resort, try to associate with a nearby card based on position
+            if matched_card_idx is None and i < len(cards):
+                matched_card_idx = i
+        
+        if matched_card_idx is not None:
+            # Update the card with reward categories
+            card = cards[matched_card_idx]
+            if not card.get('reward_categories'):
+                card['reward_categories'] = {}
+            card['reward_categories'].update(categories)
+            print(f"  Updated {card['name']} with reward categories: {categories}")
+            cards_updated += 1
+    
+    print(f"Updated {cards_updated} cards with reward categories from HTML content")
     return cards
 
 if __name__ == "__main__":

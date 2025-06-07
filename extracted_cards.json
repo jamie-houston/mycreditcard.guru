@@ -1,35 +1,27 @@
 [
   {
+    "name": "Capital One Savor Cash Rewards Credit Card",
+    "issuer": "Capital One",
+    "annual_fee": 0,
+    "reward_categories": {
+      "All Purchases": 2.0
+    },
+    "ratings": {},
+    "credit_needed": "",
+    "intro_apr": "",
+    "regular_apr": "",
+    "intro_offer": "",
+    "card_type": "",
+    "card_network": ""
+  },
+  {
     "name": "Capital One Venture Rewards Credit Card",
     "issuer": "Capital One",
     "annual_fee": 0,
-    "reward_categories": {},
-    "ratings": {},
-    "credit_needed": "",
-    "intro_apr": "",
-    "regular_apr": "",
-    "intro_offer": "",
-    "card_type": "",
-    "card_network": ""
-  },
-  {
-    "name": "Capital One Venture Card",
-    "issuer": "Capital One",
-    "annual_fee": 0,
-    "reward_categories": {},
-    "ratings": {},
-    "credit_needed": "",
-    "intro_apr": "",
-    "regular_apr": "",
-    "intro_offer": "",
-    "card_type": "",
-    "card_network": ""
-  },
-  {
-    "name": "Chase Sapphire Preferred Card",
-    "issuer": "Chase",
-    "annual_fee": 0,
-    "reward_categories": {},
+    "reward_categories": {
+      "Dining & Restaurants": 3.0,
+      "All Purchases": 2.0
+    },
     "ratings": {},
     "credit_needed": "",
     "intro_apr": "",
@@ -52,10 +44,69 @@
     "card_network": ""
   },
   {
+    "name": "Chase Freedom Flex Card",
+    "issuer": "Chase",
+    "annual_fee": 0,
+    "reward_categories": {
+      "Travel": 5.0
+    },
+    "ratings": {},
+    "credit_needed": "",
+    "intro_apr": "",
+    "regular_apr": "",
+    "intro_offer": "",
+    "card_type": "",
+    "card_network": ""
+  },
+  {
+    "name": "Chase Sapphire Preferred Card",
+    "issuer": "Chase",
+    "annual_fee": 0,
+    "reward_categories": {},
+    "ratings": {},
+    "credit_needed": "",
+    "intro_apr": "",
+    "regular_apr": "",
+    "intro_offer": "",
+    "card_type": "",
+    "card_network": ""
+  },
+  {
     "name": "Chase Sapphire Reserve Card",
     "issuer": "Chase",
     "annual_fee": 0,
     "reward_categories": {},
+    "ratings": {},
+    "credit_needed": "",
+    "intro_apr": "",
+    "regular_apr": "",
+    "intro_offer": "",
+    "card_type": "",
+    "card_network": ""
+  },
+  {
+    "name": "Citi Double Cash Card",
+    "issuer": "Citi",
+    "annual_fee": 0,
+    "reward_categories": {
+      "All Purchases": 2.0
+    },
+    "ratings": {},
+    "credit_needed": "",
+    "intro_apr": "",
+    "regular_apr": "",
+    "intro_offer": "",
+    "card_type": "",
+    "card_network": ""
+  },
+  {
+    "name": "Discover it Card",
+    "issuer": "Discover",
+    "annual_fee": 0,
+    "reward_categories": {
+      "Streaming Services": 6.0,
+      "Gas": 3.0
+    },
     "ratings": {},
     "credit_needed": "",
     "intro_apr": "",
