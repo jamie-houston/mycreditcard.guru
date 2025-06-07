@@ -38,7 +38,35 @@ class CreditCardSchema(Schema):
 def index():
     """List all credit cards."""
     cards = safe_query(CreditCard).all()
-    return render_template('credit_cards/index.html', cards=cards)
+    
+    # Get bonus categories for each card (categories with rewards > 1%)
+    cards_bonus_categories = {}
+    from app.models.category import Category, CreditCardReward
+    
+    for card in cards:
+        # Get all rewards for this card that are > 1%
+        bonus_rewards = db.session.query(CreditCardReward, Category).join(
+            Category, CreditCardReward.category_id == Category.id
+        ).filter(
+            CreditCardReward.credit_card_id == card.id,
+            CreditCardReward.reward_percent > 1.0,
+            Category.is_active == True
+        ).order_by(CreditCardReward.reward_percent.desc()).all()
+        
+        # Format the bonus categories with their percentages
+        formatted_categories = []
+        for reward, category in bonus_rewards:
+            formatted_categories.append({
+                'name': category.display_name,
+                'percent': reward.reward_percent,
+                'icon': category.icon
+            })
+        
+        cards_bonus_categories[card.id] = formatted_categories
+    
+    return render_template('credit_cards/index.html', 
+                          cards=cards, 
+                          cards_bonus_categories=cards_bonus_categories)
 
 @credit_cards.route('/import', methods=['GET', 'POST'])
 @login_required
