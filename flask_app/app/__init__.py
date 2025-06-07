@@ -1,4 +1,5 @@
 import os
+import logging
 from flask import Flask, session, g
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
@@ -10,6 +11,15 @@ import json
 from datetime import datetime
 import uuid
 from markupsafe import Markup
+
+# Load environment variables from .env file
+from dotenv import load_dotenv
+load_dotenv()
+
+# Configure logging to suppress OAuth warnings that users shouldn't see
+logging.getLogger('flask_dance').setLevel(logging.ERROR)
+logging.getLogger('oauthlib').setLevel(logging.ERROR)
+logging.getLogger('requests_oauthlib').setLevel(logging.ERROR)
 
 # Initialize extensions
 db = SQLAlchemy()
