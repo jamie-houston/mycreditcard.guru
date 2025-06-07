@@ -10,6 +10,6 @@ csrf = CSRFProtect()
 login_manager = LoginManager()
 
 # Configure login manager
-login_manager.login_view = 'auth.google_login'
+login_manager.login_view = 'auth.google.login'
 login_manager.login_message = 'Please log in with Google to access this page.'
 login_manager.login_message_category = 'info' 

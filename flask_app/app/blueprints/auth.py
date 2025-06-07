@@ -35,48 +35,42 @@ def profile():
     """Display user profile"""
     return render_template('auth/profile.html')
 
-@auth.route('/login/google')
-def google_login():
-    if not google.authorized:
-        return redirect(url_for('google.login'))
-    resp = google.get("/oauth2/v2/userinfo")
-    if not resp.ok:
-        flash("Failed to fetch user info from Google.", "danger")
-        return redirect(url_for('main.index'))
-    info = resp.json()
-    email = info["email"]
-    user = User.query.filter_by(email=email).first()
-    if not user:
-        # Create a new user with a random username
-        username = email.split('@')[0] + str(User.query.count() + 1)
-        user = User(username=username, email=email, password=os.urandom(16).hex())
-        db.session.add(user)
-        db.session.commit()
-        flash("Account created via Google login!", "success")
-    login_user(user)
-    user.update_last_login()
-    flash("Logged in with Google!", "success")
-    return redirect(url_for('main.dashboard'))
-
 @auth.route('/login/google/authorized')
 def google_authorized():
+    """Handle Google OAuth callback and create/login user"""
     if not google.authorized:
         flash("Google login failed or was cancelled.", "danger")
         return redirect(url_for('main.index'))
+    
     resp = google.get("/oauth2/v2/userinfo")
     if not resp.ok:
         flash("Failed to fetch user info from Google.", "danger")
         return redirect(url_for('main.index'))
+    
     info = resp.json()
     email = info["email"]
     user = User.query.filter_by(email=email).first()
+    
+    # Check if this is the admin user
+    is_admin_email = email.lower() == 'foresterh@gmail.com'
+    
     if not user:
+        # Create a new user with a random username
         username = email.split('@')[0] + str(User.query.count() + 1)
-        user = User(username=username, email=email, password=os.urandom(16).hex())
+        user = User(username=username, email=email, password=os.urandom(16).hex(), is_admin=is_admin_email)
         db.session.add(user)
         db.session.commit()
         flash("Account created via Google login!", "success")
+        if is_admin_email:
+            flash("Welcome, admin!", "info")
+    else:
+        # Update existing user to admin if needed
+        if is_admin_email and not user.is_admin:
+            user.role = 1  # Set admin role
+            db.session.commit()
+            flash("Admin privileges granted!", "info")
+    
     login_user(user)
     user.update_last_login()
     flash("Logged in with Google!", "success")
-    return redirect(url_for('main.dashboard')) 
+    return redirect(url_for('main.index')) 

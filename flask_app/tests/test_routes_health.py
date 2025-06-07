@@ -63,8 +63,6 @@ class RoutesHealthTestCase(unittest.TestCase):
         """Test main application routes."""
         routes = [
             '/',                      # Home page
-            '/login',                 # Login page
-            '/register',              # Registration page
             '/profile',               # User profile page
             '/recommendations/'       # Recommendations list
         ]
@@ -110,8 +108,7 @@ class RoutesHealthTestCase(unittest.TestCase):
         with self.app.test_request_context():
             # Main routes
             url_for('main.index')
-            url_for('auth.login')
-            url_for('auth.register')
+            url_for('auth.google.login')  # Flask-Dance OAuth login
             url_for('auth.logout')
             url_for('auth.profile')
             url_for('user_data.profile')

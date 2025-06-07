@@ -15,7 +15,7 @@ from markupsafe import Markup
 db = SQLAlchemy()
 migrate = Migrate()
 login_manager = LoginManager()
-login_manager.login_view = 'auth.google_login'
+login_manager.login_view = 'auth.google.login'
 login_manager.login_message_category = 'info'
 login_manager.login_message = 'Please log in to access admin features.'
 csrf = CSRFProtect()
