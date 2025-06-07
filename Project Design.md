@@ -33,6 +33,12 @@ When importing cards, if it doesn't match an existing "category", don't add the 
 
 ## Add credit card
 http://localhost:5001/credit_cards/new
-- [ ] Add/edit credit card button broken - missing csrf token.  Check for any other buttons missing it.
-- [ ] Categories should be dropdown to choose from, not text form - need to update edit page
-- [ ] Can edit and new card page use the same template so changes to one will update the other?
+- [X] Add/edit credit card button broken - missing csrf token.  Check for any other buttons missing it.
+- [X] Categories should be dropdown to choose from, not text form - need to update edit page
+- [X] Can edit and new card page use the same template so changes to one will update the other?
+- [ ] Show categories on card details page
+- [ ] Edit card doesn't show selected category for each reward category
+
+Admin
+- [ ] Create CRUD pages for categories (view list, view detail, edit, delete).  Admin can edit, users can view category detail with list of cards and reward rate for that category.
+- [ ] 

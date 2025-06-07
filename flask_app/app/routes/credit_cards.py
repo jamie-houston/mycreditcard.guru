@@ -134,7 +134,10 @@ def new():
                         # Get active categories from database for error case
                         from app.models.category import Category
                         categories = Category.get_active_categories()
-                        return render_template('credit_cards/new.html', categories=categories)
+                        return render_template('credit_cards/new.html', 
+                                              categories=categories,
+                                              form_action=url_for('credit_cards.new'),
+                                              categories_data=True)
             
             data['reward_categories'] = json.dumps(reward_categories)
             
@@ -164,7 +167,10 @@ def new():
                         # Get active categories from database for error case
                         from app.models.category import Category
                         categories = Category.get_active_categories()
-                        return render_template('credit_cards/new.html', categories=categories)
+                        return render_template('credit_cards/new.html', 
+                                              categories=categories,
+                                              form_action=url_for('credit_cards.new'),
+                                              categories_data=True)
             
             data['special_offers'] = json.dumps(special_offers)
             
@@ -188,7 +194,10 @@ def new():
     from app.models.category import Category
     categories = Category.get_active_categories()
     
-    return render_template('credit_cards/new.html', categories=categories)
+    return render_template('credit_cards/new.html', 
+                          categories=categories,
+                          form_action=url_for('credit_cards.new'),
+                          categories_data=True)
 
 @credit_cards.route('/<int:id>')
 def show(id):
@@ -260,10 +269,22 @@ def edit(id):
                 category_percentage = request.form.get(f'category_percentage_{idx}')
                 
                 if category_name and category_percentage:
-                    reward_categories.append({
-                        'category': category_name,
-                        'percentage': float(category_percentage)
-                    })
+                    try:
+                        reward_categories.append({
+                            'category': category_name,
+                            'percentage': float(category_percentage)
+                        })
+                    except ValueError:
+                        flash(f'Invalid percentage for {category_name}', 'danger')
+                        # Get active categories from database for error case
+                        from app.models.category import Category
+                        categories = Category.get_active_categories()
+                        return render_template('credit_cards/edit.html', 
+                                              card=card,
+                                              categories=categories,
+                                              reward_categories=reward_categories,
+                                              special_offers=special_offers,
+                                              form_action=url_for('credit_cards.edit', id=id))
             
             data['reward_categories'] = json.dumps(reward_categories)
             
@@ -282,35 +303,50 @@ def edit(id):
                 offer_frequency = request.form.get(f'offer_frequency_{idx}')
                 
                 if offer_type and offer_amount:
-                    special_offers.append({
-                        'type': offer_type,
-                        'amount': float(offer_amount),
-                        'frequency': offer_frequency or 'one_time'
-                    })
+                    try:
+                        special_offers.append({
+                            'type': offer_type,
+                            'amount': float(offer_amount),
+                            'frequency': offer_frequency or 'one_time'
+                        })
+                    except ValueError:
+                        flash(f'Invalid amount for {offer_type}', 'danger')
+                        return render_template('credit_cards/edit.html', 
+                                              card=card,
+                                              reward_categories=reward_categories,
+                                              special_offers=special_offers,
+                                              form_action=url_for('credit_cards.edit', id=id))
             
             data['special_offers'] = json.dumps(special_offers)
             
-            # Validate and update
-            schema = CreditCardSchema()
-            validated_data = schema.load(data)
+            # Update card with new data
+            for key, value in data.items():
+                setattr(card, key, value)
             
-            # Use the safe_commit context manager
             with safe_commit():
-                # Update card with new data
-                for key, value in validated_data.items():
-                    setattr(card, key, value)
+                db.session.add(card)
             
             flash('Credit card updated successfully!', 'success')
-            return redirect(url_for('credit_cards.show', id=id))
+            return redirect(url_for('credit_cards.show', id=card.id))
         except ValidationError as e:
             flash('Validation error: ' + str(e.messages), 'danger')
         except Exception as e:
             flash(f'Error: {str(e)}', 'danger')
     
+    # For GET requests or after validation errors
+    # Try to get categories for dropdowns
+    try:
+        from app.models.category import Category
+        categories = Category.get_active_categories()
+    except:
+        categories = None
+
     return render_template('credit_cards/edit.html', 
                           card=card,
+                          categories=categories,
                           reward_categories=reward_categories,
-                          special_offers=special_offers)
+                          special_offers=special_offers,
+                          form_action=url_for('credit_cards.edit', id=id))
 
 @credit_cards.route('/<int:id>/delete', methods=['POST'])
 @login_required
@@ -319,9 +355,11 @@ def delete(id):
     """Delete a credit card."""
     card = safe_query(CreditCard).get_or_404(id)
     
-    # Use the safe_commit context manager
-    with safe_commit():
-        db.session.delete(card)
+    try:
+        with safe_commit():
+            db.session.delete(card)
+        flash('Credit card deleted successfully!', 'success')
+    except Exception as e:
+        flash(f'Error deleting card: {str(e)}', 'danger')
     
-    flash('Credit card deleted successfully!', 'success')
     return redirect(url_for('credit_cards.index')) 
