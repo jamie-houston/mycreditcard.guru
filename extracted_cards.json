@@ -1,6 +1,6 @@
 [
   {
-    "name": "Capital One Venture",
+    "name": "Capital One Venture Rewards Credit Card",
     "issuer": "Capital One",
     "annual_fee": 0,
     "reward_categories": {},
@@ -13,7 +13,20 @@
     "card_network": ""
   },
   {
-    "name": "Chase Freedom",
+    "name": "Capital One Venture Card",
+    "issuer": "Capital One",
+    "annual_fee": 0,
+    "reward_categories": {},
+    "ratings": {},
+    "credit_needed": "",
+    "intro_apr": "",
+    "regular_apr": "",
+    "intro_offer": "",
+    "card_type": "",
+    "card_network": ""
+  },
+  {
+    "name": "Chase Sapphire Preferred Card",
     "issuer": "Chase",
     "annual_fee": 0,
     "reward_categories": {},
@@ -26,7 +39,7 @@
     "card_network": ""
   },
   {
-    "name": "Chase Sapphire",
+    "name": "Chase Freedom Unlimited Card",
     "issuer": "Chase",
     "annual_fee": 0,
     "reward_categories": {},
@@ -39,21 +52,8 @@
     "card_network": ""
   },
   {
-    "name": "Citi Double Cash",
-    "issuer": "Citi",
-    "annual_fee": 0,
-    "reward_categories": {},
-    "ratings": {},
-    "credit_needed": "",
-    "intro_apr": "",
-    "regular_apr": "",
-    "intro_offer": "",
-    "card_type": "",
-    "card_network": ""
-  },
-  {
-    "name": "Discover it",
-    "issuer": "Discover",
+    "name": "Chase Sapphire Reserve Card",
+    "issuer": "Chase",
     "annual_fee": 0,
     "reward_categories": {},
     "ratings": {},

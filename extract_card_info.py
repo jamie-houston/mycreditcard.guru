@@ -73,16 +73,24 @@ def extract_card_names_from_html(soup: BeautifulSoup) -> List[str]:
     
     # Card pattern that matches common credit card naming patterns
     card_patterns = [
-        # Pattern for cards like "Chase Sapphire Preferred® Card"
-        # r'([A-Z][a-z]+ [A-Z][a-z]+ (?:Preferred|Reserve|Premier|Cash|Rewards|Plus|Gold|Platinum|Sapphire|Explorer|One|World|Elite)(?:\s[A-Z][a-z]+)? Card)',
-        # Pattern for cards with Credit Card suffix
-        # r'([A-Z][a-z]+ (?:Rewards|Cash|Travel|Platinum|Gold|Premier|Venture|Quicksilver|Freedom|Blue) Credit Card)',
-        # Pattern for specific well-known cards
-        r'(Capital One (?:Venture|Quicksilver|SavorOne))',
-        r'(Chase (?:Sapphire|Freedom|Slate))',
-        r'(Citi (?:Double Cash|Premier|Rewards\+))',
-        r'(American Express (?:Gold|Platinum|Green) Card)',
-        r'(Discover (?:it|Miles|Student))'
+        # Pattern for Capital One cards
+        r'(Capital One (?:Venture|Quicksilver|SavorOne|Savor Cash|Secured)(?:\s+Rewards)?(?:\s+Credit Card)?)',
+        
+        # Pattern for Chase cards
+        r'(Chase (?:Sapphire|Freedom|Slate|Ink) (?:Preferred|Reserve|Unlimited|Flex|Cash|Business)(?:\s+Card)?)',
+        
+        # Pattern for Citi cards
+        r'(Citi (?:Double Cash|Premier|Rewards\+|Custom Cash|Diamond Preferred)(?:\s+Card)?)',
+        
+        # Pattern for American Express cards
+        r'(American Express (?:Gold|Platinum|Green|Blue Cash|Cash Magnet|Everyday)(?:\s+Card)?)',
+        r'(Amex (?:Gold|Platinum|Green|Blue Cash|Cash Magnet|Everyday)(?:\s+Card)?)',
+        
+        # Pattern for Discover cards
+        r'(Discover (?:it|Miles|Student|Secured|Business)(?:\s+Card)?)',
+        
+        # Generic pattern for cards with clear "Card" suffix
+        r'([A-Z][a-z]+ [A-Z][a-z]+ (?:Preferred|Reserve|Premier|Cash|Rewards|Plus|Gold|Platinum|Sapphire|Explorer|Elite) Card)'
     ]
     
     # Find all card matches
@@ -96,6 +104,11 @@ def extract_card_names_from_html(soup: BeautifulSoup) -> List[str]:
     seen = set()
     for name in card_names:
         name = name.strip()
+        
+        # Ensure card names end with "Card" if they don't already
+        if not (name.lower().endswith('card') or 'from american express' in name.lower()):
+            name = name + " Card"
+            
         if name.lower() not in seen and is_valid_credit_card(name):
             unique_cards.append(name)
             seen.add(name.lower())
@@ -476,6 +489,10 @@ def extract_card_from_container(container: BeautifulSoup) -> Optional[Dict[str, 
 
 def is_valid_credit_card(name: str) -> bool:
     """Check if a name is likely to be a credit card"""
+    # Reject if too long (likely a sentence, not a card name)
+    if len(name) > 50:
+        return False
+        
     # Common credit card keywords
     card_keywords = [
         'credit card', 'card', 'visa', 'mastercard', 'amex', 'discover',
@@ -491,7 +508,9 @@ def is_valid_credit_card(name: str) -> bool:
         'perks', 'introductory', 'ongoing', 'what\'s the best',
         'what\'s the easiest', 'contact us', 'legal', 'about', 'privacy',
         'terms', 'our partners', 'for cash back', 'for travel', 'for balance',
-        'for college', 'for business', 'for credit-building', 'interest-saving'
+        'for college', 'for business', 'for credit-building', 'interest-saving',
+        'will automatically', 'matches all', 'earn in your first', 'says there',
+        'doesn\'t', 'isn\'t', 'if you\'re', 'looking for', 'when you apply'
     ]
     
     name_lower = name.lower()
@@ -504,15 +523,13 @@ def is_valid_credit_card(name: str) -> bool:
     if any(keyword in name_lower for keyword in exclude_keywords):
         return False
     
-    # Check for card type words
-    return (
-        # Check for common card indicators
-        any(keyword in name_lower for keyword in card_keywords) or
-        # Check for issuer names
-        any(issuer.lower() in name_lower for issuer in common_issuers) or
-        # Check for card naming patterns (e.g., "Chase Sapphire Preferred®")
-        bool(re.search(r'[A-Z][a-z]+ (?:[A-Z][a-z]+ )+(?:Card|Preferred|Reserve)', name))
-    )
+    # Must begin with a known issuer
+    known_issuers = ['capital one', 'chase', 'citi', 'discover', 'american express', 'amex', 'bank of america', 'wells fargo', 'u.s. bank']
+    if not any(name_lower.startswith(issuer) for issuer in known_issuers):
+        return False
+    
+    # Must contain a card-like term
+    return any(keyword in name_lower for keyword in card_keywords)
 
 def extract_issuer_from_name(card_name: str) -> str:
     """Extract the card issuer from the card name"""
@@ -532,20 +549,66 @@ def clean_card_data(cards: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     """Clean up a list of card data"""
     return [clean_card_json(card) for card in cards]
 
+def normalize_card_name(name: str) -> str:
+    """Normalize card name to its canonical form for better deduplication"""
+    name = name.strip()
+    
+    # Standardize specific card names
+    lower_name = name.lower()
+    if ('capital one' in lower_name and 'venture' in lower_name and 'rewards' in lower_name):
+        # Standardize to the canonical name
+        return "Capital One Venture Rewards Card"
+    elif ('chase' in lower_name and 'sapphire' in lower_name and 'preferred' in lower_name):
+        return "Chase Sapphire Preferred Card"
+    elif ('chase' in lower_name and 'sapphire' in lower_name and 'reserve' in lower_name):
+        return "Chase Sapphire Reserve Card"
+    elif ('citi' in lower_name and 'double cash' in lower_name):
+        return "Citi Double Cash Card"
+    elif ('discover' in lower_name and 'it' in lower_name):
+        return "Discover it Card"
+    
+    # Standardize card suffixes
+    if not lower_name.endswith('card'):
+        if lower_name.endswith('credit card'):
+            # Standardize to just "Card" suffix
+            name = name[:-11] + "Card"
+        else:
+            # Add "Card" suffix if missing
+            name = name + " Card"
+    
+    # Standardize issuer names
+    if lower_name.startswith('amex '):
+        name = 'American Express ' + name[5:]
+    
+    # Standardize spaces and punctuation
+    name = re.sub(r'\s+', ' ', name)  # Normalize whitespace
+    name = name.replace('®', '').replace('℠', '').replace('™', '')  # Remove symbols
+    
+    return name
+
 def filter_valid_cards(cards: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     """Filter out invalid card entries"""
     filtered_cards = []
     seen_names = set()
     
+    # First normalize all card names
     for card in cards:
-        card_name = card['name'].lower()
-        if is_valid_credit_card(card['name']) and card_name not in seen_names:
+        card['name'] = normalize_card_name(card['name'])
+        # Re-extract issuer in case the name was normalized
+        card['issuer'] = extract_issuer_from_name(card['name'])
+    
+    # Then deduplicate based on normalized names
+    for card in cards:
+        name_key = card['name'].lower()
+        name_key_simple = re.sub(r'[^a-z0-9]', '', name_key)  # Remove all non-alphanumeric chars for comparison
+        
+        if is_valid_credit_card(card['name']) and name_key_simple not in seen_names:
             # Ensure all required fields exist
             if 'card_type' not in card:
                 card['card_type'] = ''
             
             filtered_cards.append(card)
-            seen_names.add(card_name)
+            seen_names.add(name_key_simple)
     
     return filtered_cards
 
