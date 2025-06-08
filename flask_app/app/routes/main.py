@@ -5,4 +5,4 @@ main = Blueprint('main', __name__)
 @main.route('/')
 def index():
     """Landing page of the application."""
-    return render_template('index.html', title='Credit Card Roadmap') 
+    return render_template('index.html', title='My Credit Card Guru') 
