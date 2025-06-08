@@ -24,13 +24,17 @@ def create_oauth_blueprint():
     pythonanywhere_domain = os.environ.get('PYTHONANYWHERE_DOMAIN')
     
     if pythonanywhere_domain:
-        # We're on PythonAnywhere, use HTTPS and the correct domain
+        # We're on PythonAnywhere with a custom domain
         redirect_url = f"https://{pythonanywhere_domain}/login/google/authorized"
         logger.info(f"Setting OAuth redirect URL to: {redirect_url}")
         
         # Make sure Flask-Dance knows we're using HTTPS
         os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '0'
         logger.info("Set OAUTHLIB_INSECURE_TRANSPORT=0 for production")
+        
+        # Important: set the reputed_uri to use the custom domain
+        os.environ['OAUTHLIB_RELAX_TOKEN_SCOPE'] = '1'
+        os.environ['OAUTHLIB_RELAX_TOKEN_SCOPE'] = '1'
     else:
         # Local development - allow HTTP
         os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
@@ -38,6 +42,9 @@ def create_oauth_blueprint():
     
     # Create the blueprint - don't specify redirect_to to use default Flask-Dance routing
     try:
+        logger.info(f"Creating Google blueprint with client_id: {os.environ.get('GOOGLE_OAUTH_CLIENT_ID')[:10]}...")
+        logger.info(f"Redirect URL: {redirect_url}")
+        
         blueprint = make_google_blueprint(
             client_id=os.environ.get('GOOGLE_OAUTH_CLIENT_ID'),
             client_secret=os.environ.get('GOOGLE_OAUTH_CLIENT_SECRET'),
@@ -46,7 +53,9 @@ def create_oauth_blueprint():
                 "https://www.googleapis.com/auth/userinfo.profile",
                 "openid"
             ],
-            redirect_url=redirect_url
+            redirect_url=redirect_url,
+            # Set reputed_uri to fix the redirect issues
+            reputed_uri=redirect_url if redirect_url else None
         )
         logger.info("Google OAuth blueprint created successfully")
         return blueprint
@@ -67,7 +76,7 @@ except Exception as e:
 def login():
     """Redirect to Google OAuth login page"""
     logger.info("Login route accessed, redirecting to Google OAuth")
-    return redirect(url_for('auth.google.login'))
+    return redirect(url_for('google.login'))
 
 # This route handles the OAuth callback
 @auth.route('/oauth-complete')

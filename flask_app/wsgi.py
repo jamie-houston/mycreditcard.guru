@@ -30,8 +30,14 @@ if '/home/' in path:
     os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '0'
     logger.info("Set OAUTHLIB_INSECURE_TRANSPORT=0 for production")
     
-    # Extract username from path for domain configuration
-    logger.info(f"PythonAnywhere domain is: {os.environ.get('PYTHONANYWHERE_DOMAIN')}")
+    # Check for custom domain environment variable
+    custom_domain = os.environ.get('PYTHONANYWHERE_DOMAIN')
+    if not custom_domain:
+        # If no custom domain is set, default to mycreditcard.guru
+        os.environ['PYTHONANYWHERE_DOMAIN'] = 'mycreditcard.guru'
+        custom_domain = 'mycreditcard.guru'
+    
+    logger.info(f"Using domain for OAuth: {custom_domain}")
 else:
     # Local development
     os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
