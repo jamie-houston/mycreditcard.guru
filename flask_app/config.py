@@ -45,6 +45,8 @@ class TestingConfig(Config):
 class ProductionConfig(Config):
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
         'sqlite:///creditcard_roadmap.db'
+    PREFERRED_URL_SCHEME = "https"
+    SERVER_NAME = "www.mycreditcard.guru"
 
 config = {
     'development': DevelopmentConfig,

@@ -19,35 +19,27 @@ def create_oauth_blueprint():
     os.environ['OAUTHLIB_RELAX_TOKEN_SCOPE'] = '1'
     logger.info("Set OAUTHLIB_RELAX_TOKEN_SCOPE=1")
     
-    # Set up redirect URL for PythonAnywhere
-    redirect_url = None
+    # Set up redirect URL for production or local
     pythonanywhere_domain = os.environ.get('PYTHONANYWHERE_DOMAIN')
-    
     if pythonanywhere_domain:
-        # We're on PythonAnywhere with a custom domain
         redirect_url = f"https://{pythonanywhere_domain}/login/google/authorized"
-        logger.info(f"Setting OAuth redirect URL to: {redirect_url}")
-        
-        # Make sure Flask-Dance knows we're using HTTPS
-        os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '0'
-        logger.info("Set OAUTHLIB_INSECURE_TRANSPORT=0 for production")
     else:
-        # Local development - allow HTTP
-        os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
-        logger.info("Set OAUTHLIB_INSECURE_TRANSPORT=1 for development")
-        logger.info("Enabled OAuth debug logging for development")
+        redirect_url = "http://localhost:5000/login/google/authorized"
+    logger.info(f"OAuth redirect_url set to: {redirect_url}")
     
-    # Create the blueprint - configure with redirect_to to use our authorized route
+    # Set OAUTHLIB_INSECURE_TRANSPORT for local/dev
+    if pythonanywhere_domain:
+        os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '0'
+    else:
+        os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
+    
     try:
         client_id = os.environ.get('GOOGLE_OAUTH_CLIENT_ID')
         client_secret = os.environ.get('GOOGLE_OAUTH_CLIENT_SECRET')
-        
         if not client_id or not client_secret:
             logger.error("Missing Google OAuth credentials")
             raise ValueError("Missing Google OAuth credentials. Set GOOGLE_OAUTH_CLIENT_ID and GOOGLE_OAUTH_CLIENT_SECRET")
-            
         logger.info(f"Creating Google blueprint with client_id: {client_id[:10]}...")
-        
         blueprint = make_google_blueprint(
             client_id=client_id,
             client_secret=client_secret,
@@ -57,7 +49,7 @@ def create_oauth_blueprint():
                 "openid"
             ],
             redirect_url=redirect_url,
-            redirect_to='auth.authorized'  # Redirect to our authorized route
+            redirect_to='auth.authorized'
         )
         logger.info("Google OAuth blueprint created successfully")
         return blueprint
