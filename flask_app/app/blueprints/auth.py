@@ -20,7 +20,7 @@ def create_oauth_blueprint():
     logger.info("Set OAUTHLIB_RELAX_TOKEN_SCOPE=1")
     
     # Set up redirect URL for production or local
-    pythonanywhere_domain = os.environ.get('PYTHONANYWHERE_DOMAIN')
+    pythonanywhere_domain = os.environ.get('SERVER_NAME')
     if pythonanywhere_domain:
         redirect_url = f"https://{pythonanywhere_domain}/login/google/authorized"
     else:
