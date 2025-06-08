@@ -55,7 +55,7 @@ def create_oauth_blueprint():
             ],
             redirect_url=redirect_url,
             # Set reputed_uri to fix the redirect issues
-            reputed_uri=redirect_url if redirect_url else None
+            # reputed_uri=redirect_url if redirect_url else None
         )
         logger.info("Google OAuth blueprint created successfully")
         return blueprint
