@@ -92,8 +92,8 @@
             {% else %}
             <li class="nav-item">
               <a
-                class="nav-link {% if request.endpoint == 'google.login' %}active{% endif %}"
-                href="{{ url_for('google.login') }}"
+                class="nav-link {% if request.endpoint == 'auth.google.login' %}active{% endif %}"
+                href="{{ url_for('auth.google.login') }}"
               >
                 <i class="fab fa-google me-1"></i> Login with Google (no
                 passwords, no problem!)
