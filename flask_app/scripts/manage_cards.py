@@ -46,6 +46,7 @@ def parse_arguments():
                           help='Spend requirement for signup bonus')
     add_parser.add_argument('--signup-bonus-time', type=int, default=3, 
                           help='Time period for signup bonus (months)')
+    add_parser.add_argument('--signup-bonus-type', type=str, choices=['points', 'dollars', 'other'], default='points', help='Type of signup bonus (points, dollars, or other)')
     add_parser.add_argument('--rewards', action='append', nargs=2, metavar=('CATEGORY', 'PERCENTAGE'),
                           help='Reward category and percentage (can be used multiple times)')
     add_parser.add_argument('--offers', action='append', nargs=3, 
@@ -64,6 +65,7 @@ def parse_arguments():
                            help='Spend requirement for signup bonus')
     edit_parser.add_argument('--signup-bonus-time', type=int, 
                            help='Time period for signup bonus (months)')
+    edit_parser.add_argument('--signup-bonus-type', type=str, choices=['points', 'dollars', 'other'], help='Type of signup bonus (points, dollars, or other)')
     edit_parser.add_argument('--replace-rewards', action='store_true', 
                            help='Replace all reward categories (use with --rewards)')
     edit_parser.add_argument('--rewards', action='append', nargs=2, metavar=('CATEGORY', 'PERCENTAGE'),
@@ -213,6 +215,7 @@ def add_card(app, args) -> None:
             signup_bonus_value=args.signup_bonus_value,
             signup_bonus_min_spend=args.signup_bonus_spend,
             signup_bonus_time_limit=args.signup_bonus_time,
+            signup_bonus_type=args.signup_bonus_type,
             reward_categories=json.dumps(reward_categories),
             offers=json.dumps(offers)
         )
@@ -246,6 +249,8 @@ def edit_card(app, args) -> None:
             card.signup_bonus_min_spend = args.signup_bonus_spend
         if args.signup_bonus_time is not None:
             card.signup_bonus_time_limit = args.signup_bonus_time
+        if args.signup_bonus_type is not None:
+            card.signup_bonus_type = args.signup_bonus_type
         
         # Update reward categories if provided
         if args.rewards:

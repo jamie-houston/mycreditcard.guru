@@ -115,11 +115,12 @@
           ${{ "%.2f"|format(card.annual_fee) }}
         </td>
         <td data-sort-value="{{ card.signup_bonus_points }}">
-          {{ card.signup_bonus_points }} points {% if card.signup_bonus_value >
-          0 %}
-          <br /><small class="text-muted"
-            >Est. ${{ "%.2f"|format(card.signup_bonus_value) }}</small
-          >
+          {% if card.signup_bonus_type == 'points' %}
+            {{ card.signup_bonus_points }} points {% if card.signup_bonus_value > 0 %}<br /><small class="text-muted">Est. ${{ "%.2f"|format(card.signup_bonus_value) }}</small>{% endif %}
+          {% elif card.signup_bonus_type == 'dollars' %}
+            ${{ "%.2f"|format(card.signup_bonus_value) }}
+          {% elif card.signup_bonus_type == 'other' %}
+            <span title="Ask the bank. Or a wizard.">Other</span>
           {% endif %}
         </td>
         <td data-sort-value="{{ card.signup_bonus_min_spend }}">

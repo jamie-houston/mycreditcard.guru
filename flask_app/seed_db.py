@@ -18,6 +18,8 @@ def seed_credit_cards():
                 "signup_bonus_value": 200,
                 "signup_bonus_min_spend": 1000,
                 "signup_bonus_time_limit": 90,
+                "signup_bonus_points": 0,
+                "signup_bonus_type": "dollars",
                 "reward_categories": json.dumps([
                     {"category": "groceries", "rate": 2.0},
                     {"category": "gas", "rate": 3.0},
@@ -36,6 +38,8 @@ def seed_credit_cards():
                 "signup_bonus_value": 600,
                 "signup_bonus_min_spend": 3000,
                 "signup_bonus_time_limit": 90,
+                "signup_bonus_points": 0,
+                "signup_bonus_type": "dollars",
                 "reward_categories": json.dumps([
                     {"category": "travel", "rate": 3.0},
                     {"category": "dining", "rate": 3.0},
@@ -55,6 +59,8 @@ def seed_credit_cards():
                 "signup_bonus_value": 150,
                 "signup_bonus_min_spend": 500,
                 "signup_bonus_time_limit": 90,
+                "signup_bonus_points": 0,
+                "signup_bonus_type": "dollars",
                 "reward_categories": json.dumps([
                     {"category": "base", "rate": 1.5}
                 ]),
@@ -68,6 +74,8 @@ def seed_credit_cards():
                 "signup_bonus_value": 200,
                 "signup_bonus_min_spend": 1000,
                 "signup_bonus_time_limit": 90,
+                "signup_bonus_points": 0,
+                "signup_bonus_type": "dollars",
                 "reward_categories": json.dumps([
                     {"category": "groceries", "rate": 5.0},
                     {"category": "base", "rate": 1.0}
@@ -84,6 +92,8 @@ def seed_credit_cards():
                 "signup_bonus_value": 1000,
                 "signup_bonus_min_spend": 5000,
                 "signup_bonus_time_limit": 90,
+                "signup_bonus_points": 0,
+                "signup_bonus_type": "dollars",
                 "reward_categories": json.dumps([
                     {"category": "travel", "rate": 5.0},
                     {"category": "dining", "rate": 3.0},

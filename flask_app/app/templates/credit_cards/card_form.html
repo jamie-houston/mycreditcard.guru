@@ -78,6 +78,16 @@
     <div class="card-body">
       <div class="row mb-3">
         <div class="col-md-6">
+          <label for="signup_bonus_type" class="form-label">Bonus Type</label>
+          <select class="form-select" id="signup_bonus_type" name="signup_bonus_type">
+            <option value="points" {% if card and card.signup_bonus_type == 'points' %}selected{% endif %}>Points/Miles</option>
+            <option value="dollars" {% if card and card.signup_bonus_type == 'dollars' %}selected{% endif %}>Dollars</option>
+            <option value="other" {% if card and card.signup_bonus_type == 'other' %}selected{% endif %}>Other</option>
+          </select>
+        </div>
+      </div>
+      <div class="row mb-3">
+        <div class="col-md-6">
           <label for="signup_bonus_points" class="form-label">Bonus Points</label>
           <input
             type="number"

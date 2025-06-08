@@ -154,6 +154,7 @@ def create_test_data():
                 signup_bonus_value=200.0,
                 signup_bonus_min_spend=1000.0,
                 signup_bonus_time_limit=90,
+                signup_bonus_type='points',
                 reward_categories=json.dumps([
                     {"category": "groceries", "rate": 3.0},
                     {"category": "gas", "rate": 3.0},

@@ -19,6 +19,7 @@ class CreditCard(db.Model):
     signup_bonus_value = db.Column(db.Float, default=0.0)
     signup_bonus_min_spend = db.Column(db.Float, default=0.0)
     signup_bonus_time_limit = db.Column(db.Integer, default=90)  # Days
+    signup_bonus_type = db.Column(db.String(20), default='points')  # 'points', 'dollars', or 'other'
     
     # Categories and Offers (stored as JSON strings) - DEPRECATED in favor of CreditCardReward model
     reward_categories = db.Column(db.Text, nullable=False)  # JSON string of category multipliers
@@ -184,6 +185,7 @@ class CreditCard(db.Model):
             'signup_bonus_value': self.signup_bonus_value,
             'signup_bonus_min_spend': self.signup_bonus_min_spend,
             'signup_bonus_time_limit': self.signup_bonus_time_limit,
+            'signup_bonus_type': self.signup_bonus_type,
             'rewards': self.get_all_rewards(),  # New structured rewards system
             'source': self.source,
             'source_url': self.source_url,

@@ -32,6 +32,7 @@
         <!-- Signup Bonus Section -->
         <h6 class="mt-4 mb-3">Signup Bonus</h6>
         <div class="row">
+          {% if card.signup_bonus_type == 'points' %}
           <div class="col-md-6 mb-3">
             <strong>Points/Miles:</strong> {{ card.signup_bonus_points }}
           </div>
@@ -39,6 +40,16 @@
             <strong>Estimated Value:</strong> ${{
             "%.2f"|format(card.signup_bonus_value) }}
           </div>
+          {% elif card.signup_bonus_type == 'dollars' %}
+          <div class="col-md-6 mb-3">
+            <strong>Cash Bonus:</strong> ${{
+            "%.2f"|format(card.signup_bonus_value) }}
+          </div>
+          {% elif card.signup_bonus_type == 'other' %}
+          <div class="col-md-6 mb-3">
+            <strong>Bonus:</strong> Something mysterious (perhaps a free llama?)
+          </div>
+          {% endif %}
           <div class="col-md-6 mb-3">
             <strong>Spend Requirement:</strong> ${{
             "%.2f"|format(card.signup_bonus_min_spend) }}
