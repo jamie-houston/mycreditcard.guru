@@ -121,7 +121,8 @@ class User(UserMixin, db.Model):
         """Return the user ID as a unicode string."""
         return str(self.id)
 
-@login_manager.user_loader
-def load_user(user_id):
-    """Load a user given the user id."""
-    return User.get_by_id(user_id) 
+# Removing duplicate user_loader that conflicts with the one in __init__.py
+# @login_manager.user_loader
+# def load_user(user_id):
+#     """Load a user given the user id."""
+#     return User.get_by_id(user_id) 

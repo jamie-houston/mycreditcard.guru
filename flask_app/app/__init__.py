@@ -70,6 +70,24 @@ def create_app(config_name=None):
     # Load config overrides if specified
     if config_name:
         app.config.from_object(Config)
+        
+    # Set up logging
+    logger = logging.getLogger('creditcard_roadmap')
+    
+    # Log configuration for debugging
+    logger.info(f"App initialized with config: {config_name}")
+    logger.info(f"Session settings: PERMANENT_SESSION_LIFETIME={app.config.get('PERMANENT_SESSION_LIFETIME')}")
+    logger.info(f"Remember cookie: REMEMBER_COOKIE_DURATION={app.config.get('REMEMBER_COOKIE_DURATION')}")
+    
+    # Make sure session is permanent by default
+    @app.before_request
+    def make_session_permanent():
+        session.permanent = True
+        # Log session info for debugging
+        if current_user.is_authenticated:
+            logger.info(f"Request from authenticated user: {current_user.username}")
+        elif 'user_id' in session:
+            logger.info(f"Session has user_id but user not authenticated: {session.get('user_id')}")
     
     # Initialize Flask extensions with app
     db.init_app(app)
@@ -80,7 +98,18 @@ def create_app(config_name=None):
     @login_manager.user_loader
     def load_user(user_id):
         from app.models.user import User
-        return User.query.get(int(user_id))
+        try:
+            # Convert to int since get_id() returns a string
+            user_id_int = int(user_id)
+            user = User.query.get(user_id_int)
+            if user:
+                logger.info(f"User loader found user: {user.username} (ID: {user_id})")
+            else:
+                logger.warning(f"User loader could not find user with ID: {user_id}")
+            return user
+        except Exception as e:
+            logger.error(f"Error in user_loader: {str(e)}", exc_info=True)
+            return None
     
     # Register custom Jinja filters
     @app.template_filter('json_parse')

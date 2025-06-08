@@ -12,6 +12,14 @@ class Config:
     
     # Flask-Login config
     REMEMBER_COOKIE_DURATION = timedelta(days=14)
+    REMEMBER_COOKIE_SECURE = False  # Set to True in production with HTTPS
+    REMEMBER_COOKIE_HTTPONLY = True
+    REMEMBER_COOKIE_REFRESH_EACH_REQUEST = True
+    
+    # Session config
+    SESSION_TYPE = 'filesystem'
+    PERMANENT_SESSION_LIFETIME = timedelta(days=14)
+    SESSION_USE_SIGNER = True
     
     # Pagination
     CARDS_PER_PAGE = 12

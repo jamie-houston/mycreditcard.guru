@@ -126,6 +126,36 @@
       </div>
     </nav>
 
+    <!-- Debug info - visible everywhere during development -->
+    <div class="container-fluid bg-light py-1 small">
+      <div class="row">
+        <div class="col">
+          <strong>Auth Debug:</strong>
+          is_authenticated: {{ current_user.is_authenticated }}, user_id: {{
+          current_user.get_id() if current_user.is_authenticated else 'None' }},
+          username: {{ current_user.username if current_user.is_authenticated
+          else 'None' }}
+          <div class="btn-group btn-group-sm">
+            <a
+              href="{{ url_for('main.debug') }}"
+              class="btn btn-outline-secondary btn-sm"
+              >Debug API</a
+            >
+            <a
+              href="{{ url_for('auth.session_debug') }}"
+              class="btn btn-outline-secondary btn-sm"
+              >Session Data</a
+            >
+            <a
+              href="{{ url_for('auth.test_login') }}"
+              class="btn btn-outline-secondary btn-sm"
+              >Test Login</a
+            >
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div class="flash-messages">
       {% with messages = get_flashed_messages(with_categories=true) %} {% if
       messages %} {% for category, message in messages %}
