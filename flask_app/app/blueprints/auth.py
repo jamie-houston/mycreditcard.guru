@@ -19,16 +19,9 @@ def create_oauth_blueprint():
     os.environ['OAUTHLIB_RELAX_TOKEN_SCOPE'] = '1'
     logger.info("Set OAUTHLIB_RELAX_TOKEN_SCOPE=1")
     
-    # Set up redirect URL for production or local
-    pythonanywhere_domain = os.environ.get('SERVER_NAME')
-    if pythonanywhere_domain:
-        redirect_url = f"https://{pythonanywhere_domain}/login/google/authorized"
-    else:
-        redirect_url = "http://localhost:5000/login/google/authorized"
-    logger.info(f"OAuth redirect_url set to: {redirect_url}")
-    
     # Set OAUTHLIB_INSECURE_TRANSPORT for local/dev
-    if pythonanywhere_domain:
+    server_name = os.environ.get('SERVER_NAME')
+    if server_name and not server_name.startswith('localhost'):
         os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '0'
     else:
         os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
@@ -48,8 +41,7 @@ def create_oauth_blueprint():
                 "https://www.googleapis.com/auth/userinfo.profile",
                 "openid"
             ],
-            redirect_url=redirect_url,
-            redirect_to='auth.authorized'
+            redirect_to='auth.authorized'  # Use dynamic URL generation
         )
         logger.info("Google OAuth blueprint created successfully")
         return blueprint
