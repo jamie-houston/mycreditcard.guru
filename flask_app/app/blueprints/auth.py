@@ -67,7 +67,7 @@ except Exception as e:
 def login():
     """Redirect to Google OAuth login page"""
     logger.info("Login route accessed, redirecting to Google OAuth")
-    return redirect(url_for('google.login'))
+    return redirect(url_for('auth.google.login'))
 
 # This route handles the OAuth callback
 @auth.route('/oauth-complete')
