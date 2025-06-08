@@ -31,9 +31,7 @@ if '/home/' in path:
     logger.info("Set OAUTHLIB_INSECURE_TRANSPORT=0 for production")
     
     # Extract username from path for domain configuration
-    username = path.split('/home/')[1].split('/')[0]
-    os.environ['PYTHONANYWHERE_DOMAIN'] = f'{username}.pythonanywhere.com'
-    logger.info(f"Setting PythonAnywhere domain to: {username}.pythonanywhere.com")
+    logger.info(f"PythonAnywhere domain is: {os.environ.get('PYTHONANYWHERE_DOMAIN')}")
 else:
     # Local development
     os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
