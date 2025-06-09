@@ -127,6 +127,7 @@
     </nav>
 
     <!-- Debug info - visible everywhere during development -->
+    {% if current_user.is_admin %}
     <div class="container-fluid bg-light py-1 small">
       <div class="row">
         <div class="col">
@@ -155,7 +156,7 @@
         </div>
       </div>
     </div>
-
+    {% endif %}
     <div class="flash-messages">
       {% with messages = get_flashed_messages(with_categories=true) %} {% if
       messages %} {% for category, message in messages %}

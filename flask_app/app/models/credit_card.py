@@ -34,6 +34,9 @@ class CreditCard(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
+    # Foreign key to User
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+
     # Relationships
     rewards = db.relationship('CreditCardReward', backref='credit_card', lazy='dynamic', cascade='all, delete-orphan')
 

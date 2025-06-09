@@ -31,6 +31,7 @@ class User(UserMixin, db.Model):
     # Relationships
     spending_profiles = db.relationship('UserProfile', backref='user', lazy='dynamic', 
                                        foreign_keys='UserProfile.user_id')
+    credit_cards = db.relationship('CreditCard', backref='owner', lazy='dynamic')
     
     def __init__(self, username, email, password, is_admin=False):
         """Initialize a new user."""

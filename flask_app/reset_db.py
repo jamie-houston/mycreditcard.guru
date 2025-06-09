@@ -5,8 +5,11 @@ This bypasses migrations and directly creates tables from the models.
 """
 
 import sys
+import os
+import subprocess
 from app import create_app, db
 from app.models.credit_card import CreditCard
+from app.models.category import Category
 
 def main():
     """Reset and initialize the database."""
@@ -22,6 +25,10 @@ def main():
         # Create all tables based on current models
         db.create_all()
         print("Created all tables from models.")
+
+        # Seed categories using the existing script
+        print("Seeding categories using seed_categories.py...")
+        subprocess.run([sys.executable, os.path.join(os.path.dirname(__file__), 'scripts', 'seed_categories.py')], check=True)
         
         print("Database initialization complete!")
     

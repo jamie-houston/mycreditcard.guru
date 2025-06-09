@@ -19,6 +19,21 @@ from app.utils.card_scraper import scrape_credit_cards
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger('import_cards')
 
+# Mapping from JSON reward category names to canonical category names
+CATEGORY_NAME_MAP = {
+    "every purchase": "base",
+    "all purchases": "base",
+    "all other purchases": "base",
+    "purchases — 1% when you buy something, and 1% when you pay it off": "base",
+    "travel booked through chase": "travel",
+    "travel purchased through chase travel": "travel",
+    "dining at restaurants": "dining",
+    "drugstore purchases": "drugstores",
+    "grocery stores": "groceries",
+    "entertainment": "entertainment",
+    # Add more mappings as needed
+}
+
 def parse_arguments():
     """Parse command line arguments"""
     parser = argparse.ArgumentParser(description='Import credit cards from NerdWallet')
@@ -147,8 +162,23 @@ def import_cards(use_proxies: bool = False, limit: int = 0, clear: bool = False,
                 
                 card_name = card_data['name']
                 
-                # Process and validate reward categories
+                # Normalize reward_categories if it's a dict (convert to list of dicts)
                 reward_categories_data = card_data.get('reward_categories')
+                if isinstance(reward_categories_data, dict):
+                    normalized_list = []
+                    unmapped_categories = []
+                    for k, v in reward_categories_data.items():
+                        mapped = CATEGORY_NAME_MAP.get(k.strip().lower())
+                        if mapped:
+                            normalized_list.append({'category': mapped, 'rate': v})
+                        else:
+                            normalized_list.append({'category': k, 'rate': v})
+                            unmapped_categories.append(k)
+                    
+                        logger.warning(f"Card '{card_name}': Unmapped reward categories: {unmapped_categories}")
+                    reward_categories_data = normalized_list
+                
+                # Process and validate reward categories
                 valid_rewards = validate_and_process_reward_categories(reward_categories_data, card_name)
                 
                 # Remove fields that aren't in the model or are processed separately
@@ -211,6 +241,9 @@ def import_cards(use_proxies: bool = False, limit: int = 0, clear: bool = False,
                     
                     # Add reward categories
                     create_card_rewards(card, valid_rewards)
+                    # Debug: Log how many rewards were created for this card
+                    reward_count = CreditCardReward.query.filter_by(credit_card_id=card.id).count()
+                    logger.info(f"Card '{filtered_card_data['name']}' now has {reward_count} rewards after import.")
                     
                     imported_count += 1
                     logger.info(f"Added new card: {filtered_card_data['name']} (with {len(valid_rewards)} reward categories)")
@@ -234,6 +267,15 @@ def import_cards(use_proxies: bool = False, limit: int = 0, clear: bool = False,
             db.session.rollback()
             logger.error(f"Error during final commit: {e}")
             return None
+
+def print_all_categories():
+    app = create_app('default')
+    with app.app_context():
+        from app.models.category import Category
+        categories = Category.query.all()
+        print("\nAll categories in the database:")
+        for cat in categories:
+            print(f"- {cat.name} (active: {cat.is_active})")
 
 if __name__ == "__main__":
     args = parse_arguments()

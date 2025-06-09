@@ -51,22 +51,13 @@ endblock %} {% block content %}
               <p>Total cards: {{ current_user.credit_cards.count() }}</p>
               <p>
                 Active cards: {{
-                current_user.credit_cards.filter_by(active=True).count() }}
+                current_user.credit_cards.filter_by(is_active=True).count() }}
               </p>
-            </div>
-            <div class="col-md-6">
-              <h5><i class="fas fa-cog me-2"></i>Account Management</h5>
-              <a
-                href="{{ url_for('auth.change_password') }}"
-                class="btn btn-outline-primary"
-              >
-                <i class="fas fa-key me-2"></i>Change Password
-              </a>
             </div>
           </div>
         </div>
       </div>
     </div>
   </div>
+  {% endblock %}
 </div>
-{% endblock %}

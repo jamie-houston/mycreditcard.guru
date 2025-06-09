@@ -65,8 +65,8 @@ def login():
     
     # Check if user is already logged in
     if current_user.is_authenticated:
-        logger.info(f"User already logged in as {current_user.username}, redirecting to index")
-        return redirect(url_for('main.index'))
+        logger.info(f"User already logged in as {current_user.username}, redirecting to profile")
+        return redirect(url_for('user_data.profile'))
         
     # Clear any stale session data
     if 'google_oauth_token' in session:
@@ -139,7 +139,7 @@ def authorized():
         logger.info(f"Session keys: {list(session.keys())}")
         
         flash("Logged in with Google!", "success")
-        return redirect(url_for('main.index'))
+        return redirect(url_for('user_data.profile'))
     
     except Exception as e:
         logger.error(f"Error in OAuth callback: {str(e)}", exc_info=True)
