@@ -34,7 +34,7 @@ DEFAULT_CATEGORIES = [
         'description': 'Supermarkets and grocery stores',
         'icon': 'fas fa-shopping-cart',
         'sort_order': 30,
-        'aliases': ['grocery', 'grocery stores', 'supermarkets', 'online groceries', 'wholesale clubs']
+        'aliases': ['grocery', 'grocery stores', 'supermarkets', 'online groceries', 'wholesale clubs', 'online grocery']
     },
     {
         'name': 'gas',
@@ -162,7 +162,7 @@ DEFAULT_CATEGORIES = [
         'description': 'Default rate for all other purchases',
         'icon': 'fas fa-percentage',
         'sort_order': 0,
-        'aliases': []
+        'aliases': ['all other purchases']
     }
 ]
 

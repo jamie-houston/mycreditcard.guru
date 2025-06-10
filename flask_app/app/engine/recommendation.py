@@ -177,7 +177,7 @@ class RecommendationEngine:
             
             for i, card in enumerate(remaining_cards):
                 # Check if adding this card would exceed the annual fee constraint
-                if current_annual_fees + card['annual_fee'] > max_annual_fees:
+                if  max_annual_fees > 0 and current_annual_fees + card['annual_fee'] > max_annual_fees :
                     continue
                     
                 # Calculate marginal value of adding this card
