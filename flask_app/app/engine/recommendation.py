@@ -147,7 +147,7 @@ class RecommendationEngine:
         Args:
             card_values: List of card value calculations
             max_cards: Maximum number of cards to recommend
-            max_annual_fees: Maximum total annual fees
+            max_annual_fees: Maximum total annual fees (0 if no limit)
             category_spending: Dictionary of spending by category
             
         Returns:
@@ -156,7 +156,7 @@ class RecommendationEngine:
         # If max_cards is 1, just return the best card that fits the annual fee constraint
         if max_cards == 1:
             for card in card_values:
-                if card['annual_fee'] <= max_annual_fees:
+                if max_annual_fees == 0 or card['annual_fee'] <= max_annual_fees:
                     return [card]
             return []
         

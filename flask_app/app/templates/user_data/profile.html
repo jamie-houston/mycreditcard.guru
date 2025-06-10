@@ -278,98 +278,19 @@
 </form>
 
 {% endblock %} {% block scripts %}
+<script src="{{ url_for('static', filename='js/user_profile.js') }}"></script>
+{% if profile and category_spending %}
 <script>
+  // Pass spending data to the chart function
   document.addEventListener('DOMContentLoaded', function() {
-    // Enable tooltips
-    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-      return new bootstrap.Tooltip(tooltipTriggerEl);
-    });
-
-    // Spending validation and auto-calculation
-    var totalInput = document.getElementById('total_monthly_spend');
-    var categoryInputs = document.querySelectorAll('input[id^="category_"]');
-    var warningEl = document.getElementById('spending-warning');
-
-    function calculateTotal() {
-      var categoryTotal = 0;
-
-      for (var i = 0; i < categoryInputs.length; i++) {
-        var input = categoryInputs[i];
-        var value = parseFloat(input.value) || 0;
-        categoryTotal += value;
-      }
-
-      // Update the total field with the sum of categories
-      totalInput.value = categoryTotal.toFixed(2);
-
-      // Hide the warning since total is now always equal to sum of categories
-      if (warningEl) {
-        warningEl.style.display = 'none';
-      }
-
-      return categoryTotal;
-    }
-
-    // Initial calculation when the page loads
-    calculateTotal();
-
-    // Add event listeners to category inputs
-    for (var i = 0; i < categoryInputs.length; i++) {
-      categoryInputs[i].addEventListener('input', calculateTotal);
-    }
-
-    // Render spending chart if data exists
-    {% if profile and category_spending %}
-    renderSpendingChart();
-    {% endif %}
-
-    function renderSpendingChart() {
-      var ctx = document.getElementById('spending-chart').getContext('2d');
-
-      // Get non-zero categories
-      var categories = [];
-      var values = [];
-
+    var categorySpending = {
       {% for category, value in category_spending.items() %}
         {% if value > 0 %}
-        categories.push('{{ category|title }}');
-        values.push({{ value }});
+        '{{ category }}': {{ value }},
         {% endif %}
       {% endfor %}
-
-      if (categories.length > 0) {
-        var chart = new Chart(ctx, {
-          type: 'doughnut',
-          data: {
-            labels: categories,
-            datasets: [{
-              data: values,
-              backgroundColor: [
-                '#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b',
-                '#6f42c1', '#5a5c69', '#8fd19e', '#f8f9fc', '#858796'
-              ]
-            }]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-              legend: {
-                position: 'right',
-                labels: {
-                  boxWidth: 12
-                }
-              },
-              title: {
-                display: true,
-                text: 'Your Spending Breakdown'
-              }
-            }
-          }
-        });
-      }
-    }
+    };
+    window.renderSpendingChart(categorySpending);
   });
 </script>
-{% endblock %}
+{% endif %} {% endblock %}

@@ -1,0 +1,6 @@
+/* Custom styles for the Google login button on small screens */
+@media (max-width: 991.98px) {
+  .navbar-login-button {
+    margin-right: 60px; /* Make room for the hamburger button */
+  }
+}

@@ -139,52 +139,8 @@ endblock %} {% block content %}
 {% endblock %} {% block scripts %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-  document.addEventListener('DOMContentLoaded', function() {
-      const ctx = document.getElementById('valueChart').getContext('2d');
-      const monthlyValues = {{ recommendation.per_month_value|tojson }};
-      const labels = ['Month 1', 'Month 2', 'Month 3', 'Month 4', 'Month 5', 'Month 6',
-                       'Month 7', 'Month 8', 'Month 9', 'Month 10', 'Month 11', 'Month 12'];
-
-      const chart = new Chart(ctx, {
-          type: 'line',
-          data: {
-              labels: labels,
-              datasets: [{
-                  label: 'Cumulative Value ($)',
-                  data: monthlyValues,
-                  borderColor: 'rgb(54, 162, 235)',
-                  backgroundColor: 'rgba(54, 162, 235, 0.1)',
-                  tension: 0.1,
-                  fill: true
-              }]
-          },
-          options: {
-              responsive: true,
-              plugins: {
-                  title: {
-                      display: true,
-                      text: 'Cumulative Card Value Over First Year'
-                  },
-                  tooltip: {
-                      callbacks: {
-                          label: function(context) {
-                              return '$' + context.raw.toFixed(2);
-                          }
-                      }
-                  }
-              },
-              scales: {
-                  y: {
-                      beginAtZero: true,
-                      ticks: {
-                          callback: function(value) {
-                              return '$' + value;
-                          }
-                      }
-                  }
-              }
-          }
-      });
-  });
+  // Pass data to the chart script
+  window.monthlyValues = {{ recommendation.per_month_value|tojson }};
 </script>
+<script src="{{ url_for('static', filename='js/recommendation_view_chart.js') }}"></script>
 {% endblock %}

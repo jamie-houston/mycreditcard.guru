@@ -131,8 +131,13 @@
         <div class="card-header bg-primary text-white">
           <h5 class="mb-0">First Year Value</h5>
         </div>
-        <div class="card-body">
-          <canvas id="valueChart" width="400" height="300"></canvas>
+        <div class="card-body" style="height: 300px">
+          <canvas
+            id="valueChart"
+            width="400"
+            height="300"
+            data-monthly-values="{{ recommendation.per_month_value | tojson }}"
+          ></canvas>
         </div>
       </div>
 
@@ -172,56 +177,5 @@
 </div>
 {% endblock %} {% block scripts %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-  document.addEventListener('DOMContentLoaded', function() {
-    // Get the canvas element
-    var ctx = document.getElementById('valueChart').getContext('2d');
-
-    // Data for the chart
-    var rawMonthlyValues = {{ recommendation.per_month_value | tojson }};
-    var monthlyValues = rawMonthlyValues.map(function(val) { return Math.round(val / 100); });
-    var months = Array.from({length: 12}, (_, i) => `Month ${i+1}`);
-
-    // Create the chart
-    var chart = new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels: months,
-        datasets: [{
-          label: 'Cumulative Value ($)',
-          data: monthlyValues,
-          backgroundColor: 'rgba(75, 192, 192, 0.2)',
-          borderColor: 'rgba(75, 192, 192, 1)',
-          borderWidth: 2,
-          pointRadius: 3,
-          pointBackgroundColor: 'rgba(75, 192, 192, 1)',
-          tension: 0.1
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        scales: {
-          y: {
-            beginAtZero: true,
-            ticks: {
-              callback: function(value) {
-                return '$' + value;
-              }
-            }
-          }
-        },
-        plugins: {
-          tooltip: {
-            callbacks: {
-              label: function(context) {
-                return '$' + Math.round(context.parsed.y);
-              }
-            }
-          }
-        }
-      }
-    });
-  });
-</script>
+<script src="{{ url_for('static', filename='js/recommendation_chart.js') }}"></script>
 {% endblock %}

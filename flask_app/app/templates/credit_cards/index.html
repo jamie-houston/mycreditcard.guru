@@ -237,21 +237,5 @@
 <!-- TableSorter JavaScript -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.31.3/js/jquery.tablesorter.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.31.3/js/jquery.tablesorter.widgets.min.js"></script>
-<script>
-  $(document).ready(function () {
-    $("#creditCardTable").tablesorter({
-      theme: "bootstrap",
-      headerTemplate: "{content}",
-      widgets: ["zebra", "columns"],
-      widgetOptions: {
-        zebra: ["even", "odd"],
-      },
-      // Default sort: first column (Card Name) ascending
-      sortList: [[0, 0]],
-      headers: {
-        5: { sorter: false } // Disable sorting on Bonus Categories (6th column, 0-indexed)
-      }
-    });
-  });
-</script>
+<script src="{{ url_for('static', filename='js/credit_cards_table.js') }}"></script>
 {% endblock %}

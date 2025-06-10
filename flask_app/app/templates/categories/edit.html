@@ -310,24 +310,6 @@ category.display_name }} - {{ super() }}{% endblock %} {% block content %}
   </div>
 </div>
 
-<script>
-  document.addEventListener("DOMContentLoaded", function () {
-    // Icon preview update
-    const iconInput = document.getElementById("icon");
-    const iconPreview = document.getElementById("icon-preview");
-
-    iconInput.addEventListener("input", function () {
-      iconPreview.className = this.value || "fas fa-tag";
-    });
-
-    // Icon selection buttons
-    document.querySelectorAll(".icon-btn").forEach((button) => {
-      button.addEventListener("click", function () {
-        const iconClass = this.dataset.icon;
-        iconInput.value = iconClass;
-        iconPreview.className = iconClass;
-      });
-    });
-  });
-</script>
+{% endblock %} {% block scripts %}
+<script src="{{ url_for('static', filename='js/category_form.js') }}"></script>
 {% endblock %}
