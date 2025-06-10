@@ -122,12 +122,12 @@
       <div class="row">
         {% for category in categories %}
         <div class="col-md-4 mb-3">
-          <label for="category_{{ category }}" class="form-label">
-            {{ category|title }}
+          <label for="category_{{ category.name }}" class="form-label">
+            <i class="{{ category.icon }} me-2"></i>{{ category.display_name }}
             <span
               class="text-muted ms-1"
               data-bs-toggle="tooltip"
-              title="{{ category_descriptions.get(category, '') }}"
+              title="{{ category.description or '' }}"
             >
               <i class="fas fa-question-circle"></i>
             </span>
@@ -139,10 +139,10 @@
               step="0.01"
               min="0"
               class="form-control category-input"
-              id="category_{{ category }}"
-              name="category_{{ category }}"
-              value="{{ category_spending.get(category, 0) }}"
-              data-category="{{ category }}"
+              id="category_{{ category.name }}"
+              name="category_{{ category.name }}"
+              value="{{ category_spending.get(category.name, 0) }}"
+              data-category="{{ category.name }}"
             />
           </div>
         </div>

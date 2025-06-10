@@ -142,6 +142,24 @@ endblock %} {% block content %}
                   >
                 </div>
 
+                <div class="mb-3">
+                  <label for="aliases" class="form-label">Aliases</label>
+                  <textarea
+                    class="form-control"
+                    id="aliases"
+                    name="aliases"
+                    rows="2"
+                    placeholder="Alternative names for this category, one per line (e.g., restaurants, takeout, delivery)"
+                  >
+{% if category and category.get_aliases() %}{{ category.get_aliases() | join('\n') }}{% endif %}</textarea
+                  >
+                  <div class="form-text">
+                    Enter alternative names that should map to this category,
+                    one per line. Used for automatic categorization during data
+                    import.
+                  </div>
+                </div>
+
                 <div class="row">
                   <div class="col-md-6">
                     <div class="mb-3">

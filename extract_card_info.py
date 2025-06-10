@@ -10,6 +10,115 @@ import logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger('extract_card_info')
 
+def get_category_mapping_from_db() -> Dict[str, str]:
+    """
+    Get category mapping from database using aliases.
+    Returns a dictionary mapping alias names to display names.
+    """
+    try:
+        # Try to import Flask app and models
+        import os
+        import sys
+        
+        # Add Flask app directory to path if not already there
+        flask_app_path = os.path.join(os.path.dirname(__file__), 'flask_app')
+        if flask_app_path not in sys.path:
+            sys.path.insert(0, flask_app_path)
+        
+        from app import create_app
+        from app.models.category import Category
+        
+        # Create app context
+        app = create_app('default')
+        with app.app_context():
+            categories = Category.get_active_categories()
+            category_mapping = {}
+            
+            for category in categories:
+                # Map the category name itself
+                category_mapping[category.name.lower()] = category.display_name
+                
+                # Map all aliases
+                aliases = category.get_aliases()
+                for alias in aliases:
+                    category_mapping[alias.lower()] = category.display_name
+            
+            return category_mapping
+            
+    except Exception as e:
+        logger.warning(f"Could not load categories from database: {e}")
+        # Fallback to hardcoded mapping if database is not available
+        return get_fallback_category_mapping()
+
+def get_fallback_category_mapping() -> Dict[str, str]:
+    """
+    Fallback category mapping when database is not available.
+    """
+    return {
+        # Dining variations
+        'dining': 'Dining & Restaurants',
+        'restaurants': 'Dining & Restaurants', 
+        'restaurant': 'Dining & Restaurants',
+        'dining at restaurants': 'Dining & Restaurants',
+        'takeout': 'Dining & Restaurants',
+        'delivery service': 'Dining & Restaurants',
+        
+        # Travel variations
+        'travel': 'Travel',
+        'travel purchases': 'Travel',
+        'travel purchased': 'Travel',
+        'other travel': 'Travel',
+        'travel booked': 'Travel',
+        'hotels': 'Travel',
+        'hotel': 'Travel',
+        'rental cars': 'Travel',
+        'car rentals': 'Travel',
+        'flights': 'Travel',
+        'airfare': 'Travel',
+        'attractions': 'Travel',
+        
+        # Groceries variations
+        'groceries': 'Groceries',
+        'grocery': 'Groceries',
+        'grocery stores': 'Groceries',
+        'supermarkets': 'Groceries',
+        'online groceries': 'Groceries',
+        'wholesale clubs': 'Groceries',
+        
+        # Streaming variations
+        'streaming': 'Streaming Services',
+        'streaming services': 'Streaming Services',
+        'select streaming services': 'Streaming Services',
+        'streaming subscriptions': 'Streaming Services',
+        
+        # Gas variations
+        'gas': 'Gas Stations',
+        'gas stations': 'Gas Stations',
+        'gasoline': 'Gas Stations',
+        'fuel': 'Gas Stations',
+        
+        # Other categories
+        'drugstore': 'Drugstores & Pharmacies',
+        'drugstores': 'Drugstores & Pharmacies',
+        'pharmacy': 'Drugstores & Pharmacies',
+        'entertainment': 'Entertainment',
+        'transit': 'Transportation',
+        'transportation': 'Transportation',
+        'rideshare': 'Transportation',
+        'parking': 'Transportation',
+        'tolls': 'Transportation',
+        'trains': 'Transportation',
+        'buses': 'Transportation',
+        'paypal': 'PayPal',
+        'amazon': 'Amazon',
+        'online retail': 'Shopping',
+        'online purchases': 'Shopping',
+        'all purchases': 'Other',
+        'everything else': 'Other',
+        'everything': 'Other',
+        'all other purchases': 'Other',
+    }
+
 def extract_card_info(html_file: str) -> List[Dict[str, Any]]:
     """
     Extract credit card information from NerdWallet HTML file.
@@ -715,70 +824,7 @@ def parse_category_bonuses_from_tooltip(tooltip_text: str) -> Dict[str, float]:
     print(f"  Parsing tooltip: {tooltip_text}")
     
     # Category mapping from various text descriptions to standardized names
-    category_mapping = {
-        # Dining variations
-        'dining': 'Dining & Restaurants',
-        'restaurants': 'Dining & Restaurants', 
-        'restaurant': 'Dining & Restaurants',
-        'dining at restaurants': 'Dining & Restaurants',
-        'takeout': 'Dining & Restaurants',
-        'delivery service': 'Dining & Restaurants',
-        
-        # Travel variations
-        'travel': 'Travel',
-        'travel purchases': 'Travel',
-        'travel purchased': 'Travel',
-        'other travel': 'Travel',
-        'travel booked': 'Travel',
-        'hotels': 'Travel',
-        'hotel': 'Travel',
-        'rental cars': 'Travel',
-        'car rentals': 'Travel',
-        'flights': 'Travel',
-        'airfare': 'Travel',
-        'attractions': 'Travel',
-        
-        # Groceries variations
-        'groceries': 'Groceries',
-        'grocery': 'Groceries',
-        'grocery stores': 'Groceries',
-        'supermarkets': 'Groceries',
-        'online groceries': 'Groceries',
-        'wholesale clubs': 'Groceries',
-        
-        # Streaming variations
-        'streaming': 'Streaming Services',
-        'streaming services': 'Streaming Services',
-        'select streaming services': 'Streaming Services',
-        'streaming subscriptions': 'Streaming Services',
-        
-        # Gas variations
-        'gas': 'Gas',
-        'gas stations': 'Gas',
-        'gasoline': 'Gas',
-        'fuel': 'Gas',
-        
-        # Other categories
-        'drugstore': 'Drugstores',
-        'drugstores': 'Drugstores',
-        'pharmacy': 'Drugstores',
-        'entertainment': 'Entertainment',
-        'transit': 'Transit',
-        'transportation': 'Transit',
-        'rideshare': 'Transit',
-        'parking': 'Transit',
-        'tolls': 'Transit',
-        'trains': 'Transit',
-        'buses': 'Transit',
-        'paypal': 'PayPal',
-        'amazon': 'Amazon',
-        'online retail': 'Online Shopping',
-        'online purchases': 'Online Shopping',
-        'all purchases': 'All Purchases',
-        'everything else': 'All Other Purchases',
-        'everything': 'All Purchases',
-        'all other purchases': 'All Other Purchases',
-    }
+    category_mapping = get_category_mapping_from_db()
     
     categories = {}
     

@@ -2,6 +2,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash,
 from flask_login import current_user
 from app import db
 from app.models.user_data import UserProfile
+from app.models.category import Category
 from marshmallow import Schema, fields, ValidationError
 import json
 import uuid
@@ -95,25 +96,10 @@ def profile():
             flash(f'Error saving profile: {str(e)}', 'danger')
 
     # GET request - show the profile form
-    categories = current_app.config.get('SPENDING_CATEGORIES', [
-        'groceries', 'dining', 'gas', 'travel', 'entertainment',
-        'shopping', 'utilities', 'healthcare', 'transportation',
-        'education', 'other'
-    ])
-
-    category_descriptions = current_app.config.get('CATEGORY_DESCRIPTIONS', {
-        'groceries': 'Supermarkets, grocery stores, and specialty food shops',
-        'dining': 'Restaurants, cafes, takeout, and food delivery services',
-        'gas': 'Gas stations and fuel purchases',
-        'travel': 'Airlines, hotels, rental cars, and vacation expenses',
-        'entertainment': 'Movies, concerts, streaming subscriptions, and recreation',
-        'shopping': 'Retail stores, online shopping, and department stores',
-        'utilities': 'Electricity, water, gas, internet, phone, and other utility bills',
-        'healthcare': 'Medical expenses, prescriptions, and insurance payments',
-        'transportation': 'Public transit, rideshare services, and vehicle maintenance',
-        'education': 'Tuition, books, courses, and education-related expenses',
-        'other': "Any expenses that don't fit into the above categories"
-    })
+    # Get categories from database instead of hardcoded config
+    db_categories = Category.get_active_categories()
+    categories = [cat.name for cat in db_categories]
+    category_descriptions = {cat.name: cat.description for cat in db_categories}
 
     reward_options = current_app.config.get('REWARD_OPTIONS', [
         'cash_back', 'travel_points', 'airline_miles',
@@ -143,7 +129,7 @@ def profile():
     return render_template(
         'user_data/profile.html',
         profile=profile,
-        categories=categories,
+        categories=db_categories,  # Pass full category objects instead of just names
         category_descriptions=category_descriptions,
         category_spending=category_spending,
         reward_options=reward_options,

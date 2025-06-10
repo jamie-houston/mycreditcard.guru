@@ -1,5 +1,6 @@
 from app import db
 from datetime import datetime
+import json
 
 class Category(db.Model):
     """Model for global spending/reward categories managed by admin."""
@@ -10,6 +11,7 @@ class Category(db.Model):
     display_name = db.Column(db.String(100), nullable=False)  # User-friendly name
     description = db.Column(db.String(200))
     icon = db.Column(db.String(50), default='fas fa-tag')  # FontAwesome icon class
+    aliases = db.Column(db.Text)  # JSON array of alternative names for this category
     is_active = db.Column(db.Boolean, default=True)
     sort_order = db.Column(db.Integer, default=0)  # For ordering in lists
     
@@ -30,6 +32,7 @@ class Category(db.Model):
             'display_name': self.display_name,
             'description': self.description,
             'icon': self.icon,
+            'aliases': self.get_aliases(),
             'is_active': self.is_active,
             'sort_order': self.sort_order,
             'created_at': self.created_at.isoformat(),
@@ -41,10 +44,45 @@ class Category(db.Model):
         """Get all active categories ordered by sort_order then name."""
         return cls.query.filter_by(is_active=True).order_by(cls.sort_order, cls.name).all()
     
+    def get_aliases(self):
+        """Get aliases as a list."""
+        if self.aliases:
+            try:
+                return json.loads(self.aliases)
+            except (json.JSONDecodeError, TypeError):
+                return []
+        return []
+    
+    def set_aliases(self, aliases_list):
+        """Set aliases from a list."""
+        if aliases_list:
+            self.aliases = json.dumps(aliases_list)
+        else:
+            self.aliases = None
+    
     @classmethod
     def get_by_name(cls, name):
         """Get category by name (case-insensitive)."""
         return cls.query.filter(cls.name.ilike(name)).first()
+    
+    @classmethod
+    def get_by_name_or_alias(cls, name):
+        """Get category by name or alias (case-insensitive)."""
+        name_lower = name.lower().strip()
+        
+        # First try exact name match
+        category = cls.query.filter(cls.name.ilike(name_lower)).first()
+        if category:
+            return category
+        
+        # Then try alias match
+        categories = cls.query.filter(cls.is_active == True).all()
+        for category in categories:
+            aliases = category.get_aliases()
+            if any(alias.lower().strip() == name_lower for alias in aliases):
+                return category
+        
+        return None
 
 
 class CreditCardReward(db.Model):

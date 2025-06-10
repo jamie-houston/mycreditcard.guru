@@ -100,6 +100,8 @@ def category_new():
         description = request.form.get('description', '').strip()
         icon = request.form.get('icon', 'fas fa-tag').strip()
         sort_order = request.form.get('sort_order', 0, type=int)
+        aliases_text = request.form.get('aliases', '').strip()
+        aliases = [alias.strip() for alias in aliases_text.split('\n') if alias.strip()] if aliases_text else []
         
         if not name or not display_name:
             flash('Name and Display Name are required.', 'danger')
@@ -118,6 +120,7 @@ def category_new():
             icon=icon,
             sort_order=sort_order
         )
+        category.set_aliases(aliases)
         
         db.session.add(category)
         db.session.commit()
@@ -138,6 +141,8 @@ def category_edit(id):
         description = request.form.get('description', '').strip()
         icon = request.form.get('icon', 'fas fa-tag').strip()
         sort_order = request.form.get('sort_order', 0, type=int)
+        aliases_text = request.form.get('aliases', '').strip()
+        aliases = [alias.strip() for alias in aliases_text.split('\n') if alias.strip()] if aliases_text else []
         is_active = 'is_active' in request.form
         
         if not name or not display_name:
@@ -155,6 +160,7 @@ def category_edit(id):
         category.description = description
         category.icon = icon
         category.sort_order = sort_order
+        category.set_aliases(aliases)
         category.is_active = is_active
         
         db.session.commit()

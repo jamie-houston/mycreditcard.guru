@@ -288,7 +288,7 @@ category.display_name }} - {{ super() }}{% endblock %} {% block content %}
           </h6>
         </div>
         <div class="card-body">
-          {% set card_count = category.card_rewards|length %}
+          {% set card_count = category.card_rewards.count() %}
           <p>
             This category is used by <strong>{{ card_count }}</strong> credit
             card{{ 's' if card_count != 1 or card_count == 0 }}.
