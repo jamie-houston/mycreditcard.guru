@@ -194,3 +194,27 @@ class CreditCard(db.Model):
             'source_url': self.source_url,
             'import_date': self.import_date
         } 
+
+    def get_signup_bonus_display_value(self):
+        """Get the properly formatted signup bonus value for display."""
+        if self.signup_bonus_type == 'dollars':
+            # For dollar bonuses, use the value as-is
+            return self.signup_bonus_value
+        elif self.signup_bonus_type == 'points':
+            # For points/miles, the signup_bonus_value should already be the dollar equivalent
+            return self.signup_bonus_value
+        else:
+            # For 'other' type bonuses
+            return self.signup_bonus_value
+    
+    def get_signup_bonus_display_text(self):
+        """Get the full display text for signup bonus."""
+        if self.signup_bonus_value <= 0:
+            return "None"
+        
+        if self.signup_bonus_type == 'dollars':
+            return f"${self.signup_bonus_value:.0f}"
+        elif self.signup_bonus_type == 'points':
+            return f"{self.signup_bonus_points:,} points (${self.signup_bonus_value:.0f})"
+        else:
+            return "Something mysterious (possibly a free llama)" 

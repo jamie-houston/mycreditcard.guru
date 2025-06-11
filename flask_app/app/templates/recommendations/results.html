@@ -16,8 +16,7 @@
                 <div class="card-body text-center">
                   <h6 class="card-title">Total First-Year Value</h6>
                   <h2 class="text-success mb-0">
-                    ${{ (recommendation.total_value // 100) | round(0, 'floor')
-                    | int }}
+                    ${{ "%.0f"|format(recommendation.total_value) }}
                   </h2>
                 </div>
               </div>
@@ -205,9 +204,10 @@
 
                   {% if card.signup_bonus_value > 0 %}
                   <p class="mt-2">
-                    <strong>Sign-up Bonus:</strong> ${{ (card.signup_bonus_value
-                    // 100) }} after spending ${{ card.signup_bonus_min_spend }}
-                    in {{ card.signup_bonus_time_limit }} months
+                    <strong>Sign-up Bonus:</strong> {{
+                    card.get_signup_bonus_display_text() }} after spending ${{
+                    card.signup_bonus_min_spend }} in {{
+                    card.signup_bonus_time_limit }} months
                   </p>
                   {% endif %}
                 </div>
@@ -224,7 +224,7 @@
                     <div class="card-body text-center p-2">
                       <small class="d-block">Annual Value</small>
                       <strong class="text-success"
-                        >${{ (details.annual_value // 100) }}</strong
+                        >${{ "%.0f"|format(details.annual_value) }}</strong
                       >
                     </div>
                   </div>
@@ -233,7 +233,8 @@
                     <div class="card-body text-center p-2">
                       <small class="d-block">Bonus Value</small>
                       <strong class="text-success"
-                        >${{ (details.signup_bonus_value // 100) }}</strong
+                        >${{ "%.0f"|format(details.signup_bonus_value)
+                        }}</strong
                       >
                     </div>
                   </div>

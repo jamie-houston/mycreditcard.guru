@@ -84,9 +84,9 @@ endblock %} {% block content %}
             <div class="col-6">
               <small class="text-muted d-block">Sign-up Bonus</small>
               <span class="fw-bold">
-                {% if card.signup_bonus_value %} ${{
-                "%.2f"|format(card.signup_bonus_value) }} {% else %} None {%
-                endif %}
+                {% if card.signup_bonus_value %} {{
+                card.get_signup_bonus_display_text() }} {% else %} None {% endif
+                %}
               </span>
             </div>
           </div>
@@ -122,7 +122,7 @@ endblock %} {% block content %}
                   <td>Sign-up Bonus</td>
                   <td class="text-end">-</td>
                   <td class="text-end">
-                    ${{ "%.2f"|format(card.signup_bonus_value) }}
+                    {{ card.get_signup_bonus_display_text() }}
                   </td>
                 </tr>
                 {% endif %}

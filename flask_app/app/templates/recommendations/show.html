@@ -86,13 +86,7 @@
           </p>
           <p>
             <strong>Signup Bonus:</strong>
-            {% if detail.card.signup_bonus_type == 'points' %} {{
-            detail.card.signup_bonus_points }} points (${{
-            "%.2f"|format(detail.card.signup_bonus_value) }}) {% elif
-            detail.card.signup_bonus_type == 'dollars' %} ${{
-            "%.2f"|format(detail.card.signup_bonus_value) }} {% elif
-            detail.card.signup_bonus_type == 'other' %} Something mysterious
-            (possibly a free llama) {% else %} None {% endif %}
+            {{ detail.card.get_signup_bonus_display_text() }}
           </p>
 
           <h6 class="mt-3">Reward Categories</h6>

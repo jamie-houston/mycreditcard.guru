@@ -53,6 +53,16 @@ The Credit Card Roadmap app allows users to:
 - `/scripts` - Management scripts
 - `/migrations` - Database migrations
 
+## Testing
+
+To run all tests:
+
+```bash
+python scripts/run_tests.py
+```
+
+For detailed testing documentation, see [tests/README.md](tests/README.md).
+
 ## Importing Credit Cards
 
 There are several ways to import credit card data:
