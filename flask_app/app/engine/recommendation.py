@@ -102,7 +102,11 @@ class RecommendationEngine:
             
             # Calculate the card's value
             value_data = RecommendationEngine.calculate_card_value(card, profile)
-            card_values.append(value_data)
+            
+            # Only include cards where total rewards + signup bonus exceed annual fee
+            total_rewards_value = value_data['annual_value'] + value_data['signup_bonus_value']
+            if total_rewards_value > card.annual_fee:
+                card_values.append(value_data)
         
         # Sort cards by net value (descending)
         card_values.sort(key=lambda x: x['net_value'], reverse=True)
@@ -145,7 +149,7 @@ class RecommendationEngine:
         Find the optimal combination of credit cards.
         
         Args:
-            card_values: List of card value calculations
+            card_values: List of card value calculations (pre-filtered for positive value)
             max_cards: Maximum number of cards to recommend
             max_annual_fees: Maximum total annual fees (0 if no limit)
             category_spending: Dictionary of spending by category
@@ -165,24 +169,23 @@ class RecommendationEngine:
                     return [card]
             return []
         
-        # Initialize variables
+        # Initialize variables for greedy selection
         best_combination = []
-        best_value = float('-inf')  # Allow negative values
+        best_value = 0.0  # Only accept positive value combinations
         
-        # Try all combinations using a greedy approach
+        # Try greedy approach: build combination by adding cards with highest marginal value
         remaining_cards = card_values.copy()
         current_combination = []
         current_annual_fees = 0.0
         
-        # Construct the combination
+        # Build the combination greedily
         while remaining_cards and len(current_combination) < max_cards:
-            # Find the best card to add next
+            # Find the card that adds the most marginal value
             best_next_card = None
-            best_next_value = float('-inf')  # Allow negative values
+            best_next_value = 0.0  # Only consider cards that add positive value
             
             for i, card in enumerate(remaining_cards):
                 # Check if adding this card would exceed the annual fee constraint
-                # If max_annual_fees is 0, it means no limit
                 if max_annual_fees > 0 and current_annual_fees + card['annual_fee'] > max_annual_fees:
                     continue
                     
@@ -193,11 +196,12 @@ class RecommendationEngine:
                     category_spending
                 )
                 
+                # Only consider cards that add positive marginal value
                 if marginal_value > best_next_value:
                     best_next_value = marginal_value
                     best_next_card = i
             
-            # If no card can be added, break
+            # If no card adds positive value, stop building the combination
             if best_next_card is None:
                 break
                 
@@ -206,19 +210,22 @@ class RecommendationEngine:
             current_combination.append(card)
             current_annual_fees += card['annual_fee']
         
-        # Calculate total value of current combination
-        total_value = RecommendationEngine.calculate_total_combination_value(current_combination, category_spending)
-        if total_value > best_value:
-            best_combination = current_combination
-            best_value = total_value
+        # Calculate total value of the built combination
+        if current_combination:
+            total_value = RecommendationEngine.calculate_total_combination_value(current_combination, category_spending)
+            if total_value > best_value:
+                best_combination = current_combination
+                best_value = total_value
         
-        # If no combination was found or all combinations have negative value,
-        # recommend just the single best card that fits constraints
-        if not best_combination or best_value < 0:
+        # If no positive-value combination was found, try just the single best card
+        if not best_combination:
             for card in card_values:
                 if max_annual_fees == 0 or card['annual_fee'] <= max_annual_fees:
-                    best_combination = [card]
-                    break
+                    # Double-check that even a single card provides positive value
+                    single_card_value = RecommendationEngine.calculate_total_combination_value([card], category_spending)
+                    if single_card_value > 0:
+                        best_combination = [card]
+                        break
         
         return best_combination
 
@@ -259,18 +266,23 @@ class RecommendationEngine:
         category_spending: Dict[str, float]
     ) -> float:
         """
-        Calculate the total value of a card combination, only counting the highest value per category from the best card for that category.
+        Calculate the total value of a card combination with category exclusivity.
+        
+        Each spending category is assigned to the card with the highest reward rate for that category.
+        This ensures no double-counting of rewards and optimal category allocation.
+        
         Args:
             cards: List of card value calculations
             category_spending: Dictionary of spending by category
         Returns:
-            The total value
+            The total value (rewards + signup bonuses - annual fees)
         """
         # Guard clause for empty input
         if not cards:
             return 0.0
 
-        # For each category, find the card with the highest value for that category
+        # For each category, find the card with the highest reward value for that category
+        # This implements category exclusivity - each category goes to the best card for it
         total_category_value = 0.0
         if cards and cards[0].get('category_values'):
             categories = cards[0]['category_values'].keys()
