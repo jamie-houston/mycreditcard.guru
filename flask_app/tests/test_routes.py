@@ -98,33 +98,33 @@ class RoutesTestCase(unittest.TestCase):
     
     def test_recommendations_list(self):
         """Test recommendations list page."""
-        # Log in the user
-        self.client.post('/login', data={
-            'email': 'test@example.com',
-            'password': 'password'
-        })
+        # Log in the user via session
+        with self.client as c:
+            with c.session_transaction() as sess:
+                sess['user_id'] = self.user.id
+                sess['_fresh'] = True
         
         response = self.client.get('/recommendations/')
         self.assertEqual(response.status_code, 200)
     
     def test_recommendation_view(self):
         """Test recommendation view page."""
-        # Log in the user
-        self.client.post('/login', data={
-            'email': 'test@example.com',
-            'password': 'password'
-        })
+        # Log in the user via session
+        with self.client as c:
+            with c.session_transaction() as sess:
+                sess['user_id'] = self.user.id
+                sess['_fresh'] = True
         
         response = self.client.get(f'/recommendations/view/{self.recommendation.id}')
         self.assertEqual(response.status_code, 200)
     
     def test_recommendation_create(self):
         """Test recommendation create endpoint."""
-        # Log in the user
-        self.client.post('/login', data={
-            'email': 'test@example.com',
-            'password': 'password'
-        })
+        # Log in the user via session
+        with self.client as c:
+            with c.session_transaction() as sess:
+                sess['user_id'] = self.user.id
+                sess['_fresh'] = True
         
         response = self.client.get(f'/recommendations/create/{self.profile.id}')
         self.assertEqual(response.status_code, 302)  # Redirect after creation
@@ -135,17 +135,17 @@ class RoutesTestCase(unittest.TestCase):
     
     def test_recommendation_delete(self):
         """Test recommendation delete endpoint."""
-        # Log in the user
-        self.client.post('/login', data={
-            'email': 'test@example.com',
-            'password': 'password'
-        })
+        # Log in the user via session
+        with self.client as c:
+            with c.session_transaction() as sess:
+                sess['user_id'] = self.user.id
+                sess['_fresh'] = True
         
         response = self.client.post(f'/recommendations/delete/{self.recommendation.id}')
         self.assertEqual(response.status_code, 302)  # Redirect after deletion
         
         # Check that recommendation was deleted
-        recommendation = Recommendation.query.get(self.recommendation.id)
+        recommendation = db.session.get(Recommendation, self.recommendation.id)
         self.assertIsNone(recommendation)
 
 if __name__ == '__main__':

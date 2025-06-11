@@ -80,11 +80,17 @@ class ModelsTestCase(unittest.TestCase):
         self.assertIsNotNone(retrieved_card)
         self.assertEqual(retrieved_card.issuer, 'Test Bank')
         
-        # Test reward categories
-        categories = retrieved_card.get_reward_categories()
-        self.assertEqual(len(categories), 2)
-        self.assertEqual(categories[0]['category'], 'dining')
-        self.assertEqual(float(categories[0]['rate']), 3.0)
+        # Test new reward system methods
+        self.assertEqual(retrieved_card.base_reward_rate, 1.0)  # Default base rate
+        self.assertEqual(retrieved_card.dining_reward_rate, 1.0)  # No specific dining rate set
+        self.assertEqual(retrieved_card.travel_reward_rate, 1.0)  # No specific travel rate set
+        
+        # Test reward calculation methods
+        category_spending = {'dining': 500, 'travel': 300}
+        monthly_value = retrieved_card.calculate_monthly_value(category_spending)
+        self.assertIsInstance(monthly_value, dict)
+        self.assertIn('total', monthly_value)
+        self.assertIn('by_category', monthly_value)
     
     def test_recommendation_model(self):
         """Test Recommendation model."""

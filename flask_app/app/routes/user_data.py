@@ -15,8 +15,8 @@ class UserProfileSchema(Schema):
     credit_score = fields.Int(required=True)
     income = fields.Float(required=True)
     total_monthly_spend = fields.Float(required=True)
-    category_spending = fields.Str(default='{}')
-    reward_preferences = fields.Str(default='[]')
+    category_spending = fields.Str(dump_default='{}')
+    reward_preferences = fields.Str(dump_default='[]')
     max_annual_fees = fields.Float()
     max_cards = fields.Int()
 

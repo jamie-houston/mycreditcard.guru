@@ -97,11 +97,18 @@
 
           <h6 class="mt-3">Reward Categories</h6>
           <ul class="list-group">
-            {% for category in detail.card.get_reward_categories() %}
+            {% for reward in detail.card.get_all_rewards() %}
             <li class="list-group-item">
-              {{ category.category|capitalize }}: {{ category.rate }}x
+              {{ reward.display_name }}: {{ reward.reward_percent }}% {% if
+              reward.is_bonus_category %}
+              <span class="badge bg-warning">Bonus</span>
+              {% endif %}
             </li>
-            {% endfor %}
+            {% endfor %} {% if detail.card.get_all_rewards()|length == 0 %}
+            <li class="list-group-item">
+              Base Rate: {{ detail.card.base_reward_rate }}%
+            </li>
+            {% endif %}
           </ul>
 
           <h6 class="mt-3">Value Breakdown</h6>

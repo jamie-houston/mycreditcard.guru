@@ -60,7 +60,7 @@ def view(recommendation_id):
     # Get card details from the recommendation
     card_details = []
     for card_id, value_data in recommendation.card_details.items():
-        card = CreditCard.query.get(int(card_id))
+        card = db.session.get(CreditCard, int(card_id))
         if card:
             card_details.append({
                 'card': card,
@@ -175,7 +175,7 @@ def results(profile_id: int):
     card_ids = recommendation_data.get('recommended_sequence', [])
     cards = {}
     for card_id in card_ids:
-        card = CreditCard.query.get(card_id)
+        card = db.session.get(CreditCard, card_id)
         if card:
             cards[card_id] = card
 
