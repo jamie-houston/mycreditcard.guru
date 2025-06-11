@@ -4,6 +4,11 @@ import sys
 import os
 from datetime import datetime
 from extract_card_info import extract_card_info
+
+# Add the parent directory to path to import from flask_app
+parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, parent_dir)
+
 from flask_app.app.utils.nerdwallet_scraper import scrape_nerdwallet_cards
 
 def integrate_card_data(html_file=None, url=None):

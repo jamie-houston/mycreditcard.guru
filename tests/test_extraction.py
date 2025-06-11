@@ -3,12 +3,20 @@
 Test script to debug NerdWallet extraction.
 """
 
+import sys
+import os
+
+# Add the parent directory and scripts directory to path
+parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, parent_dir)
+sys.path.insert(0, os.path.join(parent_dir, 'scripts'))
+
 from extract_card_info import extract_nerdwallet_card_data, parse_category_bonuses_from_tooltip
 
 def test_nerdwallet_extraction():
     """Test the NerdWallet extraction function directly."""
     
-    with open('flask_app/nerdwallet_debug_travel.html', 'r') as f:
+    with open('data/nerdwallet_debug_travel.html', 'r') as f:
         html_content = f.read()
     
     print("🔍 Testing NerdWallet extraction directly")

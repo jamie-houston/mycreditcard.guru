@@ -134,4 +134,7 @@ dmypy.json
 Thumbs.db
 
 # Cursor editor files
-.cursor/ 
+.cursor/
+
+# Archive directories (old code)
+archive_*/ 

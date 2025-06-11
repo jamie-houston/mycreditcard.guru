@@ -10,8 +10,10 @@ import unittest
 import sys
 import os
 
-# Add the parent directory to path so we can import extract_card_info
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+# Add the parent directory and scripts directory to path
+parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, parent_dir)
+sys.path.insert(0, os.path.join(parent_dir, 'scripts'))
 
 from extract_card_info import parse_category_bonuses_from_tooltip, extract_nerdwallet_card_data
 
