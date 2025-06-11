@@ -82,7 +82,7 @@ class RoutesTestCase(unittest.TestCase):
         # Log in the test user
         with self.client as c:
             with c.session_transaction() as sess:
-                sess['user_id'] = self.user.id
+                sess['_user_id'] = str(self.user.id)  # Flask-Login uses _user_id and expects string
                 sess['_fresh'] = True
     
     def tearDown(self):
@@ -92,16 +92,20 @@ class RoutesTestCase(unittest.TestCase):
         self.app_context.pop()
     
     def test_index_page(self):
-        """Test index page."""
+        """Test index page redirects authenticated users to profile."""
         response = self.client.get('/')
-        self.assertEqual(response.status_code, 200)
+        # Authenticated users should be redirected to profile
+        self.assertEqual(response.status_code, 302)
+        with self.app.test_request_context():
+            expected_url = url_for('user_data.profile')
+            self.assertIn(expected_url, response.location)
     
     def test_recommendations_list(self):
         """Test recommendations list page."""
         # Log in the user via session
         with self.client as c:
             with c.session_transaction() as sess:
-                sess['user_id'] = self.user.id
+                sess['_user_id'] = str(self.user.id)  # Flask-Login uses _user_id and expects string
                 sess['_fresh'] = True
         
         response = self.client.get('/recommendations/')
@@ -112,7 +116,7 @@ class RoutesTestCase(unittest.TestCase):
         # Log in the user via session
         with self.client as c:
             with c.session_transaction() as sess:
-                sess['user_id'] = self.user.id
+                sess['_user_id'] = str(self.user.id)  # Flask-Login uses _user_id and expects string
                 sess['_fresh'] = True
         
         response = self.client.get(f'/recommendations/view/{self.recommendation.id}')
@@ -123,7 +127,7 @@ class RoutesTestCase(unittest.TestCase):
         # Log in the user via session
         with self.client as c:
             with c.session_transaction() as sess:
-                sess['user_id'] = self.user.id
+                sess['_user_id'] = str(self.user.id)  # Flask-Login uses _user_id and expects string
                 sess['_fresh'] = True
         
         response = self.client.get(f'/recommendations/create/{self.profile.id}')
@@ -138,7 +142,7 @@ class RoutesTestCase(unittest.TestCase):
         # Log in the user via session
         with self.client as c:
             with c.session_transaction() as sess:
-                sess['user_id'] = self.user.id
+                sess['_user_id'] = str(self.user.id)  # Flask-Login uses _user_id and expects string
                 sess['_fresh'] = True
         
         response = self.client.post(f'/recommendations/delete/{self.recommendation.id}')

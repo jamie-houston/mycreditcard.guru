@@ -52,14 +52,6 @@
             {% if current_user.is_authenticated %}
             <li class="nav-item">
               <a
-                class="nav-link {% if request.endpoint == 'main.index' %}active{% endif %}"
-                href="{{ url_for('main.index') }}"
-              >
-                <i class="fas fa-tachometer-alt me-1"></i> Dashboard
-              </a>
-            </li>
-            <li class="nav-item">
-              <a
                 class="nav-link {% if 'credit_cards.' in request.endpoint %}active{% endif %}"
                 href="{{ url_for('credit_cards.index') }}"
               >
@@ -91,7 +83,10 @@
               </a>
               <ul class="dropdown-menu dropdown-menu-end">
                 <li>
-                  <a class="dropdown-item" href="{{ url_for('auth.profile') }}">
+                  <a
+                    class="dropdown-item"
+                    href="{{ url_for('user_data.profile') }}"
+                  >
                     <i class="fas fa-user me-1"></i> Profile
                   </a>
                 </li>

@@ -6,6 +6,11 @@ main = Blueprint('main', __name__)
 @main.route('/')
 def index():
     """Landing page of the application."""
+    # Redirect logged-in users to their profile page
+    if current_user.is_authenticated:
+        return redirect(url_for('user_data.profile'))
+    
+    # Show welcome/dashboard page for non-logged-in users
     return render_template('index.html', title='My Credit Card Guru')
 
 @main.route('/debug')
