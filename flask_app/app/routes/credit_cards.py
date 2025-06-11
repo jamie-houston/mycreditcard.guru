@@ -95,6 +95,13 @@ def import_cards():
                     mapped_data['source_url'] = source_url
                     mapped_data['import_date'] = import_date
                     
+                    # Extract reward categories before creating/updating card
+                    reward_categories_json = mapped_data.get('reward_categories', '[]')
+                    try:
+                        reward_categories = json.loads(reward_categories_json) if isinstance(reward_categories_json, str) else reward_categories_json
+                    except (json.JSONDecodeError, TypeError):
+                        reward_categories = []
+                    
                     # Check if card already exists
                     existing_card = safe_query(CreditCard).filter_by(name=mapped_data['name']).first()
                     if existing_card:
@@ -104,10 +111,32 @@ def import_cards():
                                 setattr(existing_card, key, json.dumps(value))
                             else:
                                 setattr(existing_card, key, value)
+                        card = existing_card
                     else:
                         # Create new card
                         new_card = CreditCard(**mapped_data)
                         db.session.add(new_card)
+                        card = new_card
+                    
+                    # Flush to get the card ID
+                    db.session.flush()
+                    
+                    # Clear existing reward relationships for this card
+                    from app.models.category import CreditCardReward
+                    CreditCardReward.query.filter_by(credit_card_id=card.id).delete()
+                    
+                    # Create CreditCardReward relationship records
+                    for reward_data in reward_categories:
+                        if isinstance(reward_data, dict):
+                            category_name = reward_data.get('category', '')
+                            percentage = reward_data.get('percentage', reward_data.get('rate', 1.0))
+                            
+                            if category_name and percentage:
+                                card.add_reward_category(
+                                    category_name=category_name,
+                                    reward_percent=float(percentage),
+                                    is_bonus=(float(percentage) > 1.0)
+                                )
             
             flash(f"Successfully imported {len(cards_data)} credit cards from {source}.", "success")
             return redirect(url_for('credit_cards.index'))

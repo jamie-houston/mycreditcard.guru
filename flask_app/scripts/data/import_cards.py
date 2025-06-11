@@ -19,21 +19,6 @@ from app.utils.card_scraper import scrape_credit_cards
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger('import_cards')
 
-# Mapping from JSON reward category names to canonical category names
-CATEGORY_NAME_MAP = {
-    "every purchase": "base",
-    "all purchases": "base",
-    "all other purchases": "base",
-    "purchases — 1% when you buy something, and 1% when you pay it off": "base",
-    "travel booked through chase": "travel",
-    "travel purchased through chase travel": "travel",
-    "dining at restaurants": "dining",
-    "drugstore purchases": "drugstores",
-    "grocery stores": "groceries",
-    "entertainment": "entertainment",
-    # Add more mappings as needed
-}
-
 def parse_arguments():
     """Parse command line arguments"""
     parser = argparse.ArgumentParser(description='Import credit cards from NerdWallet')
@@ -44,42 +29,58 @@ def parse_arguments():
     return parser.parse_args()
 
 def validate_and_process_reward_categories(reward_categories_data, card_name):
-    """Validate reward categories against global category system and return valid ones."""
+    """
+    Validate and process reward categories using the Category model's aliases system.
+    
+    Args:
+        reward_categories_data: List of reward category dictionaries
+        card_name: Name of the card (for logging)
+        
+    Returns:
+        List of valid reward category dictionaries with mapped category names
+    """
     if not reward_categories_data:
         return []
     
-    # Get all valid categories once for efficiency
-    valid_categories = {cat.name.lower(): cat for cat in Category.get_active_categories()}
-    
     valid_rewards = []
-    invalid_categories = []
+    unmapped_categories = []
     
-    try:
-        # Parse JSON if it's a string
-        if isinstance(reward_categories_data, str):
-            categories = json.loads(reward_categories_data)
+    for reward_data in reward_categories_data:
+        if not isinstance(reward_data, dict):
+            logger.warning(f"Card '{card_name}': Invalid reward data format: {reward_data}")
+            continue
+        
+        # Get category name and rate
+        category_name = reward_data.get('category', '').strip()
+        rate = reward_data.get('rate', reward_data.get('percentage', 1.0))
+        
+        if not category_name:
+            logger.warning(f"Card '{card_name}': Empty category name in reward data: {reward_data}")
+            continue
+        
+        # Try to find category using aliases system
+        category = Category.get_by_name_or_alias(category_name)
+        
+        if category:
+            logger.info(f"Card '{card_name}': Mapped '{category_name}' -> '{category.name}' ({rate}%)")
+            valid_rewards.append({
+                'category_id': category.id,
+                'category_name': category.name,
+                'reward_percent': float(rate),
+                'is_bonus': float(rate) > 1.0
+            })
         else:
-            categories = reward_categories_data
-            
-        for cat_data in categories:
-            category_name = cat_data.get('category', '').lower().strip()
-            rate = float(cat_data.get('rate', 1.0))
-            
-            if category_name in valid_categories:
-                valid_rewards.append({
-                    'category': valid_categories[category_name].name,
-                    'category_id': valid_categories[category_name].id,
-                    'rate': rate
-                })
-            else:
-                invalid_categories.append(category_name)
-                
-        if invalid_categories:
-            logger.warning(f"Card '{card_name}': Skipped invalid categories: {invalid_categories}")
-            
-    except (json.JSONDecodeError, ValueError, TypeError) as e:
-        logger.error(f"Card '{card_name}': Error processing reward categories: {e}")
-        return []
+            logger.warning(f"Card '{card_name}': No category found for '{category_name}' (rate: {rate}%)")
+            unmapped_categories.append(category_name)
+    
+    if unmapped_categories:
+        logger.warning(f"Card '{card_name}': Unmapped categories: {unmapped_categories}")
+        logger.info("Available categories and their aliases:")
+        categories = Category.get_active_categories()
+        for cat in categories:
+            aliases = cat.get_aliases()
+            aliases_str = f" (aliases: {', '.join(aliases)})" if aliases else ""
+            logger.info(f"  - {cat.name}: {cat.display_name}{aliases_str}")
     
     return valid_rewards
 
@@ -93,13 +94,14 @@ def create_card_rewards(card, valid_rewards):
         ).first()
         
         if existing_reward:
-            existing_reward.reward_percent = reward_data['rate']
+            existing_reward.reward_percent = reward_data['reward_percent']
+            existing_reward.is_bonus_category = reward_data['is_bonus']
         else:
             new_reward = CreditCardReward(
                 credit_card_id=card.id,
                 category_id=reward_data['category_id'],
-                reward_percent=reward_data['rate'],
-                is_bonus_category=(reward_data['rate'] > 1.0)
+                reward_percent=reward_data['reward_percent'],
+                is_bonus_category=reward_data['is_bonus']
             )
             db.session.add(new_reward)
 
@@ -166,16 +168,8 @@ def import_cards(use_proxies: bool = False, limit: int = 0, clear: bool = False,
                 reward_categories_data = card_data.get('reward_categories')
                 if isinstance(reward_categories_data, dict):
                     normalized_list = []
-                    unmapped_categories = []
                     for k, v in reward_categories_data.items():
-                        mapped = CATEGORY_NAME_MAP.get(k.strip().lower())
-                        if mapped:
-                            normalized_list.append({'category': mapped, 'rate': v})
-                        else:
-                            normalized_list.append({'category': k, 'rate': v})
-                            unmapped_categories.append(k)
-                    
-                        logger.warning(f"Card '{card_name}': Unmapped reward categories: {unmapped_categories}")
+                        normalized_list.append({'category': k, 'rate': v})
                     reward_categories_data = normalized_list
                 
                 # Process and validate reward categories

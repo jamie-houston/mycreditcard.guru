@@ -92,6 +92,8 @@ def edit(id):
         description = request.form.get('description', '').strip()
         icon = request.form.get('icon', 'fas fa-tag').strip()
         sort_order = request.form.get('sort_order', 0, type=int)
+        aliases_text = request.form.get('aliases', '').strip()
+        aliases = [alias.strip() for alias in aliases_text.split('\n') if alias.strip()] if aliases_text else []
         
         if not name or not display_name:
             flash('Name and Display Name are required.', 'danger')
@@ -110,6 +112,7 @@ def edit(id):
         category.description = description
         category.icon = icon
         category.sort_order = sort_order
+        category.set_aliases(aliases)
         
         db.session.commit()
         

@@ -28,6 +28,7 @@ SCRIPT_INFO = {
     "admin/generate_recommendation.py": "Generate credit card recommendations for a specific user profile",
     
     # Data scripts
+    "data/fix_card_rewards.py": "Fix existing cards that have JSON reward data but missing relationship records",
     "data/import_cards.py": "Import credit cards from NerdWallet or JSON file with reward category mapping",
     "data/init_db.py": "Initialize database tables based on current SQLAlchemy models",
     "data/manage_cards.py": "Interactive tool to manage credit cards in the database",

@@ -37,6 +37,14 @@ DEFAULT_CATEGORIES = [
         'aliases': ['grocery', 'grocery stores', 'supermarkets', 'wholesale clubs']
     },
     {
+        'name': 'online_groceries',
+        'display_name': 'Online Groceries',
+        'description': 'Online grocery delivery services and apps',
+        'icon': 'fas fa-shopping-cart',
+        'sort_order': 35,
+        'aliases': ['online grocery', 'grocery delivery', 'online grocery delivery']
+    },
+    {
         'name': 'gas',
         'display_name': 'Gas Stations',
         'description': 'Gas stations and fuel purchases',

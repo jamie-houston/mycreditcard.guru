@@ -8,12 +8,14 @@ Creates 5 example credit cards with different reward structures and features.
 
 from app import create_app, db
 from app.models.credit_card import CreditCard
+from app.models.category import Category, CreditCardReward
 import json
 
 def seed_credit_cards():
     app = create_app()
     with app.app_context():
-        # Delete existing cards
+        # Delete existing cards and their reward relationships
+        CreditCardReward.query.delete()  # Delete rewards first due to foreign key
         CreditCard.query.delete()
         
         # Create sample credit cards
@@ -118,11 +120,40 @@ def seed_credit_cards():
         
         # Add cards to database
         for card_data in cards:
+            # Extract reward categories before creating the card
+            reward_categories_json = card_data.get('reward_categories', '[]')
+            try:
+                reward_categories = json.loads(reward_categories_json)
+            except (json.JSONDecodeError, TypeError):
+                reward_categories = []
+            
+            # Create the card
             card = CreditCard(**card_data)
             db.session.add(card)
+            db.session.flush()  # Get the card ID
+            
+            # Create CreditCardReward relationship records
+            for reward_data in reward_categories:
+                category_name = reward_data.get('category')
+                rate = reward_data.get('rate', 1.0)
+                
+                if category_name:
+                    # Find the category by name
+                    category = Category.get_by_name(category_name)
+                    if category:
+                        # Create the reward relationship
+                        credit_card_reward = CreditCardReward(
+                            credit_card_id=card.id,
+                            category_id=category.id,
+                            reward_percent=rate,
+                            is_bonus_category=(rate > 1.0)
+                        )
+                        db.session.add(credit_card_reward)
+                    else:
+                        print(f"Warning: Category '{category_name}' not found for card '{card.name}'")
         
         db.session.commit()
-        print(f"Added {len(cards)} credit cards to the database.")
+        print(f"Added {len(cards)} credit cards to the database with proper reward category relationships.")
 
 if __name__ == "__main__":
     seed_credit_cards() 

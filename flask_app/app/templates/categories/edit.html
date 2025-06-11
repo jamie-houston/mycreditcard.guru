@@ -145,6 +145,30 @@ category.display_name }} - {{ super() }}{% endblock %} {% block content %}
               </div>
             </div>
 
+            <div class="mb-3">
+              <label for="aliases" class="form-label">
+                Aliases
+                <i
+                  class="fas fa-info-circle text-muted"
+                  title="Alternative names that can be used to identify this category during import"
+                ></i>
+              </label>
+              <textarea
+                class="form-control"
+                id="aliases"
+                name="aliases"
+                rows="4"
+                placeholder="Enter one alias per line, e.g.:&#10;dining at restaurants&#10;restaurant purchases&#10;food and dining"
+              >
+{% for alias in category.get_aliases() %}{{ alias }}
+{% endfor %}</textarea
+              >
+              <div class="form-text">
+                Enter alternative names for this category, one per line. These
+                are used during card import to automatically map category names.
+              </div>
+            </div>
+
             <div class="d-flex gap-2">
               <button type="submit" class="btn btn-primary">
                 <i class="fas fa-save"></i> Update Category
