@@ -179,12 +179,23 @@ def results(profile_id: int):
         if card:
             cards[card_id] = card
 
+    # Calculate category totals for display
+    category_totals = {}
+    card_details = recommendation_data.get('card_details', {})
+    for card_id in card_ids:
+        details = card_details.get(str(card_id), {})
+        category_values = details.get('category_values', {})
+        for category, value in category_values.items():
+            if value > 0:  # Only include categories with positive value
+                category_totals[category] = category_totals.get(category, 0) + value
+
     # Render the results template
     return render_template(
         'recommendations/results.html',
         profile=profile,
         recommendation=recommendation_data,
-        cards=cards
+        cards=cards,
+        category_totals=category_totals
     )
 
 @recommendations.route('/save/<int:profile_id>', methods=['POST'])

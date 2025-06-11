@@ -35,9 +35,82 @@
             </div>
           </div>
 
+          <!-- Category Values Breakdown -->
+          <div class="card mb-4 border-info">
+            <div class="card-header bg-info text-white">
+              <h5 class="mb-0">💰 Your Spending Categories Value</h5>
+            </div>
+            <div class="card-body">
+              <p class="text-muted mb-3">
+                Here's how much each of your spending categories is worth per
+                month with your recommended cards:
+              </p>
+
+              <div class="row">
+                {% for category, total_value in category_totals.items() %} {% if
+                total_value > 0 %}
+                <div class="col-md-4 col-sm-6 mb-3">
+                  <div class="card bg-light h-100">
+                    <div class="card-body text-center p-3">
+                      <div class="mb-2">
+                        {% if category == 'dining' %}
+                        <i class="fas fa-utensils text-warning fa-2x"></i>
+                        {% elif category == 'travel' %}
+                        <i class="fas fa-plane text-primary fa-2x"></i>
+                        {% elif category == 'gas' %}
+                        <i class="fas fa-gas-pump text-danger fa-2x"></i>
+                        {% elif category == 'groceries' %}
+                        <i class="fas fa-shopping-cart text-success fa-2x"></i>
+                        {% elif category == 'entertainment' %}
+                        <i class="fas fa-film text-purple fa-2x"></i>
+                        {% else %}
+                        <i class="fas fa-credit-card text-secondary fa-2x"></i>
+                        {% endif %}
+                      </div>
+                      <h6 class="card-title text-capitalize">{{ category }}</h6>
+                      <h4 class="text-success mb-1">
+                        ${{ "%.2f"|format(total_value) }}
+                      </h4>
+                      <small class="text-muted">per month</small>
+                      <div class="mt-2">
+                        <small class="text-info"
+                          >${{ "%.0f"|format(total_value * 12) }}
+                          annually</small
+                        >
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                {% endif %} {% endfor %}
+              </div>
+
+              {% if category_totals|length == 0 %}
+              <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i>
+                No category-specific rewards found. Your cards may offer
+                flat-rate rewards across all purchases.
+              </div>
+              {% endif %}
+            </div>
+          </div>
+
           <h5 class="mb-3">Recommended Cards</h5>
-          {% for card_id in recommendation.recommended_sequence %} {% set card =
-          cards[card_id] %} {% set details =
+
+          <!-- Warning for negative value cards -->
+          {% set has_negative_value = false %} {% for card_id in
+          recommendation.recommended_sequence %} {% set details =
+          recommendation.card_details[card_id|string] %} {% if details.net_value
+          < 0 %} {% set has_negative_value = true %} {% endif %} {% endfor %} {%
+          if has_negative_value %}
+          <div class="alert alert-warning mb-3">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            <strong>Cost Notice:</strong> Based on your spending pattern, the
+            annual fees for these cards exceed the rewards you would earn.
+            Consider increasing your spending in bonus categories or looking for
+            no-annual-fee alternatives.
+          </div>
+          {% endif %} {% for card_id in recommendation.recommended_sequence %}
+          {% set card = cards[card_id] %} {% set details =
           recommendation.card_details[card_id|string] %}
           <div class="card mb-3">
             <div

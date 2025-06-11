@@ -51,8 +51,8 @@ class RecommendationEngine:
             if card.base_reward_rate > reward_rate:
                 reward_rate = card.base_reward_rate
             
-            # Calculate value for this category
-            value = spend * reward_rate
+            # Calculate value for this category (convert percentage to decimal)
+            value = spend * (reward_rate / 100.0)
             monthly_value += value
             category_values[category] = value
         
@@ -153,16 +153,21 @@ class RecommendationEngine:
         Returns:
             List of optimal card value dictionaries
         """
+        # If no cards available, return empty list
+        if not card_values:
+            return []
+            
         # If max_cards is 1, just return the best card that fits the annual fee constraint
         if max_cards == 1:
             for card in card_values:
+                # If max_annual_fees is 0, it means no limit; otherwise check the constraint
                 if max_annual_fees == 0 or card['annual_fee'] <= max_annual_fees:
                     return [card]
             return []
         
         # Initialize variables
         best_combination = []
-        best_value = 0.0
+        best_value = float('-inf')  # Allow negative values
         
         # Try all combinations using a greedy approach
         remaining_cards = card_values.copy()
@@ -173,11 +178,12 @@ class RecommendationEngine:
         while remaining_cards and len(current_combination) < max_cards:
             # Find the best card to add next
             best_next_card = None
-            best_next_value = 0.0
+            best_next_value = float('-inf')  # Allow negative values
             
             for i, card in enumerate(remaining_cards):
                 # Check if adding this card would exceed the annual fee constraint
-                if  max_annual_fees > 0 and current_annual_fees + card['annual_fee'] > max_annual_fees :
+                # If max_annual_fees is 0, it means no limit
+                if max_annual_fees > 0 and current_annual_fees + card['annual_fee'] > max_annual_fees:
                     continue
                     
                 # Calculate marginal value of adding this card
@@ -200,11 +206,19 @@ class RecommendationEngine:
             current_combination.append(card)
             current_annual_fees += card['annual_fee']
         
-        # If resulting combination is better than the best found so far, update
+        # Calculate total value of current combination
         total_value = RecommendationEngine.calculate_total_combination_value(current_combination, category_spending)
         if total_value > best_value:
             best_combination = current_combination
             best_value = total_value
+        
+        # If no combination was found or all combinations have negative value,
+        # recommend just the single best card that fits constraints
+        if not best_combination or best_value < 0:
+            for card in card_values:
+                if max_annual_fees == 0 or card['annual_fee'] <= max_annual_fees:
+                    best_combination = [card]
+                    break
         
         return best_combination
 

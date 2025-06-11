@@ -4,3 +4,8 @@
     margin-right: 60px; /* Make room for the hamburger button */
   }
 }
+
+/* Custom color for entertainment category */
+.text-purple {
+  color: #6f42c1 !important;
+}
