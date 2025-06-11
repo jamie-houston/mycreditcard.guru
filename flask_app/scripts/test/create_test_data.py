@@ -1,3 +1,12 @@
+#!/usr/bin/env python
+"""
+Test Data Creator
+
+This script creates comprehensive test data including users, profiles, credit cards,
+and recommendations for development and testing purposes. Creates admin, example,
+and test users with realistic spending patterns and card recommendations.
+"""
+
 from app import create_app, db
 from app.models.user import User
 from app.models.user_data import UserProfile

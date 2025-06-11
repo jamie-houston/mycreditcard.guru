@@ -1,3 +1,11 @@
+#!/usr/bin/env python
+"""
+Route Inspector
+
+This script displays all registered Flask routes in the application,
+useful for debugging routing issues and understanding the application structure.
+"""
+
 from app import create_app
 
 def check_routes():

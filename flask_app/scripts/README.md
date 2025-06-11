@@ -1,6 +1,27 @@
 # Credit Card Roadmap Scripts
 
-This directory contains utility scripts for the Credit Card Roadmap application.
+This directory contains utility scripts for the Credit Card Roadmap application, organized by purpose:
+
+- **📁 admin/** - Administrative tools (recommendations, management)
+- **📁 data/** - Database operations (seeding, importing, updating)
+- **📁 scraping/** - Web scraping tools (NerdWallet data collection)
+- **📁 test/** - Test data creation (users, profiles, cards)
+- **📁 validate/** - Debugging and validation tools (checking data, routes, OAuth)
+
+## Running Scripts
+
+Use the enhanced script runner from the project root:
+
+```bash
+# Interactive menu with numbered options
+python scripts/run_flask_script.py
+
+# Run by number
+python scripts/run_flask_script.py 10    # Runs scraping/scrape_nerdwallet.py
+
+# Run by path
+python scripts/run_flask_script.py scraping/scrape_nerdwallet.py --json cards.json
+```
 
 ## NerdWallet Credit Card Scraper
 
@@ -18,8 +39,8 @@ The NerdWallet scraper is a specialized tool for extracting credit card informat
 
 Two scripts are available for working with the NerdWallet scraper:
 
-1. `test_nerdwallet_scraper.py` - A simple test script that runs the scraper and displays the results
-2. `scrape_nerdwallet.py` - A full-featured command-line tool for scraping, saving, and importing card data
+1. `scraping/test_nerdwallet_scraper.py` - A simple test script that runs the scraper and displays the results
+2. `scraping/scrape_nerdwallet.py` - A full-featured command-line tool for scraping, saving, and importing card data
 
 ### Using the Scraper
 
@@ -29,7 +50,7 @@ To test the scraper without modifying the database:
 
 ```bash
 # Run the test script
-./test_nerdwallet_scraper.py
+python scripts/run_flask_script.py scraping/test_nerdwallet_scraper.py
 ```
 
 This will:
@@ -39,23 +60,23 @@ This will:
 
 #### Command-line Interface
 
-The `scrape_nerdwallet.py` script provides more options:
+The `scraping/scrape_nerdwallet.py` script provides more options:
 
 ```bash
 # Display usage information
-./scrape_nerdwallet.py --help
+python scripts/run_flask_script.py scraping/scrape_nerdwallet.py --help
 
 # Scrape and save to a specific JSON file
-./scrape_nerdwallet.py --json cards.json
+python scripts/run_flask_script.py scraping/scrape_nerdwallet.py --json cards.json
 
 # Scrape and import directly to the database
-./scrape_nerdwallet.py --import
+python scripts/run_flask_script.py scraping/scrape_nerdwallet.py --import
 
 # Display detailed information for each card
-./scrape_nerdwallet.py --detail
+python scripts/run_flask_script.py scraping/scrape_nerdwallet.py --detail
 
 # Scrape quietly (no output except errors)
-./scrape_nerdwallet.py --quiet --json cards.json
+python scripts/run_flask_script.py scraping/scrape_nerdwallet.py --quiet --json cards.json
 ```
 
 #### Command-line Options
@@ -70,19 +91,19 @@ The `scrape_nerdwallet.py` script provides more options:
 #### Scrape and Display Cards
 
 ```bash
-./scrape_nerdwallet.py
+python scripts/run_flask_script.py scraping/scrape_nerdwallet.py
 ```
 
 #### Scrape and Import to Database
 
 ```bash
-./scrape_nerdwallet.py --import
+python scripts/run_flask_script.py scraping/scrape_nerdwallet.py --import
 ```
 
 #### Scrape and Save to JSON
 
 ```bash
-./scrape_nerdwallet.py --json nerdwallet_cards.json
+python scripts/run_flask_script.py scraping/scrape_nerdwallet.py --json nerdwallet_cards.json
 ```
 
 ### Implementation Details

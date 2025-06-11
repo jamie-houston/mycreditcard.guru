@@ -34,7 +34,7 @@ DEFAULT_CATEGORIES = [
         'description': 'Supermarkets and grocery stores',
         'icon': 'fas fa-shopping-cart',
         'sort_order': 30,
-        'aliases': ['grocery', 'grocery stores', 'supermarkets', 'online groceries', 'wholesale clubs', 'online grocery']
+        'aliases': ['grocery', 'grocery stores', 'supermarkets', 'wholesale clubs']
     },
     {
         'name': 'gas',

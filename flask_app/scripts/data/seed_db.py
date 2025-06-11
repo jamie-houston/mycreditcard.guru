@@ -1,3 +1,11 @@
+#!/usr/bin/env python
+"""
+Database Seeder
+
+This script seeds the database with sample credit cards for development and testing.
+Creates 5 example credit cards with different reward structures and features.
+"""
+
 from app import create_app, db
 from app.models.credit_card import CreditCard
 import json

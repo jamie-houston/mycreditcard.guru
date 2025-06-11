@@ -1,3 +1,11 @@
+#!/usr/bin/env python
+"""
+User Profile Validator
+
+This script checks all user profiles in the database and displays their spending
+patterns and reward preferences for debugging and validation purposes.
+"""
+
 from app import create_app, db
 from app.models.user_data import UserProfile
 import json

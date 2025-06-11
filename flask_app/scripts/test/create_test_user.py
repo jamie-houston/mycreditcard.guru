@@ -1,3 +1,11 @@
+#!/usr/bin/env python
+"""
+Test User Creator
+
+This script creates test user accounts for development purposes.
+Creates both admin and regular user accounts with default credentials.
+"""
+
 from app import create_app, db
 from app.models.user import User
 import uuid

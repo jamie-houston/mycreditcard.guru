@@ -63,6 +63,41 @@ python scripts/run_tests.py
 
 For detailed testing documentation, see [tests/README.md](tests/README.md).
 
+## Running Flask Scripts
+
+Flask app scripts are organized in `flask_app/scripts/` by purpose and need to be run with the proper Python path. You have several options:
+
+### Option 1: Interactive Menu (Recommended) 🚀
+```bash
+# Show numbered menu with descriptions
+python scripts/run_flask_script.py
+
+# Run script by number
+python scripts/run_flask_script.py 7    # Runs data/seed_db.py
+```
+
+### Option 2: Direct Script Path
+```bash
+# Run specific script with category path
+python scripts/run_flask_script.py data/seed_db.py
+python scripts/run_flask_script.py data/import_cards.py --json data/cards.json
+python scripts/run_flask_script.py test/create_test_data.py
+```
+
+### Option 3: Manual Method
+```bash
+# Change to flask_app directory and set PYTHONPATH
+cd flask_app
+PYTHONPATH=. python scripts/data/seed_db.py
+```
+
+### Script Categories
+- **📁 admin/** - Administrative tools (recommendations, management)
+- **📁 data/** - Database operations (seeding, importing, updating)
+- **📁 scraping/** - Web scraping tools (NerdWallet data collection)
+- **📁 test/** - Test data creation (users, profiles, cards)
+- **📁 validate/** - Debugging and validation tools (checking data, routes, OAuth)
+
 ## Importing Credit Cards
 
 There are several ways to import credit card data:
@@ -79,8 +114,7 @@ There are several ways to import credit card data:
 
 3. **From a JSON file**:
    ```
-   cd flask_app
-   python -m scripts.import_cards --json path/to/cards.json
+   python scripts/run_flask_script.py data/import_cards.py --json data/cards.json
    ```
 
 When importing cards, the system will automatically handle duplicates by matching on card name and issuer. If a card with the same name and issuer already exists in the database, all its fields will be overwritten with the new values, effectively updating the card information.

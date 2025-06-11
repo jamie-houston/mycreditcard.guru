@@ -28,7 +28,7 @@ def main():
 
         # Seed categories using the existing script
         print("Seeding categories using seed_categories.py...")
-        subprocess.run([sys.executable, os.path.join(os.path.dirname(__file__), 'scripts', 'seed_categories.py')], check=True)
+        subprocess.run([sys.executable, os.path.join(os.path.dirname(__file__), 'seed_categories.py')], check=True)
         
         print("Database initialization complete!")
     

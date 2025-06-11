@@ -1,3 +1,11 @@
+#!/usr/bin/env python
+"""
+Database Column Inspector
+
+This script checks database column definitions and schema for debugging
+and validation purposes. Displays available columns and model attributes.
+"""
+
 from app import create_app
 from app.models.credit_card import CreditCard
 

@@ -1,3 +1,11 @@
+#!/usr/bin/env python
+"""
+Credit Card Database Validator
+
+This script checks the credit cards in the database and displays their attributes
+for debugging and validation purposes.
+"""
+
 from app import create_app, db
 from app.models.credit_card import CreditCard
 

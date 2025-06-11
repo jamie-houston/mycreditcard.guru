@@ -1,3 +1,11 @@
+#!/usr/bin/env python
+"""
+Web Scraping Test
+
+This script tests web scraping functionality with sample NerdWallet URLs.
+Scrapes credit card data and saves results to JSON files for validation.
+"""
+
 from app.utils.nerdwallet_scraper import scrape_nerdwallet_cards
 import json
 
