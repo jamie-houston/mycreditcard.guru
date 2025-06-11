@@ -126,31 +126,79 @@
 
                   <h6 class="mb-2">Reward Rates:</h6>
                   <ul class="list-unstyled">
+                    {% set category_values = details.get('category_values', {})
+                    %}
                     <li>
-                      <small>Base: {{ card.base_reward_rate }}%</small>
+                      <small
+                        >Base: {{ card.base_reward_rate }}% {% if
+                        category_values.get('other', 0) > 0 %}
+                        <span class="text-success"
+                          >(${{ "%.0f"|format(category_values.get('other', 0) *
+                          12) }}/year)</span
+                        >
+                        {% endif %}
+                      </small>
                     </li>
                     {% if card.dining_reward_rate > 0 %}
                     <li>
-                      <small>Dining: {{ card.dining_reward_rate }}%</small>
+                      <small
+                        >Dining: {{ card.dining_reward_rate }}% {% if
+                        category_values.get('dining', 0) > 0 %}
+                        <span class="text-success"
+                          >(${{ "%.0f"|format(category_values.get('dining', 0) *
+                          12) }}/year)</span
+                        >
+                        {% endif %}
+                      </small>
                     </li>
                     {% endif %} {% if card.travel_reward_rate > 0 %}
                     <li>
-                      <small>Travel: {{ card.travel_reward_rate }}%</small>
+                      <small
+                        >Travel: {{ card.travel_reward_rate }}% {% if
+                        category_values.get('travel', 0) > 0 %}
+                        <span class="text-success"
+                          >(${{ "%.0f"|format(category_values.get('travel', 0) *
+                          12) }}/year)</span
+                        >
+                        {% endif %}
+                      </small>
                     </li>
                     {% endif %} {% if card.gas_reward_rate > 0 %}
                     <li>
-                      <small>Gas: {{ card.gas_reward_rate }}%</small>
+                      <small
+                        >Gas: {{ card.gas_reward_rate }}% {% if
+                        category_values.get('gas', 0) > 0 %}
+                        <span class="text-success"
+                          >(${{ "%.0f"|format(category_values.get('gas', 0) *
+                          12) }}/year)</span
+                        >
+                        {% endif %}
+                      </small>
                     </li>
                     {% endif %} {% if card.grocery_reward_rate > 0 %}
                     <li>
-                      <small>Grocery: {{ card.grocery_reward_rate }}%</small>
+                      <small
+                        >Grocery: {{ card.grocery_reward_rate }}% {% if
+                        category_values.get('groceries', 0) > 0 %}
+                        <span class="text-success"
+                          >(${{ "%.0f"|format(category_values.get('groceries',
+                          0) * 12) }}/year)</span
+                        >
+                        {% endif %}
+                      </small>
                     </li>
                     {% endif %} {% if card.entertainment_reward_rate > 0 %}
                     <li>
                       <small
-                        >Entertainment: {{ card.entertainment_reward_rate
-                        }}%</small
-                      >
+                        >Entertainment: {{ card.entertainment_reward_rate }}% {%
+                        if category_values.get('entertainment', 0) > 0 %}
+                        <span class="text-success"
+                          >(${{
+                          "%.0f"|format(category_values.get('entertainment', 0)
+                          * 12) }}/year)</span
+                        >
+                        {% endif %}
+                      </small>
                     </li>
                     {% endif %}
                   </ul>
