@@ -96,7 +96,6 @@ def profile():
             flash(f'Error saving profile: {str(e)}', 'danger')
 
     # GET request - show the profile form
-    # Get categories from database instead of hardcoded config
     db_categories = Category.get_active_categories()
     categories = [cat.name for cat in db_categories]
     category_descriptions = {cat.name: cat.description for cat in db_categories}
@@ -122,9 +121,33 @@ def profile():
         session_id = session.get('anonymous_user_id')
         profile = UserProfile.query.filter_by(session_id=session_id).first() if session_id else None
 
-    # Parse category spending and reward preferences if profile exists
-    category_spending = json.loads(profile.category_spending) if profile else {}
-    reward_preferences = json.loads(profile.reward_preferences) if profile and profile.reward_preferences else []
+    # Prefill from query params if present
+    prefill = request.args
+    if prefill:
+        # Build category_spending from category_* params
+        category_spending = {}
+        for cat in categories:
+            val = prefill.get(f'category_{cat}')
+            if val is not None:
+                try:
+                    val = float(val)
+                    if val > 0:
+                        category_spending[cat] = val
+                except ValueError:
+                    pass
+        # Other fields
+        credit_score = int(prefill.get('credit_score', profile.credit_score if profile else 700))
+        income = float(prefill.get('income', profile.income if profile else 50000))
+        max_cards = int(prefill.get('max_cards', profile.max_cards if profile else 5))
+        max_annual_fees = float(prefill.get('max_annual_fees', profile.max_annual_fees if profile else 0))
+        reward_preferences = prefill.getlist('reward_preferences') or (json.loads(profile.reward_preferences) if profile and profile.reward_preferences else [])
+    else:
+        category_spending = json.loads(profile.category_spending) if profile else {}
+        credit_score = profile.credit_score if profile else 700
+        income = profile.income if profile else 50000
+        max_cards = profile.max_cards if profile else 5
+        max_annual_fees = profile.max_annual_fees if profile else 0
+        reward_preferences = json.loads(profile.reward_preferences) if profile and profile.reward_preferences else []
 
     return render_template(
         'user_data/profile.html',
@@ -134,5 +157,9 @@ def profile():
         category_spending=category_spending,
         reward_options=reward_options,
         reward_descriptions=reward_descriptions,
-        reward_preferences=reward_preferences
+        reward_preferences=reward_preferences,
+        credit_score=credit_score,
+        income=income,
+        max_cards=max_cards,
+        max_annual_fees=max_annual_fees
     )

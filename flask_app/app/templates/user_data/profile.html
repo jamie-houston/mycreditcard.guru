@@ -168,7 +168,7 @@
               class="form-control"
               id="max_annual_fees"
               name="max_annual_fees"
-              value="{{ profile.max_annual_fees if profile else 0 }}"
+              value="{{ max_annual_fees }}"
             />
           </div>
           <div class="form-text">
@@ -187,11 +187,42 @@
             class="form-control"
             id="max_cards"
             name="max_cards"
-            value="{{ profile.max_cards if profile else 5 }}"
+            value="{{ max_cards }}"
           />
           <div class="form-text">
             How many credit cards are you willing to manage? (1-10)
           </div>
+        </div>
+        <div class="col-md-6 mb-3">
+          <label for="credit_score" class="form-label fw-bold">
+            Credit Score
+          </label>
+          <input
+            type="number"
+            min="300"
+            max="850"
+            class="form-control"
+            id="credit_score"
+            name="credit_score"
+            value="{{ credit_score }}"
+          />
+          <div class="form-text">Your estimated credit score (300-850)</div>
+        </div>
+        <div class="col-md-6 mb-3">
+          <label for="income" class="form-label fw-bold"> Annual Income </label>
+          <div class="input-group">
+            <span class="input-group-text">$</span>
+            <input
+              type="number"
+              step="0.01"
+              min="0"
+              class="form-control"
+              id="income"
+              name="income"
+              value="{{ income }}"
+            />
+          </div>
+          <div class="form-text">Your estimated annual income</div>
         </div>
       </div>
     </div>
