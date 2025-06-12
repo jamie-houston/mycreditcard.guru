@@ -16,7 +16,7 @@ class NerdWalletScraper:
     
     def __init__(self, proxies: Optional[Dict[str, str]] = None, retry_count: int = 3):
         self.base_url = "https://www.nerdwallet.com"
-        self.cards_list_url = f"{self.base_url}/the-best-credit-cards"
+        self.cards_list_url = f"{self.base_url}/best/credit-cards/rewards"
         self.headers = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
             'Accept-Language': 'en-US,en;q=0.9',
@@ -82,364 +82,416 @@ class NerdWalletScraper:
                 f.write(soup.prettify())
             logger.info("Saved HTML to nerdwallet_debug.html for debugging")
         
-        # Find the table with credit card information
+        # Extract JSON data from the page
         cards_data = []
         
-        # New approach: First try to detect if we're on a new-style page or old-style page
-        is_new_style = '/best/credit-cards/' in self.cards_list_url
-        logger.info(f"Detected page style: {'New' if is_new_style else 'Old'} format")
+        # Look for JSON data in script tags
+        script_tags = soup.find_all('script', type=['application/json', 'application/ld+json'])
+        json_data = None
         
-        # Custom selectors based on page type
-        if is_new_style:
-            # For new-style pages (best/credit-cards)
-            # These are the common container patterns for the new NerdWallet format
-            card_containers = soup.select(
-                # Product cards on new NerdWallet pages
-                'div[data-testid="product-card"], '
-                '.Product__Grid-wrapper div[class^="_Card"], '
-                '.best-product-card, '
-                '.ProductCardWrapper, '
-                # Find any div that might contain card information
-                'div.card-info, div[class*="creditcard"], div[class*="credit-card"]'
-            )
-        else:
-            # For old-style pages
-            card_containers = soup.select(
-                '[data-testid="card-container"], .CardBox_container__3d89c, .credit-card-container'
-            )
+        # First, try to find the specific product cards script
+        product_cards_script = soup.find('script', id='product-cards-linked-data')
+        if product_cards_script and product_cards_script.string:
+            try:
+                data = json.loads(product_cards_script.string)
+                if self._contains_card_data(data):
+                    json_data = data
+                    logger.info("Found product cards JSON data")
+            except (json.JSONDecodeError, AttributeError):
+                pass
         
-        logger.info(f"Found {len(card_containers)} card containers using {'new' if is_new_style else 'old'} selectors")
+        # If not found, search through all script tags
+        if not json_data:
+            for script in script_tags:
+                try:
+                    data = json.loads(script.string)
+                    # Look for card data in the JSON structure
+                    if self._contains_card_data(data):
+                        json_data = data
+                        logger.info("Found JSON data containing card information")
+                        break
+                except (json.JSONDecodeError, AttributeError):
+                    continue
         
-        # If we didn't find any containers with the specific selectors, try a more generic approach
-        if not card_containers:
-            # Try a more generic approach to find any likely card containers
-            logger.info("No cards found with specific selectors, trying generic approach")
-            card_containers = soup.select(
-                # Generic card containers
-                'div[class*="card"], div[class*="product"], div[id*="card"], '
-                # Common grid or list structures
-                'li.product-item, div.product-list-item, div.card-list-item'
-            )
-            logger.info(f"Found {len(card_containers)} card containers using generic selectors")
-        
-        # Last resort: Try to extract directly from debug HTML
-        if not card_containers and self.debug_mode:
-            logger.info("No cards found with any selectors, extracting card names from HTML content")
-            # Look for common card names in the HTML content
-            card_name_patterns = [
-                r'(Chase Sapphire Preferred)',
-                r'(Capital One Venture)',
-                r'(American Express Gold Card)',
-                r'(Citi Premier)',
-                r'(Discover it Cash Back)',
-                r'(Bank of America.*Customized Cash)'
+        # If no JSON in script tags, look for inline JSON in the HTML
+        if not json_data:
+            logger.info("No JSON in script tags, looking for inline JSON data")
+            # Look for JSON data patterns in the HTML text
+            html_text = soup.get_text()
+            
+            # Try to find JSON objects that contain card data
+            json_patterns = [
+                r'"offers":\s*\[.*?\]',
+                r'"products":\s*\[.*?\]',
+                r'"cards":\s*\[.*?\]',
+                r'\{"sectionBestFor".*?\}\]'
             ]
-            cards_found_in_text = []
-            for pattern in card_name_patterns:
-                for match in re.finditer(pattern, soup.get_text()):
-                    cards_found_in_text.append(match.group(1))
             
-            logger.info(f"Found {len(cards_found_in_text)} cards by text searching")
+            for pattern in json_patterns:
+                matches = re.findall(pattern, response.text, re.DOTALL)
+                for match in matches:
+                    try:
+                        # Try to extract a complete JSON object
+                        # Find the start of the JSON array/object
+                        start_idx = response.text.find(match)
+                        if start_idx == -1:
+                            continue
+                            
+                        # Find the complete JSON structure
+                        json_str = self._extract_complete_json(response.text, start_idx)
+                        if json_str:
+                            data = json.loads(json_str)
+                            if self._contains_card_data(data):
+                                json_data = data
+                                logger.info(f"Found card data in JSON pattern: {pattern[:50]}...")
+                                break
+                    except (json.JSONDecodeError, Exception) as e:
+                        logger.debug(f"Failed to parse JSON from pattern {pattern[:50]}: {e}")
+                        continue
+                
+                if json_data:
+                    break
+        
+        # If still no JSON data, try to extract from the full page content
+        if not json_data:
+            logger.info("Looking for card data in full page content")
+            # Look for the specific JSON structure we saw in the debug output
+            card_data_pattern = r'\[.*?"sectionBestFor".*?\]'
+            matches = re.findall(card_data_pattern, response.text, re.DOTALL)
             
-            # Create basic card data for each card name found
-            for card_name in cards_found_in_text:
-                issuer = self._extract_issuer_from_name(card_name)
-                cards_data.append({
-                    'name': card_name,
-                    'issuer': issuer,
-                    'annual_fee': 0,  # Default
-                    'reward_categories': [],
+            for match in matches:
+                try:
+                    data = json.loads(match)
+                    if isinstance(data, list) and len(data) > 0:
+                        # Check if this looks like card data
+                        first_item = data[0]
+                        if isinstance(first_item, dict) and any(key in first_item for key in ['name', 'id', 'institution']):
+                            json_data = data
+                            logger.info(f"Found card data array with {len(data)} items")
+                            break
+                except (json.JSONDecodeError, Exception) as e:
+                    logger.debug(f"Failed to parse card data array: {e}")
+                    continue
+        
+        # Process the JSON data to extract card information
+        if json_data:
+            cards_data = self._extract_cards_from_json(json_data)
+            logger.info(f"Extracted {len(cards_data)} cards from JSON data")
+        else:
+            logger.warning("No JSON card data found, falling back to HTML parsing")
+            # Fallback to the original HTML parsing method
+            cards_data = self._scrape_cards_from_html(soup)
+        
+        logger.info(f"Extracted {len(cards_data)} cards total")
+        return cards_data
+    
+    def _contains_card_data(self, data: Any) -> bool:
+        """Check if JSON data contains credit card information"""
+        if isinstance(data, dict):
+            # Look for card-related keys (including LD+JSON format)
+            card_keys = ['name', 'institution', 'annualFee', 'rewardsRates', 'signUpBonusDetails']
+            ld_json_keys = ['@type', 'itemListElement']
+            
+            # Check for LD+JSON structured data
+            if data.get('@type') == 'ItemList' and 'itemListElement' in data:
+                return True
+            
+            if any(key in data for key in card_keys):
+                return True
+            
+            # Recursively check nested objects
+            for value in data.values():
+                if self._contains_card_data(value):
+                    return True
+        elif isinstance(data, list):
+            # Check if it's a list of cards
+            for item in data:
+                if self._contains_card_data(item):
+                    return True
+        return False
+    
+    def _extract_complete_json(self, text: str, start_idx: int) -> Optional[str]:
+        """Extract a complete JSON object/array from text starting at given index"""
+        try:
+            # Find the opening bracket/brace
+            i = start_idx
+            while i < len(text) and text[i] not in '[{':
+                i += 1
+            
+            if i >= len(text):
+                return None
+            
+            # Track bracket/brace depth
+            open_char = text[i]
+            close_char = ']' if open_char == '[' else '}'
+            depth = 1
+            i += 1
+            
+            while i < len(text) and depth > 0:
+                if text[i] == open_char:
+                    depth += 1
+                elif text[i] == close_char:
+                    depth -= 1
+                elif text[i] == '"':
+                    # Skip string content
+                    i += 1
+                    while i < len(text) and text[i] != '"':
+                        if text[i] == '\\':
+                            i += 1  # Skip escaped character
+                        i += 1
+                i += 1
+            
+            if depth == 0:
+                return text[start_idx:i]
+        except Exception as e:
+            logger.debug(f"Error extracting JSON: {e}")
+        
+        return None
+    
+    def _extract_cards_from_json(self, json_data: Any) -> List[Dict[str, Any]]:
+        """Extract card data from JSON structure"""
+        cards = []
+        
+        def process_item(item):
+            if not isinstance(item, dict):
+                return None
+            
+            # Check if this looks like a credit card
+            if not any(key in item for key in ['name', 'institution', 'details']):
+                return None
+            
+            try:
+                card_data = {
+                    'name': item.get('name', '').strip(),
+                    'issuer': '',
+                    'annual_fee': 0,
+                    'reward_categories': {},
                     'special_offers': [],
                     'signup_bonus_points': 0,
                     'signup_bonus_value': 0.0,
                     'signup_bonus_spend_requirement': 0.0,
                     'signup_bonus_time_period': 3,
-                })
-            
-            return cards_data
+                }
+                
+                # Extract issuer
+                if 'institution' in item and isinstance(item['institution'], dict):
+                    card_data['issuer'] = item['institution'].get('name', '')
+                
+                # Extract annual fee
+                if 'details' in item and isinstance(item['details'], dict):
+                    details = item['details']
+                    if 'annualFee' in details and isinstance(details['annualFee'], dict):
+                        annual_fee_value = details['annualFee'].get('value', 0)
+                        if isinstance(annual_fee_value, (int, float)):
+                            card_data['annual_fee'] = float(annual_fee_value)
+                
+                # Extract signup bonus information
+                if 'details' in item and 'signUpBonusDetails' in item['details']:
+                    bonus_details = item['details']['signUpBonusDetails']
+                    if isinstance(bonus_details, dict):
+                        # Extract bonus points/value
+                        bonus_amount = bonus_details.get('bonus', 0)
+                        if isinstance(bonus_amount, (int, float)):
+                            card_data['signup_bonus_points'] = int(bonus_amount)
+                        
+                        # Extract bonus description to get spend requirement and time period
+                        bonus_desc = bonus_details.get('description', '')
+                        if bonus_desc:
+                            # Extract spend requirement
+                            spend_match = re.search(r'\$([0-9,]+)', bonus_desc)
+                            if spend_match:
+                                spend_str = spend_match.group(1).replace(',', '')
+                                try:
+                                    card_data['signup_bonus_spend_requirement'] = float(spend_str)
+                                except ValueError:
+                                    pass
+                            
+                            # Extract time period
+                            time_match = re.search(r'(\d+)\s*months?', bonus_desc, re.IGNORECASE)
+                            if time_match:
+                                try:
+                                    card_data['signup_bonus_time_period'] = int(time_match.group(1))
+                                except ValueError:
+                                    pass
+                            
+                            # Extract bonus value (for miles/points cards)
+                            value_match = re.search(r'equal to \$([0-9,]+)', bonus_desc)
+                            if value_match:
+                                value_str = value_match.group(1).replace(',', '')
+                                try:
+                                    card_data['signup_bonus_value'] = float(value_str)
+                                except ValueError:
+                                    pass
+                
+                # Extract reward rates
+                if 'details' in item and 'rewardsRates' in item['details']:
+                    rewards_rates = item['details']['rewardsRates']
+                    if isinstance(rewards_rates, list):
+                        for rate_info in rewards_rates:
+                            if isinstance(rate_info, dict):
+                                rate = rate_info.get('rate', 0)
+                                description = rate_info.get('description', '')
+                                
+                                if rate and description:
+                                    # Parse the description to extract category
+                                    category = self._parse_reward_category(description)
+                                    if category:
+                                        card_data['reward_categories'][category] = float(rate)
+                
+                # Also check for reward information in tooltips
+                if 'driverRewardRate' in item and isinstance(item['driverRewardRate'], dict):
+                    tooltip = item['driverRewardRate'].get('valueTooltip', '')
+                    if tooltip:
+                        # Parse complex reward descriptions like Chase Sapphire Preferred
+                        reward_categories = self._parse_complex_rewards(tooltip)
+                        card_data['reward_categories'].update(reward_categories)
+                
+                # Only return cards with valid names
+                if card_data['name'] and len(card_data['name']) > 3:
+                    logger.info(f"Successfully scraped {card_data['name']}")
+                    return card_data
+                
+            except Exception as e:
+                logger.error(f"Error processing card item: {e}")
+                return None
         
-        # Process card containers found with selectors
+        # Process the JSON data
+        if isinstance(json_data, list):
+            for item in json_data:
+                card = process_item(item)
+                if card:
+                    cards.append(card)
+        elif isinstance(json_data, dict):
+            # Check for LD+JSON structured data format
+            if json_data.get('@type') == 'ItemList' and 'itemListElement' in json_data:
+                logger.info("Processing LD+JSON structured data")
+                for list_item in json_data['itemListElement']:
+                    if isinstance(list_item, dict) and 'item' in list_item:
+                        item = list_item['item']
+                        if isinstance(item, dict) and item.get('@type') == 'CreditCard':
+                            # Convert LD+JSON format to our standard format
+                            converted_item = self._convert_ld_json_to_standard(item)
+                            card = process_item(converted_item)
+                            if card:
+                                cards.append(card)
+            else:
+                # Look for card arrays in the JSON structure
+                for key, value in json_data.items():
+                    if isinstance(value, list):
+                        for item in value:
+                            card = process_item(item)
+                            if card:
+                                cards.append(card)
+        
+        return cards
+    
+    def _convert_ld_json_to_standard(self, ld_json_item: Dict[str, Any]) -> Dict[str, Any]:
+        """Convert LD+JSON structured data to our standard format"""
+        card_name = ld_json_item.get('name', '')
+        issuer_name = self._extract_issuer_from_name(card_name)
+        
+        converted = {
+            'name': card_name,
+            'institution': {'name': issuer_name},
+            'details': {
+                'annualFee': {'value': 0},
+                'signUpBonusDetails': {'bonus': 0, 'description': ''},
+                'rewardsRates': []
+            }
+        }
+        
+        # Extract annual fee from offers
+        if 'offers' in ld_json_item and isinstance(ld_json_item['offers'], list):
+            for offer in ld_json_item['offers']:
+                if isinstance(offer, dict) and 'priceSpecification' in offer:
+                    price_spec = offer['priceSpecification']
+                    if isinstance(price_spec, dict) and 'price' in price_spec:
+                        converted['details']['annualFee']['value'] = price_spec['price']
+                        break
+        
+        return converted
+    
+    def _parse_complex_rewards(self, reward_text: str) -> Dict[str, float]:
+        """Parse complex reward descriptions like '5x on travel, 3x on dining, 2x on other travel, 1x on all other'"""
+        rewards = {}
+        
+        # Pattern to match "Nx on category" or "N% on category"
+        patterns = [
+            r'(\d+)x\s+on\s+([^,\.;]+)',
+            r'(\d+)%\s+on\s+([^,\.;]+)',
+            r'Earn\s+(\d+)x?\s+([^,\.;]+)',
+            r'(\d+)\s+points?\s+per\s+\$1\s+(?:spent\s+)?on\s+([^,\.;]+)',
+            r'(\d+)\s+miles?\s+per\s+\$1\s+(?:spent\s+)?on\s+([^,\.;]+)'
+        ]
+        
+        for pattern in patterns:
+            matches = re.findall(pattern, reward_text, re.IGNORECASE)
+            for rate_str, category_desc in matches:
+                try:
+                    rate = float(rate_str)
+                    category = self._parse_reward_category(category_desc)
+                    if category and rate > 0:
+                        rewards[category] = rate
+                except ValueError:
+                    continue
+        
+        return rewards
+    
+    def _scrape_cards_from_html(self, soup: BeautifulSoup) -> List[Dict[str, Any]]:
+        """Fallback method to scrape cards from HTML when JSON parsing fails"""
+        logger.info("Using fallback HTML parsing method")
+        
+        # This is the original HTML parsing logic as a fallback
+        cards_data = []
+        
+        # Try to find table rows with card data
+        card_containers = soup.select('tr.MuiTableRow-root, tbody tr')
+        logger.info(f"Found {len(card_containers)} table rows for fallback parsing")
+        
         for container in card_containers:
             try:
-                # Extract card name - use different selectors for new vs old format
-                card_name_elem = None
-                if is_new_style:
-                    card_name_elem = container.select_one(
-                        'h3, h2, div[class*="name"], span[class*="name"], '
-                        'div[class*="title"], span[class*="title"]'
-                    )
-                else:
-                    card_name_elem = container.select_one(
-                        '[data-testid="card-name"], h2, h3, .card-name'
-                    )
-                
-                if not card_name_elem:
-                    # Try a more generic approach
-                    card_name_elem = container.select_one('h2, h3, h4, [class*="title"], [class*="name"]')
-                    
+                # Extract card name
+                card_name_elem = container.select_one('span[data-testid="summary-table-card-name"], td span, h3, h2')
                 if not card_name_elem:
                     continue
                 
                 card_name = card_name_elem.text.strip()
+                if len(card_name) < 3:
+                    continue
                 
-                # Limit the card name length and clean it up
-                if len(card_name) > 100:
-                    # Probably grabbed too much text, try to trim it down
-                    card_name = card_name[:100].split('\n')[0].strip()
-                
-                # Extract issuer from card name
+                # Extract basic information
                 issuer = self._extract_issuer_from_name(card_name)
                 
-                # Extract annual fee
+                # Extract annual fee from table cells
                 annual_fee = 0
-                if is_new_style:
-                    # Look for fee information in the new format
-                    fee_patterns = [
-                        # Direct fee elements
-                        'div[class*="annual-fee"], div[class*="annualFee"]',
-                        # Fee sections
-                        'div:has(> span:contains("Annual fee"))',
-                        # Standard fee elements
-                        'div.fee, span.fee, div.card-fee',
-                        # Generic fee mentions
-                        '[class*="fee"]'
-                    ]
-                    
-                    # Try each pattern until we find a fee
-                    fee_elem = None
-                    fee_text = ""
-                    
-                    for pattern in fee_patterns:
-                        try:
-                            # BeautifulSoup doesn't support :contains() selector directly
-                            # Using a more compatible approach
-                            if ':contains' in pattern:
-                                # Extract text before and after :contains()
-                                before, contains_part = pattern.split(':has(')
-                                label = contains_part.split(':contains("')[1].split('")')[0]
-                                
-                                # Find elements that contain the label text
-                                potential_elements = container.select(before)
-                                for el in potential_elements:
-                                    if label.lower() in el.text.lower():
-                                        fee_elem = el
-                                        break
-                            else:
-                                fee_elem = container.select_one(pattern)
-                            
-                            if fee_elem:
-                                fee_text = fee_elem.text.strip()
-                                break
-                        except Exception as e:
-                            logger.debug(f"Error finding fee with pattern {pattern}: {e}")
-                            continue
-                else:
-                    # Original way of finding fee element
-                    fee_elem = container.select_one(
-                        '[data-testid="annual-fee"], .annual-fee, .card-fee'
-                    )
-                    if fee_elem:
-                        fee_text = fee_elem.text.strip()
+                fee_elements = container.select('td p, td span')
+                for elem in fee_elements:
+                    fee_text = elem.text.strip()
+                    if '$' in fee_text and any(word in fee_text.lower() for word in ['fee', 'annual']):
+                        fee_match = re.search(r'\$(\d+)', fee_text)
+                        if fee_match:
+                            annual_fee = int(fee_match.group(1))
+                            break
                 
-                # Process fee text to extract the amount
-                if fee_text:
-                    if '$0' in fee_text or 'No annual fee' in fee_text or 'no annual fee' in fee_text.lower():
-                        annual_fee = 0
-                    else:
-                        # Try to extract fee amount with different patterns
-                        fee_patterns = [
-                            r'\$(\d+(?:,\d{3})*)',  # Basic dollar amount
-                            r'Annual fee: \$(\d+(?:,\d{3})*)',  # With label
-                            r'Annual fee of \$(\d+(?:,\d{3})*)',  # Alternative phrasing
-                            r'(\d+)\/year',  # Format: 95/year
-                            r'(\d+) per year'  # Format: 95 per year
-                        ]
-                        
-                        for pattern in fee_patterns:
-                            fee_match = re.search(pattern, fee_text)
-                            if fee_match:
-                                try:
-                                    fee_str = fee_match.group(1).replace(',', '')
-                                    annual_fee = int(fee_str)
-                                    break
-                                except (ValueError, IndexError):
-                                    pass
-                
-                # Extract reward categories
-                reward_categories = {}
-                
-                # Different selectors for rewards depending on page style
-                if is_new_style:
-                    reward_patterns = [
-                        # New specific reward selectors
-                        'div[class*="rewards"], div[class*="Rewards"]',
-                        'ul[class*="rewards"], ul[class*="Rewards"]',
-                        # More generic patterns
-                        '[data-testid*="rewards"]',
-                        # Sections that typically contain rewards
-                        'div:has(> span:contains("Rewards")), div:has(> h3:contains("Rewards"))'
-                    ]
-                    
-                    rewards_elem = None
-                    for pattern in reward_patterns:
-                        try:
-                            if ':contains' in pattern:
-                                # Extract text before and after :contains()
-                                before, contains_part = pattern.split(':has(')
-                                label = contains_part.split(':contains("')[1].split('")')[0]
-                                
-                                # Find elements that contain the label text
-                                potential_elements = container.select(before)
-                                for el in potential_elements:
-                                    el_text = el.get_text(strip=True)
-                                    if label.lower() in el_text.lower():
-                                        rewards_elem = el
-                                        break
-                            else:
-                                rewards_elem = container.select_one(pattern)
-                            
-                            if rewards_elem:
-                                break
-                        except Exception as e:
-                            logger.debug(f"Error finding rewards with pattern {pattern}: {e}")
-                            continue
-                    
-                    # If we found a rewards element, extract the text
-                    rewards_text = ""
-                    if rewards_elem:
-                        rewards_text = rewards_elem.get_text(strip=True)
-                    
-                    # If we still don't have rewards text, try to find it in the full card text
-                    if not rewards_text:
-                        card_text = container.get_text(strip=True)
-                        # Look for reward percentage patterns
-                        percentage_matches = re.findall(r'(\d+(?:\.\d+)?)% (?:cash ?back|rewards?|points?) (?:on|for) ([^.;]+)', card_text)
-                        for percentage, category in percentage_matches:
-                            reward_categories[category.strip()] = float(percentage)
-                else:
-                    # Original rewards extraction logic
-                    rewards_elem = container.select_one(
-                        '[data-testid="rewards-rates"], .rewards-rates, .reward-rates'
-                    )
-                
-                # Process any found rewards element
-                if rewards_elem and not reward_categories:  # Only process if we haven't already extracted via regex
-                    rewards_text = rewards_elem.get_text(strip=True)
-                    # Look for patterns like "5% on categories" or "3X points on dining"
-                    patterns = [
-                        r'(\d+(?:\.\d+)?)% (?:cash ?back|rewards?|points?) (?:on|for) ([^.;]+)',
-                        r'(\d+)X? (?:points?|miles?|rewards?) (?:on|for) ([^.;]+)',
-                        r'(\d+) ?% (?:back|cash ?back) (?:on|in|for) ([^.;]+)'
-                    ]
-                    
-                    for pattern in patterns:
-                        matches = re.findall(pattern, rewards_text)
-                        for rate, category in matches:
-                            try:
-                                rate_value = float(rate.replace('X', '').strip())
-                                category = category.strip().lower()
-                                reward_categories[category] = rate_value
-                            except (ValueError, AttributeError):
-                                pass
-                
-                # If we still don't have any reward categories, look in the full card text
-                if not reward_categories:
-                    card_text = container.get_text(strip=True)
-                    # Additional fallback patterns
-                    fallback_patterns = [
-                        r'(\d+(?:\.\d+)?)% back on ([^.;]+)',
-                        r'(\d+(?:\.\d+)?)% cash ?back on ([^.;]+)',
-                        r'Earn (\d+(?:\.\d+)?)% (?:on|in) ([^.;]+)'
-                    ]
-                    
-                    for pattern in fallback_patterns:
-                        matches = re.findall(pattern, card_text)
-                        for rate, category in matches:
-                            try:
-                                rate_value = float(rate)
-                                category = category.strip().lower()
-                                reward_categories[category] = rate_value
-                            except (ValueError, AttributeError):
-                                pass
-                
-                # Extract signup bonus
-                signup_bonus_value = 0.0
-                signup_bonus_points = 0
-                signup_bonus_spend_requirement = 0.0
-                signup_bonus_time_period = 3
-                
-                bonus_elem = container.select_one('[data-testid="card-bonus"], .card-bonus, .signup-bonus')
-                if bonus_elem:
-                    bonus_text = bonus_elem.text.strip()
-                    
-                    # Extract bonus value
-                    value_match = re.search(r'\$(\d+(?:,\d{3})*(?:\.\d+)?)', bonus_text)
-                    if value_match:
-                        signup_bonus_value = float(value_match.group(1).replace(',', ''))
-                    
-                    # Extract bonus points
-                    points_match = re.search(r'(\d+(?:,\d{3})*)\s*(?:points|miles)', bonus_text, re.IGNORECASE)
-                    if points_match:
-                        signup_bonus_points = int(points_match.group(1).replace(',', ''))
-                    
-                    # Extract spend requirement
-                    spend_match = re.search(r'(?:spend|spending)\s+\$(\d+(?:,\d{3})*)', bonus_text, re.IGNORECASE)
-                    if spend_match:
-                        signup_bonus_spend_requirement = float(spend_match.group(1).replace(',', ''))
-                    
-                    # Extract time period
-                    time_match = re.search(r'(?:within|first)\s+(\d+)\s+months', bonus_text, re.IGNORECASE)
-                    if time_match:
-                        signup_bonus_time_period = int(time_match.group(1))
-                
-                # Extract special offers
-                special_offers = []
-                offers_elem = container.select_one('[data-testid="card-perks"], .card-perks, .special-offers')
-                if offers_elem:
-                    offers_text = offers_elem.text.strip()
-                    
-                    # Check for common offers like credits
-                    offer_patterns = [
-                        (r'\$(\d+)\s+annual\s+travel\s+credit', 'travel_credit', 'annual'),
-                        (r'\$(\d+)\s+statement\s+credit', 'statement_credit', 'one_time'),
-                        (r'Free\s+night\s+certificate', 'hotel_certificate', 'annual'),
-                        (r'\$(\d+)\s+in\s+Uber\s+credits', 'uber_credit', 'annual'),
-                        (r'\$(\d+)\s+dining\s+credit', 'dining_credit', 'annual')
-                    ]
-                    
-                    for pattern, offer_type, frequency in offer_patterns:
-                        for match in re.finditer(pattern, offers_text, re.IGNORECASE):
-                            try:
-                                if match.group(1):
-                                    amount = float(match.group(1))
-                                    special_offers.append({
-                                        'type': offer_type,
-                                        'amount': amount,
-                                        'frequency': frequency
-                                    })
-                            except (ValueError, IndexError):
-                                pass
-                
-                # Create card data dictionary
                 card_data = {
                     'name': card_name,
                     'issuer': issuer,
                     'annual_fee': annual_fee,
-                    'reward_categories': reward_categories,
-                    'special_offers': special_offers,
-                    'signup_bonus_points': signup_bonus_points,
-                    'signup_bonus_value': signup_bonus_value,
-                    'signup_bonus_spend_requirement': signup_bonus_spend_requirement,
-                    'signup_bonus_time_period': signup_bonus_time_period,
+                    'reward_categories': {},
+                    'special_offers': [],
+                    'signup_bonus_points': 0,
+                    'signup_bonus_value': 0.0,
+                    'signup_bonus_spend_requirement': 0.0,
+                    'signup_bonus_time_period': 3,
                 }
                 
                 cards_data.append(card_data)
-                logger.info(f"Successfully scraped {card_name}")
+                logger.info(f"Scraped {card_name} using HTML fallback")
                 
             except Exception as e:
-                logger.error(f"Error processing card container: {e}")
+                logger.error(f"Error processing HTML container: {e}")
+                continue
         
-        logger.info(f"Extracted {len(cards_data)} cards total")
         return cards_data
     
     def _extract_issuer_from_name(self, card_name: str) -> str:
