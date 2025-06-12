@@ -113,7 +113,7 @@ endblock %} {% block content %}
                     {% elif category == 'groceries' %} {{
                     card.grocery_reward_rate }}% {% elif category ==
                     'entertainment' %} {{ card.entertainment_reward_rate }}% {%
-                    else %} {{ card.base_reward_rate }}% {% endif %}
+                    else %} {{ card.base_reward_rate }}% (Other) {% endif %}
                   </td>
                   <td class="text-end">${{ "%.2f"|format(value) }}</td>
                 </tr>

@@ -146,7 +146,7 @@ DEFAULT_CATEGORIES = [
         'description': 'Any expenses that don\'t fit into the above categories',
         'icon': 'fas fa-ellipsis-h',
         'sort_order': 140,
-        'aliases': ['all purchases', 'everything else', 'everything', 'all other purchases']
+        'aliases': ['all purchases', 'everything else', 'everything', 'all other purchases', 'base rate', 'base']
     },
     {
         'name': 'paypal',
@@ -163,14 +163,6 @@ DEFAULT_CATEGORIES = [
         'icon': 'fab fa-amazon',
         'sort_order': 150,
         'aliases': []
-    },
-    {
-        'name': 'base',
-        'display_name': 'Base Rate',
-        'description': 'Default rate for all other purchases',
-        'icon': 'fas fa-percentage',
-        'sort_order': 0,
-        'aliases': ['all other purchases']
     }
 ]
 

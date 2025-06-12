@@ -46,12 +46,14 @@ class CreditCard(db.Model):
     def get_category_rate(self, category_name):
         """Get the reward rate for a specific category using the new reward system."""
         from app.models.category import Category
+        # Always map 'base rate' and 'base' to 'other'
+        if category_name.lower() in ['base rate', 'base']:
+            category_name = 'other'
         category = Category.get_by_name(category_name)
         if category:
             reward = self.rewards.filter_by(category_id=category.id).first()
             if reward:
                 return reward.reward_percent
-        
         return 1.0  # Default base rate
 
     def add_reward_category(self, category_name, reward_percent, is_bonus=False, notes=None):
@@ -96,8 +98,8 @@ class CreditCard(db.Model):
     # Property for base reward rate (default reward rate)
     @property
     def base_reward_rate(self):
-        """Get the base reward rate for the card."""
-        return self.get_category_rate('base') 
+        """Get the base reward rate for the card (now always 'other')."""
+        return self.get_category_rate('other')
     
     # Properties for category-specific reward rates
     @property

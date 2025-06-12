@@ -69,19 +69,19 @@ class Category(db.Model):
     def get_by_name_or_alias(cls, name):
         """Get category by name or alias (case-insensitive)."""
         name_lower = name.lower().strip()
-        
+        # Special case: map 'base rate' to 'other'
+        if name_lower in ['base rate', 'base']:
+            return cls.query.filter(cls.name.ilike('other')).first()
         # First try exact name match
         category = cls.query.filter(cls.name.ilike(name_lower)).first()
         if category:
             return category
-        
         # Then try alias match
         categories = cls.query.filter(cls.is_active == True).all()
         for category in categories:
             aliases = category.get_aliases()
             if any(alias.lower().strip() == name_lower for alias in aliases):
                 return category
-        
         return None
 
 

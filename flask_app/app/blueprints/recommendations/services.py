@@ -28,17 +28,15 @@ class RecommendationService:
             # Get the reward rate for this category from the card's reward categories
             categories = card.get_reward_categories()
             for cat_data in categories:
-                if cat_data['category'].lower() == category.lower():
-                    # Handle both 'rate' and 'percentage' field names
+                cat_name = cat_data['category'].lower()
+                if cat_name == category.lower() or (category.lower() in ['base rate', 'base'] and cat_name == 'other'):
                     category_reward_rate = float(cat_data.get('rate', cat_data.get('percentage', 0)))
                     break
             
-            # Use base rate if no specific category rate found
+            # Use 'other' if no specific category rate found
             if category_reward_rate == 0:
-                # Get base rate from the first category with 'base' or default to 1%
                 for cat_data in categories:
-                    if cat_data['category'].lower() == 'base' or cat_data['category'].lower() == 'all':
-                        # Handle both 'rate' and 'percentage' field names
+                    if cat_data['category'].lower() == 'other' or cat_data['category'].lower() == 'all':
                         category_reward_rate = float(cat_data.get('rate', cat_data.get('percentage', 0)))
                         break
                 if category_reward_rate == 0:
