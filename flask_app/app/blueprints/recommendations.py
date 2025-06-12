@@ -1,5 +1,4 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request, jsonify, current_app
-from flask_login import login_required, current_user
 from datetime import datetime
 from app import db
 from app.models.recommendation import Recommendation
@@ -10,14 +9,12 @@ from app.services.recommendation_engine import generate_recommendations
 bp = Blueprint('recommendations', __name__, url_prefix='/recommendations')
 
 @bp.route('/')
-@login_required
 def list():
     """List all recommendations for the current user."""
     recommendations = Recommendation.query.filter_by(user_id=current_user.id).order_by(Recommendation.created_at.desc()).all()
     return render_template('recommendations/list.html', recommendations=recommendations)
 
 @bp.route('/<int:recommendation_id>')
-@login_required
 def view(recommendation_id):
     """View a specific recommendation."""
     recommendation = Recommendation.query.filter_by(id=recommendation_id, user_id=current_user.id).first_or_404()
@@ -30,7 +27,6 @@ def view(recommendation_id):
     return render_template('recommendations/view.html', recommendation=recommendation, cards=cards)
 
 @bp.route('/generate/<int:profile_id>')
-@login_required
 def generate(profile_id):
     """Generate a new recommendation based on a user profile."""
     profile = UserProfile.query.filter_by(id=profile_id, user_id=current_user.id).first_or_404()
@@ -63,7 +59,6 @@ def generate(profile_id):
         return redirect(url_for('profiles.view', profile_id=profile_id))
 
 @bp.route('/delete/<int:recommendation_id>', methods=['GET'])
-@login_required
 def delete(recommendation_id):
     """Delete a recommendation."""
     recommendation = Recommendation.query.filter_by(id=recommendation_id, user_id=current_user.id).first_or_404()

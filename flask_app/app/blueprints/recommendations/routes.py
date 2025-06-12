@@ -9,7 +9,6 @@ from app.blueprints.recommendations.services import RecommendationService
 from app.models.user_data import UserProfile
 
 @bp.route('/')
-@login_required
 def list():
     """List all recommendations for the current user."""
     user_recommendations = RecommendationService.get_user_recommendations(current_user.id)
@@ -26,7 +25,6 @@ def list():
     )
 
 @bp.route('/create/<int:profile_id>')
-@login_required
 def create(profile_id):
     """Create a new recommendation based on a spending profile."""
     try:
@@ -50,7 +48,6 @@ def create(profile_id):
         return redirect(url_for('recommendations.list'))
 
 @bp.route('/view/<int:recommendation_id>')
-@login_required
 def view(recommendation_id):
     """View a specific recommendation."""
     try:
@@ -79,7 +76,6 @@ def view(recommendation_id):
         return redirect(url_for('recommendations.list'))
 
 @bp.route('/delete/<int:recommendation_id>')
-@login_required
 def delete(recommendation_id):
     """Delete a recommendation."""
     try:

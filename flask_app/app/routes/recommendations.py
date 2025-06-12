@@ -9,6 +9,7 @@ from app.utils.recommendation_engine import calculate_card_value
 from datetime import datetime
 import json
 import uuid
+import hashlib
 
 recommendations = Blueprint('recommendations', __name__)
 
@@ -25,20 +26,18 @@ def from_json_filter(json_string):
 @recommendations.route('/list')
 def list():
     """List all recommendations for the current user or session."""
-    # Get the anonymous user ID from session if not authenticated
     if current_user.is_authenticated:
         user_id = current_user.id
         session_id = None
+        profiles = {p.id: p for p in UserProfile.query.filter_by(user_id=user_id).all()}
     else:
         user_id = None
         if 'anonymous_user_id' not in session:
             session['anonymous_user_id'] = str(uuid.uuid4())
         session_id = session['anonymous_user_id']
-
-    # Get recommendations for either the logged-in user or the anonymous session
+        profiles = {p.id: p for p in UserProfile.query.filter_by(session_id=session_id).all()}
     recs = Recommendation.get_for_user_or_session(user_id=user_id, session_id=session_id)
-
-    return render_template('recommendations/list.html', recommendations=recs)
+    return render_template('recommendations/list.html', recommendations=recs, profiles=profiles)
 
 @recommendations.route('/view/<int:recommendation_id>')
 def view(recommendation_id):
@@ -86,11 +85,10 @@ def view(recommendation_id):
         optimal_strategy=optimal_strategy
     )
 
-@recommendations.route('/delete/<int:recommendation_id>', methods=['POST'])
+@recommendations.route('/delete/<recommendation_id>', methods=['POST'])
 def delete(recommendation_id):
-    """Delete a recommendation."""
-    recommendation = Recommendation.query.get_or_404(recommendation_id)
-
+    """Delete a recommendation by deterministic ID."""
+    recommendation = Recommendation.query.filter_by(recommendation_id=recommendation_id).first_or_404()
     # Check if recommendation belongs to current user or session
     if current_user.is_authenticated:
         if recommendation.user_id != current_user.id:
@@ -100,7 +98,6 @@ def delete(recommendation_id):
         if recommendation.session_id != session.get('anonymous_user_id'):
             flash('You do not have permission to delete this recommendation.', 'danger')
             return redirect(url_for('main.index'))
-
     try:
         db.session.delete(recommendation)
         db.session.commit()
@@ -109,7 +106,6 @@ def delete(recommendation_id):
         db.session.rollback()
         flash('Error deleting recommendation.', 'danger')
         current_app.logger.error(f'Error deleting recommendation: {str(e)}')
-
     return redirect(url_for('recommendations.list'))
 
 @recommendations.route('/create/<int:profile_id>', methods=['GET', 'POST'])
@@ -147,92 +143,131 @@ def create(profile_id):
         return redirect(url_for('recommendations.list'))
         # return redirect(url_for('recommendations.create', profile_id=profile.id))
 
+def generate_recommendation_id(profile, recommendation_data):
+    """Generate a deterministic hash for a recommendation based on profile and recommendation data."""
+    # Normalize relevant data
+    profile_data = {
+        'credit_score': profile.credit_score,
+        'income': profile.income,
+        'total_monthly_spend': profile.total_monthly_spend,
+        'category_spending': profile.get_category_spending(),
+        'reward_preferences': profile.get_reward_preferences() if hasattr(profile, 'get_reward_preferences') else [],
+        'max_cards': getattr(profile, 'max_cards', 5),
+        'max_annual_fees': getattr(profile, 'max_annual_fees', 1000.0),
+    }
+    # Recommendation data (sort keys for determinism)
+    rec_data = {
+        'recommended_sequence': recommendation_data.get('recommended_sequence', []),
+        'card_details': recommendation_data.get('card_details', {}),
+        'total_value': recommendation_data.get('total_value', 0),
+        'total_annual_fees': recommendation_data.get('total_annual_fees', 0),
+        'per_month_value': recommendation_data.get('per_month_value', []),
+    }
+    # Serialize and hash
+    hash_input = json.dumps({'profile': profile_data, 'recommendation': rec_data}, sort_keys=True)
+    return hashlib.sha256(hash_input.encode('utf-8')).hexdigest()
 
-@recommendations.route('/results/<int:profile_id>')
-def results(profile_id: int):
-    """Show recommendation results for a user profile."""
-    # Get the user profile
-    profile = UserProfile.query.get_or_404(profile_id)
-
-    # Check if profile belongs to current user or session
-    if current_user.is_authenticated:
-        if profile.user_id != current_user.id:
-            flash('You do not have permission to access this profile.', 'danger')
-            return redirect(url_for('main.index'))
-    else:
-        if profile.session_id != session.get('anonymous_user_id'):
-            flash('You do not have permission to access this profile.', 'danger')
-            return redirect(url_for('main.index'))
-
-    # Get recommendation data from session
-    recommendation_data = session.get('recommendation_data')
-
-    if not recommendation_data:
-        flash('No recommendation data found. Please generate recommendations first.', 'warning')
-        return redirect(url_for('recommendations.create', profile_id=profile.id))
-
-    # Get cards for the recommendation
-    card_ids = recommendation_data.get('recommended_sequence', [])
-    cards = {}
-    for card_id in card_ids:
-        card = db.session.get(CreditCard, card_id)
-        if card:
-            cards[card_id] = card
-
-    # Calculate category totals for display
-    category_totals = {}
-    card_details = recommendation_data.get('card_details', {})
-    for card_id in card_ids:
-        details = card_details.get(str(card_id), {})
-        category_values = details.get('category_values', {})
-        for category, value in category_values.items():
-            if value > 0:  # Only include categories with positive value
-                category_totals[category] = category_totals.get(category, 0) + value
-
-    # Render the results template
-    return render_template(
-        'recommendations/results.html',
-        profile=profile,
-        recommendation=recommendation_data,
-        cards=cards,
-        category_totals=category_totals
-    )
+@recommendations.route('/results/<recommendation_id>')
+def results_by_id(recommendation_id):
+    """Show recommendation results by deterministic, shareable ID."""
+    recommendation = Recommendation.query.filter_by(recommendation_id=recommendation_id).first()
+    if recommendation:
+        profile = UserProfile.query.get_or_404(recommendation.user_profile_id)
+        card_ids = recommendation.recommended_sequence
+        cards = {}
+        for card_id in card_ids:
+            card = db.session.get(CreditCard, card_id)
+            if card:
+                cards[card_id] = card
+        category_totals = {}
+        card_details = recommendation.card_details
+        for card_id in card_ids:
+            details = card_details.get(str(card_id), {})
+            category_values = details.get('category_values', {})
+            for category, value in category_values.items():
+                if value > 0:
+                    category_totals[category] = category_totals.get(category, 0) + value
+        return render_template(
+            'recommendations/results.html',
+            profile=profile,
+            recommendation=recommendation,
+            cards=cards,
+            category_totals=category_totals
+        )
+    # If not in DB, try to reconstruct from session
+    rec_data = session.get('recommendation_data')
+    rec_id = session.get('recommendation_id')
+    if rec_data and rec_id == recommendation_id:
+        # Build a fake profile for display
+        class FakeProfile:
+            def __init__(self, d):
+                self.credit_score = d.get('credit_score', 700)
+                self.income = d.get('income', 50000)
+                self.max_cards = d.get('max_cards', 5)
+                self.max_annual_fees = d.get('max_annual_fees', 0)
+                self._category_spending = d.get('category_spending', {})
+                self._reward_preferences = d.get('reward_preferences', [])
+            def get_category_spending(self):
+                return self._category_spending
+            def get_reward_preferences(self):
+                return self._reward_preferences
+            @property
+            def total_monthly_spend(self):
+                return sum(self._category_spending.values())
+        # Try to get the original profile_data from the hash input
+        # (We can't, so just use the spending_profile and card_preferences from rec_data)
+        fake_profile = FakeProfile({
+            'credit_score':  rec_data.get('spending_profile', {}).get('credit_score', 700),
+            'income': rec_data.get('spending_profile', {}).get('income', 50000),
+            'max_cards': rec_data.get('spending_profile', {}).get('max_cards', 5),
+            'max_annual_fees': rec_data.get('spending_profile', {}).get('max_annual_fees', 0),
+            'category_spending': rec_data.get('spending_profile', {}),
+            'reward_preferences': rec_data.get('card_preferences', []),
+        })
+        card_ids = rec_data.get('recommended_sequence', [])
+        cards = {}
+        for card_id in card_ids:
+            card = db.session.get(CreditCard, card_id)
+            if card:
+                cards[card_id] = card
+        category_totals = {}
+        card_details = rec_data.get('card_details', {})
+        for card_id in card_ids:
+            details = card_details.get(str(card_id), {})
+            category_values = details.get('category_values', {})
+            for category, value in category_values.items():
+                if value > 0:
+                    category_totals[category] = category_totals.get(category, 0) + value
+        return render_template(
+            'recommendations/results.html',
+            profile=fake_profile,
+            recommendation=rec_data,
+            cards=cards,
+            category_totals=category_totals
+        )
+    flash('No recommendation found for this ID. Please generate a new recommendation.', 'warning')
+    return redirect(url_for('user_data.profile'))
 
 @recommendations.route('/save/<int:profile_id>', methods=['POST'])
 def save(profile_id: int):
-    """Save a recommendation to the database."""
-    # Get the user profile
+    """Save a recommendation to the database with deterministic ID."""
     profile = UserProfile.query.get_or_404(profile_id)
-
-    # Check if profile belongs to current user or session
-    if current_user.is_authenticated:
-        if profile.user_id != current_user.id:
-            flash('You do not have permission to access this profile.', 'danger')
-            return redirect(url_for('main.index'))
-    else:
-        if profile.session_id != session.get('anonymous_user_id'):
-            flash('You do not have permission to access this profile.', 'danger')
-            return redirect(url_for('main.index'))
-
     # Get recommendation data from session
     recommendation_data = session.get('recommendation_data')
-
     if not recommendation_data:
         flash('No recommendation data found. Please generate recommendations first.', 'warning')
         return redirect(url_for('recommendations.create', profile_id=profile.id))
-
-    # Create a new recommendation
-    try:
+    # Generate deterministic ID
+    recommendation_id = generate_recommendation_id(profile, recommendation_data)
+    # Check if recommendation already exists
+    recommendation = Recommendation.query.filter_by(recommendation_id=recommendation_id).first()
+    if not recommendation:
         recommendation = Recommendation()
         recommendation.user_profile_id = profile.id
-
-        # Set user_id or session_id based on authentication status
         if current_user.is_authenticated:
             recommendation.user_id = current_user.id
         else:
             recommendation.session_id = session.get('anonymous_user_id')
-
-        # Set recommendation data
         recommendation.spending_profile = recommendation_data.get('spending_profile', {})
         recommendation.card_preferences = recommendation_data.get('card_preferences', {})
         recommendation.recommended_sequence = recommendation_data.get('recommended_sequence', [])
@@ -241,17 +276,11 @@ def save(profile_id: int):
         recommendation.total_annual_fees = recommendation_data.get('total_annual_fees', 0)
         recommendation.per_month_value = recommendation_data.get('per_month_value', [])
         recommendation.card_count = len(recommendation_data.get('recommended_sequence', []))
-
+        recommendation.recommendation_id = recommendation_id
         db.session.add(recommendation)
         db.session.commit()
-
-        flash('Recommendation saved successfully!', 'success')
-        return redirect(url_for('recommendations.view', recommendation_id=recommendation.id))
-    except Exception as e:
-        db.session.rollback()
-        flash(f'Error saving recommendation: {str(e)}', 'danger')
-        current_app.logger.error(f'Error saving recommendation: {str(e)}')
-        return redirect(url_for('recommendations.results', profile_id=profile.id))
+    flash('Recommendation saved successfully!', 'success')
+    return redirect(url_for('recommendations.results_by_id', recommendation_id=recommendation.recommendation_id))
 
 @recommendations.route('/compare/<int:profile_id>')
 def compare(profile_id: int):
@@ -334,27 +363,69 @@ def download(profile_id: int):
 
     return response
 
-@recommendations.route('/history/<int:profile_id>')
-def history(profile_id):
-    """Show recommendation history for a profile."""
-    # Get the user profile
-    profile = UserProfile.query.get_or_404(profile_id)
-
-    # Check if profile belongs to current user or session
+@recommendations.route('/history')
+def history():
+    """Show recommendation history for the current user or session."""
     if current_user.is_authenticated:
-        if profile.user_id != current_user.id:
-            flash('You do not have permission to access this profile.', 'danger')
-            return redirect(url_for('main.index'))
+        user_id = current_user.id
+        session_id = None
     else:
-        if profile.session_id != session.get('anonymous_user_id'):
-            flash('You do not have permission to access this profile.', 'danger')
-            return redirect(url_for('main.index'))
+        user_id = None
+        if 'anonymous_user_id' not in session:
+            session['anonymous_user_id'] = str(uuid.uuid4())
+        session_id = session['anonymous_user_id']
+    recommendations = Recommendation.get_for_user_or_session(user_id=user_id, session_id=session_id)
+    return render_template('recommendations/history.html', recommendations=recommendations)
 
-    # Get all recommendations for this profile
-    recommendations = Recommendation.query.filter_by(user_profile_id=profile_id).order_by(Recommendation.created_at.desc()).all()
-
-    return render_template(
-        'recommendations/history.html',
-        profile=profile,
-        recommendations=recommendations
-    )
+@recommendations.route('/generate', methods=['POST'])
+def generate():
+    """Generate recommendations from form data, statelessly."""
+    form = request.form
+    # Extract and normalize form data
+    profile_data = {
+        'credit_score': int(form.get('credit_score', 700)),
+        'income': float(form.get('income', 50000)),
+        'max_cards': int(form.get('max_cards', 5)),
+        'max_annual_fees': float(form.get('max_annual_fees', 0)),
+        'category_spending': {},
+        'reward_preferences': form.getlist('reward_preferences'),
+    }
+    for key, value in form.items():
+        if key.startswith('category_') and value:
+            category = key.replace('category_', '')
+            try:
+                amount = float(value)
+                if amount > 0:
+                    profile_data['category_spending'][category] = amount
+            except ValueError:
+                pass
+    # Deterministic hash
+    import hashlib, json
+    hash_input = json.dumps(profile_data, sort_keys=True)
+    recommendation_id = hashlib.sha256(hash_input.encode('utf-8')).hexdigest()
+    # Generate recommendations (stateless, not saved yet)
+    from app.models.credit_card import CreditCard
+    from app.engine.recommendation import RecommendationEngine
+    # Create a fake UserProfile-like object
+    class FakeProfile:
+        def __init__(self, d):
+            self.credit_score = d['credit_score']
+            self.income = d['income']
+            self.max_cards = d['max_cards']
+            self.max_annual_fees = d['max_annual_fees']
+            self._category_spending = d['category_spending']
+            self._reward_preferences = d['reward_preferences']
+        def get_category_spending(self):
+            return self._category_spending
+        def get_reward_preferences(self):
+            return self._reward_preferences
+        @property
+        def total_monthly_spend(self):
+            return sum(self._category_spending.values())
+    fake_profile = FakeProfile(profile_data)
+    cards = CreditCard.query.all()
+    recommendation_data = RecommendationEngine.generate_recommendations(fake_profile, cards)
+    # Store in session for display (not DB)
+    session['recommendation_data'] = recommendation_data
+    session['recommendation_id'] = recommendation_id
+    return redirect(url_for('recommendations.results_by_id', recommendation_id=recommendation_id))

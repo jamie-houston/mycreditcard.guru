@@ -143,9 +143,13 @@ class RecommendationService:
         return recommendation
     
     @staticmethod
-    def get_user_recommendations(user_id):
-        """Get all recommendations for a user."""
-        return Recommendation.query.filter_by(user_id=user_id).order_by(Recommendation.created_at.desc()).all()
+    def get_user_recommendations(user_id=None, session_id=None):
+        """Get all recommendations for a user or session."""
+        if user_id:
+            return Recommendation.query.filter_by(user_id=user_id).order_by(Recommendation.created_at.desc()).all()
+        elif session_id:
+            return Recommendation.query.filter_by(session_id=session_id).order_by(Recommendation.created_at.desc()).all()
+        return []
     
     @staticmethod
     def get_recommendation(recommendation_id, user_id):

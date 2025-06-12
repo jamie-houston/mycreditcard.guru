@@ -42,7 +42,6 @@ def index():
                            category_rewards=category_rewards)
 
 @categories.route('/new', methods=['GET', 'POST'])
-@login_required
 @admin_required
 def new():
     """Create a new category."""
@@ -80,7 +79,6 @@ def new():
     return render_template('categories/new.html', category=None)
 
 @categories.route('/<int:id>/edit', methods=['GET', 'POST'])
-@login_required
 @admin_required
 def edit(id):
     """Edit an existing category."""
@@ -122,7 +120,6 @@ def edit(id):
     return render_template('categories/edit.html', category=category)
 
 @categories.route('/<int:id>/delete', methods=['POST'])
-@login_required
 @admin_required
 def delete(id):
     """Delete or deactivate a category."""

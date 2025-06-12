@@ -270,7 +270,7 @@
         <div class="card-body">
           <div class="d-grid gap-2">
             <form
-              action="{{ url_for('recommendations.save', profile_id=profile.id) }}"
+              action="{% if profile.id is defined %}{{ url_for('recommendations.save', profile_id=profile.id) }}{% else %}#{% endif %}"
               method="post"
             >
               <input
@@ -278,13 +278,25 @@
                 name="csrf_token"
                 value="{{ csrf_token() }}"
               />
-              <button type="submit" class="btn btn-success w-100">
+              <button
+                type="submit"
+                class="btn btn-success w-100"
+                {%
+                if
+                not
+                profile.id
+                is
+                defined
+                %}disabled{%
+                endif
+                %}
+              >
                 Save Recommendation
               </button>
             </form>
             <a
-              href="{{ url_for('recommendations.create', profile_id=profile.id) }}"
-              class="btn btn-primary"
+              href="{% if profile.id is defined %}{{ url_for('recommendations.create', profile_id=profile.id) }}{% else %}#{% endif %}"
+              class="btn btn-primary {% if not profile.id is defined %}disabled{% endif %}"
             >
               Generate New Recommendation
             </a>

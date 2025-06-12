@@ -1,5 +1,4 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request, session, abort
-from flask_login import login_required, current_user
 from datetime import datetime
 from app.models.recommendation import Recommendation
 from app.models.credit_card import CreditCard
@@ -10,14 +9,12 @@ from app import db
 recommendations_bp = Blueprint('recommendations', __name__)
 
 @recommendations_bp.route('/list')
-@login_required
 def list():
     """Display a list of the user's saved recommendations."""
     recommendations = Recommendation.query.filter_by(user_id=current_user.id).order_by(Recommendation.created_at.desc()).all()
     return render_template('recommendations/list.html', recommendations=recommendations)
 
 @recommendations_bp.route('/create/<int:profile_id>', methods=['GET', 'POST'])
-@login_required
 def create(profile_id):
     """Create a new credit card recommendation based on a user profile."""
     # Get the user profile
@@ -41,7 +38,6 @@ def create(profile_id):
     return redirect(url_for('recommendations.view', recommendation_id=recommendation.id))
 
 @recommendations_bp.route('/view/<int:recommendation_id>')
-@login_required
 def view(recommendation_id):
     """View a specific recommendation."""
     recommendation = Recommendation.query.filter_by(id=recommendation_id, user_id=current_user.id).first_or_404()
@@ -53,7 +49,6 @@ def view(recommendation_id):
     return render_template('recommendations/view.html', recommendation=recommendation, cards=cards)
 
 @recommendations_bp.route('/delete/<int:recommendation_id>')
-@login_required
 def delete(recommendation_id):
     """Delete a recommendation."""
     recommendation = Recommendation.query.filter_by(id=recommendation_id, user_id=current_user.id).first_or_404()

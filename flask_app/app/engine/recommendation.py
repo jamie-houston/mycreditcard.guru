@@ -124,7 +124,6 @@ class RecommendationEngine:
         
         # Create recommendation data structure
         recommendation_data = {
-            'profile_id': profile.id,
             'cards': [card['card_id'] for card in optimal_combination],
             'recommended_sequence': RecommendationEngine.determine_application_sequence(optimal_combination),
             'card_details': {str(card['card_id']): card for card in optimal_combination},
@@ -135,6 +134,8 @@ class RecommendationEngine:
             'card_preferences': profile.get_reward_preferences() if hasattr(profile, 'get_reward_preferences') else [],
             'generated_at': datetime.now().isoformat()
         }
+        if hasattr(profile, 'id') and profile.id is not None:
+            recommendation_data['profile_id'] = profile.id
         
         return recommendation_data
 

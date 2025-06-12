@@ -70,7 +70,6 @@ def index():
                           cards_bonus_categories=cards_bonus_categories)
 
 @credit_cards.route('/import', methods=['GET', 'POST'])
-@login_required
 @admin_required
 def import_cards():
     """Import credit cards from a data source"""
@@ -151,7 +150,6 @@ def import_cards():
     return render_template('credit_cards/import.html', sources=SOURCE_URLS)
 
 @credit_cards.route('/new', methods=['GET', 'POST'])
-@login_required
 @admin_required
 def new():
     """Add a new credit card."""
@@ -307,7 +305,6 @@ def show(id):
                           form=form)
 
 @credit_cards.route('/<int:id>/edit', methods=['GET', 'POST'])
-@login_required
 @admin_required
 def edit(id):
     """Edit a credit card."""
@@ -448,7 +445,6 @@ def edit(id):
                           form_action=url_for('credit_cards.edit', id=id))
 
 @credit_cards.route('/<int:id>/delete', methods=['POST'])
-@login_required
 @admin_required
 def delete(id):
     """Delete a credit card."""

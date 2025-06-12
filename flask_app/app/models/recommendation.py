@@ -38,6 +38,9 @@ class Recommendation(db.Model):
     # Timestamps
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
     
+    # Deterministic, shareable recommendation ID
+    recommendation_id = db.Column(db.String(64), unique=True, index=True, nullable=False)
+    
     # Relationships with fully qualified paths
     user = db.relationship('app.models.user.User', backref=db.backref('user_recommendations', lazy=True))
 
@@ -129,6 +132,8 @@ class Recommendation(db.Model):
         return []
     
     def __repr__(self):
+        if hasattr(self, 'recommendation_id') and self.recommendation_id:
+            return f'<Recommendation {self.id} ({self.recommendation_id})>'
         if self.user_id:
             return f'<Recommendation {self.id} for User {self.user_id}>'
         else:

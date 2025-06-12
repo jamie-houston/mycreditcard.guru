@@ -11,7 +11,6 @@ from datetime import datetime
 recommendations_bp = Blueprint('recommendations', __name__, url_prefix='/recommendations')
 
 @recommendations_bp.route('/generate', methods=['POST'])
-@login_required
 def generate():
     """Generate credit card recommendations based on user profile"""
     try:
@@ -52,7 +51,6 @@ def generate():
         return redirect(url_for('user_data.profiles'))
 
 @recommendations_bp.route('/view/<int:recommendation_id>')
-@login_required
 def view(recommendation_id):
     """View a saved recommendation"""
     recommendation = Recommendation.query.filter_by(id=recommendation_id, user_id=current_user.id).first_or_404()
@@ -64,14 +62,12 @@ def view(recommendation_id):
     return render_template('recommendations/view.html', recommendation=recommendation, cards=cards)
 
 @recommendations_bp.route('/list')
-@login_required
 def list():
     """List all saved recommendations"""
     recommendations = Recommendation.query.filter_by(user_id=current_user.id).order_by(Recommendation.created_at.desc()).all()
     return render_template('recommendations/list.html', recommendations=recommendations)
 
 @recommendations_bp.route('/delete/<int:recommendation_id>')
-@login_required
 def delete(recommendation_id):
     """Delete a saved recommendation"""
     recommendation = Recommendation.query.filter_by(id=recommendation_id, user_id=current_user.id).first_or_404()
