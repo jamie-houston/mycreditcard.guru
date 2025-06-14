@@ -141,8 +141,8 @@ def create_app(config_name=None):
     from app.routes.user_data import user_data as user_data_blueprint
     app.register_blueprint(user_data_blueprint, url_prefix='/profile')
     
-    from app.routes.recommendations import recommendations as recommendations_blueprint
-    app.register_blueprint(recommendations_blueprint, url_prefix='/recommendations')
+    from app.blueprints.recommendations import bp as recommendations_blueprint
+    app.register_blueprint(recommendations_blueprint)
     
     # Register admin blueprint
     from app.blueprints.admin import admin_bp
@@ -151,6 +151,9 @@ def create_app(config_name=None):
     # Register categories blueprint
     from app.routes.categories import categories as categories_blueprint
     app.register_blueprint(categories_blueprint)
+    
+    from app.routes.issuers import issuers as issuers_blueprint
+    app.register_blueprint(issuers_blueprint, url_prefix='/issuers')
     
     # Add template context processors
     @app.context_processor

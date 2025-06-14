@@ -9,6 +9,7 @@ from app.utils.compat import safe_query, safe_commit
 import json
 from datetime import datetime
 from flask_wtf import FlaskForm
+from app.models import CreditCard, Category, CreditCardReward, CardIssuer
 
 credit_cards = Blueprint('credit_cards', __name__)
 
@@ -88,7 +89,10 @@ def import_cards():
                 for card_data in cards_data:
                     # Map field names from scraper to model fields
                     mapped_data = map_scraped_card_to_model(card_data)
-                    
+
+                    if mapped_data is None:
+                        continue
+
                     # Add source information
                     mapped_data['source'] = source
                     mapped_data['source_url'] = source_url
@@ -129,12 +133,13 @@ def import_cards():
                         if isinstance(reward_data, dict):
                             category_name = reward_data.get('category', '')
                             percentage = reward_data.get('percentage', reward_data.get('rate', 1.0))
-                            
+                            limit = reward_data.get('limit')
                             if category_name and percentage:
                                 card.add_reward_category(
                                     category_name=category_name,
                                     reward_percent=float(percentage),
-                                    is_bonus=(float(percentage) > 1.0)
+                                    is_bonus=(float(percentage) > 1.0),
+                                    limit=float(limit) if limit not in (None, "", "null") else None
                                 )
             
             flash(f"Successfully imported {len(cards_data)} credit cards from {source}.", "success")
@@ -158,7 +163,7 @@ def new():
             # Extract basic card details
             data = {
                 'name': request.form.get('name'),
-                'issuer': request.form.get('issuer'),
+                'issuer_id': request.form.get('issuer_id'),
                 'annual_fee': float(request.form.get('annual_fee', 0)),
                 'signup_bonus_points': int(request.form.get('signup_bonus_points', 0)),
                 'signup_bonus_value': float(request.form.get('signup_bonus_value', 0)),
@@ -179,20 +184,23 @@ def new():
             for idx in category_indices:
                 category_name = request.form.get(f'category_name_{idx}')
                 category_percentage = request.form.get(f'category_percentage_{idx}')
-                
+                category_limit = request.form.get(f'category_limit_{idx}')
                 if category_name and category_percentage:
                     try:
                         reward_categories.append({
                             'category': category_name,
-                            'percentage': float(category_percentage)
+                            'percentage': float(category_percentage),
+                            'limit': float(category_limit) if category_limit not in (None, '', 'null') else None
                         })
                     except ValueError:
                         flash(f'Invalid percentage for {category_name}', 'danger')
                         # Get active categories from database for error case
                         from app.models.category import Category
                         categories = Category.get_active_categories()
+                        issuers = CardIssuer.all_ordered()
                         return render_template('credit_cards/new.html', 
                                               categories=categories,
+                                              issuers=issuers,
                                               form_action=url_for('credit_cards.new'),
                                               categories_data=True)
             
@@ -224,8 +232,10 @@ def new():
                         # Get active categories from database for error case
                         from app.models.category import Category
                         categories = Category.get_active_categories()
+                        issuers = CardIssuer.all_ordered()
                         return render_template('credit_cards/new.html', 
                                               categories=categories,
+                                              issuers=issuers,
                                               form_action=url_for('credit_cards.new'),
                                               categories_data=True)
             
@@ -247,12 +257,13 @@ def new():
             for reward_data in reward_categories:
                 category_name = reward_data.get('category')
                 percentage = reward_data.get('percentage')
-                
+                limit = reward_data.get('limit')
                 if category_name and percentage:
                     card.add_reward_category(
                         category_name=category_name,
                         reward_percent=float(percentage),
-                        is_bonus=(percentage > 1.0)  # Consider it a bonus if > 1%
+                        is_bonus=(percentage > 1.0),  # Consider it a bonus if > 1%
+                        limit=float(limit) if limit not in (None, '', 'null') else None
                     )
             
             # Commit the reward changes
@@ -269,9 +280,11 @@ def new():
     # Get active categories from database
     from app.models.category import Category
     categories = Category.get_active_categories()
+    issuers = CardIssuer.all_ordered()
     
     return render_template('credit_cards/new.html', 
                           categories=categories,
+                          issuers=issuers,
                           form_action=url_for('credit_cards.new'),
                           categories_data=True)
 
@@ -286,7 +299,8 @@ def show(id):
         reward_categories.append({
             'category': reward.category.display_name,
             'percentage': reward.reward_percent,
-            'id': reward.category_id
+            'id': reward.category_id,
+            'limit': reward.limit
         })
     
     # Parse special offers (still using JSON for now)
@@ -323,7 +337,7 @@ def edit(id):
             # Similar processing as in the 'new' route
             data = {
                 'name': request.form.get('name'),
-                'issuer': request.form.get('issuer'),
+                'issuer_id': request.form.get('issuer_id'),
                 'annual_fee': float(request.form.get('annual_fee', 0)),
                 'signup_bonus_points': int(request.form.get('signup_bonus_points', 0)),
                 'signup_bonus_value': float(request.form.get('signup_bonus_value', 0)),
@@ -344,24 +358,28 @@ def edit(id):
             for idx in category_indices:
                 category_name = request.form.get(f'category_name_{idx}')
                 category_percentage = request.form.get(f'category_percentage_{idx}')
-                
+                category_limit = request.form.get(f'category_limit_{idx}')
                 if category_name and category_percentage:
                     try:
                         reward_categories.append({
                             'category': category_name,
-                            'percentage': float(category_percentage)
+                            'percentage': float(category_percentage),
+                            'limit': float(category_limit) if category_limit not in (None, '', 'null') else None
                         })
                     except ValueError:
                         flash(f'Invalid percentage for {category_name}', 'danger')
                         # Get active categories from database for error case
                         from app.models.category import Category
                         categories = Category.get_active_categories()
+                        issuers = CardIssuer.all_ordered()
                         return render_template('credit_cards/edit.html', 
                                               card=card,
                                               categories=categories,
+                                              issuers=issuers,
                                               reward_categories=reward_categories,
                                               special_offers=special_offers,
-                                              form_action=url_for('credit_cards.edit', id=id))
+                                              form_action=url_for('credit_cards.edit', id=id),
+                                              categories_data=True)
             
             data['reward_categories'] = json.dumps(reward_categories)
             
@@ -410,12 +428,13 @@ def edit(id):
             for reward_data in reward_categories:
                 category_name = reward_data.get('category')
                 percentage = reward_data.get('percentage')
-                
+                limit = reward_data.get('limit')
                 if category_name and percentage:
                     card.add_reward_category(
                         category_name=category_name,
                         reward_percent=float(percentage),
-                        is_bonus=(percentage > 1.0)  # Consider it a bonus if > 1%
+                        is_bonus=(percentage > 1.0),  # Consider it a bonus if > 1%
+                        limit=float(limit) if limit not in (None, '', 'null') else None
                     )
             
             # Commit the reward changes
@@ -434,15 +453,19 @@ def edit(id):
     try:
         from app.models.category import Category
         categories = Category.get_active_categories()
+        issuers = CardIssuer.all_ordered()
     except:
         categories = None
+        issuers = None
 
     return render_template('credit_cards/edit.html', 
                           card=card,
                           categories=categories,
+                          issuers=issuers,
                           reward_categories=reward_categories,
                           special_offers=special_offers,
-                          form_action=url_for('credit_cards.edit', id=id))
+                          form_action=url_for('credit_cards.edit', id=id),
+                          categories_data=True)
 
 @credit_cards.route('/<int:id>/delete', methods=['POST'])
 @admin_required
@@ -457,4 +480,9 @@ def delete(id):
     except Exception as e:
         flash(f'Error deleting card: {str(e)}', 'danger')
     
-    return redirect(url_for('credit_cards.index')) 
+    return redirect(url_for('credit_cards.index'))
+
+def get_issuer_by_name(name: str):
+    if not name:
+        return None
+    return CardIssuer.query.filter_by(name=name).first() 

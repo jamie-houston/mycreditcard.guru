@@ -441,10 +441,7 @@ class NerdWalletScraper:
         """Fallback method to scrape cards from HTML when JSON parsing fails"""
         logger.info("Using fallback HTML parsing method")
         
-        # This is the original HTML parsing logic as a fallback
         cards_data = []
-        
-        # Try to find table rows with card data
         card_containers = soup.select('tr.MuiTableRow-root, tbody tr')
         logger.info(f"Found {len(card_containers)} table rows for fallback parsing")
         
@@ -454,14 +451,10 @@ class NerdWalletScraper:
                 card_name_elem = container.select_one('span[data-testid="summary-table-card-name"], td span, h3, h2')
                 if not card_name_elem:
                     continue
-                
                 card_name = card_name_elem.text.strip()
                 if len(card_name) < 3:
                     continue
-                
-                # Extract basic information
                 issuer = self._extract_issuer_from_name(card_name)
-                
                 # Extract annual fee from table cells
                 annual_fee = 0
                 fee_elements = container.select('td p, td span')
@@ -472,26 +465,71 @@ class NerdWalletScraper:
                         if fee_match:
                             annual_fee = int(fee_match.group(1))
                             break
-                
+                # --- New: Extract reward info and signup bonus from aria-label spans ---
+                reward_categories = {}
+                signup_bonus_points = 0
+                signup_bonus_value = 0.0
+                signup_bonus_spend_requirement = 0.0
+                signup_bonus_time_period = 3
+                # Find all aria-label spans
+                aria_spans = container.select('span[aria-label]')
+                reward_text = ''
+                bonus_text = ''
+                for span in aria_spans:
+                    aria = span.get('aria-label', '')
+                    if 'earn' in aria.lower() and ('mile' in aria.lower() or 'point' in aria.lower()):
+                        reward_text = aria
+                    if 'bonus' in aria.lower():
+                        bonus_text = aria
+                # Parse reward categories
+                if reward_text:
+                    reward_categories = self._parse_complex_rewards(reward_text)
+                # Parse signup bonus
+                if bonus_text:
+                    # Extract points/miles
+                    points_match = re.search(r'(\d{1,3}(?:,\d{3})*)\s*(?:miles|points|point)', bonus_text, re.IGNORECASE)
+                    if points_match:
+                        try:
+                            signup_bonus_points = int(points_match.group(1).replace(',', ''))
+                        except Exception:
+                            pass
+                    # Extract spend requirement
+                    spend_match = re.search(r'\$([0-9,]+)', bonus_text)
+                    if spend_match:
+                        try:
+                            signup_bonus_spend_requirement = float(spend_match.group(1).replace(',', ''))
+                        except Exception:
+                            pass
+                    # Extract time period
+                    time_match = re.search(r'(\d+)\s*months?', bonus_text, re.IGNORECASE)
+                    if time_match:
+                        try:
+                            signup_bonus_time_period = int(time_match.group(1))
+                        except Exception:
+                            pass
+                    # Extract bonus value (for miles/points cards)
+                    value_match = re.search(r'equal to \$([0-9,]+)', bonus_text)
+                    if value_match:
+                        try:
+                            signup_bonus_value = float(value_match.group(1).replace(',', ''))
+                        except Exception:
+                            pass
                 card_data = {
                     'name': card_name,
                     'issuer': issuer,
                     'annual_fee': annual_fee,
-                    'reward_categories': {},
+                    'reward_categories': reward_categories,
                     'special_offers': [],
-                    'signup_bonus_points': 0,
-                    'signup_bonus_value': 0.0,
-                    'signup_bonus_spend_requirement': 0.0,
-                    'signup_bonus_time_period': 3,
+                    'signup_bonus_points': signup_bonus_points,
+                    'signup_bonus_value': signup_bonus_value,
+                    'signup_bonus_spend_requirement': signup_bonus_spend_requirement,
+                    'signup_bonus_time_period': signup_bonus_time_period,
                 }
-                
                 cards_data.append(card_data)
                 logger.info(f"Scraped {card_name} using HTML fallback")
-                
             except Exception as e:
                 logger.error(f"Error processing HTML container: {e}")
                 continue
-        
         return cards_data
     
     def _extract_issuer_from_name(self, card_name: str) -> str:

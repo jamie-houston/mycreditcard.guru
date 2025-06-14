@@ -2,6 +2,21 @@ from app import db
 from datetime import datetime
 import json
 
+class CardIssuer(db.Model):
+    __tablename__ = 'card_issuers'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), unique=True, nullable=False)
+    cards = db.relationship('CreditCard', backref='issuer_obj', lazy='dynamic')
+    def __repr__(self):
+        return f'<CardIssuer {self.name}>'
+
+    def __str__(self):
+        return self.name
+
+    @staticmethod
+    def all_ordered():
+        return CardIssuer.query.order_by(CardIssuer.name).all()
+
 class CreditCard(db.Model):
     """Credit card model."""
     __tablename__ = 'credit_cards'
@@ -9,7 +24,7 @@ class CreditCard(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     # Basic Card Info
     name = db.Column(db.String(100), nullable=False)
-    issuer = db.Column(db.String(100), nullable=False)
+    issuer_id = db.Column(db.Integer, db.ForeignKey('card_issuers.id'), nullable=False)
     annual_fee = db.Column(db.Float, default=0.0)
     is_active = db.Column(db.Boolean, default=True)
     
@@ -56,7 +71,7 @@ class CreditCard(db.Model):
                 return reward.reward_percent
         return 1.0  # Default base rate
 
-    def add_reward_category(self, category_name, reward_percent, is_bonus=False, notes=None):
+    def add_reward_category(self, category_name, reward_percent, is_bonus=False, notes=None, limit=None):
         """Add or update a reward category for this card."""
         from app.models.category import Category, CreditCardReward
         
@@ -70,13 +85,15 @@ class CreditCard(db.Model):
             existing_reward.reward_percent = reward_percent
             existing_reward.is_bonus_category = is_bonus
             existing_reward.notes = notes
+            existing_reward.limit = limit
         else:
             new_reward = CreditCardReward(
                 credit_card_id=self.id,
                 category_id=category.id,
                 reward_percent=reward_percent,
                 is_bonus_category=is_bonus,
-                notes=notes
+                notes=notes,
+                limit=limit
             )
             db.session.add(new_reward)
         
@@ -90,7 +107,8 @@ class CreditCard(db.Model):
                 'display_name': reward.category.display_name,
                 'reward_percent': reward.reward_percent,
                 'is_bonus_category': reward.is_bonus_category,
-                'notes': reward.notes
+                'notes': reward.notes,
+                'limit': reward.limit
             }
             for reward in self.rewards
         ]
@@ -182,7 +200,7 @@ class CreditCard(db.Model):
         return {
             'id': self.id,
             'name': self.name,
-            'issuer': self.issuer,
+            'issuer': self.issuer_id,
             'annual_fee': self.annual_fee,
             'is_active': self.is_active,
             'point_value': self.point_value,

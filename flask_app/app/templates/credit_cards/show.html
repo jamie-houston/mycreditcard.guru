@@ -79,6 +79,7 @@
             <tr>
               <th>Category</th>
               <th>Reward Percentage</th>
+              <th>Limit (Up To $)</th>
             </tr>
           </thead>
           <tbody>
@@ -93,6 +94,10 @@
                 </a>
               </td>
               <td>{{ category.percentage }}%</td>
+              <td>
+                {% if category.limit is not none %} Up to ${{
+                '%.2f'|format(category.limit) }} {% else %} No limit {% endif %}
+              </td>
             </tr>
             {% endfor %}
           </tbody>

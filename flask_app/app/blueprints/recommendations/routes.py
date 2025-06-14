@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, redirect, url_for, flash, request, abort
+from flask import Blueprint, render_template, redirect, url_for, flash, request, abort, session
 from flask_login import login_required, current_user
 from app import db
 from app.blueprints.recommendations import bp
@@ -52,9 +52,12 @@ def view(recommendation_id):
     """View a specific recommendation."""
     try:
         # Get recommendation
+        user_id = current_user.id if hasattr(current_user, 'id') and current_user.is_authenticated else None
+        session_id = session.get('anonymous_user_id')
         recommendation = RecommendationService.get_recommendation(
             recommendation_id=recommendation_id,
-            user_id=current_user.id
+            user_id=user_id,
+            session_id=session_id
         )
         
         # Get cards in the recommendation
@@ -75,14 +78,17 @@ def view(recommendation_id):
         flash(f'Error viewing recommendation: {str(e)}', 'danger')
         return redirect(url_for('recommendations.list'))
 
-@bp.route('/delete/<int:recommendation_id>')
+@bp.route('/delete/<int:recommendation_id>', methods=['POST'])
 def delete(recommendation_id):
     """Delete a recommendation."""
     try:
         # Delete recommendation
+        user_id = current_user.id if hasattr(current_user, 'id') and current_user.is_authenticated else None
+        session_id = session.get('anonymous_user_id')
         RecommendationService.delete_recommendation(
             recommendation_id=recommendation_id,
-            user_id=current_user.id
+            user_id=user_id,
+            session_id=session_id
         )
         
         flash('Recommendation deleted successfully!', 'success')

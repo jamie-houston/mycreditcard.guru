@@ -23,31 +23,53 @@ class RecommendationService:
         
         # Calculate rewards for each spending category
         for category, monthly_amount in monthly_spending.items():
-            category_reward_rate = 0
-            
-            # Get the reward rate for this category from the card's reward categories
             categories = card.get_reward_categories()
+            main_rate = None
+            limit = None
+            base_rate = 1.0
+            # Find main rate and limit for this category
             for cat_data in categories:
                 cat_name = cat_data['category'].lower()
                 if cat_name == category.lower() or (category.lower() in ['base rate', 'base'] and cat_name == 'other'):
-                    category_reward_rate = float(cat_data.get('rate', cat_data.get('percentage', 0)))
+                    main_rate = float(cat_data.get('rate', cat_data.get('percentage', 0)))
+                    limit = cat_data.get('limit')
                     break
-            
-            # Use 'other' if no specific category rate found
-            if category_reward_rate == 0:
-                for cat_data in categories:
-                    if cat_data['category'].lower() == 'other' or cat_data['category'].lower() == 'all':
-                        category_reward_rate = float(cat_data.get('rate', cat_data.get('percentage', 0)))
-                        break
-                if category_reward_rate == 0:
-                    category_reward_rate = 1.0  # Default 1% if no base rate found
-            
-            # Calculate the annual value for this category
+            # Find base rate (for spend above limit)
+            for cat_data in categories:
+                if cat_data['category'].lower() in ['other', 'all']:
+                    base_rate = float(cat_data.get('rate', cat_data.get('percentage', 1.0)))
+                    break
+            if main_rate is None:
+                main_rate = base_rate
             annual_amount = monthly_amount * 12
-            # Convert percentage to decimal (e.g., 3.0% becomes 0.03)
-            category_value = annual_amount * (category_reward_rate / 100)
-            
-            rewards_by_category[category] = category_value
+            if limit is not None:
+                try:
+                    limit = float(limit)
+                except Exception:
+                    limit = None
+            if limit is not None and limit >= 0:
+                # Apply main rate up to the limit, base rate for the rest
+                main_spend = min(annual_amount, limit)
+                base_spend = max(0, annual_amount - limit)
+                category_value = main_spend * (main_rate / 100) + base_spend * (base_rate / 100)
+                rewards_by_category[category] = {
+                    'main_rate': main_rate,
+                    'main_spend': main_spend,
+                    'limit': limit,
+                    'base_rate': base_rate,
+                    'base_spend': base_spend,
+                    'value': category_value
+                }
+            else:
+                category_value = annual_amount * (main_rate / 100)
+                rewards_by_category[category] = {
+                    'main_rate': main_rate,
+                    'main_spend': annual_amount,
+                    'limit': None,
+                    'base_rate': base_rate,
+                    'base_spend': 0,
+                    'value': category_value
+                }
             annual_value += category_value
             
         # Add sign-up bonus (already in dollars from the database)
@@ -150,26 +172,19 @@ class RecommendationService:
         return []
     
     @staticmethod
-    def get_recommendation(recommendation_id, user_id):
-        """Get a specific recommendation for a user."""
+    def get_recommendation(recommendation_id, user_id=None, session_id=None):
+        """Get a specific recommendation for a user or session."""
         recommendation = Recommendation.query.get_or_404(recommendation_id)
-        
-        # Verify user owns the recommendation
-        if recommendation.user_id != user_id:
-            raise ValueError("User does not own this recommendation")
-            
-        return recommendation
+        if (user_id and recommendation.user_id == user_id) or (session_id and recommendation.session_id == session_id):
+            return recommendation
+        raise ValueError("User does not own this recommendation")
     
     @staticmethod
-    def delete_recommendation(recommendation_id, user_id):
-        """Delete a recommendation."""
+    def delete_recommendation(recommendation_id, user_id=None, session_id=None):
+        """Delete a recommendation for a user or session."""
         recommendation = Recommendation.query.get_or_404(recommendation_id)
-        
-        # Verify user owns the recommendation
-        if recommendation.user_id != user_id:
-            raise ValueError("User does not own this recommendation")
-            
-        db.session.delete(recommendation)
-        db.session.commit()
-        
-        return True 
+        if (user_id and recommendation.user_id == user_id) or (session_id and recommendation.session_id == session_id):
+            db.session.delete(recommendation)
+            db.session.commit()
+            return True
+        raise ValueError("User does not own this recommendation") 

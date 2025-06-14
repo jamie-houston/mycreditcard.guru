@@ -4,6 +4,7 @@ from app.models.user import User
 from app.models.user_data import UserProfile
 from app.models.recommendation import Recommendation
 from app.models.credit_card import CreditCard
+from app.models import CardIssuer
 import json
 
 class ModelsTestCase(unittest.TestCase):
@@ -61,9 +62,13 @@ class ModelsTestCase(unittest.TestCase):
     
     def test_credit_card_model(self):
         """Test CreditCard model."""
+        test_issuer = CardIssuer(name='Test Bank')
+        db.session.add(test_issuer)
+        db.session.commit()
+        
         card = CreditCard(
             name='Test Card',
-            issuer='Test Bank',
+            issuer_id=test_issuer.id,
             annual_fee=95.0,
             point_value=0.01,
             reward_categories=json.dumps([
@@ -78,7 +83,7 @@ class ModelsTestCase(unittest.TestCase):
         # Test retrieval
         retrieved_card = CreditCard.query.filter_by(name='Test Card').first()
         self.assertIsNotNone(retrieved_card)
-        self.assertEqual(retrieved_card.issuer, 'Test Bank')
+        self.assertEqual(retrieved_card.issuer_id, test_issuer.id)
         
         # Test new reward system methods
         self.assertEqual(retrieved_card.base_reward_rate, 1.0)  # Default base rate
@@ -120,7 +125,8 @@ class ModelsTestCase(unittest.TestCase):
             total_value=1000.0,
             total_annual_fees=95.0,
             _per_month_value='[83.33, 166.67, 250.0, 333.33, 416.67, 500.0, 583.33, 666.67, 750.0, 833.33, 916.67, 1000.0]',
-            card_count=3
+            card_count=3,
+            recommendation_id="test-recommendation-id"
         )
         db.session.add(recommendation)
         db.session.commit()

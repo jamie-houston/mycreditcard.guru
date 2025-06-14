@@ -13,7 +13,9 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 from app import create_app, db
 from app.models.credit_card import CreditCard
 from app.models.category import Category, CreditCardReward
+from app.models import CardIssuer
 from app.utils.card_scraper import scrape_credit_cards
+from app.utils.data_utils import map_scraped_card_to_model
 
 # Set up logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -116,6 +118,11 @@ def import_cards_from_json(json_file):
         logger.error(f"Error loading cards from JSON file: {e}")
         return []
 
+def get_issuer_by_name(name: str):
+    if not name:
+        return None
+    return CardIssuer.query.filter_by(name=name).first()
+
 def import_cards(use_proxies: bool = False, limit: int = 0, clear: bool = False, json_file: str = None):
     """Import credit cards from NerdWallet."""
     logger.info("Starting card import script")
@@ -153,13 +160,16 @@ def import_cards(use_proxies: bool = False, limit: int = 0, clear: bool = False,
         imported_count = 0
         updated_count = 0
         skipped_count = 0
+        failed_cards = []  # Track failed cards with reasons
         
         for card_data in cards_data:
             try:
                 # Skip cards without a name
                 if not card_data.get('name'):
+                    reason = f"Missing name: {card_data}"
                     logger.warning(f"Skipping card with missing name: {card_data}")
                     skipped_count += 1
+                    failed_cards.append({'card': card_data, 'reason': reason})
                     continue
                 
                 card_name = card_data['name']
@@ -182,7 +192,7 @@ def import_cards(use_proxies: bool = False, limit: int = 0, clear: bool = False,
                         card_data.pop(field)
                 
                 # Filter out any other fields that don't match the model
-                valid_fields = ['name', 'issuer', 'annual_fee', 'special_offers', 
+                valid_fields = ['name', 'issuer_id', 'annual_fee', 'special_offers', 
                                'signup_bonus_points', 'signup_bonus_value', 'signup_bonus_min_spend', 
                                'signup_bonus_time_limit', 'is_active', 'source', 'source_url']
                 
@@ -201,6 +211,15 @@ def import_cards(use_proxies: bool = False, limit: int = 0, clear: bool = False,
                 # Now filter the fields
                 filtered_card_data = {k: v for k, v in card_data.items() if k in valid_fields}
                 
+                # Use map_scraped_card_to_model to handle issuer mapping and validation
+                mapped_card_data = map_scraped_card_to_model(filtered_card_data)
+                if mapped_card_data is None:
+                    reason = "Missing or invalid issuer."
+                    print(f"Skipping card '{filtered_card_data['name']}' - {reason}")
+                    failed_cards.append({'card': filtered_card_data, 'reason': reason})
+                    continue
+                filtered_card_data = mapped_card_data
+                
                 # Add empty reward_categories for backward compatibility
                 filtered_card_data['reward_categories'] = json.dumps([])
                 
@@ -208,28 +227,24 @@ def import_cards(use_proxies: bool = False, limit: int = 0, clear: bool = False,
                 if 'special_offers' in filtered_card_data:
                     filtered_card_data['special_offers'] = json.dumps(filtered_card_data['special_offers'])
                 
-                # Check if card already exists by name and issuer
-                # IMPORTANT: This is where we handle overwriting existing cards
-                # If a card with the same name and issuer exists, we update all its fields
-                existing_card = CreditCard.query.filter_by(
-                    name=filtered_card_data['name'],
-                    issuer=filtered_card_data['issuer']
-                ).first()
-                
-                if existing_card:
-                    # Update existing card - will overwrite all fields with new values
+                # Check if card already exists by name and issuer_id
+                card = CreditCard.query.filter_by(name=filtered_card_data['name'], issuer_id=filtered_card_data['issuer_id']).first()
+                if card:
+                    # Update existing card - will overwrite all fields
                     for key, value in filtered_card_data.items():
-                        setattr(existing_card, key, value)
+                        setattr(card, key, value)
                     
                     # Clear existing rewards and add new ones
-                    CreditCardReward.query.filter_by(credit_card_id=existing_card.id).delete()
-                    create_card_rewards(existing_card, valid_rewards)
+                    CreditCardReward.query.filter_by(credit_card_id=card.id).delete()
+                    create_card_rewards(card, valid_rewards)
                     
                     updated_count += 1
                     logger.info(f"Updated card: {filtered_card_data['name']} (with {len(valid_rewards)} reward categories)")
                 else:
                     # Create new card
-                    card = CreditCard(**filtered_card_data)
+                    card = CreditCard(
+                        **{k: v for k, v in filtered_card_data.items() if k != 'reward_categories'}
+                    )
                     db.session.add(card)
                     db.session.flush()  # Get the card ID
                     
@@ -248,14 +263,25 @@ def import_cards(use_proxies: bool = False, limit: int = 0, clear: bool = False,
                     logger.info(f"Committed batch of cards (progress: {imported_count + updated_count}/{len(cards_data)})")
                 
             except Exception as e:
+                reason = f"Exception: {e}"
                 logger.error(f"Error importing card {card_data.get('name', 'unknown')}: {e}")
                 logger.exception(e)
                 skipped_count += 1
+                failed_cards.append({'card': card_data, 'reason': reason})
         
         # Final commit for any remaining cards
         try:
             db.session.commit()
             logger.info(f"Import completed. Added {imported_count} new cards, updated {updated_count} existing cards, skipped {skipped_count} cards.")
+            if failed_cards:
+                print("\n--- Failed Card Imports ---")
+                for fail in failed_cards:
+                    name = fail['card'].get('name', '[unknown]')
+                    reason = fail['reason']
+                    print(f"- '{name}': {reason}")
+                print(f"\nTotal failed cards: {len(failed_cards)}. That's more than the number of British sunny days in a year!")
+            else:
+                print("\nAll cards imported successfully. Not a single one left behind—unlike my umbrella on the train.")
             return imported_count, updated_count, skipped_count
         except Exception as e:
             db.session.rollback()

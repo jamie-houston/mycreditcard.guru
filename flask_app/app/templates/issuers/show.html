@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>{{ issuer.name }}</h1>
+<p>
+    <a href="{{ url_for('issuers.edit', issuer_id=issuer.id) }}" class="btn btn-primary">Edit</a>
+    <form action="{{ url_for('issuers.delete', issuer_id=issuer.id) }}" method="post" style="display:inline;">
+        <button type="submit" class="btn btn-danger" onclick="return confirm('Delete this issuer?');">Delete</button>
+    </form>
+</p>
+<h2>Cards</h2>
+{% if cards %}
+    <ul>
+    {% for card in cards %}
+        <li><a href="{{ url_for('credit_cards.show', id=card.id) }}">{{ card.name }}</a></li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>No cards for this issuer.</p>
+{% endif %}
+<a href="{{ url_for('issuers.index') }}">Back to Issuers</a>
+{% endblock %} 

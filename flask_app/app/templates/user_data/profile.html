@@ -13,7 +13,7 @@
 
 <form
   method="post"
-  action="{{ url_for('recommendations.generate') }}"
+  action="{{ url_for('user_data.profile') }}"
   id="profile-form"
 >
   <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
@@ -168,7 +168,7 @@
               class="form-control"
               id="max_annual_fees"
               name="max_annual_fees"
-              value="{{ max_annual_fees }}"
+              value="{{ profile.max_annual_fees if profile else 0 }}"
             />
           </div>
           <div class="form-text">
@@ -187,60 +187,41 @@
             class="form-control"
             id="max_cards"
             name="max_cards"
-            value="{{ max_cards }}"
+            value="{{ profile.max_cards if profile else 5 }}"
           />
           <div class="form-text">
             How many credit cards are you willing to manage? (1-10)
           </div>
         </div>
-        <div class="col-md-6 mb-3">
-          <label for="credit_score" class="form-label fw-bold">
-            Credit Score
-          </label>
-          <input
-            type="number"
-            min="300"
-            max="850"
-            class="form-control"
-            id="credit_score"
-            name="credit_score"
-            value="{{ credit_score }}"
-          />
-          <div class="form-text">Your estimated credit score (300-850)</div>
-        </div>
-        <div class="col-md-6 mb-3">
-          <label for="income" class="form-label fw-bold"> Annual Income </label>
-          <div class="input-group">
-            <span class="input-group-text">$</span>
-            <input
-              type="number"
-              step="0.01"
-              min="0"
-              class="form-control"
-              id="income"
-              name="income"
-              value="{{ income }}"
-            />
-          </div>
-          <div class="form-text">Your estimated annual income</div>
-        </div>
       </div>
     </div>
   </div>
 
+  {% if profile %}
   <div class="mb-4 text-center">
-    <button type="submit" class="btn btn-success btn-lg">
+    <a
+      href="/recommendations/create/{{ profile.id }}"
+      class="btn btn-success btn-lg"
+    >
       <i class="fas fa-magic me-2"></i>Generate Recommendations
-    </button>
+    </a>
   </div>
+  {% endif %}
 </form>
 
 {% endblock %} {% block scripts %}
 <script src="{{ url_for('static', filename='js/user_profile.js') }}"></script>
 {% if profile and category_spending %}
 <script>
+  // Pass spending data to the chart function
   document.addEventListener('DOMContentLoaded', function() {
-    var categorySpending = {{ category_spending|tojson }};
+    var categorySpending = {
+      {% for category, value in category_spending.items() %}
+        {% if value > 0 %}
+        '{{ category }}': {{ value }},
+        {% endif %}
+      {% endfor %}
+    };
     window.renderSpendingChart(categorySpending);
   });
 </script>

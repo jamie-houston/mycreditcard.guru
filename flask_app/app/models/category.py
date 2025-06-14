@@ -99,6 +99,7 @@ class CreditCardReward(db.Model):
     reward_percent = db.Column(db.Float, nullable=False, default=1.0)  # Percentage (e.g., 2.0 for 2%)
     is_bonus_category = db.Column(db.Boolean, default=False)  # If this is a bonus category vs base rate
     notes = db.Column(db.Text)  # Any special conditions or notes
+    limit = db.Column(db.Float, nullable=True)  # Max dollar amount for which the reward applies (None = no limit)
     
     # Metadata
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
@@ -118,6 +119,7 @@ class CreditCardReward(db.Model):
             'reward_percent': self.reward_percent,
             'is_bonus_category': self.is_bonus_category,
             'notes': self.notes,
+            'limit': self.limit,
             'created_at': self.created_at.isoformat(),
             'updated_at': self.updated_at.isoformat()
         } 

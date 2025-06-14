@@ -6,7 +6,7 @@
 # Import base models first
 from app.models.category import Category, CreditCardReward
 from app.models.profile import CreditCardProfile
-from app.models.credit_card import CreditCard
+from app.models.credit_card import CreditCard, CardIssuer
 from app.models.goal import Goal
 
 # Import User last as it references the other models

@@ -1,0 +1,145 @@
+[
+  {
+    "name": "Wells Fargo Active Cash\u00ae Card",
+    "issuer": "Wells Fargo",
+    "annual_fee": 0.0,
+    "reward_categories": {},
+    "special_offers": [],
+    "signup_bonus_points": 0,
+    "signup_bonus_value": 0.0,
+    "signup_bonus_spend_requirement": 0.0,
+    "signup_bonus_time_period": 3
+  },
+  {
+    "name": "Citi Double Cash\u00ae Card",
+    "issuer": "Citi",
+    "annual_fee": 0.0,
+    "reward_categories": {},
+    "special_offers": [],
+    "signup_bonus_points": 0,
+    "signup_bonus_value": 0.0,
+    "signup_bonus_spend_requirement": 0.0,
+    "signup_bonus_time_period": 3
+  },
+  {
+    "name": "Blue Cash Preferred\u00ae Card from American Express",
+    "issuer": "American Express",
+    "annual_fee": 95.0,
+    "reward_categories": {},
+    "special_offers": [],
+    "signup_bonus_points": 0,
+    "signup_bonus_value": 0.0,
+    "signup_bonus_spend_requirement": 0.0,
+    "signup_bonus_time_period": 3
+  },
+  {
+    "name": "Chase Freedom Unlimited\u00ae",
+    "issuer": "Chase",
+    "annual_fee": 0.0,
+    "reward_categories": {},
+    "special_offers": [],
+    "signup_bonus_points": 0,
+    "signup_bonus_value": 0.0,
+    "signup_bonus_spend_requirement": 0.0,
+    "signup_bonus_time_period": 3
+  },
+  {
+    "name": "Capital One Savor Cash Rewards Credit Card",
+    "issuer": "Capital One",
+    "annual_fee": 0.0,
+    "reward_categories": {},
+    "special_offers": [],
+    "signup_bonus_points": 0,
+    "signup_bonus_value": 0.0,
+    "signup_bonus_spend_requirement": 0.0,
+    "signup_bonus_time_period": 3
+  },
+  {
+    "name": "Chase Freedom Flex\u00ae",
+    "issuer": "Chase",
+    "annual_fee": 0.0,
+    "reward_categories": {},
+    "special_offers": [],
+    "signup_bonus_points": 0,
+    "signup_bonus_value": 0.0,
+    "signup_bonus_spend_requirement": 0.0,
+    "signup_bonus_time_period": 3
+  },
+  {
+    "name": "Discover it\u00ae Cash Back",
+    "issuer": "Discover",
+    "annual_fee": 0.0,
+    "reward_categories": {},
+    "special_offers": [],
+    "signup_bonus_points": 0,
+    "signup_bonus_value": 0.0,
+    "signup_bonus_spend_requirement": 0.0,
+    "signup_bonus_time_period": 3
+  },
+  {
+    "name": "Capital One Venture Rewards Credit Card",
+    "issuer": "Capital One",
+    "annual_fee": 95.0,
+    "reward_categories": {},
+    "special_offers": [],
+    "signup_bonus_points": 0,
+    "signup_bonus_value": 0.0,
+    "signup_bonus_spend_requirement": 0.0,
+    "signup_bonus_time_period": 3
+  },
+  {
+    "name": "Chase Sapphire Preferred\u00ae Card",
+    "issuer": "Chase",
+    "annual_fee": 95.0,
+    "reward_categories": {},
+    "special_offers": [],
+    "signup_bonus_points": 0,
+    "signup_bonus_value": 0.0,
+    "signup_bonus_spend_requirement": 0.0,
+    "signup_bonus_time_period": 3
+  },
+  {
+    "name": "Discover it\u00ae Student Chrome",
+    "issuer": "Discover",
+    "annual_fee": 0.0,
+    "reward_categories": {},
+    "special_offers": [],
+    "signup_bonus_points": 0,
+    "signup_bonus_value": 0.0,
+    "signup_bonus_spend_requirement": 0.0,
+    "signup_bonus_time_period": 3
+  },
+  {
+    "name": "Bilt World Elite Mastercard\u00ae Credit Card",
+    "issuer": "Unknown Issuer",
+    "annual_fee": 0.0,
+    "reward_categories": {},
+    "special_offers": [],
+    "signup_bonus_points": 0,
+    "signup_bonus_value": 0.0,
+    "signup_bonus_spend_requirement": 0.0,
+    "signup_bonus_time_period": 3
+  },
+  {
+    "name": "Marriott Bonvoy Boundless\u00ae Credit Card",
+    "issuer": "Unknown Issuer",
+    "annual_fee": 95.0,
+    "reward_categories": {},
+    "special_offers": [],
+    "signup_bonus_points": 0,
+    "signup_bonus_value": 0.0,
+    "signup_bonus_spend_requirement": 0.0,
+    "signup_bonus_time_period": 3
+  },
+  {
+    "name": "The New United\u2120 Explorer Card",
+    "issuer": "Unknown Issuer",
+    "annual_fee": 150.0,
+    "reward_categories": {},
+    "special_offers": [],
+    "signup_bonus_points": 0,
+    "signup_bonus_value": 0.0,
+    "signup_bonus_spend_requirement": 0.0,
+    "signup_bonus_time_period": 3
+  }
+]

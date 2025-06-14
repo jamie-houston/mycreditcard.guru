@@ -942,7 +942,7 @@ def _sample_credit_cards():
             "reward_categories": [
                 {"category": "dining", "percentage": 3},
                 {"category": "streaming", "percentage": 3},
-                {"category": "online_grocery", "percentage": 3},
+                {"category": "online_groceries", "percentage": 3},
                 {"category": "travel", "percentage": 2},
                 {"category": "other", "percentage": 1}
             ]

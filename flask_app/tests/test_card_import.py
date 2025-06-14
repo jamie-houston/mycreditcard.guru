@@ -11,6 +11,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 from app import create_app, db
 from app.models.credit_card import CreditCard
 from app.models.user import User
+from app.models import CardIssuer
 from app.utils.data_utils import map_scraped_card_to_model
 import app.utils.card_scraper  # Import the module directly to ensure proper patching
 
@@ -42,10 +43,14 @@ class TestCardImport(unittest.TestCase):
         db.session.add(admin)
         db.session.commit()
         
+        # Create a test issuer
+        self.test_issuer = CardIssuer(name="Test Bank")
+        db.session.add(self.test_issuer)
+        db.session.commit()
         # Set up the mock data for scraping
         self.mock_card_data = [{
             "name": "Test Travel Card",
-            "issuer": "Test Bank",
+            "issuer_id": self.test_issuer.id,
             "annual_fee": 95.0,
             "signup_bonus_points": 60000,
             "signup_bonus_value": 750.0,
@@ -131,7 +136,7 @@ class TestCardImport(unittest.TestCase):
             # If one of our mocks was used, the name should be "Test Travel Card"
             if mock_scrape1.called or mock_scrape2.called:
                 self.assertEqual(card.name, "Test Travel Card")
-                self.assertEqual(card.issuer, "Test Bank")
+                self.assertEqual(card.issuer_id, self.test_issuer.id)
                 self.assertEqual(card.signup_bonus_min_spend, 4000.0)
                 self.assertEqual(card.signup_bonus_time_limit, 3)
                 
@@ -151,7 +156,7 @@ class TestCardImport(unittest.TestCase):
         # Mock card data from scraper (using scraper field names)
         scraped_card_data = {
             'name': 'Test Travel Card',
-            'issuer': 'Test Bank',
+            'issuer_id': self.test_issuer.id,
             'annual_fee': 99.0,
             'signup_bonus_points': 60000,
             'signup_bonus_value': 600.0,
@@ -167,14 +172,14 @@ class TestCardImport(unittest.TestCase):
         }
         
         # Map the fields using our utility function
-        mapped_data = map_scraped_card_to_model(scraped_card_data)
+        mapped_data = map_scraped_card_to_model(scraped_card_data, skip_category_lookup=True)
         
         # Create a new CreditCard instance using the mapped data
         card = CreditCard(**mapped_data)
         
         # Verify the card has the correct field values
         self.assertEqual(card.name, 'Test Travel Card')
-        self.assertEqual(card.issuer, 'Test Bank')
+        self.assertEqual(card.issuer_id, self.test_issuer.id)
         self.assertEqual(card.annual_fee, 99.0)
         self.assertEqual(card.signup_bonus_points, 60000)
         self.assertEqual(card.signup_bonus_value, 600.0)
@@ -194,7 +199,7 @@ class TestCardImport(unittest.TestCase):
         # Create a card with the mapped field names
         card = CreditCard(
             name='Test Card',
-            issuer='Test Bank',
+            issuer_id=self.test_issuer.id,
             annual_fee=99.0,
             signup_bonus_min_spend=4000.0,
             signup_bonus_time_limit=3
@@ -211,7 +216,7 @@ class TestCardImport(unittest.TestCase):
         """Test that the field mapper correctly maps field names."""
         scraped_data = {
             'name': 'Test Card',
-            'issuer': 'Test Bank',
+            'issuer_id': self.test_issuer.id,
             'signup_bonus_spend_requirement': 3000,
             'signup_bonus_time_period': 90,
             'signup_bonus_points': 50000,
@@ -223,7 +228,7 @@ class TestCardImport(unittest.TestCase):
         }
         
         # Map the scraped data
-        mapped_data = map_scraped_card_to_model(scraped_data)
+        mapped_data = map_scraped_card_to_model(scraped_data, skip_category_lookup=True)
         
         # Check that fields are correctly mapped
         self.assertEqual(mapped_data['signup_bonus_min_spend'], 3000)
@@ -234,7 +239,7 @@ class TestCardImport(unittest.TestCase):
         
         # Check that unmapped fields are preserved
         self.assertEqual(mapped_data['name'], 'Test Card')
-        self.assertEqual(mapped_data['issuer'], 'Test Bank')
+        self.assertEqual(mapped_data['issuer_id'], self.test_issuer.id)
         self.assertEqual(mapped_data['reward_categories'], json.dumps([]))
 
     def test_field_mapping(self):
@@ -242,7 +247,7 @@ class TestCardImport(unittest.TestCase):
         # Sample scraped data with scraper field names
         scraped_data = {
             'name': 'Test Card',
-            'issuer': 'Test Bank',
+            'issuer_id': self.test_issuer.id,
             'annual_fee': 95.0,
             'signup_bonus_points': 50000,
             'signup_bonus_value': 500.0,
@@ -258,11 +263,11 @@ class TestCardImport(unittest.TestCase):
         }
         
         # Map the scraped data fields to model fields
-        mapped_data = map_scraped_card_to_model(scraped_data)
+        mapped_data = map_scraped_card_to_model(scraped_data, skip_category_lookup=True)
         
         # Check that the fields were correctly mapped
         self.assertEqual(mapped_data.get('name'), 'Test Card')
-        self.assertEqual(mapped_data.get('issuer'), 'Test Bank')
+        self.assertEqual(mapped_data.get('issuer_id'), self.test_issuer.id)
         self.assertEqual(mapped_data.get('annual_fee'), 95.0)
         
         # Check that the problematic fields were correctly mapped

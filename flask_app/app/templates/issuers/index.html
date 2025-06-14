@@ -1,0 +1,43 @@
+{% extends 'base.html' %} {% block content %}
+<h1>Card Issuers</h1>
+<table class="table">
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for issuer in issuers %}
+    <tr>
+      <td>
+        <a href="{{ url_for('issuers.show', issuer_id=issuer.id) }}"
+          >{{ issuer.name }}</a
+        >
+      </td>
+      <td>
+        <a
+          href="{{ url_for('issuers.edit', issuer_id=issuer.id) }}"
+          class="btn btn-sm btn-primary"
+          >Edit</a
+        >
+        <form
+          action="{{ url_for('issuers.delete', issuer_id=issuer.id) }}"
+          method="post"
+          style="display: inline"
+        >
+          <button
+            type="submit"
+            class="btn btn-sm btn-danger"
+            onclick="return confirm('Delete this issuer?');"
+          >
+            Delete
+          </button>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+<a href="{{ url_for('issuers.new') }}" class="btn btn-success">Add Issuer</a>
+{% endblock %}

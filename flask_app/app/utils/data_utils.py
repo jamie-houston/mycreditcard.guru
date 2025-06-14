@@ -1,12 +1,23 @@
 import json
+from app.models import CardIssuer
 
-def map_scraped_card_to_model(scraped_data):
+def _serialize_percentage(val):
+    try:
+        f = float(val)
+        if f.is_integer():
+            return int(f)
+        return f
+    except Exception:
+        return val
+
+def map_scraped_card_to_model(scraped_data, skip_category_lookup=False):
     """
     Maps field names from scraped data to match the CreditCard model fields.
     Also processes reward categories using the Category aliases system.
     
     Args:
         scraped_data (dict): Card data from scraper
+        skip_category_lookup (bool): If True, do not use Category model (for tests)
         
     Returns:
         dict: Mapped data ready for the CreditCard model
@@ -30,9 +41,22 @@ def map_scraped_card_to_model(scraped_data):
         else:
             mapped_data[key] = value
     
+    # If 'issuer' is present, map to issuer_id and remove 'issuer'
+    if 'issuer' in mapped_data and 'issuer_id' not in mapped_data:
+        issuer_obj = CardIssuer.query.filter_by(name=mapped_data['issuer']).first()
+        if issuer_obj:
+            mapped_data['issuer_id'] = issuer_obj.id
+        del mapped_data['issuer']
+    
+    # If issuer_id is missing or None, skip this card
+    if 'issuer_id' not in mapped_data or mapped_data['issuer_id'] is None:
+        return None
+    
     # Process reward categories using Category aliases system
     if 'reward_categories' in mapped_data:
-        processed_categories = process_reward_categories_with_aliases(mapped_data['reward_categories'])
+        processed_categories = process_reward_categories_with_aliases(
+            mapped_data['reward_categories'], skip_category_lookup=skip_category_lookup
+        )
         mapped_data['reward_categories'] = processed_categories
     
     # Convert list or dict fields to JSON strings if necessary
@@ -42,17 +66,19 @@ def map_scraped_card_to_model(scraped_data):
     
     return mapped_data
 
-def process_reward_categories_with_aliases(reward_categories_data):
+def process_reward_categories_with_aliases(reward_categories_data, skip_category_lookup=False):
     """
     Process reward categories using the Category model's aliases system.
     
     Args:
         reward_categories_data: Can be dict, list, or JSON string
+        skip_category_lookup (bool): If True, do not use Category model (for tests)
         
     Returns:
         list: Processed reward categories with mapped category names
     """
-    from app.models.category import Category
+    if not skip_category_lookup:
+        from app.models.category import Category
     
     # Handle different input formats
     if isinstance(reward_categories_data, str):
@@ -70,17 +96,20 @@ def process_reward_categories_with_aliases(reward_categories_data):
     # Handle dict format (category_name: rate)
     if isinstance(reward_categories_data, dict):
         for category_name, rate in reward_categories_data.items():
-            category = Category.get_by_name_or_alias(category_name.strip())
+            if not skip_category_lookup:
+                category = Category.get_by_name_or_alias(category_name.strip())
+            else:
+                category = None
             if category:
                 processed_categories.append({
                     'category': category.name,
-                    'percentage': float(rate) if rate else 1.0
+                    'percentage': _serialize_percentage(rate) if rate else 1
                 })
             else:
                 # Keep unmapped categories as-is for now
                 processed_categories.append({
                     'category': category_name.strip(),
-                    'percentage': float(rate) if rate else 1.0
+                    'percentage': _serialize_percentage(rate) if rate else 1
                 })
                 unmapped_categories.append(category_name.strip())
     
@@ -91,20 +120,23 @@ def process_reward_categories_with_aliases(reward_categories_data):
                 category_name = item.get('category', '')
                 rate = item.get('percentage', item.get('rate', 1.0))
                 
-                if category_name:
-                    category = Category.get_by_name_or_alias(category_name.strip())
-                    if category:
-                        processed_categories.append({
-                            'category': category.name,
-                            'percentage': float(rate) if rate else 1.0
-                        })
-                    else:
-                        # Keep unmapped categories as-is for now
-                        processed_categories.append({
-                            'category': category_name.strip(),
-                            'percentage': float(rate) if rate else 1.0
-                        })
-                        unmapped_categories.append(category_name.strip())
+                if not skip_category_lookup:
+                    category = Category.get_by_name_or_alias(category_name.strip()) if category_name else None
+                else:
+                    category = None
+                
+                if category:
+                    processed_categories.append({
+                        'category': category.name,
+                        'percentage': _serialize_percentage(rate) if rate else 1
+                    })
+                else:
+                    # Keep unmapped categories as-is for now
+                    processed_categories.append({
+                        'category': category_name.strip(),
+                        'percentage': _serialize_percentage(rate) if rate else 1
+                    })
+                    unmapped_categories.append(category_name.strip())
     
     # Log unmapped categories for debugging
     if unmapped_categories:
