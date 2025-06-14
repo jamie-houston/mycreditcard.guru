@@ -1,21 +1,107 @@
-{% extends 'base.html' %}
-{% block content %}
-<h1>{{ issuer.name }}</h1>
-<p>
-    <a href="{{ url_for('issuers.edit', issuer_id=issuer.id) }}" class="btn btn-primary">Edit</a>
-    <form action="{{ url_for('issuers.delete', issuer_id=issuer.id) }}" method="post" style="display:inline;">
-        <button type="submit" class="btn btn-danger" onclick="return confirm('Delete this issuer?');">Delete</button>
-    </form>
-</p>
-<h2>Cards</h2>
-{% if cards %}
-    <ul>
-    {% for card in cards %}
-        <li><a href="{{ url_for('credit_cards.show', id=card.id) }}">{{ card.name }}</a></li>
-    {% endfor %}
-    </ul>
-{% else %}
-    <p>No cards for this issuer.</p>
-{% endif %}
-<a href="{{ url_for('issuers.index') }}">Back to Issuers</a>
-{% endblock %} 
+{% extends 'base.html' %} {% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h1>{{ issuer.name }}</h1>
+  <div>
+    {% if current_user.is_authenticated and current_user.is_admin %}
+    <a
+      href="{{ url_for('issuers.edit', issuer_id=issuer.id) }}"
+      class="btn btn-primary"
+      >Edit</a
+    >
+    <button
+      type="button"
+      class="btn btn-danger ms-2"
+      data-bs-toggle="modal"
+      data-bs-target="#deleteIssuerModal"
+    >
+      Delete
+    </button>
+    {% endif %}
+    <a href="{{ url_for('issuers.index') }}" class="btn btn-secondary ms-2"
+      >Back to Issuers</a
+    >
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <h5>Cards from {{ issuer.name }}</h5>
+  </div>
+  <div class="card-body">
+    {% if cards %}
+    <div class="row">
+      {% for card in cards %}
+      <div class="col-md-6 mb-3">
+        <div class="card">
+          <div class="card-body">
+            <h6 class="card-title">
+              <a
+                href="{{ url_for('credit_cards.show', id=card.id) }}"
+                class="text-decoration-none"
+              >
+                {{ card.name }}
+              </a>
+            </h6>
+            <p class="card-text">
+              <small class="text-muted">
+                Annual Fee: ${{ "%.0f"|format(card.annual_fee) }} {% if
+                card.signup_bonus_value %} | Signup Bonus: ${{
+                "%.0f"|format(card.signup_bonus_value) }} {% endif %}
+              </small>
+            </p>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <p class="text-muted">No cards for this issuer.</p>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Delete Modal -->
+{% if current_user.is_authenticated and current_user.is_admin %}
+<div
+  class="modal fade"
+  id="deleteIssuerModal"
+  tabindex="-1"
+  aria-labelledby="deleteIssuerModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="deleteIssuerModalLabel">Confirm Delete</h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </div>
+      <div class="modal-body">
+        Are you sure you want to delete {{ issuer.name }}? This action cannot be
+        undone. {% if cards %}
+        <div class="alert alert-warning mt-3">
+          <strong>Warning:</strong> This issuer has {{ cards|length }} card(s)
+          associated with it. Deleting the issuer may affect these cards.
+        </div>
+        {% endif %}
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          Cancel
+        </button>
+        <form
+          action="{{ url_for('issuers.delete', issuer_id=issuer.id) }}"
+          method="post"
+        >
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+          <button type="submit" class="btn btn-danger">Delete</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %} {% endblock %}

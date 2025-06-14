@@ -47,7 +47,7 @@ def profile():
             profile_name = request.form.get('profile_name', 'My Spending Profile')
             credit_score = int(request.form.get('credit_score', 700))
             income = float(request.form.get('income', 50000))
-            max_cards = int(request.form.get('max_cards', 5))
+            max_cards = int(request.form.get('max_cards', 1))
             max_annual_fees = float(request.form.get('max_annual_fees', 0))
 
             # Create or update profile in the database
@@ -149,14 +149,14 @@ def profile():
         # Other fields
         credit_score = int(prefill.get('credit_score', profile.credit_score if profile else 700))
         income = float(prefill.get('income', profile.income if profile else 50000))
-        max_cards = int(prefill.get('max_cards', profile.max_cards if profile else 5))
+        max_cards = int(prefill.get('max_cards', profile.max_cards if profile else 1))
         max_annual_fees = float(prefill.get('max_annual_fees', profile.max_annual_fees if profile else 0))
         reward_preferences = prefill.getlist('reward_preferences') or (json.loads(profile.reward_preferences) if profile and profile.reward_preferences else [])
     else:
         category_spending = json.loads(profile.category_spending) if profile else {}
         credit_score = profile.credit_score if profile else 700
         income = profile.income if profile else 50000
-        max_cards = profile.max_cards if profile else 5
+        max_cards = profile.max_cards if profile else 1
         max_annual_fees = profile.max_annual_fees if profile else 0
         reward_preferences = json.loads(profile.reward_preferences) if profile and profile.reward_preferences else []
 

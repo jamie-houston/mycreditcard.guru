@@ -310,7 +310,7 @@
             prefill_params.append('reward_preferences=' ~ pref) %} {% endfor %}
             {% set prefill_query = prefill_params|join('&') %} {% endif %}
             <a
-              href="{% if profile.id is defined %}{{ url_for('recommendations.create', profile_id=profile.id) }}{% else %}{{ url_for('user_data.profile') }}?{{ prefill_query }}{% endif %}"
+              href="{{ url_for('user_data.profile') }}"
               class="btn btn-primary"
             >
               Generate New Recommendation

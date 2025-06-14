@@ -17,7 +17,7 @@ class UserProfile(db.Model):
     total_monthly_spend = db.Column(db.Float, nullable=False)
     category_spending = db.Column(db.Text, nullable=False)  # JSON string
     reward_preferences = db.Column(db.Text, nullable=True)  # JSON string for reward preferences
-    max_cards = db.Column(db.Integer, default=5)
+    max_cards = db.Column(db.Integer, default=1)
     max_annual_fees = db.Column(db.Float, default=1000.0)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)

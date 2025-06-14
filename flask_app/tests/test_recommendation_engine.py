@@ -129,7 +129,7 @@ class TestRecommendationEngine(unittest.TestCase):
         # Mock spending profile
         class MockProfile:
             def __init__(self):
-                self.max_cards = 3
+                self.max_cards = 1
                 self.max_annual_fees = 500
                 self.total_monthly_spend = 2000
                 

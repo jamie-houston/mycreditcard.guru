@@ -35,7 +35,7 @@ def generate_recommendation(profile, user, available_cards):
     recommended_cards, card_details, total_value, per_month_value = optimize_card_combination(
         available_cards, 
         annual_spending,
-        max_cards=3  # Limit to 3 cards for simplicity
+        max_cards=profile.max_cards or 1  # Use profile's max_cards setting
     )
     
     # Calculate total annual fees
@@ -87,7 +87,7 @@ def calculate_card_value(card, annual_spending):
     
     return annual_value, rewards_by_category
 
-def optimize_card_combination(available_cards, annual_spending, max_cards=3):
+def optimize_card_combination(available_cards, annual_spending, max_cards=1):
     """
     Find the optimal combination of credit cards that maximizes total value.
     

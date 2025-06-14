@@ -47,7 +47,7 @@ def create_test_profile():
             existing_profile.reward_preferences = json.dumps(reward_preferences)
             
             # Set constraints
-            existing_profile.max_cards = 3
+            existing_profile.max_cards = 1
             existing_profile.max_annual_fees = 200
             
             db.session.commit()
@@ -83,7 +83,7 @@ def create_test_profile():
             new_profile.reward_preferences = json.dumps(reward_preferences)
             
             # Set constraints
-            new_profile.max_cards = 3
+            new_profile.max_cards = 1
             new_profile.max_annual_fees = 200
             
             db.session.add(new_profile)

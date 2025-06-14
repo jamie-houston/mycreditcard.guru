@@ -127,8 +127,9 @@ class RecommendationService:
             reverse=True
         )
         
-        # Get top 5 cards
-        top_cards = sorted_cards[:5]
+        # Get top cards based on profile's max_cards setting
+        max_cards = profile.max_cards or 1  # Default to 1 if not set
+        top_cards = sorted_cards[:max_cards]
         top_card_ids = [card_id for card_id, _ in top_cards]
         
         # Convert to dictionary for storage

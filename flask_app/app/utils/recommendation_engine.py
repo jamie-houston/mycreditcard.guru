@@ -70,7 +70,7 @@ def calculate_card_value(
 def generate_card_recommendations(
     profile: UserProfile, 
     cards: List[CreditCard], 
-    max_cards: int = 5, 
+    max_cards: int = 1, 
     max_annual_fees: float = 0.0
 ) -> Tuple[List[Dict[str, Any]], float]:
     """

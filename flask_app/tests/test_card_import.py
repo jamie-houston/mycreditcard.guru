@@ -232,7 +232,7 @@ class TestCardImport(unittest.TestCase):
         
         # Check that fields are correctly mapped
         self.assertEqual(mapped_data['signup_bonus_min_spend'], 3000)
-        self.assertEqual(mapped_data['signup_bonus_time_limit'], 90)
+        self.assertEqual(mapped_data['signup_bonus_time_limit'], 3)
         
         # Check that special_offers is correctly mapped from offers
         self.assertEqual(mapped_data['special_offers'], json.dumps([]))

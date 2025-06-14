@@ -69,7 +69,7 @@ def calculate_card_value(profile: Profile, card: CreditCard) -> Dict[str, Any]:
 
 def generate_recommendations(
     profile: Profile,
-    max_cards: int = 3,
+    max_cards: int = 1,
     max_annual_fees: float = 500.0,
     card_types: Optional[List[str]] = None,
     networks: Optional[List[str]] = None,
@@ -260,7 +260,7 @@ def calculate_card_sequence_value(card_sequence: List[int], cards_data: Dict[int
         'per_month_value': monthly_values
     }
 
-def generate_card_recommendations(profile: Profile, max_cards: int = 3, 
+def generate_card_recommendations(profile: Profile, max_cards: int = 1, 
                                 max_annual_fees: float = 1000) -> Dict[str, Any]:
     """Generate credit card recommendations based on user spending profile"""
     

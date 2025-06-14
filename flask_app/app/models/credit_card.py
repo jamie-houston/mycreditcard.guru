@@ -33,7 +33,7 @@ class CreditCard(db.Model):
     signup_bonus_points = db.Column(db.Integer, default=0)
     signup_bonus_value = db.Column(db.Float, default=0.0)
     signup_bonus_min_spend = db.Column(db.Float, default=0.0)
-    signup_bonus_time_limit = db.Column(db.Integer, default=90)  # Days
+    signup_bonus_time_limit = db.Column(db.Integer, default=3)  # Months
     signup_bonus_type = db.Column(db.String(20), default='points')  # 'points', 'dollars', or 'other'
     
     # Categories and Offers (stored as JSON strings) - DEPRECATED in favor of CreditCardReward model
@@ -184,15 +184,13 @@ class CreditCard(db.Model):
         """Calculate if the signup bonus is achievable and its value."""
         # Check if signup bonus can be achieved
         months_needed = self.signup_bonus_min_spend / monthly_spend
-        days_needed = months_needed * 30
         
-        achievable = days_needed <= self.signup_bonus_time_limit
+        achievable = months_needed <= self.signup_bonus_time_limit
         
         return {
             'value': self.signup_bonus_value if achievable else 0,
             'achievable': achievable,
-            'months_needed': round(months_needed, 1),
-            'days_needed': round(days_needed, 0)
+            'months_needed': round(months_needed, 1)
         }
     
     def to_dict(self):

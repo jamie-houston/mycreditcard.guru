@@ -30,7 +30,7 @@ def seed_credit_cards():
             "point_value": 0.01,
             "signup_bonus_value": 200,
             "signup_bonus_min_spend": 1000,
-            "signup_bonus_time_limit": 90,
+            "signup_bonus_time_limit": 3,
             "signup_bonus_points": 0,
             "signup_bonus_type": "dollars",
             "reward_categories": [
@@ -51,7 +51,7 @@ def seed_credit_cards():
             "point_value": 0.0125,
             "signup_bonus_value": 750,
             "signup_bonus_min_spend": 4000,
-            "signup_bonus_time_limit": 90,
+            "signup_bonus_time_limit": 3,
             "signup_bonus_points": 60000,
             "signup_bonus_type": "points",
             "reward_categories": [
@@ -72,7 +72,7 @@ def seed_credit_cards():
             "point_value": 0.02,
             "signup_bonus_value": 1500,
             "signup_bonus_min_spend": 6000,
-            "signup_bonus_time_limit": 90,
+            "signup_bonus_time_limit": 3,
             "signup_bonus_points": 75000,
             "signup_bonus_type": "points",
             "reward_categories": [
@@ -94,7 +94,7 @@ def seed_credit_cards():
             "point_value": 0.01,
             "signup_bonus_value": 300,
             "signup_bonus_min_spend": 3000,
-            "signup_bonus_time_limit": 90,
+            "signup_bonus_time_limit": 3,
             "signup_bonus_points": 0,
             "signup_bonus_type": "dollars",
             "reward_categories": [
@@ -115,7 +115,7 @@ def seed_credit_cards():
             "point_value": 0.01,
             "signup_bonus_value": 750,
             "signup_bonus_min_spend": 4000,
-            "signup_bonus_time_limit": 90,
+            "signup_bonus_time_limit": 3,
             "signup_bonus_points": 75000,
             "signup_bonus_type": "miles",
             "reward_categories": [
@@ -134,7 +134,7 @@ def seed_credit_cards():
             "point_value": 0.01,
             "signup_bonus_value": 200,
             "signup_bonus_min_spend": 1500,
-            "signup_bonus_time_limit": 90,
+            "signup_bonus_time_limit": 3,
             "signup_bonus_points": 0,
             "signup_bonus_type": "dollars",
             "reward_categories": [
@@ -172,7 +172,7 @@ def seed_credit_cards():
             "point_value": 0.01,
             "signup_bonus_value": 200,
             "signup_bonus_min_spend": 750,
-            "signup_bonus_time_limit": 90,
+            "signup_bonus_time_limit": 3,
             "signup_bonus_points": 0,
             "signup_bonus_type": "dollars",
             "reward_categories": [

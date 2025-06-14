@@ -135,7 +135,7 @@ def create_test_data():
                 signup_bonus_points=60000,
                 signup_bonus_value=600.0,
                 signup_bonus_min_spend=4000.0,
-                signup_bonus_time_limit=90,
+                signup_bonus_time_limit=3,
                 reward_categories=json.dumps([
                     {"category": "travel", "rate": 3.0},
                     {"category": "dining", "rate": 2.0},
@@ -162,7 +162,7 @@ def create_test_data():
                 signup_bonus_points=20000,
                 signup_bonus_value=200.0,
                 signup_bonus_min_spend=1000.0,
-                signup_bonus_time_limit=90,
+                signup_bonus_time_limit=3,
                 signup_bonus_type='points',
                 reward_categories=json.dumps([
                     {"category": "groceries", "rate": 3.0},
