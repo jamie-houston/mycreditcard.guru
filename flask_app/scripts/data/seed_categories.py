@@ -146,7 +146,7 @@ DEFAULT_CATEGORIES = [
         'description': 'Any expenses that don\'t fit into the above categories',
         'icon': 'fas fa-ellipsis-h',
         'sort_order': 140,
-        'aliases': ['all purchases', 'everything else', 'everything', 'all other purchases', 'base rate', 'base']
+        'aliases': ['all purchases', 'everything else', 'everything', 'all other purchases', 'base rate', 'base', 'base rate']
     },
     {
         'name': 'paypal',
@@ -163,30 +163,6 @@ DEFAULT_CATEGORIES = [
         'icon': 'fab fa-amazon',
         'sort_order': 150,
         'aliases': []
-    },
-    {
-        'name': 'base',
-        'display_name': 'Base Rate',
-        'description': 'Default reward rate for all other purchases',
-        'icon': 'fas fa-percentage',
-        'sort_order': 160,
-        'aliases': ['all purchases', 'everything else', 'everything', 'all other purchases', 'base rate']
-    },
-    {
-        'name': 'rotating',
-        'display_name': 'Rotating Categories',
-        'description': 'Quarterly rotating bonus categories',
-        'icon': 'fas fa-sync-alt',
-        'sort_order': 170,
-        'aliases': ['quarterly categories', 'rotating bonus']
-    },
-    {
-        'name': 'custom',
-        'display_name': 'Custom Categories',
-        'description': 'User-selected bonus categories',
-        'icon': 'fas fa-cog',
-        'sort_order': 180,
-        'aliases': ['choose your category', 'select category']
     },
     {
         'name': 'transit',

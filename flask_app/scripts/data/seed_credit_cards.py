@@ -37,7 +37,7 @@ def seed_credit_cards():
                 {"category": "groceries", "rate": 2.0, "limit": 1500},
                 {"category": "gas", "rate": 3.0, "limit": 1500},
                 {"category": "dining", "rate": 2.0},
-                {"category": "base", "rate": 1.0}
+                {"category": "other", "rate": 1.0}
             ],
             "special_offers": [
                 "No foreign transaction fees",
@@ -57,7 +57,7 @@ def seed_credit_cards():
             "reward_categories": [
                 {"category": "travel", "rate": 2.0},
                 {"category": "dining", "rate": 2.0},
-                {"category": "base", "rate": 1.0}
+                {"category": "other", "rate": 1.0}
             ],
             "special_offers": [
                 "25% more value when you redeem for airfare, hotels, car rentals and cruises through Chase Ultimate Rewards",
@@ -70,14 +70,14 @@ def seed_credit_cards():
             "issuer": "American Express",
             "annual_fee": 695,
             "point_value": 0.02,
-            "signup_bonus_value": 1500,
+            "signup_bonus_value": 750,
             "signup_bonus_min_spend": 6000,
             "signup_bonus_time_limit": 3,
             "signup_bonus_points": 75000,
             "signup_bonus_type": "points",
             "reward_categories": [
                 {"category": "travel", "rate": 5.0},
-                {"category": "base", "rate": 1.0}
+                {"category": "other", "rate": 1.0}
             ],
             "special_offers": [
                 "$200 annual airline fee credit",
@@ -102,7 +102,7 @@ def seed_credit_cards():
                 {"category": "streaming", "rate": 6.0, "limit": 6000},
                 {"category": "transit", "rate": 3.0},
                 {"category": "gas", "rate": 3.0, "limit": 6000},
-                {"category": "base", "rate": 1.0}
+                {"category": "other", "rate": 1.0}
             ],
             "special_offers": [
                 "0% intro APR for 12 months on purchases and balance transfers"
@@ -119,7 +119,7 @@ def seed_credit_cards():
             "signup_bonus_points": 75000,
             "signup_bonus_type": "miles",
             "reward_categories": [
-                {"category": "base", "rate": 2.0}
+                {"category": "other", "rate": 2.0}
             ],
             "special_offers": [
                 "No foreign transaction fees",
@@ -138,7 +138,7 @@ def seed_credit_cards():
             "signup_bonus_points": 0,
             "signup_bonus_type": "dollars",
             "reward_categories": [
-                {"category": "base", "rate": 2.0}
+                {"category": "other", "rate": 2.0}
             ],
             "special_offers": [
                 "1% when you buy, 1% when you pay",
@@ -177,7 +177,7 @@ def seed_credit_cards():
             "signup_bonus_type": "dollars",
             "reward_categories": [
                 {"category": "custom", "rate": 5.0, "limit": 500},
-                {"category": "base", "rate": 1.0}
+                {"category": "other", "rate": 1.0}
             ],
             "special_offers": [
                 "5% cash back on up to $500 spent in your top eligible spend category each billing cycle",

@@ -86,14 +86,6 @@ DEFAULT_CATEGORIES = [
         'icon': 'fas fa-ellipsis-h',
         'sort_order': 140,
         'aliases': ['all purchases', 'everything else', 'everything', 'all other purchases']
-    },
-    {
-        'name': 'base',
-        'display_name': 'Base Rate',
-        'description': 'Default rate for all other purchases',
-        'icon': 'fas fa-percentage',
-        'sort_order': 0,
-        'aliases': ['all other purchases']
     }
 ]
 
