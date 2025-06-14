@@ -2,6 +2,7 @@ from app.models.credit_card import CreditCard
 from app.models.user_data import UserProfile
 from app.blueprints.recommendations.models import Recommendation, create_recommendation_from_profile
 from app import db
+import json
 
 class RecommendationService:
     """Service for generating credit card recommendations based on user's spending profile."""
@@ -23,7 +24,7 @@ class RecommendationService:
         
         # Calculate rewards for each spending category
         for category, monthly_amount in monthly_spending.items():
-            categories = card.get_reward_categories()
+            categories = json.loads(card.reward_categories)
             main_rate = None
             limit = None
             base_rate = 1.0

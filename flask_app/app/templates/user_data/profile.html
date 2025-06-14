@@ -197,16 +197,35 @@
     </div>
   </div>
 
-  {% if profile %}
   <div class="mb-4 text-center">
+    {% if profile %}
+    <!-- Profile exists - link to generate recommendations -->
     <a
       href="/recommendations/create/{{ profile.id }}"
       class="btn btn-success btn-lg"
     >
       <i class="fas fa-magic me-2"></i>Generate Recommendations
     </a>
+    <div class="text-muted mt-2">
+      <small>Based on your saved spending profile</small>
+    </div>
+    {% else %}
+    <!-- No profile yet - submit button to save profile first -->
+    <button
+      type="submit"
+      class="btn btn-success btn-lg"
+      id="generate-recommendations-btn"
+    >
+      <i class="fas fa-save me-2"></i>Save Profile & Generate Recommendations
+    </button>
+    <div class="text-muted mt-2">
+      <small
+        >Save your spending data first, then we'll generate personalized
+        recommendations</small
+      >
+    </div>
+    {% endif %}
   </div>
-  {% endif %}
 </form>
 
 {% endblock %} {% block scripts %}

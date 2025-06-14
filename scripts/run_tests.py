@@ -70,6 +70,16 @@ def main():
         action="store_true", 
         help="Run only Flask app tests (/flask_app/tests)"
     )
+    parser.add_argument(
+        "--cleanup", 
+        action="store_true", 
+        help="Clean up test database after running tests"
+    )
+    parser.add_argument(
+        "--yes", "-y", 
+        action="store_true", 
+        help="Skip confirmation prompt"
+    )
     
     args = parser.parse_args()
     
@@ -80,6 +90,18 @@ def main():
     
     print("🚀 Credit Card Roadmap Test Runner")
     print(f"📁 Working directory: {project_root}")
+    
+    # Safety warning
+    test_db_path = project_root / "flask_app" / "test_creditcard_roadmap.db"
+    print(f"\n⚠️  IMPORTANT: Tests will create/destroy a separate test database:")
+    print(f"   📄 {test_db_path}")
+    print(f"   🔒 Your development database will NOT be affected.")
+    
+    if not args.yes:
+        response = input("\n❓ Continue with running tests? (y/N): ").lower().strip()
+        if response not in ['y', 'yes']:
+            print("❌ Tests cancelled by user.")
+            sys.exit(0)
     
     # Build pytest command
     base_cmd = [sys.executable, "-m", "pytest"]
@@ -108,11 +130,21 @@ def main():
     # Run the tests
     success = run_command(base_cmd, "Running All Tests")
     
+    # Clean up test database if requested
+    if args.cleanup and test_db_path.exists():
+        try:
+            test_db_path.unlink()
+            print(f"🧹 Cleaned up test database: {test_db_path}")
+        except Exception as e:
+            print(f"⚠️  Could not clean up test database: {e}")
+    
     # Summary
     print(f"\n{'='*60}")
     if success:
         print("🎉 ALL TESTS PASSED!")
         print("Your code is looking good - time for a cuppa! ☕")
+        if not args.cleanup and test_db_path.exists():
+            print(f"💡 Tip: Use --cleanup to automatically remove the test database")
     else:
         print("💥 SOME TESTS FAILED!")
         print("Don't panic! Even the best code has off days. Check the output above.")

@@ -84,10 +84,20 @@ def profile():
             db.session.add(profile)
             db.session.commit()
 
+            # Check if user wants to generate recommendations immediately
+            generate_recommendations = 'generate-recommendations-btn' in request.form or request.form.get('action') == 'generate_recommendations'
+
             if len(category_spending) > 0:
-                flash(f'Spending profile saved successfully! Click on "Generate Recommendations" to see your personalized credit card suggestions.', 'success')
+                if generate_recommendations:
+                    flash(f'Spending profile saved successfully! Generating your personalized recommendations...', 'success')
+                    return redirect(url_for('recommendations.create', profile_id=profile.id))
+                else:
+                    flash(f'Spending profile saved successfully! Click on "Generate Recommendations" to see your personalized credit card suggestions.', 'success')
             else:
-                flash(f'Profile saved, but you need to enter some spending data to generate recommendations.', 'warning')
+                if generate_recommendations:
+                    flash(f'Profile saved, but you need to enter some spending data to generate meaningful recommendations.', 'warning')
+                else:
+                    flash(f'Profile saved, but you need to enter some spending data to generate recommendations.', 'warning')
 
             return redirect(url_for('user_data.profile'))
         except Exception as e:

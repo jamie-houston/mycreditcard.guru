@@ -4,8 +4,8 @@
 import os
 import sys
 
-# Add parent directory to path
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+# Add flask_app directory to path
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
 from app import create_app, db
 from app.models.category import Category
@@ -163,50 +163,80 @@ DEFAULT_CATEGORIES = [
         'icon': 'fab fa-amazon',
         'sort_order': 150,
         'aliases': []
+    },
+    {
+        'name': 'base',
+        'display_name': 'Base Rate',
+        'description': 'Default reward rate for all other purchases',
+        'icon': 'fas fa-percentage',
+        'sort_order': 160,
+        'aliases': ['all purchases', 'everything else', 'everything', 'all other purchases', 'base rate']
+    },
+    {
+        'name': 'rotating',
+        'display_name': 'Rotating Categories',
+        'description': 'Quarterly rotating bonus categories',
+        'icon': 'fas fa-sync-alt',
+        'sort_order': 170,
+        'aliases': ['quarterly categories', 'rotating bonus']
+    },
+    {
+        'name': 'custom',
+        'display_name': 'Custom Categories',
+        'description': 'User-selected bonus categories',
+        'icon': 'fas fa-cog',
+        'sort_order': 180,
+        'aliases': ['choose your category', 'select category']
+    },
+    {
+        'name': 'transit',
+        'display_name': 'Transit',
+        'description': 'Public transportation and transit systems',
+        'icon': 'fas fa-subway',
+        'sort_order': 185,
+        'aliases': ['public transit', 'subway', 'bus', 'metro']
     }
 ]
 
 def seed_categories():
-    """Create default categories if they don't exist."""
-    app = create_app('default')
+    """Seed the database with default categories."""
+    created_count = 0
+    updated_count = 0
     
+    for cat_data in DEFAULT_CATEGORIES:
+        existing = Category.query.filter_by(name=cat_data['name']).first()
+        
+        if existing:
+            # Update existing category with new data (but keep active status)
+            existing.display_name = cat_data['display_name']
+            existing.description = cat_data['description']
+            existing.icon = cat_data['icon']
+            existing.sort_order = cat_data['sort_order']
+            existing.set_aliases(cat_data.get('aliases', []))
+            updated_count += 1
+        else:
+            # Create new category
+            category = Category(
+                name=cat_data['name'],
+                display_name=cat_data['display_name'],
+                description=cat_data['description'],
+                icon=cat_data['icon'],
+                sort_order=cat_data['sort_order'],
+                is_active=True
+            )
+            category.set_aliases(cat_data.get('aliases', []))
+            db.session.add(category)
+            created_count += 1
+    
+    db.session.commit()
+    print(f"✅ Seeded {created_count} categories, updated {updated_count} existing")
+    return created_count
+
+def main():
+    """Main function to seed categories."""
+    app = create_app('development')
     with app.app_context():
-        created_count = 0
-        updated_count = 0
-        
-        for cat_data in DEFAULT_CATEGORIES:
-            existing = Category.query.filter_by(name=cat_data['name']).first()
-            
-            if existing:
-                # Update existing category with new data (but keep active status)
-                existing.display_name = cat_data['display_name']
-                existing.description = cat_data['description']
-                existing.icon = cat_data['icon']
-                existing.sort_order = cat_data['sort_order']
-                existing.set_aliases(cat_data.get('aliases', []))
-                updated_count += 1
-                print(f"Updated category: {cat_data['display_name']}")
-            else:
-                # Create new category
-                category = Category(
-                    name=cat_data['name'],
-                    display_name=cat_data['display_name'],
-                    description=cat_data['description'],
-                    icon=cat_data['icon'],
-                    sort_order=cat_data['sort_order'],
-                    is_active=True
-                )
-                category.set_aliases(cat_data.get('aliases', []))
-                db.session.add(category)
-                created_count += 1
-                print(f"Created category: {cat_data['display_name']}")
-        
-        try:
-            db.session.commit()
-            print(f"\nSeeding completed! Created {created_count} new categories, updated {updated_count} existing categories.")
-        except Exception as e:
-            db.session.rollback()
-            print(f"Error seeding categories: {e}")
+        return seed_categories()
 
 if __name__ == '__main__':
-    seed_categories() 
+    sys.exit(main()) 

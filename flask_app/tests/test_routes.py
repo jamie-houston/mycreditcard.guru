@@ -127,7 +127,8 @@ class RoutesTestCase(unittest.TestCase):
                 sess['_user_id'] = str(self.user.id)  # Flask-Login uses _user_id and expects string
                 sess['_fresh'] = True
         
-        response = self.client.get(f'/recommendations/view/{self.recommendation.id}')
+        # Use the shareable recommendation_id, not the database ID
+        response = self.client.get(f'/recommendations/view/{self.recommendation.recommendation_id}')
         if response.status_code == 302:
             response = self.client.get(response.location)
         self.assertEqual(response.status_code, 200)
@@ -155,7 +156,8 @@ class RoutesTestCase(unittest.TestCase):
                 sess['_user_id'] = str(self.user.id)  # Flask-Login uses _user_id and expects string
                 sess['_fresh'] = True
         
-        response = self.client.post(f'/recommendations/delete/{self.recommendation.id}')
+        # Use the shareable recommendation_id, not the database ID
+        response = self.client.post(f'/recommendations/delete/{self.recommendation.recommendation_id}')
         self.assertEqual(response.status_code, 302)  # Redirect after deletion
         
         # Check that recommendation was deleted

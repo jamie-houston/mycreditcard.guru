@@ -1,5 +1,19 @@
 {% extends 'base.html' %} {% block title %}Card Recommendation Details{%
-endblock %} {% block content %}
+endblock %} {% block extra_css %}
+<style>
+  .card-name-link {
+    color: inherit;
+    transition: color 0.2s ease;
+  }
+  .card-name-link:hover {
+    color: #0d6efd !important;
+    cursor: pointer;
+  }
+  .card-header .card-name-link:hover {
+    text-decoration: underline !important;
+  }
+</style>
+{% endblock %} {% block content %}
 <div class="container mt-4">
   <div class="d-flex justify-content-between align-items-center mb-4">
     <h1>Card Recommendation Details</h1>
@@ -11,6 +25,36 @@ endblock %} {% block content %}
         <i class="bi bi-arrow-left"></i> Back to List
       </a>
     </div>
+  </div>
+
+  <!-- Shareable URL Section -->
+  <div class="alert alert-info mb-4">
+    <h6 class="alert-heading">
+      <i class="bi bi-share"></i> Shareable Recommendation
+    </h6>
+    <p class="mb-2">
+      This recommendation has a unique, shareable URL. Anyone with this link can
+      view the same recommendation results.
+    </p>
+    <div class="input-group">
+      <input
+        type="text"
+        class="form-control"
+        id="shareableUrl"
+        value="{{ request.url }}"
+        readonly
+      />
+      <button
+        class="btn btn-outline-primary"
+        type="button"
+        onclick="copyToClipboard()"
+      >
+        <i class="bi bi-clipboard"></i> Copy Link
+      </button>
+    </div>
+    <small class="text-muted">
+      Recommendation ID: <code>{{ recommendation.recommendation_id }}</code>
+    </small>
   </div>
 
   <div class="card shadow-sm mb-4">
@@ -64,14 +108,25 @@ endblock %} {% block content %}
     <div class="col-md-6 mb-4">
       <div class="card shadow-sm h-100">
         <div class="card-header d-flex justify-content-between">
-          <h5 class="mb-0">{{ card.name }}</h5>
+          <h5 class="mb-0">
+            <a
+              href="#"
+              class="text-decoration-none card-name-link"
+              data-bs-toggle="modal"
+              data-bs-target="#cardModal"
+              onclick="showCardDetails({{ card.id }})"
+            >
+              {{ card.name }}
+            </a>
+          </h5>
           <span class="badge bg-success">
-            +${{ "%.2f"|format(card_detail.annual_value) }} Value
+            +${{ "%.2f"|format(card_detail.annual_value|float) }} Value
           </span>
         </div>
         <div class="card-body">
           <div class="mb-3">
-            <small class="text-muted">Issuer:</small> {{ card.issuer }}
+            <small class="text-muted">Issuer:</small> {{ card.issuer.name if
+            card.issuer else 'Unknown' }}
           </div>
 
           <hr />
@@ -79,14 +134,16 @@ endblock %} {% block content %}
           <div class="row mb-3">
             <div class="col-6">
               <small class="text-muted d-block">Annual Fee</small>
-              <span class="fw-bold">${{ "%.2f"|format(card.annual_fee) }}</span>
+              <span class="fw-bold"
+                >${{ "%.2f"|format(card.annual_fee|float) }}</span
+              >
             </div>
             <div class="col-6">
               <small class="text-muted d-block">Sign-up Bonus</small>
               <span class="fw-bold">
-                {% if card.signup_bonus_value %} {{
-                card.get_signup_bonus_display_text() }} {% else %} None {% endif
-                %}
+                {% if card.signup_bonus_value %} ${{
+                "%.2f"|format(card.signup_bonus_value|float) }} {% else %} None
+                {% endif %}
               </span>
             </div>
           </div>
@@ -107,22 +164,24 @@ endblock %} {% block content %}
                 <tr>
                   <td>{{ category|capitalize }}</td>
                   <td class="text-end">
-                    {% if category == 'dining' %} {{ card.dining_reward_rate }}%
-                    {% elif category == 'travel' %} {{ card.travel_reward_rate
-                    }}% {% elif category == 'gas' %} {{ card.gas_reward_rate }}%
-                    {% elif category == 'groceries' %} {{
-                    card.grocery_reward_rate }}% {% elif category ==
-                    'entertainment' %} {{ card.entertainment_reward_rate }}% {%
-                    else %} {{ card.base_reward_rate }}% (Other) {% endif %}
+                    {% if category == 'signup_bonus' %} - {% elif value is
+                    mapping and 'main_rate' in value %} {{
+                    "%.1f"|format(value.main_rate|float) }}% {% else %} 1.0% {%
+                    endif %}
                   </td>
-                  <td class="text-end">${{ "%.2f"|format(value) }}</td>
+                  <td class="text-end">
+                    {% if value is mapping and 'value' in value %} ${{
+                    "%.2f"|format(value.value|float) }} {% elif value is number
+                    %} ${{ "%.2f"|format(value|float) }} {% else %} $0.00 {%
+                    endif %}
+                  </td>
                 </tr>
                 {% endfor %} {% if card.signup_bonus_value %}
                 <tr class="table-success">
                   <td>Sign-up Bonus</td>
                   <td class="text-end">-</td>
                   <td class="text-end">
-                    {{ card.get_signup_bonus_display_text() }}
+                    ${{ "%.2f"|format(card.signup_bonus_value|float) }}
                   </td>
                 </tr>
                 {% endif %}
@@ -130,14 +189,14 @@ endblock %} {% block content %}
                   <td>Annual Fee</td>
                   <td class="text-end">-</td>
                   <td class="text-end">
-                    -${{ "%.2f"|format(card.annual_fee) }}
+                    -${{ "%.2f"|format(card.annual_fee|float) }}
                   </td>
                 </tr>
                 <tr class="table-primary fw-bold">
                   <td>Total Value</td>
                   <td class="text-end">-</td>
                   <td class="text-end">
-                    ${{ "%.2f"|format(card_detail.annual_value) }}
+                    ${{ "%.2f"|format(card_detail.annual_value|float) }}
                   </td>
                 </tr>
               </tbody>
@@ -148,12 +207,184 @@ endblock %} {% block content %}
     </div>
     {% endfor %}
   </div>
+
+  <!-- Card Details Modal -->
+  <div
+    class="modal fade"
+    id="cardModal"
+    tabindex="-1"
+    aria-labelledby="cardModalLabel"
+    aria-hidden="true"
+  >
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="cardModalLabel">Card Details</h5>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+          ></button>
+        </div>
+        <div class="modal-body" id="cardModalBody">
+          <!-- Card details will be loaded here -->
+        </div>
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="btn btn-secondary"
+            data-bs-dismiss="modal"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 {% endblock %} {% block scripts %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
   // Pass data to the chart script
   window.monthlyValues = {{ recommendation.per_month_value|tojson }};
+
+  // Pass card data to JavaScript
+  window.cardData = {
+    {% for card_id, card in cards.items() %}
+    {{ card_id }}: {
+      id: {{ card.id }},
+      name: "{{ card.name|e }}",
+      issuer: "{{ card.issuer.name|e if card.issuer else 'Unknown' }}",
+      annual_fee: {{ card.annual_fee|float }},
+      signup_bonus_value: {{ card.signup_bonus_value|float if card.signup_bonus_value else 0 }},
+      signup_bonus_points: {{ card.signup_bonus_points if card.signup_bonus_points else 0 }},
+      signup_bonus_min_spend: {{ card.signup_bonus_min_spend|float if card.signup_bonus_min_spend else 0 }},
+      signup_bonus_time_limit: {{ card.signup_bonus_time_limit if card.signup_bonus_time_limit else 0 }},
+      special_offers: {{ card.special_offers|tojson if card.special_offers else '[]' }},
+      reward_categories: {{ card.reward_categories|tojson if card.reward_categories else '[]' }},
+      is_active: {{ 'true' if card.is_active else 'false' }},
+      source: "{{ card.source|e if card.source else '' }}",
+      source_url: "{{ card.source_url|e if card.source_url else '' }}"
+    }{% if not loop.last %},{% endif %}
+    {% endfor %}
+  };
+
+  // Show card details in modal
+  function showCardDetails(cardId) {
+    const card = window.cardData[cardId];
+    if (!card) {
+      document.getElementById('cardModalBody').innerHTML = '<p class="text-danger">Card details not found.</p>';
+      return;
+    }
+
+    let specialOffers = '';
+    try {
+      const offers = typeof card.special_offers === 'string' ? JSON.parse(card.special_offers) : card.special_offers;
+      if (offers && offers.length > 0) {
+        specialOffers = '<ul class="list-unstyled">';
+        offers.forEach(offer => {
+          if (typeof offer === 'string') {
+            specialOffers += `<li><i class="bi bi-check-circle text-success me-2"></i>${offer}</li>`;
+          } else if (offer.type) {
+            specialOffers += `<li><i class="bi bi-check-circle text-success me-2"></i>${offer.type}`;
+            if (offer.amount) specialOffers += ` ($${offer.amount})`;
+            if (offer.frequency) specialOffers += ` - ${offer.frequency}`;
+            specialOffers += '</li>';
+          }
+        });
+        specialOffers += '</ul>';
+      } else {
+        specialOffers = '<p class="text-muted">No special offers listed</p>';
+      }
+    } catch (e) {
+      specialOffers = '<p class="text-muted">No special offers listed</p>';
+    }
+
+    let rewardCategories = '';
+    try {
+      const rewards = typeof card.reward_categories === 'string' ? JSON.parse(card.reward_categories) : card.reward_categories;
+      if (rewards && rewards.length > 0) {
+        rewardCategories = '<div class="table-responsive"><table class="table table-sm"><thead><tr><th>Category</th><th class="text-end">Rate</th></tr></thead><tbody>';
+        rewards.forEach(reward => {
+          const category = reward.category || 'Unknown';
+          const rate = reward.rate || reward.percentage || 1;
+          rewardCategories += `<tr><td>${category.charAt(0).toUpperCase() + category.slice(1)}</td><td class="text-end">${rate}%</td></tr>`;
+        });
+        rewardCategories += '</tbody></table></div>';
+      } else {
+        rewardCategories = '<p class="text-muted">Standard 1% on all purchases</p>';
+      }
+    } catch (e) {
+      rewardCategories = '<p class="text-muted">Standard 1% on all purchases</p>';
+    }
+
+    const modalContent = `
+      <div class="row">
+        <div class="col-md-6">
+          <h6><i class="bi bi-building me-2"></i>Issuer</h6>
+          <p>${card.issuer}</p>
+
+          <h6><i class="bi bi-currency-dollar me-2"></i>Annual Fee</h6>
+          <p class="fw-bold ${card.annual_fee > 0 ? 'text-danger' : 'text-success'}">$${card.annual_fee.toFixed(2)}</p>
+
+          <h6><i class="bi bi-gift me-2"></i>Sign-up Bonus</h6>
+          ${card.signup_bonus_value > 0 ? `
+            <p><strong>$${card.signup_bonus_value.toFixed(2)}</strong></p>
+            ${card.signup_bonus_points > 0 ? `<p class="text-muted small">${card.signup_bonus_points.toLocaleString()} points</p>` : ''}
+            ${card.signup_bonus_min_spend > 0 ? `<p class="text-muted small">Spend $${card.signup_bonus_min_spend.toFixed(0)} in ${card.signup_bonus_time_limit || 3} months</p>` : ''}
+          ` : '<p class="text-muted">No sign-up bonus</p>'}
+        </div>
+
+        <div class="col-md-6">
+          <h6><i class="bi bi-star me-2"></i>Special Offers</h6>
+          ${specialOffers}
+
+          <h6><i class="bi bi-activity me-2"></i>Status</h6>
+          <p><span class="badge ${card.is_active ? 'bg-success' : 'bg-secondary'}">${card.is_active ? 'Active' : 'Inactive'}</span></p>
+
+          ${card.source ? `
+            <h6><i class="bi bi-link me-2"></i>Source</h6>
+            <p class="text-muted small">${card.source}</p>
+          ` : ''}
+        </div>
+      </div>
+
+      <hr>
+
+      <h6><i class="bi bi-percent me-2"></i>Reward Categories</h6>
+      ${rewardCategories}
+    `;
+
+    document.getElementById('cardModalLabel').textContent = card.name;
+    document.getElementById('cardModalBody').innerHTML = modalContent;
+  }
+
+  // Copy to clipboard function
+  function copyToClipboard() {
+    const urlInput = document.getElementById('shareableUrl');
+    urlInput.select();
+    urlInput.setSelectionRange(0, 99999); // For mobile devices
+
+    try {
+      document.execCommand('copy');
+      // Change button text temporarily
+      const button = event.target.closest('button');
+      const originalText = button.innerHTML;
+      button.innerHTML = '<i class="bi bi-check"></i> Copied!';
+      button.classList.remove('btn-outline-primary');
+      button.classList.add('btn-success');
+
+      setTimeout(() => {
+        button.innerHTML = originalText;
+        button.classList.remove('btn-success');
+        button.classList.add('btn-outline-primary');
+      }, 2000);
+    } catch (err) {
+      console.error('Failed to copy: ', err);
+      alert('Failed to copy URL. Please copy manually.');
+    }
+  }
 </script>
 <script src="{{ url_for('static', filename='js/recommendation_view_chart.js') }}"></script>
 {% endblock %}
