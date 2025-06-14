@@ -132,6 +132,11 @@ endblock %} {% block extra_css %}
               class="d-inline"
               onsubmit="return confirm('Are you sure you want to remove {{ card.name }} from this recommendation?');"
             >
+              <input
+                type="hidden"
+                name="csrf_token"
+                value="{{ csrf_token() }}"
+              />
               <button
                 type="submit"
                 class="btn btn-sm btn-outline-danger"
@@ -179,10 +184,10 @@ endblock %} {% block extra_css %}
                 </tr>
               </thead>
               <tbody>
-                {% set optimal_cats = optimal_categories.get(card_id, set()) %}
-                {% for category, value in
-                card_detail.rewards_by_category.items() %} {% if category ==
-                'signup_bonus' or category in optimal_cats %}
+                {% set optimal_cats = optimal_categories.get(card_id, []) %} {%
+                for category, value in card_detail.rewards_by_category.items()
+                %} {% if category == 'signup_bonus' or category in optimal_cats
+                %}
                 <tr
                   {%
                   if
