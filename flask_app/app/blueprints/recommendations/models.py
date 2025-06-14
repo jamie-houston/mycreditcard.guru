@@ -31,7 +31,7 @@ def generate_recommendation_id(profile, recommendation_data):
     hash_input = json.dumps({'profile': profile_data, 'recommendation': rec_data}, sort_keys=True)
     return hashlib.sha256(hash_input.encode('utf-8')).hexdigest()
 
-def create_recommendation_from_profile(user_id, profile_id, card_details, sequence, monthly_values=None):
+def create_recommendation_from_profile(user_id, profile_id, card_details, sequence, monthly_values=None, session_id=None):
     """Helper function to create a recommendation from a spending profile."""
     total_value = sum(details['annual_value'] for details in card_details.values())
     total_fees = sum(details['annual_fee'] for details in card_details.values())
@@ -62,5 +62,6 @@ def create_recommendation_from_profile(user_id, profile_id, card_details, sequen
         total_value=total_value,
         total_annual_fees=total_fees,
         card_count=len(sequence),
-        recommendation_id=recommendation_id
+        recommendation_id=recommendation_id,
+        session_id=session_id
     ) 

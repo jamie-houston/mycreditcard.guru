@@ -28,16 +28,26 @@ def list():
 def create(profile_id):
     """Create a new recommendation based on a spending profile."""
     try:
-        # Verify profile exists and belongs to user
+        # Verify profile exists
         profile = UserProfile.query.get_or_404(profile_id)
-        if profile.user_id != current_user.id:
+        
+        # Check permissions - profile must belong to current user or session
+        user_id = current_user.id if current_user.is_authenticated else None
+        session_id = session.get('anonymous_user_id')
+        
+        if not ((user_id and profile.user_id == user_id) or 
+                (session_id and profile.session_id == session_id)):
             flash('You do not have permission to access this profile.', 'danger')
-            return redirect(url_for('recommendations.list'))
+            if current_user.is_authenticated:
+                return redirect(url_for('recommendations.list'))
+            else:
+                return redirect(url_for('user_data.profile'))
         
         # Generate recommendation
         recommendation = RecommendationService.generate_recommendation(
-            user_id=current_user.id, 
-            profile_id=profile_id
+            user_id=user_id, 
+            profile_id=profile_id,
+            session_id=session_id
         )
         
         flash('Recommendation generated successfully!', 'success')
@@ -45,7 +55,10 @@ def create(profile_id):
     
     except Exception as e:
         flash(f'Error generating recommendation: {str(e)}', 'danger')
-        return redirect(url_for('recommendations.list'))
+        if current_user.is_authenticated:
+            return redirect(url_for('recommendations.list'))
+        else:
+            return redirect(url_for('user_data.profile'))
 
 @bp.route('/view/<recommendation_id>')
 def view(recommendation_id):

@@ -84,22 +84,23 @@ def profile():
             db.session.add(profile)
             db.session.commit()
 
-            # Check if user wants to generate recommendations immediately
-            generate_recommendations = 'generate-recommendations-btn' in request.form or request.form.get('action') == 'generate_recommendations'
-
-            if len(category_spending) > 0:
-                if generate_recommendations:
+            # Check what action the user wants to take
+            action = request.form.get('action', 'save_profile')
+            
+            if action == 'generate_recommendations':
+                if len(category_spending) > 0:
                     flash(f'Spending profile saved successfully! Generating your personalized recommendations...', 'success')
                     return redirect(url_for('recommendations.create', profile_id=profile.id))
                 else:
-                    flash(f'Spending profile saved successfully! Click on "Generate Recommendations" to see your personalized credit card suggestions.', 'success')
-            else:
-                if generate_recommendations:
                     flash(f'Profile saved, but you need to enter some spending data to generate meaningful recommendations.', 'warning')
+                    return redirect(url_for('user_data.profile'))
+            else:
+                # Regular save without generating recommendations
+                if len(category_spending) > 0:
+                    flash(f'Spending profile saved successfully! Click on "Generate Recommendations" to see your personalized credit card suggestions.', 'success')
                 else:
                     flash(f'Profile saved, but you need to enter some spending data to generate recommendations.', 'warning')
-
-            return redirect(url_for('user_data.profile'))
+                return redirect(url_for('user_data.profile'))
         except Exception as e:
             db.session.rollback()
             current_app.logger.error(f"Error saving profile: {str(e)}")

@@ -87,13 +87,14 @@ class RecommendationService:
         }
     
     @classmethod
-    def generate_recommendation(cls, user_id, profile_id):
+    def generate_recommendation(cls, user_id=None, profile_id=None, session_id=None):
         """
         Generate a credit card recommendation based on a user's spending profile.
         
         Args:
-            user_id: User ID
+            user_id: User ID (for authenticated users)
             profile_id: Spending profile ID
+            session_id: Session ID (for anonymous users)
         
         Returns:
             Recommendation object
@@ -101,9 +102,10 @@ class RecommendationService:
         # Get spending profile
         profile = UserProfile.query.get_or_404(profile_id)
         
-        # Verify user owns the profile
-        if profile.user_id != user_id:
-            raise ValueError("User does not own this profile")
+        # Verify user/session owns the profile
+        if not ((user_id and profile.user_id == user_id) or 
+                (session_id and profile.session_id == session_id)):
+            raise ValueError("User/session does not own this profile")
         
         # Get spending data from the category_spending JSON
         category_spending = profile.get_category_spending()
@@ -155,7 +157,8 @@ class RecommendationService:
             profile_id=profile_id,
             card_details=card_details,
             sequence=top_card_ids,
-            monthly_values=monthly_values
+            monthly_values=monthly_values,
+            session_id=session_id
         )
         
         db.session.add(recommendation)

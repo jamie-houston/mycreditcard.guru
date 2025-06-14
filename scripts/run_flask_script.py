@@ -24,6 +24,9 @@ import re
 
 # Script descriptions and categories
 SCRIPT_INFO = {
+    # Root level scripts
+    "run.py": "Start the Flask development server with configurable options",
+    
     # Admin scripts
     "admin/generate_recommendation.py": "Generate credit card recommendations for a specific user profile",
     
@@ -94,36 +97,60 @@ def extract_description_from_file(script_path):
 
 def get_available_scripts():
     """Get all available Flask scripts organized by category."""
+    flask_app_dir = Path("flask_app")
     flask_scripts_dir = Path("flask_app/scripts")
-    if not flask_scripts_dir.exists():
+    
+    if not flask_app_dir.exists():
         return {}
     
     scripts_by_category = {}
     
-    # Scan all subdirectories
-    for category_dir in flask_scripts_dir.iterdir():
-        if category_dir.is_dir() and category_dir.name != "__pycache__":
-            category = category_dir.name
-            scripts_by_category[category] = []
+    # First, scan for root-level scripts in flask_app directory
+    root_scripts = []
+    for script in flask_app_dir.glob("*.py"):
+        if script.name not in ["__init__.py", "config.py"]:  # Skip common non-script files
+            relative_path = script.name
             
-            for script in category_dir.glob("*.py"):
-                if script.name != "__init__.py":
-                    relative_path = f"{category}/{script.name}"
-                    
-                    # Get description from SCRIPT_INFO or extract from file
-                    description = SCRIPT_INFO.get(relative_path)
-                    if not description:
-                        description = extract_description_from_file(script)
-                    
-                    scripts_by_category[category].append({
-                        'name': script.name,
-                        'path': relative_path,
-                        'full_path': script,
-                        'description': description
-                    })
+            # Get description from SCRIPT_INFO or extract from file
+            description = SCRIPT_INFO.get(relative_path)
+            if not description:
+                description = extract_description_from_file(script)
             
-            # Sort scripts alphabetically within category
-            scripts_by_category[category].sort(key=lambda x: x['name'])
+            root_scripts.append({
+                'name': script.name,
+                'path': relative_path,
+                'full_path': script,
+                'description': description
+            })
+    
+    if root_scripts:
+        scripts_by_category['root'] = sorted(root_scripts, key=lambda x: x['name'])
+    
+    # Then scan all subdirectories in scripts/
+    if flask_scripts_dir.exists():
+        for category_dir in flask_scripts_dir.iterdir():
+            if category_dir.is_dir() and category_dir.name != "__pycache__":
+                category = category_dir.name
+                scripts_by_category[category] = []
+                
+                for script in category_dir.glob("*.py"):
+                    if script.name != "__init__.py":
+                        relative_path = f"{category}/{script.name}"
+                        
+                        # Get description from SCRIPT_INFO or extract from file
+                        description = SCRIPT_INFO.get(relative_path)
+                        if not description:
+                            description = extract_description_from_file(script)
+                        
+                        scripts_by_category[category].append({
+                            'name': script.name,
+                            'path': relative_path,
+                            'full_path': script,
+                            'description': description
+                        })
+                
+                # Sort scripts alphabetically within category
+                scripts_by_category[category].sort(key=lambda x: x['name'])
     
     return scripts_by_category
 
@@ -210,8 +237,13 @@ def run_script(script_info, args=None):
         print(f"⚙️  Arguments: {' '.join(args)}")
     
     try:
-        # Build the command
-        cmd = [sys.executable, f"scripts/{script_path}"] + args
+        # Build the command - handle root scripts vs scripts in subdirectories
+        if '/' in script_path:
+            # Script in subdirectory
+            cmd = [sys.executable, f"scripts/{script_path}"] + args
+        else:
+            # Root-level script
+            cmd = [sys.executable, script_path] + args
         
         # Set up environment
         env = os.environ.copy()
@@ -288,15 +320,17 @@ def main():
             if not script_name.endswith('.py'):
                 script_name += '.py'
             
-            # Check if script exists
-            script_path = Path(f"flask_app/scripts/{script_name}")
+            # Check if script exists (try root first, then scripts subdirectories)
+            script_path = Path(f"flask_app/{script_name}")
             if not script_path.exists():
-                print(f"❌ Script '{script_name}' not found in flask_app/scripts/")
-                
-                # Show available scripts
-                print("\nAvailable scripts:")
-                show_menu()
-                sys.exit(1)
+                script_path = Path(f"flask_app/scripts/{script_name}")
+                if not script_path.exists():
+                    print(f"❌ Script '{script_name}' not found in flask_app/ or flask_app/scripts/")
+                    
+                    # Show available scripts
+                    print("\nAvailable scripts:")
+                    show_menu()
+                    sys.exit(1)
             
             # Create script info
             script_info = {
