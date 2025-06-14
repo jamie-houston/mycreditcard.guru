@@ -46,7 +46,7 @@ endblock %} {% block content %}
         <div class="col-md-4 mb-3 mb-md-0">
           <div class="p-3 border rounded text-center">
             <h3 class="text-danger fw-bold">
-              ${{ "%.2f"|format(recommendation.total_annual_fees) }}
+              ${{ "%.0f"|format(recommendation.total_annual_fees) }}
             </h3>
             <p class="text-muted mb-0">Annual Fees</p>
           </div>
@@ -80,10 +80,12 @@ endblock %} {% block content %}
         >
           <div class="ms-2 me-auto">
             <div class="fw-bold">{{ card.name }}</div>
-            <p class="mb-0">{{ card.issuer }}</p>
+            <p class="mb-0">
+              {{ card.issuer_obj.name if card.issuer_obj else 'Unknown' }}
+            </p>
             {% if card.annual_fee > 0 %}
             <p class="text-danger mb-0">
-              Annual Fee: ${{ "%.2f"|format(card.annual_fee) }}
+              Annual Fee: ${{ "%.0f"|format(card.annual_fee) }}
             </p>
             {% else %}
             <p class="text-success mb-0">No Annual Fee</p>
@@ -130,7 +132,7 @@ endblock %} {% block content %}
               {% for category in ['dining', 'groceries', 'travel', 'gas',
               'general', 'online_shopping'] %}
               <td>
-                ${{ "%.2f"|format(details.rewards_by_category.get(category, 0))
+                ${{ "%.0f"|format(details.rewards_by_category.get(category, 0))
                 }}
               </td>
               {% endfor %}

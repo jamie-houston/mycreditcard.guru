@@ -14,7 +14,7 @@
           <p><strong>Credit Score:</strong> {{ profile.credit_score }}</p>
           <p>
             <strong>Total Monthly Spend:</strong> ${{
-            "%.2f"|format(profile.total_monthly_spend) }}
+            "%.0f"|format(profile.total_monthly_spend) }}
           </p>
 
           <h6 class="mt-3">Category Spending</h6>
@@ -25,7 +25,7 @@
             >
               {{ category|capitalize }}
               <span class="badge bg-primary rounded-pill"
-                >${{ "%.2f"|format(amount) }}</span
+                >${{ "%.0f"|format(amount) }}</span
               >
             </li>
             {% endfor %}
@@ -46,7 +46,7 @@
           </p>
           <p>
             <strong>Total Annual Fees:</strong> ${{
-            "%.2f"|format(recommendation.total_annual_fees) }}
+            "%.0f"|format(recommendation.total_annual_fees) }}
           </p>
           <p>
             <strong>Net Value:</strong> ${{
@@ -79,10 +79,13 @@
           <h5 class="mb-0">{{ detail.card.name }}</h5>
         </div>
         <div class="card-body">
-          <p><strong>Issuer:</strong> {{ detail.card.issuer }}</p>
+          <p>
+            <strong>Issuer:</strong> {{ detail.card.issuer_obj.name if
+            detail.card.issuer_obj else 'Unknown' }}
+          </p>
           <p>
             <strong>Annual Fee:</strong> ${{
-            "%.2f"|format(detail.card.annual_fee) }}
+            "%.0f"|format(detail.card.annual_fee) }}
           </p>
           <p>
             <strong>Signup Bonus:</strong>
@@ -113,7 +116,7 @@
           {% if detail.card.annual_fee > 0 %}
           <p>
             <strong>Net After Annual Fee:</strong> ${{
-            "%.2f"|format(detail.estimated_value - detail.card.annual_fee) }}
+            "%.0f"|format(detail.estimated_value - detail.card.annual_fee) }}
           </p>
           {% endif %} {% if detail.signup_month != 'Anytime' %}
           <div class="alert alert-info mt-3">

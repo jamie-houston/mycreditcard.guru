@@ -150,8 +150,8 @@ class RecommendationService:
                 monthly_value += signup_value
                 
             monthly_values.append(monthly_value)
-            
-        # Create the recommendation
+        
+        # Create the recommendation (this generates the deterministic ID)
         recommendation = create_recommendation_from_profile(
             user_id=user_id,
             profile_id=profile_id,
@@ -161,6 +161,16 @@ class RecommendationService:
             session_id=session_id
         )
         
+        # Check if a recommendation with this ID already exists
+        existing_recommendation = Recommendation.query.filter_by(
+            recommendation_id=recommendation.recommendation_id
+        ).first()
+        
+        if existing_recommendation:
+            # Return the existing recommendation instead of creating a duplicate
+            return existing_recommendation
+        
+        # If no existing recommendation, save the new one
         db.session.add(recommendation)
         db.session.commit()
         

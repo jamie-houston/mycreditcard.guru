@@ -65,7 +65,7 @@ endblock %} {% block extra_css %}
           <div class="card bg-light h-100">
             <div class="card-body text-center">
               <h3 class="text-success">
-                ${{ "%.2f"|format(recommendation.total_value) }}
+                ${{ "%.0f"|format(recommendation.total_value) }}
               </h3>
               <p class="text-muted mb-0">Total First-Year Value</p>
             </div>
@@ -74,7 +74,7 @@ endblock %} {% block extra_css %}
         <div class="col-md-4">
           <div class="card bg-light h-100">
             <div class="card-body text-center">
-              <h3>${{ "%.2f"|format(recommendation.total_annual_fees) }}</h3>
+              <h3>${{ "%.0f"|format(recommendation.total_annual_fees) }}</h3>
               <p class="text-muted mb-0">Total Annual Fees</p>
             </div>
           </div>
@@ -107,7 +107,9 @@ endblock %} {% block extra_css %}
     recommendation.card_details[card_id|string] %}
     <div class="col-md-6 mb-4">
       <div class="card shadow-sm h-100">
-        <div class="card-header d-flex justify-content-between">
+        <div
+          class="card-header d-flex justify-content-between align-items-center"
+        >
           <h5 class="mb-0">
             <a
               href="#"
@@ -119,14 +121,32 @@ endblock %} {% block extra_css %}
               {{ card.name }}
             </a>
           </h5>
-          <span class="badge bg-success">
-            +${{ "%.2f"|format(card_detail.annual_value|float) }} Value
-          </span>
+          <div class="d-flex align-items-center gap-2">
+            <span class="badge bg-success">
+              +${{ "%.0f"|format(card_detail.annual_value|float) }} Value
+            </span>
+            {% if recommendation.recommended_sequence|length > 1 %}
+            <form
+              method="POST"
+              action="{{ url_for('recommendations.remove_card', recommendation_id=recommendation.recommendation_id, card_id=card.id) }}"
+              class="d-inline"
+              onsubmit="return confirm('Are you sure you want to remove {{ card.name }} from this recommendation?');"
+            >
+              <button
+                type="submit"
+                class="btn btn-sm btn-outline-danger"
+                title="Remove card from recommendation"
+              >
+                <i class="fas fa-times"></i>
+              </button>
+            </form>
+            {% endif %}
+          </div>
         </div>
         <div class="card-body">
           <div class="mb-3">
-            <small class="text-muted">Issuer:</small> {{ card.issuer.name if
-            card.issuer else 'Unknown' }}
+            <small class="text-muted">Issuer:</small> {{ card.issuer_obj.name if
+            card.issuer_obj else 'Unknown' }}
           </div>
 
           <hr />
@@ -135,14 +155,14 @@ endblock %} {% block extra_css %}
             <div class="col-6">
               <small class="text-muted d-block">Annual Fee</small>
               <span class="fw-bold"
-                >${{ "%.2f"|format(card.annual_fee|float) }}</span
+                >${{ "%.0f"|format(card.annual_fee|float) }}</span
               >
             </div>
             <div class="col-6">
               <small class="text-muted d-block">Sign-up Bonus</small>
               <span class="fw-bold">
                 {% if card.signup_bonus_value %} ${{
-                "%.2f"|format(card.signup_bonus_value|float) }} {% else %} None
+                "%.0f"|format(card.signup_bonus_value|float) }} {% else %} None
                 {% endif %}
               </span>
             </div>
@@ -159,10 +179,29 @@ endblock %} {% block extra_css %}
                 </tr>
               </thead>
               <tbody>
+                {% set optimal_cats = optimal_categories.get(card_id, set()) %}
                 {% for category, value in
-                card_detail.rewards_by_category.items() %}
-                <tr>
-                  <td>{{ category|capitalize }}</td>
+                card_detail.rewards_by_category.items() %} {% if category ==
+                'signup_bonus' or category in optimal_cats %}
+                <tr
+                  {%
+                  if
+                  category
+                  in
+                  optimal_cats
+                  %}class="table-success"
+                  {%
+                  endif
+                  %}
+                >
+                  <td>
+                    {{ category|capitalize }} {% if category in optimal_cats %}
+                    <i
+                      class="fas fa-star text-warning ms-1"
+                      title="Best card for this category"
+                    ></i>
+                    {% endif %}
+                  </td>
                   <td class="text-end">
                     {% if category == 'signup_bonus' %} - {% elif value is
                     mapping and 'main_rate' in value %} {{
@@ -171,17 +210,17 @@ endblock %} {% block extra_css %}
                   </td>
                   <td class="text-end">
                     {% if value is mapping and 'value' in value %} ${{
-                    "%.2f"|format(value.value|float) }} {% elif value is number
-                    %} ${{ "%.2f"|format(value|float) }} {% else %} $0.00 {%
-                    endif %}
+                    "%.0f"|format(value.value|float) }} {% elif value is number
+                    %} ${{ "%.0f"|format(value|float) }} {% else %} $0 {% endif
+                    %}
                   </td>
                 </tr>
-                {% endfor %} {% if card.signup_bonus_value %}
+                {% endif %} {% endfor %} {% if card.signup_bonus_value %}
                 <tr class="table-success">
                   <td>Sign-up Bonus</td>
                   <td class="text-end">-</td>
                   <td class="text-end">
-                    ${{ "%.2f"|format(card.signup_bonus_value|float) }}
+                    ${{ "%.0f"|format(card.signup_bonus_value|float) }}
                   </td>
                 </tr>
                 {% endif %}
@@ -189,14 +228,14 @@ endblock %} {% block extra_css %}
                   <td>Annual Fee</td>
                   <td class="text-end">-</td>
                   <td class="text-end">
-                    -${{ "%.2f"|format(card.annual_fee|float) }}
+                    -${{ "%.0f"|format(card.annual_fee|float) }}
                   </td>
                 </tr>
                 <tr class="table-primary fw-bold">
                   <td>Total Value</td>
                   <td class="text-end">-</td>
                   <td class="text-end">
-                    ${{ "%.2f"|format(card_detail.annual_value|float) }}
+                    ${{ "%.0f"|format(card_detail.annual_value|float) }}
                   </td>
                 </tr>
               </tbody>
@@ -255,7 +294,7 @@ endblock %} {% block extra_css %}
     {{ card_id }}: {
       id: {{ card.id }},
       name: "{{ card.name|e }}",
-      issuer: "{{ card.issuer.name|e if card.issuer else 'Unknown' }}",
+      issuer: "{{ card.issuer_obj.name|e if card.issuer_obj else 'Unknown' }}",
       annual_fee: {{ card.annual_fee|float }},
       signup_bonus_value: {{ card.signup_bonus_value|float if card.signup_bonus_value else 0 }},
       signup_bonus_points: {{ card.signup_bonus_points if card.signup_bonus_points else 0 }},
@@ -326,13 +365,13 @@ endblock %} {% block extra_css %}
           <p>${card.issuer}</p>
 
           <h6><i class="bi bi-currency-dollar me-2"></i>Annual Fee</h6>
-          <p class="fw-bold ${card.annual_fee > 0 ? 'text-danger' : 'text-success'}">$${card.annual_fee.toFixed(2)}</p>
+          <p class="fw-bold ${card.annual_fee > 0 ? 'text-danger' : 'text-success'}">$${Math.round(card.annual_fee)}</p>
 
           <h6><i class="bi bi-gift me-2"></i>Sign-up Bonus</h6>
           ${card.signup_bonus_value > 0 ? `
-            <p><strong>$${card.signup_bonus_value.toFixed(2)}</strong></p>
+            <p><strong>$${Math.round(card.signup_bonus_value)}</strong></p>
             ${card.signup_bonus_points > 0 ? `<p class="text-muted small">${card.signup_bonus_points.toLocaleString()} points</p>` : ''}
-            ${card.signup_bonus_min_spend > 0 ? `<p class="text-muted small">Spend $${card.signup_bonus_min_spend.toFixed(0)} in ${card.signup_bonus_time_limit || 3} months</p>` : ''}
+            ${card.signup_bonus_min_spend > 0 ? `<p class="text-muted small">Spend $${Math.round(card.signup_bonus_min_spend)} in ${card.signup_bonus_time_limit || 3} months</p>` : ''}
           ` : '<p class="text-muted">No sign-up bonus</p>'}
         </div>
 

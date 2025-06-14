@@ -112,13 +112,13 @@
         <td>{{ card.name }}</td>
         <td>{{ card.issuer_obj.name }}</td>
         <td data-sort-value="{{ card.annual_fee }}">
-          ${{ "%.2f"|format(card.annual_fee) }}
+          ${{ "%.0f"|format(card.annual_fee) }}
         </td>
         <td data-sort-value="{{ card.signup_bonus_points }}">
           {{ card.get_signup_bonus_display_text() }}
         </td>
         <td data-sort-value="{{ card.signup_bonus_min_spend }}">
-          ${{ "%.2f"|format(card.signup_bonus_min_spend) }} in {{
+          ${{ "%.0f"|format(card.signup_bonus_min_spend) }} in {{
           card.signup_bonus_time_limit }} months
         </td>
         <td>

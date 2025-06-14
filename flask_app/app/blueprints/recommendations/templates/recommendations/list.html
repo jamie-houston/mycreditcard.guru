@@ -28,7 +28,7 @@ block content %}
           </p>
           <p>
             <strong>Annual Fees:</strong> ${{
-            '%.2f'|format(recommendation.total_annual_fees) }}
+            '%.0f'|format(recommendation.total_annual_fees) }}
           </p>
           <p><strong>Cards:</strong> {{ recommendation.card_count }}</p>
         </div>

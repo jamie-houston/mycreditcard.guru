@@ -89,11 +89,48 @@ def view(recommendation_id):
         # Get the profile for additional context
         profile = UserProfile.query.get(recommendation.user_profile_id)
         
+        # Calculate which categories each card is optimal for (category exclusivity)
+        card_details = recommendation.card_details
+        optimal_categories = {}  # card_id -> set of categories where this card is optimal
+        
+        # Find all categories across all cards
+        all_categories = set()
+        for card_id in card_ids:
+            details = card_details.get(str(card_id), {})
+            rewards_by_category = details.get('rewards_by_category', {})
+            all_categories.update(rewards_by_category.keys())
+        
+        # For each category, find which card has the highest value
+        for category in all_categories:
+            if category == 'signup_bonus':
+                continue  # Skip signup bonus in category optimization
+            
+            best_card_id = None
+            max_value = 0
+            
+            for card_id in card_ids:
+                details = card_details.get(str(card_id), {})
+                rewards_by_category = details.get('rewards_by_category', {})
+                reward_info = rewards_by_category.get(category, {})
+                
+                if isinstance(reward_info, dict) and 'value' in reward_info:
+                    value = reward_info['value']
+                    if value > max_value:
+                        max_value = value
+                        best_card_id = card_id
+            
+            # Assign this category to the best card
+            if best_card_id and max_value > 0:
+                if best_card_id not in optimal_categories:
+                    optimal_categories[best_card_id] = set()
+                optimal_categories[best_card_id].add(category)
+        
         return render_template(
             'recommendations/view.html',
             recommendation=recommendation,
             cards=cards,
-            profile=profile
+            profile=profile,
+            optimal_categories=optimal_categories
         )
     
     except Exception as e:
@@ -128,4 +165,76 @@ def delete(recommendation_id):
     except Exception as e:
         flash(f'Error deleting recommendation: {str(e)}', 'danger')
     
-    return redirect(url_for('recommendations.list')) 
+    return redirect(url_for('recommendations.list'))
+
+@bp.route('/remove_card/<recommendation_id>/<int:card_id>', methods=['POST'])
+def remove_card(recommendation_id, card_id):
+    """Remove a card from a recommendation and create a new recommendation."""
+    try:
+        # Get the original recommendation
+        recommendation = Recommendation.query.filter_by(recommendation_id=recommendation_id).first()
+        if not recommendation:
+            flash('Recommendation not found.', 'warning')
+            return redirect(url_for('user_data.profile'))
+        
+        # Check permissions
+        user_id = current_user.id if hasattr(current_user, 'id') and current_user.is_authenticated else None
+        session_id = session.get('anonymous_user_id')
+        
+        if not ((user_id and recommendation.user_id == user_id) or 
+                (session_id and recommendation.session_id == session_id)):
+            flash('You do not have permission to modify this recommendation.', 'danger')
+            return redirect(url_for('recommendations.view', recommendation_id=recommendation_id))
+        
+        # Remove the card from the recommendation
+        new_sequence = [cid for cid in recommendation.recommended_sequence if cid != card_id]
+        
+        if len(new_sequence) == 0:
+            flash('Cannot remove all cards from recommendation.', 'warning')
+            return redirect(url_for('recommendations.view', recommendation_id=recommendation_id))
+        
+        # Create new card details without the removed card
+        new_card_details = {str(cid): details for cid, details in recommendation.card_details.items() if int(cid) != card_id}
+        
+        # Recalculate totals
+        new_total_value = sum(details.get('annual_value', 0) for details in new_card_details.values())
+        new_total_annual_fees = sum(details.get('annual_fee', 0) for details in new_card_details.values())
+        
+        # Create a new recommendation
+        new_recommendation = Recommendation()
+        new_recommendation.user_profile_id = recommendation.user_profile_id
+        new_recommendation.user_id = recommendation.user_id
+        new_recommendation.session_id = recommendation.session_id
+        new_recommendation.spending_profile = recommendation.spending_profile
+        new_recommendation.card_preferences = recommendation.card_preferences
+        new_recommendation.recommended_sequence = new_sequence
+        new_recommendation.card_details = new_card_details
+        new_recommendation.total_value = new_total_value
+        new_recommendation.total_annual_fees = new_total_annual_fees
+        new_recommendation.per_month_value = recommendation.per_month_value  # Keep original for now
+        new_recommendation.card_count = len(new_sequence)
+        
+        # Generate new recommendation ID
+        import hashlib
+        import json
+        hash_input = json.dumps({
+            'sequence': new_sequence,
+            'details': new_card_details,
+            'profile_id': recommendation.user_profile_id
+        }, sort_keys=True)
+        new_recommendation.recommendation_id = hashlib.sha256(hash_input.encode('utf-8')).hexdigest()
+        
+        # Save the new recommendation
+        db.session.add(new_recommendation)
+        db.session.commit()
+        
+        # Get the removed card name for the flash message
+        removed_card = CreditCard.query.get(card_id)
+        card_name = removed_card.name if removed_card else f"Card {card_id}"
+        
+        flash(f'Removed {card_name} from recommendation. New recommendation created.', 'success')
+        return redirect(url_for('recommendations.view', recommendation_id=new_recommendation.recommendation_id))
+    
+    except Exception as e:
+        flash(f'Error removing card: {str(e)}', 'danger')
+        return redirect(url_for('recommendations.view', recommendation_id=recommendation_id)) 

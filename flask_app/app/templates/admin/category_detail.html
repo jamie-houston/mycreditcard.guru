@@ -217,7 +217,10 @@ Category Details - {{ super() }}{% endblock %} {% block content %}
                           {{ item.card.name }}
                         </a>
                       </td>
-                      <td>{{ item.card.issuer }}</td>
+                      <td>
+                        {{ item.card.issuer_obj.name if item.card.issuer_obj
+                        else 'Unknown' }}
+                      </td>
                       <td>${{ "%.0f"|format(item.card.annual_fee) }}</td>
                       <td>
                         <span class="badge bg-success">

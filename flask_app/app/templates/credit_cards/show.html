@@ -22,10 +22,11 @@
       <div class="card-body">
         <div class="row">
           <div class="col-md-6 mb-3">
-            <strong>Issuer:</strong> {{ card.issuer }}
+            <strong>Issuer:</strong> {{ card.issuer_obj.name if card.issuer_obj
+            else 'Unknown' }}
           </div>
           <div class="col-md-6 mb-3">
-            <strong>Annual Fee:</strong> ${{ "%.2f"|format(card.annual_fee) }}
+            <strong>Annual Fee:</strong> ${{ "%.0f"|format(card.annual_fee) }}
           </div>
         </div>
 
@@ -37,7 +38,7 @@
           </div>
           <div class="col-md-6 mb-3">
             <strong>Spend Requirement:</strong> ${{
-            "%.2f"|format(card.signup_bonus_min_spend) }}
+            "%.0f"|format(card.signup_bonus_min_spend) }}
           </div>
           <div class="col-md-6 mb-3">
             <strong>Time Period:</strong> {{ card.signup_bonus_time_limit }}
@@ -96,7 +97,7 @@
               <td>{{ category.percentage }}%</td>
               <td>
                 {% if category.limit is not none %} Up to ${{
-                '%.2f'|format(category.limit) }} {% else %} No limit {% endif %}
+                '%.0f'|format(category.limit) }} {% else %} No limit {% endif %}
               </td>
             </tr>
             {% endfor %}
@@ -119,7 +120,7 @@
             {% for offer in offers %}
             <tr>
               <td>{{ offer.type|replace('_', ' ')|title }}</td>
-              <td>${{ "%.2f"|format(offer.amount) }}</td>
+              <td>${{ "%.0f"|format(offer.amount) }}</td>
               <td>{{ offer.frequency|replace('_', ' ')|title }}</td>
             </tr>
             {% endfor %}

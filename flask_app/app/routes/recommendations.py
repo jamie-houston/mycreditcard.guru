@@ -181,12 +181,29 @@ def results_by_id(recommendation_id):
                 cards[card_id] = card
         category_totals = {}
         card_details = recommendation.card_details
+        
+        # For each category, find the card with the highest reward value for that category
+        # This prevents double-counting rewards across multiple cards
+        all_categories = set()
         for card_id in card_ids:
             details = card_details.get(str(card_id), {})
-            category_values = details.get('category_values', {})
-            for category, value in category_values.items():
-                if value > 0:
-                    category_totals[category] = category_totals.get(category, 0) + value
+            rewards_by_category = details.get('rewards_by_category', {})
+            all_categories.update(rewards_by_category.keys())
+        
+        for category in all_categories:
+            if category == 'signup_bonus':
+                continue  # Skip signup bonus in category totals
+            max_value = 0
+            for card_id in card_ids:
+                details = card_details.get(str(card_id), {})
+                rewards_by_category = details.get('rewards_by_category', {})
+                reward_info = rewards_by_category.get(category, {})
+                if isinstance(reward_info, dict) and 'value' in reward_info:
+                    value = reward_info['value'] / 12  # Convert annual to monthly
+                    if value > max_value:
+                        max_value = value
+            if max_value > 0:
+                category_totals[category] = max_value
         return render_template(
             'recommendations/results.html',
             profile=profile,
@@ -232,12 +249,29 @@ def results_by_id(recommendation_id):
                 cards[card_id] = card
         category_totals = {}
         card_details = rec_data.get('card_details', {})
+        
+        # For each category, find the card with the highest reward value for that category
+        # This prevents double-counting rewards across multiple cards
+        all_categories = set()
         for card_id in card_ids:
             details = card_details.get(str(card_id), {})
-            category_values = details.get('category_values', {})
-            for category, value in category_values.items():
-                if value > 0:
-                    category_totals[category] = category_totals.get(category, 0) + value
+            rewards_by_category = details.get('rewards_by_category', {})
+            all_categories.update(rewards_by_category.keys())
+        
+        for category in all_categories:
+            if category == 'signup_bonus':
+                continue  # Skip signup bonus in category totals
+            max_value = 0
+            for card_id in card_ids:
+                details = card_details.get(str(card_id), {})
+                rewards_by_category = details.get('rewards_by_category', {})
+                reward_info = rewards_by_category.get(category, {})
+                if isinstance(reward_info, dict) and 'value' in reward_info:
+                    value = reward_info['value'] / 12  # Convert annual to monthly
+                    if value > max_value:
+                        max_value = value
+            if max_value > 0:
+                category_totals[category] = max_value
         return render_template(
             'recommendations/results.html',
             profile=fake_profile,

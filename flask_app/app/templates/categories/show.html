@@ -126,7 +126,10 @@ Category - {{ super() }}{% endblock %} {% block content %}
                       <strong>{{ item.card.name }}</strong>
                     </a>
                   </td>
-                  <td>{{ item.card.issuer }}</td>
+                  <td>
+                    {{ item.card.issuer_obj.name if item.card.issuer_obj else
+                    'Unknown' }}
+                  </td>
                   <td>
                     <span class="badge bg-success p-2">
                       {{ item.reward.reward_percent }}%

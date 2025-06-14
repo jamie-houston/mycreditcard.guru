@@ -68,7 +68,7 @@
                       </div>
                       <h6 class="card-title text-capitalize">{{ category }}</h6>
                       <h4 class="text-success mb-1">
-                        ${{ "%.2f"|format(total_value) }}
+                        ${{ "%.0f"|format(total_value) }}
                       </h4>
                       <small class="text-muted">per month</small>
                       <div class="mt-2">
@@ -116,7 +116,10 @@
               class="card-header d-flex justify-content-between align-items-center"
             >
               <h5 class="mb-0">{{ card.name }}</h5>
-              <span class="badge bg-primary">{{ card.issuer }}</span>
+              <span class="badge bg-primary"
+                >{{ card.issuer_obj.name if card.issuer_obj else 'Unknown'
+                }}</span
+              >
             </div>
             <div class="card-body">
               <div class="row">

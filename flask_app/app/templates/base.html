@@ -74,16 +74,68 @@
                 <i class="fas fa-building me-1"></i> Issuers
               </a>
             </li>
-            {% if current_user.is_authenticated %}
-            <li class="nav-item">
+            <li class="nav-item dropdown">
               <a
-                class="nav-link {% if 'recommendations.' in request.endpoint %}active{% endif %}"
-                href="{{ url_for('recommendations.list') }}"
+                class="nav-link dropdown-toggle {% if 'recommendations.' in request.endpoint or 'user_data.profile' in request.endpoint %}active{% endif %}"
+                href="#"
+                id="recommendationsDropdown"
+                role="button"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
               >
                 <i class="fas fa-star me-1"></i> Recommendations
               </a>
+              <ul
+                class="dropdown-menu"
+                aria-labelledby="recommendationsDropdown"
+              >
+                {% if current_user.is_authenticated %}
+                <li>
+                  <a
+                    class="dropdown-item"
+                    href="{{ url_for('recommendations.list') }}"
+                  >
+                    <i class="fas fa-list me-2"></i> My Recommendations
+                  </a>
+                </li>
+                <li>
+                  <a
+                    class="dropdown-item"
+                    href="{{ url_for('user_data.profile') }}"
+                  >
+                    <i class="fas fa-user-edit me-2"></i> Update Profile
+                  </a>
+                </li>
+                {% else %}
+                <li>
+                  <a
+                    class="dropdown-item"
+                    href="{{ url_for('user_data.profile') }}"
+                  >
+                    <i class="fas fa-magic me-2"></i> Generate Recommendations
+                  </a>
+                </li>
+                <li><hr class="dropdown-divider" /></li>
+                <li class="px-3 py-2">
+                  <small class="text-muted">
+                    <i class="fas fa-info-circle me-1"></i>
+                    <strong>Want to save your recommendations?</strong><br />
+                    Login to keep track of your personalized card suggestions
+                    and compare different scenarios.
+                  </small>
+                </li>
+                <li>
+                  <a
+                    class="dropdown-item"
+                    href="{{ url_for('auth.google.login') }}"
+                  >
+                    <i class="fab fa-google me-2"></i> Login to Save
+                    Recommendations
+                  </a>
+                </li>
+                {% endif %}
+              </ul>
             </li>
-            {% endif %}
           </ul>
           <ul class="navbar-nav ms-auto">
             {% if current_user.is_authenticated %}
