@@ -19,7 +19,7 @@ class UserProfile(db.Model):
     reward_type = db.Column(db.String(20), default='points')  # 'points', 'cash_back', 'miles', 'hotel'
     preferred_issuer_id = db.Column(db.Integer, db.ForeignKey('card_issuers.id'), nullable=True)  # Preferred issuer constraint
     max_cards = db.Column(db.Integer, default=1)
-    max_annual_fees = db.Column(db.Float, default=1000.0)
+    max_annual_fees = db.Column(db.Float, default=None)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     

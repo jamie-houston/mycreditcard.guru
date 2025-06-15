@@ -199,28 +199,18 @@ class TestProfileForm:
     def test_profile_form_get_request(self, client, test_app):
         """Test that the profile form loads correctly via GET request."""
         with test_app.app_context():
-            # The route might redirect to login for unauthenticated users
-            # Let's test that it either returns 200 or redirects to login
             response = client.get('/profile')
+            assert response.status_code == 200
             
-            if response.status_code == 302:
-                # If it redirects, it should be to the login page
-                assert '/login' in response.location
-                print("Profile route correctly redirects unauthenticated users to login")
-            elif response.status_code == 200:
-                # If it returns 200, check that the form contains expected elements
-                html = response.data.decode('utf-8')
-                assert 'Monthly Spending by Category' in html
-                assert 'Constraints' in html
-                assert 'Generate Recommendations' in html
-                assert 'csrf_token' in html  # CSRF token should be present
-                
-                # Check that basic information section is NOT present
-                assert 'Basic Information' not in html
-                assert 'Credit Score' not in html
-                assert 'Annual Income' not in html
-                assert 'Profile Name' not in html
-                print("Profile route correctly displays form for authenticated users")
-            else:
-                # Unexpected status code
-                assert False, f"Unexpected status code: {response.status_code}" 
+            # Check that the form contains expected elements
+            html = response.data.decode('utf-8')
+            assert 'Monthly Spending by Category' in html
+            assert 'Constraints' in html
+            assert 'Generate Recommendations' in html
+            assert 'csrf_token' in html  # CSRF token should be present
+            
+            # Check that basic information section is NOT present
+            assert 'Basic Information' not in html
+            assert 'Credit Score' not in html
+            assert 'Annual Income' not in html
+            assert 'Profile Name' not in html 

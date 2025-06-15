@@ -259,7 +259,7 @@ def calculate_card_sequence_value(card_sequence: List[int], cards_data: Dict[int
     }
 
 def generate_card_recommendations(profile: Profile, max_cards: int = 1, 
-                                max_annual_fees: float = 1000) -> Dict[str, Any]:
+                                max_annual_fees: float = None) -> Dict[str, Any]:
     """Generate credit card recommendations based on user spending profile"""
     
     logger.info(f"Generating recommendations for profile {profile.id}")

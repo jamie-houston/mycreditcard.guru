@@ -153,7 +153,7 @@ def generate_recommendation_id(profile, recommendation_data):
         'category_spending': profile.get_category_spending(),
         'reward_preferences': profile.get_reward_preferences() if hasattr(profile, 'get_reward_preferences') else [],
         'max_cards': getattr(profile, 'max_cards', 5),
-        'max_annual_fees': getattr(profile, 'max_annual_fees', 1000.0),
+        'max_annual_fees': getattr(profile, 'max_annual_fees', None),
     }
     # Recommendation data (sort keys for determinism)
     rec_data = {
