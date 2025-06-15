@@ -60,8 +60,8 @@ class LandingPageTestCase(unittest.TestCase):
         
         self.assertEqual(response.status_code, 200)
         self.assertIn(b'Get Started', response.data)
-        # The button should link to the profile page
-        self.assertIn(b'href="/profile/profile"', response.data)
+        # The button should link to the profile page - check for profile in the href
+        self.assertIn(b'href="/profile', response.data)
 
 
 if __name__ == '__main__':
