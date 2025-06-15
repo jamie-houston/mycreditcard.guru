@@ -116,6 +116,10 @@ class RecommendationService:
         else:
             cards = CreditCard.query.all()
         
+        # Filter cards by reward type preference
+        reward_type = profile.get_reward_type()
+        cards = [card for card in cards if card.reward_type == reward_type]
+        
         # Calculate value for each card
         card_values = {}
         for card in cards:

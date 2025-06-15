@@ -169,8 +169,15 @@ def show_menu():
     script_list = []
     counter = 1
     
-    # Sort categories alphabetically
-    for category in sorted(scripts_by_category.keys()):
+    # Sort categories alphabetically, but put 'root' first
+    categories = list(scripts_by_category.keys())
+    if 'root' in categories:
+        categories.remove('root')
+        categories = ['root'] + sorted(categories)
+    else:
+        categories = sorted(categories)
+    
+    for category in categories:
         scripts = scripts_by_category[category]
         if not scripts:
             continue

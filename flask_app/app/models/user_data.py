@@ -16,7 +16,7 @@ class UserProfile(db.Model):
     income = db.Column(db.Float, nullable=False)
     total_monthly_spend = db.Column(db.Float, nullable=False)
     category_spending = db.Column(db.Text, nullable=False)  # JSON string
-    reward_preferences = db.Column(db.Text, nullable=True)  # JSON string for reward preferences
+    reward_type = db.Column(db.String(20), default='points')  # 'points', 'cash_back', 'miles', 'hotel'
     preferred_issuer_id = db.Column(db.Integer, db.ForeignKey('card_issuers.id'), nullable=True)  # Preferred issuer constraint
     max_cards = db.Column(db.Integer, default=1)
     max_annual_fees = db.Column(db.Float, default=1000.0)
@@ -41,16 +41,13 @@ class UserProfile(db.Model):
         """Convert dictionary to JSON string and set category_spending."""
         self.category_spending = json.dumps(spending_dict)
     
-    def get_reward_preferences(self):
-        """Parse and return the reward preferences as a list."""
-        try:
-            return json.loads(self.reward_preferences)
-        except (json.JSONDecodeError, TypeError):
-            return []
+    def get_reward_type(self):
+        """Get the reward type preference."""
+        return self.reward_type or 'points'
     
-    def set_reward_preferences(self, preferences_list):
-        """Convert list to JSON string and set reward_preferences."""
-        self.reward_preferences = json.dumps(preferences_list)
+    def set_reward_type(self, reward_type):
+        """Set the reward type preference."""
+        self.reward_type = reward_type
     
     def calculate_total_spend(self):
         """Calculate the total monthly spend from category spending."""

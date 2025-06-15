@@ -17,7 +17,7 @@ class UserProfileSchema(Schema):
     income = fields.Float(required=True)
     total_monthly_spend = fields.Float(required=True)
     category_spending = fields.Str(dump_default='{}')
-    reward_preferences = fields.Str(dump_default='[]')
+    reward_type = fields.Str(dump_default='points')
     max_annual_fees = fields.Float()
     max_cards = fields.Int()
 
@@ -41,8 +41,8 @@ def profile():
             # Calculate total monthly spend from category spending
             total_monthly_spend = sum(category_spending.values())
 
-            # Process reward preferences from form
-            reward_preferences = request.form.getlist('reward_preferences')
+            # Process reward type from form
+            reward_type = request.form.get('reward_type', 'points')
 
             # Get other form data
             profile_name = request.form.get('profile_name', 'My Spending Profile')
@@ -86,7 +86,7 @@ def profile():
             profile.income = income
             profile.total_monthly_spend = total_monthly_spend
             profile.category_spending = json.dumps(category_spending)
-            profile.reward_preferences = json.dumps(reward_preferences)
+            profile.reward_type = reward_type
             profile.max_cards = max_cards
             profile.max_annual_fees = max_annual_fees
             profile.preferred_issuer_id = preferred_issuer_id
@@ -125,20 +125,6 @@ def profile():
     # Get all issuers for the dropdown
     issuers = CardIssuer.all_ordered()
 
-    reward_options = current_app.config.get('REWARD_OPTIONS', [
-        'cash_back', 'travel_points', 'airline_miles',
-        'hotel_points', 'statement_credits', 'shopping_benefits'
-    ])
-
-    reward_descriptions = current_app.config.get('REWARD_DESCRIPTIONS', {
-        'cash_back': 'Direct cash rewards as statement credits or deposits',
-        'travel_points': 'Flexible points that can be redeemed for travel bookings',
-        'airline_miles': 'Miles that can be used for flight redemptions',
-        'hotel_points': 'Points that can be redeemed for hotel stays',
-        'statement_credits': 'Credits for specific categories like dining or travel',
-        'shopping_benefits': 'Special discounts, extended warranties, and purchase protection'
-    })
-
     # Get the user's profile if they have one
     if current_user.is_authenticated:
         profile = UserProfile.query.filter_by(user_id=current_user.id).first()
@@ -169,14 +155,14 @@ def profile():
             max_annual_fees = float(max_annual_fees_raw)
         else:
             max_annual_fees = None
-        reward_preferences = prefill.getlist('reward_preferences') or (json.loads(profile.reward_preferences) if profile and profile.reward_preferences else [])
+        reward_type = prefill.get('reward_type', profile.reward_type if profile else 'points')
     else:
         category_spending = json.loads(profile.category_spending) if profile else {}
         credit_score = profile.credit_score if profile else 700
         income = profile.income if profile else 50000
         max_cards = profile.max_cards if profile else 1
         max_annual_fees = profile.max_annual_fees if profile else None
-        reward_preferences = json.loads(profile.reward_preferences) if profile and profile.reward_preferences else []
+        reward_type = profile.reward_type if profile else 'points'
 
     return render_template(
         'user_data/profile.html',
@@ -184,9 +170,7 @@ def profile():
         categories=db_categories,  # Pass full category objects instead of just names
         category_descriptions=category_descriptions,
         category_spending=category_spending,
-        reward_options=reward_options,
-        reward_descriptions=reward_descriptions,
-        reward_preferences=reward_preferences,
+        reward_type=reward_type,
         credit_score=credit_score,
         income=income,
         max_cards=max_cards,

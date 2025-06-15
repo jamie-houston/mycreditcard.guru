@@ -34,7 +34,8 @@ class CreditCardSchema(Schema):
     signup_bonus_value = fields.Float(dump_default=0.0)
     signup_bonus_min_spend = fields.Float(dump_default=0.0)
     signup_bonus_max_months = fields.Int(dump_default=3)
-    signup_bonus_type = fields.Str(dump_default='points')
+    reward_type = fields.Str(dump_default='points')
+    reward_value_multiplier = fields.Float(dump_default=0.01)
 
 @credit_cards.route('/')
 def index():
@@ -165,11 +166,12 @@ def new():
                 'name': request.form.get('name'),
                 'issuer_id': request.form.get('issuer_id'),
                 'annual_fee': float(request.form.get('annual_fee', 0)),
+                'reward_type': request.form.get('reward_type', 'points'),
+                'reward_value_multiplier': float(request.form.get('reward_value_multiplier', 0.01)),
                 'signup_bonus_points': int(request.form.get('signup_bonus_points', 0)),
                 'signup_bonus_value': float(request.form.get('signup_bonus_value', 0)),
                 'signup_bonus_min_spend': float(request.form.get('signup_bonus_min_spend', 0)),
                 'signup_bonus_max_months': int(request.form.get('signup_bonus_max_months', 3)),
-                'signup_bonus_type': request.form.get('signup_bonus_type', 'points'),
             }
             
             # Process reward categories from form
@@ -339,11 +341,12 @@ def edit(id):
                 'name': request.form.get('name'),
                 'issuer_id': request.form.get('issuer_id'),
                 'annual_fee': float(request.form.get('annual_fee', 0)),
+                'reward_type': request.form.get('reward_type', 'points'),
+                'reward_value_multiplier': float(request.form.get('reward_value_multiplier', 0.01)),
                 'signup_bonus_points': int(request.form.get('signup_bonus_points', 0)),
                 'signup_bonus_value': float(request.form.get('signup_bonus_value', 0)),
                 'signup_bonus_min_spend': float(request.form.get('signup_bonus_min_spend', 0)),
                 'signup_bonus_max_months': int(request.form.get('signup_bonus_max_months', 3)),
-                'signup_bonus_type': request.form.get('signup_bonus_type', 'points'),
             }
             
             # Process reward categories (similar to 'new' route)

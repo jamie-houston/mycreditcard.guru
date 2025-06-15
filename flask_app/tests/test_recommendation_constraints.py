@@ -50,6 +50,8 @@ def _add_card(name: str, issuer_id: int, annual_fee: float, rewards: list[dict])
         name=name,
         issuer_id=issuer_id,
         annual_fee=annual_fee,
+        reward_type='points',  # Default to points for existing tests
+        reward_value_multiplier=0.01,  # Default value multiplier
         reward_categories=json.dumps(rewards),
     )
     db.session.add(card)
@@ -119,7 +121,7 @@ def _create_profile(spending: dict, max_cards: int, max_fees, preferred_issuer, 
         income=100000,
         total_monthly_spend=sum(spending.values()),
         category_spending=json.dumps(spending),
-        reward_preferences=json.dumps([]),
+        reward_type='points',  # Default to points for existing tests
         max_cards=max_cards,
         max_annual_fees=max_fees if max_fees is not None else None,
         preferred_issuer_id=preferred_issuer,

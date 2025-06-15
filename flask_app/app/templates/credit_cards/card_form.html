@@ -1,9 +1,12 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h1 class="mb-4">
-    {% if card %}Edit Credit Card: {{ card.name }}{% else %}Add New Credit Card{% endif %}
-</h1>
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h1>{{ 'Edit Credit Card' if card else 'Add New Credit Card' }}</h1>
+  <a href="{{ url_for('credit_cards.index') }}" class="btn btn-secondary">
+    Back to List
+  </a>
+</div>
 
 <!-- Hidden categories data for JavaScript if available -->
 {% if categories_data is defined %}
@@ -18,10 +21,7 @@
 </div>
 {% endif %}
 
-<form method="post" action="{{ form_action }}">
-  <!-- CSRF Token -->
-  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
-  
+<form method="POST" class="needs-validation" novalidate>
   <div class="card mb-4">
     <div class="card-header">
       <h5>Basic Information</h5>
@@ -40,13 +40,46 @@
           />
         </div>
         <div class="col-md-6">
-          <label for="issuer_id">Issuer</label>
-          <select name="issuer_id" id="issuer_id" class="form-control" required>
-            <option value="">-- Select Issuer --</option>
+          <label for="issuer_id" class="form-label">Issuer</label>
+          <select class="form-select" id="issuer_id" name="issuer_id" required>
+            <option value="">Select an issuer...</option>
             {% for issuer in issuers %}
-                <option value="{{ issuer.id }}" {% if card and card.issuer_id == issuer.id %}selected{% endif %}>{{ issuer.name }}</option>
+            <option
+              value="{{ issuer.id }}"
+              {% if card and card.issuer_id == issuer.id %}selected{% endif %}
+            >
+              {{ issuer.name }}
+            </option>
             {% endfor %}
           </select>
+        </div>
+      </div>
+      <div class="row mb-3">
+        <div class="col-md-6">
+          <label for="reward_type" class="form-label">Reward Type</label>
+          <select class="form-select" id="reward_type" name="reward_type">
+            <option value="points" {% if card and card.reward_type == 'points' %}selected{% elif not card %}selected{% endif %}>Points</option>
+            <option value="cash_back" {% if card and card.reward_type == 'cash_back' %}selected{% endif %}>Cash Back</option>
+            <option value="miles" {% if card and card.reward_type == 'miles' %}selected{% endif %}>Miles</option>
+            <option value="hotel" {% if card and card.reward_type == 'hotel' %}selected{% endif %}>Hotel</option>
+          </select>
+        </div>
+        <div class="col-md-6">
+          <label for="reward_value_multiplier" class="form-label">Reward Value Multiplier</label>
+          <div class="input-group">
+            <span class="input-group-text">$</span>
+            <input
+              type="number"
+              step="0.001"
+              min="0"
+              class="form-control"
+              id="reward_value_multiplier"
+              name="reward_value_multiplier"
+              value="{{ card.reward_value_multiplier if card else 0.01 }}"
+              oninput="calculateEstimatedValue()"
+            />
+          </div>
+          <div class="form-text">Dollar value per point/mile (e.g., 0.01 = 1 cent per point)</div>
         </div>
       </div>
       <div class="row mb-3">
@@ -76,16 +109,6 @@
     <div class="card-body">
       <div class="row mb-3">
         <div class="col-md-6">
-          <label for="signup_bonus_type" class="form-label">Bonus Type</label>
-          <select class="form-select" id="signup_bonus_type" name="signup_bonus_type">
-            <option value="points" {% if card and card.signup_bonus_type == 'points' %}selected{% endif %}>Points/Miles</option>
-            <option value="dollars" {% if card and card.signup_bonus_type == 'dollars' %}selected{% endif %}>Dollars</option>
-            <option value="other" {% if card and card.signup_bonus_type == 'other' %}selected{% endif %}>Other</option>
-          </select>
-        </div>
-      </div>
-      <div class="row mb-3">
-        <div class="col-md-6">
           <label for="signup_bonus_points" class="form-label">Bonus Points</label>
           <input
             type="number"
@@ -93,10 +116,11 @@
             id="signup_bonus_points"
             name="signup_bonus_points"
             value="{{ card.signup_bonus_points if card else 0 }}"
+            oninput="calculateEstimatedValue()"
           />
         </div>
         <div class="col-md-6">
-          <label for="signup_bonus_value" class="form-label">Estimated Value</label>
+          <label for="estimated_value" class="form-label">Estimated Value (Calculated)</label>
           <div class="input-group">
             <span class="input-group-text">$</span>
             <input
@@ -104,11 +128,14 @@
               step="0.01"
               min="0"
               class="form-control"
-              id="signup_bonus_value"
-              name="signup_bonus_value"
-              value="{{ card.signup_bonus_value if card else 0 }}"
+              id="estimated_value"
+              name="estimated_value"
+              value="{{ card.estimated_value if card else 0 }}"
+              readonly
+              style="background-color: #f8f9fa;"
             />
           </div>
+          <div class="form-text">Automatically calculated: Bonus Points × Reward Value Multiplier</div>
         </div>
       </div>
       <div class="row mb-3">
@@ -207,45 +234,26 @@
                 <span class="input-group-text">%</span>
               </div>
             </div>
-            <div class="col-md-5">
-              <label class="form-label">Limit (Up To $)
-                <span class="text-muted" title="Maximum spend for which this reward applies. Leave blank for no limit.">(optional)</span>
-              </label>
-              <div class="input-group">
-                <span class="input-group-text">$</span>
-                <input
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  class="form-control"
-                  name="category_limit_{{ loop.index0 }}"
-                  value="{{ category.limit if category.limit is defined and category.limit is not none else '' }}"
-                  placeholder="No limit"
-                />
-              </div>
-            </div>
-            <div class="col-md-1 d-flex align-items-end mb-2">
+            <div class="col-md-1 d-flex align-items-end">
               <button
                 type="button"
-                class="btn btn-sm btn-outline-danger remove-category"
+                class="btn btn-outline-danger btn-sm remove-category"
               >
-                ✕
+                <i class="fas fa-trash"></i>
               </button>
             </div>
           </div>
           {% endfor %}
         {% else %}
-          <!-- Default empty category for new cards -->
+          <!-- Default empty category row -->
           <div class="row mb-3 category-row">
             <div class="col-md-6">
               <label class="form-label">Category</label>
               {% if categories is defined %}
                 <select class="form-select" name="category_name_0">
                   <option value="">Select a category...</option>
-                  {% for category in categories %}
-                  <option value="{{ category.name }}">
-                    {{ category.display_name }}
-                  </option>
+                  {% for cat in categories %}
+                  <option value="{{ cat.name }}">{{ cat.display_name }}</option>
                   {% endfor %}
                 </select>
               {% else %}
@@ -266,38 +274,27 @@
                   min="0"
                   class="form-control"
                   name="category_percentage_0"
-                  value="0"
+                  placeholder="1.0"
                 />
                 <span class="input-group-text">%</span>
               </div>
             </div>
-            <div class="col-md-5">
-              <label class="form-label">Limit (Up To $)
-                <span class="text-muted" title="Maximum spend for which this reward applies. Leave blank for no limit.">(optional)</span>
-              </label>
-              <div class="input-group">
-                <span class="input-group-text">$</span>
-                <input
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  class="form-control"
-                  name="category_limit_0"
-                  value=""
-                  placeholder="No limit"
-                />
-              </div>
-            </div>
-            <div class="col-md-1 d-flex align-items-end mb-2">
+            <div class="col-md-1 d-flex align-items-end">
               <button
                 type="button"
-                class="btn btn-sm btn-outline-danger remove-category"
+                class="btn btn-outline-danger btn-sm remove-category"
               >
-                ✕
+                <i class="fas fa-trash"></i>
               </button>
             </div>
           </div>
         {% endif %}
+      </div>
+      <div class="text-muted mt-2">
+        <small>
+          <i class="fas fa-info-circle me-1"></i>
+          Add reward categories and their respective percentages. Leave empty to use the default 1% rate.
+        </small>
       </div>
     </div>
   </div>
@@ -409,18 +406,108 @@
     </div>
   </div>
 
-  <div class="mb-4">
+  <div class="d-flex justify-content-between">
+    <a href="{{ url_for('credit_cards.index') }}" class="btn btn-secondary">
+      Cancel
+    </a>
     <button type="submit" class="btn btn-primary">
-      {% if card %}Update Credit Card{% else %}Add Credit Card{% endif %}
+      {{ 'Update Card' if card else 'Add Card' }}
     </button>
-    {% if card %}
-      <a href="{{ url_for('credit_cards.show', id=card.id) }}" class="btn btn-secondary ms-2">Cancel</a>
-    {% endif %}
   </div>
 </form>
+
+<!-- Category row template for JavaScript -->
+<template id="category-row-template">
+  <div class="row mb-3 category-row">
+    <div class="col-md-6">
+      <label class="form-label">Category</label>
+      {% if categories is defined %}
+        <select class="form-select" name="category_name_INDEX">
+          <option value="">Select a category...</option>
+          {% for cat in categories %}
+          <option value="{{ cat.name }}">{{ cat.display_name }}</option>
+          {% endfor %}
+        </select>
+      {% else %}
+        <input 
+          type="text" 
+          class="form-control" 
+          name="category_name_INDEX" 
+          placeholder="e.g., Gas, Groceries"
+        >
+      {% endif %}
+    </div>
+    <div class="col-md-5">
+      <label class="form-label">Reward Percentage</label>
+      <div class="input-group">
+        <input
+          type="number"
+          step="0.1"
+          min="0"
+          class="form-control"
+          name="category_percentage_INDEX"
+          placeholder="1.0"
+        />
+        <span class="input-group-text">%</span>
+      </div>
+    </div>
+    <div class="col-md-1 d-flex align-items-end">
+      <button
+        type="button"
+        class="btn btn-outline-danger btn-sm remove-category"
+      >
+        <i class="fas fa-trash"></i>
+      </button>
+    </div>
+  </div>
+</template>
 
 {% endblock %}
 
 {% block scripts %}
-<script src="{{ url_for('static', filename='js/card_form.js') }}"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    let categoryIndex = {{ reward_categories|length if reward_categories else 1 }};
+    
+    // Function to calculate estimated value
+    window.calculateEstimatedValue = function() {
+      const bonusPoints = parseFloat(document.getElementById('signup_bonus_points').value) || 0;
+      const multiplier = parseFloat(document.getElementById('reward_value_multiplier').value) || 0;
+      const estimatedValue = bonusPoints * multiplier;
+      document.getElementById('estimated_value').value = estimatedValue.toFixed(2);
+    };
+    
+    // Calculate initial estimated value
+    calculateEstimatedValue();
+    
+    // Add category functionality
+    document.getElementById('add-category').addEventListener('click', function() {
+      const template = document.getElementById('category-row-template');
+      const clone = template.content.cloneNode(true);
+      
+      // Replace INDEX placeholders with actual index
+      const inputs = clone.querySelectorAll('input, select');
+      inputs.forEach(input => {
+        if (input.name) {
+          input.name = input.name.replace('INDEX', categoryIndex);
+        }
+      });
+      
+      document.getElementById('categories-container').appendChild(clone);
+      categoryIndex++;
+    });
+    
+    // Remove category functionality
+    document.addEventListener('click', function(e) {
+      if (e.target.classList.contains('remove-category') || e.target.closest('.remove-category')) {
+        const row = e.target.closest('.category-row');
+        if (document.querySelectorAll('.category-row').length > 1) {
+          row.remove();
+        } else {
+          alert('At least one category row must remain.');
+        }
+      }
+    });
+  });
+</script>
 {% endblock %} 

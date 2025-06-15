@@ -21,192 +21,132 @@ from app.models import CardIssuer
 def seed_credit_cards():
     """Seed the database with sample credit cards."""
     
-    # Sample credit cards data - expanded from the original
+    # Sample credit cards data based on user specifications
     cards_data = [
         {
-            "name": "Sapphire Preferred",
+            "name": "Sapphire Reserve",
             "issuer": "Chase",
-            "annual_fee": 95,
-            "point_value": 0.0125,
-            "signup_bonus_value": 750,
-            "signup_bonus_min_spend": 5000,
-            "signup_bonus_max_months": 3,
+            "annual_fee": 550,
+            "reward_type": "points",
+            "reward_value_multiplier": 0.015,
             "signup_bonus_points": 60000,
-            "signup_bonus_type": "points",
+            "signup_bonus_value": 900,
+            "signup_bonus_min_spend": 4000,
+            "signup_bonus_max_months": 3,
             "reward_categories": [
+                {"category": "other", "rate": 1.0},
                 {"category": "dining", "rate": 3.0},
-                {"category": "streaming", "rate": 3.0},
-                {"category": "online_groceries", "rate": 3.0},
-                {"category": "travel", "rate": 2.0},
-                {"category": "other", "rate": 1.0}
+                {"category": "travel", "rate": 3.0}
             ],
             "special_offers": [
-                "25% more value when you redeem for airfare, hotels, car rentals and cruises through Chase Ultimate Rewards",
-                "5x on travel through Chase Travel",
-                "No foreign transaction fees",
-                "$50 annual Ultimate Rewards hotel credit"
+                "Premium travel benefits",
+                "Airport lounge access",
+                "$300 annual travel credit"
             ]
         },
         {
             "name": "Freedom Unlimited",
             "issuer": "Chase",
-            "annual_fee": 95,
-            "point_value": 0.0125,
+            "annual_fee": 0,
+            "reward_type": "cash_back",
+            "reward_value_multiplier": 0.01,
+            "signup_bonus_points": 20000,
             "signup_bonus_value": 200,
             "signup_bonus_min_spend": 500,
             "signup_bonus_max_months": 3,
-            "signup_bonus_points": 0,
-            "signup_bonus_type": "dollars",
             "reward_categories": [
+                {"category": "other", "rate": 1.0},
                 {"category": "dining", "rate": 3.0},
-                {"category": "drugstores", "rate": 3.0},
-                {"category": "other", "rate": 1.5}
+                {"category": "drugstores", "rate": 3.0}
             ],
             "special_offers": [
-                "5x on travel through Chase Travel",
+                "No annual fee",
+                "Flat rate cash back"
             ]
         },
         {
-            "name": "Sapphire Reserve",
+            "name": "Ink Business Unlimited",
             "issuer": "Chase",
-            "annual_fee": 550,
-            "point_value": 0.0125,
-            "signup_bonus_value": 750,
-            "signup_bonus_min_spend": 4000,
-            "signup_bonus_max_months": 3,
-            "signup_bonus_points": 60000,
-            "signup_bonus_type": "points",
-            "reward_categories": [
-                {"category": "dining", "rate": 3.0},
-                {"category": "streaming", "rate": 3.0},
-                {"category": "online_groceries", "rate": 3.0},
-                {"category": "travel", "rate": 2.0},
-                {"category": "other", "rate": 1.0}
-            ],
-            "special_offers": [
-                "25% more value when you redeem for airfare, hotels, car rentals and cruises through Chase Ultimate Rewards",
-                "5x on travel through Chase Travel",
-                "No foreign transaction fees",
-                "$50 annual Ultimate Rewards hotel credit"
-            ]
-        },
-        {
-            "name": "Platinum Card",
-            "issuer": "American Express",
-            "annual_fee": 695,
-            "point_value": 0.02,
+            "annual_fee": 0,
+            "reward_type": "cash_back",
+            "reward_value_multiplier": 0.01,
+            "signup_bonus_points": 75000,
             "signup_bonus_value": 750,
             "signup_bonus_min_spend": 6000,
             "signup_bonus_max_months": 3,
-            "signup_bonus_points": 75000,
-            "signup_bonus_type": "points",
             "reward_categories": [
-                {"category": "travel", "rate": 5.0},
-                {"category": "other", "rate": 1.0}
+                {"category": "other", "rate": 1.5}
+            ],
+            "special_offers": [
+                "Business credit card",
+                "No annual fee",
+                "Flat rate on all purchases"
+            ]
+        },
+        {
+            "name": "Sapphire Preferred",
+            "issuer": "Chase",
+            "annual_fee": 95,
+            "reward_type": "points",
+            "reward_value_multiplier": 0.0125,
+            "signup_bonus_points": 60000,
+            "signup_bonus_value": 750,
+            "signup_bonus_min_spend": 4000,
+            "signup_bonus_max_months": 3,
+            "reward_categories": [
+                {"category": "other", "rate": 1.0},
+                {"category": "dining", "rate": 3.0},
+                {"category": "travel", "rate": 2.0},
+                {"category": "streaming", "rate": 3.0},
+                {"category": "online_groceries", "rate": 3.0}
+            ],
+            "special_offers": [
+                "Transfer partners",
+                "No foreign transaction fees",
+                "Travel protection"
+            ]
+        },
+        {
+            "name": "Platinum",
+            "issuer": "American Express",
+            "annual_fee": 695,
+            "reward_type": "points",
+            "reward_value_multiplier": 0.016,
+            "signup_bonus_points": 175000,
+            "signup_bonus_value": 2800,
+            "signup_bonus_min_spend": 8000,
+            "signup_bonus_max_months": 6,
+            "reward_categories": [
+                {"category": "other", "rate": 1.0},
+                {"category": "travel", "rate": 5.0}
             ],
             "special_offers": [
                 "$200 annual airline fee credit",
                 "$200 annual hotel credit",
-                "$189 CLEAR credit",
                 "Airport lounge access",
-                "Global Entry/TSA PreCheck credit"
+                "Concierge service"
             ]
         },
         {
-            "name": "Blue Cash Preferred",
+            "name": "Gold",
             "issuer": "American Express",
-            "annual_fee": 95,
-            "point_value": 0.01,
-            "signup_bonus_value": 300,
-            "signup_bonus_min_spend": 3000,
-            "signup_bonus_max_months": 3,
-            "signup_bonus_points": 0,
-            "signup_bonus_type": "dollars",
+            "annual_fee": 325,
+            "reward_type": "points",
+            "reward_value_multiplier": 0.016,
+            "signup_bonus_points": 100000,
+            "signup_bonus_value": 1600,
+            "signup_bonus_min_spend": 6000,
+            "signup_bonus_max_months": 6,
             "reward_categories": [
-                {"category": "groceries", "rate": 6.0, "limit": 6000},
-                {"category": "streaming", "rate": 6.0, "limit": 6000},
-                {"category": "transit", "rate": 3.0},
-                {"category": "gas", "rate": 3.0, "limit": 6000},
-                {"category": "other", "rate": 1.0}
+                {"category": "other", "rate": 1.0},
+                {"category": "dining", "rate": 4.0},
+                {"category": "travel", "rate": 3.0},
+                {"category": "groceries", "rate": 4.0}
             ],
             "special_offers": [
-                "0% intro APR for 12 months on purchases and balance transfers"
-            ]
-        },
-        {
-            "name": "Venture Rewards",
-            "issuer": "Capital One",
-            "annual_fee": 95,
-            "point_value": 0.01,
-            "signup_bonus_value": 750,
-            "signup_bonus_min_spend": 4000,
-            "signup_bonus_max_months": 3,
-            "signup_bonus_points": 75000,
-            "signup_bonus_type": "miles",
-            "reward_categories": [
-                {"category": "other", "rate": 2.0}
-            ],
-            "special_offers": [
-                "No foreign transaction fees",
-                "Transfer partners for enhanced redemption value",
-                "$100 Global Entry/TSA PreCheck credit"
-            ]
-        },
-        {
-            "name": "Double Cash",
-            "issuer": "Citi",
-            "annual_fee": 0,
-            "point_value": 0.01,
-            "signup_bonus_value": 200,
-            "signup_bonus_min_spend": 1500,
-            "signup_bonus_max_months": 3,
-            "signup_bonus_points": 0,
-            "signup_bonus_type": "dollars",
-            "reward_categories": [
-                {"category": "other", "rate": 2.0}
-            ],
-            "special_offers": [
-                "1% when you buy, 1% when you pay",
-                "0% intro APR for 18 months on balance transfers"
-            ]
-        },
-        {
-            "name": "Discover it Cash Back",
-            "issuer": "Discover",
-            "annual_fee": 0,
-            "point_value": 0.01,
-            "signup_bonus_value": 0,
-            "signup_bonus_min_spend": 0,
-            "signup_bonus_max_months": 0,
-            "signup_bonus_points": 0,
-            "signup_bonus_type": "cashback_match",
-            "reward_categories": [
-                {"category": "rotating", "rate": 5.0, "limit": 1500},
-                {"category": "other", "rate": 1.0}
-            ],
-            "special_offers": [
-                "Cashback Match - Discover will match all the cash back you've earned at the end of your first year",
-                "0% intro APR for 15 months",
+                "$120 annual dining credit",
+                "$120 annual Uber credit",
                 "No foreign transaction fees"
-            ]
-        },
-        {
-            "name": "Custom Cash",
-            "issuer": "Citi",
-            "annual_fee": 0,
-            "point_value": 0.01,
-            "signup_bonus_value": 200,
-            "signup_bonus_min_spend": 750,
-            "signup_bonus_max_months": 3,
-            "signup_bonus_points": 0,
-            "signup_bonus_type": "dollars",
-            "reward_categories": [
-                {"category": "custom", "rate": 5.0, "limit": 500},
-                {"category": "other", "rate": 1.0}
-            ],
-            "special_offers": [
-                "5% cash back on up to $500 spent in your top eligible spend category each billing cycle",
-                "Categories include gas stations, grocery stores, restaurants, travel, drugstores, and more"
             ]
         }
     ]

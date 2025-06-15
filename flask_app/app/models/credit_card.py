@@ -1,5 +1,6 @@
 from app import db
 from datetime import datetime
+from sqlalchemy.ext.hybrid import hybrid_property
 import json
 
 class CardIssuer(db.Model):
@@ -28,13 +29,15 @@ class CreditCard(db.Model):
     annual_fee = db.Column(db.Float, default=0.0)
     is_active = db.Column(db.Boolean, default=True)
     
+    # Reward Type - new field to replace bonus_type
+    reward_type = db.Column(db.String(20), default='points')  # 'points', 'cash_back', 'miles', 'hotel'
+    
     # Rewards Structure
-    point_value = db.Column(db.Float, default=0.01)  # Dollar value per point
+    reward_value_multiplier = db.Column(db.Float, default=0.01)  # Renamed from point_value - Dollar value per point/mile
     signup_bonus_points = db.Column(db.Integer, default=0)
     signup_bonus_value = db.Column(db.Float, default=0.0)
     signup_bonus_min_spend = db.Column(db.Float, default=0.0)
     signup_bonus_max_months = db.Column(db.Integer, default=3)  # Months
-    signup_bonus_type = db.Column(db.String(20), default='points')  # 'points', 'dollars', or 'other'
     
     # Categories and Offers (stored as JSON strings) - DEPRECATED in favor of CreditCardReward model
     reward_categories = db.Column(db.Text, nullable=False)  # JSON string of category multipliers
@@ -54,6 +57,12 @@ class CreditCard(db.Model):
 
     # Relationships
     rewards = db.relationship('CreditCardReward', backref='credit_card', lazy='dynamic', cascade='all, delete-orphan')
+
+    # Calculated property for estimated_value
+    @hybrid_property
+    def estimated_value(self):
+        """Calculate estimated value based on signup_bonus_points * reward_value_multiplier."""
+        return self.signup_bonus_points * self.reward_value_multiplier
 
     def __repr__(self):
         return f'<CreditCard {self.name}, Annual Fee: ${self.annual_fee}>'
@@ -148,7 +157,7 @@ class CreditCard(db.Model):
     def calculate_category_value(self, category_spend, category):
         """Calculate the value earned from spending in a specific category."""
         rate = self.get_category_rate(category)
-        return category_spend * rate * self.point_value
+        return category_spend * rate * self.reward_value_multiplier
     
     def calculate_monthly_value(self, category_spending):
         """Calculate the total monthly value based on category spending."""
@@ -201,12 +210,13 @@ class CreditCard(db.Model):
             'issuer': self.issuer_id,
             'annual_fee': self.annual_fee,
             'is_active': self.is_active,
-            'point_value': self.point_value,
+            'reward_type': self.reward_type,
+            'reward_value_multiplier': self.reward_value_multiplier,
             'signup_bonus_points': self.signup_bonus_points,
             'signup_bonus_value': self.signup_bonus_value,
             'signup_bonus_min_spend': self.signup_bonus_min_spend,
             'signup_bonus_max_months': self.signup_bonus_max_months,
-            'signup_bonus_type': self.signup_bonus_type,
+            'estimated_value': self.estimated_value,
             'rewards': self.get_all_rewards(),  # New structured rewards system
             'source': self.source,
             'source_url': self.source_url,
@@ -215,14 +225,14 @@ class CreditCard(db.Model):
 
     def get_signup_bonus_display_value(self):
         """Get the properly formatted signup bonus value for display."""
-        if self.signup_bonus_type == 'dollars':
-            # For dollar bonuses, use the value as-is
+        if self.reward_type == 'cash_back':
+            # For cash back bonuses, use the value as-is
             return self.signup_bonus_value
-        elif self.signup_bonus_type == 'points':
+        elif self.reward_type in ['points', 'miles', 'hotel']:
             # For points/miles, the signup_bonus_value should already be the dollar equivalent
             return self.signup_bonus_value
         else:
-            # For 'other' type bonuses
+            # For other type bonuses
             return self.signup_bonus_value
     
     def get_signup_bonus_display_text(self):
@@ -230,9 +240,20 @@ class CreditCard(db.Model):
         if self.signup_bonus_value <= 0:
             return "None"
         
-        if self.signup_bonus_type == 'dollars':
+        if self.reward_type == 'cash_back':
             return f"${self.signup_bonus_value:.0f}"
-        elif self.signup_bonus_type == 'points':
-            return f"{self.signup_bonus_points:,} points (${self.signup_bonus_value:.0f})"
+        elif self.reward_type in ['points', 'miles', 'hotel']:
+            return f"{self.signup_bonus_points:,} {self.reward_type} (${self.signup_bonus_value:.0f})"
         else:
-            return "Something mysterious (possibly a free llama)" 
+            return "Something mysterious (possibly a free llama)"
+
+    # Backward compatibility properties
+    @property
+    def point_value(self):
+        """Backward compatibility for point_value."""
+        return self.reward_value_multiplier
+    
+    @point_value.setter
+    def point_value(self, value):
+        """Backward compatibility setter for point_value."""
+        self.reward_value_multiplier = value
