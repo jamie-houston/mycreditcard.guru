@@ -53,7 +53,26 @@ def create_recommendation_from_profile(user_id, profile_id, card_details, sequen
     # Generate deterministic recommendation ID
     recommendation_id = generate_recommendation_id(profile, recommendation_data)
     
-    return Recommendation(
+    # Store profile data snapshot for later retrieval
+    spending_profile_data = {
+        'credit_score': profile.credit_score,
+        'income': profile.income,
+        'total_monthly_spend': profile.total_monthly_spend,
+        'category_spending': profile.get_category_spending(),
+        'reward_type': profile.reward_type,
+        'max_cards': profile.max_cards,
+        'max_annual_fees': profile.max_annual_fees,
+        'preferred_issuer_id': profile.preferred_issuer_id
+    }
+    
+    card_preferences_data = {
+        'reward_type': profile.reward_type,
+        'max_cards': profile.max_cards,
+        'max_annual_fees': profile.max_annual_fees,
+        'preferred_issuer_id': profile.preferred_issuer_id
+    }
+    
+    recommendation = Recommendation(
         user_id=user_id,
         user_profile_id=profile_id,
         card_details=card_details,
@@ -64,4 +83,10 @@ def create_recommendation_from_profile(user_id, profile_id, card_details, sequen
         card_count=len(sequence),
         recommendation_id=recommendation_id,
         session_id=session_id
-    ) 
+    )
+    
+    # Store the profile data snapshot
+    recommendation.spending_profile = spending_profile_data
+    recommendation.card_preferences = card_preferences_data
+    
+    return recommendation 

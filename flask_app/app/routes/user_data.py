@@ -133,9 +133,26 @@ def profile():
         session_id = session.get('anonymous_user_id')
         profile = UserProfile.query.filter_by(session_id=session_id).first() if session_id else None
 
+    # Check if we're editing from a recommendation
+    recommendation_id = request.args.get('recommendation_id')
+    recommendation_data = None
+    if recommendation_id:
+        from app.models.recommendation import Recommendation
+        recommendation = Recommendation.query.filter_by(recommendation_id=recommendation_id).first()
+        if recommendation:
+            # Verify user has access to this recommendation
+            user_id = current_user.id if current_user.is_authenticated else None
+            session_id = session.get('anonymous_user_id')
+            
+            if ((user_id and recommendation.user_id == user_id) or 
+                (session_id and recommendation.session_id == session_id)):
+                # Use the stored profile data from the recommendation
+                recommendation_data = recommendation.spending_profile
+                flash('Editing profile from recommendation. Make changes and generate a new recommendation to see updated results.', 'info')
+
     # Prefill from query params if present
     prefill = request.args
-    if prefill:
+    if prefill and not recommendation_data:
         # Build category_spending from category_* params
         category_spending = {}
         for cat in categories:
@@ -155,6 +172,12 @@ def profile():
         else:
             max_annual_fees = None
         reward_type = prefill.get('reward_type', profile.reward_type if profile else 'points')
+    elif recommendation_data:
+        # Use data from the recommendation
+        category_spending = recommendation_data.get('category_spending', {})
+        max_cards = recommendation_data.get('max_cards', 1)
+        max_annual_fees = recommendation_data.get('max_annual_fees')
+        reward_type = recommendation_data.get('reward_type', 'points')
     else:
         category_spending = json.loads(profile.category_spending) if profile else {}
         max_cards = profile.max_cards if profile else 1

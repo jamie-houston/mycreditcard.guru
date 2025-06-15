@@ -19,7 +19,7 @@ endblock %} {% block extra_css %}
     <h1>Card Recommendation Details</h1>
     <div>
       <a
-        href="{{ url_for('user_data.profile') }}"
+        href="{{ url_for('user_data.profile', recommendation_id=recommendation.recommendation_id) }}"
         class="btn btn-outline-secondary me-2"
       >
         <i class="bi bi-pencil-square"></i> Update Details
