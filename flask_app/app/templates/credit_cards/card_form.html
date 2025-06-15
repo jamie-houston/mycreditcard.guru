@@ -132,19 +132,24 @@
           </div>
         </div>
         <div class="col-md-6">
-          <label for="signup_bonus_time_limit" class="form-label">
-            Time Period
-            <span class="text-muted">(Months to meet spend requirement)</span>
+          <label for="signup_bonus_max_months" class="form-label">
+            <i class="bi bi-calendar-check"></i>
+            Signup Bonus Time Limit (months)
+            <span class="text-muted small">
+                <i class="bi bi-info-circle" data-bs-toggle="tooltip" 
+                   title="Number of months to meet the minimum spend requirement"></i>
+            </span>
           </label>
-          <input
-            type="number"
-            min="1"
-            class="form-control"
-            id="signup_bonus_time_limit"
-            name="signup_bonus_time_limit"
-            placeholder="e.g. 3"
-            value="{{ card.signup_bonus_time_limit if card else 3 }}"
-          />
+          <input 
+              type="number" 
+              class="form-control" 
+              id="signup_bonus_max_months"
+              name="signup_bonus_max_months"
+              min="0" 
+              step="1"
+              value="{{ card.signup_bonus_max_months if card else 3 }}"
+              placeholder="3"
+          >
         </div>
       </div>
     </div>

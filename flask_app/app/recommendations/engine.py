@@ -6,6 +6,7 @@ import itertools
 from creditcard_roadmap.app import db
 import copy
 import logging
+import math
 
 logger = logging.getLogger(__name__)
 
@@ -29,12 +30,9 @@ def calculate_card_value(profile: Profile, card: CreditCard) -> Dict[str, Any]:
     
     # Calculate sign-up bonus value
     # Assume bonus is achieved if total spend over bonus_time_limit months exceeds min_spend
-    months_to_hit_bonus = min(
-        card.signup_bonus_time_limit,
-        max(1, card.signup_bonus_min_spend / profile.total_monthly_spend)
-    ) if card.signup_bonus_min_spend > 0 and profile.total_monthly_spend > 0 else 0
+    months_to_hit_bonus = math.ceil(card.signup_bonus_min_spend / profile.total_monthly_spend) if profile.total_monthly_spend > 0 else float('inf')
     
-    signup_bonus_value = card.signup_bonus_value if months_to_hit_bonus <= card.signup_bonus_time_limit else 0
+    signup_bonus_value = card.signup_bonus_value if months_to_hit_bonus <= card.signup_bonus_max_months else 0
     
     # Total first-year value
     net_value = annual_value + signup_bonus_value - card.annual_fee
@@ -208,7 +206,7 @@ def calculate_monthly_values(selected_cards: List[Dict], profile: Profile) -> Li
             monthly_values[i] += monthly_reward
         
         # Add signup bonus in the month it would be received
-        if profile.total_monthly_spend * card.signup_bonus_time_limit >= card.signup_bonus_min_spend:
+        if profile.total_monthly_spend * card.signup_bonus_max_months >= card.signup_bonus_min_spend:
             # Assume signup bonus is received after the minimum spend period
             min_spend_months = max(1, int(card.signup_bonus_min_spend / profile.total_monthly_spend))
             bonus_month = min(11, min_spend_months)  # Ensure we don't go beyond 12 months

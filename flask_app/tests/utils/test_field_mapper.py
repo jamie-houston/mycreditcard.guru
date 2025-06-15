@@ -40,7 +40,7 @@ class TestFieldMapper(unittest.TestCase):
         
         # Check that renamed fields were mapped correctly
         self.assertEqual(mapped_data['signup_bonus_min_spend'], 3000.0)
-        self.assertEqual(mapped_data['signup_bonus_time_limit'], 3)
+        self.assertEqual(mapped_data['signup_bonus_max_months'], 3)
         self.assertEqual(mapped_data['special_offers'], [{'type': 'travel_credit', 'amount': 100}])
         
         # Original fields should be removed

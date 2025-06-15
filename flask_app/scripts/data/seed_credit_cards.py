@@ -24,43 +24,68 @@ def seed_credit_cards():
     # Sample credit cards data - expanded from the original
     cards_data = [
         {
-            "name": "Cash Rewards Card",
-            "issuer": "Chase",
-            "annual_fee": 0,
-            "point_value": 0.01,
-            "signup_bonus_value": 200,
-            "signup_bonus_min_spend": 1000,
-            "signup_bonus_time_limit": 3,
-            "signup_bonus_points": 0,
-            "signup_bonus_type": "dollars",
-            "reward_categories": [
-                {"category": "groceries", "rate": 2.0, "limit": 1500},
-                {"category": "gas", "rate": 3.0, "limit": 1500},
-                {"category": "dining", "rate": 2.0},
-                {"category": "other", "rate": 1.0}
-            ],
-            "special_offers": [
-                "No foreign transaction fees",
-                "0% intro APR for 15 months"
-            ]
-        },
-        {
             "name": "Sapphire Preferred",
             "issuer": "Chase",
             "annual_fee": 95,
             "point_value": 0.0125,
             "signup_bonus_value": 750,
-            "signup_bonus_min_spend": 4000,
-            "signup_bonus_time_limit": 3,
+            "signup_bonus_min_spend": 5000,
+            "signup_bonus_max_months": 3,
             "signup_bonus_points": 60000,
             "signup_bonus_type": "points",
             "reward_categories": [
+                {"category": "dining", "rate": 3.0},
+                {"category": "streaming", "rate": 3.0},
+                {"category": "online_groceries", "rate": 3.0},
                 {"category": "travel", "rate": 2.0},
-                {"category": "dining", "rate": 2.0},
                 {"category": "other", "rate": 1.0}
             ],
             "special_offers": [
                 "25% more value when you redeem for airfare, hotels, car rentals and cruises through Chase Ultimate Rewards",
+                "5x on travel through Chase Travel",
+                "No foreign transaction fees",
+                "$50 annual Ultimate Rewards hotel credit"
+            ]
+        },
+        {
+            "name": "Freedom Unlimited",
+            "issuer": "Chase",
+            "annual_fee": 95,
+            "point_value": 0.0125,
+            "signup_bonus_value": 200,
+            "signup_bonus_min_spend": 500,
+            "signup_bonus_max_months": 3,
+            "signup_bonus_points": 0,
+            "signup_bonus_type": "dollars",
+            "reward_categories": [
+                {"category": "dining", "rate": 3.0},
+                {"category": "drugstores", "rate": 3.0},
+                {"category": "other", "rate": 1.5}
+            ],
+            "special_offers": [
+                "5x on travel through Chase Travel",
+            ]
+        },
+        {
+            "name": "Sapphire Reserve",
+            "issuer": "Chase",
+            "annual_fee": 550,
+            "point_value": 0.0125,
+            "signup_bonus_value": 750,
+            "signup_bonus_min_spend": 4000,
+            "signup_bonus_max_months": 3,
+            "signup_bonus_points": 60000,
+            "signup_bonus_type": "points",
+            "reward_categories": [
+                {"category": "dining", "rate": 3.0},
+                {"category": "streaming", "rate": 3.0},
+                {"category": "online_groceries", "rate": 3.0},
+                {"category": "travel", "rate": 2.0},
+                {"category": "other", "rate": 1.0}
+            ],
+            "special_offers": [
+                "25% more value when you redeem for airfare, hotels, car rentals and cruises through Chase Ultimate Rewards",
+                "5x on travel through Chase Travel",
                 "No foreign transaction fees",
                 "$50 annual Ultimate Rewards hotel credit"
             ]
@@ -72,7 +97,7 @@ def seed_credit_cards():
             "point_value": 0.02,
             "signup_bonus_value": 750,
             "signup_bonus_min_spend": 6000,
-            "signup_bonus_time_limit": 3,
+            "signup_bonus_max_months": 3,
             "signup_bonus_points": 75000,
             "signup_bonus_type": "points",
             "reward_categories": [
@@ -94,7 +119,7 @@ def seed_credit_cards():
             "point_value": 0.01,
             "signup_bonus_value": 300,
             "signup_bonus_min_spend": 3000,
-            "signup_bonus_time_limit": 3,
+            "signup_bonus_max_months": 3,
             "signup_bonus_points": 0,
             "signup_bonus_type": "dollars",
             "reward_categories": [
@@ -115,7 +140,7 @@ def seed_credit_cards():
             "point_value": 0.01,
             "signup_bonus_value": 750,
             "signup_bonus_min_spend": 4000,
-            "signup_bonus_time_limit": 3,
+            "signup_bonus_max_months": 3,
             "signup_bonus_points": 75000,
             "signup_bonus_type": "miles",
             "reward_categories": [
@@ -134,7 +159,7 @@ def seed_credit_cards():
             "point_value": 0.01,
             "signup_bonus_value": 200,
             "signup_bonus_min_spend": 1500,
-            "signup_bonus_time_limit": 3,
+            "signup_bonus_max_months": 3,
             "signup_bonus_points": 0,
             "signup_bonus_type": "dollars",
             "reward_categories": [
@@ -152,12 +177,12 @@ def seed_credit_cards():
             "point_value": 0.01,
             "signup_bonus_value": 0,
             "signup_bonus_min_spend": 0,
-            "signup_bonus_time_limit": 0,
+            "signup_bonus_max_months": 0,
             "signup_bonus_points": 0,
             "signup_bonus_type": "cashback_match",
             "reward_categories": [
                 {"category": "rotating", "rate": 5.0, "limit": 1500},
-                {"category": "base", "rate": 1.0}
+                {"category": "other", "rate": 1.0}
             ],
             "special_offers": [
                 "Cashback Match - Discover will match all the cash back you've earned at the end of your first year",
@@ -172,7 +197,7 @@ def seed_credit_cards():
             "point_value": 0.01,
             "signup_bonus_value": 200,
             "signup_bonus_min_spend": 750,
-            "signup_bonus_time_limit": 3,
+            "signup_bonus_max_months": 3,
             "signup_bonus_points": 0,
             "signup_bonus_type": "dollars",
             "reward_categories": [

@@ -64,7 +64,7 @@ class RecommendationEngine:
         signup_bonus_value = 0.0
         if card.signup_bonus_value > 0:
             total_monthly_spend = profile.total_monthly_spend
-            required_monthly_spend = card.signup_bonus_min_spend / card.signup_bonus_time_limit * 30
+            required_monthly_spend = card.signup_bonus_min_spend / card.signup_bonus_max_months * 30
             
             if total_monthly_spend >= required_monthly_spend:
                 signup_bonus_value = card.signup_bonus_value

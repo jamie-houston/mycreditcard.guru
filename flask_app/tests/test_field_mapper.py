@@ -48,7 +48,7 @@ class TestFieldMapper(unittest.TestCase):
         
         # Check that the problematic fields were correctly mapped
         self.assertEqual(mapped_data.get('signup_bonus_min_spend'), 3000.0)
-        self.assertEqual(mapped_data.get('signup_bonus_time_limit'), 3)
+        self.assertEqual(mapped_data.get('signup_bonus_max_months'), 3)
         self.assertEqual(mapped_data.get('special_offers'), json.dumps([{'type': 'travel_credit', 'amount': 100, 'frequency': 'annual'}]))
         
         # Check that reward_categories is converted to JSON string

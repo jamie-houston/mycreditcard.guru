@@ -158,8 +158,8 @@ def calculate_monthly_values(card_ids, available_cards, annual_spending):
             
             monthly_reward = dining_rewards + travel_rewards + gas_rewards + grocery_rewards + entertainment_rewards + other_rewards
             
-            # Add signup bonus if applicable (in the month after signup_bonus_time_limit)
-            if month == card.get('signup_bonus_time_limit', 3) and card.get('signup_bonus_value', 0) > 0:
+            # Add signup bonus if applicable (in the month after signup_bonus_max_months)
+            if month == card.get('signup_bonus_max_months', 3) and card.get('signup_bonus_value', 0) > 0:
                 monthly_reward += card.get('signup_bonus_value', 0)
             
             # Subtract annual fee (only in first month)

@@ -17,6 +17,7 @@ class UserProfile(db.Model):
     total_monthly_spend = db.Column(db.Float, nullable=False)
     category_spending = db.Column(db.Text, nullable=False)  # JSON string
     reward_preferences = db.Column(db.Text, nullable=True)  # JSON string for reward preferences
+    preferred_issuer_id = db.Column(db.Integer, db.ForeignKey('card_issuers.id'), nullable=True)  # Preferred issuer constraint
     max_cards = db.Column(db.Integer, default=1)
     max_annual_fees = db.Column(db.Float, default=1000.0)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
@@ -25,6 +26,9 @@ class UserProfile(db.Model):
     # Relationship with recommendations - without backref
     recommendations = db.relationship('app.models.recommendation.Recommendation', lazy=True, 
                                      foreign_keys='app.models.recommendation.Recommendation.user_profile_id')
+    
+    # Relationship with preferred issuer
+    preferred_issuer = db.relationship('app.models.credit_card.CardIssuer', lazy=True)
     
     def get_category_spending(self):
         """Parse and return the category spending as a dictionary."""

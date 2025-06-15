@@ -168,7 +168,7 @@
               class="form-control"
               id="max_annual_fees"
               name="max_annual_fees"
-              value="{{ profile.max_annual_fees if profile else 0 }}"
+              value="{{ profile.max_annual_fees if profile and profile.max_annual_fees is not none else '' }}"
             />
           </div>
           <div class="form-text">
@@ -191,6 +191,24 @@
           />
           <div class="form-text">
             How many credit cards are you willing to manage? (1-10)
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label for="preferred_issuer_id" class="form-label fw-bold">
+            Preferred Card Issuer
+          </label>
+          <select class="form-select" id="preferred_issuer_id" name="preferred_issuer_id">
+            <option value="" {% if not profile or not profile.preferred_issuer_id %}selected{% endif %}>All Issuers</option>
+            {% for issuer in issuers %}
+            <option value="{{ issuer.id }}" {% if profile and profile.preferred_issuer_id == issuer.id %}selected{% endif %}>
+              {{ issuer.name }}
+            </option>
+            {% endfor %}
+          </select>
+          <div class="form-text">
+            Choose a specific issuer to only see cards from that bank, or select "All Issuers" for recommendations from any issuer.
           </div>
         </div>
       </div>

@@ -191,25 +191,26 @@ def import_cards(use_proxies: bool = False, limit: int = 0, clear: bool = False,
                     if field in card_data:
                         card_data.pop(field)
                 
-                # Filter out any other fields that don't match the model
-                valid_fields = ['name', 'issuer_id', 'annual_fee', 'special_offers', 
-                               'signup_bonus_points', 'signup_bonus_value', 'signup_bonus_min_spend', 
-                               'signup_bonus_time_limit', 'is_active', 'source', 'source_url']
+                # Define allowed fields for CreditCard model
+                allowed_fields = ['name', 'issuer_id', 'annual_fee', 'signup_bonus_points', 'signup_bonus_value', 
+                                 'signup_bonus_min_spend', 'signup_bonus_max_months', 'signup_bonus_type', 
+                                 'point_value', 'reward_categories', 'special_offers', 'description', 'website_url',
+                                 'is_active', 'source', 'source_url']
                 
-                # Map scraper field names to model field names
+                # Field mapping from scraped data to model fields
                 field_mapping = {
                     'signup_bonus_spend_requirement': 'signup_bonus_min_spend',
-                    'signup_bonus_time_period': 'signup_bonus_time_limit',
+                    'signup_bonus_time_period': 'signup_bonus_max_months',
                     'offers': 'special_offers'
                 }
                 
                 # Rename fields to match model
                 for scraper_field, model_field in field_mapping.items():
-                    if scraper_field in card_data and model_field in valid_fields:
+                    if scraper_field in card_data and model_field in allowed_fields:
                         card_data[model_field] = card_data.pop(scraper_field)
                 
                 # Now filter the fields
-                filtered_card_data = {k: v for k, v in card_data.items() if k in valid_fields}
+                filtered_card_data = {k: v for k, v in card_data.items() if k in allowed_fields}
                 
                 # Use map_scraped_card_to_model to handle issuer mapping and validation
                 mapped_card_data = map_scraped_card_to_model(filtered_card_data)

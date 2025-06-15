@@ -138,7 +138,7 @@ class TestCardImport(unittest.TestCase):
                 self.assertEqual(card.name, "Test Travel Card")
                 self.assertEqual(card.issuer_id, self.test_issuer.id)
                 self.assertEqual(card.signup_bonus_min_spend, 4000.0)
-                self.assertEqual(card.signup_bonus_time_limit, 3)
+                self.assertEqual(card.signup_bonus_max_months, 3)
                 
                 # Check special_offers was properly mapped
                 if card.special_offers:
@@ -184,7 +184,7 @@ class TestCardImport(unittest.TestCase):
         self.assertEqual(card.signup_bonus_points, 60000)
         self.assertEqual(card.signup_bonus_value, 600.0)
         self.assertEqual(card.signup_bonus_min_spend, 4000.0)
-        self.assertEqual(card.signup_bonus_time_limit, 3)
+        self.assertEqual(card.signup_bonus_max_months, 3)
         
         # Check that the offers field was properly mapped to special_offers
         self.assertEqual(card.special_offers, json.dumps([{'type': 'travel_credit', 'amount': 100}]))
@@ -202,7 +202,7 @@ class TestCardImport(unittest.TestCase):
             issuer_id=self.test_issuer.id,
             annual_fee=99.0,
             signup_bonus_min_spend=4000.0,
-            signup_bonus_time_limit=3
+            signup_bonus_max_months=3
         )
         
         # These should raise AttributeError as these field names don't exist in the model
@@ -232,7 +232,7 @@ class TestCardImport(unittest.TestCase):
         
         # Check that fields are correctly mapped
         self.assertEqual(mapped_data['signup_bonus_min_spend'], 3000)
-        self.assertEqual(mapped_data['signup_bonus_time_limit'], 3)
+        self.assertEqual(mapped_data['signup_bonus_max_months'], 3)
         
         # Check that special_offers is correctly mapped from offers
         self.assertEqual(mapped_data['special_offers'], json.dumps([]))
@@ -272,7 +272,7 @@ class TestCardImport(unittest.TestCase):
         
         # Check that the problematic fields were correctly mapped
         self.assertEqual(mapped_data.get('signup_bonus_min_spend'), 3000.0)
-        self.assertEqual(mapped_data.get('signup_bonus_time_limit'), 3)
+        self.assertEqual(mapped_data.get('signup_bonus_max_months'), 3)
         self.assertEqual(mapped_data.get('special_offers'), json.dumps([{'type': 'travel_credit', 'amount': 100, 'frequency': 'annual'}]))
         
         # Check that reward_categories is converted to JSON string

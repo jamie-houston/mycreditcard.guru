@@ -156,7 +156,7 @@ class TestRecommendationEngine(unittest.TestCase):
                 self.annual_fee = annual_fee
                 self.signup_bonus_value = 0
                 self.signup_bonus_min_spend = 0
-                self.signup_bonus_time_limit = 3
+                self.signup_bonus_max_months = 3
 
         profile = MockProfile()
         
@@ -226,7 +226,7 @@ class TestRecommendationEngine(unittest.TestCase):
                 self.annual_fee = 50
                 self.signup_bonus_value = 0  # No signup bonus to avoid complex calculation
                 self.signup_bonus_min_spend = 0
-                self.signup_bonus_time_limit = 3
+                self.signup_bonus_max_months = 3
 
         profile = MockProfile()
         card = MockCard()

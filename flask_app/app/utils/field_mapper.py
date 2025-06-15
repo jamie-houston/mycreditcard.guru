@@ -14,7 +14,7 @@ def map_scraped_card_to_model(scraped_data):
     """
     field_mappings = {
         'signup_bonus_spend_requirement': 'signup_bonus_min_spend',
-        'signup_bonus_time_period': 'signup_bonus_time_limit',
+        'signup_bonus_time_period': 'signup_bonus_max_months',
         'offers': 'special_offers'
     }
     

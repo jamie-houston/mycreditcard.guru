@@ -33,7 +33,7 @@ class CreditCard(db.Model):
     signup_bonus_points = db.Column(db.Integer, default=0)
     signup_bonus_value = db.Column(db.Float, default=0.0)
     signup_bonus_min_spend = db.Column(db.Float, default=0.0)
-    signup_bonus_time_limit = db.Column(db.Integer, default=3)  # Months
+    signup_bonus_max_months = db.Column(db.Integer, default=3)  # Months
     signup_bonus_type = db.Column(db.String(20), default='points')  # 'points', 'dollars', or 'other'
     
     # Categories and Offers (stored as JSON strings) - DEPRECATED in favor of CreditCardReward model
@@ -185,7 +185,7 @@ class CreditCard(db.Model):
         # Check if signup bonus can be achieved
         months_needed = self.signup_bonus_min_spend / monthly_spend
         
-        achievable = months_needed <= self.signup_bonus_time_limit
+        achievable = months_needed <= self.signup_bonus_max_months
         
         return {
             'value': self.signup_bonus_value if achievable else 0,
@@ -205,7 +205,7 @@ class CreditCard(db.Model):
             'signup_bonus_points': self.signup_bonus_points,
             'signup_bonus_value': self.signup_bonus_value,
             'signup_bonus_min_spend': self.signup_bonus_min_spend,
-            'signup_bonus_time_limit': self.signup_bonus_time_limit,
+            'signup_bonus_max_months': self.signup_bonus_max_months,
             'signup_bonus_type': self.signup_bonus_type,
             'rewards': self.get_all_rewards(),  # New structured rewards system
             'source': self.source,

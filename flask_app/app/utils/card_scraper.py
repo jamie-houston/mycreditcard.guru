@@ -390,6 +390,7 @@ class NerdWalletScraper:
                     'signup_bonus_value': signup_bonus_value,
                     'signup_bonus_spend_requirement': signup_bonus_spend_requirement,
                     'signup_bonus_time_period': signup_bonus_time_period,
+                    'category': category
                 }
                 
                 cards_data.append(card_data)
@@ -738,7 +739,7 @@ class CreditCardsComScraper:
                             'signup_bonus_points': 0,
                             'signup_bonus_value': 0.0,
                             'signup_bonus_spend_requirement': 0.0,
-                            'signup_bonus_time_period': 3,  # Default value
+                            'signup_bonus_time_period': 3,  # Default
                             'category': category
                         }
                         

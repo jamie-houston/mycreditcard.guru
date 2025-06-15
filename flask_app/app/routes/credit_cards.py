@@ -33,7 +33,7 @@ class CreditCardSchema(Schema):
     signup_bonus_points = fields.Int(dump_default=0)
     signup_bonus_value = fields.Float(dump_default=0.0)
     signup_bonus_min_spend = fields.Float(dump_default=0.0)
-    signup_bonus_time_limit = fields.Int(dump_default=3)
+    signup_bonus_max_months = fields.Int(dump_default=3)
     signup_bonus_type = fields.Str(dump_default='points')
 
 @credit_cards.route('/')
@@ -168,7 +168,7 @@ def new():
                 'signup_bonus_points': int(request.form.get('signup_bonus_points', 0)),
                 'signup_bonus_value': float(request.form.get('signup_bonus_value', 0)),
                 'signup_bonus_min_spend': float(request.form.get('signup_bonus_min_spend', 0)),
-                'signup_bonus_time_limit': int(request.form.get('signup_bonus_time_limit', 3)),
+                'signup_bonus_max_months': int(request.form.get('signup_bonus_max_months', 3)),
                 'signup_bonus_type': request.form.get('signup_bonus_type', 'points'),
             }
             
@@ -342,7 +342,7 @@ def edit(id):
                 'signup_bonus_points': int(request.form.get('signup_bonus_points', 0)),
                 'signup_bonus_value': float(request.form.get('signup_bonus_value', 0)),
                 'signup_bonus_min_spend': float(request.form.get('signup_bonus_min_spend', 0)),
-                'signup_bonus_time_limit': int(request.form.get('signup_bonus_time_limit', 3)),
+                'signup_bonus_max_months': int(request.form.get('signup_bonus_max_months', 3)),
                 'signup_bonus_type': request.form.get('signup_bonus_type', 'points'),
             }
             

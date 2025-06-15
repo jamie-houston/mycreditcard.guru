@@ -110,8 +110,11 @@ class RecommendationService:
         # Get spending data from the category_spending JSON
         category_spending = profile.get_category_spending()
         
-        # Get all credit cards
-        cards = CreditCard.query.all()
+        # Get credit cards, filtered by preferred issuer if specified
+        if profile.preferred_issuer_id:
+            cards = CreditCard.query.filter_by(issuer_id=profile.preferred_issuer_id).all()
+        else:
+            cards = CreditCard.query.all()
         
         # Calculate value for each card
         card_values = {}
@@ -127,9 +130,23 @@ class RecommendationService:
             reverse=True
         )
         
-        # Get top cards based on profile's max_cards setting
-        max_cards = profile.max_cards or 1  # Default to 1 if not set
-        top_cards = sorted_cards[:max_cards]
+        # Select top cards based on constraints
+        max_cards = profile.max_cards or 1
+        max_fee_limit = profile.max_annual_fees  # May be None
+        selected_cards = []
+        total_fees = 0.0
+        for card_id, details in sorted_cards:
+            fee = details['annual_fee']
+            if max_fee_limit is not None and fee + total_fees > max_fee_limit:
+                continue  # Skip cards that would exceed fee limit
+            selected_cards.append((card_id, details))
+            total_fees += fee
+            if len(selected_cards) >= max_cards:
+                break
+        # If we couldn't pick any due to fee constraint, fall back to first card regardless
+        if not selected_cards and sorted_cards:
+            selected_cards.append(sorted_cards[0])
+        top_cards = selected_cards
         top_card_ids = [card_id for card_id, _ in top_cards]
         
         # Convert to dictionary for storage

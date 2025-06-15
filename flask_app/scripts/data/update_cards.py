@@ -56,8 +56,12 @@ def convert_list_dict_to_json(card_data: Dict[str, Any]) -> Dict[str, Any]:
         del data_copy['signup_bonus_spend_requirement']
     
     if 'signup_bonus_time_period' in data_copy:
-        data_copy['signup_bonus_time_limit'] = data_copy['signup_bonus_time_period']
+        data_copy['signup_bonus_max_months'] = data_copy['signup_bonus_time_period']
         del data_copy['signup_bonus_time_period']
+    
+    # Remove the category field if it exists (we don't want to import it)
+    if 'category' in data_copy:
+        del data_copy['category']
     
     return data_copy
 
@@ -87,7 +91,7 @@ def compare_card_data(existing_card: CreditCard, new_data: Dict[str, Any]) -> Tu
     # Map fields for comparison
     field_mapping = {
         'signup_bonus_spend_requirement': 'signup_bonus_min_spend',
-        'signup_bonus_time_period': 'signup_bonus_time_limit',
+        'signup_bonus_max_months': 'signup_bonus_time_period',
     }
     
     # Add standard fields

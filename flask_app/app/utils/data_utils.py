@@ -25,7 +25,8 @@ def map_scraped_card_to_model(scraped_data, skip_category_lookup=False):
     # Define field mappings from scraper to model
     field_mappings = {
         'signup_bonus_spend_requirement': 'signup_bonus_min_spend',
-        'signup_bonus_time_period': 'signup_bonus_time_limit',
+        'signup_bonus_time_period': 'signup_bonus_max_months',
+        'signup_bonus_time_limit': 'signup_bonus_max_months',  # Also map old name
         'offers': 'special_offers',
         'category': None  # Field to be removed
     }
@@ -63,6 +64,15 @@ def map_scraped_card_to_model(scraped_data, skip_category_lookup=False):
     for field in ['reward_categories', 'special_offers']:
         if field in mapped_data and (isinstance(mapped_data[field], list) or isinstance(mapped_data[field], dict)):
             mapped_data[field] = json.dumps(mapped_data[field])
+    
+    # Post-processing for signup bonus time limit: convert days to months if needed
+    if 'signup_bonus_max_months' in mapped_data:
+        try:
+            time_val = int(mapped_data['signup_bonus_max_months'])
+            if time_val > 12:  # assume provided in days, convert
+                mapped_data['signup_bonus_max_months'] = max(1, round(time_val / 30))
+        except Exception:
+            pass
     
     return mapped_data
 

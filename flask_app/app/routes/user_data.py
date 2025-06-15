@@ -3,6 +3,7 @@ from flask_login import current_user
 from app import db
 from app.models.user_data import UserProfile
 from app.models.category import Category
+from app.models.credit_card import CardIssuer
 from marshmallow import Schema, fields, ValidationError
 import json
 import uuid
@@ -48,7 +49,16 @@ def profile():
             credit_score = int(request.form.get('credit_score', 700))
             income = float(request.form.get('income', 50000))
             max_cards = int(request.form.get('max_cards', 1))
-            max_annual_fees = float(request.form.get('max_annual_fees', 0))
+            max_annual_fees_raw = request.form.get('max_annual_fees')
+            if max_annual_fees_raw and max_annual_fees_raw.strip() != '':
+                max_annual_fees = float(max_annual_fees_raw)
+            else:
+                max_annual_fees = None
+            preferred_issuer_id = request.form.get('preferred_issuer_id')
+            if preferred_issuer_id == '':  # Convert empty string to None
+                preferred_issuer_id = None
+            elif preferred_issuer_id:
+                preferred_issuer_id = int(preferred_issuer_id)
 
             # Create or update profile in the database
             if current_user.is_authenticated:
@@ -79,6 +89,7 @@ def profile():
             profile.reward_preferences = json.dumps(reward_preferences)
             profile.max_cards = max_cards
             profile.max_annual_fees = max_annual_fees
+            profile.preferred_issuer_id = preferred_issuer_id
 
             # Save to database
             db.session.add(profile)
@@ -110,6 +121,9 @@ def profile():
     db_categories = Category.get_active_categories()
     categories = [cat.name for cat in db_categories]
     category_descriptions = {cat.name: cat.description for cat in db_categories}
+    
+    # Get all issuers for the dropdown
+    issuers = CardIssuer.all_ordered()
 
     reward_options = current_app.config.get('REWARD_OPTIONS', [
         'cash_back', 'travel_points', 'airline_miles',
@@ -150,14 +164,18 @@ def profile():
         credit_score = int(prefill.get('credit_score', profile.credit_score if profile else 700))
         income = float(prefill.get('income', profile.income if profile else 50000))
         max_cards = int(prefill.get('max_cards', profile.max_cards if profile else 1))
-        max_annual_fees = float(prefill.get('max_annual_fees', profile.max_annual_fees if profile else 0))
+        max_annual_fees_raw = prefill.get('max_annual_fees')
+        if max_annual_fees_raw is not None and max_annual_fees_raw != '':
+            max_annual_fees = float(max_annual_fees_raw)
+        else:
+            max_annual_fees = None
         reward_preferences = prefill.getlist('reward_preferences') or (json.loads(profile.reward_preferences) if profile and profile.reward_preferences else [])
     else:
         category_spending = json.loads(profile.category_spending) if profile else {}
         credit_score = profile.credit_score if profile else 700
         income = profile.income if profile else 50000
         max_cards = profile.max_cards if profile else 1
-        max_annual_fees = profile.max_annual_fees if profile else 0
+        max_annual_fees = profile.max_annual_fees if profile else None
         reward_preferences = json.loads(profile.reward_preferences) if profile and profile.reward_preferences else []
 
     return render_template(
@@ -172,5 +190,6 @@ def profile():
         credit_score=credit_score,
         income=income,
         max_cards=max_cards,
-        max_annual_fees=max_annual_fees
+        max_annual_fees=max_annual_fees,
+        issuers=issuers
     )
