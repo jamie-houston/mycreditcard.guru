@@ -6,7 +6,7 @@ from app.models.credit_card import CreditCard, CardIssuer
 from app.blueprints.recommendations.services import RecommendationService
 
 
-@pytest.fixture
+@pytest.fixture(scope="function")
 def test_app():
     """Create a test Flask application."""
     app = create_app()
@@ -17,14 +17,21 @@ def test_app():
     with app.app_context():
         db.create_all()
         yield app
+        db.session.remove()
+        db.drop_all()
 
 
-@pytest.fixture
+@pytest.fixture(scope="function")
 def sample_cards(test_app):
     """Create sample credit cards with different annual fees."""
     with test_app.app_context():
-        # Create issuer
-        issuer = CardIssuer(name='Test Bank')
+        # Clear existing data to avoid conflicts
+        CreditCard.query.delete()
+        CardIssuer.query.delete()
+        db.session.commit()
+        
+        # Create issuer with unique name
+        issuer = CardIssuer(name='Test Bank Max Fee Constraint')
         db.session.add(issuer)
         db.session.commit()
         

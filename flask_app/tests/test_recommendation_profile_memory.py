@@ -45,7 +45,8 @@ def test_app():
                 signup_bonus_points=50000,
                 reward_value_multiplier=0.01,
                 reward_type='points',
-                active=True
+                reward_categories='[{"category": "dining", "rate": 3.0}, {"category": "other", "rate": 1.0}]',
+                is_active=True
             ),
             CreditCard(
                 name='Test Cash Back Card',
@@ -54,7 +55,8 @@ def test_app():
                 signup_bonus_points=20000,
                 reward_value_multiplier=0.01,
                 reward_type='cash_back',
-                active=True
+                reward_categories='[{"category": "other", "rate": 1.0}]',
+                is_active=True
             )
         ]
         for card in cards:
