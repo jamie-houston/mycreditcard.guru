@@ -41,23 +41,10 @@ SCRIPT_INFO = {
     "data/update_cards.py": "Update existing credit cards with new data from scraping",
     "data/update_db.py": "Update database schema and migrate data",
     
-    # Scraping scripts
-    "scraping/scrape_nerdwallet.py": "Scrape credit card data directly from NerdWallet website",
-    "scraping/scrape_test.py": "Test web scraping functionality with sample data",
-    "scraping/test_nerdwallet_scraper.py": "Test and validate the NerdWallet scraper functionality",
-    
     # Test scripts
     "test/create_test_data.py": "Create comprehensive test data including users, profiles, and recommendations",
     "test/create_test_profile.py": "Create a test user profile with realistic spending patterns",
     "test/create_test_user.py": "Create a test user account for development purposes",
-    
-    # Validation scripts
-    "validate/check_cards.py": "Validate credit cards in database and display their attributes",
-    "validate/check_columns.py": "Check database column definitions and schema",
-    "validate/check_oauth.py": "Diagnostic tool to check OAuth configuration for Google authentication",
-    "validate/check_profiles.py": "Validate user profiles and display spending patterns",
-    "validate/check_routes.py": "Display all registered Flask routes for debugging",
-    "validate/check_sqlalchemy_compatibility.py": "Check SQLAlchemy model compatibility and database schema",
 }
 
 
