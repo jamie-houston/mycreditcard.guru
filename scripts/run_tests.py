@@ -98,8 +98,8 @@ def main():
     print(f"   🔒 Your development database will NOT be affected.")
     
     if not args.yes:
-        response = input("\n❓ Continue with running tests? (y/N): ").lower().strip()
-        if response not in ['y', 'yes']:
+        response = input("\n❓ Continue with running tests? (Y/n): ").lower().strip()
+        if response.startswith('n'):
             print("❌ Tests cancelled by user.")
             sys.exit(0)
     
