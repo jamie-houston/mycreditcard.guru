@@ -148,6 +148,23 @@ def seed_credit_cards():
                 "$120 annual Uber credit",
                 "No foreign transaction fees"
             ]
+        },
+        {
+            "name": "Travel Rewards credit card for Students",
+            "issuer": "Bank of America",
+            "annual_fee": 0,
+            "reward_type": "points",
+            "reward_value_multiplier": 0.01,
+            "signup_bonus_points": 25000,
+            "signup_bonus_value": 250,
+            "signup_bonus_min_spend": 1000,
+            "signup_bonus_max_months": 3,
+            "reward_categories": [
+                {"category": "other", "rate": 1.5},
+            ],
+            "special_offers": [
+                "Earn 3 points per $1 spent on travel purchases booked through the Bank of America Travel Center."
+            ]
         }
     ]
     

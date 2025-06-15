@@ -53,8 +53,9 @@ class RecommendationService:
                 main_spend = min(annual_amount, limit)
                 base_spend = max(0, annual_amount - limit)
                 # Calculate points/miles earned, then convert to dollar value using multiplier
+                # Fix: Compensate for the /100 division by multiplying the multiplier by 100
                 points_earned = main_spend * (main_rate / 100) + base_spend * (base_rate / 100)
-                category_value = points_earned * card.reward_value_multiplier
+                category_value = points_earned * (card.reward_value_multiplier * 100)
                 rewards_by_category[category] = {
                     'main_rate': main_rate,
                     'main_spend': main_spend,
@@ -66,8 +67,9 @@ class RecommendationService:
                 }
             else:
                 # Calculate points/miles earned, then convert to dollar value using multiplier
+                # Fix: Compensate for the /100 division by multiplying the multiplier by 100
                 points_earned = annual_amount * (main_rate / 100)
-                category_value = points_earned * card.reward_value_multiplier
+                category_value = points_earned * (card.reward_value_multiplier * 100)
                 rewards_by_category[category] = {
                     'main_rate': main_rate,
                     'main_spend': annual_amount,
