@@ -65,7 +65,7 @@ def integrate_card_data(html_file=None, url=None):
         card['signup_bonus_points'] = card.get('signup_bonus_points', 0)
         card['signup_bonus_value'] = card.get('signup_bonus_value', 0.0)
         card['signup_bonus_min_spend'] = card.get('signup_bonus_spend_requirement', 0.0)
-        card['signup_bonus_time_limit'] = card.get('signup_bonus_time_period', 3)
+        card['signup_bonus_max_months'] = card.get('signup_bonus_time_period', 3)
         
         prepared_cards.append(card)
     
