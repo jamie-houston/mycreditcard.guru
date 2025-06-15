@@ -213,9 +213,9 @@ class TestMaxAnnualFeeConstraint:
             assert total_individual_fees <= 150, f"Cumulative fees ${total_individual_fees} exceed limit"
     
     def test_fallback_when_no_cards_meet_constraint(self, test_app, sample_cards):
-        """Test fallback behavior when no cards meet the fee constraint."""
+        """Test that when no cards meet the fee constraint, an appropriate error is raised."""
         with test_app.app_context():
-            # Remove the free card to test fallback behavior
+            # Remove the free card to test constraint behavior
             free_card = CreditCard.query.filter_by(name='Free Card').first()
             if free_card:
                 db.session.delete(free_card)
@@ -235,17 +235,18 @@ class TestMaxAnnualFeeConstraint:
             db.session.add(profile)
             db.session.commit()
             
-            rec = RecommendationService.generate_recommendation(
-                profile_id=profile.id, 
-                session_id='test_session_5'
-            )
+            # Should raise ValueError when no cards meet the constraint
+            with pytest.raises(ValueError) as exc_info:
+                RecommendationService.generate_recommendation(
+                    profile_id=profile.id, 
+                    session_id='test_session_5'
+                )
             
-            # Should fall back to recommending at least one card even if it exceeds the constraint
-            assert len(rec.recommended_sequence) >= 1, "Should recommend at least one card as fallback"
-            
-            # The fallback card will likely have fees > 0
-            # This tests the fallback logic in the recommendation service 
-
+            # Verify the error message mentions the fee limit
+            error_message = str(exc_info.value)
+            assert "maximum annual fee limit" in error_message
+            assert "$0" in error_message
+    
     def test_strict_fee_constraint_no_fallback(self, test_app, sample_cards):
         """Test that when user sets a strict fee limit, no high-fee cards are recommended (Bug Fix Test)."""
         with test_app.app_context():
