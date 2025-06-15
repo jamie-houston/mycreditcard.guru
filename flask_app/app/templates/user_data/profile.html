@@ -24,71 +24,8 @@
 </div>
 
 <form method="POST" class="needs-validation" novalidate>
-  <div class="card mb-4">
-    <div class="card-header bg-primary text-white">
-      <h5 class="mb-0">
-        <i class="fas fa-user me-2"></i>Basic Information
-      </h5>
-    </div>
-    <div class="card-body">
-      <div class="row">
-        <div class="col-md-6 mb-3">
-          <label for="profile_name" class="form-label fw-bold">
-            Profile Name
-          </label>
-          <input
-            type="text"
-            class="form-control"
-            id="profile_name"
-            name="profile_name"
-            value="{{ profile.name if profile else 'My Spending Profile' }}"
-            required
-          />
-          <div class="form-text">
-            Give your spending profile a memorable name
-          </div>
-        </div>
-        <div class="col-md-6 mb-3">
-          <label for="credit_score" class="form-label fw-bold">
-            Credit Score
-          </label>
-          <input
-            type="number"
-            min="300"
-            max="850"
-            class="form-control"
-            id="credit_score"
-            name="credit_score"
-            value="{{ credit_score }}"
-            required
-          />
-          <div class="form-text">Your current credit score (300-850)</div>
-        </div>
-      </div>
-      <div class="row">
-        <div class="col-md-6 mb-3">
-          <label for="income" class="form-label fw-bold">
-            Annual Income
-          </label>
-          <div class="input-group">
-            <span class="input-group-text">$</span>
-            <input
-              type="number"
-              step="1000"
-              min="0"
-              class="form-control"
-              id="income"
-              name="income"
-              value="{{ income }}"
-              required
-            />
-          </div>
-          <div class="form-text">Your annual household income</div>
-        </div>
-      </div>
-    </div>
-  </div>
-
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+  
   <div class="card mb-4">
     <div class="card-header bg-success text-white">
       <h5 class="mb-0">

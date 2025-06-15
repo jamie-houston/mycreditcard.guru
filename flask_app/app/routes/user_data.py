@@ -21,7 +21,7 @@ class UserProfileSchema(Schema):
     max_annual_fees = fields.Float()
     max_cards = fields.Int()
 
-@user_data.route('/profile', methods=['GET', 'POST'])
+@user_data.route('/', methods=['GET', 'POST'])
 def profile():
     """User profile form to collect spending habits and preferences."""
     if request.method == 'POST':
@@ -45,9 +45,10 @@ def profile():
             reward_type = request.form.get('reward_type', 'points')
 
             # Get other form data
-            profile_name = request.form.get('profile_name', 'My Spending Profile')
-            credit_score = int(request.form.get('credit_score', 700))
-            income = float(request.form.get('income', 50000))
+            # Set default values for removed fields
+            profile_name = 'Spending Profile'  # Default name since we removed the field
+            credit_score = 750  # Default credit score since we removed the field
+            income = 75000  # Default income since we removed the field
             max_cards = int(request.form.get('max_cards', 1))
             max_annual_fees_raw = request.form.get('max_annual_fees')
             if max_annual_fees_raw and max_annual_fees_raw.strip() != '':
@@ -146,9 +147,7 @@ def profile():
                         category_spending[cat] = val
                 except ValueError:
                     pass
-        # Other fields
-        credit_score = int(prefill.get('credit_score', profile.credit_score if profile else 700))
-        income = float(prefill.get('income', profile.income if profile else 50000))
+        # Other fields (removed credit_score and income)
         max_cards = int(prefill.get('max_cards', profile.max_cards if profile else 1))
         max_annual_fees_raw = prefill.get('max_annual_fees')
         if max_annual_fees_raw is not None and max_annual_fees_raw != '':
@@ -158,8 +157,6 @@ def profile():
         reward_type = prefill.get('reward_type', profile.reward_type if profile else 'points')
     else:
         category_spending = json.loads(profile.category_spending) if profile else {}
-        credit_score = profile.credit_score if profile else 700
-        income = profile.income if profile else 50000
         max_cards = profile.max_cards if profile else 1
         max_annual_fees = profile.max_annual_fees if profile else None
         reward_type = profile.reward_type if profile else 'points'
@@ -171,8 +168,6 @@ def profile():
         category_descriptions=category_descriptions,
         category_spending=category_spending,
         reward_type=reward_type,
-        credit_score=credit_score,
-        income=income,
         max_cards=max_cards,
         max_annual_fees=max_annual_fees,
         issuers=issuers
