@@ -245,3 +245,78 @@ class TestMaxAnnualFeeConstraint:
             
             # The fallback card will likely have fees > 0
             # This tests the fallback logic in the recommendation service 
+
+    def test_strict_fee_constraint_no_fallback(self, test_app, sample_cards):
+        """Test that when user sets a strict fee limit, no high-fee cards are recommended (Bug Fix Test)."""
+        with test_app.app_context():
+            # Remove free and mid-fee cards, leaving only high-fee card
+            free_card = CreditCard.query.filter_by(name='Free Card').first()
+            mid_fee_card = CreditCard.query.filter_by(name='Mid Fee Card').first()
+            if free_card:
+                db.session.delete(free_card)
+            if mid_fee_card:
+                db.session.delete(mid_fee_card)
+            db.session.commit()
+            
+            # Create profile with very low fee limit
+            profile = UserProfile(
+                name='Test Profile',
+                credit_score=750,
+                income=75000,
+                total_monthly_spend=1000,
+                category_spending=json.dumps({'dining': 500, 'travel': 300, 'other': 200}),
+                reward_type='points',
+                max_cards=1,
+                max_annual_fees=50,  # Low limit, but only high-fee card ($550) available
+                session_id='test_session_strict'
+            )
+            db.session.add(profile)
+            db.session.commit()
+            
+            # Should raise ValueError instead of recommending high-fee card
+            with pytest.raises(ValueError) as exc_info:
+                RecommendationService.generate_recommendation(
+                    profile_id=profile.id, 
+                    session_id='test_session_strict'
+                )
+            
+            # Verify the error message mentions the fee limit
+            error_message = str(exc_info.value)
+            assert "maximum annual fee limit" in error_message
+            assert "$50" in error_message
+            
+    def test_fee_constraint_respects_individual_card_limits(self, test_app, sample_cards):
+        """Test that individual cards exceeding the fee limit are rejected (Bug Fix Test)."""
+        with test_app.app_context():
+            profile = UserProfile(
+                name='Test Profile',
+                credit_score=750,
+                income=75000,
+                total_monthly_spend=1000,
+                category_spending=json.dumps({'dining': 500, 'travel': 300, 'other': 200}),
+                reward_type='points',
+                max_cards=3,
+                max_annual_fees=100,  # $100 limit
+                session_id='test_session_individual'
+            )
+            db.session.add(profile)
+            db.session.commit()
+            
+            rec = RecommendationService.generate_recommendation(
+                profile_id=profile.id, 
+                session_id='test_session_individual'
+            )
+            
+            # Should recommend cards within the fee limit
+            assert len(rec.recommended_sequence) > 0
+            assert rec.total_annual_fees <= 100
+            
+            # Verify NO individual card exceeds the limit
+            for card_id in rec.recommended_sequence:
+                card = CreditCard.query.get(card_id)
+                assert card.annual_fee <= 100, f"Card {card.name} with fee ${card.annual_fee} should not be recommended with $100 limit"
+            
+            # Specifically verify the high-fee card ($550) is NOT recommended
+            high_fee_card = CreditCard.query.filter_by(name='High Fee Card').first()
+            if high_fee_card:
+                assert high_fee_card.id not in rec.recommended_sequence, "High Fee Card ($550) should not be recommended with $100 limit" 

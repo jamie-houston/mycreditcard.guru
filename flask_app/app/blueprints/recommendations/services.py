@@ -147,9 +147,19 @@ class RecommendationService:
             total_fees += fee
             if len(selected_cards) >= max_cards:
                 break
-        # If we couldn't pick any due to fee constraint, fall back to first card regardless
-        if not selected_cards and sorted_cards:
+        
+        # Only fall back to first card if no fee limit was set
+        # If user set a fee limit and no cards meet it, return empty recommendation
+        if not selected_cards and sorted_cards and max_fee_limit is None:
             selected_cards.append(sorted_cards[0])
+        
+        # If no cards were selected due to fee constraints, raise an error
+        if not selected_cards:
+            if max_fee_limit is not None:
+                raise ValueError(f"No cards found within your maximum annual fee limit of ${max_fee_limit}. Consider increasing your fee limit or adjusting your preferences.")
+            else:
+                raise ValueError("No cards found matching your criteria.")
+        
         top_cards = selected_cards
         top_card_ids = [card_id for card_id, _ in top_cards]
         
