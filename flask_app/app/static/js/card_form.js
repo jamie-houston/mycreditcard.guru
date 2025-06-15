@@ -81,7 +81,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     <label class="form-label">Amount</label>
                     <div class="input-group">
                         <span class="input-group-text">$</span>
-                        <input type="number" step="0.01" min="0" class="form-control" name="offer_amount_${offerCount}" value="0">
+                        <input type="number" min="0" class="form-control" name="offer_amount_${offerCount}" value="0">
                     </div>
                 </div>
                 <div class="col-md-4">

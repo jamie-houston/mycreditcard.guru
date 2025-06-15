@@ -98,6 +98,7 @@
       <tr>
         <th data-sorter="true">Card Name</th>
         <th data-sorter="true">Issuer</th>
+        <th data-sorter="true">Reward Type</th>
         <th data-sorter="true" data-sort-type="number">Annual Fee</th>
         <th data-sorter="true" data-sort-type="number">Signup Bonus</th>
         <th data-sorter="true" data-sort-type="number">Spend Requirement</th>
@@ -111,6 +112,7 @@
       <tr>
         <td>{{ card.name }}</td>
         <td>{{ card.issuer_obj.name }}</td>
+        <td>{{ card.reward_type }}</td>
         <td data-sort-value="{{ card.annual_fee }}">
           ${{ "%.0f"|format(card.annual_fee) }}
         </td>

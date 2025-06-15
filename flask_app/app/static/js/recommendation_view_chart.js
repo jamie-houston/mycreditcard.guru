@@ -56,7 +56,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 tooltip: {
                     callbacks: {
                         label: function (context) {
-                            return '$' + context.raw.toFixed(2);
+                            return '$' + Math.round(context.raw);
                         }
                     }
                 }

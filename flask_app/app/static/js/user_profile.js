@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         // Update the total field with the sum of categories
         if (totalInput) {
-            totalInput.value = categoryTotal.toFixed(2);
+            totalInput.value = Math.round(categoryTotal);
         }
 
         // Hide the warning since total is now always equal to sum of categories

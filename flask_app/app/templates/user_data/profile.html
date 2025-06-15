@@ -48,13 +48,12 @@
             <span class="input-group-text">$</span>
             <input
               type="number"
-              step="0.01"
               min="0"
               class="form-control"
               id="category_{{ category.name }}"
               name="category_{{ category.name }}"
               value="{{ category_spending.get(category.name, '') }}"
-              placeholder="0.00"
+              placeholder="0"
               title="{{ category.description if category.description else category.display_name }}"
             />
           </div>
@@ -113,7 +112,6 @@
             <span class="input-group-text">$</span>
             <input
               type="number"
-              step="0.01"
               min="0"
               class="form-control"
               id="max_annual_fees"
@@ -122,8 +120,7 @@
             />
           </div>
           <div class="form-text">
-            Set to 0 for no limit. Many premium cards with high rewards also
-            have annual fees.
+            Leave blank for no limit, or set to $0 to only see free cards. Many premium cards with high rewards also have annual fees.
           </div>
         </div>
       </div>
@@ -205,7 +202,7 @@
         total += value;
       });
       if (totalDisplay) {
-        totalDisplay.textContent = `$${total.toFixed(2)}`;
+        totalDisplay.textContent = `$${Math.round(total)}`;
       }
     }
 
