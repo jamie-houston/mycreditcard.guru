@@ -180,14 +180,14 @@ class TestDataDrivenRecommendations:
                 description="Credit card with 2% other rate, reward value multiplier of 0.015, $100 travel spending - now works correctly!",
                 cards=[TestCard(
                     name="Basic 2% Card",
-                    reward_value_multiplier=0.015,
+                    reward_value_multiplier=1.5,
                     reward_categories=[{"category": "other", "rate": 2.0}]
                 )],
                 profile=TestProfile(
                     category_spending={"travel": 100}
                 ),
                 expected=ExpectedResult(
-                    annual_value=36.0,  # FIXED: 100*12*(2/100)*0.015*100 = 36 (CORRECT!)
+                    annual_value=36.0,  # 100*12*.02*.015*100 = 36
                     monthly_value=3.0,  # 36/12 = 3
                     net_value=36.0,     # No annual fee
                     category_values={"travel": 36.0}
@@ -211,9 +211,9 @@ class TestDataDrivenRecommendations:
                     category_spending={"travel": 100, "dining": 50}
                 ),
                 expected=ExpectedResult(
-                    annual_value=6300.0,   # travel: 100*12*(3/100)*1.5*100=5400, dining: 50*12*(1/100)*1.5*100=900, total=6300
-                    net_value=6205.0,      # 6300 - 95 = 6205
-                    category_values={"travel": 5400.0, "dining": 900.0}
+                    annual_value=63.0,   # travel: 100*12*(3/100)*1.5=54, dining: 50*12*(1/100)*1.5=9, total=63
+                    net_value=-32.0,      # 6300 - 95 = 6205
+                    category_values={"travel": 54.0, "dining": 9.0}
                 )
             ),
             
@@ -223,7 +223,7 @@ class TestDataDrivenRecommendations:
                 description="Gas card with spending limit",
                 cards=[TestCard(
                     name="Gas Rewards Card",
-                    reward_value_multiplier=0.01,
+                    reward_value_multiplier=1,
                     reward_categories=[
                         {"category": "gas", "rate": 5.0, "limit": 1000},
                         {"category": "other", "rate": 1.0}
@@ -244,7 +244,7 @@ class TestDataDrivenRecommendations:
                 description="Card with multiple reward categories",
                 cards=[TestCard(
                     name="Multi-Category Card",
-                    reward_value_multiplier=0.01,
+                    reward_value_multiplier=1,
                     reward_categories=[
                         {"category": "dining", "rate": 3.0},
                         {"category": "gas", "rate": 2.0},
@@ -282,18 +282,39 @@ class TestDataDrivenRecommendations:
                     reward_type="cash_back"
                 ),
                 expected=ExpectedResult(
-                    annual_value=4800.0,  # 200*12*(2/100)*1.0*100 = 4800
-                    category_values={"dining": 4800.0}
+                    annual_value=48.0,  # 200*12*(2/100)*1.0*100 = 4800
+                    category_values={"dining": 48.0}
                 )
             ),
             
+            # Spending below min spend scenario
+            TestScenario(
+                name="spending_below_min_spend",
+                description="Card with signup bonus",
+                cards=[TestCard(
+                    name="Signup Bonus Card",
+                    reward_value_multiplier=1,
+                    reward_categories=[{"category": "dining", "rate": 5.0}],
+                    signup_bonus_value=200,
+                    signup_bonus_min_spend=1000,
+                    signup_bonus_max_months=3
+                )],
+                profile=TestProfile(
+                    category_spending={"dining": 300} 
+                ),
+                expected=ExpectedResult(
+                    annual_value=180.0,  
+                    category_values={"dining": 180.0}  
+                )
+            ),
+
             # Signup bonus scenario
             TestScenario(
                 name="signup_bonus_card",
                 description="Card with signup bonus",
                 cards=[TestCard(
                     name="Signup Bonus Card",
-                    reward_value_multiplier=0.01,
+                    reward_value_multiplier=1,
                     reward_categories=[{"category": "other", "rate": 1.0}],
                     signup_bonus_value=200,
                     signup_bonus_min_spend=1000,
