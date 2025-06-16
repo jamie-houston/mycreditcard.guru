@@ -37,14 +37,6 @@ DEFAULT_CATEGORIES = [
         'aliases': ['grocery', 'grocery stores', 'supermarkets', 'wholesale clubs']
     },
     {
-        'name': 'online_groceries',
-        'display_name': 'Online Groceries',
-        'description': 'Online grocery delivery services and apps',
-        'icon': 'fas fa-shopping-cart',
-        'sort_order': 35,
-        'aliases': ['online grocery', 'grocery delivery', 'online grocery delivery']
-    },
-    {
         'name': 'gas',
         'display_name': 'Gas Stations',
         'description': 'Gas stations and fuel purchases',
@@ -74,7 +66,7 @@ DEFAULT_CATEGORIES = [
         'description': 'Public transit, taxis, rideshare services',
         'icon': 'fas fa-car',
         'sort_order': 70,
-        'aliases': ['transit', 'rideshare', 'parking', 'tolls', 'trains', 'buses']
+        'aliases': ['transit', 'rideshare', 'parking', 'tolls', 'trains', 'buses', 'public transit', 'subway', 'bus', 'metro']
     },
     {
         'name': 'streaming',
@@ -125,19 +117,11 @@ DEFAULT_CATEGORIES = [
         'aliases': []
     },
     {
-        'name': 'healthcare',
-        'display_name': 'Healthcare',
-        'description': 'Medical expenses, prescriptions, and insurance payments',
-        'icon': 'fas fa-heartbeat',
-        'sort_order': 130,
-        'aliases': []
-    },
-    {
-        'name': 'education',
-        'display_name': 'Education',
-        'description': 'Tuition, books, courses, and education-related expenses',
-        'icon': 'fas fa-graduation-cap',
-        'sort_order': 135,
+        'name': 'amazon',
+        'display_name': 'Amazon',
+        'description': 'Amazon purchases',
+        'icon': 'fab fa-amazon',
+        'sort_order': 150,
         'aliases': []
     },
     {
@@ -148,30 +132,38 @@ DEFAULT_CATEGORIES = [
         'sort_order': 140,
         'aliases': ['all purchases', 'everything else', 'everything', 'all other purchases', 'base rate', 'base', 'base rate']
     },
-    {
-        'name': 'paypal',
-        'display_name': 'PayPal',
-        'description': 'PayPal purchases and transactions',
-        'icon': 'fab fa-paypal',
-        'sort_order': 145,
-        'aliases': []
-    },
-    {
-        'name': 'amazon',
-        'display_name': 'Amazon',
-        'description': 'Amazon purchases',
-        'icon': 'fab fa-amazon',
-        'sort_order': 150,
-        'aliases': []
-    },
-    {
-        'name': 'transit',
-        'display_name': 'Transit',
-        'description': 'Public transportation and transit systems',
-        'icon': 'fas fa-subway',
-        'sort_order': 185,
-        'aliases': ['public transit', 'subway', 'bus', 'metro']
-    }
+    # {
+    #     'name': 'healthcare',
+    #     'display_name': 'Healthcare',
+    #     'description': 'Medical expenses, prescriptions, and insurance payments',
+    #     'icon': 'fas fa-heartbeat',
+    #     'sort_order': 130,
+    #     'aliases': []
+    # },
+    # {
+    #     'name': 'education',
+    #     'display_name': 'Education',
+    #     'description': 'Tuition, books, courses, and education-related expenses',
+    #     'icon': 'fas fa-graduation-cap',
+    #     'sort_order': 135,
+    #     'aliases': []
+    # },
+    # {
+    #     'name': 'paypal',
+    #     'display_name': 'PayPal',
+    #     'description': 'PayPal purchases and transactions',
+    #     'icon': 'fab fa-paypal',
+    #     'sort_order': 145,
+    #     'aliases': []
+    # },
+    # {
+    #     'name': 'online_groceries',
+    #     'display_name': 'Online Groceries',
+    #     'description': 'Online grocery delivery services and apps',
+    #     'icon': 'fas fa-shopping-cart',
+    #     'sort_order': 35,
+    #     'aliases': ['online grocery', 'grocery delivery', 'online grocery delivery']
+    # },
 ]
 
 def seed_categories():

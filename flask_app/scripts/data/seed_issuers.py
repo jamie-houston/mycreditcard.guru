@@ -21,17 +21,17 @@ def seed_issuers():
         'Capital One', 
         'American Express',
         'Citi',
-        'Discover',
         'Bank of America',
-        'Wells Fargo',
-        'U.S. Bank',
-        'Barclays',
-        'HSBC',
-        'PNC Bank',
-        'TD Bank',
-        'USAA',
-        'Navy Federal Credit Union',
-        'Alliant Credit Union'
+        # 'Discover',
+        # 'Wells Fargo',
+        # 'U.S. Bank',
+        # 'Barclays',
+        # 'HSBC',
+        # 'PNC Bank',
+        # 'TD Bank',
+        # 'USAA',
+        # 'Navy Federal Credit Union',
+        # 'Alliant Credit Union'
     ]
     
     created_count = 0
