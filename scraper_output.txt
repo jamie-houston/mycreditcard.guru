@@ -1,0 +1,89 @@
+2025-06-15 22:21:19,894 - INFO - Loading table HTML file: /Users/jamie.houston/src/gh/personal/cursor/creditcard-roadmap/data/input/nerdwallet_bonus_offers_table.html
+2025-06-15 22:21:19,894 - INFO - Scraping NerdWallet table...
+2025-06-15 22:21:19,912 - INFO - Found 20 card rows in table
+2025-06-15 22:21:19,917 - INFO - Extracted 20 cards from table
+2025-06-15 22:21:19,918 - INFO - Results saved to: /Users/jamie.houston/src/gh/personal/cursor/creditcard-roadmap/data/scraped/nerdwallet_table_cards.json
+
+======================================================================
+NERDWALLET TABLE SCRAPING RESULTS
+======================================================================
+📊 Total cards found: 20
+🎯 Cards with reward categories: 10
+💬 Cards with reward tooltips: 20
+🎁 Cards with intro offers: 3
+
+🏆 Cards with detailed reward categories:
+
+1. Capital One Venture Rewards Credit Card (Capital One)
+   Annual Fee: $95.0
+   • Other: 2.0x
+   • Travel: 5.0x
+   🎁 Signup Bonus: 75,000 points
+   💰 Bonus Value: $750.0
+
+2. Chase Sapphire Preferred® Card (Chase)
+   Annual Fee: $95.0
+   • Travel: 2.0x
+   • Other: 1.0x
+   • Dining & Restaurants: 3.0x
+   • Streaming Services: 3.0x
+
+3. Chase Freedom Flex® (Chase)
+   Annual Fee: $0.0
+   • Up To $1: 5.0x
+   • Dining & Restaurants: 3.0x
+   • Other: 1.0x
+   • Drugstores: 3.0x
+   💰 Bonus Value: $200.0
+
+4. Bank of America® Customized Cash Rewards credit card (Bank of America)
+   Annual Fee: $0.0
+   • Other: 1.0x
+   • Purchases In Your Choice Category: 3.0x
+   • The First $2: 2.0x
+   • These Purchases Up To The Quarterly Maximum: 2.0x
+   • Groceries: 2.0x
+
+5. Capital One Quicksilver Cash Rewards Credit Card (Capital One)
+   Annual Fee: $0.0
+   • Other: 1.5x
+
+6. Blue Cash Preferred® Card from American Express (American Express)
+   Annual Fee: $0.0
+   • Select U: 6.0x
+   • Other: 1.0x
+
+7. Discover it® Cash Back (Discover)
+   Annual Fee: $0.0
+   • Groceries: 5.0x
+   • Other: 1.0x
+   • Dining & Restaurants: 5.0x
+   • Gas Stations: 5.0x
+   💰 Bonus Value: $150.0
+
+8. Southwest Rapid Rewards® Priority Credit Card (Unknown)
+   Annual Fee: $149.0
+   • Southwest Purchases: 3.0x
+   • Transit: 2.0x
+   • Internet: 2.0x
+   • Other: 1.0x
+
+9. Delta SkyMiles® Platinum American Express Card (American Express)
+   Annual Fee: $350.0
+   • Travel: 3.0x
+   • All Other Eligible Purchases: 1.0x
+
+10. Wells Fargo Autograph® Card (Wells Fargo)
+   Annual Fee: $0.0
+   • Dining & Restaurants: 3.0x
+   • Other: 1.0x
+
+🎯 CHASE SAPPHIRE PREFERRED FOUND:
+   Name: Chase Sapphire Preferred® Card
+   Categories: {'Travel': 2.0, 'Other': 1.0, 'Dining & Restaurants': 3.0, 'Streaming Services': 3.0}
+   Rewards Tooltip: 5x on travel purchased through Chase Travel℠, 3x on dining, select streaming services and online groceries, 2x on all other travel purchases, 1x on all other purchases.
+
+   ✅ Category validation:
+   ✅ Dining & Restaurants: 3.0x (expected 3.0x)
+   ✅ Streaming Services: 3.0x (expected 3.0x)
+   ✅ Travel: 2.0x (expected 2.0x)

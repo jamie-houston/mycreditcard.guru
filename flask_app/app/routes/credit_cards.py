@@ -7,11 +7,93 @@ from app.utils.card_scraper import scrape_credit_cards, SOURCE_URLS
 from app.utils.data_utils import map_scraped_card_to_model
 from app.utils.compat import safe_query, safe_commit
 import json
+import glob
+import os
 from datetime import datetime
 from flask_wtf import FlaskForm
 from app.models import CreditCard, Category, CreditCardReward, CardIssuer
 
 credit_cards = Blueprint('credit_cards', __name__)
+
+def import_cards_from_json_data(cards_data: list, source_file: str) -> int:
+    """Import cards from a list of card data from JSON files."""
+    created_count = 0
+    updated_count = 0
+    
+    for card_data in cards_data:
+        try:
+            # Get or create issuer
+            issuer_name = card_data.get('issuer', 'Unknown')
+            issuer = CardIssuer.query.filter_by(name=issuer_name).first()
+            if not issuer:
+                # Create new issuer if it doesn't exist
+                issuer = CardIssuer(name=issuer_name)
+                db.session.add(issuer)
+                db.session.flush()
+            
+            # Check if card already exists
+            existing_card = CreditCard.query.filter_by(
+                name=card_data.get('name'),
+                issuer_id=issuer.id
+            ).first()
+            
+            # Prepare card data for database
+            db_card_data = {
+                'name': card_data.get('name'),
+                'issuer_id': issuer.id,
+                'annual_fee': card_data.get('annual_fee', 0.0),
+                'reward_type': card_data.get('reward_type', 'points'),
+                'reward_value_multiplier': card_data.get('reward_value_multiplier', 0.01),
+                'signup_bonus_points': card_data.get('signup_bonus_points', 0),
+                'signup_bonus_value': card_data.get('signup_bonus_value', 0.0),
+                'signup_bonus_min_spend': card_data.get('signup_bonus_min_spend', 0.0),
+                'signup_bonus_max_months': card_data.get('signup_bonus_max_months', 3),
+                'source': card_data.get('source', 'scraped'),
+                'source_url': card_data.get('source_url', ''),
+                'import_date': datetime.utcnow()
+            }
+            
+            if existing_card:
+                # Update existing card
+                for key, value in db_card_data.items():
+                    if key != 'import_date':  # Don't update import_date for existing cards
+                        setattr(existing_card, key, value)
+                card = existing_card
+                updated_count += 1
+            else:
+                # Create new card
+                card = CreditCard(**db_card_data)
+                db.session.add(card)
+                created_count += 1
+            
+            db.session.flush()  # Get the card ID
+            
+            # Clear existing reward relationships for this card
+            CreditCardReward.query.filter_by(credit_card_id=card.id).delete()
+            
+            # Create CreditCardReward relationship records
+            reward_categories = card_data.get('reward_categories', {})
+            if isinstance(reward_categories, dict):
+                for category_name, rate in reward_categories.items():
+                    # Map category name to database category
+                    category = Category.get_by_name(category_name)
+                    if category:
+                        credit_card_reward = CreditCardReward(
+                            credit_card_id=card.id,
+                            category_id=category.id,
+                            reward_percent=float(rate),
+                            is_bonus_category=(float(rate) > 1.0)
+                        )
+                        db.session.add(credit_card_reward)
+                    else:
+                        print(f"     ⚠️  Category '{category_name}' not found for card '{card.name}'")
+            
+        except Exception as e:
+            print(f"     ❌ Error importing card '{card_data.get('name', 'Unknown')}': {e}")
+            continue
+    
+    db.session.commit()
+    return created_count + updated_count
 
 # Admin access decorator
 def admin_required(f):
@@ -74,86 +156,155 @@ def index():
 @credit_cards.route('/import', methods=['GET', 'POST'])
 @admin_required
 def import_cards():
-    """Import credit cards from a data source"""
+    """Import credit cards from a data source or scraped files"""
     if request.method == 'POST':
-        source = request.form.get('source', 'nerdwallet')
-        try:
-            # Scrape credit cards from the source
-            cards_data = scrape_credit_cards(source)
-            
-            # Set source URLs based on the source
-            source_url = SOURCE_URLS.get(source, '')
-            import_date = datetime.utcnow()
-            
-            # Create new cards from the scraped data
-            with safe_commit():  # Use the safe commit context manager
-                for card_data in cards_data:
-                    # Map field names from scraper to model fields
-                    mapped_data = map_scraped_card_to_model(card_data)
-
-                    if mapped_data is None:
-                        continue
-
-                    # Add source information
-                    mapped_data['source'] = source
-                    mapped_data['source_url'] = source_url
-                    mapped_data['import_date'] = import_date
-                    
-                    # Extract reward categories before creating/updating card
-                    reward_categories_json = mapped_data.get('reward_categories', '[]')
-                    try:
-                        reward_categories = json.loads(reward_categories_json) if isinstance(reward_categories_json, str) else reward_categories_json
-                    except (json.JSONDecodeError, TypeError):
-                        reward_categories = []
-                    
-                    # Check if card already exists
-                    existing_card = safe_query(CreditCard).filter_by(name=mapped_data['name']).first()
-                    if existing_card:
-                        # Update existing card
-                        for key, value in mapped_data.items():
-                            if key in ['reward_categories', 'special_offers'] and isinstance(value, list):
-                                setattr(existing_card, key, json.dumps(value))
-                            else:
-                                setattr(existing_card, key, value)
-                        card = existing_card
-                    else:
-                        # Create new card
-                        new_card = CreditCard(**mapped_data)
-                        db.session.add(new_card)
-                        card = new_card
-                    
-                    # Flush to get the card ID
-                    db.session.flush()
-                    
-                    # Clear existing reward relationships for this card
-                    from app.models.category import CreditCardReward
-                    CreditCardReward.query.filter_by(credit_card_id=card.id).delete()
-                    
-                    # Create CreditCardReward relationship records
-                    for reward_data in reward_categories:
-                        if isinstance(reward_data, dict):
-                            category_name = reward_data.get('category', '')
-                            percentage = reward_data.get('percentage', reward_data.get('rate', 1.0))
-                            limit = reward_data.get('limit')
-                            if category_name and percentage:
-                                card.add_reward_category(
-                                    category_name=category_name,
-                                    reward_percent=float(percentage),
-                                    is_bonus=(float(percentage) > 1.0),
-                                    limit=float(limit) if limit not in (None, "", "null") else None
-                                )
-            
-            flash(f"Successfully imported {len(cards_data)} credit cards from {source}.", "success")
-            return redirect(url_for('credit_cards.index'))
+        import_type = request.form.get('import_type', 'scrape')
         
-        except Exception as e:
-            db.session.rollback()
-            error_message = f"Error importing credit cards: {str(e)}"
-            flash(error_message, "danger")
-            print(error_message)
+        if import_type == 'file':
+            # Import from selected files
+            selected_files = request.form.getlist('selected_files')
+            import_all = request.form.get('import_all') == 'on'
+            
+            try:
+                # Get available files
+                base_dir = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+                output_dir = os.path.join(base_dir, 'data', 'output')
+                
+                if import_all:
+                    # Import all files
+                    json_files = sorted(glob.glob(os.path.join(output_dir, '*.json')))
+                else:
+                    # Import selected files
+                    json_files = [os.path.join(output_dir, f) for f in selected_files if f]
+                
+                total_imported = 0
+                
+                for json_file in json_files:
+                    if not os.path.exists(json_file):
+                        continue
+                        
+                    with open(json_file, 'r', encoding='utf-8') as f:
+                        data = json.load(f)
+                    
+                    cards_data = data.get('cards', [])
+                    imported_count = import_cards_from_json_data(cards_data, os.path.basename(json_file))
+                    total_imported += imported_count
+                
+                flash(f"Successfully imported {total_imported} credit cards from {len(json_files)} file(s).", "success")
+                return redirect(url_for('credit_cards.index'))
+                
+            except Exception as e:
+                db.session.rollback()
+                error_message = f"Error importing from files: {str(e)}"
+                flash(error_message, "danger")
+                print(error_message)
+        
+        else:
+            # Original scraping functionality
+            source = request.form.get('source', 'nerdwallet')
+            try:
+                # Scrape credit cards from the source
+                cards_data = scrape_credit_cards(source)
+                
+                # Set source URLs based on the source
+                source_url = SOURCE_URLS.get(source, '')
+                import_date = datetime.utcnow()
+                
+                # Create new cards from the scraped data
+                with safe_commit():  # Use the safe commit context manager
+                    for card_data in cards_data:
+                        # Map field names from scraper to model fields
+                        mapped_data = map_scraped_card_to_model(card_data)
+
+                        if mapped_data is None:
+                            continue
+
+                        # Add source information
+                        mapped_data['source'] = source
+                        mapped_data['source_url'] = source_url
+                        mapped_data['import_date'] = import_date
+                        
+                        # Extract reward categories before creating/updating card
+                        reward_categories_json = mapped_data.get('reward_categories', '[]')
+                        try:
+                            reward_categories = json.loads(reward_categories_json) if isinstance(reward_categories_json, str) else reward_categories_json
+                        except (json.JSONDecodeError, TypeError):
+                            reward_categories = []
+                        
+                        # Check if card already exists
+                        existing_card = safe_query(CreditCard).filter_by(name=mapped_data['name']).first()
+                        if existing_card:
+                            # Update existing card
+                            for key, value in mapped_data.items():
+                                if key in ['reward_categories', 'special_offers'] and isinstance(value, list):
+                                    setattr(existing_card, key, json.dumps(value))
+                                else:
+                                    setattr(existing_card, key, value)
+                            card = existing_card
+                        else:
+                            # Create new card
+                            new_card = CreditCard(**mapped_data)
+                            db.session.add(new_card)
+                            card = new_card
+                        
+                        # Flush to get the card ID
+                        db.session.flush()
+                        
+                        # Clear existing reward relationships for this card
+                        from app.models.category import CreditCardReward
+                        CreditCardReward.query.filter_by(credit_card_id=card.id).delete()
+                        
+                        # Create CreditCardReward relationship records
+                        for reward_data in reward_categories:
+                            if isinstance(reward_data, dict):
+                                category_name = reward_data.get('category', '')
+                                percentage = reward_data.get('percentage', reward_data.get('rate', 1.0))
+                                limit = reward_data.get('limit')
+                                if category_name and percentage:
+                                    card.add_reward_category(
+                                        category_name=category_name,
+                                        reward_percent=float(percentage),
+                                        is_bonus=(float(percentage) > 1.0),
+                                        limit=float(limit) if limit not in (None, "", "null") else None
+                                    )
+                
+                flash(f"Successfully imported {len(cards_data)} credit cards from {source}.", "success")
+                return redirect(url_for('credit_cards.index'))
+            
+            except Exception as e:
+                db.session.rollback()
+                error_message = f"Error importing credit cards: {str(e)}"
+                flash(error_message, "danger")
+                print(error_message)
     
-    # Pass SOURCE_URLS dictionary to the template
-    return render_template('credit_cards/import.html', sources=SOURCE_URLS)
+    # Get available scraped files for the template
+    import glob
+    base_dir = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+    output_dir = os.path.join(base_dir, 'data', 'output')
+    available_files = []
+    
+    if os.path.exists(output_dir):
+        json_files = sorted(glob.glob(os.path.join(output_dir, '*.json')), reverse=True)  # Newest first
+        for json_file in json_files:
+            try:
+                with open(json_file, 'r', encoding='utf-8') as f:
+                    data = json.load(f)
+                
+                file_info = {
+                    'filename': os.path.basename(json_file),
+                    'full_path': json_file,
+                    'size': os.path.getsize(json_file),
+                    'modified': datetime.fromtimestamp(os.path.getmtime(json_file)),
+                    'card_count': len(data.get('cards', [])),
+                    'extraction_summary': data.get('extraction_summary', {})
+                }
+                available_files.append(file_info)
+            except Exception as e:
+                print(f"Error reading file {json_file}: {e}")
+                continue
+    
+    # Pass SOURCE_URLS dictionary and available files to the template
+    return render_template('credit_cards/import.html', sources=SOURCE_URLS, available_files=available_files)
 
 @credit_cards.route('/new', methods=['GET', 'POST'])
 @admin_required

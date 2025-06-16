@@ -26,6 +26,8 @@ import re
 SCRIPT_INFO = {
     # Root level scripts
     "run.py": "Start the Flask development server with configurable options",
+    "run_tests.py": "Run all tests with coverage reporting and detailed output",
+    "guided_scraping.py": "Step-by-step guided workflow for scraping and importing credit card data",
     
     # Admin scripts
     "admin/generate_recommendation.py": "Generate credit card recommendations for a specific user profile",
@@ -38,8 +40,13 @@ SCRIPT_INFO = {
     "data/reset_db.py": "Reset and initialize the database, bypassing migrations",
     "data/seed_categories.py": "Seed database with default categories for credit card rewards",
     "data/seed_db.py": "Seed database with sample credit cards for development and testing",
+    "data/seed_credit_cards.py": "Import credit cards from scraped data files or seed sample cards",
     "data/update_cards.py": "Update existing credit cards with new data from scraping",
     "data/update_db.py": "Update database schema and migrate data",
+    
+    # Scraping scripts
+    "scraping/scrape_nerdwallet.py": "Scrape credit card data from NerdWallet HTML files with timestamped output",
+    "scraping/scrape_nerdwallet_table_detailed.py": "Detailed NerdWallet table scraper with reward category parsing",
     
     # Test scripts
     "test/create_test_data.py": "Create comprehensive test data including users, profiles, and recommendations",
@@ -142,7 +149,7 @@ def get_available_scripts():
     return scripts_by_category
 
 
-def show_menu():
+def show_menu(show_all=False):
     """Display the script menu with numbered options."""
     scripts_by_category = get_available_scripts()
     
@@ -156,49 +163,82 @@ def show_menu():
     script_list = []
     counter = 1
     
-    # Sort categories alphabetically, but put 'root' first
-    categories = list(scripts_by_category.keys())
-    if 'root' in categories:
-        categories.remove('root')
-        categories = ['root'] + sorted(categories)
-    else:
-        categories = sorted(categories)
-    
-    for category in categories:
-        scripts = scripts_by_category[category]
-        if not scripts:
-            continue
+    if not show_all:
+        # Show only root scripts initially
+        if 'root' in scripts_by_category:
+            scripts = scripts_by_category['root']
+            print(f"\n📁 ROOT SCRIPTS")
+            print("-" * 40)
             
-        print(f"\n📁 {category.upper()} SCRIPTS")
-        print("-" * 40)
+            for script in scripts:
+                print(f"{counter:2d}. {script['path']}")
+                print(f"    {script['description']}")
+                script_list.append(script)
+                counter += 1
         
-        for script in scripts:
-            print(f"{counter:2d}. {script['path']}")
-            print(f"    {script['description']}")
-            script_list.append(script)
-            counter += 1
-    
-    print(f"\n{'=' * 80}")
-    print("Usage:")
-    print("  Enter a number (1-{}) to run that script".format(len(script_list)))
-    print("  Or use: python scripts/run_flask_script.py <category/script_name> [args...]")
-    print("  Press Ctrl+C to exit")
+        print(f"\n{'=' * 80}")
+        print("Usage:")
+        print("  Enter a number (1-{}) to run that script".format(len(script_list)))
+        print("  Press Enter to show all scripts")
+        print("  Or use: python scripts/run_flask_script.py <category/script_name> [args...]")
+        print("  Press Ctrl+C to exit")
+        
+    else:
+        # Show all scripts
+        # Sort categories alphabetically, but put 'root' first
+        categories = list(scripts_by_category.keys())
+        if 'root' in categories:
+            categories.remove('root')
+            categories = ['root'] + sorted(categories)
+        else:
+            categories = sorted(categories)
+        
+        for category in categories:
+            scripts = scripts_by_category[category]
+            if not scripts:
+                continue
+                
+            print(f"\n📁 {category.upper()} SCRIPTS")
+            print("-" * 40)
+            
+            for script in scripts:
+                print(f"{counter:2d}. {script['path']}")
+                print(f"    {script['description']}")
+                script_list.append(script)
+                counter += 1
+        
+        print(f"\n{'=' * 80}")
+        print("Usage:")
+        print("  Enter a number (1-{}) to run that script".format(len(script_list)))
+        print("  Or use: python scripts/run_flask_script.py <category/script_name> [args...]")
+        print("  Press Ctrl+C to exit")
     
     return script_list
 
 
-def get_user_choice(script_list):
+def get_user_choice(script_list, show_all_mode=False):
     """Get user's script choice."""
     try:
-        choice = input(f"\nSelect script (1-{len(script_list)}): ").strip()
+        if show_all_mode:
+            prompt = f"\nSelect script (1-{len(script_list)}): "
+        else:
+            prompt = f"\nSelect script (1-{len(script_list)}) or Enter for all scripts: "
         
-        if choice.isdigit():
+        choice = input(prompt).strip()
+        
+        if not choice and not show_all_mode:
+            # Empty input in root-only mode means show all scripts
+            return "show_all"
+        elif choice.isdigit():
             choice_num = int(choice)
             if 1 <= choice_num <= len(script_list):
                 return script_list[choice_num - 1]
             else:
                 print(f"❌ Invalid choice. Please enter a number between 1 and {len(script_list)}")
                 return None
+        elif not choice:
+            # Empty input in show_all mode means exit
+            return None
         else:
             print("❌ Please enter a valid number")
             return None
@@ -268,23 +308,70 @@ def main():
     """Main function."""
     if len(sys.argv) == 1:
         # Interactive mode
-        script_list = show_menu()
+        show_all_mode = False
+        script_list = show_menu(show_all=show_all_mode)
         if not script_list:
             sys.exit(1)
             
         while True:
-            choice = get_user_choice(script_list)
+            choice = get_user_choice(script_list, show_all_mode=show_all_mode)
+            
             if choice is None:
                 sys.exit(0)
+            elif choice == "show_all":
+                # Switch to show all scripts mode
+                show_all_mode = True
+                script_list = show_menu(show_all=True)
+                if not script_list:
+                    sys.exit(1)
+                continue
             
+            # Run the selected script
             run_script(choice)
             
-            # Ask if user wants to run another script
+            # After running a script, ask for next action
+            print(f"\n{'='*60}")
+            print("🔄 What would you like to do next?")
+            print("   • Enter a script number (1-{}) to run another script".format(len(script_list)))
+            print("   • Press Enter to exit")
+            print("   • Type 'menu' to show the menu again")
+            if show_all_mode:
+                print("   • Type 'root' to show only root scripts")
+            
             try:
-                again = input("\n🔄 Run another script? (y/N): ").strip().lower()
-                if again not in ['y', 'yes']:
+                next_action = input(f"\nNext action: ").strip()
+                
+                if not next_action:
+                    # Empty input - exit
                     print("👋 Goodbye!")
                     break
+                elif next_action.lower() == 'menu':
+                    # Show current menu again
+                    script_list = show_menu(show_all=show_all_mode)
+                    if not script_list:
+                        sys.exit(1)
+                    continue
+                elif next_action.lower() == 'root' and show_all_mode:
+                    # Switch back to root-only mode
+                    show_all_mode = False
+                    script_list = show_menu(show_all=False)
+                    if not script_list:
+                        sys.exit(1)
+                    continue
+                elif next_action.isdigit():
+                    # Direct script number selection
+                    choice_num = int(next_action)
+                    if 1 <= choice_num <= len(script_list):
+                        run_script(script_list[choice_num - 1])
+                        continue
+                    else:
+                        print(f"❌ Invalid script number. Please choose between 1 and {len(script_list)}")
+                        continue
+                else:
+                    # Invalid input - exit
+                    print("👋 Goodbye!")
+                    break
+                    
             except (KeyboardInterrupt, EOFError):
                 print("\n👋 Goodbye!")
                 break

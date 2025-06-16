@@ -1,0 +1,524 @@
+{
+  "analysis": {
+    "title": "Best Credit Card Bonuses for New Cardholders - NerdWallet",
+    "total_elements": 13225,
+    "potential_card_containers": [
+      {
+        "pattern": "data-testid containing \"card\"",
+        "count": 614,
+        "sample_classes": [
+          [
+            "MuiTypography-root",
+            "MuiTypography-textSmall",
+            "css-1o6et8a"
+          ],
+          [
+            "MuiTypography-root",
+            "MuiTypography-textSmall",
+            "css-1o6et8a"
+          ],
+          [
+            "MuiTypography-root",
+            "MuiTypography-textSmall",
+            "css-1o6et8a"
+          ]
+        ]
+      },
+      {
+        "pattern": "class containing \"card\"",
+        "count": 1,
+        "sample_classes": [
+          [
+            "v-card__title",
+            "pa-0",
+            "ma-0"
+          ]
+        ]
+      }
+    ]
+  },
+  "cards": [
+    {
+      "name": "Find the right credit card for you.",
+      "raw_text_sample": "Find the right credit card for you.Whether you want to pay less interest or earn more rewards, the right card's out there. Just answer a few questions and we'll narrow the search for you.Get Started"
+    },
+    {
+      "name": "Our pick for: Capital One Miles",
+      "bonus_offer": "75,000",
+      "spending_requirement": "$4,000",
+      "annual_fee": "$95",
+      "apr": "19.99%",
+      "issuer": "Capital One",
+      "raw_text_sample": "Our pick for: Capital One MilesCapital One Venture Rewards Credit Card4.7NerdWallet ratingAdd to compareApply Nowon Capital One's websiteon Capital One's websiteRates & FeesAnnual fee$95Rewards rate2x"
+    },
+    {
+      "name": "Capital One Venture Rewards Credit Card",
+      "bonus_offer": "75,000",
+      "annual_fee": "$95",
+      "apr": "19.99%",
+      "issuer": "Capital One",
+      "raw_text_sample": "Capital One Venture Rewards Credit Card4.7NerdWallet ratingAdd to compareApply Nowon Capital One's websiteon Capital One's websiteRates & FeesAnnual fee$95Rewards rate2x-5xMilesIntro offer75,000milesR"
+    },
+    {
+      "name": "Capital One Venture Rewards Credit Card",
+      "bonus_offer": "75,000",
+      "annual_fee": "$95",
+      "apr": "19.99%",
+      "issuer": "Capital One",
+      "raw_text_sample": "Capital One Venture Rewards Credit CardNerdWallet rating4.7Add to compareApply Nowon Capital One's websiteon Capital One's websiteRates & FeesAnnual fee$95Rewards rate2x-5xMilesIntro offer75,000milesR"
+    },
+    {
+      "name": "Our pick for: Flat-rate cash back",
+      "annual_fee": "$0",
+      "apr": "29.24%",
+      "issuer": "Wells Fargo",
+      "raw_text_sample": "Our pick for: Flat-rate cash backWells Fargo Active Cash® Card5.0NerdWallet ratingAdd to compareApply Nowon Wells Fargo's websiteon Wells Fargo's websiteRates & FeesAnnual fee$0Rewards rate2%CashbackI"
+    },
+    {
+      "name": "Wells Fargo Active Cash® Card",
+      "annual_fee": "$0",
+      "apr": "29.24%",
+      "issuer": "Wells Fargo",
+      "raw_text_sample": "Wells Fargo Active Cash® Card5.0NerdWallet ratingAdd to compareApply Nowon Wells Fargo's websiteon Wells Fargo's websiteRates & FeesAnnual fee$0Rewards rate2%CashbackIntro offer$200Recommended credit"
+    },
+    {
+      "name": "Wells Fargo Active Cash® Card",
+      "annual_fee": "$0",
+      "apr": "29.24%",
+      "issuer": "Wells Fargo",
+      "raw_text_sample": "Wells Fargo Active Cash® CardNerdWallet rating5.0Add to compareApply Nowon Wells Fargo's websiteon Wells Fargo's websiteRates & FeesAnnual fee$0Rewards rate2%CashbackIntro offer$200Recommended credit"
+    },
+    {
+      "name": "Our pick for: Chase Ultimate Rewards® points",
+      "bonus_offer": "60,000",
+      "spending_requirement": "$5,000",
+      "annual_fee": "$95",
+      "apr": "19.99%",
+      "issuer": "Chase",
+      "raw_text_sample": "Our pick for: Chase Ultimate Rewards® pointsChase Sapphire Preferred® Card5.0NerdWallet ratingAdd to compareApply Nowon Chase's websiteon Chase's websiteRates & FeesAnnual fee$95Rewards rate1x-5xPoint"
+    },
+    {
+      "name": "Chase Sapphire Preferred® Card",
+      "bonus_offer": "60,000",
+      "annual_fee": "$95",
+      "apr": "19.99%",
+      "issuer": "Chase",
+      "raw_text_sample": "Chase Sapphire Preferred® Card5.0NerdWallet ratingAdd to compareApply Nowon Chase's websiteon Chase's websiteRates & FeesAnnual fee$95Rewards rate1x-5xPointsIntro offer60,000pointsRegular APR19.99%-28"
+    },
+    {
+      "name": "Chase Sapphire Preferred® Card",
+      "bonus_offer": "60,000",
+      "annual_fee": "$95",
+      "apr": "19.99%",
+      "issuer": "Chase",
+      "raw_text_sample": "Chase Sapphire Preferred® CardNerdWallet rating5.0Add to compareApply Nowon Chase's websiteon Chase's websiteRates & FeesAnnual fee$95Rewards rate1x-5xPointsIntro offer60,000pointsRegular APR19.99%-28"
+    },
+    {
+      "name": "Our pick for: Quarterly categories + cash bonus",
+      "bonus_offer": "$200",
+      "spending_requirement": "$500",
+      "annual_fee": "$0",
+      "apr": "18.99%",
+      "issuer": "Chase",
+      "raw_text_sample": "Our pick for: Quarterly categories + cash bonusChase Freedom Flex®5.0NerdWallet ratingAdd to compareApply Nowon Chase's websiteon Chase's websiteRates & FeesAnnual fee$0Rewards rate1%-5%CashbackIntro"
+    },
+    {
+      "name": "Chase Freedom Flex®",
+      "annual_fee": "$0",
+      "apr": "18.99%",
+      "issuer": "Chase",
+      "raw_text_sample": "Chase Freedom Flex®5.0NerdWallet ratingAdd to compareApply Nowon Chase's websiteon Chase's websiteRates & FeesAnnual fee$0Rewards rate1%-5%CashbackIntro offer$200Recommended credit score690-850(Good -"
+    },
+    {
+      "name": "Chase Freedom Flex®",
+      "annual_fee": "$0",
+      "apr": "18.99%",
+      "issuer": "Chase",
+      "raw_text_sample": "Chase Freedom Flex®NerdWallet rating5.0Add to compareApply Nowon Chase's websiteon Chase's websiteRates & FeesAnnual fee$0Rewards rate1%-5%CashbackIntro offer$200Recommended credit score690-850(Good -"
+    },
+    {
+      "name": "Our pick for: Adjustable 3% categories",
+      "bonus_offer": "6",
+      "annual_fee": "$0",
+      "apr": "18.24%",
+      "issuer": "Bank of America",
+      "raw_text_sample": "Why this card stands outThis card ordinarily pays 3% cash back in a category you choose (terms apply). In the first year, however, that top rate DOUBLES to 6% cash back. Options for your 3%/6% categor"
+    },
+    {
+      "name": "Bank of America® Customized Cash Rewards credit card",
+      "annual_fee": "$0",
+      "apr": "18.24%",
+      "issuer": "Bank of America",
+      "raw_text_sample": "Bank of America® Customized Cash Rewards credit card4.0NerdWallet ratingAdd to compareApply Nowon Bank of America's websiteon Bank of America's websiteAnnual fee$0Rewards rate1%-6%CashbackIntro offer$"
+    },
+    {
+      "name": "Bank of America® Customized Cash Rewards credit card",
+      "annual_fee": "$0",
+      "apr": "18.24%",
+      "issuer": "Bank of America",
+      "raw_text_sample": "Bank of America® Customized Cash Rewards credit cardNerdWallet rating4.0Add to compareApply Nowon Bank of America's websiteon Bank of America's websiteAnnual fee$0Rewards rate1%-6%CashbackIntro offer$"
+    },
+    {
+      "name": "Our pick for: Simplicity + intro APR offer",
+      "bonus_offer": "0",
+      "spending_requirement": "$500",
+      "annual_fee": "$0",
+      "apr": "19.24%",
+      "issuer": "Capital One",
+      "raw_text_sample": "Our pick for: Simplicity + intro APR offerCapital One Quicksilver Cash Rewards Credit Card4.6NerdWallet ratingAdd to compareApply Nowon Capital One's websiteon Capital One's websiteRates & FeesAnnual"
+    },
+    {
+      "name": "Capital One Quicksilver Cash Rewards Credit Card",
+      "annual_fee": "$0",
+      "apr": "19.24%",
+      "issuer": "Capital One",
+      "raw_text_sample": "Capital One Quicksilver Cash Rewards Credit Card4.6NerdWallet ratingAdd to compareApply Nowon Capital One's websiteon Capital One's websiteRates & FeesAnnual fee$0Rewards rate1.5%-5%CashbackIntro offe"
+    },
+    {
+      "name": "Capital One Quicksilver Cash Rewards Credit Card",
+      "annual_fee": "$0",
+      "apr": "19.24%",
+      "issuer": "Capital One",
+      "raw_text_sample": "Capital One Quicksilver Cash Rewards Credit CardNerdWallet rating4.6Add to compareApply Nowon Capital One's websiteon Capital One's websiteRates & FeesAnnual fee$0Rewards rate1.5%-5%CashbackIntro offe"
+    },
+    {
+      "name": "Our pick for: American Airlines",
+      "bonus_offer": "50,000",
+      "annual_fee": "$99",
+      "apr": "20.24%",
+      "issuer": "Citi",
+      "raw_text_sample": "Our pick for: American AirlinesCiti® / AAdvantage® Platinum Select® World Elite Mastercard®5.0NerdWallet ratingAdd to compareApply Nowon Citibank's applicationon Citibank's applicationRates & FeesAnnu"
+    },
+    {
+      "name": "Citi® / AAdvantage® Platinum Select® World Elite Mastercard®",
+      "bonus_offer": "50,000",
+      "annual_fee": "$99",
+      "apr": "20.24%",
+      "issuer": "Citi",
+      "raw_text_sample": "Citi® / AAdvantage® Platinum Select® World Elite Mastercard®5.0NerdWallet ratingAdd to compareApply Nowon Citibank's applicationon Citibank's applicationRates & FeesAnnual fee$99, waived for the first"
+    },
+    {
+      "name": "Citi® / AAdvantage® Platinum Select® World Elite Mastercard®",
+      "bonus_offer": "50,000",
+      "annual_fee": "$99",
+      "apr": "20.24%",
+      "issuer": "Citi",
+      "raw_text_sample": "Citi® / AAdvantage® Platinum Select® World Elite Mastercard®NerdWallet rating5.0Add to compareApply Nowon Citibank's applicationon Citibank's applicationRates & FeesAnnual fee$99, waived for the first"
+    },
+    {
+      "name": "Our pick for: Families & households",
+      "spending_requirement": "$3,000",
+      "annual_fee": "$0",
+      "apr": "20.24%",
+      "issuer": "American Express",
+      "raw_text_sample": "Our pick for: Families & householdsBlue Cash Preferred® Card from American Express5.0NerdWallet ratingAdd to compareApply Nowon American Express' websiteon American Express' websiteRates & FeesAnnual"
+    },
+    {
+      "name": "Blue Cash Preferred® Card from American Express",
+      "annual_fee": "$0",
+      "apr": "20.24%",
+      "issuer": "American Express",
+      "raw_text_sample": "Blue Cash Preferred® Card from American Express5.0NerdWallet ratingAdd to compareApply Nowon American Express' websiteon American Express' websiteRates & FeesAnnual fee$0 intro annual fee for the firs"
+    },
+    {
+      "name": "Blue Cash Preferred® Card from American Express",
+      "annual_fee": "$0",
+      "apr": "20.24%",
+      "issuer": "American Express",
+      "raw_text_sample": "Blue Cash Preferred® Card from American ExpressNerdWallet rating5.0Add to compareApply Nowon American Express' websiteon American Express' websiteRates & FeesAnnual fee$0 intro annual fee for the firs"
+    },
+    {
+      "name": "Our pick for: Citi ThankYou® Points",
+      "bonus_offer": "60,000",
+      "annual_fee": "$95",
+      "apr": "20.24%",
+      "issuer": "Citi",
+      "raw_text_sample": "Our pick for: Citi ThankYou® PointsCiti Strata Premier℠ Card4.9NerdWallet ratingAdd to compareApply Nowon Citibank's applicationon Citibank's applicationRates & FeesAnnual fee$95Rewards rate1x-10xPoin"
+    },
+    {
+      "name": "Citi Strata Premier℠ Card",
+      "bonus_offer": "60,000",
+      "annual_fee": "$95",
+      "apr": "20.24%",
+      "issuer": "Citi",
+      "raw_text_sample": "Citi Strata Premier℠ Card4.9NerdWallet ratingAdd to compareApply Nowon Citibank's applicationon Citibank's applicationRates & FeesAnnual fee$95Rewards rate1x-10xPointsIntro offer60,000pointsRegular AP"
+    },
+    {
+      "name": "Citi Strata Premier℠ Card",
+      "bonus_offer": "60,000",
+      "annual_fee": "$95",
+      "apr": "20.24%",
+      "issuer": "Citi",
+      "raw_text_sample": "Citi Strata Premier℠ CardNerdWallet rating4.9Add to compareApply Nowon Citibank's applicationon Citibank's applicationRates & FeesAnnual fee$95Rewards rate1x-10xPointsIntro offer60,000pointsRegular AP"
+    },
+    {
+      "name": "Our pick for: American Express Membership Rewards",
+      "bonus_offer": "60,000",
+      "spending_requirement": "$6,000",
+      "annual_fee": "$325",
+      "issuer": "American Express",
+      "raw_text_sample": "Our pick for: American Express Membership RewardsAmerican Express® Gold Card4.6NerdWallet ratingAdd to compareApply Nowon American Express' websiteon American Express' websiteRates & FeesAnnual fee$32"
+    },
+    {
+      "name": "American Express® Gold Card",
+      "bonus_offer": "60,000",
+      "annual_fee": "$325",
+      "issuer": "American Express",
+      "raw_text_sample": "American Express® Gold Card4.6NerdWallet ratingAdd to compareApply Nowon American Express' websiteon American Express' websiteRates & FeesAnnual fee$325Rewards rate1x-4xPointsIntro offer60,000pointsAP"
+    },
+    {
+      "name": "American Express® Gold Card",
+      "bonus_offer": "60,000",
+      "annual_fee": "$325",
+      "issuer": "American Express",
+      "raw_text_sample": "American Express® Gold CardNerdWallet rating4.6Add to compareApply Nowon American Express' websiteon American Express' websiteRates & FeesAnnual fee$325Rewards rate1x-4xPointsIntro offer60,000pointsAP"
+    },
+    {
+      "name": "Our pick for: Cash back match",
+      "bonus_offer": "$150",
+      "annual_fee": "$0",
+      "apr": "18.24%",
+      "issuer": "Discover",
+      "raw_text_sample": "Our pick for: Cash back matchDiscover it® Cash Back4.9NerdWallet ratingAdd to compareApply Nowon Discover's website,on Discover's website, or call 800-347-0264Rates & FeesAnnual fee$0Rewards rate1%-5%"
+    },
+    {
+      "name": "Discover it® Cash Back",
+      "annual_fee": "$0",
+      "apr": "18.24%",
+      "issuer": "Discover",
+      "raw_text_sample": "Discover it® Cash Back4.9NerdWallet ratingAdd to compareApply Nowon Discover's website,on Discover's website, or call 800-347-0264Rates & FeesAnnual fee$0Rewards rate1%-5%CashbackIntro offerCashback M"
+    },
+    {
+      "name": "Discover it® Cash Back",
+      "annual_fee": "$0",
+      "apr": "18.24%",
+      "issuer": "Discover",
+      "raw_text_sample": "Discover it® Cash BackNerdWallet rating4.9Add to compareApply Nowon Discover's website,on Discover's website, or call 800-347-0264Rates & FeesAnnual fee$0Rewards rate1%-5%CashbackIntro offerCashback M"
+    },
+    {
+      "name": "Our pick for: Hilton Hotels",
+      "bonus_offer": "130,000",
+      "spending_requirement": "$3,000",
+      "annual_fee": "$0",
+      "apr": "20.24%",
+      "issuer": "American Express",
+      "raw_text_sample": "Our pick for: Hilton HotelsHilton Honors American Express Surpass® Card5.0NerdWallet ratingAdd to compareApply Nowon American Express' websiteon American Express' websiteRates & FeesAnnual fee$0 intro"
+    },
+    {
+      "name": "Hilton Honors American Express Surpass® Card",
+      "bonus_offer": "130,000",
+      "annual_fee": "$0",
+      "apr": "20.24%",
+      "issuer": "American Express",
+      "raw_text_sample": "Hilton Honors American Express Surpass® Card5.0NerdWallet ratingAdd to compareApply Nowon American Express' websiteon American Express' websiteRates & FeesAnnual fee$0 intro annual fee for the first y"
+    },
+    {
+      "name": "Hilton Honors American Express Surpass® Card",
+      "bonus_offer": "130,000",
+      "annual_fee": "$0",
+      "apr": "20.24%",
+      "issuer": "American Express",
+      "raw_text_sample": "Hilton Honors American Express Surpass® CardNerdWallet rating5.0Add to compareApply Nowon American Express' websiteon American Express' websiteRates & FeesAnnual fee$0 intro annual fee for the first y"
+    },
+    {
+      "name": "Our pick for: Alaska Airlines",
+      "bonus_offer": "50,000",
+      "spending_requirement": "$6,000",
+      "annual_fee": "$95",
+      "apr": "20.24%",
+      "issuer": "Bank of America",
+      "raw_text_sample": "Our pick for: Alaska AirlinesAlaska Airlines Visa Signature® credit card5.0NerdWallet ratingAdd to compareApply Nowon Bank of America's websiteon Bank of America's websiteAnnual fee$95Rewards rate1x-3"
+    },
+    {
+      "name": "Alaska Airlines Visa Signature® credit card",
+      "bonus_offer": "50,000",
+      "annual_fee": "$95",
+      "apr": "20.24%",
+      "issuer": "Bank of America",
+      "raw_text_sample": "Alaska Airlines Visa Signature® credit card5.0NerdWallet ratingAdd to compareApply Nowon Bank of America's websiteon Bank of America's websiteAnnual fee$95Rewards rate1x-3xMilesIntro offer50,000 Miles"
+    },
+    {
+      "name": "Alaska Airlines Visa Signature® credit card",
+      "bonus_offer": "50,000",
+      "annual_fee": "$95",
+      "apr": "20.24%",
+      "issuer": "Bank of America",
+      "raw_text_sample": "Alaska Airlines Visa Signature® credit cardNerdWallet rating5.0Add to compareApply Nowon Bank of America's websiteon Bank of America's websiteAnnual fee$95Rewards rate1x-3xMilesIntro offer50,000 Miles"
+    },
+    {
+      "name": "Our pick for: IHG Hotels",
+      "bonus_offer": "5",
+      "annual_fee": "$99",
+      "apr": "19.99%",
+      "issuer": "Chase",
+      "raw_text_sample": "Our pick for: IHG HotelsIHG One Rewards Premier Credit Card5.0NerdWallet ratingAdd to compareApply Nowon Chase's websiteon Chase's websiteRates & FeesAnnual fee$99Rewards rate1x-26xPointsIntro offer5"
+    },
+    {
+      "name": "IHG One Rewards Premier Credit Card",
+      "annual_fee": "$99",
+      "apr": "19.99%",
+      "issuer": "Chase",
+      "raw_text_sample": "IHG One Rewards Premier Credit Card5.0NerdWallet ratingAdd to compareApply Nowon Chase's websiteon Chase's websiteRates & FeesAnnual fee$99Rewards rate1x-26xPointsIntro offer5 Free NightsRegular APR19"
+    },
+    {
+      "name": "IHG One Rewards Premier Credit Card",
+      "annual_fee": "$99",
+      "apr": "19.99%",
+      "issuer": "Chase",
+      "raw_text_sample": "IHG One Rewards Premier Credit CardNerdWallet rating5.0Add to compareApply Nowon Chase's websiteon Chase's websiteRates & FeesAnnual fee$99Rewards rate1x-26xPointsIntro offer5 Free NightsRegular APR19"
+    },
+    {
+      "name": "Our pick for: United Airlines",
+      "bonus_offer": "60,000",
+      "spending_requirement": "$3,000",
+      "annual_fee": "$0",
+      "apr": "20.49%",
+      "issuer": "Chase",
+      "raw_text_sample": "Our pick for: United AirlinesThe New United℠ Explorer Card4.9NerdWallet ratingAdd to compareApply Nowon Chase's websiteon Chase's websiteRates & FeesAnnual fee$0 intro for the first year, then $150Rew"
+    },
+    {
+      "name": "The New United℠ Explorer Card",
+      "bonus_offer": "60,000",
+      "annual_fee": "$0",
+      "apr": "20.49%",
+      "issuer": "Chase",
+      "raw_text_sample": "The New United℠ Explorer Card4.9NerdWallet ratingAdd to compareApply Nowon Chase's websiteon Chase's websiteRates & FeesAnnual fee$0 intro for the first year, then $150Rewards rate1x-2xMilesIntro offe"
+    },
+    {
+      "name": "The New United℠ Explorer Card",
+      "bonus_offer": "60,000",
+      "annual_fee": "$0",
+      "apr": "20.49%",
+      "issuer": "Chase",
+      "raw_text_sample": "The New United℠ Explorer CardNerdWallet rating4.9Add to compareApply Nowon Chase's websiteon Chase's websiteRates & FeesAnnual fee$0 intro for the first year, then $150Rewards rate1x-2xMilesIntro offe"
+    },
+    {
+      "name": "Our pick for: Marriott Bonvoy Hotels",
+      "bonus_offer": "50,000",
+      "spending_requirement": "$35,000",
+      "annual_fee": "$95",
+      "apr": "19.99%",
+      "issuer": "Chase",
+      "raw_text_sample": "Our pick for: Marriott Bonvoy HotelsMarriott Bonvoy Boundless® Credit Card4.0NerdWallet ratingAdd to compareApply Nowon Chase's websiteon Chase's websiteRates & FeesAnnual fee$95Rewards rate2x-17xPoin"
+    },
+    {
+      "name": "Marriott Bonvoy Boundless® Credit Card",
+      "annual_fee": "$95",
+      "apr": "19.99%",
+      "issuer": "Chase",
+      "raw_text_sample": "Marriott Bonvoy Boundless® Credit Card4.0NerdWallet ratingAdd to compareApply Nowon Chase's websiteon Chase's websiteRates & FeesAnnual fee$95Rewards rate2x-17xPointsIntro offer5 Free Night AwardsRegu"
+    },
+    {
+      "name": "Marriott Bonvoy Boundless® Credit Card",
+      "annual_fee": "$95",
+      "apr": "19.99%",
+      "issuer": "Chase",
+      "raw_text_sample": "Marriott Bonvoy Boundless® Credit CardNerdWallet rating4.0Add to compareApply Nowon Chase's websiteon Chase's websiteRates & FeesAnnual fee$95Rewards rate2x-17xPointsIntro offer5 Free Night AwardsRegu"
+    },
+    {
+      "name": "Our pick for: Southwest Airlines",
+      "bonus_offer": "50,000",
+      "annual_fee": "$149",
+      "apr": "20.49%",
+      "issuer": "Chase",
+      "raw_text_sample": "Our pick for: Southwest AirlinesSouthwest Rapid Rewards® Priority Credit Card3.9NerdWallet ratingAdd to compareApply Nowon Chase's websiteon Chase's websiteRates & FeesAnnual fee$149Rewards rate1x-3xP"
+    },
+    {
+      "name": "Southwest Rapid Rewards® Priority Credit Card",
+      "bonus_offer": "50,000",
+      "annual_fee": "$149",
+      "apr": "20.49%",
+      "issuer": "Chase",
+      "raw_text_sample": "Southwest Rapid Rewards® Priority Credit Card3.9NerdWallet ratingAdd to compareApply Nowon Chase's websiteon Chase's websiteRates & FeesAnnual fee$149Rewards rate1x-3xPointsIntro offer50,000pointsRegu"
+    },
+    {
+      "name": "Southwest Rapid Rewards® Priority Credit Card",
+      "bonus_offer": "50,000",
+      "annual_fee": "$149",
+      "apr": "20.49%",
+      "issuer": "Chase",
+      "raw_text_sample": "Southwest Rapid Rewards® Priority Credit CardNerdWallet rating3.9Add to compareApply Nowon Chase's websiteon Chase's websiteRates & FeesAnnual fee$149Rewards rate1x-3xPointsIntro offer50,000pointsRegu"
+    },
+    {
+      "name": "Our pick for: World of Hyatt",
+      "bonus_offer": "60,000",
+      "spending_requirement": "$3,000",
+      "annual_fee": "$95",
+      "apr": "19.99%",
+      "issuer": "Chase",
+      "raw_text_sample": "Our pick for: World of HyattWorld of Hyatt Credit Card5.0NerdWallet ratingAdd to compareApply Nowon Chase's websiteon Chase's websiteRates & FeesAnnual fee$95Rewards rate1x-9xPointsIntro offerUp to 60"
+    },
+    {
+      "name": "World of Hyatt Credit Card",
+      "bonus_offer": "60,000",
+      "annual_fee": "$95",
+      "apr": "19.99%",
+      "issuer": "Chase",
+      "raw_text_sample": "World of Hyatt Credit Card5.0NerdWallet ratingAdd to compareApply Nowon Chase's websiteon Chase's websiteRates & FeesAnnual fee$95Rewards rate1x-9xPointsIntro offerUp to 60,000 PointsRegular APR19.99%"
+    },
+    {
+      "name": "World of Hyatt Credit Card",
+      "bonus_offer": "60,000",
+      "annual_fee": "$95",
+      "apr": "19.99%",
+      "issuer": "Chase",
+      "raw_text_sample": "World of Hyatt Credit CardNerdWallet rating5.0Add to compareApply Nowon Chase's websiteon Chase's websiteRates & FeesAnnual fee$95Rewards rate1x-9xPointsIntro offerUp to 60,000 PointsRegular APR19.99%"
+    },
+    {
+      "name": "Our pick for: Delta Air Lines",
+      "bonus_offer": "90,000",
+      "spending_requirement": "$4,000",
+      "annual_fee": "$350",
+      "apr": "20.24%",
+      "issuer": "American Express",
+      "raw_text_sample": "Our pick for: Delta Air LinesDelta SkyMiles® Platinum American Express Card4.8NerdWallet ratingAdd to compareApply Nowon American Express' websiteon American Express' websiteRates & FeesAnnual fee$350"
+    },
+    {
+      "name": "Delta SkyMiles® Platinum American Express Card",
+      "bonus_offer": "90,000",
+      "annual_fee": "$350",
+      "apr": "20.24%",
+      "issuer": "American Express",
+      "raw_text_sample": "Delta SkyMiles® Platinum American Express Card4.8NerdWallet ratingAdd to compareApply Nowon American Express' websiteon American Express' websiteRates & FeesAnnual fee$350Rewards rate1x-3xMilesIntro o"
+    },
+    {
+      "name": "Delta SkyMiles® Platinum American Express Card",
+      "bonus_offer": "90,000",
+      "annual_fee": "$350",
+      "apr": "20.24%",
+      "issuer": "American Express",
+      "raw_text_sample": "Delta SkyMiles® Platinum American Express CardNerdWallet rating4.8Add to compareApply Nowon American Express' websiteon American Express' websiteRates & FeesAnnual fee$350Rewards rate1x-3xMilesIntro o"
+    },
+    {
+      "name": "Our pick for: No-annual-fee travel points",
+      "bonus_offer": "20,000",
+      "spending_requirement": "$1,000",
+      "annual_fee": "$0",
+      "apr": "29.24%",
+      "issuer": "Wells Fargo",
+      "raw_text_sample": "Our pick for: No-annual-fee travel pointsWells Fargo Autograph® Card4.5NerdWallet ratingAdd to compareApply Nowon Wells Fargo's websiteon Wells Fargo's websiteRates & FeesAnnual fee$0Rewards rate1x-3x"
+    },
+    {
+      "name": "Wells Fargo Autograph® Card",
+      "bonus_offer": "20,000",
+      "annual_fee": "$0",
+      "apr": "29.24%",
+      "issuer": "Wells Fargo",
+      "raw_text_sample": "Wells Fargo Autograph® Card4.5NerdWallet ratingAdd to compareApply Nowon Wells Fargo's websiteon Wells Fargo's websiteRates & FeesAnnual fee$0Rewards rate1x-3xPointsIntro offer20,000pointsRecommended"
+    },
+    {
+      "name": "Wells Fargo Autograph® Card",
+      "bonus_offer": "20,000",
+      "annual_fee": "$0",
+      "apr": "29.24%",
+      "issuer": "Wells Fargo",
+      "raw_text_sample": "Wells Fargo Autograph® CardNerdWallet rating4.5Add to compareApply Nowon Wells Fargo's websiteon Wells Fargo's websiteRates & FeesAnnual fee$0Rewards rate1x-3xPointsIntro offer20,000pointsRecommended"
+    }
+  ],
+  "extraction_summary": {
+    "total_cards": 61,
+    "cards_with_bonus": 42,
+    "cards_with_fee_info": 60,
+    "cards_with_issuer": 60
+  }
+}

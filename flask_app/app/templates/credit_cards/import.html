@@ -6,54 +6,302 @@
   >
 </div>
 
-<div class="card mb-4">
-  <div class="card-header">
-    <h5>Import Options</h5>
+<!-- Tab Navigation -->
+<ul class="nav nav-tabs mb-4" id="importTabs" role="tablist">
+  <li class="nav-item" role="presentation">
+    <button
+      class="nav-link active"
+      id="scrape-tab"
+      data-bs-toggle="tab"
+      data-bs-target="#scrape"
+      type="button"
+      role="tab"
+      aria-controls="scrape"
+      aria-selected="true"
+    >
+      <i class="fas fa-globe"></i> Scrape from Web
+    </button>
+  </li>
+  <li class="nav-item" role="presentation">
+    <button
+      class="nav-link"
+      id="files-tab"
+      data-bs-toggle="tab"
+      data-bs-target="#files"
+      type="button"
+      role="tab"
+      aria-controls="files"
+      aria-selected="false"
+    >
+      <i class="fas fa-file-import"></i> Import from Files
+    </button>
+  </li>
+</ul>
+
+<!-- Tab Content -->
+<div class="tab-content" id="importTabContent">
+  <!-- Scraping Tab -->
+  <div
+    class="tab-pane fade show active"
+    id="scrape"
+    role="tabpanel"
+    aria-labelledby="scrape-tab"
+  >
+    <div class="card mb-4">
+      <div class="card-header">
+        <h5><i class="fas fa-globe"></i> Web Scraping Options</h5>
+      </div>
+      <div class="card-body">
+        <form method="post" action="{{ url_for('credit_cards.import_cards') }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+          <input type="hidden" name="import_type" value="scrape" />
+
+          <div class="mb-3">
+            <label for="source" class="form-label">Data Source</label>
+            <select class="form-select" id="source" name="source">
+              {% for source, url in sources.items() %}
+              <option value="{{ url }}">{{ source|title }}</option>
+              {% endfor %}
+            </select>
+            <div class="form-text">
+              Select the website to scrape credit card data from.
+            </div>
+          </div>
+
+          <div class="alert alert-info">
+            <p><strong>Note:</strong> This process will:</p>
+            <ul>
+              <li>Scrape credit card data from the selected source</li>
+              <li>Add new cards to the database</li>
+              <li>Update existing cards if they already exist</li>
+            </ul>
+            <p>
+              This may take a few minutes to complete as it carefully retrieves
+              data without overloading the source website.
+            </p>
+          </div>
+
+          <button type="submit" class="btn btn-primary">
+            <i class="fas fa-download"></i> Start Import
+          </button>
+        </form>
+      </div>
+    </div>
   </div>
-  <div class="card-body">
-    <form method="post" action="{{ url_for('credit_cards.import_cards') }}">
-      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
-      <div class="mb-3">
-        <label for="source" class="form-label">Data Source</label>
-        <select class="form-select" id="source" name="source">
-          {% for source, url in sources.items() %}
-          <option value="{{ url }}">{{ source|title }}</option>
-          {% endfor %}
-        </select>
-        <div class="form-text">
-          Select the website to scrape credit card data from.
+
+  <!-- File Import Tab -->
+  <div
+    class="tab-pane fade"
+    id="files"
+    role="tabpanel"
+    aria-labelledby="files-tab"
+  >
+    <div class="card mb-4">
+      <div class="card-header">
+        <h5><i class="fas fa-file-import"></i> Import from Scraped Files</h5>
+      </div>
+      <div class="card-body">
+        {% if available_files %}
+        <form method="post" action="{{ url_for('credit_cards.import_cards') }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+          <input type="hidden" name="import_type" value="file" />
+
+          <div class="mb-3">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <label class="form-label"
+                >Available Files ({{ available_files|length }} files)</label
+              >
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  id="import_all"
+                  name="import_all"
+                />
+                <label class="form-check-label" for="import_all">
+                  Import All Files
+                </label>
+              </div>
+            </div>
+
+            <div class="table-responsive">
+              <table class="table table-sm table-hover">
+                <thead>
+                  <tr>
+                    <th width="50">
+                      <input
+                        type="checkbox"
+                        id="select_all"
+                        class="form-check-input"
+                      />
+                    </th>
+                    <th>File</th>
+                    <th>Cards</th>
+                    <th>Size</th>
+                    <th>Modified</th>
+                    <th>Details</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for file in available_files %}
+                  <tr>
+                    <td>
+                      <input
+                        type="checkbox"
+                        name="selected_files"
+                        value="{{ file.filename }}"
+                        class="form-check-input file-checkbox"
+                      />
+                    </td>
+                    <td>
+                      <code class="text-primary">{{ file.filename }}</code>
+                    </td>
+                    <td>
+                      <span class="badge bg-info"
+                        >{{ file.card_count }} cards</span
+                      >
+                    </td>
+                    <td>
+                      <small class="text-muted"
+                        >{{ "%.1f"|format(file.size / 1024) }} KB</small
+                      >
+                    </td>
+                    <td>
+                      <small class="text-muted"
+                        >{{ file.modified.strftime('%Y-%m-%d %H:%M') }}</small
+                      >
+                    </td>
+                    <td>
+                      {% if file.extraction_summary %}
+                      <small class="text-muted">
+                        {% if file.extraction_summary.extraction_method %} {{
+                        file.extraction_summary.extraction_method|title }} {%
+                        endif %} {% if
+                        file.extraction_summary.cards_with_reward_categories %}
+                        • {{
+                        file.extraction_summary.cards_with_reward_categories }}
+                        with rewards {% endif %}
+                      </small>
+                      {% endif %}
+                    </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="alert alert-warning">
+            <p><strong>Import Process:</strong></p>
+            <ul>
+              <li>Files are processed in chronological order (oldest first)</li>
+              <li>New cards will be created, existing cards will be updated</li>
+              <li>Reward categories will be mapped to database categories</li>
+              <li>Unknown issuers will be created automatically</li>
+            </ul>
+          </div>
+
+          <button
+            type="submit"
+            class="btn btn-success"
+            id="import-btn"
+            disabled
+          >
+            <i class="fas fa-upload"></i> Import Selected Files
+          </button>
+        </form>
+        {% else %}
+        <div class="alert alert-info">
+          <h6><i class="fas fa-info-circle"></i> No Files Available</h6>
+          <p>No scraped data files found in <code>/data/output</code>.</p>
+          <p>
+            Run the scraping scripts first to generate data files, or use the
+            web scraping option above.
+          </p>
         </div>
+        {% endif %}
       </div>
-
-      <div class="alert alert-info">
-        <p><strong>Note:</strong> This process will:</p>
-        <ul>
-          <li>Scrape credit card data from the selected source</li>
-          <li>Add new cards to the database</li>
-          <li>Update existing cards if they already exist</li>
-        </ul>
-        <p>
-          This may take a few minutes to complete as it carefully retrieves data
-          without overloading the source website.
-        </p>
-      </div>
-
-      <button type="submit" class="btn btn-primary">Start Import</button>
-    </form>
+    </div>
   </div>
 </div>
 
+<!-- Manual Options -->
 <div class="card">
   <div class="card-header">
-    <h5>Manual Options</h5>
+    <h5><i class="fas fa-plus"></i> Manual Options</h5>
   </div>
   <div class="card-body">
     <p>
       Prefer to add cards manually? You can add individual cards using the form.
     </p>
-    <a href="{{ url_for('credit_cards.new') }}" class="btn btn-outline-primary"
-      >Add Credit Card Manually</a
-    >
+    <a href="{{ url_for('credit_cards.new') }}" class="btn btn-outline-primary">
+      <i class="fas fa-plus"></i> Add Credit Card Manually
+    </a>
   </div>
 </div>
+
+<script>
+  // Handle select all checkbox
+  document.getElementById("select_all").addEventListener("change", function () {
+    const checkboxes = document.querySelectorAll(".file-checkbox");
+    checkboxes.forEach((checkbox) => {
+      checkbox.checked = this.checked;
+    });
+    updateImportButton();
+  });
+
+  // Handle individual checkboxes
+  document.querySelectorAll(".file-checkbox").forEach((checkbox) => {
+    checkbox.addEventListener("change", updateImportButton);
+  });
+
+  // Handle import all checkbox
+  document.getElementById("import_all").addEventListener("change", function () {
+    const fileCheckboxes = document.querySelectorAll(".file-checkbox");
+    const selectAllCheckbox = document.getElementById("select_all");
+
+    if (this.checked) {
+      // Disable individual checkboxes when import all is checked
+      fileCheckboxes.forEach((checkbox) => {
+        checkbox.disabled = true;
+        checkbox.checked = false;
+      });
+      selectAllCheckbox.disabled = true;
+      selectAllCheckbox.checked = false;
+    } else {
+      // Re-enable individual checkboxes
+      fileCheckboxes.forEach((checkbox) => {
+        checkbox.disabled = false;
+      });
+      selectAllCheckbox.disabled = false;
+    }
+    updateImportButton();
+  });
+
+  function updateImportButton() {
+    const importAllChecked = document.getElementById("import_all").checked;
+    const anyFileSelected =
+      document.querySelectorAll(".file-checkbox:checked").length > 0;
+    const importBtn = document.getElementById("import-btn");
+
+    if (importAllChecked || anyFileSelected) {
+      importBtn.disabled = false;
+      importBtn.textContent = importAllChecked
+        ? " Import All Files"
+        : ` Import Selected Files (${
+            document.querySelectorAll(".file-checkbox:checked").length
+          })`;
+      importBtn.innerHTML =
+        '<i class="fas fa-upload"></i>' + importBtn.textContent;
+    } else {
+      importBtn.disabled = true;
+      importBtn.innerHTML =
+        '<i class="fas fa-upload"></i> Import Selected Files';
+    }
+  }
+
+  // Initialize button state
+  updateImportButton();
+</script>
+
 {% endblock %}

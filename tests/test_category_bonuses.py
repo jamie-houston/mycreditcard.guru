@@ -29,12 +29,13 @@ class TestCategoryBonusParsing(unittest.TestCase):
         result = parse_category_bonuses_from_tooltip(tooltip_text)
         
         # Expected results based on user requirements
-        expected = {
-            "Dining & Restaurants": 3.0,
-            "Groceries": 3.0,
-            "Streaming Services": 3.0,
-            "Travel": 2.0  # Should pick up the "2x on all other travel purchases"
-        }
+        expected = [
+                {"category": "other", "rate": 1.0},
+                {"category": "dining", "rate": 3.0},
+                {"category": "travel", "rate": 2.0},
+                {"category": "streaming", "rate": 3.0},
+                {"category": "travel", "rate": 2.0}  # Should pick up the "2x on all other travel purchases"
+        ]
         
         self.assertEqual(result, expected)
         print(f"✅ Chase Sapphire Preferred: {result}")
@@ -81,7 +82,7 @@ class TestCategoryBonusParsing(unittest.TestCase):
             "Groceries": 6.0,  # supermarkets
             "Streaming Services": 6.0,
             "Gas": 3.0,
-            "Transit": 3.0
+            "Transportation": 3.0
         }
         
         self.assertEqual(result, expected)

@@ -1,22 +1,55 @@
 # Credit Card Roadmap
 
-A Flask web application to help users create a roadmap for credit card applications based on their spending habits and desired rewards.
-
-## Overview
-
-The Credit Card Roadmap app allows users to:
-- Import credit card data from NerdWallet
-- Input their spending habits and desired rewards
-- Get recommendations on which credit cards to apply for and when
-- Visualize potential rewards over time
+A Flask web application for analyzing and recommending credit cards based on spending patterns and preferences.
 
 ## Features
 
-- Credit card data storage and management
-- Web scraping from NerdWallet to get current card information
-- User spending profile creation
-- Recommendation engine to optimize card applications
-- User-friendly web interface
+- **Credit Card Database**: Comprehensive database of credit cards with reward categories, annual fees, and signup bonuses
+- **Smart Recommendations**: AI-powered recommendations based on spending patterns and preferences
+- **Category Management**: Flexible reward category system with aliases and mappings
+- **Data Import**: Automated scraping and import of credit card data from external sources
+- **User Profiles**: Save spending patterns and get personalized recommendations
+- **Admin Interface**: Manage cards, categories, and issuers
+
+## 📊 Data Management
+
+The application includes a robust data collection and import system:
+
+- **Automated Scraping**: Extract credit card data from financial websites
+- **Timestamped Files**: All scraped data is organized with timestamps for tracking
+- **Flexible Import**: Command-line and web interface import options
+- **Quality Control**: Built-in validation and error handling
+
+**📖 For detailed scraping and import instructions, see [data/README.md](data/README.md)**
+
+## Quick Start
+
+### Prerequisites
+- Python 3.8+
+- Flask and dependencies (see requirements.txt)
+
+### Installation
+```bash
+# Clone the repository
+git clone <repository-url>
+cd creditcard-roadmap
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Initialize the database
+cd flask_app
+python scripts/data/reset_db.py
+python scripts/data/seed_db.py
+
+# Start the application
+python run.py
+```
+
+### Access the Application
+- **Web Interface**: http://127.0.0.1:5000
+- **Admin Features**: Login required for data management
+- **Recommendations**: Available to all users
 
 ## Technical Details
 
