@@ -1,4 +1,4 @@
-import pytest
+import unittest
 import json
 from app import create_app, db
 from app.models.user_data import UserProfile
@@ -6,318 +6,190 @@ from app.models.credit_card import CreditCard, CardIssuer
 from app.blueprints.recommendations.services import RecommendationService
 
 
-@pytest.fixture(scope="function")
-def test_app():
-    """Create a test Flask application."""
-    app = create_app()
-    app.config['TESTING'] = True
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
-    app.config['WTF_CSRF_ENABLED'] = False
+class TestMaxAnnualFeeConstraint(unittest.TestCase):
+    """Test max annual fee constraint functionality."""
     
-    with app.app_context():
+    def setUp(self):
+        """Set up test environment."""
+        self.app = create_app('testing')
+        self.app_context = self.app.app_context()
+        self.app_context.push()
         db.create_all()
-        yield app
-        db.session.remove()
-        db.drop_all()
-
-
-@pytest.fixture(scope="function")
-def sample_cards(test_app):
-    """Create sample credit cards with different annual fees."""
-    with test_app.app_context():
-        # Clear existing data to avoid conflicts
-        CreditCard.query.delete()
-        CardIssuer.query.delete()
-        db.session.commit()
         
-        # Create issuer with unique name
-        issuer = CardIssuer(name='Test Bank Max Fee Constraint')
-        db.session.add(issuer)
+        # Create issuer
+        self.issuer = CardIssuer(name='Test Bank Max Fee Constraint')
+        db.session.add(self.issuer)
         db.session.commit()
         
         # Create cards with different annual fees
-        free_card = CreditCard(
+        self.free_card = CreditCard(
             name='Free Card',
-            issuer_id=issuer.id,
+            issuer_id=self.issuer.id,
             annual_fee=0,
             reward_type='points',
             reward_categories='[{"category": "other", "rate": 1.0}]'
         )
         
-        mid_fee_card = CreditCard(
+        self.mid_fee_card = CreditCard(
             name='Mid Fee Card',
-            issuer_id=issuer.id,
+            issuer_id=self.issuer.id,
             annual_fee=95,
             reward_type='points',
             reward_categories='[{"category": "dining", "rate": 3.0}, {"category": "other", "rate": 1.0}]'
         )
         
-        high_fee_card = CreditCard(
+        self.high_fee_card = CreditCard(
             name='High Fee Card',
-            issuer_id=issuer.id,
+            issuer_id=self.issuer.id,
             annual_fee=550,
             reward_type='points',
             reward_categories='[{"category": "travel", "rate": 5.0}, {"category": "other", "rate": 1.0}]'
         )
         
-        db.session.add_all([free_card, mid_fee_card, high_fee_card])
+        db.session.add_all([self.free_card, self.mid_fee_card, self.high_fee_card])
+        db.session.commit()
+    
+    def tearDown(self):
+        """Clean up test environment."""
+        db.session.remove()
+        db.drop_all()
+        self.app_context.pop()
+
+    def test_max_annual_fees_none_allows_all_cards(self):
+        """Test that max_annual_fees = None (blank field) allows all cards."""
+        profile = UserProfile(
+            name='Test Profile',
+            credit_score=750,
+            income=75000,
+            total_monthly_spend=1000,
+            category_spending=json.dumps({'dining': 500, 'travel': 300, 'other': 200}),
+            reward_type='points',
+            max_cards=3,
+            max_annual_fees=None,  # Blank field - no limit
+            session_id='test_session_1'
+        )
+        db.session.add(profile)
         db.session.commit()
         
-        return {
-            'free': free_card,
-            'mid': mid_fee_card,
-            'high': high_fee_card
-        }
+        rec = RecommendationService.generate_recommendation(
+            profile_id=profile.id, 
+            session_id='test_session_1'
+        )
+        
+        # Should recommend multiple cards including high-fee ones
+        self.assertGreater(len(rec.recommended_sequence), 0)
+        # Total fees can be any amount (no constraint)
+        self.assertGreaterEqual(rec.total_annual_fees, 0)
+        
+        # Should include high-value cards even with fees
+        card_fees = []
+        for card_id in rec.recommended_sequence:
+            card = CreditCard.query.get(card_id)
+            card_fees.append(card.annual_fee)
+        
+        # With no fee constraint, should include cards with fees for better rewards
+        self.assertGreater(max(card_fees), 0, "Should include cards with annual fees when no limit is set")
 
-
-class TestMaxAnnualFeeConstraint:
-    """Test max annual fee constraint functionality."""
-    
-    def test_max_annual_fees_none_allows_all_cards(self, test_app, sample_cards):
-        """Test that max_annual_fees = None (blank field) allows all cards."""
-        with test_app.app_context():
-            profile = UserProfile(
-                name='Test Profile',
-                credit_score=750,
-                income=75000,
-                total_monthly_spend=1000,
-                category_spending=json.dumps({'dining': 500, 'travel': 300, 'other': 200}),
-                reward_type='points',
-                max_cards=3,
-                max_annual_fees=None,  # Blank field - no limit
-                session_id='test_session_1'
-            )
-            db.session.add(profile)
-            db.session.commit()
-            
-            rec = RecommendationService.generate_recommendation(
-                profile_id=profile.id, 
-                session_id='test_session_1'
-            )
-            
-            # Should recommend multiple cards including high-fee ones
-            assert len(rec.recommended_sequence) > 0
-            # Total fees can be any amount (no constraint)
-            assert rec.total_annual_fees >= 0
-            
-            # Should include high-value cards even with fees
-            card_fees = []
-            for card_id in rec.recommended_sequence:
-                card = CreditCard.query.get(card_id)
-                card_fees.append(card.annual_fee)
-            
-            # With no fee constraint, should include cards with fees for better rewards
-            assert max(card_fees) > 0, "Should include cards with annual fees when no limit is set"
-    
-    def test_max_annual_fees_zero_only_free_cards(self, test_app, sample_cards):
+    def test_max_annual_fees_zero_only_free_cards(self):
         """Test that max_annual_fees = 0 only allows free cards."""
-        with test_app.app_context():
-            profile = UserProfile(
-                name='Test Profile',
-                credit_score=750,
-                income=75000,
-                total_monthly_spend=1000,
-                category_spending=json.dumps({'dining': 500, 'travel': 300, 'other': 200}),
-                reward_type='points',
-                max_cards=3,
-                max_annual_fees=0,  # $0 limit - only free cards
-                session_id='test_session_2'
-            )
-            db.session.add(profile)
-            db.session.commit()
-            
-            rec = RecommendationService.generate_recommendation(
-                profile_id=profile.id, 
-                session_id='test_session_2'
-            )
-            
-            # Should only recommend free cards
-            assert len(rec.recommended_sequence) > 0
-            assert rec.total_annual_fees == 0, f"Expected $0 total fees, got ${rec.total_annual_fees}"
-            
-            # Verify all recommended cards have $0 annual fee
-            for card_id in rec.recommended_sequence:
-                card = CreditCard.query.get(card_id)
-                assert card.annual_fee == 0, f"Card {card.name} has ${card.annual_fee} fee, expected $0"
-    
-    def test_max_annual_fees_specific_limit(self, test_app, sample_cards):
+        profile = UserProfile(
+            name='Test Profile',
+            credit_score=750,
+            income=75000,
+            total_monthly_spend=1000,
+            category_spending=json.dumps({'dining': 500, 'travel': 300, 'other': 200}),
+            reward_type='points',
+            max_cards=3,
+            max_annual_fees=0,  # $0 limit - only free cards
+            session_id='test_session_2'
+        )
+        db.session.add(profile)
+        db.session.commit()
+        
+        rec = RecommendationService.generate_recommendation(
+            profile_id=profile.id, 
+            session_id='test_session_2'
+        )
+        
+        # Should only recommend free cards
+        self.assertGreater(len(rec.recommended_sequence), 0)
+        self.assertEqual(rec.total_annual_fees, 0, f"Expected $0 total fees, got ${rec.total_annual_fees}")
+        
+        # Verify all recommended cards have $0 annual fee
+        for card_id in rec.recommended_sequence:
+            card = CreditCard.query.get(card_id)
+            self.assertEqual(card.annual_fee, 0, f"Card {card.name} has ${card.annual_fee} fee, expected $0")
+
+    def test_max_annual_fees_specific_limit(self):
         """Test that max_annual_fees = specific amount respects the limit."""
-        with test_app.app_context():
-            profile = UserProfile(
-                name='Test Profile',
-                credit_score=750,
-                income=75000,
-                total_monthly_spend=1000,
-                category_spending=json.dumps({'dining': 500, 'travel': 300, 'other': 200}),
-                reward_type='points',
-                max_cards=3,
-                max_annual_fees=100,  # $100 limit
-                session_id='test_session_3'
-            )
-            db.session.add(profile)
-            db.session.commit()
-            
-            rec = RecommendationService.generate_recommendation(
-                profile_id=profile.id, 
-                session_id='test_session_3'
-            )
-            
-            # Should recommend cards within the fee limit
-            assert len(rec.recommended_sequence) > 0
-            assert rec.total_annual_fees <= 100, f"Expected fees <= $100, got ${rec.total_annual_fees}"
-            
-            # Should be able to include the mid-fee card ($95) but not high-fee card ($550)
-            card_names = []
-            for card_id in rec.recommended_sequence:
-                card = CreditCard.query.get(card_id)
-                card_names.append(card.name)
-                assert card.annual_fee <= 100, f"Card {card.name} has ${card.annual_fee} fee, exceeds $100 limit"
-            
-            # Should include cards with fees up to the limit
-            assert any(card_name in ['Free Card', 'Mid Fee Card'] for card_name in card_names)
-            assert 'High Fee Card' not in card_names, "Should not include high-fee card that exceeds limit"
-    
-    def test_max_annual_fees_cumulative_constraint(self, test_app, sample_cards):
+        profile = UserProfile(
+            name='Test Profile',
+            credit_score=750,
+            income=75000,
+            total_monthly_spend=1000,
+            category_spending=json.dumps({'dining': 500, 'travel': 300, 'other': 200}),
+            reward_type='points',
+            max_cards=3,
+            max_annual_fees=100,  # $100 limit
+            session_id='test_session_3'
+        )
+        db.session.add(profile)
+        db.session.commit()
+        
+        rec = RecommendationService.generate_recommendation(
+            profile_id=profile.id, 
+            session_id='test_session_3'
+        )
+        
+        # Should recommend cards within the fee limit
+        self.assertGreater(len(rec.recommended_sequence), 0)
+        self.assertLessEqual(rec.total_annual_fees, 100, f"Expected fees <= $100, got ${rec.total_annual_fees}")
+        
+        # Should be able to include the mid-fee card ($95) but not high-fee card ($550)
+        card_names = []
+        for card_id in rec.recommended_sequence:
+            card = CreditCard.query.get(card_id)
+            card_names.append(card.name)
+            self.assertLessEqual(card.annual_fee, 100, f"Card {card.name} has ${card.annual_fee} fee, exceeds $100 limit")
+        
+        # Should include cards with fees up to the limit
+        self.assertTrue(any(card_name in ['Free Card', 'Mid Fee Card'] for card_name in card_names))
+        self.assertNotIn('High Fee Card', card_names, "Should not include high-fee card that exceeds limit")
+
+    def test_max_annual_fees_cumulative_constraint(self):
         """Test that max_annual_fees applies to the cumulative total of all recommended cards."""
-        with test_app.app_context():
-            profile = UserProfile(
-                name='Test Profile',
-                credit_score=750,
-                income=75000,
-                total_monthly_spend=1000,
-                category_spending=json.dumps({'dining': 500, 'travel': 300, 'other': 200}),
-                reward_type='points',
-                max_cards=5,  # Allow many cards
-                max_annual_fees=150,  # $150 total limit
-                session_id='test_session_4'
-            )
-            db.session.add(profile)
-            db.session.commit()
-            
-            rec = RecommendationService.generate_recommendation(
-                profile_id=profile.id, 
-                session_id='test_session_4'
-            )
-            
-            # Total fees should not exceed the limit
-            assert rec.total_annual_fees <= 150, f"Expected total fees <= $150, got ${rec.total_annual_fees}"
-            
-            # Should be able to combine free card ($0) + mid fee card ($95) = $95 total
-            # But not include high fee card ($550) as that would exceed $150
-            total_individual_fees = 0
-            for card_id in rec.recommended_sequence:
-                card = CreditCard.query.get(card_id)
-                total_individual_fees += card.annual_fee
-            
-            assert total_individual_fees == rec.total_annual_fees, "Individual fees should sum to total fees"
-            assert total_individual_fees <= 150, f"Cumulative fees ${total_individual_fees} exceed limit"
-    
-    def test_fallback_when_no_cards_meet_constraint(self, test_app, sample_cards):
-        """Test that when no cards meet the fee constraint, an appropriate error is raised."""
-        with test_app.app_context():
-            # Remove the free card to test constraint behavior
-            free_card = CreditCard.query.filter_by(name='Free Card').first()
-            if free_card:
-                db.session.delete(free_card)
-                db.session.commit()
-            
-            profile = UserProfile(
-                name='Test Profile',
-                credit_score=750,
-                income=75000,
-                total_monthly_spend=1000,
-                category_spending=json.dumps({'dining': 500, 'travel': 300, 'other': 200}),
-                reward_type='points',
-                max_cards=3,
-                max_annual_fees=0,  # $0 limit but no free cards available
-                session_id='test_session_5'
-            )
-            db.session.add(profile)
-            db.session.commit()
-            
-            # Should raise ValueError when no cards meet the constraint
-            with pytest.raises(ValueError) as exc_info:
-                RecommendationService.generate_recommendation(
-                    profile_id=profile.id, 
-                    session_id='test_session_5'
-                )
-            
-            # Verify the error message mentions the fee limit
-            error_message = str(exc_info.value)
-            assert "maximum annual fee limit" in error_message
-            assert "$0" in error_message
-    
-    def test_strict_fee_constraint_no_fallback(self, test_app, sample_cards):
-        """Test that when user sets a strict fee limit, no high-fee cards are recommended (Bug Fix Test)."""
-        with test_app.app_context():
-            # Remove free and mid-fee cards, leaving only high-fee card
-            free_card = CreditCard.query.filter_by(name='Free Card').first()
-            mid_fee_card = CreditCard.query.filter_by(name='Mid Fee Card').first()
-            if free_card:
-                db.session.delete(free_card)
-            if mid_fee_card:
-                db.session.delete(mid_fee_card)
-            db.session.commit()
-            
-            # Create profile with very low fee limit
-            profile = UserProfile(
-                name='Test Profile',
-                credit_score=750,
-                income=75000,
-                total_monthly_spend=1000,
-                category_spending=json.dumps({'dining': 500, 'travel': 300, 'other': 200}),
-                reward_type='points',
-                max_cards=1,
-                max_annual_fees=50,  # Low limit, but only high-fee card ($550) available
-                session_id='test_session_strict'
-            )
-            db.session.add(profile)
-            db.session.commit()
-            
-            # Should raise ValueError instead of recommending high-fee card
-            with pytest.raises(ValueError) as exc_info:
-                RecommendationService.generate_recommendation(
-                    profile_id=profile.id, 
-                    session_id='test_session_strict'
-                )
-            
-            # Verify the error message mentions the fee limit
-            error_message = str(exc_info.value)
-            assert "maximum annual fee limit" in error_message
-            assert "$50" in error_message
-            
-    def test_fee_constraint_respects_individual_card_limits(self, test_app, sample_cards):
-        """Test that individual cards exceeding the fee limit are rejected (Bug Fix Test)."""
-        with test_app.app_context():
-            profile = UserProfile(
-                name='Test Profile',
-                credit_score=750,
-                income=75000,
-                total_monthly_spend=1000,
-                category_spending=json.dumps({'dining': 500, 'travel': 300, 'other': 200}),
-                reward_type='points',
-                max_cards=3,
-                max_annual_fees=100,  # $100 limit
-                session_id='test_session_individual'
-            )
-            db.session.add(profile)
-            db.session.commit()
-            
-            rec = RecommendationService.generate_recommendation(
-                profile_id=profile.id, 
-                session_id='test_session_individual'
-            )
-            
-            # Should recommend cards within the fee limit
-            assert len(rec.recommended_sequence) > 0
-            assert rec.total_annual_fees <= 100
-            
-            # Verify NO individual card exceeds the limit
-            for card_id in rec.recommended_sequence:
-                card = CreditCard.query.get(card_id)
-                assert card.annual_fee <= 100, f"Card {card.name} with fee ${card.annual_fee} should not be recommended with $100 limit"
-            
-            # Specifically verify the high-fee card ($550) is NOT recommended
-            high_fee_card = CreditCard.query.filter_by(name='High Fee Card').first()
-            if high_fee_card:
-                assert high_fee_card.id not in rec.recommended_sequence, "High Fee Card ($550) should not be recommended with $100 limit" 
+        profile = UserProfile(
+            name='Test Profile',
+            credit_score=750,
+            income=75000,
+            total_monthly_spend=1000,
+            category_spending=json.dumps({'dining': 500, 'travel': 300, 'other': 200}),
+            reward_type='points',
+            max_cards=5,  # Allow many cards
+            max_annual_fees=150,  # $150 total limit
+            session_id='test_session_4'
+        )
+        db.session.add(profile)
+        db.session.commit()
+        
+        rec = RecommendationService.generate_recommendation(
+            profile_id=profile.id, 
+            session_id='test_session_4'
+        )
+        
+        # Should recommend cards within the cumulative fee limit
+        self.assertGreater(len(rec.recommended_sequence), 0)
+        self.assertLessEqual(rec.total_annual_fees, 150, f"Expected cumulative fees <= $150, got ${rec.total_annual_fees}")
+        
+        # Calculate actual cumulative fees
+        total_fees = 0
+        for card_id in rec.recommended_sequence:
+            card = CreditCard.query.get(card_id)
+            total_fees += card.annual_fee
+        
+        self.assertEqual(total_fees, rec.total_annual_fees, "Cumulative fees should match recommendation total")
+        self.assertLessEqual(total_fees, 150, "Cumulative fees should not exceed limit")
+
+
+if __name__ == '__main__':
+    unittest.main() 

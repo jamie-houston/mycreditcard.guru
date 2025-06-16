@@ -165,6 +165,38 @@ def seed_credit_cards():
             "special_offers": [
                 "Earn 3 points per $1 spent on travel purchases booked through the Bank of America Travel Center."
             ]
+        },
+        {
+            "name": "Venture Rewards Credit Card",
+            "issuer": "Capital One",
+            "annual_fee": 95,
+            "reward_type": "miles",
+            "reward_value_multiplier": 1,
+            "signup_bonus_points": 75000,
+            "signup_bonus_min_spend": 4000,
+            "signup_bonus_max_months": 3,
+            "reward_categories": [
+                {"category": "other", "rate": 2},
+            ],
+            "special_offers": [
+                "Earn 5X miles on hotels, vacation rentals and rental cars booked through Capital One Travel."
+            ]
+        },
+        {
+            "name": "Strata Premier",
+            "issuer": "Citi",
+            "annual_fee": 95,
+            "reward_type": "points",
+            "reward_value_multiplier": 1,
+            "signup_bonus_points": 60000,
+            "signup_bonus_min_spend": 4000,
+            "signup_bonus_max_months": 3,
+            "reward_categories": [
+                {"category": "travel", "rate": 3},
+            ],
+            "special_offers": [
+                "Earn 5X miles on hotels, vacation rentals and rental cars booked through Capital One Travel."
+            ]
         }
     ]
     
