@@ -69,7 +69,9 @@ def create_app(config_name=None):
     
     # Load config overrides if specified
     if config_name:
-        app.config.from_object(Config)
+        from config import config
+        config_class = config.get(config_name, Config)
+        app.config.from_object(config_class)
         
     # Set up logging
     logger = logging.getLogger('creditcard_roadmap')

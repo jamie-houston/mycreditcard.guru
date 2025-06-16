@@ -1,41 +1,37 @@
-import pytest
+import unittest
 from app import create_app, db
 from app.models.credit_card import CreditCard, CardIssuer
 from app.blueprints.recommendations.services import RecommendationService
 import json
 
 
-@pytest.fixture(scope='function')
-def app():
-    """Create application for the tests."""
-    app = create_app()
-    app.config['TESTING'] = True
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
+class TestRewardValueMultiplier(unittest.TestCase):
+    """Test reward value multiplier calculations"""
     
-    with app.app_context():
+    def setUp(self):
+        """Set up test environment."""
+        self.app = create_app('testing')
+        self.app_context = self.app.app_context()
+        self.app_context.push()
         db.create_all()
-        yield app
+        
+        # Create test issuer
+        self.test_issuer = CardIssuer(name='Test Multiplier Bank')
+        db.session.add(self.test_issuer)
+        db.session.commit()
+    
+    def tearDown(self):
+        """Clean up test environment."""
         db.session.remove()
         db.drop_all()
+        self.app_context.pop()
 
-
-@pytest.fixture(scope='function')
-def test_issuer(app):
-    """Create a test card issuer."""
-    with app.app_context():
-        issuer = CardIssuer(name='Test Multiplier Bank')
-        db.session.add(issuer)
-        db.session.commit()
-        return issuer
-
-
-def test_reward_value_multiplier_calculation(app, test_issuer):
-    """Test that reward_value_multiplier is correctly applied to convert points to dollars."""
-    with app.app_context():
+    def test_reward_value_multiplier_calculation(self):
+        """Test that reward_value_multiplier is correctly applied to convert points to dollars."""
         # Create a card with 1.5 cents per point multiplier
         card = CreditCard(
             name='Test Points Card',
-            issuer_id=test_issuer.id,
+            issuer_id=self.test_issuer.id,
             annual_fee=0,
             reward_type='points',
             reward_value_multiplier=1.5,  # 1.5 cents per point
@@ -59,18 +55,16 @@ def test_reward_value_multiplier_calculation(app, test_issuer):
         
         dining_rewards = result['rewards_by_category']['dining']
         
-        assert dining_rewards['points_earned'] == expected_points
-        assert abs(dining_rewards['value'] - expected_value) < 0.01
-        assert abs(result['annual_value'] - expected_value) < 0.01
+        self.assertEqual(dining_rewards['points_earned'], expected_points)
+        self.assertAlmostEqual(dining_rewards['value'], expected_value, places=2)
+        self.assertAlmostEqual(result['annual_value'], expected_value, places=2)
 
-
-def test_reward_value_multiplier_with_limits(app, test_issuer):
-    """Test that reward_value_multiplier works correctly with spending limits."""
-    with app.app_context():
+    def test_reward_value_multiplier_with_limits(self):
+        """Test that reward_value_multiplier works correctly with spending limits."""
         # Create a card with spending limit and multiplier
         card = CreditCard(
             name='Test Limited Card',
-            issuer_id=test_issuer.id,
+            issuer_id=self.test_issuer.id,
             annual_fee=0,
             reward_type='points',
             reward_value_multiplier=1.0,  # 1 cent per point
@@ -98,21 +92,19 @@ def test_reward_value_multiplier_with_limits(app, test_issuer):
         
         gas_rewards = result['rewards_by_category']['gas']
         
-        assert abs(gas_rewards['points_earned'] - expected_total_points) < 0.01
-        assert abs(gas_rewards['value'] - expected_value) < 0.01
-        assert abs(result['annual_value'] - expected_value) < 0.01
+        self.assertAlmostEqual(gas_rewards['points_earned'], expected_total_points, places=2)
+        self.assertAlmostEqual(gas_rewards['value'], expected_value, places=2)
+        self.assertAlmostEqual(result['annual_value'], expected_value, places=2)
 
-
-def test_reward_value_multiplier_high_value_example(app, test_issuer):
-    """Test the user's example: $100/month * 3% * multiplier = $4.50/month."""
-    with app.app_context():
+    def test_reward_value_multiplier_high_value_example(self):
+        """Test the user's example: $100/month * 3% * multiplier = $4.50/month."""
         # To get $4.50/month ($54/year) from $100/month at 3%:
         # $1,200/year * 3% = 36 points
         # 36 points * multiplier = $54
         # multiplier = $54 / 36 = $1.50 per point
         card = CreditCard(
             name='High Value Card',
-            issuer_id=test_issuer.id,
+            issuer_id=self.test_issuer.id,
             annual_fee=0,
             reward_type='travel',
             reward_value_multiplier=1.5,  # $1.50 per point (high-value travel card)
@@ -133,9 +125,13 @@ def test_reward_value_multiplier_high_value_example(app, test_issuer):
         
         dining_rewards = result['rewards_by_category']['dining']
         
-        assert abs(dining_rewards['value'] - expected_annual_value) < 0.01
-        assert abs(result['annual_value'] - expected_annual_value) < 0.01
+        self.assertAlmostEqual(dining_rewards['value'], expected_annual_value, places=2)
+        self.assertAlmostEqual(result['annual_value'], expected_annual_value, places=2)
         
         # Verify monthly value
         monthly_value = result['annual_value'] / 12
-        assert abs(monthly_value - expected_monthly_value) < 0.01 
+        self.assertAlmostEqual(monthly_value, expected_monthly_value, places=2)
+
+
+if __name__ == '__main__':
+    unittest.main() 

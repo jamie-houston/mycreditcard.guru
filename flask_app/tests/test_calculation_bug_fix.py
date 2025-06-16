@@ -1,36 +1,32 @@
-import pytest
+import unittest
 import json
 from app import create_app, db
 from app.models.credit_card import CreditCard, CardIssuer
 from app.blueprints.recommendations.services import RecommendationService
 
 
-class TestCalculationBugFix:
+class TestCalculationBugFix(unittest.TestCase):
     """Test to demonstrate and verify the new calculation system"""
     
-    @pytest.fixture(scope='function')
-    def app(self):
-        """Create application for the tests."""
-        app = create_app()
-        app.config['TESTING'] = True
-        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
+    def setUp(self):
+        """Set up test environment."""
+        self.app = create_app('testing')
+        self.app_context = self.app.app_context()
+        self.app_context.push()
+        db.create_all()
         
-        with app.app_context():
-            db.create_all()
-            yield app
-            db.session.remove()
-            db.drop_all()
+        # Create test issuer
+        self.test_issuer = CardIssuer(name='Calculation Test Bank')
+        db.session.add(self.test_issuer)
+        db.session.commit()
     
-    @pytest.fixture
-    def test_issuer(self, app):
-        """Create a test card issuer."""
-        with app.app_context():
-            issuer = CardIssuer(name='Test Bank')
-            db.session.add(issuer)
-            db.session.commit()
-            return issuer
+    def tearDown(self):
+        """Clean up test environment."""
+        db.session.remove()
+        db.drop_all()
+        self.app_context.pop()
     
-    def test_user_example_new_system(self, app, test_issuer):
+    def test_user_example_new_system(self):
         """
         Test the user's example with the new calculation system.
         
@@ -39,156 +35,160 @@ class TestCalculationBugFix:
         - Profile with spending of $100 in travel category  
         - Result: card with annual value of $36 (100*12*0.02*1.5)
         """
-        with app.app_context():
-            # Create card with new system values
-            card = CreditCard(
-                name='User Example Card - New System',
-                issuer_id=test_issuer.id,
-                annual_fee=0,
-                reward_type='cash_back',
-                reward_value_multiplier=1.5,  # New system: 1.5 instead of 0.015
-                reward_categories=json.dumps([{"category": "other", "rate": 2.0}]),
-                is_active=True
-            )
-            db.session.add(card)
-            db.session.commit()
-            
-            # Test with user's spending profile
-            monthly_spending = {"travel": 100}
-            result = RecommendationService.calculate_card_value(card, monthly_spending)
-            
-            print(f"\n=== User's Example Test - New System ===")
-            print(f"Monthly spending: {monthly_spending}")
-            print(f"Card reward categories: {card.reward_categories}")
-            print(f"Card reward value multiplier: {card.reward_value_multiplier}")
-            print(f"Actual result: {result}")
-            
-            # What user expects with new system
-            user_expected = 100 * 12 * 0.02 * 1.5  # $36
-            print(f"User expects: ${user_expected}")
-            
-            # What new system gives
-            current_result = result['annual_value']
-            print(f"New system gives: ${current_result}")
-            
-            # Verify the new system works correctly
-            assert abs(current_result - 36.0) < 0.01, f"New system should give $36, got ${current_result}"
-            assert abs(user_expected - 36.0) < 0.01, f"User expects $36, calculated ${user_expected}"
+        # Create card with new system values
+        card = CreditCard(
+            name='User Example Card - New System',
+            issuer_id=self.test_issuer.id,
+            annual_fee=0,
+            reward_type='cash_back',
+            reward_value_multiplier=1.5,  # New system: 1.5 instead of 0.015
+            reward_categories=json.dumps([{"category": "other", "rate": 2.0}]),
+            is_active=True
+        )
+        db.session.add(card)
+        db.session.commit()
+        
+        # Test with user's spending profile
+        monthly_spending = {"travel": 100}
+        result = RecommendationService.calculate_card_value(card, monthly_spending)
+        
+        print(f"\n=== User's Example Test - New System ===")
+        print(f"Monthly spending: {monthly_spending}")
+        print(f"Card reward categories: {card.reward_categories}")
+        print(f"Card reward value multiplier: {card.reward_value_multiplier}")
+        print(f"Actual result: {result}")
+        
+        # What user expects with new system
+        user_expected = 100 * 12 * 0.02 * 1.5  # $36
+        print(f"User expects: ${user_expected}")
+        
+        # What new system gives
+        current_result = result['annual_value']
+        print(f"New system gives: ${current_result}")
+        
+        # Verify the new system works correctly
+        self.assertAlmostEqual(current_result, 36.0, places=2, 
+                              msg=f"New system should give $36, got ${current_result}")
+        self.assertAlmostEqual(user_expected, 36.0, places=2, 
+                              msg=f"User expects $36, calculated ${user_expected}")
     
-    def test_calculation_breakdown_new_system(self, app, test_issuer):
+    def test_calculation_breakdown_new_system(self):
         """Break down the calculation to show the new system works correctly"""
-        with app.app_context():
-            card = CreditCard(
-                name='Debug Card - New System',
-                issuer_id=test_issuer.id,
-                annual_fee=0,
-                reward_type='cash_back',
-                reward_value_multiplier=1.5,  # New system
-                reward_categories=json.dumps([{"category": "other", "rate": 2.0}]),
-                is_active=True
-            )
-            db.session.add(card)
-            db.session.commit()
-            
-            monthly_spending = {"travel": 100}
-            result = RecommendationService.calculate_card_value(card, monthly_spending)
-            
-            print(f"\n=== Calculation Breakdown - New System ===")
-            
-            # Extract the calculation details
-            travel_details = result['rewards_by_category']['travel']
-            print(f"Travel category details: {travel_details}")
-            
-            # Manual step-by-step calculation
-            monthly_spend = 100
-            annual_spend = monthly_spend * 12  # 1200
-            reward_rate = 2.0  # 2%
-            multiplier = 1.5  # New system
-            
-            # New system logic
-            points_earned = annual_spend * (reward_rate / 100)  # 1200 * 0.02 = 24
-            dollar_value = points_earned * multiplier  # 24 * 1.5 = 36
-            
-            print(f"Step-by-step new system logic:")
-            print(f"  Annual spend: ${annual_spend}")
-            print(f"  Reward rate: {reward_rate}% -> {reward_rate/100} (decimal)")
-            print(f"  Points earned: {annual_spend} * {reward_rate/100} = {points_earned}")
-            print(f"  Dollar value: {points_earned} * {multiplier} = ${dollar_value}")
-            
-            # Verify our understanding matches the actual result
-            assert abs(travel_details['points_earned'] - points_earned) < 0.01
-            assert abs(travel_details['value'] - dollar_value) < 0.01
-            assert abs(result['annual_value'] - dollar_value) < 0.01
+        card = CreditCard(
+            name='Debug Card - New System',
+            issuer_id=self.test_issuer.id,
+            annual_fee=0,
+            reward_type='cash_back',
+            reward_value_multiplier=1.5,  # New system
+            reward_categories=json.dumps([{"category": "other", "rate": 2.0}]),
+            is_active=True
+        )
+        db.session.add(card)
+        db.session.commit()
+        
+        monthly_spending = {"travel": 100}
+        result = RecommendationService.calculate_card_value(card, monthly_spending)
+        
+        print(f"\n=== Calculation Breakdown - New System ===")
+        
+        # Extract the calculation details
+        travel_details = result['rewards_by_category']['travel']
+        print(f"Travel category details: {travel_details}")
+        
+        # Manual step-by-step calculation
+        monthly_spend = 100
+        annual_spend = monthly_spend * 12  # 1200
+        reward_rate = 2.0  # 2%
+        multiplier = 1.5  # New system
+        
+        # New system logic
+        points_earned = annual_spend * (reward_rate / 100)  # 1200 * 0.02 = 24
+        dollar_value = points_earned * multiplier  # 24 * 1.5 = 36
+        
+        print(f"Step-by-step new system logic:")
+        print(f"  Annual spend: ${annual_spend}")
+        print(f"  Reward rate: {reward_rate}% -> {reward_rate/100} (decimal)")
+        print(f"  Points earned: {annual_spend} * {reward_rate/100} = {points_earned}")
+        print(f"  Dollar value: {points_earned} * {multiplier} = ${dollar_value}")
+        
+        # Verify our understanding matches the actual result
+        self.assertAlmostEqual(travel_details['points_earned'], points_earned, places=2)
+        self.assertAlmostEqual(travel_details['value'], dollar_value, places=2)
+        self.assertAlmostEqual(result['annual_value'], dollar_value, places=2)
     
-    def test_new_system_with_different_multipliers(self, app, test_issuer):
+    def test_new_system_with_different_multipliers(self):
         """
         Test the new system with different multiplier values to ensure it works correctly.
         """
-        with app.app_context():
-            # Test with 1.0 multiplier (cash back)
-            cash_card = CreditCard(
-                name='Cash Back Card',
-                issuer_id=test_issuer.id,
-                annual_fee=0,
-                reward_type='cash_back',
-                reward_value_multiplier=1.0,  # 1.0 for cash back
-                reward_categories=json.dumps([{"category": "other", "rate": 2.0}]),
-                is_active=True
-            )
-            db.session.add(cash_card)
-            
-            # Test with 1.6 multiplier (premium points)
-            points_card = CreditCard(
-                name='Premium Points Card',
-                issuer_id=test_issuer.id,
-                annual_fee=95,
-                reward_type='points',
-                reward_value_multiplier=1.6,  # 1.6 for premium points
-                reward_categories=json.dumps([{"category": "other", "rate": 2.0}]),
-                is_active=True
-            )
-            db.session.add(points_card)
-            db.session.commit()
-            
-            monthly_spending = {"travel": 100}
-            
-            # Test cash back card
-            cash_result = RecommendationService.calculate_card_value(cash_card, monthly_spending)
-            expected_cash = 100 * 12 * 0.02 * 1.0  # $24
-            assert abs(cash_result['annual_value'] - 24.0) < 0.01, f"Cash card should give $24, got ${cash_result['annual_value']}"
-            
-            # Test points card
-            points_result = RecommendationService.calculate_card_value(points_card, monthly_spending)
-            expected_points = 100 * 12 * 0.02 * 1.6  # $38.4
-            assert abs(points_result['annual_value'] - 38.4) < 0.01, f"Points card should give $38.4, got ${points_result['annual_value']}"
-            
-            print(f"\n=== Multiple Multiplier Test ===")
-            print(f"Cash back card (1.0x): ${cash_result['annual_value']}")
-            print(f"Points card (1.6x): ${points_result['annual_value']}")
+        # Test with 1.0 multiplier (cash back)
+        cash_card = CreditCard(
+            name='Cash Back Card',
+            issuer_id=self.test_issuer.id,
+            annual_fee=0,
+            reward_type='cash_back',
+            reward_value_multiplier=1.0,  # 1.0 for cash back
+            reward_categories=json.dumps([{"category": "other", "rate": 2.0}]),
+            is_active=True
+        )
+        db.session.add(cash_card)
+        
+        # Test with 1.6 multiplier (premium points)
+        points_card = CreditCard(
+            name='Premium Points Card',
+            issuer_id=self.test_issuer.id,
+            annual_fee=95,
+            reward_type='points',
+            reward_value_multiplier=1.6,  # 1.6 for premium points
+            reward_categories=json.dumps([{"category": "other", "rate": 2.0}]),
+            is_active=True
+        )
+        db.session.add(points_card)
+        db.session.commit()
+        
+        monthly_spending = {"travel": 100}
+        
+        # Test cash back card
+        cash_result = RecommendationService.calculate_card_value(cash_card, monthly_spending)
+        expected_cash = 100 * 12 * 0.02 * 1.0  # $24
+        self.assertAlmostEqual(cash_result['annual_value'], 24.0, places=2, 
+                              msg=f"Cash card should give $24, got ${cash_result['annual_value']}")
+        
+        # Test points card
+        points_result = RecommendationService.calculate_card_value(points_card, monthly_spending)
+        expected_points = 100 * 12 * 0.02 * 1.6  # $38.4
+        self.assertAlmostEqual(points_result['annual_value'], 38.4, places=2, 
+                              msg=f"Points card should give $38.4, got ${points_result['annual_value']}")
+        
+        print(f"\n=== Multiple Multiplier Test ===")
+        print(f"Cash back card (1.0x): ${cash_result['annual_value']}")
+        print(f"Points card (1.6x): ${points_result['annual_value']}")
     
-    def test_backward_compatibility_property(self, app, test_issuer):
+    def test_backward_compatibility_property(self):
         """
         Test that the point_value property still works for backward compatibility.
         """
-        with app.app_context():
-            card = CreditCard(
-                name='Backward Compatibility Card',
-                issuer_id=test_issuer.id,
-                annual_fee=0,
-                reward_type='cash_back',
-                reward_value_multiplier=1.5,
-                reward_categories=json.dumps([{"category": "other", "rate": 2.0}]),
-                is_active=True
-            )
-            db.session.add(card)
-            db.session.commit()
-            
-            # Test that point_value property returns the same as reward_value_multiplier
-            assert card.point_value == card.reward_value_multiplier
-            
-            # Test that setting point_value updates reward_value_multiplier
-            card.point_value = 2.0
-            assert card.reward_value_multiplier == 2.0
-            
-            print(f"\n=== Backward Compatibility Test ===")
-            print(f"point_value property works correctly") 
+        card = CreditCard(
+            name='Backward Compatibility Card',
+            issuer_id=self.test_issuer.id,
+            annual_fee=0,
+            reward_type='cash_back',
+            reward_value_multiplier=1.5,
+            reward_categories=json.dumps([{"category": "other", "rate": 2.0}]),
+            is_active=True
+        )
+        db.session.add(card)
+        db.session.commit()
+        
+        # Test that point_value property returns the same as reward_value_multiplier
+        self.assertEqual(card.point_value, card.reward_value_multiplier)
+        
+        # Test that setting point_value updates reward_value_multiplier
+        card.point_value = 2.0
+        self.assertEqual(card.reward_value_multiplier, 2.0)
+        
+        print(f"\n=== Backward Compatibility Test ===")
+        print(f"point_value property works correctly")
+
+
+if __name__ == '__main__':
+    unittest.main() 
