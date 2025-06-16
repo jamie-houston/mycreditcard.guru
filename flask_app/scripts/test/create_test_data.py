@@ -12,6 +12,7 @@ from app.models.user import User
 from app.models.user_data import UserProfile
 from app.models.recommendation import Recommendation
 from app.models.credit_card import CreditCard
+from app.models import CardIssuer
 import json
 from datetime import datetime
 
@@ -123,14 +124,21 @@ def create_test_data():
             db.session.commit()
             print(f"Created test profile for user: {user.email}")
         
+        # Create test issuer if it doesn't exist
+        test_issuer = CardIssuer.query.filter_by(name='Test Bank').first()
+        if not test_issuer:
+            test_issuer = CardIssuer(name='Test Bank')
+            db.session.add(test_issuer)
+            db.session.commit()
+        
         # Create a test credit card if it doesn't exist
         card = CreditCard.query.filter_by(name='Test Travel Card').first()
         if not card:
             card = CreditCard(
                 name='Test Travel Card',
-                issuer='Test Bank',
+                issuer_id=test_issuer.id,
                 annual_fee=95.0,
-                point_value=0.01,
+                reward_value_multiplier=1.0,
                 is_active=True,
                 signup_bonus_points=60000,
                 signup_bonus_value=600.0,
@@ -150,20 +158,26 @@ def create_test_data():
             db.session.commit()
             print(f"Created test credit card: {card.name}")
             
+        # Create cash bank issuer if it doesn't exist
+        cash_issuer = CardIssuer.query.filter_by(name='Cash Bank').first()
+        if not cash_issuer:
+            cash_issuer = CardIssuer(name='Cash Bank')
+            db.session.add(cash_issuer)
+            db.session.commit()
+        
         # Create a cash back credit card if it doesn't exist
         cash_card = CreditCard.query.filter_by(name='Cash Back Card').first()
         if not cash_card:
             cash_card = CreditCard(
                 name='Cash Back Card',
-                issuer='Cash Bank',
+                issuer_id=cash_issuer.id,
                 annual_fee=0.0,
-                point_value=0.01,
+                reward_value_multiplier=1.0,
                 is_active=True,
                 signup_bonus_points=20000,
                 signup_bonus_value=200.0,
                 signup_bonus_min_spend=1000.0,
                 signup_bonus_max_months=3,
-                signup_bonus_type='points',
                 reward_categories=json.dumps([
                     {"category": "groceries", "rate": 3.0},
                     {"category": "gas", "rate": 3.0},

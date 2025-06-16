@@ -157,7 +157,9 @@ class CreditCard(db.Model):
     def calculate_category_value(self, category_spend, category):
         """Calculate the value earned from spending in a specific category."""
         rate = self.get_category_rate(category)
-        return category_spend * rate * self.reward_value_multiplier
+        # New system: rate is percentage (e.g., 2.0 for 2%), convert to decimal and multiply by multiplier
+        points_earned = category_spend * (rate / 100)
+        return points_earned * self.reward_value_multiplier
     
     def calculate_monthly_value(self, category_spending):
         """Calculate the total monthly value based on category spending."""

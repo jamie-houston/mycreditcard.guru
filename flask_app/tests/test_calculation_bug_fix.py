@@ -6,7 +6,7 @@ from app.blueprints.recommendations.services import RecommendationService
 
 
 class TestCalculationBugFix:
-    """Test to demonstrate and fix the calculation bug"""
+    """Test to demonstrate and verify the new calculation system"""
     
     @pytest.fixture(scope='function')
     def app(self):
@@ -30,25 +30,23 @@ class TestCalculationBugFix:
             db.session.commit()
             return issuer
     
-    def test_user_example_demonstrates_bug(self, app, test_issuer):
+    def test_user_example_new_system(self, app, test_issuer):
         """
-        Test the user's exact example to demonstrate the calculation bug.
+        Test the user's example with the new calculation system.
         
-        User expects:
-        - Credit card with 2% other rate, reward value multiplier of 0.015
+        New system:
+        - Credit card with 2% other rate, reward value multiplier of 1.5
         - Profile with spending of $100 in travel category  
-        - Result: card with annual value of $36 (100*12*0.015*2)
-        
-        But current code gives: $0.36 (100*12*(2/100)*0.015)
+        - Result: card with annual value of $36 (100*12*0.02*1.5)
         """
         with app.app_context():
-            # Create card exactly as user described
+            # Create card with new system values
             card = CreditCard(
-                name='User Example Card',
+                name='User Example Card - New System',
                 issuer_id=test_issuer.id,
                 annual_fee=0,
                 reward_type='cash_back',
-                reward_value_multiplier=0.015,
+                reward_value_multiplier=1.5,  # New system: 1.5 instead of 0.015
                 reward_categories=json.dumps([{"category": "other", "rate": 2.0}]),
                 is_active=True
             )
@@ -59,38 +57,33 @@ class TestCalculationBugFix:
             monthly_spending = {"travel": 100}
             result = RecommendationService.calculate_card_value(card, monthly_spending)
             
-            print(f"\n=== User's Example Test ===")
+            print(f"\n=== User's Example Test - New System ===")
             print(f"Monthly spending: {monthly_spending}")
             print(f"Card reward categories: {card.reward_categories}")
             print(f"Card reward value multiplier: {card.reward_value_multiplier}")
             print(f"Actual result: {result}")
             
-            # What user expects
-            user_expected = 100 * 12 * 0.015 * 2  # $36
+            # What user expects with new system
+            user_expected = 100 * 12 * 0.02 * 1.5  # $36
             print(f"User expects: ${user_expected}")
             
-            # What current code gives
+            # What new system gives
             current_result = result['annual_value']
-            print(f"Current code gives: ${current_result}")
+            print(f"New system gives: ${current_result}")
             
-            # Demonstrate the bug
-            assert abs(current_result - 0.36) < 0.01, f"Current code should give $0.36, got ${current_result}"
+            # Verify the new system works correctly
+            assert abs(current_result - 36.0) < 0.01, f"New system should give $36, got ${current_result}"
             assert abs(user_expected - 36.0) < 0.01, f"User expects $36, calculated ${user_expected}"
-            
-            # Show the difference
-            difference_factor = user_expected / current_result
-            print(f"Difference factor: {difference_factor}x")
-            assert abs(difference_factor - 100.0) < 0.01, "The bug is exactly a factor of 100"
     
-    def test_calculation_breakdown(self, app, test_issuer):
-        """Break down the calculation to show exactly where the issue is"""
+    def test_calculation_breakdown_new_system(self, app, test_issuer):
+        """Break down the calculation to show the new system works correctly"""
         with app.app_context():
             card = CreditCard(
-                name='Debug Card',
+                name='Debug Card - New System',
                 issuer_id=test_issuer.id,
                 annual_fee=0,
                 reward_type='cash_back',
-                reward_value_multiplier=0.015,
+                reward_value_multiplier=1.5,  # New system
                 reward_categories=json.dumps([{"category": "other", "rate": 2.0}]),
                 is_active=True
             )
@@ -100,7 +93,7 @@ class TestCalculationBugFix:
             monthly_spending = {"travel": 100}
             result = RecommendationService.calculate_card_value(card, monthly_spending)
             
-            print(f"\n=== Calculation Breakdown ===")
+            print(f"\n=== Calculation Breakdown - New System ===")
             
             # Extract the calculation details
             travel_details = result['rewards_by_category']['travel']
@@ -110,13 +103,13 @@ class TestCalculationBugFix:
             monthly_spend = 100
             annual_spend = monthly_spend * 12  # 1200
             reward_rate = 2.0  # 2%
-            multiplier = 0.015
+            multiplier = 1.5  # New system
             
-            # Current code logic
+            # New system logic
             points_earned = annual_spend * (reward_rate / 100)  # 1200 * 0.02 = 24
-            dollar_value = points_earned * multiplier  # 24 * 0.015 = 0.36
+            dollar_value = points_earned * multiplier  # 24 * 1.5 = 36
             
-            print(f"Step-by-step current logic:")
+            print(f"Step-by-step new system logic:")
             print(f"  Annual spend: ${annual_spend}")
             print(f"  Reward rate: {reward_rate}% -> {reward_rate/100} (decimal)")
             print(f"  Points earned: {annual_spend} * {reward_rate/100} = {points_earned}")
@@ -126,81 +119,76 @@ class TestCalculationBugFix:
             assert abs(travel_details['points_earned'] - points_earned) < 0.01
             assert abs(travel_details['value'] - dollar_value) < 0.01
             assert abs(result['annual_value'] - dollar_value) < 0.01
-            
-            # User's expected logic (what they think should happen)
-            user_expected = monthly_spend * 12 * reward_rate * multiplier  # 100 * 12 * 2 * 0.015 = 36
-            print(f"\nUser's expected logic:")
-            print(f"  {monthly_spend} * 12 * {reward_rate} * {multiplier} = ${user_expected}")
-            
-            print(f"\nThe issue: reward_rate is divided by 100 in the code, but user expects it to be used directly")
     
-    def test_proposed_fix_approach_1_adjust_multiplier(self, app, test_issuer):
+    def test_new_system_with_different_multipliers(self, app, test_issuer):
         """
-        Test approach 1: Keep current logic but adjust multiplier values.
-        
-        To get user's expected $36 with current logic:
-        - Current: annual_spend * (rate/100) * multiplier = 1200 * 0.02 * multiplier = 36
-        - So: multiplier = 36 / (1200 * 0.02) = 36 / 24 = 1.5
+        Test the new system with different multiplier values to ensure it works correctly.
         """
         with app.app_context():
-            card = CreditCard(
-                name='Fixed Card - Approach 1',
+            # Test with 1.0 multiplier (cash back)
+            cash_card = CreditCard(
+                name='Cash Back Card',
                 issuer_id=test_issuer.id,
                 annual_fee=0,
                 reward_type='cash_back',
-                reward_value_multiplier=1.5,  # Adjusted from 0.015 to 1.5
+                reward_value_multiplier=1.0,  # 1.0 for cash back
+                reward_categories=json.dumps([{"category": "other", "rate": 2.0}]),
+                is_active=True
+            )
+            db.session.add(cash_card)
+            
+            # Test with 1.6 multiplier (premium points)
+            points_card = CreditCard(
+                name='Premium Points Card',
+                issuer_id=test_issuer.id,
+                annual_fee=95,
+                reward_type='points',
+                reward_value_multiplier=1.6,  # 1.6 for premium points
+                reward_categories=json.dumps([{"category": "other", "rate": 2.0}]),
+                is_active=True
+            )
+            db.session.add(points_card)
+            db.session.commit()
+            
+            monthly_spending = {"travel": 100}
+            
+            # Test cash back card
+            cash_result = RecommendationService.calculate_card_value(cash_card, monthly_spending)
+            expected_cash = 100 * 12 * 0.02 * 1.0  # $24
+            assert abs(cash_result['annual_value'] - 24.0) < 0.01, f"Cash card should give $24, got ${cash_result['annual_value']}"
+            
+            # Test points card
+            points_result = RecommendationService.calculate_card_value(points_card, monthly_spending)
+            expected_points = 100 * 12 * 0.02 * 1.6  # $38.4
+            assert abs(points_result['annual_value'] - 38.4) < 0.01, f"Points card should give $38.4, got ${points_result['annual_value']}"
+            
+            print(f"\n=== Multiple Multiplier Test ===")
+            print(f"Cash back card (1.0x): ${cash_result['annual_value']}")
+            print(f"Points card (1.6x): ${points_result['annual_value']}")
+    
+    def test_backward_compatibility_property(self, app, test_issuer):
+        """
+        Test that the point_value property still works for backward compatibility.
+        """
+        with app.app_context():
+            card = CreditCard(
+                name='Backward Compatibility Card',
+                issuer_id=test_issuer.id,
+                annual_fee=0,
+                reward_type='cash_back',
+                reward_value_multiplier=1.5,
                 reward_categories=json.dumps([{"category": "other", "rate": 2.0}]),
                 is_active=True
             )
             db.session.add(card)
             db.session.commit()
             
-            monthly_spending = {"travel": 100}
-            result = RecommendationService.calculate_card_value(card, monthly_spending)
+            # Test that point_value property returns the same as reward_value_multiplier
+            assert card.point_value == card.reward_value_multiplier
             
-            print(f"\n=== Fix Approach 1: Adjust Multiplier ===")
-            print(f"Adjusted multiplier to: {card.reward_value_multiplier}")
-            print(f"Result: {result}")
+            # Test that setting point_value updates reward_value_multiplier
+            card.point_value = 2.0
+            assert card.reward_value_multiplier == 2.0
             
-            # Should now give user's expected $36
-            expected_value = 36.0
-            actual_value = result['annual_value']
-            
-            print(f"Expected: ${expected_value}")
-            print(f"Actual: ${actual_value}")
-            
-            assert abs(actual_value - expected_value) < 0.01, f"Fix approach 1 failed: expected ${expected_value}, got ${actual_value}"
-    
-    def test_proposed_fix_approach_2_change_calculation(self, app, test_issuer):
-        """
-        Test approach 2: Change the calculation logic to not divide by 100.
-        
-        This would require modifying the RecommendationService.calculate_card_value method.
-        For now, we'll just demonstrate what the calculation should be.
-        """
-        print(f"\n=== Fix Approach 2: Change Calculation Logic ===")
-        
-        # Simulate the fixed calculation
-        monthly_spend = 100
-        annual_spend = monthly_spend * 12  # 1200
-        reward_rate = 2.0  # Store as 2.0 but treat as 0.02 directly
-        multiplier = 0.015
-        
-        # Current (buggy) logic
-        current_points = annual_spend * (reward_rate / 100)  # 1200 * 0.02 = 24
-        current_value = current_points * multiplier  # 24 * 0.015 = 0.36
-        
-        # Proposed fixed logic - don't divide by 100
-        fixed_points = annual_spend * (reward_rate / 100)  # Keep this part the same for now
-        # But adjust how we interpret the multiplier or rate
-        
-        # Actually, the cleanest fix might be to store rates as decimals (0.02 instead of 2.0)
-        # Or adjust the multiplier values to account for the /100
-        
-        print(f"Current logic gives: ${current_value}")
-        print(f"User expects: ${100 * 12 * 2 * 0.015}")
-        print(f"The issue is in how we interpret the reward_rate and multiplier relationship")
-        
-        # For this test, we'll just verify our understanding
-        assert abs(current_value - 0.36) < 0.01
-        assert abs(100 * 12 * 2 * 0.015 - 36.0) < 0.01 
+            print(f"\n=== Backward Compatibility Test ===")
+            print(f"point_value property works correctly") 

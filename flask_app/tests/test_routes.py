@@ -48,23 +48,25 @@ class RoutesTestCase(unittest.TestCase):
             name='Test Card 1',
             issuer_id=self.test_issuer.id,
             annual_fee=95.0,
-            point_value=0.01,
+            reward_value_multiplier=1.0,
             reward_categories=json.dumps([
                 {"category": "dining", "rate": 3.0},
                 {"category": "travel", "rate": 2.0}
             ]),
-            signup_bonus_value=500.0
+            signup_bonus_value=500.0,
+            is_active=True
         )
         card2 = CreditCard(
             name='Test Card 2',
             issuer_id=self.other_issuer.id,
             annual_fee=0.0,
-            point_value=0.01,
+            reward_value_multiplier=1.0,
             reward_categories=json.dumps([
                 {"category": "groceries", "rate": 2.0},
                 {"category": "gas", "rate": 2.0}
             ]),
-            signup_bonus_value=200.0
+            signup_bonus_value=200.0,
+            is_active=True
         )
         db.session.add(card1)
         db.session.add(card2)

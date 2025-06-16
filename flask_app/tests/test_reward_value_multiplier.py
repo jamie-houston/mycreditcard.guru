@@ -38,7 +38,7 @@ def test_reward_value_multiplier_calculation(app, test_issuer):
             issuer_id=test_issuer.id,
             annual_fee=0,
             reward_type='points',
-            reward_value_multiplier=0.015,  # 1.5 cents per point
+            reward_value_multiplier=1.5,  # 1.5 cents per point
             reward_categories='[{"category": "dining", "rate": 3.0}, {"category": "other", "rate": 1.0}]',
             is_active=True
         )
@@ -50,12 +50,12 @@ def test_reward_value_multiplier_calculation(app, test_issuer):
         
         result = RecommendationService.calculate_card_value(card, monthly_spending)
         
-        # Expected calculation (FIXED):
+        # Expected calculation (NEW SYSTEM):
         # Annual spending: $100 * 12 = $1,200
         # Points earned: $1,200 * 3% = 36 points
-        # Dollar value: 36 points * 0.015 * 100 = $54 (fix applied)
+        # Dollar value: 36 points * 1.5 = $54 (1.5 dollar value per point)
         expected_points = 1200 * 0.03  # 36 points
-        expected_value = expected_points * 0.015 * 100  # $54 (with fix)
+        expected_value = expected_points * 1.5  # $54 (1.5 dollar value per point)
         
         dining_rewards = result['rewards_by_category']['dining']
         
@@ -73,7 +73,7 @@ def test_reward_value_multiplier_with_limits(app, test_issuer):
             issuer_id=test_issuer.id,
             annual_fee=0,
             reward_type='points',
-            reward_value_multiplier=0.01,  # 1 cent per point
+            reward_value_multiplier=1.0,  # 1 cent per point
             reward_categories='[{"category": "gas", "rate": 5.0, "limit": 1000}, {"category": "other", "rate": 1.0}]',
             is_active=True
         )
@@ -86,15 +86,15 @@ def test_reward_value_multiplier_with_limits(app, test_issuer):
         
         result = RecommendationService.calculate_card_value(card, monthly_spending)
         
-        # Expected calculation (FIXED):
+        # Expected calculation (NEW SYSTEM):
         # Main spend: $1,000 * 5% = 50 points
         # Base spend: $1,400 * 1% = 14 points
         # Total points: 64 points
-        # Dollar value: 64 points * 0.01 * 100 = $64 (fix applied)
+        # Dollar value: 64 points * 1.0 = $64 (1.0 dollar value per point)
         expected_main_points = 1000 * 0.05  # 50 points
         expected_base_points = 1400 * 0.01  # 14 points
         expected_total_points = expected_main_points + expected_base_points  # 64 points
-        expected_value = expected_total_points * 0.01 * 100  # $64 (with fix)
+        expected_value = expected_total_points * 1.0  # $64 (1.0 dollar value per point)
         
         gas_rewards = result['rewards_by_category']['gas']
         
@@ -127,9 +127,9 @@ def test_reward_value_multiplier_high_value_example(app, test_issuer):
         
         result = RecommendationService.calculate_card_value(card, monthly_spending)
         
-        # Expected (FIXED): $100 * 12 * 3% * 1.5 * 100 = $5400/year = $450/month
-        expected_annual_value = 100 * 12 * 0.03 * 1.5 * 100  # $5400 (with fix)
-        expected_monthly_value = expected_annual_value / 12  # $450
+        # Expected (NEW SYSTEM): $100 * 12 * 3% * 1.5 = $54/year = $4.50/month
+        expected_annual_value = 100 * 12 * 0.03 * 1.5  # $54 (1.5 dollar value per point)
+        expected_monthly_value = expected_annual_value / 12  # $4.50
         
         dining_rewards = result['rewards_by_category']['dining']
         

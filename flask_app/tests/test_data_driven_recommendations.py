@@ -85,9 +85,16 @@ class TestDataDrivenRecommendations:
         """Create a CreditCard object from TestCard configuration"""
         reward_categories_json = json.dumps(test_card.reward_categories)
         
+        # Refresh the issuer to ensure it's attached to the current session
+        issuer = CardIssuer.query.filter_by(name='Test Bank').first()
+        if not issuer:
+            issuer = CardIssuer(name='Test Bank')
+            db.session.add(issuer)
+            db.session.commit()
+        
         card = CreditCard(
             name=test_card.name,
-            issuer_id=self.test_issuer.id,
+            issuer_id=issuer.id,
             annual_fee=test_card.annual_fee,
             reward_type=test_card.reward_type,
             reward_value_multiplier=test_card.reward_value_multiplier,
@@ -187,10 +194,10 @@ class TestDataDrivenRecommendations:
                     category_spending={"travel": 100}
                 ),
                 expected=ExpectedResult(
-                    annual_value=36.0,  # 100*12*.02*.015*100 = 36
+                    annual_value=36.0,  # 100*12*0.02*1.5 = 36
                     monthly_value=3.0,  # 36/12 = 3
                     net_value=36.0,     # No annual fee
-                    category_values={"travel": 36.0}
+                    category_values={"other": 36.0}  # Travel spending goes to 'other' category
                 )
             ),
             
@@ -211,8 +218,8 @@ class TestDataDrivenRecommendations:
                     category_spending={"travel": 100, "dining": 50}
                 ),
                 expected=ExpectedResult(
-                    annual_value=63.0,   # travel: 100*12*(3/100)*1.5=54, dining: 50*12*(1/100)*1.5=9, total=63
-                    net_value=-32.0,      # 6300 - 95 = 6205
+                    annual_value=63.0,   # travel: 100*12*0.03*1.5=54, dining: 50*12*0.01*1.5=9, total=63
+                    net_value=-32.0,      # 63 - 95 = -32
                     category_values={"travel": 54.0, "dining": 9.0}
                 )
             ),
@@ -233,7 +240,7 @@ class TestDataDrivenRecommendations:
                     category_spending={"gas": 200}  # $200/month = $2400/year
                 ),
                 expected=ExpectedResult(
-                    annual_value=64.0,  # First $1000 at (5/100) = 50 points, remaining $1400 at (1/100) = 14 points, total 64 points * 0.01 * 100 = $64
+                    annual_value=64.0,  # First $1000 at 5% = 50 points, remaining $1400 at 1% = 14 points, total 64 points * 1.0 = $64
                     category_values={"gas": 64.0}
                 )
             ),
@@ -255,11 +262,11 @@ class TestDataDrivenRecommendations:
                     category_spending={"dining": 300, "gas": 150, "groceries": 200}
                 ),
                 expected=ExpectedResult(
-                    annual_value=168.0,   # dining: 300*12*(3/100)*0.01*100=108, gas: 150*12*(2/100)*0.01*100=36, groceries: 200*12*(1/100)*0.01*100=24, total=168
+                    annual_value=168.0,   # dining: 300*12*0.03*1.0=108, gas: 150*12*0.02*1.0=36, groceries: 200*12*0.01*1.0=24, total=168
                     category_values={
-                        "dining": 108.0,     # 300*12*(3/100)*0.01*100 = 108
-                        "gas": 36.0,         # 150*12*(2/100)*0.01*100 = 36
-                        "groceries": 24.0    # 200*12*(1/100)*0.01*100 = 24
+                        "dining": 108.0,     # 300*12*0.03*1.0 = 108
+                        "gas": 36.0,         # 150*12*0.02*1.0 = 36
+                        "groceries": 24.0    # 200*12*0.01*1.0 = 24 (groceries uses 'other' rate)
                     }
                 )
             ),
@@ -282,7 +289,7 @@ class TestDataDrivenRecommendations:
                     reward_type="cash_back"
                 ),
                 expected=ExpectedResult(
-                    annual_value=48.0,  # 200*12*(2/100)*1.0*100 = 4800
+                    annual_value=48.0,  # 200*12*0.02*1.0 = 48
                     category_values={"dining": 48.0}
                 )
             ),
@@ -303,7 +310,7 @@ class TestDataDrivenRecommendations:
                     category_spending={"dining": 300} 
                 ),
                 expected=ExpectedResult(
-                    annual_value=180.0,  
+                    annual_value=180.0,  # 300*12*0.05*1.0 = 180
                     category_values={"dining": 180.0}  
                 )
             ),
@@ -324,8 +331,8 @@ class TestDataDrivenRecommendations:
                     category_spending={"dining": 400}  # $400/month = $1200 in 3 months, meets requirement
                 ),
                 expected=ExpectedResult(
-                    annual_value=248.0,  # Regular rewards: 400*12*(1/100)*0.01*100 = 48, plus signup bonus: 200, total = 248
-                    category_values={"dining": 48.0}  # Just the regular rewards: 400*12*(1/100)*0.01*100 = 48
+                    annual_value=248.0,  # Regular rewards: 400*12*0.01*1.0 = 48, plus signup bonus: 200, total = 248
+                    category_values={"dining": 48.0}  # Just the regular rewards: 400*12*0.01*1.0 = 48
                 )
             )
         ]
@@ -352,7 +359,7 @@ class TestDataDrivenRecommendations:
             # Create a simple test case
             card = self.create_test_card(TestCard(
                 name="Debug Card",
-                reward_value_multiplier=0.015,
+                reward_value_multiplier=1.5,
                 reward_categories=[{"category": "other", "rate": 2.0}]
             ))
             
@@ -368,10 +375,10 @@ class TestDataDrivenRecommendations:
             # Manual calculation
             annual_spending = 100 * 12  # 1200
             points_earned = annual_spending * (2.0 / 100)  # 1200 * 0.02 = 24 points
-            dollar_value = points_earned * 0.015  # 24 * 0.015 = 0.36
+            dollar_value = points_earned * 1.5  # 24 * 1.5 = 36
             
             print(f"Manual calculation:")
             print(f"  Annual spending: {annual_spending}")
             print(f"  Points earned: {points_earned}")
             print(f"  Dollar value: {dollar_value}")
-            print(f"  Expected annual value: {100 * 12 * 0.015 * 2} (direct calculation)") 
+            print(f"  Expected annual value: {100 * 12 * 0.02 * 1.5} (direct calculation)") 

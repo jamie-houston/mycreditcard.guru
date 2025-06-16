@@ -70,7 +70,7 @@ class ModelsTestCase(unittest.TestCase):
             name='Test Card',
             issuer_id=test_issuer.id,
             annual_fee=95.0,
-            point_value=0.01,
+            reward_value_multiplier=1.0,
             reward_categories=json.dumps([
                 {"category": "dining", "rate": 3.0},
                 {"category": "travel", "rate": 2.0}
