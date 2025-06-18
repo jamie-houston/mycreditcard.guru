@@ -9,7 +9,7 @@ import sys
 import json
 import re
 from bs4 import BeautifulSoup
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Any
 import logging
 
 # Add the flask_app directory to the Python path
@@ -206,18 +206,27 @@ def parse_intro_offer(intro_text: str) -> Dict[str, any]:
     
     result = {'points': 0, 'value': 0.0, 'spending_requirement': 0.0, 'months': 3}
     
-    # Extract bonus amount
+    # Extract bonus amount - improved patterns
     bonus_patterns = [
+        # Specific patterns for points/miles first
+        r'earn (\d{1,3}(?:,\d{3})*)\s+(?:bonus\s+)?(?:hilton honors\s+bonus\s+)?(?:miles|points)',
         r'bonus of (\d{1,3}(?:,\d{3})*)\s+(?:miles|points)',
-        r'earn (\d{1,3}(?:,\d{3})*)\s+(?:miles|points)',
-        r'\$(\d{1,3}(?:,\d{3})*)\s+(?:cash back|bonus)',
+        r'earn (\d{1,3}(?:,\d{3})*)\s+(?:membership rewards|thankyou|aadvantage|skymiles)?\s*(?:bonus\s+)?(?:miles|points)',
+        r'(\d{1,3}(?:,\d{3})*)\s+(?:bonus\s+)?(?:hilton honors\s+bonus\s+)?(?:miles|points)',
+        # Cash patterns
+        r'earn a \$(\d{1,3}(?:,\d{3})*)\s+(?:cash back|bonus|statement credit)',
+        r'\$(\d{1,3}(?:,\d{3})*)\s+(?:cash back|bonus|statement credit|online cash rewards bonus)',
+        # Generic patterns
+        r'earn (\d{1,3}(?:,\d{3})*)',
+        r'bonus of (\d{1,3}(?:,\d{3})*)',
     ]
     
     for pattern in bonus_patterns:
         match = re.search(pattern, intro_text, re.IGNORECASE)
         if match:
             amount = int(match.group(1).replace(',', ''))
-            if '$' in match.group(0):
+            # Check if this is a cash bonus
+            if '$' in match.group(0) or 'cash' in match.group(0).lower() or 'statement credit' in match.group(0).lower():
                 result['value'] = float(amount)
             else:
                 result['points'] = amount
@@ -226,7 +235,10 @@ def parse_intro_offer(intro_text: str) -> Dict[str, any]:
     # Extract spending requirement
     spend_patterns = [
         r'spend \$(\d{1,3}(?:,\d{3})*)',
+        r'after you spend \$(\d{1,3}(?:,\d{3})*)',
         r'after \$(\d{1,3}(?:,\d{3})*)',
+        r'make at least \$(\d{1,3}(?:,\d{3})*)',
+        r'make \$(\d{1,3}(?:,\d{3})*)',
     ]
     
     for pattern in spend_patterns:
@@ -235,15 +247,46 @@ def parse_intro_offer(intro_text: str) -> Dict[str, any]:
             result['spending_requirement'] = float(match.group(1).replace(',', ''))
             break
     
-    # Extract time period
-    month_match = re.search(r'within (\d+) months?', intro_text, re.IGNORECASE)
-    if month_match:
-        result['months'] = int(month_match.group(1))
+    # Extract time period - improved patterns
+    month_patterns = [
+        r'within (\d+) months?',
+        r'in the first (\d+) months?',
+        r'first (\d+) months?',
+        r'in (\d+) months?',
+        r'within the first (\d+) months?',
+        r'in your first (\d+) months?',
+        r'first (\d+) months? from account opening',
+        r'within (\d+) months? from account opening',
+        r'(\d+) months? of card membership',
+        r'first (\d+) months? of account opening',
+        r'first (\d+) days' # Handle days and convert to months
+    ]
     
-    # Extract value if mentioned
-    value_match = re.search(r'equal to \$(\d{1,3}(?:,\d{3})*)', intro_text, re.IGNORECASE)
-    if value_match and result['value'] == 0.0:
-        result['value'] = float(value_match.group(1).replace(',', ''))
+    for pattern in month_patterns:
+        match = re.search(pattern, intro_text, re.IGNORECASE)
+        if match:
+            time_value = int(match.group(1))
+            if 'days' in pattern:
+                # Convert days to months (approximation)
+                result['months'] = max(1, round(time_value / 30))
+            else:
+                result['months'] = time_value
+            break
+    
+    # Extract value if mentioned (e.g., "equal to $750 in travel")
+    value_patterns = [
+        r'equal to \$(\d{1,3}(?:,\d{3})*)',
+        r'worth \$(\d{1,3}(?:,\d{3})*)',
+        r'value of \$(\d{1,3}(?:,\d{3})*)',
+        r'redeemable for \$(\d{1,3}(?:,\d{3})*)',
+        r'that\'s a \$(\d{1,3}(?:,\d{3})*)'
+    ]
+    
+    for pattern in value_patterns:
+        match = re.search(pattern, intro_text, re.IGNORECASE)
+        if match and result['value'] == 0.0:
+            result['value'] = float(match.group(1).replace(',', ''))
+            break
     
     return result
 
@@ -458,6 +501,97 @@ def parse_annual_fee(fee_str: str) -> float:
     return 0.0
 
 
+def check_issuer_in_database(issuer_name: str) -> bool:
+    """Check if an issuer exists in the database."""
+    try:
+        from app import create_app, db
+        from app.models.credit_card import CardIssuer
+        
+        # Create app context to access database
+        app = create_app('default')
+        with app.app_context():
+            # Check if issuer exists in database
+            issuer = CardIssuer.query.filter_by(name=issuer_name).first()
+            return issuer is not None
+    except Exception as e:
+        logger.warning(f"Could not check issuer '{issuer_name}' in database: {e}")
+        return False
+
+
+def get_all_database_issuers() -> List[str]:
+    """Get all issuer names from the database."""
+    try:
+        from app import create_app, db
+        from app.models.credit_card import CardIssuer
+        
+        # Create app context to access database
+        app = create_app('default')
+        with app.app_context():
+            issuers = CardIssuer.query.all()
+            return [issuer.name for issuer in issuers]
+    except Exception as e:
+        logger.warning(f"Could not get issuers from database: {e}")
+        return []
+
+
+def categorize_cards(cards: List[Dict]) -> Dict[str, Any]:
+    """Categorize cards into valid and problematic lists."""
+    valid_cards = []
+    problematic_cards = []
+    
+    # Get available issuers from database
+    available_issuers = get_all_database_issuers()
+    logger.info(f"Available issuers in database: {available_issuers}")
+    
+    for card in cards:
+        issues = []
+        card_name = card.get('name', 'Unknown')
+        issuer_name = card.get('issuer', 'Unknown')
+        
+        # Check for various issues
+        if not card_name or card_name == 'Unknown':
+            issues.append('missing_name')
+        
+        if not issuer_name or issuer_name == 'Unknown':
+            issues.append('missing_issuer')
+        elif not check_issuer_in_database(issuer_name):
+            issues.append('issuer_not_in_database')
+        
+        # Check for other potential data quality issues
+        if card.get('annual_fee') is None:
+            issues.append('missing_annual_fee')
+        
+        if not card.get('reward_categories') and not card.get('rewards_tooltip'):
+            issues.append('missing_reward_info')
+        
+        if not card.get('intro_offer_display') and not card.get('intro_offer_tooltip'):
+            issues.append('missing_intro_offer')
+        
+        # Add the issues to the card for reference
+        if issues:
+            card_with_issues = card.copy()
+            card_with_issues['issues'] = issues
+            card_with_issues['issue_reasons'] = {
+                'missing_name': 'Card name is missing or unknown',
+                'missing_issuer': 'Issuer information is missing or unknown',
+                'issuer_not_in_database': f'Issuer "{issuer_name}" not found in database (available: {", ".join(available_issuers)})',
+                'missing_annual_fee': 'Annual fee information is missing',
+                'missing_reward_info': 'No reward categories or reward tooltip found',
+                'missing_intro_offer': 'No intro offer information found'
+            }
+            problematic_cards.append(card_with_issues)
+            logger.info(f"Card '{card_name}' has issues: {issues}")
+        else:
+            valid_cards.append(card)
+            logger.info(f"Card '{card_name}' is valid for import")
+    
+    return {
+        'valid_cards': valid_cards,
+        'problematic_cards': problematic_cards,
+        'available_issuers': available_issuers
+    }
+
+
 def main():
     """Main function to scrape the NerdWallet table."""
     # File paths
@@ -481,26 +615,44 @@ def main():
     
     logger.info(f"Extracted {len(cards)} cards from table")
     
-    # Analyze results
-    cards_with_rewards = [c for c in cards if c.get('reward_categories')]
-    cards_with_tooltips = [c for c in cards if c.get('rewards_tooltip')]
-    cards_with_intro_offers = [c for c in cards if c.get('signup_bonus_points', 0) > 0 or c.get('signup_bonus_value', 0) > 0]
+    # Categorize cards into valid and problematic lists
+    logger.info("Categorizing cards based on issuer availability...")
+    categorization = categorize_cards(cards)
+    
+    valid_cards = categorization['valid_cards']
+    problematic_cards = categorization['problematic_cards']
+    available_issuers = categorization['available_issuers']
+    
+    # Analyze results for valid cards
+    valid_cards_with_rewards = [c for c in valid_cards if c.get('reward_categories')]
+    valid_cards_with_tooltips = [c for c in valid_cards if c.get('rewards_tooltip')]
+    valid_cards_with_intro_offers = [c for c in valid_cards if c.get('signup_bonus_points', 0) > 0 or c.get('signup_bonus_value', 0) > 0]
+    
+    # Analyze issues in problematic cards
+    issue_summary = {}
+    for card in problematic_cards:
+        for issue in card.get('issues', []):
+            issue_summary[issue] = issue_summary.get(issue, 0) + 1
     
     # Save detailed results with timestamp
-    from datetime import datetime
     timestamp = datetime.now().strftime('%Y%m%d%H%M')
     output_file = os.path.join(output_dir, f'{timestamp}_nerdwallet_table_cards.json')
     results = {
         'extraction_summary': {
-            'total_cards': len(cards),
-            'cards_with_reward_categories': len(cards_with_rewards),
-            'cards_with_reward_tooltips': len(cards_with_tooltips),
-            'cards_with_intro_offers': len(cards_with_intro_offers),
-            'extraction_method': 'table_html_parsing',
+            'total_cards_extracted': len(cards),
+            'valid_cards_count': len(valid_cards),
+            'problematic_cards_count': len(problematic_cards),
+            'valid_cards_with_reward_categories': len(valid_cards_with_rewards),
+            'valid_cards_with_reward_tooltips': len(valid_cards_with_tooltips),
+            'valid_cards_with_intro_offers': len(valid_cards_with_intro_offers),
+            'issue_summary': issue_summary,
+            'available_issuers': available_issuers,
+            'extraction_method': 'table_html_parsing_with_issuer_validation',
             'source_file': 'nerdwallet_bonus_offers_table.html',
             'extraction_timestamp': datetime.now().isoformat()
         },
-        'cards': cards
+        'valid_cards': valid_cards,
+        'problematic_cards': problematic_cards
     }
     
     with open(output_file, 'w', encoding='utf-8') as f:
@@ -508,18 +660,30 @@ def main():
     
     logger.info(f"Results saved to: {output_file}")
     
-    # Print summary
+    # Print comprehensive summary
     print("\n" + "="*70)
     print("NERDWALLET TABLE SCRAPING RESULTS")
     print("="*70)
-    print(f"📊 Total cards found: {len(cards)}")
-    print(f"🎯 Cards with reward categories: {len(cards_with_rewards)}")
-    print(f"💬 Cards with reward tooltips: {len(cards_with_tooltips)}")
-    print(f"🎁 Cards with intro offers: {len(cards_with_intro_offers)}")
+    print(f"📊 Total cards extracted: {len(cards)}")
+    print(f"✅ Valid cards (ready for import): {len(valid_cards)}")
+    print(f"⚠️  Problematic cards: {len(problematic_cards)}")
+    print(f"🏦 Available issuers in database: {len(available_issuers)}")
+    print(f"   • {', '.join(available_issuers)}")
     
-    if cards_with_rewards:
-        print(f"\n🏆 Cards with detailed reward categories:")
-        for i, card in enumerate(cards_with_rewards[:10]):
+    if issue_summary:
+        print(f"\n📋 Issue summary for problematic cards:")
+        for issue, count in issue_summary.items():
+            print(f"   • {issue.replace('_', ' ').title()}: {count} cards")
+    
+    if valid_cards:
+        print(f"\n🎯 Valid cards analysis:")
+        print(f"   • Cards with reward categories: {len(valid_cards_with_rewards)}")
+        print(f"   • Cards with reward tooltips: {len(valid_cards_with_tooltips)}")
+        print(f"   • Cards with intro offers: {len(valid_cards_with_intro_offers)}")
+    
+    if valid_cards_with_rewards:
+        print(f"\n🏆 Sample valid cards with detailed reward categories:")
+        for i, card in enumerate(valid_cards_with_rewards[:5]):
             print(f"\n{i+1}. {card['name']} ({card['issuer']})")
             print(f"   Annual Fee: ${card['annual_fee']}")
             if card.get('reward_categories'):
@@ -530,21 +694,30 @@ def main():
             if card.get('signup_bonus_value', 0) > 0:
                 print(f"   💰 Bonus Value: ${card['signup_bonus_value']}")
     
+    if problematic_cards:
+        print(f"\n⚠️  Sample problematic cards:")
+        for i, card in enumerate(problematic_cards[:5]):
+            print(f"\n{i+1}. {card['name']} ({card.get('issuer', 'Unknown')})")
+            print(f"   Issues: {', '.join(card.get('issues', []))}")
+            if 'issuer_not_in_database' in card.get('issues', []):
+                print(f"   Note: Issuer '{card.get('issuer')}' not found in database")
+    
     # Look specifically for Chase Sapphire Preferred
-    chase_cards = [c for c in cards if 'sapphire preferred' in c['name'].lower()]
+    chase_cards = [c for c in valid_cards if 'sapphire preferred' in c['name'].lower()]
     if chase_cards:
-        print(f"\n🎯 CHASE SAPPHIRE PREFERRED FOUND:")
+        print(f"\n🎯 CHASE SAPPHIRE PREFERRED VALIDATION:")
         card = chase_cards[0]
         print(f"   Name: {card['name']}")
+        print(f"   Status: ✅ Valid for import")
         print(f"   Categories: {card.get('reward_categories', {})}")
         if card.get('rewards_tooltip'):
-            print(f"   Rewards Tooltip: {card['rewards_tooltip']}")
+            print(f"   Rewards Tooltip: {card['rewards_tooltip'][:100]}...")
         
-        # Test against expected categories from test file (updated - removed online groceries)
+        # Test against expected categories
         expected_categories = {
             "Dining & Restaurants": 3.0,
             "Streaming Services": 3.0,
-            "Travel": 2.0  # Should be "2x on all other travel purchases", not 5x Chase Travel
+            "Travel": 2.0
         }
         
         actual_categories = card.get('reward_categories', {})
@@ -556,6 +729,16 @@ def main():
                 print(f"   {status} {category}: {actual_rate}x (expected {expected_rate}x)")
             else:
                 print(f"   ❌ Missing: {category} (expected {expected_rate}x)")
+    else:
+        # Check if it's in problematic cards
+        problematic_chase = [c for c in problematic_cards if 'sapphire preferred' in c['name'].lower()]
+        if problematic_chase:
+            card = problematic_chase[0]
+            print(f"\n⚠️  CHASE SAPPHIRE PREFERRED IN PROBLEMATIC CARDS:")
+            print(f"   Name: {card['name']}")
+            print(f"   Issues: {', '.join(card.get('issues', []))}")
+    
+    print(f"\n💾 Detailed results saved to: {output_file}")
 
 
 if __name__ == '__main__':

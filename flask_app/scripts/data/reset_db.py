@@ -16,7 +16,7 @@ from app import create_app, db
 # Import seed functions
 from seed_categories import seed_categories
 from seed_issuers import seed_issuers
-from seed_credit_cards import seed_credit_cards
+from seed_credit_cards import seed_credit_cards_auto
 # from seed_profiles import seed_profiles  # Skip for now due to model issues
 
 def main():
@@ -47,7 +47,7 @@ def main():
         
         # 3. Credit cards (depends on categories and issuers)
         print("3️⃣  Seeding credit cards...")
-        seed_credit_cards()
+        seed_credit_cards_auto()
         
         # 4. User profiles (optional sample data) - Skip for now due to model issues
         # print("4️⃣  Seeding sample user profiles...")

@@ -6,8 +6,9 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 
 class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'you-will-never-guess'
+    # Use instance folder for database to ensure consistency
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
-        'sqlite:///' + os.path.join(basedir, 'app.db')
+        'sqlite:///creditcard_roadmap.db'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     
     # Flask-Login config

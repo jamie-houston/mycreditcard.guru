@@ -99,52 +99,55 @@ def get_available_scripts():
     
     scripts_by_category = {}
     
+    # Define allowed root scripts
+    allowed_root_scripts = [
+        "run.py",
+        "run_tests.py", 
+        "guided_scraping.py",
+        "seed_db.py"
+    ]
+    
+    # Add scripts from scripts/data directory
+    allowed_scripts_data = [
+        "scripts/data/reset_db.py"
+    ]
+    
     # First, scan for root-level scripts in flask_app directory
     root_scripts = []
-    for script in flask_app_dir.glob("*.py"):
-        if script.name not in ["__init__.py", "config.py"]:  # Skip common non-script files
-            relative_path = script.name
-            
+    for script_name in allowed_root_scripts:
+        script_path = flask_app_dir / script_name
+        if script_path.exists():
             # Get description from SCRIPT_INFO or extract from file
-            description = SCRIPT_INFO.get(relative_path)
+            description = SCRIPT_INFO.get(script_name)
             if not description:
-                description = extract_description_from_file(script)
+                description = extract_description_from_file(script_path)
             
             root_scripts.append({
-                'name': script.name,
-                'path': relative_path,
-                'full_path': script,
+                'name': script_name,
+                'path': script_name,
+                'full_path': script_path,
+                'description': description
+            })
+    
+    # Add selected scripts from scripts/data directory
+    for script_path_str in allowed_scripts_data:
+        script_path = flask_app_dir / script_path_str
+        if script_path.exists():
+            script_name = script_path.name
+            # Use just the filename for display but keep the relative path
+            description = SCRIPT_INFO.get(f"data/{script_name}")
+            if not description:
+                description = extract_description_from_file(script_path)
+            
+            root_scripts.append({
+                'name': script_name,
+                'path': script_path_str,
+                'full_path': script_path,
                 'description': description
             })
     
     if root_scripts:
         scripts_by_category['root'] = sorted(root_scripts, key=lambda x: x['name'])
-    
-    # Then scan all subdirectories in scripts/
-    if flask_scripts_dir.exists():
-        for category_dir in flask_scripts_dir.iterdir():
-            if category_dir.is_dir() and category_dir.name != "__pycache__":
-                category = category_dir.name
-                scripts_by_category[category] = []
-                
-                for script in category_dir.glob("*.py"):
-                    if script.name != "__init__.py":
-                        relative_path = f"{category}/{script.name}"
-                        
-                        # Get description from SCRIPT_INFO or extract from file
-                        description = SCRIPT_INFO.get(relative_path)
-                        if not description:
-                            description = extract_description_from_file(script)
-                        
-                        scripts_by_category[category].append({
-                            'name': script.name,
-                            'path': relative_path,
-                            'full_path': script,
-                            'description': description
-                        })
-                
-                # Sort scripts alphabetically within category
-                scripts_by_category[category].sort(key=lambda x: x['name'])
     
     return scripts_by_category
 
@@ -154,7 +157,7 @@ def show_menu(show_all=False):
     scripts_by_category = get_available_scripts()
     
     if not scripts_by_category:
-        print("No scripts found in flask_app/scripts/")
+        print("No scripts found in flask_app/")
         return None
     
     print("🚀 Flask Script Runner")
@@ -163,73 +166,34 @@ def show_menu(show_all=False):
     script_list = []
     counter = 1
     
-    if not show_all:
-        # Show only root scripts initially
-        if 'root' in scripts_by_category:
-            scripts = scripts_by_category['root']
-            print(f"\n📁 ROOT SCRIPTS")
-            print("-" * 40)
-            
-            for script in scripts:
-                print(f"{counter:2d}. {script['path']}")
-                print(f"    {script['description']}")
-                script_list.append(script)
-                counter += 1
+    # Show available scripts
+    if 'root' in scripts_by_category:
+        scripts = scripts_by_category['root']
+        print(f"\n📁 AVAILABLE SCRIPTS")
+        print("-" * 40)
         
-        print(f"\n{'=' * 80}")
-        print("Usage:")
-        print("  Enter a number (1-{}) to run that script".format(len(script_list)))
-        print("  Press Enter to show all scripts")
-        print("  Or use: python scripts/run_flask_script.py <category/script_name> [args...]")
-        print("  Press Ctrl+C to exit")
-        
-    else:
-        # Show all scripts
-        # Sort categories alphabetically, but put 'root' first
-        categories = list(scripts_by_category.keys())
-        if 'root' in categories:
-            categories.remove('root')
-            categories = ['root'] + sorted(categories)
-        else:
-            categories = sorted(categories)
-        
-        for category in categories:
-            scripts = scripts_by_category[category]
-            if not scripts:
-                continue
-                
-            print(f"\n📁 {category.upper()} SCRIPTS")
-            print("-" * 40)
-            
-            for script in scripts:
-                print(f"{counter:2d}. {script['path']}")
-                print(f"    {script['description']}")
-                script_list.append(script)
-                counter += 1
-        
-        print(f"\n{'=' * 80}")
-        print("Usage:")
-        print("  Enter a number (1-{}) to run that script".format(len(script_list)))
-        print("  Or use: python scripts/run_flask_script.py <category/script_name> [args...]")
-        print("  Press Ctrl+C to exit")
+        for script in scripts:
+            print(f"{counter:2d}. {script['name']}")
+            print(f"    {script['description']}")
+            script_list.append(script)
+            counter += 1
+    
+    print(f"\n{'=' * 80}")
+    print("Usage:")
+    print("  Enter a number (1-{}) to run that script".format(len(script_list)))
+    print("  Or use: python scripts/run_flask_script.py <script_name> [args...]")
+    print("  Press Ctrl+C to exit")
     
     return script_list
 
 
-def get_user_choice(script_list, show_all_mode=False):
+def get_user_choice(script_list):
     """Get user's script choice."""
     try:
-        if show_all_mode:
-            prompt = f"\nSelect script (1-{len(script_list)}): "
-        else:
-            prompt = f"\nSelect script (1-{len(script_list)}) or Enter for all scripts: "
-        
+        prompt = f"\nSelect script (1-{len(script_list)}): "
         choice = input(prompt).strip()
         
-        if not choice and not show_all_mode:
-            # Empty input in root-only mode means show all scripts
-            return "show_all"
-        elif choice.isdigit():
+        if choice.isdigit():
             choice_num = int(choice)
             if 1 <= choice_num <= len(script_list):
                 return script_list[choice_num - 1]
@@ -237,7 +201,7 @@ def get_user_choice(script_list, show_all_mode=False):
                 print(f"❌ Invalid choice. Please enter a number between 1 and {len(script_list)}")
                 return None
         elif not choice:
-            # Empty input in show_all mode means exit
+            # Empty input means exit
             return None
         else:
             print("❌ Please enter a valid number")
@@ -272,9 +236,9 @@ def run_script(script_info, args=None):
     
     try:
         # Build the command - handle root scripts vs scripts in subdirectories
-        if '/' in script_path:
-            # Script in subdirectory
-            cmd = [sys.executable, f"scripts/{script_path}"] + args
+        if script_path.startswith('scripts/'):
+            # Script in subdirectory (already has scripts/ prefix)
+            cmd = [sys.executable, script_path] + args
         else:
             # Root-level script
             cmd = [sys.executable, script_path] + args
@@ -308,23 +272,15 @@ def main():
     """Main function."""
     if len(sys.argv) == 1:
         # Interactive mode
-        show_all_mode = False
-        script_list = show_menu(show_all=show_all_mode)
+        script_list = show_menu()
         if not script_list:
             sys.exit(1)
             
         while True:
-            choice = get_user_choice(script_list, show_all_mode=show_all_mode)
+            choice = get_user_choice(script_list)
             
             if choice is None:
                 sys.exit(0)
-            elif choice == "show_all":
-                # Switch to show all scripts mode
-                show_all_mode = True
-                script_list = show_menu(show_all=True)
-                if not script_list:
-                    sys.exit(1)
-                continue
             
             # Run the selected script
             run_script(choice)
@@ -335,8 +291,6 @@ def main():
             print("   • Enter a script number (1-{}) to run another script".format(len(script_list)))
             print("   • Press Enter to exit")
             print("   • Type 'menu' to show the menu again")
-            if show_all_mode:
-                print("   • Type 'root' to show only root scripts")
             
             try:
                 next_action = input(f"\nNext action: ").strip()
@@ -346,15 +300,8 @@ def main():
                     print("👋 Goodbye!")
                     break
                 elif next_action.lower() == 'menu':
-                    # Show current menu again
-                    script_list = show_menu(show_all=show_all_mode)
-                    if not script_list:
-                        sys.exit(1)
-                    continue
-                elif next_action.lower() == 'root' and show_all_mode:
-                    # Switch back to root-only mode
-                    show_all_mode = False
-                    script_list = show_menu(show_all=False)
+                    # Show menu again
+                    script_list = show_menu()
                     if not script_list:
                         sys.exit(1)
                     continue

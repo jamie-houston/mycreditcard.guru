@@ -1,13 +1,27 @@
 {
   "extraction_summary": {
-    "total_cards": 20,
-    "cards_with_reward_categories": 10,
-    "cards_with_reward_tooltips": 20,
-    "cards_with_intro_offers": 3,
-    "extraction_method": "table_html_parsing",
-    "source_file": "nerdwallet_bonus_offers_table.html"
+    "total_cards_extracted": 20,
+    "valid_cards_count": 11,
+    "problematic_cards_count": 9,
+    "valid_cards_with_reward_categories": 7,
+    "valid_cards_with_reward_tooltips": 11,
+    "valid_cards_with_intro_offers": 10,
+    "issue_summary": {
+      "issuer_not_in_database": 3,
+      "missing_issuer": 6
+    },
+    "available_issuers": [
+      "Chase",
+      "Capital One",
+      "American Express",
+      "Bank of America",
+      "Citi"
+    ],
+    "extraction_method": "table_html_parsing_with_issuer_validation",
+    "source_file": "nerdwallet_bonus_offers_table.html",
+    "extraction_timestamp": "2025-06-16T23:08:02.254351"
   },
-  "cards": [
+  "valid_cards": [
     {
       "name": "Capital One Venture Rewards Credit Card",
       "issuer": "Capital One",
@@ -34,27 +48,6 @@
       "row_index": 0
     },
     {
-      "name": "Wells Fargo Active Cash® Card",
-      "issuer": "Wells Fargo",
-      "nerdwallet_rating": 5.0,
-      "best_for": "Best for Flat-rate cash back",
-      "annual_fee": 0.0,
-      "rewards_rate_display": "2%",
-      "reward_type_display": "Cashback",
-      "rewards_tooltip": "Earn unlimited 2% cash rewards on purchases",
-      "reward_categories": {},
-      "reward_type": "cash_back",
-      "intro_offer_display": "$200",
-      "intro_offer_tooltip": "Earn a $200 cash rewards bonus after spending $500 in purchases in the first 3 months.",
-      "signup_bonus_points": 0,
-      "signup_bonus_value": 0.0,
-      "signup_bonus_min_spend": 0.0,
-      "signup_bonus_max_months": 3,
-      "source": "nerdwallet_table",
-      "source_url": "https://www.nerdwallet.com/best/credit-cards/bonus-offers",
-      "row_index": 1
-    },
-    {
       "name": "Chase Sapphire Preferred® Card",
       "issuer": "Chase",
       "nerdwallet_rating": 5.0,
@@ -73,7 +66,7 @@
       "intro_offer_display": "60,000",
       "intro_offer_type": "points",
       "intro_offer_tooltip": "Earn 60,000 bonus points after you spend $5,000 on purchases in the first 3 months from account opening.",
-      "signup_bonus_points": 0,
+      "signup_bonus_points": 60000,
       "signup_bonus_value": 0.0,
       "signup_bonus_min_spend": 5000.0,
       "signup_bonus_max_months": 3,
@@ -127,8 +120,8 @@
       "intro_offer_display": "$200",
       "intro_offer_tooltip": "$200 online cash rewards bonus after you make at least $1,000 in purchases in the first 90 days of account opening.",
       "signup_bonus_points": 0,
-      "signup_bonus_value": 0.0,
-      "signup_bonus_min_spend": 0.0,
+      "signup_bonus_value": 200.0,
+      "signup_bonus_min_spend": 1000.0,
       "signup_bonus_max_months": 3,
       "source": "nerdwallet_table",
       "source_url": "https://www.nerdwallet.com/best/credit-cards/bonus-offers",
@@ -171,7 +164,7 @@
       "intro_offer_display": "50,000",
       "intro_offer_type": "miles",
       "intro_offer_tooltip": "Earn 50,000 American Airlines AAdvantage® bonus miles after spending $2,500 in purchases within the first 3 months of account opening.",
-      "signup_bonus_points": 0,
+      "signup_bonus_points": 50000,
       "signup_bonus_value": 0.0,
       "signup_bonus_min_spend": 0.0,
       "signup_bonus_max_months": 3,
@@ -196,9 +189,9 @@
       "intro_offer_display": "$250",
       "intro_offer_tooltip": "Earn a $250 statement credit after you spend $3,000 in purchases on your new Card within the first 6 months. Terms Apply.",
       "signup_bonus_points": 0,
-      "signup_bonus_value": 0.0,
+      "signup_bonus_value": 250.0,
       "signup_bonus_min_spend": 3000.0,
-      "signup_bonus_max_months": 3,
+      "signup_bonus_max_months": 6,
       "source": "nerdwallet_table",
       "source_url": "https://www.nerdwallet.com/best/credit-cards/bonus-offers",
       "row_index": 7
@@ -217,8 +210,8 @@
       "intro_offer_display": "60,000",
       "intro_offer_type": "points",
       "intro_offer_tooltip": "Earn 60,000 bonus ThankYou® Points after spending $4,000 in the first 3 months of account opening, redeemable for $600 in gift cards or travel rewards at thankyou.com.",
-      "signup_bonus_points": 0,
-      "signup_bonus_value": 0.0,
+      "signup_bonus_points": 60000,
+      "signup_bonus_value": 600.0,
       "signup_bonus_min_spend": 0.0,
       "signup_bonus_max_months": 3,
       "source": "nerdwallet_table",
@@ -239,13 +232,94 @@
       "intro_offer_display": "60,000",
       "intro_offer_type": "points",
       "intro_offer_tooltip": "Earn 60,000 Membership Rewards® Points after you spend $6,000 on eligible purchases on your new Card in your first 6 months of Card Membership. Terms Apply.",
-      "signup_bonus_points": 0,
+      "signup_bonus_points": 60000,
       "signup_bonus_value": 0.0,
       "signup_bonus_min_spend": 6000.0,
-      "signup_bonus_max_months": 3,
+      "signup_bonus_max_months": 6,
       "source": "nerdwallet_table",
       "source_url": "https://www.nerdwallet.com/best/credit-cards/bonus-offers",
       "row_index": 9
+    },
+    {
+      "name": "Hilton Honors American Express Surpass® Card",
+      "issuer": "American Express",
+      "nerdwallet_rating": 5.0,
+      "best_for": "Best for Hilton Hotels",
+      "annual_fee": 0.0,
+      "rewards_rate_display": "3x-12x",
+      "reward_type_display": "Points",
+      "rewards_tooltip": "Earn 12X Hilton Honors Bonus Points for each dollar of eligible purchases charged on your Card directly with a hotel or resort within the Hilton portfolio. Earn 6X Points for each dollar of purchases on your Card at U.S. restaurants, at U.S. supermarkets, and at U.S. gas stations. Earn 4X Points for each dollar on U.S. Online Retail Purchases. Earn 3X Points for all other eligible purchases on your Card. Terms Apply.",
+      "reward_categories": {},
+      "reward_type": "hotel",
+      "intro_offer_display": "130,000",
+      "intro_offer_type": "points",
+      "intro_offer_tooltip": "Earn 130,000 Hilton Honors Bonus Points after you spend $3,000 in purchases on the Card in the first 6 months of Card Membership. Offer Ends 8/13/2025. Terms Apply.",
+      "signup_bonus_points": 130000,
+      "signup_bonus_value": 0.0,
+      "signup_bonus_min_spend": 3000.0,
+      "signup_bonus_max_months": 6,
+      "source": "nerdwallet_table",
+      "source_url": "https://www.nerdwallet.com/best/credit-cards/bonus-offers",
+      "row_index": 11
+    },
+    {
+      "name": "Delta SkyMiles® Platinum American Express Card",
+      "issuer": "American Express",
+      "nerdwallet_rating": 4.8,
+      "best_for": "Best for Delta Air Lines",
+      "annual_fee": 350.0,
+      "rewards_rate_display": "1x-3x",
+      "reward_type_display": "Miles",
+      "rewards_tooltip": "Earn 3X Miles on Delta purchases and purchases made directly with hotels. Earn 2X Miles at restaurants worldwide including takeout and delivery in the U.S., and at U.S. supermarkets. Earn 1X Miles on all other eligible purchases. Terms Apply.",
+      "reward_categories": {
+        "Travel": 3.0,
+        "All Other Eligible Purchases": 1.0
+      },
+      "reward_type": "miles",
+      "intro_offer_display": "90,000",
+      "intro_offer_type": "miles",
+      "intro_offer_tooltip": "Earn 90,000 Bonus Miles after you spend $4,000 in eligible purchases on your new Card in your first 6 months of Card Membership. Terms Apply.",
+      "signup_bonus_points": 90000,
+      "signup_bonus_value": 0.0,
+      "signup_bonus_min_spend": 4000.0,
+      "signup_bonus_max_months": 6,
+      "source": "nerdwallet_table",
+      "source_url": "https://www.nerdwallet.com/best/credit-cards/bonus-offers",
+      "row_index": 18
+    }
+  ],
+  "problematic_cards": [
+    {
+      "name": "Wells Fargo Active Cash® Card",
+      "issuer": "Wells Fargo",
+      "nerdwallet_rating": 5.0,
+      "best_for": "Best for Flat-rate cash back",
+      "annual_fee": 0.0,
+      "rewards_rate_display": "2%",
+      "reward_type_display": "Cashback",
+      "rewards_tooltip": "Earn unlimited 2% cash rewards on purchases",
+      "reward_categories": {},
+      "reward_type": "cash_back",
+      "intro_offer_display": "$200",
+      "intro_offer_tooltip": "Earn a $200 cash rewards bonus after spending $500 in purchases in the first 3 months.",
+      "signup_bonus_points": 0,
+      "signup_bonus_value": 0.0,
+      "signup_bonus_min_spend": 0.0,
+      "signup_bonus_max_months": 3,
+      "source": "nerdwallet_table",
+      "source_url": "https://www.nerdwallet.com/best/credit-cards/bonus-offers",
+      "row_index": 1,
+      "issues": [
+        "issuer_not_in_database"
+      ],
+      "issue_reasons": {
+        "missing_name": "Card name is missing or unknown",
+        "missing_issuer": "Issuer information is missing or unknown",
+        "issuer_not_in_database": "Issuer \"Wells Fargo\" not found in database (available: Chase, Capital One, American Express, Bank of America, Citi)",
+        "missing_annual_fee": "Annual fee information is missing",
+        "missing_reward_info": "No reward categories or reward tooltip found",
+        "missing_intro_offer": "No intro offer information found"
+      }
     },
     {
       "name": "Discover it® Cash Back",
@@ -271,29 +345,18 @@
       "signup_bonus_max_months": 3,
       "source": "nerdwallet_table",
       "source_url": "https://www.nerdwallet.com/best/credit-cards/bonus-offers",
-      "row_index": 10
-    },
-    {
-      "name": "Hilton Honors American Express Surpass® Card",
-      "issuer": "American Express",
-      "nerdwallet_rating": 5.0,
-      "best_for": "Best for Hilton Hotels",
-      "annual_fee": 0.0,
-      "rewards_rate_display": "3x-12x",
-      "reward_type_display": "Points",
-      "rewards_tooltip": "Earn 12X Hilton Honors Bonus Points for each dollar of eligible purchases charged on your Card directly with a hotel or resort within the Hilton portfolio. Earn 6X Points for each dollar of purchases on your Card at U.S. restaurants, at U.S. supermarkets, and at U.S. gas stations. Earn 4X Points for each dollar on U.S. Online Retail Purchases. Earn 3X Points for all other eligible purchases on your Card. Terms Apply.",
-      "reward_categories": {},
-      "reward_type": "hotel",
-      "intro_offer_display": "130,000",
-      "intro_offer_type": "points",
-      "intro_offer_tooltip": "Earn 130,000 Hilton Honors Bonus Points after you spend $3,000 in purchases on the Card in the first 6 months of Card Membership. Offer Ends 8/13/2025. Terms Apply.",
-      "signup_bonus_points": 0,
-      "signup_bonus_value": 0.0,
-      "signup_bonus_min_spend": 3000.0,
-      "signup_bonus_max_months": 3,
-      "source": "nerdwallet_table",
-      "source_url": "https://www.nerdwallet.com/best/credit-cards/bonus-offers",
-      "row_index": 11
+      "row_index": 10,
+      "issues": [
+        "issuer_not_in_database"
+      ],
+      "issue_reasons": {
+        "missing_name": "Card name is missing or unknown",
+        "missing_issuer": "Issuer information is missing or unknown",
+        "issuer_not_in_database": "Issuer \"Discover\" not found in database (available: Chase, Capital One, American Express, Bank of America, Citi)",
+        "missing_annual_fee": "Annual fee information is missing",
+        "missing_reward_info": "No reward categories or reward tooltip found",
+        "missing_intro_offer": "No intro offer information found"
+      }
     },
     {
       "name": "Alaska Airlines Visa Signature® credit card",
@@ -308,13 +371,24 @@
       "reward_type": "miles",
       "intro_offer_display": "50,000 Miles + BOGO Ticket",
       "intro_offer_tooltip": "Get 50,000 bonus miles plus buy one ticket, get one for just the taxes and fees ($0 fare plus taxes and fees from $23) with this offer. To qualify, make $3,000 or more in purchases within the first 90 days of opening your account.",
-      "signup_bonus_points": 0,
+      "signup_bonus_points": 50000,
       "signup_bonus_value": 0.0,
-      "signup_bonus_min_spend": 0.0,
+      "signup_bonus_min_spend": 3000.0,
       "signup_bonus_max_months": 3,
       "source": "nerdwallet_table",
       "source_url": "https://www.nerdwallet.com/best/credit-cards/bonus-offers",
-      "row_index": 12
+      "row_index": 12,
+      "issues": [
+        "missing_issuer"
+      ],
+      "issue_reasons": {
+        "missing_name": "Card name is missing or unknown",
+        "missing_issuer": "Issuer information is missing or unknown",
+        "issuer_not_in_database": "Issuer \"Unknown\" not found in database (available: Chase, Capital One, American Express, Bank of America, Citi)",
+        "missing_annual_fee": "Annual fee information is missing",
+        "missing_reward_info": "No reward categories or reward tooltip found",
+        "missing_intro_offer": "No intro offer information found"
+      }
     },
     {
       "name": "IHG One Rewards Premier Credit Card",
@@ -329,13 +403,24 @@
       "reward_type": "hotel",
       "intro_offer_display": "5 Free Nights",
       "intro_offer_tooltip": "Earn 5 Free Nights after spending $5,000 on purchases in the first 3 months from account opening.",
-      "signup_bonus_points": 0,
+      "signup_bonus_points": 5,
       "signup_bonus_value": 0.0,
       "signup_bonus_min_spend": 0.0,
       "signup_bonus_max_months": 3,
       "source": "nerdwallet_table",
       "source_url": "https://www.nerdwallet.com/best/credit-cards/bonus-offers",
-      "row_index": 13
+      "row_index": 13,
+      "issues": [
+        "missing_issuer"
+      ],
+      "issue_reasons": {
+        "missing_name": "Card name is missing or unknown",
+        "missing_issuer": "Issuer information is missing or unknown",
+        "issuer_not_in_database": "Issuer \"Unknown\" not found in database (available: Chase, Capital One, American Express, Bank of America, Citi)",
+        "missing_annual_fee": "Annual fee information is missing",
+        "missing_reward_info": "No reward categories or reward tooltip found",
+        "missing_intro_offer": "No intro offer information found"
+      }
     },
     {
       "name": "The New United℠ Explorer Card",
@@ -351,13 +436,24 @@
       "intro_offer_display": "60,000",
       "intro_offer_type": "miles",
       "intro_offer_tooltip": "Limited-Time Offer: Earn 60,000 bonus miles after you spend $3,000 on purchases in the first 3 months your account is open.",
-      "signup_bonus_points": 0,
+      "signup_bonus_points": 60000,
       "signup_bonus_value": 0.0,
       "signup_bonus_min_spend": 3000.0,
       "signup_bonus_max_months": 3,
       "source": "nerdwallet_table",
       "source_url": "https://www.nerdwallet.com/best/credit-cards/bonus-offers",
-      "row_index": 14
+      "row_index": 14,
+      "issues": [
+        "missing_issuer"
+      ],
+      "issue_reasons": {
+        "missing_name": "Card name is missing or unknown",
+        "missing_issuer": "Issuer information is missing or unknown",
+        "issuer_not_in_database": "Issuer \"Unknown\" not found in database (available: Chase, Capital One, American Express, Bank of America, Citi)",
+        "missing_annual_fee": "Annual fee information is missing",
+        "missing_reward_info": "No reward categories or reward tooltip found",
+        "missing_intro_offer": "No intro offer information found"
+      }
     },
     {
       "name": "Marriott Bonvoy Boundless® Credit Card",
@@ -372,13 +468,24 @@
       "reward_type": "hotel",
       "intro_offer_display": "5 Free Night Awards",
       "intro_offer_tooltip": "Our best offer is back! Earn 5 Free Nights (each night valued up to 50,000 points) after spending $5,000 on eligible purchases within 3 months of account opening with your Marriott Bonvoy Boundless® Credit Card. Certain hotels have resort fees.",
-      "signup_bonus_points": 0,
+      "signup_bonus_points": 50000,
       "signup_bonus_value": 0.0,
       "signup_bonus_min_spend": 0.0,
       "signup_bonus_max_months": 3,
       "source": "nerdwallet_table",
       "source_url": "https://www.nerdwallet.com/best/credit-cards/bonus-offers",
-      "row_index": 15
+      "row_index": 15,
+      "issues": [
+        "missing_issuer"
+      ],
+      "issue_reasons": {
+        "missing_name": "Card name is missing or unknown",
+        "missing_issuer": "Issuer information is missing or unknown",
+        "issuer_not_in_database": "Issuer \"Unknown\" not found in database (available: Chase, Capital One, American Express, Bank of America, Citi)",
+        "missing_annual_fee": "Annual fee information is missing",
+        "missing_reward_info": "No reward categories or reward tooltip found",
+        "missing_intro_offer": "No intro offer information found"
+      }
     },
     {
       "name": "Southwest Rapid Rewards® Priority Credit Card",
@@ -399,13 +506,24 @@
       "intro_offer_display": "50,000",
       "intro_offer_type": "points",
       "intro_offer_tooltip": "Earn 50,000 bonus points after spending $1,000 on purchases in the first 3 months from account opening.",
-      "signup_bonus_points": 0,
+      "signup_bonus_points": 50000,
       "signup_bonus_value": 0.0,
       "signup_bonus_min_spend": 0.0,
       "signup_bonus_max_months": 3,
       "source": "nerdwallet_table",
       "source_url": "https://www.nerdwallet.com/best/credit-cards/bonus-offers",
-      "row_index": 16
+      "row_index": 16,
+      "issues": [
+        "missing_issuer"
+      ],
+      "issue_reasons": {
+        "missing_name": "Card name is missing or unknown",
+        "missing_issuer": "Issuer information is missing or unknown",
+        "issuer_not_in_database": "Issuer \"Unknown\" not found in database (available: Chase, Capital One, American Express, Bank of America, Citi)",
+        "missing_annual_fee": "Annual fee information is missing",
+        "missing_reward_info": "No reward categories or reward tooltip found",
+        "missing_intro_offer": "No intro offer information found"
+      }
     },
     {
       "name": "World of Hyatt Credit Card",
@@ -420,38 +538,24 @@
       "reward_type": "miles",
       "intro_offer_display": "Up to 60,000 Points",
       "intro_offer_tooltip": "Earn up to 60,000 Bonus Points. Earn 30,000 Bonus Points after you spend $3,000 on purchases in your first 3 months from account opening. Plus, up to 30,000 more Bonus Points by earning 2 Bonus Points total per $1 spent in the first 6 months from account opening on purchases that normally earn 1 Bonus Point, on up to $15,000 spent.",
-      "signup_bonus_points": 0,
+      "signup_bonus_points": 30000,
       "signup_bonus_value": 0.0,
       "signup_bonus_min_spend": 3000.0,
-      "signup_bonus_max_months": 3,
+      "signup_bonus_max_months": 6,
       "source": "nerdwallet_table",
       "source_url": "https://www.nerdwallet.com/best/credit-cards/bonus-offers",
-      "row_index": 17
-    },
-    {
-      "name": "Delta SkyMiles® Platinum American Express Card",
-      "issuer": "American Express",
-      "nerdwallet_rating": 4.8,
-      "best_for": "Best for Delta Air Lines",
-      "annual_fee": 350.0,
-      "rewards_rate_display": "1x-3x",
-      "reward_type_display": "Miles",
-      "rewards_tooltip": "Earn 3X Miles on Delta purchases and purchases made directly with hotels. Earn 2X Miles at restaurants worldwide including takeout and delivery in the U.S., and at U.S. supermarkets. Earn 1X Miles on all other eligible purchases. Terms Apply.",
-      "reward_categories": {
-        "Travel": 3.0,
-        "All Other Eligible Purchases": 1.0
-      },
-      "reward_type": "miles",
-      "intro_offer_display": "90,000",
-      "intro_offer_type": "miles",
-      "intro_offer_tooltip": "Earn 90,000 Bonus Miles after you spend $4,000 in eligible purchases on your new Card in your first 6 months of Card Membership. Terms Apply.",
-      "signup_bonus_points": 0,
-      "signup_bonus_value": 0.0,
-      "signup_bonus_min_spend": 4000.0,
-      "signup_bonus_max_months": 3,
-      "source": "nerdwallet_table",
-      "source_url": "https://www.nerdwallet.com/best/credit-cards/bonus-offers",
-      "row_index": 18
+      "row_index": 17,
+      "issues": [
+        "missing_issuer"
+      ],
+      "issue_reasons": {
+        "missing_name": "Card name is missing or unknown",
+        "missing_issuer": "Issuer information is missing or unknown",
+        "issuer_not_in_database": "Issuer \"Unknown\" not found in database (available: Chase, Capital One, American Express, Bank of America, Citi)",
+        "missing_annual_fee": "Annual fee information is missing",
+        "missing_reward_info": "No reward categories or reward tooltip found",
+        "missing_intro_offer": "No intro offer information found"
+      }
     },
     {
       "name": "Wells Fargo Autograph® Card",
@@ -470,13 +574,24 @@
       "intro_offer_display": "20,000",
       "intro_offer_type": "points",
       "intro_offer_tooltip": "Earn 20,000 bonus points when you spend $1,000 in purchases in the first 3 months - that's a $200 cash redemption value.",
-      "signup_bonus_points": 0,
-      "signup_bonus_value": 0.0,
+      "signup_bonus_points": 20000,
+      "signup_bonus_value": 200.0,
       "signup_bonus_min_spend": 1000.0,
       "signup_bonus_max_months": 3,
       "source": "nerdwallet_table",
       "source_url": "https://www.nerdwallet.com/best/credit-cards/bonus-offers",
-      "row_index": 19
+      "row_index": 19,
+      "issues": [
+        "issuer_not_in_database"
+      ],
+      "issue_reasons": {
+        "missing_name": "Card name is missing or unknown",
+        "missing_issuer": "Issuer information is missing or unknown",
+        "issuer_not_in_database": "Issuer \"Wells Fargo\" not found in database (available: Chase, Capital One, American Express, Bank of America, Citi)",
+        "missing_annual_fee": "Annual fee information is missing",
+        "missing_reward_info": "No reward categories or reward tooltip found",
+        "missing_intro_offer": "No intro offer information found"
+      }
     }
   ]
 }

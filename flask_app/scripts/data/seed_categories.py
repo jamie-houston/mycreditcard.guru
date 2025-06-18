@@ -1,8 +1,10 @@
 #!/usr/bin/env python
-"""Script to seed database with default categories for credit card rewards."""
+"""Script to seed database with default categories for credit card rewards and optionally import cards."""
 
 import os
 import sys
+import glob
+from pathlib import Path
 
 # Add flask_app directory to path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
@@ -18,7 +20,7 @@ DEFAULT_CATEGORIES = [
         'description': 'Restaurants, bars, cafes, and food delivery services',
         'icon': 'fas fa-utensils',
         'sort_order': 10,
-        'aliases': ['restaurants', 'restaurant', 'dining at restaurants', 'takeout', 'delivery service']
+        'aliases': ['restaurants', 'restaurant', 'dining at restaurants', 'takeout', 'delivery service', 'dining & restaurants']
     },
     {
         'name': 'travel',
@@ -26,7 +28,7 @@ DEFAULT_CATEGORIES = [
         'description': 'Airlines, hotels, rental cars, and travel booking services',
         'icon': 'fas fa-plane',
         'sort_order': 20,
-        'aliases': ['travel purchases', 'travel purchased', 'other travel', 'travel booked', 'hotels', 'hotel', 'rental cars', 'car rentals', 'flights', 'airfare', 'attractions']
+        'aliases': ['travel purchases', 'travel purchased', 'other travel', 'travel booked', 'hotels', 'hotel', 'rental cars', 'car rentals', 'flights', 'airfare', 'attractions', 'southwest purchases']
     },
     {
         'name': 'groceries',
@@ -106,7 +108,7 @@ DEFAULT_CATEGORIES = [
         'description': 'Phone, internet, and cable services',
         'icon': 'fas fa-phone',
         'sort_order': 120,
-        'aliases': []
+        'aliases': ['internet', 'phone', 'cable', 'cell phone', 'wireless']
     },
     {
         'name': 'utilities',
@@ -200,11 +202,82 @@ def seed_categories():
     print(f"✅ Seeded {created_count} categories, updated {updated_count} existing")
     return created_count
 
+def find_newest_output_file():
+    """Find the newest JSON file in the data/output directory."""
+    output_dir = Path(__file__).parent.parent.parent.parent / 'flask_app' / 'data' / 'output'
+    
+    if not output_dir.exists():
+        print(f"📁 Output directory not found: {output_dir}")
+        return None
+    
+    # Find all JSON files in the output directory
+    json_files = list(output_dir.glob("*.json"))
+    
+    if not json_files:
+        print(f"📄 No JSON files found in {output_dir}")
+        return None
+    
+    # Sort by modification time and get the newest
+    newest_file = max(json_files, key=lambda f: f.stat().st_mtime)
+    print(f"🔍 Found newest output file: {newest_file.name}")
+    return newest_file
+
+def import_sample_cards():
+    """Import some sample credit cards if no output files are available."""
+    from seed_credit_cards import seed_credit_cards
+    print("🎯 Importing sample credit cards...")
+    return seed_credit_cards()
+
+def import_cards_from_output():
+    """Import cards from the newest output file."""
+    from import_cards import import_cards
+    
+    newest_file = find_newest_output_file()
+    
+    if newest_file:
+        print(f"📥 Importing cards from: {newest_file.name}")
+        try:
+            import_cards(json_file=str(newest_file))
+            print("✅ Cards imported successfully!")
+            return True
+        except Exception as e:
+            print(f"❌ Error importing cards: {e}")
+            print("🔄 Falling back to sample cards...")
+            return import_sample_cards()
+    else:
+        print("📂 No output files found, importing sample cards...")
+        return import_sample_cards()
+
 def main():
-    """Main function to seed categories."""
+    """Main function to seed categories and optionally import cards."""
+    import argparse
+    
+    parser = argparse.ArgumentParser(description='Seed categories and optionally import cards')
+    parser.add_argument('--import-cards', action='store_true', 
+                       help='Import cards from newest output file or sample cards')
+    parser.add_argument('--sample-only', action='store_true',
+                       help='Only import sample cards, skip checking output files')
+    
+    args = parser.parse_args()
+    
     app = create_app('development')
     with app.app_context():
-        return seed_categories()
+        # Always seed categories first
+        print("🏷️  Seeding categories...")
+        created_categories = seed_categories()
+        
+        # Import cards if requested
+        if args.import_cards or args.sample_only:
+            print("\n" + "="*50)
+            if args.sample_only:
+                import_sample_cards()
+            else:
+                import_cards_from_output()
+        else:
+            print(f"\n💡 To also import cards, run with --import-cards")
+            print(f"   Example: python {Path(__file__).name} --import-cards")
+        
+        return 0
 
 if __name__ == '__main__':
     sys.exit(main()) 

@@ -111,9 +111,64 @@ def import_cards_from_json(json_file):
     """Import credit cards from a JSON file."""
     try:
         with open(json_file, 'r', encoding='utf-8') as f:
-            cards_data = json.load(f)
-        logger.info(f"Loaded {len(cards_data)} cards from {json_file}")
-        return cards_data
+            data = json.load(f)
+        
+        # Handle new structure with valid_cards and problematic_cards
+        if isinstance(data, dict):
+            if 'valid_cards' in data and 'problematic_cards' in data:
+                valid_cards = data.get('valid_cards', [])
+                problematic_cards = data.get('problematic_cards', [])
+                extraction_summary = data.get('extraction_summary', {})
+                
+                logger.info(f"📊 New categorized JSON structure detected:")
+                logger.info(f"  ✅ Valid cards (ready for import): {len(valid_cards)}")
+                logger.info(f"  ⚠️  Problematic cards (skipped): {len(problematic_cards)}")
+                
+                # Show extraction summary if available
+                if extraction_summary:
+                    logger.info(f"  📄 Source file: {extraction_summary.get('source_file', 'Unknown')}")
+                    logger.info(f"  🕒 Extracted: {extraction_summary.get('extraction_timestamp', 'Unknown')}")
+                    if 'available_issuers' in extraction_summary:
+                        issuers = extraction_summary['available_issuers']
+                        logger.info(f"  🏦 Available issuers: {', '.join(issuers)}")
+                
+                # Show detailed issue breakdown
+                if problematic_cards:
+                    logger.info(f"📋 Problematic cards will be skipped:")
+                    issue_counts = {}
+                    for card in problematic_cards:
+                        for issue in card.get('issues', []):
+                            issue_counts[issue] = issue_counts.get(issue, 0) + 1
+                    for issue, count in issue_counts.items():
+                        logger.info(f"    • {issue.replace('_', ' ').title()}: {count} cards")
+                    
+                    # Show a few examples
+                    logger.info(f"  📝 Example problematic cards:")
+                    for i, card in enumerate(problematic_cards[:3]):
+                        issues = ', '.join(card.get('issues', []))
+                        logger.info(f"    {i+1}. {card.get('name', 'Unknown')}: {issues}")
+                    if len(problematic_cards) > 3:
+                        logger.info(f"    ... and {len(problematic_cards) - 3} more")
+                
+                logger.info(f"🎯 Proceeding with import of {len(valid_cards)} valid cards only")
+                return valid_cards  # Only return valid cards for import
+            elif 'cards' in data:
+                # Old structure
+                cards_data = data['cards']
+                logger.info(f"Old JSON structure detected: {len(cards_data)} cards")
+                return cards_data
+            else:
+                # Assume it's a single card
+                logger.info(f"Single card structure detected")
+                return [data]
+        elif isinstance(data, list):
+            # Direct array of cards
+            logger.info(f"Direct array structure detected: {len(data)} cards")
+            return data
+        else:
+            logger.error(f"Unexpected JSON structure in {json_file}")
+            return []
+            
     except Exception as e:
         logger.error(f"Error loading cards from JSON file: {e}")
         return []

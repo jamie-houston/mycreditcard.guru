@@ -17,32 +17,61 @@ from app.models import CardIssuer
 def seed_issuers():
     """Seed the database with card issuers."""
     issuers_data = [
+        # Major US Credit Card Issuers (always include)
         'Chase',
         'Capital One', 
         'American Express',
-        'Citi',
         'Bank of America',
-        # 'Discover',
-        # 'Wells Fargo',
-        # 'U.S. Bank',
-        # 'Barclays',
-        # 'HSBC',
-        # 'PNC Bank',
-        # 'TD Bank',
-        # 'USAA',
-        # 'Navy Federal Credit Union',
-        # 'Alliant Credit Union'
+        'Citi',
+    ]
+    ignored_issuers = [
+        # Additional issuers commonly found in scraped data
+        'Discover',
+        'Wells Fargo',
+        'U.S. Bank',
+        'Barclays',
+        'HSBC',
+        'PNC Bank',
+        'TD Bank',
+        'USAA',
+        'Navy Federal Credit Union',
+        'Alliant Credit Union',
+        'Synchrony Bank',
+        'Marcus by Goldman Sachs',
+        'Citizens Bank',
+        'Fifth Third Bank',
+        'Regions Bank',
+        'SunTrust Bank',
+        'BB&T',
+        'KeyBank',
+        'Huntington Bank',
+        'First National Bank',
+        'BMO Harris Bank',
+        'BBVA',
+        'Comerica Bank',
+        'Zions Bank'
     ]
     
     created_count = 0
+    updated_count = 0
+    
     for name in issuers_data:
-        if not CardIssuer.query.filter_by(name=name).first():
+        existing_issuer = CardIssuer.query.filter_by(name=name).first()
+        if not existing_issuer:
             issuer = CardIssuer(name=name)
             db.session.add(issuer)
             created_count += 1
+            print(f"✅ Created issuer: {name}")
+        else:
+            updated_count += 1
+            print(f"⏭️  Skipped existing issuer: {name}")
     
     db.session.commit()
-    print(f"✅ Seeded {created_count} card issuers (skipped {len(issuers_data) - created_count} existing)")
+    print(f"\n📊 Summary:")
+    print(f"✅ Created {created_count} new card issuers")
+    print(f"⏭️  Skipped {updated_count} existing issuers")
+    print(f"🏦 Total issuers in database: {created_count + updated_count}")
+    
     return created_count
 
 def main():

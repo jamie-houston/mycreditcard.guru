@@ -1,14 +1,27 @@
 {
   "extraction_summary": {
-    "total_cards": 14,
-    "cards_with_reward_categories": 11,
-    "cards_with_reward_tooltips": 14,
-    "cards_with_intro_offers": 4,
-    "extraction_method": "table_html_parsing",
+    "total_cards_extracted": 14,
+    "valid_cards_count": 8,
+    "problematic_cards_count": 6,
+    "valid_cards_with_reward_categories": 8,
+    "valid_cards_with_reward_tooltips": 8,
+    "valid_cards_with_intro_offers": 6,
+    "issue_summary": {
+      "issuer_not_in_database": 2,
+      "missing_issuer": 4
+    },
+    "available_issuers": [
+      "Chase",
+      "Capital One",
+      "American Express",
+      "Bank of America",
+      "Citi"
+    ],
+    "extraction_method": "table_html_parsing_with_issuer_validation",
     "source_file": "nerdwallet_cash_back_table.html",
-    "extraction_timestamp": "2025-06-15T22:56:16.785861"
+    "extraction_timestamp": "2025-06-17T22:48:42.105830"
   },
-  "cards": [
+  "valid_cards": [
     {
       "name": "Chase Freedom Unlimited®",
       "issuer": "Chase",
@@ -33,27 +46,6 @@
       "source": "nerdwallet_table",
       "source_url": "https://www.nerdwallet.com/best/credit-cards/bonus-offers",
       "row_index": 0
-    },
-    {
-      "name": "Wells Fargo Active Cash® Card",
-      "issuer": "Wells Fargo",
-      "nerdwallet_rating": 5.0,
-      "best_for": "Best for Flat-rate cash back",
-      "annual_fee": 0.0,
-      "rewards_rate_display": "2%",
-      "reward_type_display": "Cashback",
-      "rewards_tooltip": "Earn unlimited 2% cash rewards on purchases",
-      "reward_categories": {},
-      "reward_type": "cash_back",
-      "intro_offer_display": "$200",
-      "intro_offer_tooltip": "Earn a $200 cash rewards bonus after spending $500 in purchases in the first 3 months.",
-      "signup_bonus_points": 0,
-      "signup_bonus_value": 0.0,
-      "signup_bonus_min_spend": 0.0,
-      "signup_bonus_max_months": 3,
-      "source": "nerdwallet_table",
-      "source_url": "https://www.nerdwallet.com/best/credit-cards/bonus-offers",
-      "row_index": 1
     },
     {
       "name": "Capital One Savor Cash Rewards Credit Card",
@@ -96,38 +88,12 @@
       "intro_offer_display": "$250",
       "intro_offer_tooltip": "Earn a $250 statement credit after you spend $3,000 in purchases on your new Card within the first 6 months. Terms Apply.",
       "signup_bonus_points": 0,
-      "signup_bonus_value": 0.0,
+      "signup_bonus_value": 250.0,
       "signup_bonus_min_spend": 3000.0,
-      "signup_bonus_max_months": 3,
+      "signup_bonus_max_months": 6,
       "source": "nerdwallet_table",
       "source_url": "https://www.nerdwallet.com/best/credit-cards/bonus-offers",
       "row_index": 3
-    },
-    {
-      "name": "Discover it® Cash Back",
-      "issuer": "Discover",
-      "nerdwallet_rating": 4.9,
-      "best_for": "Best for Quarterly categories + matching bonus",
-      "annual_fee": 0.0,
-      "rewards_rate_display": "1%-5%",
-      "reward_type_display": "Cashback",
-      "rewards_tooltip": "Earn 5% cash back on everyday purchases at different places you shop each quarter like grocery stores, restaurants, gas stations, and more, up to the quarterly maximum when you activate. Plus, earn unlimited 1% cash back on all other purchases.",
-      "reward_categories": {
-        "Groceries": 5.0,
-        "Other": 1.0,
-        "Dining & Restaurants": 5.0,
-        "Gas Stations": 5.0
-      },
-      "reward_type": "cash_back",
-      "intro_offer_display": "Cashback Match™",
-      "intro_offer_tooltip": "INTRO OFFER: Unlimited Cashback Match for all new cardmembers – only from Discover. Discover will automatically match all the cash back you’ve earned at the end of your first year! There’s no minimum spending or maximum rewards. You could turn $150 cash back into $300.",
-      "signup_bonus_points": 0,
-      "signup_bonus_value": 150.0,
-      "signup_bonus_min_spend": 0.0,
-      "signup_bonus_max_months": 3,
-      "source": "nerdwallet_table",
-      "source_url": "https://www.nerdwallet.com/best/credit-cards/bonus-offers",
-      "row_index": 4
     },
     {
       "name": "Blue Cash Everyday® Card from American Express",
@@ -145,9 +111,9 @@
       "intro_offer_display": "$200",
       "intro_offer_tooltip": "Earn a $200 statement credit after you spend $2,000 in purchases on your new Card within the first 6 months. Terms Apply.",
       "signup_bonus_points": 0,
-      "signup_bonus_value": 0.0,
+      "signup_bonus_value": 200.0,
       "signup_bonus_min_spend": 2000.0,
-      "signup_bonus_max_months": 3,
+      "signup_bonus_max_months": 6,
       "source": "nerdwallet_table",
       "source_url": "https://www.nerdwallet.com/best/credit-cards/bonus-offers",
       "row_index": 5
@@ -170,33 +136,10 @@
       "signup_bonus_points": 0,
       "signup_bonus_value": 200.0,
       "signup_bonus_min_spend": 1500.0,
-      "signup_bonus_max_months": 3,
+      "signup_bonus_max_months": 6,
       "source": "nerdwallet_table",
       "source_url": "https://www.nerdwallet.com/best/credit-cards/bonus-offers",
       "row_index": 6
-    },
-    {
-      "name": "Prime Visa",
-      "issuer": "Unknown",
-      "nerdwallet_rating": 4.6,
-      "best_for": "Best for Amazon Prime shoppers",
-      "annual_fee": 0.0,
-      "rewards_rate_display": "1%-5%",
-      "reward_type_display": "Cashback",
-      "rewards_tooltip": "Earn unlimited 5% back at Amazon.com, Amazon Fresh, Whole Foods Market, and on Chase Travel purchases with an eligible Prime membership, unlimited 2% back at gas stations, restaurants, and on local transit and commuting (including rideshare), and unlimited 1% on all other purchases.",
-      "reward_categories": {
-        "Other": 1.0
-      },
-      "reward_type": "points",
-      "intro_offer_display": "$150",
-      "intro_offer_tooltip": "Get a $150 Amazon Gift Card instantly upon approval exclusively for Prime members.",
-      "signup_bonus_points": 0,
-      "signup_bonus_value": 0.0,
-      "signup_bonus_min_spend": 0.0,
-      "signup_bonus_max_months": 3,
-      "source": "nerdwallet_table",
-      "source_url": "https://www.nerdwallet.com/best/credit-cards/bonus-offers",
-      "row_index": 7
     },
     {
       "name": "Capital One Quicksilver Cash Rewards Credit Card",
@@ -222,48 +165,6 @@
       "row_index": 8
     },
     {
-      "name": "Apple Card",
-      "issuer": "Unknown",
-      "nerdwallet_rating": 4.5,
-      "best_for": "Best for Apple Pay users",
-      "annual_fee": 0.0,
-      "rewards_rate_display": "1%-3%",
-      "reward_type_display": "Cashback",
-      "rewards_tooltip": "3% unlimited Daily Cash back on anything you buy from Apple and at select merchants like Nike, Uber, Walgreens, and more when you use Apple Card with Apple Pay. 2% unlimited Daily Cash back when you use Apple Card with Apple Pay. 1% unlimited Daily Cash back when you use the titanium card in stores or your virtual card number online. Merchant offers may change at any time.",
-      "reward_categories": {},
-      "reward_type": "cash_back",
-      "intro_offer_display": "N/A",
-      "signup_bonus_points": 0,
-      "signup_bonus_value": 0.0,
-      "signup_bonus_min_spend": 0.0,
-      "signup_bonus_max_months": 3,
-      "source": "nerdwallet_table",
-      "source_url": "https://www.nerdwallet.com/best/credit-cards/bonus-offers",
-      "row_index": 9
-    },
-    {
-      "name": "Synchrony Premier World Mastercard®",
-      "issuer": "Unknown",
-      "nerdwallet_rating": 4.5,
-      "best_for": "Best for High rate + hassle-free redemption",
-      "annual_fee": 0.0,
-      "rewards_rate_display": "2%",
-      "reward_type_display": "Cashback",
-      "rewards_tooltip": "Earn 2% cash back on every purchase.",
-      "reward_categories": {
-        "Other": 2.0
-      },
-      "reward_type": "cash_back",
-      "intro_offer_display": "None",
-      "signup_bonus_points": 0,
-      "signup_bonus_value": 0.0,
-      "signup_bonus_min_spend": 0.0,
-      "signup_bonus_max_months": 3,
-      "source": "nerdwallet_table",
-      "source_url": "https://www.nerdwallet.com/best/credit-cards/bonus-offers",
-      "row_index": 10
-    },
-    {
       "name": "Bank of America® Customized Cash Rewards credit card",
       "issuer": "Bank of America",
       "nerdwallet_rating": 4.0,
@@ -283,8 +184,8 @@
       "intro_offer_display": "$200",
       "intro_offer_tooltip": "$200 online cash rewards bonus after you make at least $1,000 in purchases in the first 90 days of account opening.",
       "signup_bonus_points": 0,
-      "signup_bonus_value": 0.0,
-      "signup_bonus_min_spend": 0.0,
+      "signup_bonus_value": 200.0,
+      "signup_bonus_min_spend": 1000.0,
       "signup_bonus_max_months": 3,
       "source": "nerdwallet_table",
       "source_url": "https://www.nerdwallet.com/best/credit-cards/bonus-offers",
@@ -315,6 +216,175 @@
       "source": "nerdwallet_table",
       "source_url": "https://www.nerdwallet.com/best/credit-cards/bonus-offers",
       "row_index": 12
+    }
+  ],
+  "problematic_cards": [
+    {
+      "name": "Wells Fargo Active Cash® Card",
+      "issuer": "Wells Fargo",
+      "nerdwallet_rating": 5.0,
+      "best_for": "Best for Flat-rate cash back",
+      "annual_fee": 0.0,
+      "rewards_rate_display": "2%",
+      "reward_type_display": "Cashback",
+      "rewards_tooltip": "Earn unlimited 2% cash rewards on purchases",
+      "reward_categories": {},
+      "reward_type": "cash_back",
+      "intro_offer_display": "$200",
+      "intro_offer_tooltip": "Earn a $200 cash rewards bonus after spending $500 in purchases in the first 3 months.",
+      "signup_bonus_points": 0,
+      "signup_bonus_value": 0.0,
+      "signup_bonus_min_spend": 0.0,
+      "signup_bonus_max_months": 3,
+      "source": "nerdwallet_table",
+      "source_url": "https://www.nerdwallet.com/best/credit-cards/bonus-offers",
+      "row_index": 1,
+      "issues": [
+        "issuer_not_in_database"
+      ],
+      "issue_reasons": {
+        "missing_name": "Card name is missing or unknown",
+        "missing_issuer": "Issuer information is missing or unknown",
+        "issuer_not_in_database": "Issuer \"Wells Fargo\" not found in database (available: Chase, Capital One, American Express, Bank of America, Citi)",
+        "missing_annual_fee": "Annual fee information is missing",
+        "missing_reward_info": "No reward categories or reward tooltip found",
+        "missing_intro_offer": "No intro offer information found"
+      }
+    },
+    {
+      "name": "Discover it® Cash Back",
+      "issuer": "Discover",
+      "nerdwallet_rating": 4.9,
+      "best_for": "Best for Quarterly categories + matching bonus",
+      "annual_fee": 0.0,
+      "rewards_rate_display": "1%-5%",
+      "reward_type_display": "Cashback",
+      "rewards_tooltip": "Earn 5% cash back on everyday purchases at different places you shop each quarter like grocery stores, restaurants, gas stations, and more, up to the quarterly maximum when you activate. Plus, earn unlimited 1% cash back on all other purchases.",
+      "reward_categories": {
+        "Groceries": 5.0,
+        "Other": 1.0,
+        "Dining & Restaurants": 5.0,
+        "Gas Stations": 5.0
+      },
+      "reward_type": "cash_back",
+      "intro_offer_display": "Cashback Match™",
+      "intro_offer_tooltip": "INTRO OFFER: Unlimited Cashback Match for all new cardmembers – only from Discover. Discover will automatically match all the cash back you’ve earned at the end of your first year! There’s no minimum spending or maximum rewards. You could turn $150 cash back into $300.",
+      "signup_bonus_points": 0,
+      "signup_bonus_value": 150.0,
+      "signup_bonus_min_spend": 0.0,
+      "signup_bonus_max_months": 3,
+      "source": "nerdwallet_table",
+      "source_url": "https://www.nerdwallet.com/best/credit-cards/bonus-offers",
+      "row_index": 4,
+      "issues": [
+        "issuer_not_in_database"
+      ],
+      "issue_reasons": {
+        "missing_name": "Card name is missing or unknown",
+        "missing_issuer": "Issuer information is missing or unknown",
+        "issuer_not_in_database": "Issuer \"Discover\" not found in database (available: Chase, Capital One, American Express, Bank of America, Citi)",
+        "missing_annual_fee": "Annual fee information is missing",
+        "missing_reward_info": "No reward categories or reward tooltip found",
+        "missing_intro_offer": "No intro offer information found"
+      }
+    },
+    {
+      "name": "Prime Visa",
+      "issuer": "Unknown",
+      "nerdwallet_rating": 4.6,
+      "best_for": "Best for Amazon Prime shoppers",
+      "annual_fee": 0.0,
+      "rewards_rate_display": "1%-5%",
+      "reward_type_display": "Cashback",
+      "rewards_tooltip": "Earn unlimited 5% back at Amazon.com, Amazon Fresh, Whole Foods Market, and on Chase Travel purchases with an eligible Prime membership, unlimited 2% back at gas stations, restaurants, and on local transit and commuting (including rideshare), and unlimited 1% on all other purchases.",
+      "reward_categories": {
+        "Other": 1.0
+      },
+      "reward_type": "points",
+      "intro_offer_display": "$150",
+      "intro_offer_tooltip": "Get a $150 Amazon Gift Card instantly upon approval exclusively for Prime members.",
+      "signup_bonus_points": 0,
+      "signup_bonus_value": 0.0,
+      "signup_bonus_min_spend": 0.0,
+      "signup_bonus_max_months": 3,
+      "source": "nerdwallet_table",
+      "source_url": "https://www.nerdwallet.com/best/credit-cards/bonus-offers",
+      "row_index": 7,
+      "issues": [
+        "missing_issuer"
+      ],
+      "issue_reasons": {
+        "missing_name": "Card name is missing or unknown",
+        "missing_issuer": "Issuer information is missing or unknown",
+        "issuer_not_in_database": "Issuer \"Unknown\" not found in database (available: Chase, Capital One, American Express, Bank of America, Citi)",
+        "missing_annual_fee": "Annual fee information is missing",
+        "missing_reward_info": "No reward categories or reward tooltip found",
+        "missing_intro_offer": "No intro offer information found"
+      }
+    },
+    {
+      "name": "Apple Card",
+      "issuer": "Unknown",
+      "nerdwallet_rating": 4.5,
+      "best_for": "Best for Apple Pay users",
+      "annual_fee": 0.0,
+      "rewards_rate_display": "1%-3%",
+      "reward_type_display": "Cashback",
+      "rewards_tooltip": "3% unlimited Daily Cash back on anything you buy from Apple and at select merchants like Nike, Uber, Walgreens, and more when you use Apple Card with Apple Pay. 2% unlimited Daily Cash back when you use Apple Card with Apple Pay. 1% unlimited Daily Cash back when you use the titanium card in stores or your virtual card number online. Merchant offers may change at any time.",
+      "reward_categories": {},
+      "reward_type": "cash_back",
+      "intro_offer_display": "N/A",
+      "signup_bonus_points": 0,
+      "signup_bonus_value": 0.0,
+      "signup_bonus_min_spend": 0.0,
+      "signup_bonus_max_months": 3,
+      "source": "nerdwallet_table",
+      "source_url": "https://www.nerdwallet.com/best/credit-cards/bonus-offers",
+      "row_index": 9,
+      "issues": [
+        "missing_issuer"
+      ],
+      "issue_reasons": {
+        "missing_name": "Card name is missing or unknown",
+        "missing_issuer": "Issuer information is missing or unknown",
+        "issuer_not_in_database": "Issuer \"Unknown\" not found in database (available: Chase, Capital One, American Express, Bank of America, Citi)",
+        "missing_annual_fee": "Annual fee information is missing",
+        "missing_reward_info": "No reward categories or reward tooltip found",
+        "missing_intro_offer": "No intro offer information found"
+      }
+    },
+    {
+      "name": "Synchrony Premier World Mastercard®",
+      "issuer": "Unknown",
+      "nerdwallet_rating": 4.5,
+      "best_for": "Best for High rate + hassle-free redemption",
+      "annual_fee": 0.0,
+      "rewards_rate_display": "2%",
+      "reward_type_display": "Cashback",
+      "rewards_tooltip": "Earn 2% cash back on every purchase.",
+      "reward_categories": {
+        "Other": 2.0
+      },
+      "reward_type": "cash_back",
+      "intro_offer_display": "None",
+      "signup_bonus_points": 0,
+      "signup_bonus_value": 0.0,
+      "signup_bonus_min_spend": 0.0,
+      "signup_bonus_max_months": 3,
+      "source": "nerdwallet_table",
+      "source_url": "https://www.nerdwallet.com/best/credit-cards/bonus-offers",
+      "row_index": 10,
+      "issues": [
+        "missing_issuer"
+      ],
+      "issue_reasons": {
+        "missing_name": "Card name is missing or unknown",
+        "missing_issuer": "Issuer information is missing or unknown",
+        "issuer_not_in_database": "Issuer \"Unknown\" not found in database (available: Chase, Capital One, American Express, Bank of America, Citi)",
+        "missing_annual_fee": "Annual fee information is missing",
+        "missing_reward_info": "No reward categories or reward tooltip found",
+        "missing_intro_offer": "No intro offer information found"
+      }
     },
     {
       "name": "PayPal Cashback Mastercard®",
@@ -334,7 +404,18 @@
       "signup_bonus_max_months": 3,
       "source": "nerdwallet_table",
       "source_url": "https://www.nerdwallet.com/best/credit-cards/bonus-offers",
-      "row_index": 13
+      "row_index": 13,
+      "issues": [
+        "missing_issuer"
+      ],
+      "issue_reasons": {
+        "missing_name": "Card name is missing or unknown",
+        "missing_issuer": "Issuer information is missing or unknown",
+        "issuer_not_in_database": "Issuer \"Unknown\" not found in database (available: Chase, Capital One, American Express, Bank of America, Citi)",
+        "missing_annual_fee": "Annual fee information is missing",
+        "missing_reward_info": "No reward categories or reward tooltip found",
+        "missing_intro_offer": "No intro offer information found"
+      }
     }
   ]
 }
