@@ -8,7 +8,7 @@ parent_dir = os.path.abspath(os.path.join(current_dir, '../..'))
 sys.path.insert(0, parent_dir)
 
 try:
-    from creditcard_roadmap.app.utils.field_mapper import map_scraped_card_to_model
+    from app.utils.field_mapper import map_scraped_card_to_model
 except ImportError:
     # Try alternative import if the first one fails
     from app.utils.field_mapper import map_scraped_card_to_model
