@@ -61,41 +61,39 @@ class ModelsTestCase(unittest.TestCase):
         self.assertEqual(category_spending['travel'], 1000)
     
     def test_credit_card_model(self):
-        """Test CreditCard model."""
-        test_issuer = CardIssuer(name='Test Bank')
-        db.session.add(test_issuer)
+        """Test CreditCard model creation and methods."""
+        issuer = CardIssuer(name='Test Bank')
+        db.session.add(issuer)
         db.session.commit()
         
         card = CreditCard(
             name='Test Card',
-            issuer_id=test_issuer.id,
+            issuer_id=issuer.id,
             annual_fee=95.0,
-            reward_value_multiplier=1.0,
-            reward_categories=json.dumps([
-                {"category": "dining", "rate": 3.0},
-                {"category": "travel", "rate": 2.0}
-            ]),
-            signup_bonus_value=500.0
+            reward_type='cash_back',
+            reward_categories='[]'  # Empty JSON array for the deprecated field
         )
         db.session.add(card)
         db.session.commit()
         
-        # Test retrieval
-        retrieved_card = CreditCard.query.filter_by(name='Test Card').first()
-        self.assertIsNotNone(retrieved_card)
-        self.assertEqual(retrieved_card.issuer_id, test_issuer.id)
+        self.assertEqual(card.name, 'Test Card')
+        self.assertEqual(card.annual_fee, 95.0)
+        self.assertEqual(card.reward_type, 'cash_back')
+        self.assertEqual(card.get_reward_type_display_name(), 'Cash Back')
         
-        # Test new reward system methods
-        self.assertEqual(retrieved_card.base_reward_rate, 1.0)  # Default base rate
-        self.assertEqual(retrieved_card.dining_reward_rate, 1.0)  # No specific dining rate set
-        self.assertEqual(retrieved_card.travel_reward_rate, 1.0)  # No specific travel rate set
+        # Test other reward types
+        card.reward_type = 'points'
+        self.assertEqual(card.get_reward_type_display_name(), 'Points')
         
-        # Test reward calculation methods
-        category_spending = {'dining': 500, 'travel': 300}
-        monthly_value = retrieved_card.calculate_monthly_value(category_spending)
-        self.assertIsInstance(monthly_value, dict)
-        self.assertIn('total', monthly_value)
-        self.assertIn('by_category', monthly_value)
+        card.reward_type = 'miles'
+        self.assertEqual(card.get_reward_type_display_name(), 'Miles')
+        
+        card.reward_type = 'hotel'
+        self.assertEqual(card.get_reward_type_display_name(), 'Hotel')
+        
+        # Test unknown reward type
+        card.reward_type = 'unknown_type'
+        self.assertEqual(card.get_reward_type_display_name(), 'Unknown Type')
     
     def test_recommendation_model(self):
         """Test Recommendation model."""

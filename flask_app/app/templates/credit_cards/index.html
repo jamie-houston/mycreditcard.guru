@@ -112,7 +112,7 @@
       <tr>
         <td>{{ card.name }}</td>
         <td>{{ card.issuer_obj.name }}</td>
-        <td>{{ card.reward_type }}</td>
+        <td>{{ card.get_reward_type_display_name() }}</td>
         <td data-sort-value="{{ card.annual_fee }}">
           ${{ "%.0f"|format(card.annual_fee) }}
         </td>

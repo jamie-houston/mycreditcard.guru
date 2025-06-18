@@ -33,13 +33,13 @@
       "reward_type_display": "Miles",
       "rewards_tooltip": "Earn unlimited 1.25X miles on every purchase, every day. Earn 5X miles on hotels and rental cars booked through Capital One Travel, where you'll get Capital One's best prices on thousands of trip options.",
       "reward_categories": {
-        "Other": 1.25
+        "Drugstores": 1.5
       },
       "reward_type": "miles",
       "intro_offer_display": "40,000",
       "intro_offer_type": "miles",
       "intro_offer_tooltip": "Earn a bonus of 40,000 miles once you spend $1,000 on purchases within 3 months from account opening, equal to $400 in travel.",
-      "signup_bonus_points": 40000,
+      "signup_bonus_points": 50000,
       "signup_bonus_value": 400.0,
       "signup_bonus_min_spend": 1000.0,
       "signup_bonus_max_months": 3,
@@ -188,9 +188,7 @@
       "source": "nerdwallet_table",
       "source_url": "https://www.nerdwallet.com/best/credit-cards/bonus-offers",
       "row_index": 1,
-      "issues": [
-        "issuer_not_in_database"
-      ],
+      "issues": ["issuer_not_in_database"],
       "issue_reasons": {
         "missing_name": "Card name is missing or unknown",
         "missing_issuer": "Issuer information is missing or unknown",
@@ -224,9 +222,7 @@
       "source": "nerdwallet_table",
       "source_url": "https://www.nerdwallet.com/best/credit-cards/bonus-offers",
       "row_index": 4,
-      "issues": [
-        "issuer_not_in_database"
-      ],
+      "issues": ["issuer_not_in_database"],
       "issue_reasons": {
         "missing_name": "Card name is missing or unknown",
         "missing_issuer": "Issuer information is missing or unknown",
@@ -253,10 +249,7 @@
       "source": "nerdwallet_table",
       "source_url": "https://www.nerdwallet.com/best/credit-cards/bonus-offers",
       "row_index": 5,
-      "issues": [
-        "issuer_not_in_database",
-        "missing_reward_info"
-      ],
+      "issues": ["issuer_not_in_database", "missing_reward_info"],
       "issue_reasons": {
         "missing_name": "Card name is missing or unknown",
         "missing_issuer": "Issuer information is missing or unknown",
@@ -291,9 +284,7 @@
       "source": "nerdwallet_table",
       "source_url": "https://www.nerdwallet.com/best/credit-cards/bonus-offers",
       "row_index": 6,
-      "issues": [
-        "issuer_not_in_database"
-      ],
+      "issues": ["issuer_not_in_database"],
       "issue_reasons": {
         "missing_name": "Card name is missing or unknown",
         "missing_issuer": "Issuer information is missing or unknown",
@@ -328,9 +319,7 @@
       "source": "nerdwallet_table",
       "source_url": "https://www.nerdwallet.com/best/credit-cards/bonus-offers",
       "row_index": 9,
-      "issues": [
-        "missing_issuer"
-      ],
+      "issues": ["missing_issuer"],
       "issue_reasons": {
         "missing_name": "Card name is missing or unknown",
         "missing_issuer": "Issuer information is missing or unknown",
@@ -361,9 +350,7 @@
       "source": "nerdwallet_table",
       "source_url": "https://www.nerdwallet.com/best/credit-cards/bonus-offers",
       "row_index": 10,
-      "issues": [
-        "missing_issuer"
-      ],
+      "issues": ["missing_issuer"],
       "issue_reasons": {
         "missing_name": "Card name is missing or unknown",
         "missing_issuer": "Issuer information is missing or unknown",

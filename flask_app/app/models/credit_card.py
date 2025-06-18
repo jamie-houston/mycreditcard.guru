@@ -245,9 +245,20 @@ class CreditCard(db.Model):
         if self.reward_type == 'cash_back':
             return f"${self.signup_bonus_value:.0f}"
         elif self.reward_type in ['points', 'miles', 'hotel']:
-            return f"{self.signup_bonus_points:,} {self.reward_type} (${self.signup_bonus_value:.0f})"
+            return f"{self.signup_bonus_points:,} {self.get_reward_type_display_name().lower()} (${self.signup_bonus_value:.0f})"
         else:
             return "Something mysterious (possibly a free llama)"
+    
+    def get_reward_type_display_name(self):
+        """Get the display name for the reward type."""
+        reward_type_mapping = {
+            'cash_back': 'Cash Back',
+            'points': 'Points',
+            'miles': 'Miles',
+            'hotel': 'Hotel',
+            'travel': 'Travel'
+        }
+        return reward_type_mapping.get(self.reward_type, self.reward_type.replace('_', ' ').title())
 
     # Backward compatibility properties
     @property

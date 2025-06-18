@@ -30,6 +30,10 @@
           <div class="col-md-6 mb-3">
             <strong>Annual Fee:</strong> ${{ "%.0f"|format(card.annual_fee) }}
           </div>
+          <div class="col-md-6 mb-3">
+            <strong>Reward Type:</strong> {{ card.get_reward_type_display_name()
+            }}
+          </div>
         </div>
 
         <!-- Signup Bonus Section -->

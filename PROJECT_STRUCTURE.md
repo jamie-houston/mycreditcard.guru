@@ -11,7 +11,6 @@ creditcard-roadmap/
 ├── scripts/             # Utility scripts and data processing tools
 ├── tests/               # Test files for scripts and utilities
 ├── data/                # Data files, JSON exports, and debug HTML files
-├── archive_old_app/     # Archived old application structure
 ├── requirements.txt     # Python dependencies
 ├── README.md           # Main project documentation
 └── Project Design.md   # Design documentation
@@ -65,19 +64,12 @@ python run.py
 ### Running Tests
 ```bash
 # Root level tests
-cd tests
-python -m pytest
-
-# Flask app tests  
-cd flask_app
-python -m pytest tests/
-```
+`python ./scripts/run_tests.py -y` to run all of the tests.
 
 ### Running Scripts
 ```bash
 # From root directory
-python scripts/extract_card_info.py
-python scripts/debug_parsing.py
+python scripts/run_python_scripts.py
 ```
 
 ## Import Path Notes
@@ -86,10 +78,3 @@ python scripts/debug_parsing.py
 - Scripts importing from `flask_app/` need to add the parent directory to `sys.path`
 - Tests in `tests/` have been updated to import from `scripts/` correctly
 - Flask app internal imports remain unchanged
-
-## Migration Notes
-
-- Old `app/` directory moved to `archive_old_app/`
-- Duplicate data files consolidated in `data/`
-- Empty root `migrations/` directory removed (active migrations in `flask_app/migrations/`)
-- All import paths updated to reflect new structure 
