@@ -28,8 +28,9 @@ cd flask_app && python -m pytest tests/ -v
 ### Database Management
 ```bash
 # From project root, use the Flask script runner:
-python scripts/run_flask_script.py data/reset_db.py    # Reset database
-python scripts/run_flask_script.py data/seed_db.py     # Seed with sample data
+python scripts/run_flask_script.py data/reset_db.py           # Reset database
+python scripts/run_flask_script.py data/seed_db.py            # Seed with sample data
+python scripts/run_flask_script.py data/seed_issuer_policies.py  # Seed issuer policies (Chase 5/24, etc.)
 python scripts/run_flask_script.py data/import_cards.py --json path/to/cards.json
 ```
 
@@ -43,16 +44,19 @@ python scripts/run_flask_script.py guided_scraping.py  # Interactive workflow
 
 ### Core Application Structure
 - **Flask App Factory Pattern**: App created via `create_app()` in `app/__init__.py`
-- **Blueprint Organization**: Features split into blueprints (`auth`, `recommendations`, `admin`, etc.)
+- **Blueprint Organization**: Features split into blueprints (`auth`, `recommendations`, `admin`, `roadmap`, etc.)
 - **SQLAlchemy 2.x**: Modern ORM with relationship-based queries
 - **Dual User System**: Supports both authenticated users and anonymous sessions
 
 ### Key Models and Relationships
 - **CreditCard**: Core entity with reward rates, annual fees, signup bonuses
+- **UserCard**: Junction table tracking user's owned cards with acquisition dates, bonus status
+- **IssuerPolicy**: Configurable application rules (Chase 5/24, Amex 2/90, etc.)
 - **Category**: Reward categories (dining, travel, gas, etc.) with flexible aliasing system
 - **CreditCardReward**: Junction table linking cards to reward categories with rates/limits
 - **UserProfile**: Spending patterns by category, constraints (max annual fee, card count)
 - **RecommendationEngine**: Calculates card value based on spending patterns and reward rates
+- **RoadmapEngine**: Advanced engine for portfolio optimization and application timing
 
 ### Recommendation Engine Logic
 - Monthly spending × reward rate × reward_value_multiplier = card value
@@ -60,6 +64,15 @@ python scripts/run_flask_script.py guided_scraping.py  # Interactive workflow
 - Filters by max annual fee constraint and maximum number of cards
 - Prioritizes cards with highest reward rates for user's spending categories
 - Supports both travel and cash back reward types
+
+### Phase 2: Roadmap Engine Features
+- **Portfolio Management**: Track owned cards with acquisition dates and bonus status
+- **Current Usage Roadmap**: Shows which card to use for each spending category
+- **Application Strategy**: Recommends when to apply for new cards considering issuer policies
+- **Cancellation Recommendations**: Identifies cards with poor value proposition
+- **Bonus Optimization**: Tracks signup bonus deadlines and spending requirements
+- **Policy Compliance**: Respects issuer rules like Chase 5/24, Amex 2/90, etc.
+- **Timeline Generation**: Creates optimal application schedule based on spending velocity
 
 ### Data Flow
 1. **Web Scraping**: NerdWallet data → timestamped JSON files in `data/output/`

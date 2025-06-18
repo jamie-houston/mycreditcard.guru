@@ -157,6 +157,10 @@ def create_app(config_name=None):
     from app.routes.issuers import issuers as issuers_blueprint
     app.register_blueprint(issuers_blueprint, url_prefix='/issuers')
     
+    # Register roadmap blueprint
+    from app.routes.roadmap import roadmap as roadmap_blueprint
+    app.register_blueprint(roadmap_blueprint, url_prefix='/roadmap')
+    
     # Add template context processors
     @app.context_processor
     def utility_processor():

@@ -1,0 +1,201 @@
+{% extends "base.html" %}
+
+{% block title %}Credit Card Portfolio{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="mb-4">
+                <i class="fas fa-credit-card"></i>
+                Your Credit Card Portfolio
+            </h1>
+        </div>
+    </div>
+
+    {% if user_cards %}
+        <!-- Portfolio Summary -->
+        {% if current_roadmap.portfolio_summary %}
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h4><i class="fas fa-chart-line"></i> Portfolio Summary</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="text-center">
+                                    <h5 class="text-success">${{ "%.2f"|format(current_roadmap.portfolio_summary.total_annual_value) }}</h5>
+                                    <small class="text-muted">Annual Rewards Value</small>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="text-center">
+                                    <h5 class="text-danger">${{ "%.2f"|format(current_roadmap.portfolio_summary.total_annual_fees) }}</h5>
+                                    <small class="text-muted">Annual Fees</small>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="text-center">
+                                    <h5 class="{% if current_roadmap.portfolio_summary.net_annual_value > 0 %}text-success{% else %}text-danger{% endif %}">
+                                        ${{ "%.2f"|format(current_roadmap.portfolio_summary.net_annual_value) }}
+                                    </h5>
+                                    <small class="text-muted">Net Annual Value</small>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="text-center">
+                                    <h5 class="text-info">{{ current_roadmap.portfolio_summary.active_cards_count }}</h5>
+                                    <small class="text-muted">Active Cards</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Current Usage Roadmap -->
+        {% if current_roadmap.category_recommendations %}
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h4><i class="fas fa-map-marked-alt"></i> Optimal Card Usage by Category</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Spending Category</th>
+                                        <th>Recommended Card</th>
+                                        <th>Monthly Value</th>
+                                        <th>Annual Value</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for category, rec in current_roadmap.category_recommendations.items() %}
+                                    <tr>
+                                        <td>
+                                            <span class="badge badge-primary">{{ category.title() }}</span>
+                                        </td>
+                                        <td>
+                                            <strong>{{ rec.card.credit_card_name }}</strong>
+                                            <br>
+                                            <small class="text-muted">{{ rec.card.credit_card_issuer }}</small>
+                                        </td>
+                                        <td class="text-success">${{ "%.2f"|format(rec.monthly_value) }}</td>
+                                        <td class="text-success">${{ "%.2f"|format(rec.annual_value) }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Card Portfolio Details -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h4><i class="fas fa-credit-card"></i> Your Cards</h4>
+                        <a href="{{ url_for('roadmap.add_card') }}" class="btn btn-primary">
+                            <i class="fas fa-plus"></i> Add Card
+                        </a>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            {% for user_card in user_cards %}
+                            <div class="col-md-6 col-lg-4 mb-3">
+                                <div class="card {% if not user_card.is_active %}bg-light{% endif %}">
+                                    <div class="card-body">
+                                        <h6 class="card-title">
+                                            {{ user_card.credit_card.name }}
+                                            {% if not user_card.is_active %}
+                                                <span class="badge badge-secondary">Cancelled</span>
+                                            {% endif %}
+                                        </h6>
+                                        <p class="card-text">
+                                            <small class="text-muted">{{ user_card.credit_card.issuer_obj.name }}</small><br>
+                                            <strong>Acquired:</strong> {{ user_card.date_acquired.strftime('%m/%d/%Y') }}<br>
+                                            <strong>Annual Fee:</strong> ${{ user_card.credit_card.annual_fee }}<br>
+                                            
+                                            {% if user_card.effective_signup_bonus_value > 0 %}
+                                                <strong>Signup Bonus:</strong> 
+                                                {% if user_card.bonus_earned %}
+                                                    <span class="text-success">✓ Earned (${{ user_card.effective_signup_bonus_value }})</span>
+                                                {% elif user_card.is_signup_bonus_expired %}
+                                                    <span class="text-danger">✗ Expired</span>
+                                                {% else %}
+                                                    <span class="text-warning">Pending (${{ user_card.effective_signup_bonus_value }})</span>
+                                                    {% if user_card.signup_bonus_deadline %}
+                                                        <br><small>Deadline: {{ user_card.signup_bonus_deadline.strftime('%m/%d/%Y') }}</small>
+                                                    {% endif %}
+                                                {% endif %}
+                                            {% endif %}
+                                        </p>
+                                        
+                                        <!-- Quick update form -->
+                                        <form method="POST" action="{{ url_for('roadmap.update_card', user_card_id=user_card.id) }}" class="mt-2">
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input" type="checkbox" name="bonus_earned" 
+                                                       {% if user_card.bonus_earned %}checked{% endif %}
+                                                       onchange="this.form.submit()">
+                                                <label class="form-check-label">Bonus Earned</label>
+                                            </div>
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input" type="checkbox" name="is_active" 
+                                                       {% if user_card.is_active %}checked{% endif %}
+                                                       onchange="this.form.submit()">
+                                                <label class="form-check-label">Active</label>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <!-- Empty portfolio state -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body text-center py-5">
+                        <i class="fas fa-credit-card fa-4x text-muted mb-3"></i>
+                        <h4>No Credit Cards in Your Portfolio</h4>
+                        <p class="text-muted">Start building your credit card portfolio to get personalized recommendations.</p>
+                        <a href="{{ url_for('roadmap.add_card') }}" class="btn btn-primary">
+                            <i class="fas fa-plus"></i> Add Your First Card
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- Navigation -->
+    <div class="row mt-4">
+        <div class="col-12 text-center">
+            <a href="{{ url_for('roadmap.recommendations') }}" class="btn btn-info mr-3">
+                <i class="fas fa-lightbulb"></i> View Recommendations
+            </a>
+            {% if user_profile %}
+                <a href="{{ url_for('user_data.profile') }}" class="btn btn-secondary">
+                    <i class="fas fa-user-edit"></i> Update Spending Profile
+                </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

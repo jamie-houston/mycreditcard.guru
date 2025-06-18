@@ -9,8 +9,10 @@ from app.models.profile import CreditCardProfile
 from app.models.credit_card import CreditCard, CardIssuer
 from app.models.goal import Goal
 
-# Import User last as it references the other models
+# Import User-related models
 from app.models.user import User
+from app.models.user_card import UserCard
+from app.models.issuer_policy import IssuerPolicy
 
 # Define __all__ to control what gets imported with 'from app.models import *'
-__all__ = ['User', 'CreditCardProfile', 'CreditCard', 'Category', 'CreditCardReward', 'Goal'] 
+__all__ = ['User', 'CreditCardProfile', 'CreditCard', 'CardIssuer', 'Category', 'CreditCardReward', 'Goal', 'UserCard', 'IssuerPolicy'] 

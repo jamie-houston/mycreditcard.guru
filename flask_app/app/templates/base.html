@@ -76,6 +76,56 @@
             </li>
             <li class="nav-item dropdown">
               <a
+                class="nav-link dropdown-toggle {% if 'roadmap.' in request.endpoint %}active{% endif %}"
+                href="#"
+                id="roadmapDropdown"
+                role="button"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+              >
+                <i class="fas fa-map-marked-alt me-1"></i> My Roadmap
+              </a>
+              <ul
+                class="dropdown-menu"
+                aria-labelledby="roadmapDropdown"
+              >
+                <li>
+                  <a
+                    class="dropdown-item"
+                    href="{{ url_for('roadmap.portfolio') }}"
+                  >
+                    <i class="fas fa-credit-card me-2"></i> My Portfolio
+                  </a>
+                </li>
+                <li>
+                  <a
+                    class="dropdown-item"
+                    href="{{ url_for('roadmap.recommendations') }}"
+                  >
+                    <i class="fas fa-lightbulb me-2"></i> Recommendations
+                  </a>
+                </li>
+                <li>
+                  <a
+                    class="dropdown-item"
+                    href="{{ url_for('roadmap.add_card') }}"
+                  >
+                    <i class="fas fa-plus me-2"></i> Add Card
+                  </a>
+                </li>
+                <li><hr class="dropdown-divider" /></li>
+                <li>
+                  <a
+                    class="dropdown-item"
+                    href="{{ url_for('user_data.profile') }}"
+                  >
+                    <i class="fas fa-user-edit me-2"></i> Update Profile
+                  </a>
+                </li>
+              </ul>
+            </li>
+            <li class="nav-item dropdown">
+              <a
                 class="nav-link dropdown-toggle {% if 'recommendations.' in request.endpoint or 'user_data.profile' in request.endpoint %}active{% endif %}"
                 href="#"
                 id="recommendationsDropdown"
@@ -83,7 +133,7 @@
                 data-bs-toggle="dropdown"
                 aria-expanded="false"
               >
-                <i class="fas fa-star me-1"></i> Recommendations
+                <i class="fas fa-star me-1"></i> Quick Recommendations
               </a>
               <ul
                 class="dropdown-menu"

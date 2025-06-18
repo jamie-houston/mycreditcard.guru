@@ -1,0 +1,285 @@
+{% extends "base.html" %}
+
+{% block title %}Roadmap Recommendations{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="mb-4">
+                <i class="fas fa-lightbulb"></i>
+                Your Credit Card Roadmap
+            </h1>
+        </div>
+    </div>
+
+    <!-- Application Timeline -->
+    {% if timeline %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4><i class="fas fa-calendar-alt"></i> Recommended Application Timeline</h4>
+                </div>
+                <div class="card-body">
+                    <div class="timeline">
+                        {% for event in timeline %}
+                        <div class="timeline-item">
+                            <div class="timeline-marker bg-primary"></div>
+                            <div class="timeline-content">
+                                <h6 class="timeline-date">{{ event.date.strftime('%B %d, %Y') }}</h6>
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h6 class="card-title">
+                                            {% if event.action == 'apply' %}
+                                                Apply for {{ event.card.name }}
+                                            {% endif %}
+                                        </h6>
+                                        <p class="card-text">
+                                            <strong>Expected Annual Value:</strong> ${{ "%.2f"|format(event.expected_annual_value) }}<br>
+                                            {% if event.minimum_spend_required > 0 %}
+                                                <strong>Minimum Spend:</strong> ${{ "%.0f"|format(event.minimum_spend_required) }}<br>
+                                                <strong>Estimated Completion:</strong> {{ event.estimated_spend_completion.strftime('%B %d, %Y') }}<br>
+                                            {% endif %}
+                                            <small class="text-muted">{{ event.reason }}</small>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Cards to Apply For -->
+    {% if recommendations.cards_to_apply %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4><i class="fas fa-plus-circle"></i> Recommended Cards to Apply For</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        {% for rec in recommendations.cards_to_apply %}
+                        <div class="col-md-6 col-lg-4 mb-3">
+                            <div class="card border-{% if rec.priority == 'high' %}success{% else %}info{% endif %}">
+                                <div class="card-body">
+                                    <h6 class="card-title">{{ rec.card.name }}</h6>
+                                    <p class="card-text">
+                                        <strong>Annual Value:</strong> 
+                                        <span class="text-success">${{ "%.2f"|format(rec.annual_value) }}</span><br>
+                                        <strong>Signup Bonus:</strong> ${{ "%.2f"|format(rec.signup_bonus_value) }}<br>
+                                        <strong>Annual Fee:</strong> ${{ rec.annual_fee }}<br>
+                                        
+                                        {% if rec.can_apply_now %}
+                                            <span class="badge badge-success">Can Apply Now</span>
+                                        {% else %}
+                                            <span class="badge badge-warning">Policy Restrictions</span>
+                                            {% if rec.next_eligible_date %}
+                                                <br><small>Eligible: {{ rec.next_eligible_date.strftime('%m/%d/%Y') }}</small>
+                                            {% endif %}
+                                        {% endif %}
+                                    </p>
+                                    
+                                    {% if not rec.can_apply_now and rec.policy_restrictions %}
+                                        <div class="mt-2">
+                                            <small class="text-muted">
+                                                <strong>Restrictions:</strong><br>
+                                                {% for restriction in rec.policy_restrictions %}
+                                                    • {{ restriction.policy_name }}: {{ restriction.result.reason }}<br>
+                                                {% endfor %}
+                                            </small>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Cards to Cancel -->
+    {% if recommendations.cards_to_cancel %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4><i class="fas fa-times-circle"></i> Consider Cancelling These Cards</h4>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Card</th>
+                                    <th>Annual Fee</th>
+                                    <th>Annual Value</th>
+                                    <th>Net Loss</th>
+                                    <th>Reason</th>
+                                    <th>Priority</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for cancel_rec in recommendations.cards_to_cancel %}
+                                <tr>
+                                    <td>
+                                        <strong>{{ cancel_rec.card.credit_card_name }}</strong><br>
+                                        <small class="text-muted">{{ cancel_rec.card.credit_card_issuer }}</small>
+                                    </td>
+                                    <td class="text-danger">${{ cancel_rec.annual_fee }}</td>
+                                    <td class="text-success">${{ "%.2f"|format(cancel_rec.annual_value) }}</td>
+                                    <td class="text-danger">${{ "%.2f"|format(cancel_rec.annual_fee - cancel_rec.annual_value) }}</td>
+                                    <td><small>{{ cancel_rec.reason }}</small></td>
+                                    <td>
+                                        <span class="badge badge-{% if cancel_rec.priority == 'high' %}danger{% else %}warning{% endif %}">
+                                            {{ cancel_rec.priority.title() }}
+                                        </span>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Bonus Opportunities -->
+    {% if recommendations.bonus_opportunities %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4><i class="fas fa-gift"></i> Signup Bonus Opportunities</h4>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Card</th>
+                                    <th>Bonus Value</th>
+                                    <th>Minimum Spend</th>
+                                    <th>Time to Complete</th>
+                                    <th>Time Remaining</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for bonus in recommendations.bonus_opportunities %}
+                                <tr class="{% if not bonus.is_achievable %}table-warning{% endif %}">
+                                    <td>
+                                        <strong>{{ bonus.card.credit_card_name }}</strong><br>
+                                        <small class="text-muted">{{ bonus.card.credit_card_issuer }}</small>
+                                    </td>
+                                    <td class="text-success">${{ "%.2f"|format(bonus.bonus_value) }}</td>
+                                    <td>${{ "%.0f"|format(bonus.min_spend_required) }}</td>
+                                    <td>{{ "%.1f"|format(bonus.months_to_complete) }} months</td>
+                                    <td>{{ "%.1f"|format(bonus.months_until_deadline) }} months</td>
+                                    <td>
+                                        {% if bonus.is_achievable %}
+                                            <span class="badge badge-success">Achievable</span>
+                                        {% else %}
+                                            <span class="badge badge-warning">At Risk</span>
+                                        {% endif %}
+                                        {% if bonus.priority == 'high' %}
+                                            <span class="badge badge-danger">Urgent</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- No Recommendations -->
+    {% if not recommendations.cards_to_apply and not recommendations.cards_to_cancel and not recommendations.bonus_opportunities %}
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body text-center py-5">
+                    <i class="fas fa-check-circle fa-4x text-success mb-3"></i>
+                    <h4>Your Portfolio Looks Optimized!</h4>
+                    <p class="text-muted">We don't have any major recommendations at this time. Keep monitoring your spending patterns and check back periodically.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Navigation -->
+    <div class="row mt-4">
+        <div class="col-12 text-center">
+            <a href="{{ url_for('roadmap.portfolio') }}" class="btn btn-primary mr-3">
+                <i class="fas fa-credit-card"></i> View Portfolio
+            </a>
+            <a href="{{ url_for('roadmap.add_card') }}" class="btn btn-success">
+                <i class="fas fa-plus"></i> Add Card
+            </a>
+        </div>
+    </div>
+</div>
+
+<style>
+.timeline {
+    position: relative;
+    padding-left: 30px;
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: 30px;
+}
+
+.timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -15px;
+    top: 0;
+    bottom: -30px;
+    width: 2px;
+    background-color: #dee2e6;
+}
+
+.timeline-item:last-child::before {
+    bottom: 0;
+}
+
+.timeline-marker {
+    position: absolute;
+    left: -22px;
+    top: 8px;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    box-shadow: 0 0 0 2px #007bff;
+}
+
+.timeline-content {
+    margin-left: 20px;
+}
+
+.timeline-date {
+    color: #6c757d;
+    font-size: 0.9rem;
+    margin-bottom: 10px;
+}
+</style>
+{% endblock %}
