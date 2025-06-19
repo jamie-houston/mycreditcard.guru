@@ -636,6 +636,76 @@ def delete(id):
     
     return redirect(url_for('credit_cards.index'))
 
+@credit_cards.route('/export')
+@admin_required
+def export_cards():
+    """Export all credit cards to JSON file with timestamp."""
+    try:
+        # Get all credit cards with their relationships
+        cards = safe_query(CreditCard).all()
+        
+        # Build export data
+        export_data = {
+            'export_info': {
+                'timestamp': datetime.utcnow().isoformat(),
+                'total_cards': len(cards),
+                'exported_by': current_user.email if current_user.email else 'anonymous'
+            },
+            'cards': []
+        }
+        
+        for card in cards:
+            # Get reward categories for this card
+            reward_categories = {}
+            for reward in card.rewards:
+                reward_categories[reward.category.name] = reward.reward_percent
+            
+            # Parse special offers from JSON
+            try:
+                special_offers = json.loads(card.special_offers) if card.special_offers else []
+            except (json.JSONDecodeError, TypeError):
+                special_offers = []
+            
+            card_data = {
+                'name': card.name,
+                'issuer': card.issuer_obj.name,
+                'annual_fee': card.annual_fee,
+                'reward_type': card.reward_type,
+                'reward_value_multiplier': card.reward_value_multiplier,
+                'signup_bonus_points': card.signup_bonus_points,
+                'signup_bonus_value': card.signup_bonus_value,
+                'signup_bonus_min_spend': card.signup_bonus_min_spend,
+                'signup_bonus_max_months': card.signup_bonus_max_months,
+                'reward_categories': reward_categories,
+                'special_offers': special_offers,
+                'source': card.source,
+                'source_url': card.source_url,
+                'import_date': card.import_date.isoformat() if card.import_date else None
+            }
+            export_data['cards'].append(card_data)
+        
+        # Create timestamp for filename
+        timestamp = datetime.now().strftime('%Y%m%d%H%M')
+        filename = f"{timestamp}_exported_cards.json"
+        
+        # Ensure data/output directory exists
+        base_dir = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+        output_dir = os.path.join(base_dir, 'data', 'output')
+        os.makedirs(output_dir, exist_ok=True)
+        
+        # Write export file
+        file_path = os.path.join(output_dir, filename)
+        with open(file_path, 'w', encoding='utf-8') as f:
+            json.dump(export_data, f, indent=2, ensure_ascii=False)
+        
+        flash(f"Successfully exported {len(cards)} credit cards to {filename}", "success")
+        return redirect(url_for('credit_cards.index'))
+        
+    except Exception as e:
+        flash(f"Error exporting credit cards: {str(e)}", "danger")
+        return redirect(url_for('credit_cards.index'))
+
+
 def get_issuer_by_name(name: str):
     if not name:
         return None

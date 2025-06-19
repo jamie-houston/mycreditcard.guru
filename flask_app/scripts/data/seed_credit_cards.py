@@ -107,47 +107,6 @@ def seed_credit_cards():
     # Sample credit cards data based on user specifications
     cards_data = [
         {
-            "name": "Chase Sapphire Reserve Card",
-            "issuer": "Chase",
-            "annual_fee": 550,
-            "reward_type": "points",
-            "reward_value_multiplier": 1.5,
-            "signup_bonus_points": 60000,
-            "signup_bonus_value": 900,
-            "signup_bonus_min_spend": 4000,
-            "signup_bonus_max_months": 3,
-            "reward_categories": [
-                {"category": "other", "rate": 1.0},
-                {"category": "dining", "rate": 3.0},
-                {"category": "travel", "rate": 3.0}
-            ],
-            "special_offers": [
-                "Premium travel benefits",
-                "Airport lounge access",
-                "$300 annual travel credit"
-            ]
-        },
-        {
-            "name": "Chase Freedom Unlimited Card",
-            "issuer": "Chase",
-            "annual_fee": 0,
-            "reward_type": "cash_back",
-            "reward_value_multiplier": 1,
-            "signup_bonus_points": 20000,
-            "signup_bonus_value": 200,
-            "signup_bonus_min_spend": 500,
-            "signup_bonus_max_months": 3,
-            "reward_categories": [
-                {"category": "other", "rate": 1.0},
-                {"category": "dining", "rate": 3.0},
-                {"category": "drugstores", "rate": 3.0}
-            ],
-            "special_offers": [
-                "No annual fee",
-                "Flat rate cash back"
-            ]
-        },
-        {
             "name": "Chase Ink Business Unlimited Card",
             "issuer": "Chase",
             "annual_fee": 0,
@@ -549,6 +508,120 @@ def seed_credit_cards_auto():
         return seed_credit_cards()
 
 
+def get_import_files():
+    """Get list of available import files from data/import directory."""
+    base_dir = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+    import_dir = os.path.join(base_dir, 'data', 'import')
+    
+    # Also check 'imput' directory in case it exists
+    imput_dir = os.path.join(base_dir, 'data', 'imput')
+    
+    json_files = []
+    
+    # Check import directory
+    if os.path.exists(import_dir):
+        json_files.extend(glob.glob(os.path.join(import_dir, '*.json')))
+    
+    # Check imput directory (typo but may exist)
+    if os.path.exists(imput_dir):
+        json_files.extend(glob.glob(os.path.join(imput_dir, '*.json')))
+    
+    return sorted(json_files)
+
+
+def display_file_menu():
+    """Display available import files and get user selection."""
+    json_files = get_import_files()
+    
+    if not json_files:
+        print("❌ No JSON files found in data/import or data/imput directories")
+        return None
+    
+    print("\n📁 Available import files:")
+    print("=" * 50)
+    
+    for i, file_path in enumerate(json_files, 1):
+        filename = os.path.basename(file_path)
+        file_size = os.path.getsize(file_path)
+        print(f"{i:2d}. {filename} ({file_size:,} bytes)")
+    
+    print(f"{len(json_files) + 1:2d}. all (import all files)")
+    print("=" * 50)
+    
+    while True:
+        try:
+            choice = input("\nEnter your choice (number or press Enter to exit): ").strip()
+            
+            if not choice:
+                return None
+            
+            choice_num = int(choice)
+            
+            if choice_num == len(json_files) + 1:
+                return 'all'
+            elif 1 <= choice_num <= len(json_files):
+                return json_files[choice_num - 1]
+            else:
+                print(f"❌ Please enter a number between 1 and {len(json_files) + 1}")
+                
+        except ValueError:
+            print("❌ Please enter a valid number")
+
+
+def import_from_import_directory(file_selection):
+    """Import cards from files in the import directory."""
+    if file_selection == 'all':
+        json_files = get_import_files()
+        print(f"\n🚀 Importing from all {len(json_files)} files...")
+    else:
+        json_files = [file_selection]
+        print(f"\n🚀 Importing from: {os.path.basename(file_selection)}")
+    
+    total_imported = 0
+    successful_files = 0
+    failed_files = 0
+    
+    for json_file in json_files:
+        print(f"\n📁 Processing file: {os.path.basename(json_file)}")
+        
+        try:
+            with open(json_file, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            
+            # Try different possible keys for cards data
+            cards_data = data.get('cards', []) or data.get('valid_cards', []) or data
+            
+            # If data is a list directly, use it
+            if isinstance(data, list):
+                cards_data = data
+            elif not cards_data:
+                print(f"   ⚠️  No cards found in file (tried 'cards', 'valid_cards' keys, and root level)")
+                failed_files += 1
+                continue
+            
+            print(f"   📊 Found {len(cards_data)} cards to import...")
+            imported_count = import_cards_from_data(cards_data, os.path.basename(json_file))
+            total_imported += imported_count
+            successful_files += 1
+            print(f"   ✅ Successfully imported {imported_count} cards from {os.path.basename(json_file)}")
+            
+        except Exception as e:
+            print(f"   ❌ Error processing {os.path.basename(json_file)}: {e}")
+            failed_files += 1
+            continue
+    
+    # Final summary
+    print(f"\n{'='*60}")
+    print(f"📈 IMPORT COMPLETE")
+    print(f"{'='*60}")
+    print(f"📁 Total files processed: {len(json_files)}")
+    print(f"✅ Successful files: {successful_files}")
+    print(f"❌ Failed files: {failed_files}")
+    print(f"🏷️  Total cards imported: {total_imported}")
+    
+    return total_imported
+
+
 def main():
     """Main function to seed credit cards."""
     import argparse
@@ -562,6 +635,8 @@ def main():
                        help='Only seed sample cards (default behavior)')
     parser.add_argument('--force', action='store_true',
                        help='Skip Flask server check and force execution')
+    parser.add_argument('--interactive', action='store_true',
+                       help='Show interactive file selection menu')
     
     args = parser.parse_args()
     
@@ -570,10 +645,22 @@ def main():
     try:
         app = create_app('development')
         with app.app_context():
-            if args.import_scraped or args.file:
+            if args.interactive:
+                # Show interactive menu
+                file_selection = display_file_menu()
+                if file_selection is None:
+                    print("👋 Exiting without importing")
+                    return 0
+                return import_from_import_directory(file_selection)
+            elif args.import_scraped or args.file:
                 return import_scraped_cards(args.file)
             else:
-                return seed_credit_cards()
+                # Default behavior: show interactive menu instead of just sample cards
+                file_selection = display_file_menu()
+                if file_selection is None:
+                    print("👋 Exiting without importing")
+                    return 0
+                return import_from_import_directory(file_selection)
     except Exception as e:
         error_msg = str(e).lower()
         if 'database is locked' in error_msg:

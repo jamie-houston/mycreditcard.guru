@@ -1,0 +1,210 @@
+{
+  "export_info": {
+    "timestamp": "2025-06-19T02:54:13.736245",
+    "total_cards": 11,
+    "exported_by": "foresterh@gmail.com"
+  },
+  "cards": [
+    {
+      "name": "Chase Sapphire Preferred® Card",
+      "issuer": "Chase",
+      "annual_fee": 95.0,
+      "reward_type": "points",
+      "reward_value_multiplier": 0.01,
+      "signup_bonus_points": 60000,
+      "signup_bonus_value": 0.0,
+      "signup_bonus_min_spend": 5000.0,
+      "signup_bonus_max_months": 3,
+      "reward_categories": {
+        "dining": 3.0,
+        "travel": 2.0,
+        "streaming": 3.0,
+        "other": 1.0
+      },
+      "special_offers": [],
+      "source": "nerdwallet_table",
+      "source_url": "https://www.nerdwallet.com/best/credit-cards/bonus-offers",
+      "import_date": "2025-06-19T02:31:10.187839"
+    },
+    {
+      "name": "Capital One VentureOne Rewards Credit Card - Miles Boost",
+      "issuer": "Capital One",
+      "annual_fee": 0.0,
+      "reward_type": "miles",
+      "reward_value_multiplier": 0.01,
+      "signup_bonus_points": 50000,
+      "signup_bonus_value": 400.0,
+      "signup_bonus_min_spend": 1000.0,
+      "signup_bonus_max_months": 3,
+      "reward_categories": {
+        "drugstores": 1.5
+      },
+      "special_offers": [],
+      "source": "nerdwallet_table",
+      "source_url": "https://www.nerdwallet.com/best/credit-cards/bonus-offers",
+      "import_date": "2025-06-19T02:31:10.191470"
+    },
+    {
+      "name": "Chase Freedom Unlimited®",
+      "issuer": "Chase",
+      "annual_fee": 0.0,
+      "reward_type": "cash_back",
+      "reward_value_multiplier": 0.01,
+      "signup_bonus_points": 0,
+      "signup_bonus_value": 200.0,
+      "signup_bonus_min_spend": 500.0,
+      "signup_bonus_max_months": 3,
+      "reward_categories": {
+        "dining": 3.0,
+        "drugstores": 3.0,
+        "other": 1.5
+      },
+      "special_offers": [],
+      "source": "nerdwallet_table",
+      "source_url": "https://www.nerdwallet.com/best/credit-cards/bonus-offers",
+      "import_date": "2025-06-19T02:31:10.192746"
+    },
+    {
+      "name": "Capital One Savor Cash Rewards Credit Card",
+      "issuer": "Capital One",
+      "annual_fee": 0.0,
+      "reward_type": "cash_back",
+      "reward_value_multiplier": 0.01,
+      "signup_bonus_points": 0,
+      "signup_bonus_value": 0.0,
+      "signup_bonus_min_spend": 500.0,
+      "signup_bonus_max_months": 3,
+      "reward_categories": {
+        "entertainment": 8.0,
+        "other": 1.0
+      },
+      "special_offers": [],
+      "source": "nerdwallet_table",
+      "source_url": "https://www.nerdwallet.com/best/credit-cards/bonus-offers",
+      "import_date": "2025-06-19T02:31:10.194513"
+    },
+    {
+      "name": "Citi Double Cash® Card",
+      "issuer": "Citi",
+      "annual_fee": 0.0,
+      "reward_type": "cash_back",
+      "reward_value_multiplier": 0.01,
+      "signup_bonus_points": 0,
+      "signup_bonus_value": 200.0,
+      "signup_bonus_min_spend": 1500.0,
+      "signup_bonus_max_months": 6,
+      "reward_categories": {
+        "other": 2.0
+      },
+      "special_offers": [],
+      "source": "nerdwallet_table",
+      "source_url": "https://www.nerdwallet.com/best/credit-cards/bonus-offers",
+      "import_date": "2025-06-19T02:31:10.195940"
+    },
+    {
+      "name": "Hilton Honors American Express Card",
+      "issuer": "American Express",
+      "annual_fee": 0.0,
+      "reward_type": "hotel",
+      "reward_value_multiplier": 0.01,
+      "signup_bonus_points": 100000,
+      "signup_bonus_value": 0.0,
+      "signup_bonus_min_spend": 2000.0,
+      "signup_bonus_max_months": 6,
+      "reward_categories": {},
+      "special_offers": [],
+      "source": "nerdwallet_table",
+      "source_url": "https://www.nerdwallet.com/best/credit-cards/bonus-offers",
+      "import_date": "2025-06-19T02:31:10.197135"
+    },
+    {
+      "name": "Chase Freedom Flex®",
+      "issuer": "Chase",
+      "annual_fee": 0.0,
+      "reward_type": "cash_back",
+      "reward_value_multiplier": 0.01,
+      "signup_bonus_points": 0,
+      "signup_bonus_value": 200.0,
+      "signup_bonus_min_spend": 500.0,
+      "signup_bonus_max_months": 3,
+      "reward_categories": {
+        "dining": 3.0,
+        "drugstores": 3.0,
+        "other": 1.0
+      },
+      "special_offers": [],
+      "source": "nerdwallet_table",
+      "source_url": "https://www.nerdwallet.com/best/credit-cards/bonus-offers",
+      "import_date": "2025-06-19T02:31:10.198163"
+    },
+    {
+      "name": "Chase Sapphire Reserve Card",
+      "issuer": "Chase",
+      "annual_fee": 550.0,
+      "reward_type": "points",
+      "reward_value_multiplier": 1.5,
+      "signup_bonus_points": 60000,
+      "signup_bonus_value": 900.0,
+      "signup_bonus_min_spend": 4000.0,
+      "signup_bonus_max_months": 3,
+      "reward_categories": {},
+      "special_offers": [],
+      "source": "scraped",
+      "source_url": "",
+      "import_date": "2025-06-19T02:33:58.918826"
+    },
+    {
+      "name": "Chase Sapphire Reserve Card B",
+      "issuer": "Chase",
+      "annual_fee": 550.0,
+      "reward_type": "points",
+      "reward_value_multiplier": 1.5,
+      "signup_bonus_points": 60000,
+      "signup_bonus_value": 900.0,
+      "signup_bonus_min_spend": 4000.0,
+      "signup_bonus_max_months": 3,
+      "reward_categories": {},
+      "special_offers": [],
+      "source": "scraped",
+      "source_url": "",
+      "import_date": "2025-06-19T02:35:44.434145"
+    },
+    {
+      "name": "Chase Sapphire Preferred® Card B",
+      "issuer": "Chase",
+      "annual_fee": 95.0,
+      "reward_type": "points",
+      "reward_value_multiplier": 0.01,
+      "signup_bonus_points": 60000,
+      "signup_bonus_value": 0.0,
+      "signup_bonus_min_spend": 5000.0,
+      "signup_bonus_max_months": 3,
+      "reward_categories": {
+        "dining": 3.0,
+        "travel": 2.0,
+        "streaming": 3.0,
+        "other": 1.0
+      },
+      "special_offers": [],
+      "source": "nerdwallet_table",
+      "source_url": "https://www.nerdwallet.com/best/credit-cards/bonus-offers",
+      "import_date": "2025-06-19T02:35:44.438419"
+    },
+    {
+      "name": "Chase Freedom Unlimited Card",
+      "issuer": "Chase",
+      "annual_fee": 0.0,
+      "reward_type": "cash_back",
+      "reward_value_multiplier": 1.0,
+      "signup_bonus_points": 20000,
+      "signup_bonus_value": 200.0,
+      "signup_bonus_min_spend": 500.0,
+      "signup_bonus_max_months": 3,
+      "reward_categories": {},
+      "special_offers": [],
+      "source": "scraped",
+      "source_url": "",
+      "import_date": "2025-06-19T02:35:44.444175"
+    }
+  ]
+}

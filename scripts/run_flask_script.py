@@ -104,12 +104,13 @@ def get_available_scripts():
         "run.py",
         "run_tests.py", 
         "guided_scraping.py",
-        "seed_db.py"
+        "seed_db.py",
     ]
     
     # Add scripts from scripts/data directory
     allowed_scripts_data = [
-        "scripts/data/reset_db.py"
+        "scripts/data/reset_db.py",
+        "scripts/data/seed_credit_cards.py"
     ]
     
     # First, scan for root-level scripts in flask_app directory
