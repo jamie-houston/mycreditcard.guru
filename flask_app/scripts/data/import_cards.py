@@ -52,9 +52,10 @@ def validate_and_process_reward_categories(reward_categories_data, card_name):
             logger.warning(f"Card '{card_name}': Invalid reward data format: {reward_data}")
             continue
         
-        # Get category name and rate
+        # Get category name, rate, and limit
         category_name = reward_data.get('category', '').strip()
         rate = reward_data.get('rate', reward_data.get('percentage', 1.0))
+        limit = reward_data.get('limit')
         
         if not category_name:
             logger.warning(f"Card '{card_name}': Empty category name in reward data: {reward_data}")
@@ -69,7 +70,8 @@ def validate_and_process_reward_categories(reward_categories_data, card_name):
                 'category_id': category.id,
                 'category_name': category.name,
                 'reward_percent': float(rate),
-                'is_bonus': float(rate) > 1.0
+                'is_bonus': float(rate) > 1.0,
+                'limit': float(limit) if limit not in (None, '', 'null') else None
             })
         else:
             logger.warning(f"Card '{card_name}': No category found for '{category_name}' (rate: {rate}%)")
@@ -98,12 +100,14 @@ def create_card_rewards(card, valid_rewards):
         if existing_reward:
             existing_reward.reward_percent = reward_data['reward_percent']
             existing_reward.is_bonus_category = reward_data['is_bonus']
+            existing_reward.limit = reward_data.get('limit')
         else:
             new_reward = CreditCardReward(
                 credit_card_id=card.id,
                 category_id=reward_data['category_id'],
                 reward_percent=reward_data['reward_percent'],
-                is_bonus_category=reward_data['is_bonus']
+                is_bonus_category=reward_data['is_bonus'],
+                limit=reward_data.get('limit')
             )
             db.session.add(new_reward)
 

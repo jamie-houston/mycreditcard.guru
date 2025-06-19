@@ -93,14 +93,18 @@
             {% for category in reward_categories %}
             <tr>
               <td>
+                {% if category.id %}
                 <a
                   href="{{ url_for('categories.show', id=category.id) }}"
                   class="text-decoration-none"
                 >
                   {{ category.category|title }}
                 </a>
+                {% else %}
+                {{ category.category|title }}
+                {% endif %}
               </td>
-              <td>{{ category.percentage }}%</td>
+              <td>{{ category.rate }}%</td>
               <td>
                 {% if category.limit is not none %} Up to ${{
                 '%.0f'|format(category.limit) }} {% else %} No limit {% endif %}

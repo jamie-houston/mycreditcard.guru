@@ -16,13 +16,14 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 logger = logging.getLogger(__name__)
 
 
-def parse_category_bonuses_from_tooltip(tooltip_text: str) -> Dict[str, float]:
+def parse_category_bonuses_from_tooltip(tooltip_text: str) -> List[Dict[str, any]]:
     """
     Parse category bonuses from NerdWallet valueTooltip text.
     Enhanced version based on test_category_bonuses.py.
+    Returns a list of reward categories with category, rate, and limit fields.
     """
     if not tooltip_text or tooltip_text in [None, "", "$undefined"]:
-        return {}
+        return []
     
     # Clean up the text
     text = tooltip_text.replace('℠', '').replace('®', '').replace('™', '')
@@ -132,7 +133,16 @@ def parse_category_bonuses_from_tooltip(tooltip_text: str) -> Dict[str, float]:
         except (ValueError, IndexError):
             continue
     
-    return categories
+    # Convert dictionary to list format with limit field
+    reward_categories = []
+    for category, rate in categories.items():
+        reward_categories.append({
+            "category": category,
+            "rate": rate,
+            "limit": None  # Default to None - could be enhanced to parse limits from tooltip in the future
+        })
+    
+    return reward_categories
 
 
 def extract_json_from_script(script_content: str) -> List[Dict]:
@@ -266,7 +276,7 @@ def process_card_object(card_obj: Dict) -> Optional[Dict]:
     card = {
         'name': name,
         'issuer': extract_issuer_from_name(name),
-        'reward_categories': {},
+        'reward_categories': [],
         'raw_data': card_obj
     }
     
@@ -392,8 +402,9 @@ def main():
         print(f"\n🏆 Top cards with reward categories:")
         for i, card in enumerate(cards_with_rewards[:10]):
             print(f"\n{i+1}. {card['name']} ({card['issuer']})")
-            for category, rate in card['reward_categories'].items():
-                print(f"   • {category}: {rate}x")
+            for reward_cat in card['reward_categories']:
+                limit_text = f" (limit: ${reward_cat['limit']:,})" if reward_cat['limit'] else ""
+                print(f"   • {reward_cat['category']}: {reward_cat['rate']}x{limit_text}")
             if card.get('value_tooltip'):
                 print(f"   💬 Tooltip: {card['value_tooltip'][:80]}...")
     
@@ -403,7 +414,7 @@ def main():
         print(f"\n🎯 CHASE SAPPHIRE PREFERRED FOUND:")
         card = chase_cards[0]
         print(f"   Name: {card['name']}")
-        print(f"   Categories: {card.get('reward_categories', {})}")
+        print(f"   Categories: {card.get('reward_categories', [])}")
         if card.get('value_tooltip'):
             print(f"   Full tooltip: {card['value_tooltip']}")
         
@@ -415,7 +426,9 @@ def main():
             "Travel": 2.0
         }
         
-        actual_categories = card.get('reward_categories', {})
+        # Convert new list format to dictionary for validation
+        reward_categories_list = card.get('reward_categories', [])
+        actual_categories = {cat['category']: cat['rate'] for cat in reward_categories_list}
         print(f"\n   ✅ Category validation:")
         for category, expected_rate in expected_categories.items():
             if category in actual_categories:

@@ -144,6 +144,7 @@
                                         
                                         <!-- Quick update form -->
                                         <form method="POST" action="{{ url_for('roadmap.update_card', user_card_id=user_card.id) }}" class="mt-2">
+                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
                                             <div class="form-check form-check-inline">
                                                 <input class="form-check-input" type="checkbox" name="bonus_earned" 
                                                        {% if user_card.bonus_earned %}checked{% endif %}

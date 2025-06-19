@@ -170,34 +170,40 @@ class RoadmapEngine:
     
     def _calculate_monthly_category_value(self, card: CreditCard, category: str, monthly_spend: float) -> float:
         """Calculate the monthly reward value for a specific category and spend amount."""
-        # Get the reward rate for this category
-        reward_rate = self._get_card_category_rate(card, category)
+        # Get the reward rate and limit for this category
+        reward_rate, limit = self._get_card_category_rate_and_limit(card, category)
+        
+        # Apply spending limit if it exists
+        effective_spend = monthly_spend
+        if limit is not None:
+            # Convert annual limit to monthly limit
+            monthly_limit = limit / 12
+            effective_spend = min(monthly_spend, monthly_limit)
         
         # Apply reward value multiplier
-        monthly_value = monthly_spend * reward_rate * card.reward_value_multiplier
+        monthly_value = effective_spend * reward_rate * card.reward_value_multiplier
         
         return monthly_value
     
+    def _get_card_category_rate_and_limit(self, card: CreditCard, category: str) -> tuple:
+        """Get the reward rate and limit for a specific category from a card."""
+        # Use the card's get_category_rate method which handles category matching
+        reward_rate = card.get_category_rate(category)
+        
+        # Get the limit for this specific category if it exists
+        category_obj = Category.get_by_name_or_alias(category)
+        if category_obj:
+            reward = card.rewards.filter_by(category_id=category_obj.id).first()
+            if reward:
+                return reward_rate / 100, reward.limit  # Convert percentage to decimal
+        
+        # Return rate with no limit
+        return reward_rate / 100, None
+    
     def _get_card_category_rate(self, card: CreditCard, category: str) -> float:
         """Get the reward rate for a specific category from a card."""
-        # First check for specific reward relationships
-        rewards = CreditCardReward.query.filter_by(credit_card_id=card.id).all()
-        
-        for reward in rewards:
-            category_obj = Category.query.get(reward.category_id)
-            if category_obj and category_obj.matches_category(category):
-                return reward.reward_rate
-        
-        # Fall back to legacy fields or default rate
-        category_rates = {
-            'dining': getattr(card, 'dining_reward_rate', 0),
-            'travel': getattr(card, 'travel_reward_rate', 0),
-            'gas': getattr(card, 'gas_reward_rate', 0),
-            'groceries': getattr(card, 'grocery_reward_rate', 0),
-            'entertainment': getattr(card, 'entertainment_reward_rate', 0),
-        }
-        
-        return category_rates.get(category, 0.01)  # Default 1% rate
+        # Use the card's built-in method which handles category matching
+        return card.get_category_rate(category)
     
     def _calculate_annual_card_value(self, card: CreditCard) -> float:
         """Calculate the annual value of a card for this user's spending."""
@@ -267,7 +273,7 @@ class RoadmapEngine:
         ).all()
         
         # Check user constraints
-        max_annual_fee = self.user_profile.max_annual_fee
+        max_annual_fee = self.user_profile.max_annual_fees
         max_cards = self.user_profile.max_cards or 10
         
         for card in available_cards:

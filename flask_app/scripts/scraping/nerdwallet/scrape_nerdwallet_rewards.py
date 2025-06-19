@@ -20,13 +20,14 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 logger = logging.getLogger(__name__)
 
 
-def parse_category_bonuses_from_tooltip(tooltip_text: str) -> Dict[str, float]:
+def parse_category_bonuses_from_tooltip(tooltip_text: str) -> List[Dict[str, any]]:
     """
     Parse category bonuses from NerdWallet valueTooltip text.
     Based on the test_category_bonuses.py functionality.
+    Returns a list of reward categories with category, rate, and limit fields.
     """
     if not tooltip_text or tooltip_text in [None, "", "$undefined"]:
-        return {}
+        return []
     
     # Clean up the text
     text = tooltip_text.replace('℠', '').replace('®', '').replace('™', '')
@@ -112,7 +113,16 @@ def parse_category_bonuses_from_tooltip(tooltip_text: str) -> Dict[str, float]:
                             categories[standard_name] = rate
                         break
     
-    return categories
+    # Convert dictionary to list format with limit field
+    reward_categories = []
+    for category, rate in categories.items():
+        reward_categories.append({
+            "category": category,
+            "rate": rate,
+            "limit": None  # Default to None - could be enhanced to parse limits from tooltip in the future
+        })
+    
+    return reward_categories
 
 
 def extract_reward_data_from_html(soup: BeautifulSoup) -> List[Dict]:
@@ -204,7 +214,7 @@ def extract_single_card_from_json(card_data: Dict) -> Optional[Dict]:
         'name': name,
         'issuer': extract_issuer_from_name(name),
         'annual_fee': parse_annual_fee(card_data.get('annualFee', '')),
-        'reward_categories': {},
+        'reward_categories': [],
         'raw_data': card_data
     }
     
@@ -234,7 +244,7 @@ def extract_card_from_element(element) -> Optional[Dict]:
     card = {
         'name': name,
         'issuer': extract_issuer_from_name(name),
-        'reward_categories': {},
+        'reward_categories': [],
         'raw_element_attrs': dict(element.attrs)
     }
     
@@ -379,7 +389,7 @@ def main():
             'name': card['name'],
             'issuer': card['issuer'],
             'annual_fee': card.get('annual_fee', 0),
-            'reward_categories': card.get('reward_categories', {}),
+            'reward_categories': card.get('reward_categories', []),
             'has_tooltip': bool(card.get('value_tooltip'))
         }
         if card.get('value_tooltip'):
@@ -404,8 +414,9 @@ def main():
         print(f"\nSample cards with reward categories:")
         for i, card in enumerate(cards_with_rewards[:5]):
             print(f"\n{i+1}. {card['name']} ({card['issuer']})")
-            for category, rate in card['reward_categories'].items():
-                print(f"   {category}: {rate}x")
+            for reward_cat in card['reward_categories']:
+                limit_text = f" (limit: ${reward_cat['limit']:,})" if reward_cat['limit'] else ""
+                print(f"   {reward_cat['category']}: {reward_cat['rate']}x{limit_text}")
             if card.get('value_tooltip'):
                 print(f"   Tooltip: {card['value_tooltip'][:80]}...")
     
@@ -415,7 +426,7 @@ def main():
         print(f"\n🎯 Found Chase Sapphire Preferred:")
         card = chase_cards[0]
         print(f"   Name: {card['name']}")
-        print(f"   Categories: {card.get('reward_categories', {})}")
+        print(f"   Categories: {card.get('reward_categories', [])}")
         if card.get('value_tooltip'):
             print(f"   Tooltip: {card['value_tooltip']}")
 

@@ -22,6 +22,7 @@
 {% endif %}
 
 <form method="POST" class="needs-validation" novalidate>
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
   <div class="card mb-4">
     <div class="card-header">
       <h5>Basic Information</h5>
@@ -217,7 +218,7 @@
                 >
               {% endif %}
             </div>
-            <div class="col-md-5">
+            <div class="col-md-3">
               <label class="form-label">Reward Percentage</label>
               <div class="input-group">
                 <input
@@ -226,9 +227,23 @@
                   min="0"
                   class="form-control"
                   name="category_percentage_{{ loop.index0 }}"
-                  value="{{ category.percentage }}"
+                  value="{{ category.rate }}"
                 />
                 <span class="input-group-text">%</span>
+              </div>
+            </div>
+            <div class="col-md-2">
+              <label class="form-label">Limit (Optional)</label>
+              <div class="input-group">
+                <span class="input-group-text">$</span>
+                <input
+                  type="number"
+                  min="0"
+                  class="form-control"
+                  name="category_limit_{{ loop.index0 }}"
+                  value="{{ category.limit if category.limit else '' }}"
+                  placeholder="No limit"
+                />
               </div>
             </div>
             <div class="col-md-1 d-flex align-items-end">
@@ -262,7 +277,7 @@
                 >
               {% endif %}
             </div>
-            <div class="col-md-5">
+            <div class="col-md-3">
               <label class="form-label">Reward Percentage</label>
               <div class="input-group">
                 <input
@@ -274,6 +289,19 @@
                   placeholder="1.0"
                 />
                 <span class="input-group-text">%</span>
+              </div>
+            </div>
+            <div class="col-md-2">
+              <label class="form-label">Limit (Optional)</label>
+              <div class="input-group">
+                <span class="input-group-text">$</span>
+                <input
+                  type="number"
+                  min="0"
+                  class="form-control"
+                  name="category_limit_0"
+                  placeholder="No limit"
+                />
               </div>
             </div>
             <div class="col-md-1 d-flex align-items-end">
@@ -432,7 +460,7 @@
         >
       {% endif %}
     </div>
-    <div class="col-md-5">
+    <div class="col-md-3">
       <label class="form-label">Reward Percentage</label>
       <div class="input-group">
         <input
@@ -444,6 +472,19 @@
           placeholder="1.0"
         />
         <span class="input-group-text">%</span>
+      </div>
+    </div>
+    <div class="col-md-2">
+      <label class="form-label">Limit (Optional)</label>
+      <div class="input-group">
+        <span class="input-group-text">$</span>
+        <input
+          type="number"
+          min="0"
+          class="form-control"
+          name="category_limit_INDEX"
+          placeholder="No limit"
+        />
       </div>
     </div>
     <div class="col-md-1 d-flex align-items-end">

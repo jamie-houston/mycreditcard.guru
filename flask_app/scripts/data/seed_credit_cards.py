@@ -117,7 +117,7 @@ def seed_credit_cards():
             "signup_bonus_min_spend": 6000,
             "signup_bonus_max_months": 3,
             "reward_categories": [
-                {"category": "other", "rate": 1.5}
+                {"category": "other", "rate": 1.5, "limit": None}
             ],
             "special_offers": [
                 "Business credit card",
@@ -136,10 +136,10 @@ def seed_credit_cards():
             "signup_bonus_min_spend": 4000,
             "signup_bonus_max_months": 3,
             "reward_categories": [
-                {"category": "other", "rate": 1.0},
-                {"category": "dining", "rate": 3.0},
-                {"category": "travel", "rate": 2.0},
-                {"category": "streaming", "rate": 3.0}
+                {"category": "other", "rate": 1.0, "limit": None},
+                {"category": "dining", "rate": 3.0, "limit": None},
+                {"category": "travel", "rate": 2.0, "limit": None},
+                {"category": "streaming", "rate": 3.0, "limit": None}
             ],
             "special_offers": [
                 "Transfer partners",
@@ -158,8 +158,8 @@ def seed_credit_cards():
             "signup_bonus_min_spend": 8000,
             "signup_bonus_max_months": 6,
             "reward_categories": [
-                {"category": "other", "rate": 1.0},
-                {"category": "travel", "rate": 5.0}
+                {"category": "other", "rate": 1.0, "limit": None},
+                {"category": "travel", "rate": 5.0, "limit": None}
             ],
             "special_offers": [
                 "$200 annual airline fee credit",
@@ -179,10 +179,10 @@ def seed_credit_cards():
             "signup_bonus_min_spend": 6000,
             "signup_bonus_max_months": 6,
             "reward_categories": [
-                {"category": "other", "rate": 1.0},
-                {"category": "dining", "rate": 4.0},
-                {"category": "travel", "rate": 3.0},
-                {"category": "groceries", "rate": 4.0}
+                {"category": "other", "rate": 1.0, "limit": None},
+                {"category": "dining", "rate": 4.0, "limit": None},
+                {"category": "travel", "rate": 3.0, "limit": None},
+                {"category": "groceries", "rate": 4.0, "limit": 25000}
             ],
             "special_offers": [
                 "$120 annual dining credit",
@@ -201,7 +201,7 @@ def seed_credit_cards():
             "signup_bonus_min_spend": 1000,
             "signup_bonus_max_months": 3,
             "reward_categories": [
-                {"category": "other", "rate": 1.5},
+                {"category": "other", "rate": 1.5, "limit": None},
             ],
             "special_offers": [
                 "Earn 3 points per $1 spent on travel purchases booked through the Bank of America Travel Center."
@@ -218,7 +218,7 @@ def seed_credit_cards():
             "signup_bonus_min_spend": 4000,
             "signup_bonus_max_months": 3,
             "reward_categories": [
-                {"category": "other", "rate": 2},
+                {"category": "other", "rate": 2, "limit": None},
             ],
             "special_offers": [
                 "Earn 5X miles on hotels, vacation rentals and rental cars booked through Capital One Travel."
@@ -235,7 +235,7 @@ def seed_credit_cards():
             "signup_bonus_min_spend": 4000,
             "signup_bonus_max_months": 3,
             "reward_categories": [
-                {"category": "travel", "rate": 3},
+                {"category": "travel", "rate": 3, "limit": None},
             ],
             "special_offers": [
                 "Earn 5X miles on hotels, vacation rentals and rental cars booked through Capital One Travel."
@@ -269,7 +269,6 @@ def seed_credit_cards():
         special_offers = card_data.pop('special_offers', [])
         
         # Convert lists to JSON strings for database storage
-        card_data['reward_categories'] = json.dumps(reward_categories)
         card_data['special_offers'] = json.dumps(special_offers)
         
         # Set the issuer_id
@@ -406,7 +405,6 @@ def import_cards_from_data(cards_data: list, source_file: str) -> int:
                 'signup_bonus_value': card_data.get('signup_bonus_value', 0.0),
                 'signup_bonus_min_spend': card_data.get('signup_bonus_min_spend', 0.0),
                 'signup_bonus_max_months': card_data.get('signup_bonus_max_months', 3),
-                'reward_categories': '{}',  # Empty JSON object for deprecated field (required NOT NULL)
                 'source': card_data.get('source', 'scraped'),
                 'source_url': card_data.get('source_url', ''),
                 'import_date': datetime.utcnow()
@@ -431,9 +429,13 @@ def import_cards_from_data(cards_data: list, source_file: str) -> int:
             CreditCardReward.query.filter_by(credit_card_id=card.id).delete()
             
             # Create CreditCardReward relationship records
-            reward_categories = card_data.get('reward_categories', {})
-            if isinstance(reward_categories, dict):
-                for category_name, rate in reward_categories.items():
+            reward_categories = card_data.get('reward_categories', [])
+            for reward_data in reward_categories:
+                if isinstance(reward_data, dict):
+                    category_name = reward_data.get('category')
+                    rate = reward_data.get('rate', 1.0)
+                    limit = reward_data.get('limit')
+                    
                     # Skip invalid category names that are parsing artifacts
                     if should_skip_category(category_name):
                         continue
@@ -449,7 +451,8 @@ def import_cards_from_data(cards_data: list, source_file: str) -> int:
                             credit_card_id=card.id,
                             category_id=category.id,
                             reward_percent=float(rate),
-                            is_bonus_category=(float(rate) > 1.0)
+                            is_bonus_category=(float(rate) > 1.0),
+                            limit=float(limit) if limit not in (None, '', 'null') else None
                         )
                         db.session.add(credit_card_reward)
                     else:

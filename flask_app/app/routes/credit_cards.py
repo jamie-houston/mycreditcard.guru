@@ -72,21 +72,25 @@ def import_cards_from_json_data(cards_data: list, source_file: str) -> int:
             CreditCardReward.query.filter_by(credit_card_id=card.id).delete()
             
             # Create CreditCardReward relationship records
-            reward_categories = card_data.get('reward_categories', {})
-            if isinstance(reward_categories, dict):
-                for category_name, rate in reward_categories.items():
-                    # Map category name to database category
-                    category = Category.get_by_name(category_name)
-                    if category:
-                        credit_card_reward = CreditCardReward(
-                            credit_card_id=card.id,
-                            category_id=category.id,
-                            reward_percent=float(rate),
-                            is_bonus_category=(float(rate) > 1.0)
-                        )
-                        db.session.add(credit_card_reward)
-                    else:
-                        print(f"     ⚠️  Category '{category_name}' not found for card '{card.name}'")
+            reward_categories = card_data.get('reward_categories', [])
+            for reward_data in reward_categories:
+                category_name = reward_data.get('category')
+                rate = reward_data.get('rate', 1.0)
+                limit = reward_data.get('limit')
+                
+                # Map category name to database category
+                category = Category.get_by_name(category_name)
+                if category:
+                    credit_card_reward = CreditCardReward(
+                        credit_card_id=card.id,
+                        category_id=category.id,
+                        reward_percent=float(rate),
+                        is_bonus_category=(float(rate) > 1.0),
+                        limit=float(limit) if limit not in (None, '', 'null') else None
+                    )
+                    db.session.add(credit_card_reward)
+                else:
+                    print(f"     ⚠️  Category '{category_name}' not found for card '{card.name}'")
             
         except Exception as e:
             print(f"     ❌ Error importing card '{card_data.get('name', 'Unknown')}': {e}")
@@ -110,7 +114,6 @@ class CreditCardSchema(Schema):
     name = fields.Str(required=True)
     issuer = fields.Str(required=True)
     annual_fee = fields.Float(dump_default=0.0)
-    reward_categories = fields.Str(dump_default='[]')
     special_offers = fields.Str(dump_default='[]')
     signup_bonus_points = fields.Int(dump_default=0)
     signup_bonus_value = fields.Float(dump_default=0.0)
@@ -225,18 +228,17 @@ def import_cards():
                         mapped_data['import_date'] = import_date
                         
                         # Extract reward categories before creating/updating card
-                        reward_categories_json = mapped_data.get('reward_categories', '[]')
-                        try:
-                            reward_categories = json.loads(reward_categories_json) if isinstance(reward_categories_json, str) else reward_categories_json
-                        except (json.JSONDecodeError, TypeError):
-                            reward_categories = []
+                        reward_categories = mapped_data.get('reward_categories', [])
+                        
+                        # Remove reward_categories from mapped_data as it's handled separately
+                        mapped_data.pop('reward_categories', None)
                         
                         # Check if card already exists
                         existing_card = safe_query(CreditCard).filter_by(name=mapped_data['name']).first()
                         if existing_card:
                             # Update existing card
                             for key, value in mapped_data.items():
-                                if key in ['reward_categories', 'special_offers'] and isinstance(value, list):
+                                if key in ['special_offers'] and isinstance(value, list):
                                     setattr(existing_card, key, json.dumps(value))
                                 else:
                                     setattr(existing_card, key, value)
@@ -258,13 +260,13 @@ def import_cards():
                         for reward_data in reward_categories:
                             if isinstance(reward_data, dict):
                                 category_name = reward_data.get('category', '')
-                                percentage = reward_data.get('percentage', reward_data.get('rate', 1.0))
+                                rate = reward_data.get('rate', 1.0)
                                 limit = reward_data.get('limit')
-                                if category_name and percentage:
+                                if category_name and rate:
                                     card.add_reward_category(
                                         category_name=category_name,
-                                        reward_percent=float(percentage),
-                                        is_bonus=(float(percentage) > 1.0),
+                                        reward_percent=float(rate),
+                                        is_bonus=(float(rate) > 1.0),
                                         limit=float(limit) if limit not in (None, "", "null") else None
                                     )
                 
@@ -342,7 +344,7 @@ def new():
                     try:
                         reward_categories.append({
                             'category': category_name,
-                            'percentage': float(category_percentage),
+                            'rate': float(category_percentage),
                             'limit': float(category_limit) if category_limit not in (None, '', 'null') else None
                         })
                     except ValueError:
@@ -357,7 +359,6 @@ def new():
                                               form_action=url_for('credit_cards.new'),
                                               categories_data=True)
             
-            data['reward_categories'] = json.dumps(reward_categories)
             
             # Process special offers from form
             special_offers = []
@@ -409,13 +410,13 @@ def new():
             # Add rewards from the form
             for reward_data in reward_categories:
                 category_name = reward_data.get('category')
-                percentage = reward_data.get('percentage')
+                rate = reward_data.get('rate')
                 limit = reward_data.get('limit')
-                if category_name and percentage:
+                if category_name and rate:
                     card.add_reward_category(
                         category_name=category_name,
-                        reward_percent=float(percentage),
-                        is_bonus=(percentage > 1.0),  # Consider it a bonus if > 1%
+                        reward_percent=float(rate),
+                        is_bonus=(rate > 1.0),  # Consider it a bonus if > 1%
                         limit=float(limit) if limit not in (None, '', 'null') else None
                     )
             
@@ -451,7 +452,7 @@ def show(id):
     for reward in card.rewards:
         reward_categories.append({
             'category': reward.category.display_name,
-            'percentage': reward.reward_percent,
+            'rate': reward.reward_percent,
             'id': reward.category_id,
             'limit': reward.limit
         })
@@ -477,12 +478,19 @@ def edit(id):
     """Edit a credit card."""
     card = safe_query(CreditCard).get_or_404(id)
     
-    # Parse JSON data for display
+    # Get reward categories from the CreditCardReward relationship for form display
+    reward_categories = []
+    for reward in card.rewards:
+        reward_categories.append({
+            'category': reward.category.name,  # Use name for form (not display_name)
+            'rate': reward.reward_percent,
+            'limit': reward.limit
+        })
+    
+    # Parse special offers from JSON
     try:
-        reward_categories = json.loads(card.reward_categories)
         special_offers = json.loads(card.special_offers)
     except (json.JSONDecodeError, TypeError):
-        reward_categories = []
         special_offers = []
     
     if request.method == 'POST':
@@ -517,7 +525,7 @@ def edit(id):
                     try:
                         reward_categories.append({
                             'category': category_name,
-                            'percentage': float(category_percentage),
+                            'rate': float(category_percentage),
                             'limit': float(category_limit) if category_limit not in (None, '', 'null') else None
                         })
                     except ValueError:
@@ -535,7 +543,6 @@ def edit(id):
                                               form_action=url_for('credit_cards.edit', id=id),
                                               categories_data=True)
             
-            data['reward_categories'] = json.dumps(reward_categories)
             
             # Process special offers (similar to 'new' route)
             special_offers = []
@@ -575,19 +582,19 @@ def edit(id):
             with safe_commit():
                 db.session.add(card)
             
-            # Now add the actual reward categories using the CreditCardReward model
-            # No need to clear existing rewards for a new card
+            # Clear existing reward relationships for this card before adding new ones
+            CreditCardReward.query.filter_by(credit_card_id=card.id).delete()
             
             # Add rewards from the form
             for reward_data in reward_categories:
                 category_name = reward_data.get('category')
-                percentage = reward_data.get('percentage')
+                rate = reward_data.get('rate')
                 limit = reward_data.get('limit')
-                if category_name and percentage:
+                if category_name and rate:
                     card.add_reward_category(
                         category_name=category_name,
-                        reward_percent=float(percentage),
-                        is_bonus=(percentage > 1.0),  # Consider it a bonus if > 1%
+                        reward_percent=float(rate),
+                        is_bonus=(rate > 1.0),  # Consider it a bonus if > 1%
                         limit=float(limit) if limit not in (None, '', 'null') else None
                     )
             
@@ -656,9 +663,13 @@ def export_cards():
         
         for card in cards:
             # Get reward categories for this card
-            reward_categories = {}
+            reward_categories = []
             for reward in card.rewards:
-                reward_categories[reward.category.name] = reward.reward_percent
+                reward_categories.append({
+                    'category': reward.category.name,
+                    'rate': reward.reward_percent,
+                    'limit': reward.limit
+                })
             
             # Parse special offers from JSON
             try:

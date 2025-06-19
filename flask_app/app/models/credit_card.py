@@ -39,8 +39,7 @@ class CreditCard(db.Model):
     signup_bonus_min_spend = db.Column(db.Float, default=0.0)
     signup_bonus_max_months = db.Column(db.Integer, default=3)  # Months
     
-    # Categories and Offers (stored as JSON strings) - DEPRECATED in favor of CreditCardReward model
-    reward_categories = db.Column(db.Text, nullable=False)  # JSON string of category multipliers
+    # Special offers (stored as JSON string)
     special_offers = db.Column(db.Text, nullable=True)  # JSON string of special offers
     
     # Source information for import tracking

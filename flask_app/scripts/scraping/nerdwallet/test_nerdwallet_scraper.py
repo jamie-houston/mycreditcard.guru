@@ -47,7 +47,8 @@ def main():
             # Print reward categories
             print("\nReward Categories:")
             for category in sample_card['reward_categories']:
-                print(f"  {category['percentage']}% on {category['category']}")
+                limit_text = f" (limit: ${category['limit']:,})" if category['limit'] else ""
+                print(f"  {category['rate']}x on {category['category']}{limit_text}")
             
             # Print signup bonus
             if sample_card['signup_bonus_value'] > 0 or sample_card['signup_bonus_points'] > 0:

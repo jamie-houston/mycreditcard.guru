@@ -2,7 +2,6 @@ from app.models.credit_card import CreditCard
 from app.models.user_data import UserProfile
 from app.blueprints.recommendations.models import Recommendation, create_recommendation_from_profile
 from app import db
-import json
 
 class RecommendationService:
     """Service for generating credit card recommendations based on user's spending profile."""
@@ -24,24 +23,20 @@ class RecommendationService:
         
         # Calculate rewards for each spending category
         for category, monthly_amount in monthly_spending.items():
-            categories = json.loads(card.reward_categories)
-            main_rate = None
+            # Get reward rate and limit from the new rewards relationship
+            main_rate = card.get_category_rate(category)
             limit = None
-            base_rate = 1.0
-            # Find main rate and limit for this category
-            for cat_data in categories:
-                cat_name = cat_data['category'].lower()
-                if cat_name == category.lower() or (category.lower() in ['base rate', 'base'] and cat_name == 'other'):
-                    main_rate = float(cat_data.get('rate', cat_data.get('percentage', 0)))
-                    limit = cat_data.get('limit')
-                    break
-            # Find base rate (for spend above limit)
-            for cat_data in categories:
-                if cat_data['category'].lower() in ['other', 'all']:
-                    base_rate = float(cat_data.get('rate', cat_data.get('percentage', 1.0)))
-                    break
-            if main_rate is None:
-                main_rate = base_rate
+            
+            # Get the limit for this specific category if it exists
+            from app.models.category import Category
+            category_obj = Category.get_by_name_or_alias(category)
+            if category_obj:
+                reward = card.rewards.filter_by(category_id=category_obj.id).first()
+                if reward:
+                    limit = reward.limit
+            
+            # Get base rate (for spend above limit) - always use 'other' category
+            base_rate = card.get_category_rate('other')
             annual_amount = monthly_amount * 12
             if limit is not None:
                 try:
