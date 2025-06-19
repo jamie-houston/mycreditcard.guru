@@ -24,6 +24,33 @@
   },
   "valid_cards": [
     {
+      "name": "Chase Sapphire Preferred® Card",
+      "issuer": "Chase",
+      "nerdwallet_rating": 5.0,
+      "best_for": "Best for Chase Ultimate Rewards® points",
+      "annual_fee": 95.0,
+      "rewards_rate_display": "1x-5x",
+      "reward_type_display": "Points",
+      "rewards_tooltip": "5x on travel purchased through Chase Travel℠, 3x on dining, select streaming services and online groceries, 2x on all other travel purchases, 1x on all other purchases.",
+      "reward_categories": {
+        "Travel": 2.0,
+        "Other": 1.0,
+        "Dining & Restaurants": 3.0,
+        "Streaming Services": 3.0
+      },
+      "reward_type": "points",
+      "intro_offer_display": "60,000",
+      "intro_offer_type": "points",
+      "intro_offer_tooltip": "Earn 60,000 bonus points after you spend $5,000 on purchases in the first 3 months from account opening.",
+      "signup_bonus_points": 60000,
+      "signup_bonus_value": 0.0,
+      "signup_bonus_min_spend": 5000.0,
+      "signup_bonus_max_months": 3,
+      "source": "nerdwallet_table",
+      "source_url": "https://www.nerdwallet.com/best/credit-cards/bonus-offers",
+      "row_index": 2
+    },
+    {
       "name": "Capital One VentureOne Rewards Credit Card - Miles Boost",
       "issuer": "Capital One",
       "nerdwallet_rating": 4.1,
