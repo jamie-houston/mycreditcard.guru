@@ -2,6 +2,7 @@ import unittest
 import json
 from app import create_app, db
 from app.models.credit_card import CreditCard, CardIssuer
+from app.models.category import Category
 from app.blueprints.recommendations.services import RecommendationService
 
 
@@ -14,6 +15,15 @@ class TestCalculationBugFix(unittest.TestCase):
         self.app_context = self.app.app_context()
         self.app_context.push()
         db.create_all()
+        
+        # Create test categories
+        categories = [
+            Category(name='travel', display_name='Travel'),
+            Category(name='other', display_name='Other'),
+            Category(name='dining', display_name='Dining'),
+        ]
+        for category in categories:
+            db.session.add(category)
         
         # Create test issuer
         self.test_issuer = CardIssuer(name='Calculation Test Bank')
@@ -42,10 +52,14 @@ class TestCalculationBugFix(unittest.TestCase):
             annual_fee=0,
             reward_type='cash_back',
             reward_value_multiplier=1.5,  # New system: 1.5 instead of 0.015
-            reward_categories=json.dumps([{"category": "other", "rate": 2.0}]),
             is_active=True
         )
         db.session.add(card)
+        db.session.commit()
+        
+        # Add reward category using new system - travel should get 2%
+        card.add_reward_category('travel', 2.0)
+        card.add_reward_category('other', 1.0)  # Default rate
         db.session.commit()
         
         # Test with user's spending profile
@@ -54,7 +68,7 @@ class TestCalculationBugFix(unittest.TestCase):
         
         print(f"\n=== User's Example Test - New System ===")
         print(f"Monthly spending: {monthly_spending}")
-        print(f"Card reward categories: {card.reward_categories}")
+        print(f"Card reward categories: {card.get_all_rewards()}")
         print(f"Card reward value multiplier: {card.reward_value_multiplier}")
         print(f"Actual result: {result}")
         
@@ -80,10 +94,14 @@ class TestCalculationBugFix(unittest.TestCase):
             annual_fee=0,
             reward_type='cash_back',
             reward_value_multiplier=1.5,  # New system
-            reward_categories=json.dumps([{"category": "other", "rate": 2.0}]),
             is_active=True
         )
         db.session.add(card)
+        db.session.commit()
+        
+        # Add reward category using new system - travel should get 2%
+        card.add_reward_category('travel', 2.0)
+        card.add_reward_category('other', 1.0)  # Default rate
         db.session.commit()
         
         monthly_spending = {"travel": 100}
@@ -127,7 +145,6 @@ class TestCalculationBugFix(unittest.TestCase):
             annual_fee=0,
             reward_type='cash_back',
             reward_value_multiplier=1.0,  # 1.0 for cash back
-            reward_categories=json.dumps([{"category": "other", "rate": 2.0}]),
             is_active=True
         )
         db.session.add(cash_card)
@@ -139,10 +156,16 @@ class TestCalculationBugFix(unittest.TestCase):
             annual_fee=95,
             reward_type='points',
             reward_value_multiplier=1.6,  # 1.6 for premium points
-            reward_categories=json.dumps([{"category": "other", "rate": 2.0}]),
             is_active=True
         )
         db.session.add(points_card)
+        db.session.commit()
+        
+        # Add reward categories using new system - travel should get 2%
+        cash_card.add_reward_category('travel', 2.0)
+        cash_card.add_reward_category('other', 1.0)
+        points_card.add_reward_category('travel', 2.0)
+        points_card.add_reward_category('other', 1.0)
         db.session.commit()
         
         monthly_spending = {"travel": 100}
@@ -173,10 +196,13 @@ class TestCalculationBugFix(unittest.TestCase):
             annual_fee=0,
             reward_type='cash_back',
             reward_value_multiplier=1.5,
-            reward_categories=json.dumps([{"category": "other", "rate": 2.0}]),
             is_active=True
         )
         db.session.add(card)
+        db.session.commit()
+        
+        # Add reward category using new system
+        card.add_reward_category('other', 1.0)  # Just a default rate for this test
         db.session.commit()
         
         # Test that point_value property returns the same as reward_value_multiplier

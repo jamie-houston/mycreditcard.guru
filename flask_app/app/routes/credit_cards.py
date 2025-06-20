@@ -44,14 +44,44 @@ def import_cards_from_json_data(cards_data: list, source_file: str) -> int:
                 'annual_fee': card_data.get('annual_fee', 0.0),
                 'reward_type': card_data.get('reward_type', 'points'),
                 'reward_value_multiplier': card_data.get('reward_value_multiplier', 0.01),
-                'signup_bonus_points': card_data.get('signup_bonus_points', 0),
-                'signup_bonus_value': card_data.get('signup_bonus_value', 0.0),
-                'signup_bonus_min_spend': card_data.get('signup_bonus_min_spend', 0.0),
-                'signup_bonus_max_months': card_data.get('signup_bonus_max_months', 3),
                 'source': card_data.get('source', 'scraped'),
                 'source_url': card_data.get('source_url', ''),
                 'import_date': datetime.utcnow()
             }
+            
+            # Create signup bonus JSON structure from imported data
+            signup_bonus_data = None
+            signup_bonus_points = card_data.get('signup_bonus_points', 0)
+            signup_bonus_value = card_data.get('signup_bonus_value', 0.0)
+            signup_bonus_min_spend = card_data.get('signup_bonus_min_spend', 0.0)
+            signup_bonus_max_months = card_data.get('signup_bonus_max_months', 3)
+            reward_type = card_data.get('reward_type', 'points')
+            reward_value_multiplier = card_data.get('reward_value_multiplier', 0.01)
+            
+            if signup_bonus_points > 0 or signup_bonus_value > 0:
+                signup_bonus_data = {}
+                
+                if reward_type == 'cash_back':
+                    amount = signup_bonus_value if signup_bonus_value > 0 else signup_bonus_points
+                    signup_bonus_data['cash_back'] = float(amount)
+                    signup_bonus_data['value'] = float(amount)
+                elif reward_type == 'miles':
+                    amount = signup_bonus_points if signup_bonus_points > 0 else signup_bonus_value / reward_value_multiplier
+                    signup_bonus_data['miles'] = int(amount)
+                    signup_bonus_data['value'] = float(amount * reward_value_multiplier)
+                elif reward_type == 'hotel':
+                    amount = signup_bonus_points if signup_bonus_points > 0 else signup_bonus_value / reward_value_multiplier
+                    signup_bonus_data['points'] = int(amount)
+                    signup_bonus_data['value'] = float(amount * reward_value_multiplier)
+                else:  # 'points' or default
+                    amount = signup_bonus_points if signup_bonus_points > 0 else signup_bonus_value / reward_value_multiplier
+                    signup_bonus_data['points'] = int(amount)
+                    signup_bonus_data['value'] = float(amount * reward_value_multiplier)
+                
+                signup_bonus_data['min_spend'] = float(signup_bonus_min_spend)
+                signup_bonus_data['max_months'] = int(signup_bonus_max_months)
+                
+                db_card_data['signup_bonus'] = json.dumps(signup_bonus_data)
             
             if existing_card:
                 # Update existing card

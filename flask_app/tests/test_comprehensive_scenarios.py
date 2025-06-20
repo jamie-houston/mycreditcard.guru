@@ -2,6 +2,7 @@ import unittest
 import json
 from app import create_app, db
 from app.models.credit_card import CreditCard, CardIssuer
+from app.models.category import Category
 from app.models.user_data import UserProfile
 from app.blueprints.recommendations.services import RecommendationService
 
@@ -16,10 +17,56 @@ class TestComprehensiveScenarios(unittest.TestCase):
         self.app_context.push()
         db.create_all()
         
+        # Create test categories
+        categories = [
+            Category(name='travel', display_name='Travel'),
+            Category(name='other', display_name='Other'),
+            Category(name='dining', display_name='Dining'),
+            Category(name='gas', display_name='Gas'),
+        ]
+        for category in categories:
+            db.session.add(category)
+        
         # Create test issuer
         self.test_issuer = CardIssuer(name='Comprehensive Test Bank')
         db.session.add(self.test_issuer)
         db.session.commit()
+    
+    def create_card_with_rewards(self, name, annual_fee=0, reward_type='cash_back', 
+                                reward_value_multiplier=1.0, reward_categories=None, 
+                                signup_bonus=None):
+        """Helper to create a card with the new reward system"""
+        card = CreditCard(
+            name=name,
+            issuer_id=self.test_issuer.id,
+            annual_fee=annual_fee,
+            reward_type=reward_type,
+            reward_value_multiplier=reward_value_multiplier,
+            is_active=True
+        )
+        
+        # Handle signup bonus
+        if signup_bonus:
+            card.update_signup_bonus(
+                amount=signup_bonus.get('amount', 0),
+                min_spend=signup_bonus.get('min_spend', 0),
+                max_months=signup_bonus.get('max_months', 3)
+            )
+        
+        db.session.add(card)
+        db.session.commit()
+        
+        # Add reward categories
+        if reward_categories:
+            for reward in reward_categories:
+                card.add_reward_category(
+                    reward['category'], 
+                    reward['rate'],
+                    limit=reward.get('limit')
+                )
+        
+        db.session.commit()
+        return card
     
     def tearDown(self):
         """Clean up test environment."""
@@ -30,17 +77,11 @@ class TestComprehensiveScenarios(unittest.TestCase):
     def test_basic_travel_spending_with_other_rate(self):
         """Test travel spending that falls back to 'other' category rate"""
         # Card only has 'other' category, travel spending should use that rate
-        card = CreditCard(
+        card = self.create_card_with_rewards(
             name='Basic 2% Card',
-            issuer_id=self.test_issuer.id,
-            annual_fee=0,
-            reward_type='cash_back',
             reward_value_multiplier=1.5,
-            reward_categories=json.dumps([{"category": "other", "rate": 2.0}]),
-            is_active=True
+            reward_categories=[{"category": "other", "rate": 2.0}]
         )
-        db.session.add(card)
-        db.session.commit()
         
         monthly_spending = {"travel": 100}
         result = RecommendationService.calculate_card_value(card, monthly_spending)
@@ -58,21 +99,17 @@ class TestComprehensiveScenarios(unittest.TestCase):
 
     def test_multiple_categories_with_different_rates(self):
         """Test card with multiple reward categories and spending"""
-        card = CreditCard(
+        card = self.create_card_with_rewards(
             name='Multi-Category Card',
-            issuer_id=self.test_issuer.id,
             annual_fee=95,
             reward_type='points',
             reward_value_multiplier=1.5,
-            reward_categories=json.dumps([
+            reward_categories=[
                 {"category": "travel", "rate": 3.0},
                 {"category": "dining", "rate": 2.0},
                 {"category": "other", "rate": 1.0}
-            ]),
-            is_active=True
+            ]
         )
-        db.session.add(card)
-        db.session.commit()
         
         monthly_spending = {"travel": 100, "dining": 50, "groceries": 200}
         result = RecommendationService.calculate_card_value(card, monthly_spending)
@@ -97,20 +134,16 @@ class TestComprehensiveScenarios(unittest.TestCase):
 
     def test_spending_limit_with_overflow(self):
         """Test spending limit where spending exceeds the limit"""
-        card = CreditCard(
+        card = self.create_card_with_rewards(
             name='Gas Rewards Card',
-            issuer_id=self.test_issuer.id,
             annual_fee=0,
             reward_type='cash_back',
             reward_value_multiplier=1.0,
-            reward_categories=json.dumps([
+            reward_categories=[
                 {"category": "gas", "rate": 5.0, "limit": 1000},
                 {"category": "other", "rate": 1.0}
-            ]),
-            is_active=True
+            ]
         )
-        db.session.add(card)
-        db.session.commit()
         
         # $200/month = $2400/year, exceeds $1000 limit
         monthly_spending = {"gas": 200}
@@ -133,20 +166,14 @@ class TestComprehensiveScenarios(unittest.TestCase):
 
     def test_signup_bonus_calculation(self):
         """Test card with signup bonus"""
-        card = CreditCard(
+        card = self.create_card_with_rewards(
             name='Signup Bonus Card',
-            issuer_id=self.test_issuer.id,
             annual_fee=0,
             reward_type='cash_back',
             reward_value_multiplier=1.0,
-            reward_categories=json.dumps([{"category": "other", "rate": 1.0}]),
-            signup_bonus_value=200,
-            signup_bonus_min_spend=1000,
-            signup_bonus_max_months=3,
-            is_active=True
+            reward_categories=[{"category": "other", "rate": 1.0}],
+            signup_bonus={"amount": 200, "min_spend": 1000, "max_months": 3}
         )
-        db.session.add(card)
-        db.session.commit()
         
         # $400/month = $1200 in 3 months, meets signup requirement
         monthly_spending = {"dining": 400}
@@ -166,17 +193,13 @@ class TestComprehensiveScenarios(unittest.TestCase):
 
     def test_high_annual_fee_negative_net_value(self):
         """Test card where annual fee exceeds rewards (negative net value)"""
-        card = CreditCard(
+        card = self.create_card_with_rewards(
             name='Premium Card',
-            issuer_id=self.test_issuer.id,
             annual_fee=500,  # High fee
             reward_type='points',
             reward_value_multiplier=1.5,
-            reward_categories=json.dumps([{"category": "other", "rate": 2.0}]),
-            is_active=True
+            reward_categories=[{"category": "other", "rate": 2.0}]
         )
-        db.session.add(card)
-        db.session.commit()
         
         # Low spending: $50/month
         monthly_spending = {"dining": 50}
@@ -197,29 +220,22 @@ class TestComprehensiveScenarios(unittest.TestCase):
     def test_cash_back_vs_points_multiplier(self):
         """Test different reward types with different multipliers"""
         # Cash back card (1:1 ratio)
-        cash_card = CreditCard(
+        cash_card = self.create_card_with_rewards(
             name='Cash Back Card',
-            issuer_id=self.test_issuer.id,
             annual_fee=0,
             reward_type='cash_back',
             reward_value_multiplier=1.0,  # 1:1 for cash back
-            reward_categories=json.dumps([{"category": "dining", "rate": 2.0}]),
-            is_active=True
+            reward_categories=[{"category": "dining", "rate": 2.0}]
         )
-        db.session.add(cash_card)
         
         # Points card (higher value per point)
-        points_card = CreditCard(
+        points_card = self.create_card_with_rewards(
             name='Points Card',
-            issuer_id=self.test_issuer.id,
             annual_fee=0,
             reward_type='points',
             reward_value_multiplier=1.5,  # 1.5 cents per point
-            reward_categories=json.dumps([{"category": "dining", "rate": 2.0}]),
-            is_active=True
+            reward_categories=[{"category": "dining", "rate": 2.0}]
         )
-        db.session.add(points_card)
-        db.session.commit()
         
         monthly_spending = {"dining": 100}
         

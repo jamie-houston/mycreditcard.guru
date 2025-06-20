@@ -78,11 +78,11 @@ class RecommendationService:
                 }
             annual_value += category_value
             
-        # Add sign-up bonus (already in dollars from the database)
-        if card.signup_bonus_value and card.signup_bonus_value > 0:
-            signup_bonus_dollars = card.signup_bonus_value
-            annual_value += signup_bonus_dollars
-            rewards_by_category['signup_bonus'] = signup_bonus_dollars
+        # Add sign-up bonus (calculated value from JSON structure)
+        signup_bonus_value = card.get_signup_bonus_value_new()
+        if signup_bonus_value > 0:
+            annual_value += signup_bonus_value
+            rewards_by_category['signup_bonus'] = signup_bonus_value
             
         return {
             'annual_value': annual_value,

@@ -5,7 +5,7 @@ from app.models.user import User
 from app.models.user_data import UserProfile
 from app.models.recommendation import Recommendation
 from app.models.credit_card import CreditCard
-from app.models import CardIssuer
+from app.models import CardIssuer, Category
 import json
 
 class RoutesTestCase(unittest.TestCase):
@@ -20,8 +20,10 @@ class RoutesTestCase(unittest.TestCase):
         # Create test client
         self.client = self.app.test_client(use_cookies=True)
         
-        # Create test user
-        self.user = User(username='test_user', email='test@example.com', password='password')
+        # Create test user with unique username
+        import uuid
+        unique_id = str(uuid.uuid4())[:8]
+        self.user = User(username=f'test_user_{unique_id}', email=f'test_{unique_id}@example.com', password='password')
         db.session.add(self.user)
         db.session.commit()  # Commit to get the user ID
         
@@ -37,36 +39,42 @@ class RoutesTestCase(unittest.TestCase):
         db.session.add(self.profile)
         db.session.commit()  # Commit to get the profile ID
         
-        # Create test issuers
-        self.test_issuer = CardIssuer(name='Test Bank')
-        self.other_issuer = CardIssuer(name='Other Bank')
+        # Create test issuers with unique names
+        self.test_issuer = CardIssuer(name=f'Test Bank {unique_id}')
+        self.other_issuer = CardIssuer(name=f'Other Bank {unique_id}')
         db.session.add(self.test_issuer)
         db.session.add(self.other_issuer)
         db.session.commit()
+        
+        # Create test categories (or get existing ones)
+        category_names = ['dining', 'travel', 'groceries', 'gas', 'other']
+        for cat_name in category_names:
+            existing_category = Category.query.filter_by(name=cat_name).first()
+            if not existing_category:
+                category = Category(name=cat_name, display_name=cat_name.title())
+                db.session.add(category)
+        db.session.commit()
+        
         # Create test cards
-        card1 = CreditCard(
+        card1 = self.create_card_with_rewards(
             name='Test Card 1',
             issuer_id=self.test_issuer.id,
             annual_fee=95.0,
-            reward_value_multiplier=1.0,
-            reward_categories=json.dumps([
+            reward_categories=[
                 {"category": "dining", "rate": 3.0},
                 {"category": "travel", "rate": 2.0}
-            ]),
-            signup_bonus_value=500.0,
-            is_active=True
+            ],
+            signup_bonus={"amount": 500.0}
         )
-        card2 = CreditCard(
+        card2 = self.create_card_with_rewards(
             name='Test Card 2',
             issuer_id=self.other_issuer.id,
             annual_fee=0.0,
-            reward_value_multiplier=1.0,
-            reward_categories=json.dumps([
+            reward_categories=[
                 {"category": "groceries", "rate": 2.0},
                 {"category": "gas", "rate": 2.0}
-            ]),
-            signup_bonus_value=200.0,
-            is_active=True
+            ],
+            signup_bonus={"amount": 200.0}
         )
         db.session.add(card1)
         db.session.add(card2)
@@ -94,6 +102,28 @@ class RoutesTestCase(unittest.TestCase):
             with c.session_transaction() as sess:
                 sess['_user_id'] = str(self.user.id)  # Flask-Login uses _user_id and expects string
                 sess['_fresh'] = True
+    
+    def create_card_with_rewards(self, name, issuer_id, annual_fee, reward_categories, signup_bonus=None):
+        """Helper method to create a credit card with reward categories."""
+        card = CreditCard(
+            name=name,
+            issuer_id=issuer_id,
+            annual_fee=annual_fee,
+            reward_value_multiplier=1.0,
+            signup_bonus=json.dumps(signup_bonus or {"amount": 0}),
+            is_active=True
+        )
+        db.session.add(card)
+        db.session.flush()  # Get the card ID
+        
+        # Add reward categories using the add_reward_category method
+        for reward in reward_categories:
+            card.add_reward_category(
+                category_name=reward["category"],
+                reward_percent=reward["rate"]
+            )
+        
+        return card
     
     def tearDown(self):
         """Clean up test environment."""

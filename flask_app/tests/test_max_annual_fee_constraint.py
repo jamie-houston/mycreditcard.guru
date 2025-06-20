@@ -3,6 +3,7 @@ import json
 from app import create_app, db
 from app.models.user_data import UserProfile
 from app.models.credit_card import CreditCard, CardIssuer
+from app.models.category import Category
 from app.blueprints.recommendations.services import RecommendationService
 
 
@@ -16,38 +17,68 @@ class TestMaxAnnualFeeConstraint(unittest.TestCase):
         self.app_context.push()
         db.create_all()
         
+        # Create test categories
+        categories = [
+            Category(name='dining', display_name='Dining'),
+            Category(name='other', display_name='Other'),
+            Category(name='travel', display_name='Travel'),
+            Category(name='gas', display_name='Gas'),
+        ]
+        for category in categories:
+            db.session.add(category)
+        
         # Create issuer
         self.issuer = CardIssuer(name='Test Bank Max Fee Constraint')
         db.session.add(self.issuer)
         db.session.commit()
         
         # Create cards with different annual fees
-        self.free_card = CreditCard(
+        self.free_card = self.create_card_with_rewards(
             name='Free Card',
-            issuer_id=self.issuer.id,
             annual_fee=0,
             reward_type='points',
-            reward_categories='[{"category": "other", "rate": 1.0}]'
+            reward_categories=[{"category": "other", "rate": 1.0}]
         )
         
-        self.mid_fee_card = CreditCard(
+        self.mid_fee_card = self.create_card_with_rewards(
             name='Mid Fee Card',
-            issuer_id=self.issuer.id,
             annual_fee=95,
             reward_type='points',
-            reward_categories='[{"category": "dining", "rate": 3.0}, {"category": "other", "rate": 1.0}]'
+            reward_categories=[{"category": "dining", "rate": 3.0}, {"category": "other", "rate": 1.0}]
         )
         
-        self.high_fee_card = CreditCard(
+        self.high_fee_card = self.create_card_with_rewards(
             name='High Fee Card',
-            issuer_id=self.issuer.id,
             annual_fee=550,
             reward_type='points',
-            reward_categories='[{"category": "travel", "rate": 5.0}, {"category": "other", "rate": 1.0}]'
+            reward_categories=[{"category": "travel", "rate": 5.0}, {"category": "other", "rate": 1.0}]
         )
-        
-        db.session.add_all([self.free_card, self.mid_fee_card, self.high_fee_card])
+    
+    def create_card_with_rewards(self, name, annual_fee=0, reward_type='points', 
+                                reward_value_multiplier=1.0, reward_categories=None):
+        """Helper to create a card with the new reward system"""
+        card = CreditCard(
+            name=name,
+            issuer_id=self.issuer.id,
+            annual_fee=annual_fee,
+            reward_type=reward_type,
+            reward_value_multiplier=reward_value_multiplier,
+            is_active=True
+        )
+        db.session.add(card)
         db.session.commit()
+        
+        # Add reward categories
+        if reward_categories:
+            for reward in reward_categories:
+                card.add_reward_category(
+                    reward['category'], 
+                    reward['rate'],
+                    limit=reward.get('limit')
+                )
+        
+        db.session.commit()
+        return card
     
     def tearDown(self):
         """Clean up test environment."""

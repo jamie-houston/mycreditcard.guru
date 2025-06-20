@@ -1,6 +1,7 @@
 import unittest
 from app import create_app, db
 from app.models.credit_card import CreditCard, CardIssuer
+from app.models.category import Category
 from app.blueprints.recommendations.services import RecommendationService
 import json
 
@@ -15,10 +16,46 @@ class TestRewardValueMultiplier(unittest.TestCase):
         self.app_context.push()
         db.create_all()
         
+        # Create test categories
+        categories = [
+            Category(name='dining', display_name='Dining'),
+            Category(name='other', display_name='Other'),
+            Category(name='travel', display_name='Travel'),
+            Category(name='gas', display_name='Gas'),
+        ]
+        for category in categories:
+            db.session.add(category)
+        
         # Create test issuer
         self.test_issuer = CardIssuer(name='Test Multiplier Bank')
         db.session.add(self.test_issuer)
         db.session.commit()
+    
+    def create_card_with_rewards(self, name, annual_fee=0, reward_type='cash_back', 
+                                reward_value_multiplier=1.0, reward_categories=None):
+        """Helper to create a card with the new reward system"""
+        card = CreditCard(
+            name=name,
+            issuer_id=self.test_issuer.id,
+            annual_fee=annual_fee,
+            reward_type=reward_type,
+            reward_value_multiplier=reward_value_multiplier,
+            is_active=True
+        )
+        db.session.add(card)
+        db.session.commit()
+        
+        # Add reward categories
+        if reward_categories:
+            for reward in reward_categories:
+                card.add_reward_category(
+                    reward['category'], 
+                    reward['rate'],
+                    limit=reward.get('limit')
+                )
+        
+        db.session.commit()
+        return card
     
     def tearDown(self):
         """Clean up test environment."""
@@ -29,17 +66,15 @@ class TestRewardValueMultiplier(unittest.TestCase):
     def test_reward_value_multiplier_calculation(self):
         """Test that reward_value_multiplier is correctly applied to convert points to dollars."""
         # Create a card with 1.5 cents per point multiplier
-        card = CreditCard(
+        card = self.create_card_with_rewards(
             name='Test Points Card',
-            issuer_id=self.test_issuer.id,
-            annual_fee=0,
             reward_type='points',
             reward_value_multiplier=1.5,  # 1.5 cents per point
-            reward_categories='[{"category": "dining", "rate": 3.0}, {"category": "other", "rate": 1.0}]',
-            is_active=True
+            reward_categories=[
+                {"category": "dining", "rate": 3.0}, 
+                {"category": "other", "rate": 1.0}
+            ]
         )
-        db.session.add(card)
-        db.session.commit()
         
         # Test spending: $100/month on dining
         monthly_spending = {'dining': 100}
@@ -62,17 +97,15 @@ class TestRewardValueMultiplier(unittest.TestCase):
     def test_reward_value_multiplier_with_limits(self):
         """Test that reward_value_multiplier works correctly with spending limits."""
         # Create a card with spending limit and multiplier
-        card = CreditCard(
+        card = self.create_card_with_rewards(
             name='Test Limited Card',
-            issuer_id=self.test_issuer.id,
-            annual_fee=0,
             reward_type='points',
             reward_value_multiplier=1.0,  # 1 cent per point
-            reward_categories='[{"category": "gas", "rate": 5.0, "limit": 1000}, {"category": "other", "rate": 1.0}]',
-            is_active=True
+            reward_categories=[
+                {"category": "gas", "rate": 5.0, "limit": 1000}, 
+                {"category": "other", "rate": 1.0}
+            ]
         )
-        db.session.add(card)
-        db.session.commit()
         
         # Test spending: $200/month on gas = $2,400/year
         # First $1,000 at 5%, remaining $1,400 at 1%
@@ -102,17 +135,15 @@ class TestRewardValueMultiplier(unittest.TestCase):
         # $1,200/year * 3% = 36 points
         # 36 points * multiplier = $54
         # multiplier = $54 / 36 = $1.50 per point
-        card = CreditCard(
+        card = self.create_card_with_rewards(
             name='High Value Card',
-            issuer_id=self.test_issuer.id,
-            annual_fee=0,
             reward_type='travel',
             reward_value_multiplier=1.5,  # $1.50 per point (high-value travel card)
-            reward_categories='[{"category": "dining", "rate": 3.0}, {"category": "other", "rate": 1.0}]',
-            is_active=True
+            reward_categories=[
+                {"category": "dining", "rate": 3.0}, 
+                {"category": "other", "rate": 1.0}
+            ]
         )
-        db.session.add(card)
-        db.session.commit()
         
         # Test spending: $100/month on dining
         monthly_spending = {'dining': 100}

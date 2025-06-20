@@ -6,6 +6,7 @@ from app import create_app, db
 from app.engine.recommendation import RecommendationEngine
 from app.models.user_data import UserProfile
 from app.models.credit_card import CreditCard
+from app.models.category import Category
 from app.models import CardIssuer
 from app.blueprints.recommendations.services import RecommendationService
 
@@ -22,6 +23,16 @@ class TestRecommendationEngine(unittest.TestCase):
         # Only create tables for tests that need database access
         if hasattr(self, '_testMethodName') and 'duplicate_recommendation' in self._testMethodName:
             db.create_all()
+            
+            # Create test categories for duplicate_recommendation test
+            categories = [
+                Category(name='dining', display_name='Dining'),
+                Category(name='travel', display_name='Travel'),
+                Category(name='other', display_name='Other'),
+            ]
+            for category in categories:
+                db.session.add(category)
+            db.session.commit()
 
     def tearDown(self):
         """Clean up after tests."""
@@ -49,29 +60,37 @@ class TestRecommendationEngine(unittest.TestCase):
             issuer_id=issuer.id,
             annual_fee=95.0,
             reward_value_multiplier=1.0,
-            reward_categories=json.dumps([
-                {"category": "dining", "rate": 3.0},
-                {"category": "travel", "rate": 2.0},
-                {"category": "other", "rate": 1.0}
-            ]),
-            signup_bonus_value=500.0,
             is_active=True
         )
+        card1.update_signup_bonus(500)  # Set signup bonus
+        db.session.add(card1)
+        db.session.commit()
+        
+        # Add reward categories
+        card1.add_reward_category('dining', 3.0)
+        card1.add_reward_category('travel', 2.0)
+        card1.add_reward_category('other', 1.0)
         card2 = CreditCard(
             name='Test Card 2',
             issuer_id=issuer.id,
             annual_fee=0.0,
             reward_value_multiplier=1.0,
-            reward_categories=json.dumps([
-                {"category": "groceries", "rate": 2.0},
-                {"category": "gas", "rate": 2.0},
-                {"category": "other", "rate": 1.0}
-            ]),
-            signup_bonus_value=200.0,
             is_active=True
         )
-        db.session.add(card1)
+        card2.update_signup_bonus(200)  # Set signup bonus
         db.session.add(card2)
+        db.session.commit()
+        
+        # Add reward categories (need to add missing categories first)
+        groceries_cat = Category(name='groceries', display_name='Groceries')
+        gas_cat = Category(name='gas', display_name='Gas')
+        db.session.add(groceries_cat)
+        db.session.add(gas_cat)
+        db.session.commit()
+        
+        card2.add_reward_category('groceries', 2.0)
+        card2.add_reward_category('gas', 2.0)
+        card2.add_reward_category('other', 1.0)
         db.session.commit()
         
         # Create test profile

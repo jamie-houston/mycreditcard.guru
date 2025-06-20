@@ -70,8 +70,7 @@ class ModelsTestCase(unittest.TestCase):
             name='Test Card',
             issuer_id=issuer.id,
             annual_fee=95.0,
-            reward_type='cash_back',
-            reward_categories='[]'  # Empty JSON array for the deprecated field
+            reward_type='cash_back'
         )
         db.session.add(card)
         db.session.commit()

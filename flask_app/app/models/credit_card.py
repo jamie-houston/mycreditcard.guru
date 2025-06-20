@@ -34,10 +34,9 @@ class CreditCard(db.Model):
     
     # Rewards Structure
     reward_value_multiplier = db.Column(db.Float, default=0.01)  # Renamed from point_value - Dollar value per point/mile
-    signup_bonus_points = db.Column(db.Integer, default=0)
-    signup_bonus_value = db.Column(db.Float, default=0.0)
-    signup_bonus_min_spend = db.Column(db.Float, default=0.0)
-    signup_bonus_max_months = db.Column(db.Integer, default=3)  # Months
+    
+    # JSON-based signup bonus structure
+    signup_bonus = db.Column(db.Text, nullable=True)  # JSON string containing signup bonus details
     
     # Special offers (stored as JSON string)
     special_offers = db.Column(db.Text, nullable=True)  # JSON string of special offers
@@ -60,8 +59,8 @@ class CreditCard(db.Model):
     # Calculated property for estimated_value
     @hybrid_property
     def estimated_value(self):
-        """Calculate estimated value based on signup_bonus_points * reward_value_multiplier."""
-        return self.signup_bonus_points * self.reward_value_multiplier
+        """Calculate estimated value based on signup bonus value from JSON structure."""
+        return self.get_signup_bonus_value_new()
 
     def __repr__(self):
         return f'<CreditCard {self.name}, Annual Fee: ${self.annual_fee}>'
@@ -72,12 +71,23 @@ class CreditCard(db.Model):
         # Always map 'base rate' and 'base' to 'other'
         if category_name.lower() in ['base rate', 'base']:
             category_name = 'other'
+        
+        # First try to find the specific category
         category = Category.get_by_name(category_name)
         if category:
             reward = self.rewards.filter_by(category_id=category.id).first()
             if reward:
                 return reward.reward_percent
-        return 1.0  # Default base rate
+        
+        # If no specific category found, fall back to 'other' category rate
+        if category_name.lower() != 'other':
+            other_category = Category.get_by_name('other')
+            if other_category:
+                other_reward = self.rewards.filter_by(category_id=other_category.id).first()
+                if other_reward:
+                    return other_reward.reward_percent
+        
+        return 1.0  # Default base rate if no 'other' category either
 
     def add_reward_category(self, category_name, reward_percent, is_bonus=False, notes=None, limit=None):
         """Add or update a reward category for this card."""
@@ -213,10 +223,7 @@ class CreditCard(db.Model):
             'is_active': self.is_active,
             'reward_type': self.reward_type,
             'reward_value_multiplier': self.reward_value_multiplier,
-            'signup_bonus_points': self.signup_bonus_points,
-            'signup_bonus_value': self.signup_bonus_value,
-            'signup_bonus_min_spend': self.signup_bonus_min_spend,
-            'signup_bonus_max_months': self.signup_bonus_max_months,
+            'signup_bonus': self.get_signup_bonus_data(),  # New JSON structure
             'estimated_value': self.estimated_value,
             'rewards': self.get_all_rewards(),  # New structured rewards system
             'source': self.source,
@@ -226,27 +233,30 @@ class CreditCard(db.Model):
 
     def get_signup_bonus_display_value(self):
         """Get the properly formatted signup bonus value for display."""
-        if self.reward_type == 'cash_back':
-            # For cash back bonuses, use the value as-is
-            return self.signup_bonus_value
-        elif self.reward_type in ['points', 'miles', 'hotel']:
-            # For points/miles, the signup_bonus_value should already be the dollar equivalent
-            return self.signup_bonus_value
-        else:
-            # For other type bonuses
-            return self.signup_bonus_value
+        return self.get_signup_bonus_value_new()
     
     def get_signup_bonus_display_text(self):
         """Get the full display text for signup bonus."""
-        if self.signup_bonus_value <= 0:
+        bonus_data = self.get_signup_bonus_data()
+        if not bonus_data:
+            return "None"
+            
+        value = bonus_data.get('value', 0)
+        if value <= 0:
             return "None"
         
         if self.reward_type == 'cash_back':
-            return f"${self.signup_bonus_value:.0f}"
-        elif self.reward_type in ['points', 'miles', 'hotel']:
-            return f"{self.signup_bonus_points:,} {self.get_reward_type_display_name().lower()} (${self.signup_bonus_value:.0f})"
-        else:
-            return "Something mysterious (possibly a free llama)"
+            amount = bonus_data.get('cash_back', 0)
+            return f"${amount:.0f}"
+        elif self.reward_type == 'miles':
+            amount = bonus_data.get('miles', 0)
+            return f"{amount:,} {self.get_reward_type_display_name().lower()} (${value:.0f})"
+        elif self.reward_type == 'hotel':
+            amount = bonus_data.get('points', 0)
+            return f"{amount:,} {self.get_reward_type_display_name().lower()} (${value:.0f})"
+        else:  # 'points' or default
+            amount = bonus_data.get('points', 0)
+            return f"{amount:,} {self.get_reward_type_display_name().lower()} (${value:.0f})"
     
     def get_reward_type_display_name(self):
         """Get the display name for the reward type."""
@@ -258,6 +268,91 @@ class CreditCard(db.Model):
             'travel': 'Travel'
         }
         return reward_type_mapping.get(self.reward_type, self.reward_type.replace('_', ' ').title())
+
+    # New signup bonus methods for JSON structure
+    def get_signup_bonus_data(self):
+        """Get signup bonus data as a dictionary."""
+        if not self.signup_bonus:
+            return None
+        try:
+            return json.loads(self.signup_bonus)
+        except (json.JSONDecodeError, TypeError):
+            return None
+    
+    def set_signup_bonus_data(self, bonus_data):
+        """Set signup bonus data from a dictionary."""
+        if bonus_data:
+            self.signup_bonus = json.dumps(bonus_data)
+        else:
+            self.signup_bonus = None
+    
+    def get_signup_bonus_amount(self):
+        """Get the signup bonus amount based on reward type."""
+        bonus_data = self.get_signup_bonus_data()
+        if not bonus_data:
+            return 0
+        
+        reward_type = self.reward_type
+        if reward_type == 'cash_back':
+            return bonus_data.get('cash_back', 0)
+        elif reward_type == 'miles':
+            return bonus_data.get('miles', 0)
+        elif reward_type == 'hotel':
+            return bonus_data.get('points', 0)  # Hotel points
+        else:  # 'points' or default
+            return bonus_data.get('points', 0)
+    
+    def get_signup_bonus_value_new(self):
+        """Get the calculated value of the signup bonus."""
+        bonus_data = self.get_signup_bonus_data()
+        if not bonus_data:
+            return 0.0
+        return bonus_data.get('value', 0.0)
+    
+    def get_signup_bonus_min_spend_new(self):
+        """Get the minimum spend requirement for the signup bonus."""
+        bonus_data = self.get_signup_bonus_data()
+        if not bonus_data:
+            return 0.0
+        return bonus_data.get('min_spend', 0.0)
+    
+    def get_signup_bonus_max_months_new(self):
+        """Get the maximum months to achieve the signup bonus."""
+        bonus_data = self.get_signup_bonus_data()
+        if not bonus_data:
+            return 3
+        return bonus_data.get('max_months', 3)
+    
+    def update_signup_bonus(self, amount, min_spend=None, max_months=None):
+        """Update signup bonus with new amount and requirements."""
+        if amount <= 0:
+            self.signup_bonus = None
+            return
+        
+        bonus_data = {}
+        reward_type = self.reward_type
+        
+        # Set the amount field based on reward type
+        if reward_type == 'cash_back':
+            bonus_data['cash_back'] = float(amount)
+            bonus_data['value'] = float(amount)  # For cash back, value equals amount
+        elif reward_type == 'miles':
+            bonus_data['miles'] = int(amount)
+            bonus_data['value'] = float(amount * self.reward_value_multiplier)
+        elif reward_type == 'hotel':
+            bonus_data['points'] = int(amount)  # Hotel points
+            bonus_data['value'] = float(amount * self.reward_value_multiplier)
+        else:  # 'points' or default
+            bonus_data['points'] = int(amount)
+            bonus_data['value'] = float(amount * self.reward_value_multiplier)
+        
+        # Set requirements
+        if min_spend is not None:
+            bonus_data['min_spend'] = float(min_spend)
+        if max_months is not None:
+            bonus_data['max_months'] = int(max_months)
+        
+        self.set_signup_bonus_data(bonus_data)
 
     # Backward compatibility properties
     @property
