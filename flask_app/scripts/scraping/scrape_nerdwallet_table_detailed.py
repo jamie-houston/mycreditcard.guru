@@ -20,6 +20,47 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 logger = logging.getLogger(__name__)
 
 
+def create_signup_bonus_json(intro_details: Dict, reward_type: str, reward_value_multiplier: float) -> Optional[str]:
+    """
+    Create JSON signup bonus structure from parsed intro offer details.
+    
+    Args:
+        intro_details: Dictionary with 'points', 'value', 'spending_requirement', 'months'
+        reward_type: The card's reward type ('points', 'cash_back', 'miles', 'hotel')
+        reward_value_multiplier: The card's reward value multiplier
+    
+    Returns:
+        JSON string of signup bonus data or None if no valid bonus
+    """
+    if not intro_details or intro_details.get('points', 0) <= 0:
+        return None
+    
+    bonus_data = {}
+    amount = intro_details.get('points', 0)
+    
+    # Set the amount field based on reward type
+    if reward_type == 'cash_back':
+        bonus_data['cash_back'] = float(amount)
+        bonus_data['value'] = float(amount)  # For cash back, value equals amount
+    elif reward_type == 'miles':
+        bonus_data['miles'] = int(amount)
+        bonus_data['value'] = float(amount * reward_value_multiplier)
+    elif reward_type == 'hotel':
+        bonus_data['points'] = int(amount)  # Hotel points
+        bonus_data['value'] = float(amount * reward_value_multiplier)
+    else:  # 'points' or default
+        bonus_data['points'] = int(amount)
+        bonus_data['value'] = float(amount * reward_value_multiplier)
+    
+    # Set requirements
+    if intro_details.get('spending_requirement', 0) > 0:
+        bonus_data['min_spend'] = float(intro_details['spending_requirement'])
+    if intro_details.get('months', 0) > 0:
+        bonus_data['max_months'] = int(intro_details['months'])
+    
+    return json.dumps(bonus_data)
+
+
 def parse_category_bonuses_from_tooltip(tooltip_text: str) -> List[Dict[str, any]]:
     """
     Parse category bonuses from NerdWallet aria-label tooltip text.
@@ -455,12 +496,10 @@ def extract_card_from_row(row, row_index: int) -> Optional[Dict]:
         if intro_aria_label and intro_aria_label != "Intro Offer Details":
             card['intro_offer_tooltip'] = intro_aria_label
             intro_details = parse_intro_offer(intro_aria_label)
-            card.update({
-                'signup_bonus_points': intro_details['points'],
-                'signup_bonus_value': intro_details['value'],
-                'signup_bonus_min_spend': intro_details['spending_requirement'],
-                'signup_bonus_max_months': intro_details['months']
-            })
+            # Use new JSON signup bonus format
+            card['signup_bonus'] = create_signup_bonus_json(
+                intro_details, card.get('reward_type', 'points'), card.get('reward_value_multiplier', 0.01)
+            )
     
     # Fallback to button if span not found
     if not card.get('intro_offer_tooltip'):
@@ -470,21 +509,17 @@ def extract_card_from_row(row, row_index: int) -> Optional[Dict]:
             if intro_aria_label and intro_aria_label != "Intro Offer Details":
                 card['intro_offer_tooltip'] = intro_aria_label
                 intro_details = parse_intro_offer(intro_aria_label)
-                card.update({
-                    'signup_bonus_points': intro_details['points'],
-                    'signup_bonus_value': intro_details['value'],
-                    'signup_bonus_min_spend': intro_details['spending_requirement'],
-                    'signup_bonus_max_months': intro_details['months']
-                })
+                # Use new JSON signup bonus format
+                card['signup_bonus'] = create_signup_bonus_json(
+                    intro_details, card.get('reward_type', 'points'), card.get('reward_value_multiplier', 0.01)
+                )
     
     # Set default values if not found
     card.setdefault('reward_categories', [])
     card.setdefault('reward_type', 'points')
     card.setdefault('annual_fee', 0.0)
-    card.setdefault('signup_bonus_points', 0)
-    card.setdefault('signup_bonus_value', 0.0)
-    card.setdefault('signup_bonus_min_spend', 0.0)
-    card.setdefault('signup_bonus_max_months', 3)
+    card.setdefault('reward_value_multiplier', 0.01)
+    card.setdefault('signup_bonus', None)
     
     # Add metadata
     card['source'] = 'nerdwallet_table'
@@ -636,7 +671,7 @@ def main():
     # Analyze results for valid cards
     valid_cards_with_rewards = [c for c in valid_cards if c.get('reward_categories')]
     valid_cards_with_tooltips = [c for c in valid_cards if c.get('rewards_tooltip')]
-    valid_cards_with_intro_offers = [c for c in valid_cards if c.get('signup_bonus_points', 0) > 0 or c.get('signup_bonus_value', 0) > 0]
+    valid_cards_with_intro_offers = [c for c in valid_cards if c.get('signup_bonus') is not None]
     
     # Analyze issues in problematic cards
     issue_summary = {}
@@ -700,10 +735,19 @@ def main():
                 for reward_cat in card['reward_categories']:
                     limit_text = f" (limit: ${reward_cat['limit']:,})" if reward_cat['limit'] else ""
                     print(f"   • {reward_cat['category']}: {reward_cat['rate']}x{limit_text}")
-            if card.get('signup_bonus_points', 0) > 0:
-                print(f"   🎁 Signup Bonus: {card['signup_bonus_points']:,} points")
-            if card.get('signup_bonus_value', 0) > 0:
-                print(f"   💰 Bonus Value: ${card['signup_bonus_value']}")
+            if card.get('signup_bonus'):
+                try:
+                    bonus_data = json.loads(card['signup_bonus'])
+                    if 'points' in bonus_data:
+                        print(f"   🎁 Signup Bonus: {bonus_data['points']:,} points")
+                    elif 'miles' in bonus_data:
+                        print(f"   🎁 Signup Bonus: {bonus_data['miles']:,} miles")
+                    elif 'cash_back' in bonus_data:
+                        print(f"   🎁 Signup Bonus: ${bonus_data['cash_back']:.0f} cash back")
+                    if 'value' in bonus_data:
+                        print(f"   💰 Bonus Value: ${bonus_data['value']:.0f}")
+                except (json.JSONDecodeError, KeyError):
+                    print(f"   🎁 Signup Bonus: {card['signup_bonus']}")
     
     if problematic_cards:
         print(f"\n⚠️  Sample problematic cards:")

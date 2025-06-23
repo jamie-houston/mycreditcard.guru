@@ -112,10 +112,7 @@ def seed_credit_cards():
             "annual_fee": 0,
             "reward_type": "cash_back",
             "reward_value_multiplier": 1,
-            "signup_bonus_points": 75000,
-            "signup_bonus_value": 750,
-            "signup_bonus_min_spend": 6000,
-            "signup_bonus_max_months": 3,
+            "signup_bonus": {"cash_back": 750, "value": 750, "min_spend": 6000, "max_months": 3},
             "reward_categories": [
                 {"category": "other", "rate": 1.5, "limit": None}
             ],
@@ -130,11 +127,8 @@ def seed_credit_cards():
             "issuer": "Chase",
             "annual_fee": 95,
             "reward_type": "points",
-            "reward_value_multiplier": 1.25,
-            "signup_bonus_points": 60000,
-            "signup_bonus_value": 750,
-            "signup_bonus_min_spend": 4000,
-            "signup_bonus_max_months": 3,
+            "reward_value_multiplier": 0.0125,
+            "signup_bonus": {"points": 60000, "value": 750, "min_spend": 4000, "max_months": 3},
             "reward_categories": [
                 {"category": "other", "rate": 1.0, "limit": None},
                 {"category": "dining", "rate": 3.0, "limit": None},
@@ -152,11 +146,8 @@ def seed_credit_cards():
             "issuer": "American Express",
             "annual_fee": 695,
             "reward_type": "points",
-            "reward_value_multiplier": 1.6,
-            "signup_bonus_points": 175000,
-            "signup_bonus_value": 2800,
-            "signup_bonus_min_spend": 8000,
-            "signup_bonus_max_months": 6,
+            "reward_value_multiplier": 0.016,
+            "signup_bonus": {"points": 175000, "value": 2800, "min_spend": 8000, "max_months": 6},
             "reward_categories": [
                 {"category": "other", "rate": 1.0, "limit": None},
                 {"category": "travel", "rate": 5.0, "limit": None}
@@ -173,11 +164,8 @@ def seed_credit_cards():
             "issuer": "American Express",
             "annual_fee": 325,
             "reward_type": "points",
-            "reward_value_multiplier": 1.6,
-            "signup_bonus_points": 100000,
-            "signup_bonus_value": 1600,
-            "signup_bonus_min_spend": 6000,
-            "signup_bonus_max_months": 6,
+            "reward_value_multiplier": 0.016,
+            "signup_bonus": {"points": 100000, "value": 1600, "min_spend": 6000, "max_months": 6},
             "reward_categories": [
                 {"category": "other", "rate": 1.0, "limit": None},
                 {"category": "dining", "rate": 4.0, "limit": None},
@@ -195,11 +183,8 @@ def seed_credit_cards():
             "issuer": "Bank of America",
             "annual_fee": 0,
             "reward_type": "points",
-            "reward_value_multiplier": 1,
-            "signup_bonus_points": 25000,
-            "signup_bonus_value": 250,
-            "signup_bonus_min_spend": 1000,
-            "signup_bonus_max_months": 3,
+            "reward_value_multiplier": 0.01,
+            "signup_bonus": {"points": 25000, "value": 250, "min_spend": 1000, "max_months": 3},
             "reward_categories": [
                 {"category": "other", "rate": 1.5, "limit": None},
             ],
@@ -212,11 +197,8 @@ def seed_credit_cards():
             "issuer": "Capital One",
             "annual_fee": 95,
             "reward_type": "miles",
-            "reward_value_multiplier": 1,
-            "signup_bonus_points": 75000,
-            "signup_bonus_value": 750,
-            "signup_bonus_min_spend": 4000,
-            "signup_bonus_max_months": 3,
+            "reward_value_multiplier": 0.01,
+            "signup_bonus": {"miles": 75000, "value": 750, "min_spend": 4000, "max_months": 3},
             "reward_categories": [
                 {"category": "other", "rate": 2, "limit": None},
             ],
@@ -229,11 +211,8 @@ def seed_credit_cards():
             "issuer": "Citi",
             "annual_fee": 95,
             "reward_type": "points",
-            "reward_value_multiplier": 1,
-            "signup_bonus_points": 60000,
-            "signup_bonus_value": 600,
-            "signup_bonus_min_spend": 4000,
-            "signup_bonus_max_months": 3,
+            "reward_value_multiplier": 0.01,
+            "signup_bonus": {"points": 60000, "value": 600, "min_spend": 4000, "max_months": 3},
             "reward_categories": [
                 {"category": "travel", "rate": 3, "limit": None},
             ],
@@ -267,9 +246,14 @@ def seed_credit_cards():
         # Extract reward categories and special offers
         reward_categories = card_data.pop('reward_categories', [])
         special_offers = card_data.pop('special_offers', [])
+        signup_bonus_data = card_data.pop('signup_bonus', None)
         
         # Convert lists to JSON strings for database storage
         card_data['special_offers'] = json.dumps(special_offers)
+        
+        # Convert signup bonus dict to JSON string if present
+        if signup_bonus_data and isinstance(signup_bonus_data, dict):
+            card_data['signup_bonus'] = json.dumps(signup_bonus_data)
         
         # Set the issuer_id
         card_data['issuer_id'] = issuer.id
@@ -401,14 +385,46 @@ def import_cards_from_data(cards_data: list, source_file: str) -> int:
                 'annual_fee': card_data.get('annual_fee', 0.0),
                 'reward_type': card_data.get('reward_type', 'points'),
                 'reward_value_multiplier': card_data.get('reward_value_multiplier', 0.01),
-                'signup_bonus_points': card_data.get('signup_bonus_points', 0),
-                'signup_bonus_value': card_data.get('signup_bonus_value', 0.0),
-                'signup_bonus_min_spend': card_data.get('signup_bonus_min_spend', 0.0),
-                'signup_bonus_max_months': card_data.get('signup_bonus_max_months', 3),
                 'source': card_data.get('source', 'scraped'),
                 'source_url': card_data.get('source_url', ''),
                 'import_date': datetime.utcnow()
             }
+            
+            # Handle signup bonus - support both new JSON format and old separate fields format
+            if 'signup_bonus' in card_data and card_data['signup_bonus']:
+                # New JSON format
+                if isinstance(card_data['signup_bonus'], dict):
+                    db_card_data['signup_bonus'] = json.dumps(card_data['signup_bonus'])
+                elif isinstance(card_data['signup_bonus'], str):
+                    db_card_data['signup_bonus'] = card_data['signup_bonus']  # Already JSON string
+            elif any(k in card_data for k in ['signup_bonus_points', 'signup_bonus_value']):
+                # Old format - convert to new JSON structure
+                signup_points = card_data.get('signup_bonus_points', 0)
+                signup_value = card_data.get('signup_bonus_value', 0.0)
+                signup_min_spend = card_data.get('signup_bonus_min_spend', 0.0)
+                signup_max_months = card_data.get('signup_bonus_max_months', 3)
+                
+                if signup_points > 0 or signup_value > 0:
+                    reward_type = db_card_data['reward_type']
+                    reward_multiplier = db_card_data['reward_value_multiplier']
+                    
+                    bonus_data = {}
+                    if reward_type == 'cash_back':
+                        bonus_data['cash_back'] = float(signup_value or signup_points)
+                        bonus_data['value'] = float(signup_value or signup_points)
+                    elif reward_type == 'miles':
+                        bonus_data['miles'] = int(signup_points or (signup_value / reward_multiplier))
+                        bonus_data['value'] = float(signup_value or (signup_points * reward_multiplier))
+                    else:  # points or default
+                        bonus_data['points'] = int(signup_points or (signup_value / reward_multiplier))
+                        bonus_data['value'] = float(signup_value or (signup_points * reward_multiplier))
+                    
+                    if signup_min_spend > 0:
+                        bonus_data['min_spend'] = float(signup_min_spend)
+                    if signup_max_months > 0:
+                        bonus_data['max_months'] = int(signup_max_months)
+                    
+                    db_card_data['signup_bonus'] = json.dumps(bonus_data)
             
             if existing_card:
                 # Update existing card
