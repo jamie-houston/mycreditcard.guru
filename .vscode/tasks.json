@@ -1,0 +1,184 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Django: Run Server",
+            "type": "shell",
+            "command": "${workspaceFolder}/venv/bin/python",
+            "args": ["manage.py", "runserver"],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "new"
+            },
+            "options": {
+                "cwd": "${workspaceFolder}",
+                "env": {
+                    "DJANGO_SETTINGS_MODULE": "creditcard_guru.settings"
+                }
+            },
+            "problemMatcher": [],
+            "detail": "Start Django development server"
+        },
+        {
+            "label": "Django: Run Tests",
+            "type": "shell",
+            "command": "${workspaceFolder}/venv/bin/python",
+            "args": ["manage.py", "test"],
+            "group": "test",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "new"
+            },
+            "options": {
+                "cwd": "${workspaceFolder}",
+                "env": {
+                    "DJANGO_SETTINGS_MODULE": "creditcard_guru.settings"
+                }
+            },
+            "problemMatcher": [],
+            "detail": "Run Django tests"
+        },
+        {
+            "label": "Django: Migrate",
+            "type": "shell",
+            "command": "${workspaceFolder}/venv/bin/python",
+            "args": ["manage.py", "migrate"],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "new"
+            },
+            "options": {
+                "cwd": "${workspaceFolder}",
+                "env": {
+                    "DJANGO_SETTINGS_MODULE": "creditcard_guru.settings"
+                }
+            },
+            "problemMatcher": [],
+            "detail": "Apply Django migrations"
+        },
+        {
+            "label": "Django: Make Migrations",
+            "type": "shell",
+            "command": "${workspaceFolder}/venv/bin/python",
+            "args": ["manage.py", "makemigrations"],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "new"
+            },
+            "options": {
+                "cwd": "${workspaceFolder}",
+                "env": {
+                    "DJANGO_SETTINGS_MODULE": "creditcard_guru.settings"
+                }
+            },
+            "problemMatcher": [],
+            "detail": "Create Django migrations"
+        },
+        {
+            "label": "Django: Import Sample Data",
+            "type": "shell",
+            "command": "${workspaceFolder}/venv/bin/python",
+            "args": ["manage.py", "import_cards", "sample_cards.json"],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "new"
+            },
+            "options": {
+                "cwd": "${workspaceFolder}",
+                "env": {
+                    "DJANGO_SETTINGS_MODULE": "creditcard_guru.settings"
+                }
+            },
+            "problemMatcher": [],
+            "detail": "Import sample credit card data"
+        },
+        {
+            "label": "Django: Create Superuser",
+            "type": "shell",
+            "command": "${workspaceFolder}/venv/bin/python",
+            "args": ["manage.py", "createsuperuser"],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "new"
+            },
+            "options": {
+                "cwd": "${workspaceFolder}",
+                "env": {
+                    "DJANGO_SETTINGS_MODULE": "creditcard_guru.settings"
+                }
+            },
+            "problemMatcher": [],
+            "detail": "Create Django superuser"
+        },
+        {
+            "label": "Django: Shell",
+            "type": "shell",
+            "command": "${workspaceFolder}/venv/bin/python",
+            "args": ["manage.py", "shell_plus"],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "new"
+            },
+            "options": {
+                "cwd": "${workspaceFolder}",
+                "env": {
+                    "DJANGO_SETTINGS_MODULE": "creditcard_guru.settings"
+                }
+            },
+            "problemMatcher": [],
+            "detail": "Open Django shell with extensions"
+        },
+        {
+            "label": "Install Dependencies",
+            "type": "shell",
+            "command": "${workspaceFolder}/venv/bin/pip",
+            "args": ["install", "-r", "requirements.txt"],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "new"
+            },
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [],
+            "detail": "Install Python dependencies"
+        },
+        {
+            "label": "Setup Project",
+            "dependsOrder": "sequence",
+            "dependsOn": [
+                "Install Dependencies",
+                "Django: Migrate",
+                "Django: Import Sample Data"
+            ],
+            "group": "build",
+            "detail": "Complete project setup: install deps, migrate, import data"
+        }
+    ]
+}

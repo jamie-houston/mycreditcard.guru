@@ -39,7 +39,6 @@ env.bak/
 venv.bak/
 
 # IDE
-.vscode/
 .idea/
 *.swp
 *.swo
@@ -49,6 +48,13 @@ venv.bak/
 *.njsproj
 *.sln
 *.sw?
+
+# VSCode - include shared configs
+.vscode/
+!.vscode/launch.json
+!.vscode/tasks.json
+!.vscode/extensions.json
+!.vscode/snippets.code-snippets
 
 # OS
 .DS_Store

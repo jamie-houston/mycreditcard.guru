@@ -1,0 +1,89 @@
+{
+    "Django Model": {
+        "prefix": "djmodel",
+        "body": [
+            "class ${1:ModelName}(models.Model):",
+            "    ${2:field_name} = models.${3:CharField}(${4:max_length=100})",
+            "    created_at = models.DateTimeField(auto_now_add=True)",
+            "    updated_at = models.DateTimeField(auto_now=True)",
+            "",
+            "    class Meta:",
+            "        verbose_name = '${5:$1}'",
+            "        verbose_name_plural = '${6:$1s}'",
+            "",
+            "    def __str__(self):",
+            "        return self.${7:field_name}"
+        ],
+        "description": "Django model template"
+    },
+    "Django View": {
+        "prefix": "djview",
+        "body": [
+            "class ${1:ViewName}(${2:generics.ListAPIView}):",
+            "    queryset = ${3:Model}.objects.all()",
+            "    serializer_class = ${4:Serializer}",
+            "",
+            "    def get_queryset(self):",
+            "        queryset = super().get_queryset()",
+            "        ${5:# Add filtering logic here}",
+            "        return queryset"
+        ],
+        "description": "Django REST view template"
+    },
+    "Django Serializer": {
+        "prefix": "djserializer",
+        "body": [
+            "class ${1:SerializerName}(serializers.ModelSerializer):",
+            "    class Meta:",
+            "        model = ${2:Model}",
+            "        fields = [${3:'__all__'}]",
+            "",
+            "    def validate_${4:field_name}(self, value):",
+            "        ${5:# Add validation logic}",
+            "        return value"
+        ],
+        "description": "Django serializer template"
+    },
+    "Django URL Pattern": {
+        "prefix": "djurl",
+        "body": [
+            "path('${1:endpoint}/', ${2:views.ViewName}.as_view(), name='${3:url-name}'),"
+        ],
+        "description": "Django URL pattern"
+    },
+    "Django Management Command": {
+        "prefix": "djcommand",
+        "body": [
+            "from django.core.management.base import BaseCommand",
+            "",
+            "class Command(BaseCommand):",
+            "    help = '${1:Command description}'",
+            "",
+            "    def add_arguments(self, parser):",
+            "        parser.add_argument('${2:arg_name}', type=str, help='${3:Argument description}')",
+            "",
+            "    def handle(self, *args, **options):",
+            "        ${4:arg_name} = options['${2:arg_name}']",
+            "        self.stdout.write(self.style.SUCCESS(f'Processing {${4:arg_name}}'))",
+            "        ${5:# Command logic here}"
+        ],
+        "description": "Django management command template"
+    },
+    "Credit Card Model": {
+        "prefix": "ccmodel",
+        "body": [
+            "class ${1:CreditCard}(models.Model):",
+            "    name = models.CharField(max_length=200)",
+            "    issuer = models.ForeignKey(Issuer, on_delete=models.CASCADE)",
+            "    annual_fee = models.DecimalField(max_digits=8, decimal_places=2, default=0)",
+            "    signup_bonus_amount = models.IntegerField(null=True, blank=True)",
+            "    signup_bonus_type = models.ForeignKey(RewardType, on_delete=models.CASCADE)",
+            "    is_active = models.BooleanField(default=True)",
+            "    created_at = models.DateTimeField(auto_now_add=True)",
+            "",
+            "    def __str__(self):",
+            "        return f'{self.issuer.name} {self.name}'"
+        ],
+        "description": "Credit card model template"
+    }
+}

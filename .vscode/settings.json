@@ -1,0 +1,60 @@
+{
+    "python.defaultInterpreterPath": "./venv/bin/python",
+    "python.linting.enabled": true,
+    "python.linting.pylintEnabled": false,
+    "python.linting.flake8Enabled": true,
+    "python.linting.flake8Args": [
+        "--max-line-length=120",
+        "--ignore=E501,W503"
+    ],
+    "python.formatting.provider": "black",
+    "python.formatting.blackArgs": [
+        "--line-length=120"
+    ],
+    "python.sortImports.args": [
+        "--profile=black"
+    ],
+    "python.testing.pytestEnabled": false,
+    "python.testing.unittestEnabled": true,
+    "python.testing.unittestArgs": [
+        "-v",
+        "-s",
+        "./",
+        "-p",
+        "test*.py"
+    ],
+    "files.exclude": {
+        "**/__pycache__": true,
+        "**/*.pyc": true,
+        "**/venv": true,
+        "**/.git": false,
+        "**/*.log": true,
+        "**/db.sqlite3": true
+    },
+    "emmet.includeLanguages": {
+        "django-html": "html"
+    },
+    "files.associations": {
+        "**/*.html": "django-html",
+        "**/templates/**/*.html": "django-html",
+        "**/requirements*.txt": "pip-requirements"
+    },
+    "django.snippets.enabled": true,
+    "django.settings.module": "creditcard_guru.settings",
+    "django.project.root": "${workspaceFolder}",
+    "django.manage.py": "${workspaceFolder}/manage.py",
+    "autoDocstring.docstringFormat": "google",
+    "python.analysis.extraPaths": [
+        "${workspaceFolder}"
+    ],
+    "python.envFile": "${workspaceFolder}/.env",
+    "terminal.integrated.env.osx": {
+        "DJANGO_SETTINGS_MODULE": "creditcard_guru.settings"
+    },
+    "terminal.integrated.env.linux": {
+        "DJANGO_SETTINGS_MODULE": "creditcard_guru.settings"
+    },
+    "terminal.integrated.env.windows": {
+        "DJANGO_SETTINGS_MODULE": "creditcard_guru.settings"
+    }
+}

@@ -1,0 +1,20 @@
+{
+    "recommendations": [
+        "ms-python.python",
+        "ms-python.flake8",
+        "ms-python.black-formatter",
+        "ms-python.isort",
+        "batisteo.vscode-django",
+        "wholroyd.jinja",
+        "ms-vscode.vscode-json",
+        "bradlc.vscode-tailwindcss",
+        "formulahendry.auto-rename-tag",
+        "ms-vscode.vscode-typescript-next",
+        "esbenp.prettier-vscode",
+        "ms-python.debugpy",
+        "njpwerner.autodocstring",
+        "donjayamanne.githistory",
+        "eamodio.gitlens",
+        "ms-vscode.vscode-eslint"
+    ]
+}
