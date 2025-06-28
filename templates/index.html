@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Credit Card Guru</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2563eb;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            background: #f9fafb;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #374151;
+        }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        button {
+            background: #2563eb;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+        }
+        button:hover {
+            background: #1d4ed8;
+        }
+        .card-item {
+            padding: 15px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            background: white;
+        }
+        .card-title {
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 5px;
+        }
+        .card-details {
+            color: #6b7280;
+            font-size: 14px;
+        }
+        .recommendation {
+            padding: 20px;
+            border-left: 4px solid #10b981;
+            background: #f0fdf4;
+            margin-bottom: 15px;
+            border-radius: 0 8px 8px 0;
+        }
+        .recommendation.apply {
+            border-left-color: #3b82f6;
+            background: #eff6ff;
+        }
+        .recommendation.cancel {
+            border-left-color: #ef4444;
+            background: #fef2f2;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        .results {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        .error {
+            color: #ef4444;
+            background: #fef2f2;
+            padding: 10px;
+            border-radius: 6px;
+            margin: 10px 0;
+        }
+        .loading {
+            text-align: center;
+            color: #6b7280;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏦 Credit Card Guru</h1>
+        <p style="text-align: center; color: #6b7280; margin-bottom: 40px;">
+            Get personalized credit card recommendations based on your spending patterns
+        </p>
+
+        <div class="grid">
+            <!-- Spending Profile Section -->
+            <div class="section">
+                <h2>💰 Your Spending Profile</h2>
+                <form id="spendingForm">
+                    <div class="form-group">
+                        <label>Monthly Groceries Spending ($)</label>
+                        <input type="number" id="groceries" placeholder="500" min="0" step="10">
+                    </div>
+                    <div class="form-group">
+                        <label>Monthly Dining Spending ($)</label>
+                        <input type="number" id="dining" placeholder="300" min="0" step="10">
+                    </div>
+                    <div class="form-group">
+                        <label>Monthly Travel Spending ($)</label>
+                        <input type="number" id="travel" placeholder="200" min="0" step="10">
+                    </div>
+                    <div class="form-group">
+                        <label>Monthly Gas Spending ($)</label>
+                        <input type="number" id="gas" placeholder="150" min="0" step="10">
+                    </div>
+                    <div class="form-group">
+                        <label>Monthly Online Shopping ($)</label>
+                        <input type="number" id="online_shopping" placeholder="250" min="0" step="10">
+                    </div>
+                    <div class="form-group">
+                        <label>Other Monthly Spending ($)</label>
+                        <input type="number" id="general" placeholder="800" min="0" step="10">
+                    </div>
+                </form>
+            </div>
+
+            <!-- Current Cards Section -->
+            <div class="section">
+                <h2>💳 Current Credit Cards</h2>
+                <div id="currentCards">
+                    <p>Select cards you currently have:</p>
+                    <div id="cardsList"></div>
+                </div>
+                <button onclick="loadAvailableCards()">Load Available Cards</button>
+            </div>
+        </div>
+
+        <!-- Filters Section -->
+        <div class="section">
+            <h2>🔍 Preferences</h2>
+            <div class="grid">
+                <div class="form-group">
+                    <label>Preferred Issuer</label>
+                    <select id="issuer">
+                        <option value="">Any Issuer</option>
+                        <option value="Chase">Chase</option>
+                        <option value="American Express">American Express</option>
+                        <option value="Capital One">Capital One</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Reward Type</label>
+                    <select id="rewardType">
+                        <option value="">Any Rewards</option>
+                        <option value="Points">Points</option>
+                        <option value="Miles">Miles</option>
+                        <option value="Cashback">Cashback</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Maximum Annual Fee ($)</label>
+                    <input type="number" id="maxFee" placeholder="95" min="0" step="25">
+                </div>
+                <div class="form-group">
+                    <label>Max Recommendations</label>
+                    <select id="maxRecs">
+                        <option value="3">3 cards</option>
+                        <option value="5" selected>5 cards</option>
+                        <option value="10">10 cards</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Button -->
+        <div style="text-align: center; margin: 30px 0;">
+            <button onclick="getRecommendations()" style="font-size: 18px; padding: 16px 32px;">
+                🚀 Get My Roadmap
+            </button>
+        </div>
+
+        <!-- Results Section -->
+        <div id="results"></div>
+    </div>
+
+    <script>
+        const API_BASE = '/api';
+        let availableCards = [];
+        let spendingCategories = {};
+
+        async function loadData() {
+            try {
+                // Load spending categories
+                const categoriesResponse = await fetch(`${API_BASE}/cards/spending-categories/`);
+                const categories = await categoriesResponse.json();
+                categories.forEach(cat => {
+                    spendingCategories[cat.slug] = cat.id;
+                });
+            } catch (error) {
+                console.error('Error loading data:', error);
+            }
+        }
+
+        async function loadAvailableCards() {
+            try {
+                const response = await fetch(`${API_BASE}/cards/cards/`);
+                const data = await response.json();
+                availableCards = data.results || data;
+                
+                const cardsList = document.getElementById('cardsList');
+                cardsList.innerHTML = availableCards.map(card => `
+                    <div class="card-item">
+                        <input type="checkbox" id="card_${card.id}" value="${card.id}">
+                        <label for="card_${card.id}" style="display: inline; margin-left: 8px;">
+                            <span class="card-title">${card.issuer} ${card.name}</span><br>
+                            <span class="card-details">
+                                Annual Fee: $${card.annual_fee} | 
+                                Signup Bonus: ${card.signup_bonus_amount || 0} ${card.signup_bonus_type}
+                            </span>
+                        </label>
+                    </div>
+                `).join('');
+            } catch (error) {
+                document.getElementById('cardsList').innerHTML = 
+                    '<div class="error">Error loading cards. Please try again.</div>';
+            }
+        }
+
+        async function getRecommendations() {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '<div class="loading">🔄 Analyzing your profile and generating recommendations...</div>';
+
+            try {
+                // Build spending amounts object
+                const spendingAmounts = {};
+                Object.keys(spendingCategories).forEach(slug => {
+                    const amount = document.getElementById(slug)?.value;
+                    if (amount && amount > 0) {
+                        spendingAmounts[spendingCategories[slug]] = parseFloat(amount);
+                    }
+                });
+
+                // Build user cards array
+                const userCards = [];
+                document.querySelectorAll('#cardsList input[type="checkbox"]:checked').forEach(checkbox => {
+                    userCards.push({
+                        card_id: parseInt(checkbox.value),
+                        opened_date: '2023-01-01', // Default date
+                        nickname: '',
+                        is_active: true
+                    });
+                });
+
+                // Build filters array
+                const filters = [];
+                const issuer = document.getElementById('issuer').value;
+                const rewardType = document.getElementById('rewardType').value;
+                const maxFee = document.getElementById('maxFee').value;
+
+                if (issuer) {
+                    filters.push({
+                        name: 'Issuer Filter',
+                        filter_type: 'issuer',
+                        value: issuer
+                    });
+                }
+                if (rewardType) {
+                    filters.push({
+                        name: 'Reward Type Filter',
+                        filter_type: 'reward_type',
+                        value: rewardType
+                    });
+                }
+                if (maxFee) {
+                    filters.push({
+                        name: 'Annual Fee Filter',
+                        filter_type: 'annual_fee',
+                        value: `0-${maxFee}`
+                    });
+                }
+
+                const requestData = {
+                    spending_amounts: spendingAmounts,
+                    user_cards: userCards,
+                    filters: filters,
+                    max_recommendations: parseInt(document.getElementById('maxRecs').value)
+                };
+
+                const response = await fetch(`${API_BASE}/roadmaps/quick-recommendation/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify(requestData)
+                });
+
+                const data = await response.json();
+
+                if (data.error) {
+                    resultsDiv.innerHTML = `<div class="error">Error: ${data.error}</div>`;
+                    return;
+                }
+
+                // Display recommendations
+                const recommendations = data.recommendations || [];
+                const totalValue = data.total_estimated_rewards || 0;
+
+                let html = `
+                    <div class="results">
+                        <h2>🎯 Your Personalized Credit Card Roadmap</h2>
+                        <p style="background: #10b981; color: white; padding: 15px; border-radius: 8px; text-align: center; font-size: 18px; font-weight: 600;">
+                            💰 Total Estimated First-Year Value: $${totalValue.toFixed(0)}
+                        </p>
+                `;
+
+                if (recommendations.length === 0) {
+                    html += '<p>No recommendations found with your current criteria. Try adjusting your filters.</p>';
+                } else {
+                    recommendations.forEach((rec, index) => {
+                        const actionClass = rec.action.toLowerCase();
+                        const actionEmoji = {
+                            'apply': '✅',
+                            'keep': '👍',
+                            'cancel': '❌',
+                            'upgrade': '⬆️',
+                            'downgrade': '⬇️'
+                        }[rec.action] || '📋';
+
+                        html += `
+                            <div class="recommendation ${actionClass}">
+                                <div style="display: flex; justify-content: between; align-items: start;">
+                                    <div>
+                                        <h3>${actionEmoji} ${rec.action.toUpperCase()}: ${rec.card.issuer} ${rec.card.name}</h3>
+                                        <p><strong>Estimated Value:</strong> $${rec.estimated_rewards.toFixed(0)}</p>
+                                        <p><strong>Annual Fee:</strong> $${rec.card.annual_fee}</p>
+                                        ${rec.card.signup_bonus_amount ? 
+                                            `<p><strong>Signup Bonus:</strong> ${rec.card.signup_bonus_amount} points/miles</p>` : ''
+                                        }
+                                        <p><strong>Why:</strong> ${rec.reasoning}</p>
+                                    </div>
+                                    <div style="background: rgba(255,255,255,0.7); padding: 8px 12px; border-radius: 20px; font-weight: 600;">
+                                        #${rec.priority}
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    });
+                }
+
+                html += '</div>';
+                resultsDiv.innerHTML = html;
+
+            } catch (error) {
+                resultsDiv.innerHTML = '<div class="error">Error generating recommendations. Please try again.</div>';
+                console.error('Error:', error);
+            }
+        }
+
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        // Load initial data when page loads
+        loadData();
+    </script>
+</body>
+</html>
