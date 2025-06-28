@@ -23,14 +23,17 @@
       "name": "Sapphire Preferred",
       "issuer": "Chase",
       "annual_fee": 95,
-      "signup_bonus_amount": 60000,
-      "signup_bonus_type": "Points",
-      "signup_bonus_requirement": "$4000 in 3 months",
-      "primary_reward_type": "Points",
+      "signup_bonus": {
+        "bonus_amount": 60000,
+        "spending_requirement": 4000,
+        "time_limit_months": 3
+      },
+      "reward_type": "Points",
+      "reward_value_multiplier": 0.01,
       "reward_categories": [
-        {"category": "Travel", "reward_rate": 2.0, "reward_type": "Points"},
-        {"category": "Dining", "reward_rate": 2.0, "reward_type": "Points"},
-        {"category": "General", "reward_rate": 1.0, "reward_type": "Points"}
+        {"category": "Travel", "reward_rate": 2.0},
+        {"category": "Dining", "reward_rate": 2.0},
+        {"category": "General", "reward_rate": 1.0}
       ],
       "offers": [
         {"title": "DashPass Complimentary", "description": "12 months of complimentary DashPass", "value": "$120"}
@@ -40,12 +43,15 @@
       "name": "Freedom Unlimited",
       "issuer": "Chase",
       "annual_fee": 0,
-      "signup_bonus_amount": 20000,
-      "signup_bonus_type": "Points",
-      "signup_bonus_requirement": "$500 in 3 months",
-      "primary_reward_type": "Points",
+      "signup_bonus": {
+        "bonus_amount": 20000,
+        "spending_requirement": 500,
+        "time_limit_months": 3
+      },
+      "reward_type": "Points",
+      "reward_value_multiplier": 0.01,
       "reward_categories": [
-        {"category": "General", "reward_rate": 1.5, "reward_type": "Points"}
+        {"category": "General", "reward_rate": 1.5}
       ]
     }
   ]
