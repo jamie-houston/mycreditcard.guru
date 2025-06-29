@@ -46,9 +46,17 @@ class Command(BaseCommand):
             self.import_spending_categories(data)
         elif filename == 'credit_cards.json':
             self.import_credit_cards(data)
+        elif filename in ['chase.json', 'american_express.json', 'citi.json', 'capital_one.json']:
+            # Issuer-specific credit card files (array of cards)
+            self.import_credit_cards(data)
         else:
-            # Legacy format - assume it's the old combined format
-            self.import_data(data)
+            # Check if it's an array of credit cards vs legacy combined format
+            if isinstance(data, list) and data and 'name' in data[0] and 'issuer' in data[0]:
+                # Array of credit cards
+                self.import_credit_cards(data)
+            else:
+                # Legacy format - assume it's the old combined format
+                self.import_data(data)
 
     def import_data(self, data):
         """
