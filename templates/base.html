@@ -460,39 +460,57 @@
                 button.disabled = true;
                 button.textContent = '...';
                 
-                if (isAuthenticated) {
-                    // Use authenticated API
-                    const response = await fetch(`${API_BASE}/users/cards/toggle/`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRFToken': getCookie('csrftoken')
-                        },
-                        body: JSON.stringify({
-                            card_id: cardId,
-                            action: action
-                        })
-                    });
-                    
-                    const data = await response.json();
-                    
-                    if (data.success) {
-                        updateButtonState(button, hasCard);
-                    } else {
-                        alert('Error updating card ownership');
+                // Update local data first
+                const userCards = await UserDataManager.getCards();
+                if (hasCard) {
+                    if (!userCards.includes(cardId)) {
+                        userCards.push(cardId);
                     }
                 } else {
-                    // Use local storage for anonymous users
-                    const userCards = await UserDataManager.getCards();
-                    if (hasCard) {
-                        userCards.push(cardId);
-                    } else {
-                        const index = userCards.indexOf(cardId);
-                        if (index > -1) userCards.splice(index, 1);
-                    }
-                    await UserDataManager.saveCards(userCards);
-                    updateButtonState(button, hasCard);
+                    const index = userCards.indexOf(cardId);
+                    if (index > -1) userCards.splice(index, 1);
                 }
+                await UserDataManager.saveCards(userCards);
+                
+                if (isAuthenticated) {
+                    // Sync with authenticated API
+                    try {
+                        const response = await fetch(`${API_BASE}/users/cards/toggle/`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRFToken': getCookie('csrftoken')
+                            },
+                            body: JSON.stringify({
+                                card_id: cardId,
+                                action: action
+                            })
+                        });
+                        
+                        const data = await response.json();
+                        
+                        if (!data.success) {
+                            // Revert local changes if API call failed
+                            const revertCards = await UserDataManager.getCards();
+                            if (hasCard) {
+                                const index = revertCards.indexOf(cardId);
+                                if (index > -1) revertCards.splice(index, 1);
+                            } else {
+                                if (!revertCards.includes(cardId)) {
+                                    revertCards.push(cardId);
+                                }
+                            }
+                            await UserDataManager.saveCards(revertCards);
+                            alert('Error updating card ownership');
+                            return;
+                        }
+                    } catch (apiError) {
+                        console.error('API sync error:', apiError);
+                        // Keep local changes even if API fails
+                    }
+                }
+                
+                updateButtonState(button, hasCard);
                 
             } catch (error) {
                 console.error('Error:', error);

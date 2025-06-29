@@ -98,18 +98,19 @@ async function loadCards() {
 
 async function loadUserCards() {
     try {
-        // This would normally load from user profile, but for now we'll use localStorage
-        const stored = localStorage.getItem('userCards');
-        if (stored) {
-            userCards = new Set(JSON.parse(stored));
-        }
+        const cards = await UserDataManager.getCards();
+        userCards = new Set(cards);
     } catch (error) {
         console.error('Error loading user cards:', error);
     }
 }
 
-function saveUserCards() {
-    localStorage.setItem('userCards', JSON.stringify([...userCards]));
+async function saveUserCards() {
+    try {
+        await UserDataManager.saveCards([...userCards]);
+    } catch (error) {
+        console.error('Error saving user cards:', error);
+    }
 }
 
 function filterCards() {
@@ -217,24 +218,7 @@ async function toggleCardOwnership(cardId, button) {
             button.className = 'danger';
         }
         
-        saveUserCards();
-        
-        // If there's an API endpoint, sync with server
-        try {
-            await fetch(`${API_BASE}/cards/toggle-ownership/`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': getCookie('csrftoken')
-                },
-                body: JSON.stringify({
-                    card_id: cardId,
-                    action: hasCard ? 'remove' : 'add'
-                })
-            });
-        } catch (syncError) {
-            console.log('API sync not available, using local storage only');
-        }
+        await saveUserCards();
         
     } catch (error) {
         console.error('Error:', error);

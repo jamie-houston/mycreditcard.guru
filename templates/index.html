@@ -119,10 +119,14 @@
                 const data = await response.json();
                 availableCards = data.results || data;
                 
+                // Load user's current cards
+                const userCards = await UserDataManager.getCards();
+                const userCardSet = new Set(userCards);
+                
                 const cardsList = document.getElementById('cardsList');
                 cardsList.innerHTML = availableCards.map(card => `
                     <div class="card-item">
-                        <input type="checkbox" id="card_${card.id}" value="${card.id}">
+                        <input type="checkbox" id="card_${card.id}" value="${card.id}" ${userCardSet.has(card.id) ? 'checked' : ''}>
                         <label for="card_${card.id}" style="display: inline; margin-left: 8px;">
                             <span class="card-title">${card.issuer} ${card.name}</span><br>
                             <span class="card-details">
@@ -132,6 +136,28 @@
                         </label>
                     </div>
                 `).join('');
+                
+                // Add event listeners to save changes when checkboxes are toggled
+                document.querySelectorAll('#cardsList input[type="checkbox"]').forEach(checkbox => {
+                    checkbox.addEventListener('change', async function() {
+                        const cardId = parseInt(this.value);
+                        const userCards = await UserDataManager.getCards();
+                        
+                        if (this.checked) {
+                            if (!userCards.includes(cardId)) {
+                                userCards.push(cardId);
+                            }
+                        } else {
+                            const index = userCards.indexOf(cardId);
+                            if (index > -1) {
+                                userCards.splice(index, 1);
+                            }
+                        }
+                        
+                        await UserDataManager.saveCards(userCards);
+                    });
+                });
+                
             } catch (error) {
                 document.getElementById('cardsList').innerHTML = 
                     '<div class="error">Error loading cards. Please try again.</div>';
@@ -293,6 +319,24 @@
 
         // Load initial data when page loads
         loadData();
+        
+        // Auto-load cards when user authentication is ready
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Wait for user state to initialize
+            await initUserState();
+            
+            // Check if cards are already loaded and update their selection state
+            const cardsList = document.getElementById('cardsList');
+            if (cardsList.children.length > 0) {
+                const userCards = await UserDataManager.getCards();
+                const userCardSet = new Set(userCards);
+                
+                document.querySelectorAll('#cardsList input[type="checkbox"]').forEach(checkbox => {
+                    const cardId = parseInt(checkbox.value);
+                    checkbox.checked = userCardSet.has(cardId);
+                });
+            }
+        });
     </script>
 {% endblock %}
 
