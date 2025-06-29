@@ -97,12 +97,110 @@
                 categories.forEach(cat => {
                     spendingCategories[cat.slug] = cat.id;
                 });
+                
+                // Load saved spending and preferences
+                await loadSavedData();
+                
+                // Set up auto-save listeners after data is loaded
+                setupAutoSave();
             } catch (error) {
                 console.error('Error loading data:', error);
             }
         }
 
+        async function loadSavedData() {
+            try {
+                // Wait for user state to be initialized
+                await initUserState();
+                
+                // Load spending data
+                const savedSpending = await UserDataManager.getSpending();
+                Object.keys(savedSpending).forEach(categorySlug => {
+                    const amount = savedSpending[categorySlug];
+                    const input = document.getElementById(categorySlug);
+                    if (input && amount) {
+                        input.value = amount;
+                    }
+                });
+                
+                // Load preferences
+                const savedPreferences = await UserDataManager.getPreferences();
+                if (savedPreferences.default_issuer_filter) {
+                    const issuerSelect = document.getElementById('issuer');
+                    if (issuerSelect) issuerSelect.value = savedPreferences.default_issuer_filter;
+                }
+                if (savedPreferences.default_reward_type_filter) {
+                    const rewardTypeSelect = document.getElementById('rewardType');
+                    if (rewardTypeSelect) rewardTypeSelect.value = savedPreferences.default_reward_type_filter;
+                }
+                if (savedPreferences.default_max_fee_filter) {
+                    const maxFeeInput = document.getElementById('maxFee');
+                    if (maxFeeInput) maxFeeInput.value = savedPreferences.default_max_fee_filter;
+                }
+                if (savedPreferences.default_max_recommendations) {
+                    const maxRecsSelect = document.getElementById('maxRecs');
+                    if (maxRecsSelect) maxRecsSelect.value = savedPreferences.default_max_recommendations;
+                }
+            } catch (error) {
+                console.error('Error loading saved data:', error);
+            }
+        }
+
+        async function saveCurrentData() {
+            try {
+                // Save spending data
+                const spendingData = {};
+                Object.keys(spendingCategories).forEach(slug => {
+                    const input = document.getElementById(slug);
+                    if (input && input.value) {
+                        spendingData[slug] = parseFloat(input.value) || 0;
+                    }
+                });
+                
+                // Save preferences
+                const preferencesData = {
+                    default_issuer_filter: document.getElementById('issuer')?.value || '',
+                    default_reward_type_filter: document.getElementById('rewardType')?.value || '',
+                    default_max_fee_filter: parseFloat(document.getElementById('maxFee')?.value) || null,
+                    default_max_recommendations: parseInt(document.getElementById('maxRecs')?.value) || 5
+                };
+                
+                // Use the unified data manager to save
+                await UserDataManager.saveSpending(spendingData);
+                
+                // For preferences, we need to save them separately since UserDataManager 
+                // doesn't have a savePreferences method yet
+                if (isAuthenticated) {
+                    try {
+                        await fetch(`${API_BASE}/users/data/`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRFToken': getCookie('csrftoken')
+                            },
+                            body: JSON.stringify({
+                                spending: spendingData,
+                                cards: await UserDataManager.getCards(),
+                                preferences: preferencesData
+                            })
+                        });
+                    } catch (error) {
+                        console.error('Error saving to server:', error);
+                    }
+                } else {
+                    // Save preferences to localStorage for anonymous users
+                    localStorage.setItem('userPreferences', JSON.stringify(preferencesData));
+                }
+                
+            } catch (error) {
+                console.error('Error saving current data:', error);
+            }
+        }
+
         async function getRecommendations() {
+            // Save current data before getting recommendations
+            await saveCurrentData();
+            
             const resultsDiv = document.getElementById('results');
             resultsDiv.innerHTML = '<div class="loading">🔄 Analyzing your profile and generating recommendations...</div>';
 
@@ -255,6 +353,69 @@
 
         // Load initial data when page loads
         loadData();
+        
+        // Auto-save when user navigates away
+        window.addEventListener('beforeunload', function(e) {
+            // Save data synchronously (limited time available)
+            try {
+                const spendingData = {};
+                Object.keys(spendingCategories).forEach(slug => {
+                    const input = document.getElementById(slug);
+                    if (input && input.value) {
+                        spendingData[slug] = parseFloat(input.value) || 0;
+                    }
+                });
+                
+                const preferencesData = {
+                    default_issuer_filter: document.getElementById('issuer')?.value || '',
+                    default_reward_type_filter: document.getElementById('rewardType')?.value || '',
+                    default_max_fee_filter: parseFloat(document.getElementById('maxFee')?.value) || null,
+                    default_max_recommendations: parseInt(document.getElementById('maxRecs')?.value) || 5
+                };
+                
+                // Use localStorage for immediate saving (works in beforeunload)
+                localStorage.setItem('userSpending', JSON.stringify(spendingData));
+                localStorage.setItem('userPreferences', JSON.stringify(preferencesData));
+                
+                // If authenticated, try to save to server (may not complete)
+                if (isAuthenticated) {
+                    navigator.sendBeacon(`${API_BASE}/users/data/`, JSON.stringify({
+                        spending: spendingData,
+                        cards: JSON.parse(localStorage.getItem('userCards') || '[]'),
+                        preferences: preferencesData
+                    }));
+                }
+            } catch (error) {
+                console.error('Error in beforeunload save:', error);
+            }
+        });
+        
+        // Auto-save on form changes (debounced)
+        let saveTimeout;
+        function debouncedSave() {
+            clearTimeout(saveTimeout);
+            saveTimeout = setTimeout(saveCurrentData, 1000); // Save 1 second after last change
+        }
+        
+        function setupAutoSave() {
+            // Add listeners to spending inputs
+            Object.keys(spendingCategories).forEach(slug => {
+                const input = document.getElementById(slug);
+                if (input) {
+                    input.addEventListener('input', debouncedSave);
+                    input.addEventListener('change', debouncedSave);
+                }
+            });
+            
+            // Add listeners to preference inputs
+            const preferenceInputs = ['issuer', 'rewardType', 'maxFee', 'maxRecs'];
+            preferenceInputs.forEach(id => {
+                const input = document.getElementById(id);
+                if (input) {
+                    input.addEventListener('change', debouncedSave);
+                }
+            });
+        }
         
     </script>
 {% endblock %}
