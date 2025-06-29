@@ -13,6 +13,14 @@
     <h2>🔍 Filter Cards</h2>
     <div class="grid">
         <div class="form-group">
+            <label for="filterOwnership">Ownership</label>
+            <select id="filterOwnership" onchange="filterCards()">
+                <option value="not_owned" selected>Not Owned</option>
+                <option value="owned">Owned</option>
+                <option value="all">All Cards</option>
+            </select>
+        </div>
+        <div class="form-group">
             <label for="filterIssuer">Issuer</label>
             <select id="filterIssuer" onchange="filterCards()">
                 <option value="">All Issuers</option>
@@ -114,12 +122,19 @@ async function saveUserCards() {
 }
 
 function filterCards() {
+    const ownershipFilter = document.getElementById('filterOwnership').value;
     const issuerFilter = document.getElementById('filterIssuer').value.toLowerCase();
     const rewardTypeFilter = document.getElementById('filterRewardType').value.toLowerCase();
     const feeFilter = document.getElementById('filterFee').value;
     const searchFilter = document.getElementById('searchCards').value.toLowerCase();
     
     let filteredCards = allCards.filter(card => {
+        // Ownership filter
+        const hasCard = userCards.has(card.id);
+        if (ownershipFilter === 'owned' && !hasCard) return false;
+        if (ownershipFilter === 'not_owned' && hasCard) return false;
+        // 'all' shows everything
+        
         // Issuer filter
         if (issuerFilter && card.issuer.toLowerCase() !== issuerFilter) {
             return false;
@@ -219,6 +234,9 @@ async function toggleCardOwnership(cardId, button) {
         }
         
         await saveUserCards();
+        
+        // Refresh the display to apply ownership filter
+        filterCards();
         
     } catch (error) {
         console.error('Error:', error);

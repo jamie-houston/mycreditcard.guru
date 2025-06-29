@@ -6,11 +6,11 @@
             Get personalized credit card recommendations based on your spending patterns
         </p>
 
-        <div class="grid">
-            <!-- Spending Profile Section -->
-            <div class="section">
-                <h2>💰 Your Spending Profile</h2>
-                <form id="spendingForm">
+        <!-- Spending Profile Section -->
+        <div class="section">
+            <h2>💰 Your Spending Profile</h2>
+            <form id="spendingForm">
+                <div class="grid">
                     <div class="form-group">
                         <label>Monthly Groceries Spending ($)</label>
                         <input type="number" id="groceries" placeholder="500" min="0" step="10">
@@ -35,18 +35,8 @@
                         <label>Other Monthly Spending ($)</label>
                         <input type="number" id="general" placeholder="800" min="0" step="10">
                     </div>
-                </form>
-            </div>
-
-            <!-- Current Cards Section -->
-            <div class="section">
-                <h2>💳 Current Credit Cards</h2>
-                <div id="currentCards">
-                    <p>Select cards you currently have:</p>
-                    <div id="cardsList"></div>
                 </div>
-                <button onclick="loadAvailableCards()">Load Available Cards</button>
-            </div>
+            </form>
         </div>
 
         <!-- Filters Section -->
@@ -97,7 +87,6 @@
     </div>
 
     <script>
-        let availableCards = [];
         let spendingCategories = {};
 
         async function loadData() {
@@ -110,57 +99,6 @@
                 });
             } catch (error) {
                 console.error('Error loading data:', error);
-            }
-        }
-
-        async function loadAvailableCards() {
-            try {
-                const response = await fetch(`${API_BASE}/cards/cards/`);
-                const data = await response.json();
-                availableCards = data.results || data;
-                
-                // Load user's current cards
-                const userCards = await UserDataManager.getCards();
-                const userCardSet = new Set(userCards);
-                
-                const cardsList = document.getElementById('cardsList');
-                cardsList.innerHTML = availableCards.map(card => `
-                    <div class="card-item">
-                        <input type="checkbox" id="card_${card.id}" value="${card.id}" ${userCardSet.has(card.id) ? 'checked' : ''}>
-                        <label for="card_${card.id}" style="display: inline; margin-left: 8px;">
-                            <span class="card-title">${card.issuer} ${card.name}</span><br>
-                            <span class="card-details">
-                                Annual Fee: $${card.annual_fee} | 
-                                Signup Bonus: ${card.signup_bonus_amount || 0} ${card.signup_bonus_type}
-                            </span>
-                        </label>
-                    </div>
-                `).join('');
-                
-                // Add event listeners to save changes when checkboxes are toggled
-                document.querySelectorAll('#cardsList input[type="checkbox"]').forEach(checkbox => {
-                    checkbox.addEventListener('change', async function() {
-                        const cardId = parseInt(this.value);
-                        const userCards = await UserDataManager.getCards();
-                        
-                        if (this.checked) {
-                            if (!userCards.includes(cardId)) {
-                                userCards.push(cardId);
-                            }
-                        } else {
-                            const index = userCards.indexOf(cardId);
-                            if (index > -1) {
-                                userCards.splice(index, 1);
-                            }
-                        }
-                        
-                        await UserDataManager.saveCards(userCards);
-                    });
-                });
-                
-            } catch (error) {
-                document.getElementById('cardsList').innerHTML = 
-                    '<div class="error">Error loading cards. Please try again.</div>';
             }
         }
 
@@ -178,16 +116,14 @@
                     }
                 });
 
-                // Build user cards array
-                const userCards = [];
-                document.querySelectorAll('#cardsList input[type="checkbox"]:checked').forEach(checkbox => {
-                    userCards.push({
-                        card_id: parseInt(checkbox.value),
-                        opened_date: '2023-01-01', // Default date
-                        nickname: '',
-                        is_active: true
-                    });
-                });
+                // Build user cards array from saved data
+                const userCardIds = await UserDataManager.getCards();
+                const userCards = userCardIds.map(cardId => ({
+                    card_id: cardId,
+                    opened_date: '2023-01-01', // Default date
+                    nickname: '',
+                    is_active: true
+                }));
 
                 // Build filters array
                 const filters = [];
@@ -320,23 +256,6 @@
         // Load initial data when page loads
         loadData();
         
-        // Auto-load cards when user authentication is ready
-        document.addEventListener('DOMContentLoaded', async function() {
-            // Wait for user state to initialize
-            await initUserState();
-            
-            // Check if cards are already loaded and update their selection state
-            const cardsList = document.getElementById('cardsList');
-            if (cardsList.children.length > 0) {
-                const userCards = await UserDataManager.getCards();
-                const userCardSet = new Set(userCards);
-                
-                document.querySelectorAll('#cardsList input[type="checkbox"]').forEach(checkbox => {
-                    const cardId = parseInt(checkbox.value);
-                    checkbox.checked = userCardSet.has(cardId);
-                });
-            }
-        });
     </script>
 {% endblock %}
 
