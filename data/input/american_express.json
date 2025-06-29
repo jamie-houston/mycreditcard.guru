@@ -1,0 +1,122 @@
+[
+  {
+    "name": "Blue Cash Preferred® Card from American Express",
+    "issuer": "American Express",
+    "annual_fee": 0,
+    "signup_bonus": {
+      "bonus_amount": 25000,
+      "spending_requirement": 3000,
+      "time_limit_months": 6
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      { "category": "Groceries", "reward_rate": 6.0 },
+      { "category": "Gas", "reward_rate": 3.0 },
+      { "category": "General", "reward_rate": 1.0 }
+    ],
+    "offers": [
+      {
+        "title": "No Annual Fee",
+        "description": "No annual fee ever",
+        "value": "$0"
+      },
+      {
+        "title": "High Grocery Rewards",
+        "description": "6% cash back at U.S. supermarkets up to $6,000 per year",
+        "value": "Up to $360"
+      }
+    ]
+  },
+  {
+    "name": "American Express® Gold Card",
+    "issuer": "American Express",
+    "annual_fee": 325,
+    "signup_bonus": {
+      "bonus_amount": 60000,
+      "spending_requirement": 6000,
+      "time_limit_months": 6
+    },
+    "reward_type": "Points",
+    "reward_value_multiplier": 0.02,
+    "reward_categories": [
+      { "category": "Dining", "reward_rate": 4.0 },
+      { "category": "Groceries", "reward_rate": 4.0 },
+      { "category": "Travel", "reward_rate": 3.0 },
+      { "category": "General", "reward_rate": 1.0 }
+    ],
+    "offers": [
+      {
+        "title": "Monthly Credits",
+        "description": "$120 annual Uber Cash + dining credits",
+        "value": "$240"
+      },
+      {
+        "title": "High Multipliers",
+        "description": "4X points on dining and U.S. supermarkets",
+        "value": "High earning"
+      }
+    ]
+  },
+  {
+    "name": "Hilton Honors American Express Surpass® Card",
+    "issuer": "American Express",
+    "annual_fee": 0,
+    "signup_bonus": {
+      "bonus_amount": 130000,
+      "spending_requirement": 3000,
+      "time_limit_months": 6
+    },
+    "reward_type": "Hotel Nights",
+    "reward_value_multiplier": 0.005,
+    "reward_categories": [
+      { "category": "Travel", "reward_rate": 12.0 },
+      { "category": "Dining", "reward_rate": 6.0 },
+      { "category": "Groceries", "reward_rate": 6.0 },
+      { "category": "Gas", "reward_rate": 6.0 },
+      { "category": "General", "reward_rate": 3.0 }
+    ],
+    "offers": [
+      {
+        "title": "Hilton Elite Status",
+        "description": "Complimentary Hilton Gold Status",
+        "value": "Elite benefits"
+      },
+      {
+        "title": "Weekend Night Award",
+        "description": "Free weekend night award annually",
+        "value": "$200+"
+      }
+    ]
+  },
+  {
+    "name": "Delta SkyMiles® Platinum American Express Card",
+    "issuer": "American Express",
+    "annual_fee": 350,
+    "signup_bonus": {
+      "bonus_amount": 90000,
+      "spending_requirement": 4000,
+      "time_limit_months": 6
+    },
+    "reward_type": "Miles",
+    "reward_value_multiplier": 0.012,
+    "reward_categories": [
+      { "category": "Travel", "reward_rate": 3.0 },
+      { "category": "Dining", "reward_rate": 2.0 },
+      { "category": "Groceries", "reward_rate": 2.0 },
+      { "category": "General", "reward_rate": 1.0 }
+    ],
+    "offers": [
+      {
+        "title": "Delta Benefits",
+        "description": "Priority boarding and free checked bags",
+        "value": "$200+"
+      },
+      {
+        "title": "Annual Companion Certificate",
+        "description": "Annual companion certificate for domestic flights",
+        "value": "$400+"
+      }
+    ]
+  }
+]

@@ -1,0 +1,90 @@
+[
+  {
+    "name": "Citi Double Cash® Card",
+    "issuer": "Citi",
+    "annual_fee": 0,
+    "signup_bonus": {
+      "bonus_amount": 20000,
+      "spending_requirement": 1500,
+      "time_limit_months": 6
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      { "category": "General", "reward_rate": 2.0 }
+    ],
+    "offers": [
+      {
+        "title": "No Annual Fee",
+        "description": "No annual fee ever",
+        "value": "$0"
+      },
+      {
+        "title": "Flat Rate Rewards",
+        "description": "2% cash back on all purchases (1% when you buy, 1% when you pay)",
+        "value": "2% everywhere"
+      }
+    ]
+  },
+  {
+    "name": "Citi® / AAdvantage® Platinum Select® World Elite Mastercard®",
+    "issuer": "Citi",
+    "annual_fee": 99,
+    "signup_bonus": {
+      "bonus_amount": 50000,
+      "spending_requirement": 2500,
+      "time_limit_months": 3
+    },
+    "reward_type": "Miles",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      { "category": "Travel", "reward_rate": 2.0 },
+      { "category": "Dining", "reward_rate": 2.0 },
+      { "category": "Gas", "reward_rate": 2.0 },
+      { "category": "General", "reward_rate": 1.0 }
+    ],
+    "offers": [
+      {
+        "title": "American Airlines Benefits",
+        "description": "Priority boarding and free checked bags on American Airlines",
+        "value": "$200+"
+      },
+      {
+        "title": "Annual Fee Waived",
+        "description": "First year annual fee waived",
+        "value": "$99"
+      }
+    ]
+  },
+  {
+    "name": "Citi Strata Premier℠ Card",
+    "issuer": "Citi",
+    "annual_fee": 95,
+    "signup_bonus": {
+      "bonus_amount": 60000,
+      "spending_requirement": 4000,
+      "time_limit_months": 3
+    },
+    "reward_type": "Points",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      { "category": "Travel", "reward_rate": 10.0 },
+      { "category": "Dining", "reward_rate": 3.0 },
+      { "category": "Groceries", "reward_rate": 3.0 },
+      { "category": "Gas", "reward_rate": 3.0 },
+      { "category": "General", "reward_rate": 1.0 }
+    ],
+    "offers": [
+      {
+        "title": "High Travel Multiplier",
+        "description": "10X points on hotels, car rentals, and attractions via CitiTravel.com",
+        "value": "High earning"
+      },
+      {
+        "title": "ThankYou Points",
+        "description": "Flexible redemption with ThankYou Points program",
+        "value": "Flexible value"
+      }
+    ]
+  }
+]
