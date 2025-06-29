@@ -111,14 +111,48 @@ class Command(BaseCommand):
 
     def import_spending_categories(self, categories):
         for category_data in categories:
-            category, created = SpendingCategory.objects.get_or_create(
-                name=category_data['name'],
-                defaults={
-                    'slug': slugify(category_data['name']),
-                }
-            )
+            # Try to find existing category by name first, then by slug
+            category = None
+            try:
+                category = SpendingCategory.objects.get(name=category_data['name'])
+                created = False
+            except SpendingCategory.DoesNotExist:
+                try:
+                    # Try to find by the new slug
+                    category = SpendingCategory.objects.get(slug=slugify(category_data['name']))
+                    created = False
+                except SpendingCategory.DoesNotExist:
+                    # Create new category
+                    category = SpendingCategory.objects.create(
+                        name=category_data['name'],
+                        slug=slugify(category_data['name']),
+                        display_name=category_data.get('display_name', ''),
+                        description=category_data.get('description', ''),
+                        icon=category_data.get('icon', ''),
+                        sort_order=category_data.get('sort_order', 100),
+                    )
+                    created = True
             if created:
-                self.stdout.write(f'Created spending category: {category.name}')
+                self.stdout.write(f'Created spending category: {category.display_name or category.name}')
+            else:
+                # Update existing categories with new fields if they don't have them
+                updated = False
+                if not category.display_name and category_data.get('display_name'):
+                    category.display_name = category_data['display_name']
+                    updated = True
+                if not category.description and category_data.get('description'):
+                    category.description = category_data['description']
+                    updated = True
+                if not category.icon and category_data.get('icon'):
+                    category.icon = category_data['icon']
+                    updated = True
+                if category.sort_order == 100 and category_data.get('sort_order', 100) != 100:
+                    category.sort_order = category_data['sort_order']
+                    updated = True
+                    
+                if updated:
+                    category.save()
+                    self.stdout.write(f'Updated spending category: {category.display_name or category.name}')
 
     def import_credit_cards(self, cards):
         for card_data in cards:

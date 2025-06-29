@@ -21,7 +21,7 @@ class RewardTypeSerializer(serializers.ModelSerializer):
 class SpendingCategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = SpendingCategory
-        fields = ['id', 'name', 'slug']
+        fields = ['id', 'name', 'slug', 'display_name', 'description', 'icon', 'sort_order']
 
 
 class RewardCategorySerializer(serializers.ModelSerializer):

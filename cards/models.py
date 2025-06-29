@@ -26,9 +26,17 @@ class RewardType(models.Model):
 class SpendingCategory(models.Model):
     name = models.CharField(max_length=100, unique=True)
     slug = models.SlugField(unique=True)
+    display_name = models.CharField(max_length=150, blank=True)
+    description = models.TextField(blank=True)
+    icon = models.CharField(max_length=50, blank=True)
+    sort_order = models.IntegerField(default=100)
+    
+    class Meta:
+        ordering = ['sort_order', 'name']
+        verbose_name_plural = "Spending Categories"
     
     def __str__(self):
-        return self.name
+        return self.display_name or self.name
 
 
 class CreditCard(models.Model):

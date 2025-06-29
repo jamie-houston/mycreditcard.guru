@@ -36,12 +36,21 @@ function displayCategories(categories) {
         return;
     }
     
+    // Sort categories by sort_order
+    categories.sort((a, b) => (a.sort_order || 100) - (b.sort_order || 100));
+    
     const html = categories.map(category => `
         <div class="card-item">
-            <div class="card-title">${category.name}</div>
+            <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                ${category.icon ? `<i class="${category.icon}" style="font-size: 24px; margin-right: 15px; color: #2563eb;"></i>` : ''}
+                <div>
+                    <div class="card-title">${category.display_name || category.name}</div>
+                    <div style="color: #6b7280; font-size: 12px; font-weight: normal;">Sort: ${category.sort_order || 100}</div>
+                </div>
+            </div>
             <div class="card-details">
-                <p><strong>Slug:</strong> ${category.slug}</p>
-                <p><strong>Description:</strong> Track spending on ${category.name.toLowerCase()}</p>
+                <p><strong>Description:</strong> ${category.description || `Track spending on ${category.name.toLowerCase()}`}</p>
+                <p><strong>Category Slug:</strong> ${category.slug}</p>
             </div>
         </div>
     `).join('');
