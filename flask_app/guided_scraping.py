@@ -48,14 +48,29 @@ def get_input_files():
     return sorted(html_files)
 
 
-def get_output_files():
-    """Get available JSON files for importing."""
-    output_dir = Path("data/output")
-    if not output_dir.exists():
-        return []
+def get_data_files():
+    """Get available JSON files from data/input, data/output, and flask_app/data/input directories."""
+    files = []
     
-    json_files = list(output_dir.glob("*.json"))
-    return sorted(json_files, reverse=True)  # Newest first
+    # Get files from data/input
+    input_dir = Path("data/input")
+    if input_dir.exists():
+        input_files = list(input_dir.glob("*.json"))
+        files.extend(input_files)
+    
+    # Get files from data/output
+    output_dir = Path("data/output")
+    if output_dir.exists():
+        output_files = list(output_dir.glob("*.json"))
+        files.extend(output_files)
+    
+    # Get files from flask_app/data/input
+    flask_input_dir = Path("flask_app/data/input")
+    if flask_input_dir.exists():
+        flask_input_files = list(flask_input_dir.glob("*.json"))
+        files.extend(flask_input_files)
+    
+    return sorted(files, reverse=True)  # Newest first
 
 
 def show_file_selection(files, file_type="files"):
@@ -69,7 +84,18 @@ def show_file_selection(files, file_type="files"):
         file_size = file_path.stat().st_size
         size_str = f"{file_size/1024:.1f}KB" if file_size < 1024*1024 else f"{file_size/(1024*1024):.1f}MB"
         mod_time = datetime.fromtimestamp(file_path.stat().st_mtime).strftime("%Y-%m-%d %H:%M")
-        print(f"  {i:2d}. {file_path.name} ({size_str}, modified {mod_time})")
+        
+        # Show which directory the file is from
+        if "data/input" in str(file_path):
+            location = "📥 input"
+        elif "data/output" in str(file_path):
+            location = "📤 output"
+        elif "flask_app/data/input" in str(file_path):
+            location = "📥 flask_input"
+        else:
+            location = "📁 data"
+        
+        print(f"  {i:2d}. {file_path.name} ({size_str}, {location}, modified {mod_time})")
     
     print(f"  {len(files)+1:2d}. All files")
     print(f"  {len(files)+2:2d}. Skip this step")
@@ -216,15 +242,15 @@ def main():
     
     # Step 3: File Selection for Importing
     print_section("Step 3: Select Files to Import")
-    output_files = get_output_files()
+    output_files = get_data_files()
     
     if not output_files:
-        print("❌ No JSON files found in data/output/")
+        print("❌ No JSON files found in data/input/, data/output/, or flask_app/data/input/")
         if selected_input_files == "skip":
-            print("💡 Run the scraper first to generate JSON files.")
+            print("💡 Run the scraper first to generate JSON files, or add JSON files to data/input/.")
             sys.exit(1)
         else:
-            print("💡 The scraper should have created files. Check data/output/ directory.")
+            print("💡 The scraper should have created files. Check data/input/, data/output/, and flask_app/data/input/ directories.")
             sys.exit(1)
     
     selected_output_files = None

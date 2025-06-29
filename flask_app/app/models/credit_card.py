@@ -202,13 +202,23 @@ class CreditCard(db.Model):
     
     def calculate_signup_bonus_value(self, monthly_spend):
         """Calculate if the signup bonus is achievable and its value."""
-        # Check if signup bonus can be achieved
-        months_needed = self.signup_bonus_min_spend / monthly_spend
+        min_spend = self.get_signup_bonus_min_spend_new()
+        max_months = self.get_signup_bonus_max_months_new()
+        bonus_value = self.get_signup_bonus_value_new()
         
-        achievable = months_needed <= self.signup_bonus_max_months
+        if min_spend <= 0 or monthly_spend <= 0:
+            return {
+                'value': 0,
+                'achievable': False,
+                'months_needed': 0
+            }
+        
+        # Check if signup bonus can be achieved
+        months_needed = min_spend / monthly_spend
+        achievable = months_needed <= max_months
         
         return {
-            'value': self.signup_bonus_value if achievable else 0,
+            'value': bonus_value if achievable else 0,
             'achievable': achievable,
             'months_needed': round(months_needed, 1)
         }
@@ -364,3 +374,23 @@ class CreditCard(db.Model):
     def point_value(self, value):
         """Backward compatibility setter for point_value."""
         self.reward_value_multiplier = value
+    
+    @property
+    def signup_bonus_points(self):
+        """Backward compatibility for signup_bonus_points."""
+        return self.get_signup_bonus_amount()
+    
+    @property
+    def signup_bonus_value(self):
+        """Backward compatibility for signup_bonus_value."""
+        return self.get_signup_bonus_value_new()
+    
+    @property
+    def signup_bonus_min_spend(self):
+        """Backward compatibility for signup_bonus_min_spend."""
+        return self.get_signup_bonus_min_spend_new()
+    
+    @property
+    def signup_bonus_max_months(self):
+        """Backward compatibility for signup_bonus_max_months."""
+        return self.get_signup_bonus_max_months_new()

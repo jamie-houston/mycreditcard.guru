@@ -351,11 +351,12 @@ def new():
                 'annual_fee': float(request.form.get('annual_fee', 0)),
                 'reward_type': request.form.get('reward_type', 'points'),
                 'reward_value_multiplier': float(request.form.get('reward_value_multiplier', 0.01)),
-                'signup_bonus_points': int(request.form.get('signup_bonus_points', 0)),
-                'signup_bonus_value': float(request.form.get('signup_bonus_value', 0)),
-                'signup_bonus_min_spend': float(request.form.get('signup_bonus_min_spend', 0)),
-                'signup_bonus_max_months': int(request.form.get('signup_bonus_max_months', 3)),
             }
+            
+            # Extract signup bonus data separately
+            signup_bonus_points = int(request.form.get('signup_bonus_points', 0))
+            signup_bonus_min_spend = float(request.form.get('signup_bonus_min_spend', 0))
+            signup_bonus_max_months = int(request.form.get('signup_bonus_max_months', 3))
             
             # Process reward categories from form
             reward_categories = []
@@ -432,6 +433,9 @@ def new():
             # Use the safe_commit context manager
             with safe_commit():
                 card = CreditCard(**validated_data)
+                # Set up signup bonus using the new JSON structure
+                if signup_bonus_points > 0:
+                    card.update_signup_bonus(signup_bonus_points, signup_bonus_min_spend, signup_bonus_max_months)
                 db.session.add(card)
             
             # Now add the actual reward categories using the CreditCardReward model
@@ -532,11 +536,12 @@ def edit(id):
                 'annual_fee': float(request.form.get('annual_fee', 0)),
                 'reward_type': request.form.get('reward_type', 'points'),
                 'reward_value_multiplier': float(request.form.get('reward_value_multiplier', 0.01)),
-                'signup_bonus_points': int(request.form.get('signup_bonus_points', 0)),
-                'signup_bonus_value': float(request.form.get('signup_bonus_value', 0)),
-                'signup_bonus_min_spend': float(request.form.get('signup_bonus_min_spend', 0)),
-                'signup_bonus_max_months': int(request.form.get('signup_bonus_max_months', 3)),
             }
+            
+            # Extract signup bonus data separately
+            signup_bonus_points = int(request.form.get('signup_bonus_points', 0))
+            signup_bonus_min_spend = float(request.form.get('signup_bonus_min_spend', 0))
+            signup_bonus_max_months = int(request.form.get('signup_bonus_max_months', 3))
             
             # Process reward categories (similar to 'new' route)
             reward_categories = []
@@ -608,6 +613,9 @@ def edit(id):
             # Update card with new data
             for key, value in data.items():
                 setattr(card, key, value)
+            
+            # Update signup bonus using the new JSON structure
+            card.update_signup_bonus(signup_bonus_points, signup_bonus_min_spend, signup_bonus_max_months)
             
             with safe_commit():
                 db.session.add(card)
