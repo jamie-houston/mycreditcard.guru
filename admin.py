@@ -71,12 +71,29 @@ def run_server(port=8000):
     run_command(f"python manage.py runserver {port}", f"Starting development server on port {port}")
 
 def import_sample_data():
-    """Import sample credit card data."""
-    sample_file = PROJECT_ROOT / "sample_cards.json"
-    if sample_file.exists():
-        run_command(f"python manage.py import_cards {sample_file}", "Importing sample data")
-    else:
-        print("❌ sample_cards.json not found")
+    """Import sample credit card data from separate files."""
+    data_dir = PROJECT_ROOT / "data" / "input"
+    
+    # Check if data directory exists
+    if not data_dir.exists():
+        print("❌ data/input directory not found")
+        return
+    
+    # Import files in order
+    files_to_import = [
+        "issuers.json",
+        "reward_types.json", 
+        "spending_categories.json",
+        "credit_cards.json"
+    ]
+    
+    for filename in files_to_import:
+        file_path = data_dir / filename
+        if file_path.exists():
+            print(f"📄 Importing {filename}")
+            run_command(f"python manage.py import_cards {file_path}", f"Importing {filename}")
+        else:
+            print(f"⚠️  {filename} not found, skipping")
 
 def import_data(file_path):
     """Import credit card data from specified file."""
@@ -118,10 +135,112 @@ def full_setup():
     import_sample_data()
     print("✅ Full setup complete!")
 
+def show_interactive_menu():
+    """Show interactive menu for task selection."""
+    print("\n🎯 Credit Card Guru Admin")
+    print("=" * 40)
+    
+    # Common workflows
+    common_workflows = {
+        '1': ('Full Project Setup', 'setup', 'Complete setup from scratch'),
+        '2': ('Start Development Server', 'server', 'Run server on port 8000'),
+        '3': ('Import Sample Data', 'import-sample', 'Import all sample JSON files'),
+        '4': ('Run Tests', 'test', 'Execute Django test suite'),
+        '5': ('Open Django Shell', 'shell', 'Interactive Python shell'),
+    }
+    
+    print("\n📋 Common Workflows:")
+    for key, (name, _, desc) in common_workflows.items():
+        print(f"  {key}. {name} - {desc}")
+    
+    print("\n⚙️  Other Options:")
+    print("  a. List all available commands")
+    print("  q. Quit")
+    
+    while True:
+        try:
+            choice = input("\nSelect an option: ").strip().lower()
+            
+            if choice == 'q':
+                print("👋 Goodbye!")
+                return
+            
+            if choice == 'a':
+                show_all_commands()
+                continue
+            
+            if choice in common_workflows:
+                _, task, _ = common_workflows[choice]
+                execute_task(task)
+                return
+            
+            print("❌ Invalid choice. Please try again.")
+            
+        except KeyboardInterrupt:
+            print("\n👋 Goodbye!")
+            return
+        except EOFError:
+            print("\n👋 Goodbye!")
+            return
+
+def show_all_commands():
+    """Show all available commands."""
+    print("\n📚 All Available Commands:")
+    print("-" * 40)
+    
+    commands = {
+        'setup': 'Complete project setup from scratch',
+        'install': 'Install Python dependencies',
+        'setup-db': 'Set up database with migrations',
+        'createsuperuser': 'Create Django superuser account',
+        'server': 'Run development server (default port 8000)',
+        'test': 'Run Django test suite',
+        'import-sample': 'Import sample credit card data',
+        'import <file>': 'Import credit card data from specific file',
+        'shell': 'Open Django interactive shell',
+        'collectstatic': 'Collect static files for production',
+        'flush': 'Flush database (WARNING: deletes all data)',
+        'urls': 'Show all URL patterns',
+        'check': 'Check deployment readiness',
+    }
+    
+    for cmd, desc in commands.items():
+        print(f"  python admin.py {cmd:<20} # {desc}")
+    
+    print(f"\n💡 You can also run: python admin.py <command> directly")
+
+def execute_task(task, args=None):
+    """Execute a specific task."""
+    task_map = {
+        'install': install_dependencies,
+        'setup-db': setup_database,
+        'createsuperuser': create_superuser,
+        'test': run_tests,
+        'server': lambda: run_server(8000),
+        'import-sample': import_sample_data,
+        'collectstatic': collect_static,
+        'shell': shell,
+        'flush': flush_database,
+        'urls': show_urls,
+        'check': check_deployment,
+        'setup': full_setup,
+    }
+    
+    if task in task_map:
+        task_map[task]()
+    else:
+        print(f"❌ Unknown task: {task}")
+
 def main():
     """Main entry point."""
     setup_environment()
     
+    # If no arguments, show interactive menu
+    if len(sys.argv) == 1:
+        show_interactive_menu()
+        return
+    
+    # Otherwise, use command line arguments
     parser = argparse.ArgumentParser(description='Credit Card Guru Admin Script')
     subparsers = parser.add_subparsers(dest='task', help='Available tasks')
     
@@ -153,6 +272,7 @@ def main():
     
     if not args.task or args.task == 'help':
         parser.print_help()
+        print("\n💡 Run without arguments for interactive menu")
         print("\nCommon workflows:")
         print("  python admin.py setup              # Full project setup")
         print("  python admin.py server             # Start development server")
@@ -162,27 +282,12 @@ def main():
         return
     
     # Execute the requested task
-    task_map = {
-        'install': install_dependencies,
-        'setup-db': setup_database,
-        'createsuperuser': create_superuser,
-        'test': run_tests,
-        'server': lambda: run_server(args.port if hasattr(args, 'port') else 8000),
-        'import-sample': import_sample_data,
-        'import': lambda: import_data(args.file),
-        'collectstatic': collect_static,
-        'shell': shell,
-        'flush': flush_database,
-        'urls': show_urls,
-        'check': check_deployment,
-        'setup': full_setup,
-    }
-    
-    if args.task in task_map:
-        task_map[args.task]()
+    if args.task == 'server':
+        run_server(args.port if hasattr(args, 'port') else 8000)
+    elif args.task == 'import':
+        import_data(args.file)
     else:
-        print(f"❌ Unknown task: {args.task}")
-        parser.print_help()
+        execute_task(args.task, args)
 
 if __name__ == '__main__':
     main()

@@ -36,7 +36,19 @@ class Command(BaseCommand):
             )
             return
 
-        self.import_data(data)
+        # Determine file type and import accordingly
+        filename = os.path.basename(file_path).lower()
+        if filename == 'issuers.json':
+            self.import_issuers(data)
+        elif filename == 'reward_types.json':
+            self.import_reward_types(data)
+        elif filename == 'spending_categories.json':
+            self.import_spending_categories(data)
+        elif filename == 'credit_cards.json':
+            self.import_credit_cards(data)
+        else:
+            # Legacy format - assume it's the old combined format
+            self.import_data(data)
 
     def import_data(self, data):
         """
@@ -104,19 +116,36 @@ class Command(BaseCommand):
         for card_data in cards:
             try:
                 issuer = Issuer.objects.get(name=card_data['issuer'])
-                primary_reward_type = RewardType.objects.get(name=card_data['primary_reward_type'])
-                signup_bonus_type = RewardType.objects.get(name=card_data['signup_bonus_type'])
+                # Handle both old and new data formats
+                reward_type_name = card_data.get('reward_type') or card_data.get('primary_reward_type')
+                primary_reward_type = RewardType.objects.get(name=reward_type_name)
+                
+                # Handle signup bonus structure
+                signup_bonus = card_data.get('signup_bonus', {})
+                if isinstance(signup_bonus, dict):
+                    signup_bonus_amount = signup_bonus.get('bonus_amount')
+                    signup_bonus_requirement = f"${signup_bonus.get('spending_requirement', 0)} in {signup_bonus.get('time_limit_months', 0)} months"
+                else:
+                    # Legacy format
+                    signup_bonus_amount = card_data.get('signup_bonus_amount')
+                    signup_bonus_requirement = card_data.get('signup_bonus_requirement', '')
+                
+                # For signup bonus type, use the card's reward type
+                signup_bonus_type = primary_reward_type
                 
                 card, created = CreditCard.objects.get_or_create(
                     name=card_data['name'],
                     issuer=issuer,
                     defaults={
                         'annual_fee': card_data.get('annual_fee', 0),
-                        'signup_bonus_amount': card_data.get('signup_bonus_amount'),
+                        'signup_bonus_amount': signup_bonus_amount,
                         'signup_bonus_type': signup_bonus_type,
-                        'signup_bonus_requirement': card_data.get('signup_bonus_requirement', ''),
+                        'signup_bonus_requirement': signup_bonus_requirement,
                         'primary_reward_type': primary_reward_type,
-                        'metadata': card_data.get('metadata', {}),
+                        'metadata': {
+                            'reward_value_multiplier': card_data.get('reward_value_multiplier', 0.01),
+                            **card_data.get('metadata', {})
+                        },
                     }
                 )
                 
@@ -140,7 +169,8 @@ class Command(BaseCommand):
         for category_data in reward_categories:
             try:
                 category = SpendingCategory.objects.get(name=category_data['category'])
-                reward_type = RewardType.objects.get(name=category_data['reward_type'])
+                # Use card's reward type since we removed it from categories
+                reward_type = card.primary_reward_type
                 
                 RewardCategory.objects.get_or_create(
                     card=card,

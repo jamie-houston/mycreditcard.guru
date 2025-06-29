@@ -19,4 +19,7 @@ urlpatterns = [
     
     # Quick recommendations
     path('recommendations/preview/', views.card_recommendations_preview, name='recommendations-preview'),
+    
+    # Card ownership management
+    path('toggle-ownership/', views.toggle_card_ownership, name='toggle-ownership'),
 ]

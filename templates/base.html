@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Credit Card Guru{% endblock %}</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0;
+            background-color: #f5f5f5;
+        }
+        
+        /* Navigation */
+        .navbar {
+            background: white;
+            border-bottom: 1px solid #e5e7eb;
+            padding: 0 20px;
+            margin-bottom: 20px;
+        }
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 15px 0;
+        }
+        .nav-brand {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2563eb;
+            text-decoration: none;
+        }
+        .nav-menu {
+            display: flex;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            gap: 30px;
+        }
+        .nav-item a {
+            text-decoration: none;
+            color: #374151;
+            font-weight: 500;
+            padding: 8px 16px;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+        .nav-item a:hover {
+            background: #f3f4f6;
+            color: #2563eb;
+        }
+        .nav-item a.active {
+            background: #2563eb;
+            color: white;
+        }
+        
+        /* Main container */
+        .container {
+            background: white;
+            margin: 0 20px;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+        }
+        
+        /* Common styles */
+        h1 {
+            color: #2563eb;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            background: #f9fafb;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #374151;
+        }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        button {
+            background: #2563eb;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+        button:hover {
+            background: #1d4ed8;
+        }
+        button.secondary {
+            background: #6b7280;
+        }
+        button.secondary:hover {
+            background: #4b5563;
+        }
+        button.success {
+            background: #10b981;
+        }
+        button.success:hover {
+            background: #059669;
+        }
+        button.danger {
+            background: #ef4444;
+        }
+        button.danger:hover {
+            background: #dc2626;
+        }
+        .card-item {
+            padding: 15px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            background: white;
+        }
+        .card-title {
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 5px;
+        }
+        .card-details {
+            color: #6b7280;
+            font-size: 14px;
+        }
+        .recommendation {
+            padding: 20px;
+            border-left: 4px solid #10b981;
+            background: #f0fdf4;
+            margin-bottom: 15px;
+            border-radius: 0 8px 8px 0;
+        }
+        .recommendation.apply {
+            border-left-color: #3b82f6;
+            background: #eff6ff;
+        }
+        .recommendation.cancel {
+            border-left-color: #ef4444;
+            background: #fef2f2;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+            .nav-menu {
+                flex-direction: column;
+                gap: 10px;
+            }
+            .nav-container {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+        }
+        .results {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        .error {
+            color: #ef4444;
+            background: #fef2f2;
+            padding: 10px;
+            border-radius: 6px;
+            margin: 10px 0;
+        }
+        .loading {
+            text-align: center;
+            color: #6b7280;
+            padding: 20px;
+        }
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        .badge.points { background: #dbeafe; color: #1d4ed8; }
+        .badge.miles { background: #fef3c7; color: #d97706; }
+        .badge.cashback { background: #dcfce7; color: #16a34a; }
+        .card-actions {
+            margin-top: 10px;
+            display: flex;
+            gap: 10px;
+        }
+        .card-actions button {
+            padding: 6px 12px;
+            font-size: 14px;
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="/" class="nav-brand">🏦 Credit Card Guru</a>
+            <ul class="nav-menu">
+                <li class="nav-item"><a href="/" {% if request.resolver_match.url_name == 'index' %}class="active"{% endif %}>Profile</a></li>
+                <li class="nav-item"><a href="/cards/" {% if request.resolver_match.url_name == 'cards_list' %}class="active"{% endif %}>Credit Cards</a></li>
+                <li class="nav-item"><a href="/categories/" {% if request.resolver_match.url_name == 'categories_list' %}class="active"{% endif %}>Categories</a></li>
+                <li class="nav-item"><a href="/issuers/" {% if request.resolver_match.url_name == 'issuers_list' %}class="active"{% endif %}>Issuers</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        {% block content %}{% endblock %}
+    </div>
+
+    <script>
+        const API_BASE = '/api';
+        
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        async function toggleCardOwnership(cardId, button) {
+            try {
+                const hasCard = button.textContent.includes('I have this');
+                const action = hasCard ? 'add' : 'remove';
+                
+                button.disabled = true;
+                button.textContent = '...';
+                
+                const response = await fetch(`${API_BASE}/cards/toggle-ownership/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify({
+                        card_id: cardId,
+                        action: action
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    if (hasCard) {
+                        button.textContent = '❌ Remove from my cards';
+                        button.className = 'danger';
+                    } else {
+                        button.textContent = '✅ I have this card';
+                        button.className = 'success';
+                    }
+                } else {
+                    alert('Error updating card ownership');
+                }
+                
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error updating card ownership');
+            } finally {
+                button.disabled = false;
+            }
+        }
+    </script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

@@ -3,6 +3,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
 from django.db.models import Q
+from django.shortcuts import render
 
 from .models import (
     Issuer, RewardType, SpendingCategory, CreditCard,
@@ -163,7 +164,6 @@ def card_search_view(request):
 @api_view(['GET'])
 def card_recommendations_preview(request):
     """Preview card recommendations without saving"""
-    from roadmaps.recommendation_engine import RecommendationEngine
     from roadmaps.serializers import GenerateRoadmapSerializer
     
     serializer = GenerateRoadmapSerializer(
@@ -194,3 +194,50 @@ def card_recommendations_preview(request):
             )
     
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+# Template Views
+def index_view(request):
+    """Main profile page"""
+    return render(request, 'index.html')
+
+def cards_list_view(request):
+    """Credit cards listing page"""
+    return render(request, 'cards_list.html')
+
+def categories_list_view(request):
+    """Spending categories listing page"""
+    return render(request, 'categories_list.html')
+
+def issuers_list_view(request):
+    """Issuers listing page"""
+    return render(request, 'issuers_list.html')
+
+
+@api_view(['POST'])
+def toggle_card_ownership(request):
+    """Add or remove a card from user's collection"""
+    try:
+        card_id = request.data.get('card_id')
+        action = request.data.get('action')  # 'add' or 'remove'
+        
+        if not card_id or action not in ['add', 'remove']:
+            return Response(
+                {'error': 'card_id and action (add/remove) required'}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # For now, we'll just return success since we don't have UserCard model
+        # In a full implementation, this would manage UserCard records
+        return Response({
+            'success': True,
+            'message': f'Card {"added to" if action == "add" else "removed from"} your collection',
+            'card_id': card_id,
+            'action': action
+        })
+        
+    except Exception as e:
+        return Response(
+            {'error': str(e)}, 
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )

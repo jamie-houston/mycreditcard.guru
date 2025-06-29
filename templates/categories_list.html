@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+
+{% block title %}Spending Categories - Credit Card Guru{% endblock %}
+
+{% block content %}
+<h1>📊 Spending Categories</h1>
+<p style="text-align: center; color: #6b7280; margin-bottom: 40px;">
+    View all spending categories tracked by the system
+</p>
+
+<div id="categoriesContainer">
+    <div class="loading">🔄 Loading spending categories...</div>
+</div>
+
+<script>
+async function loadCategories() {
+    try {
+        const response = await fetch(`${API_BASE}/cards/spending-categories/`);
+        const data = await response.json();
+        const categories = data.results || data;
+        
+        displayCategories(categories);
+        
+    } catch (error) {
+        console.error('Error loading categories:', error);
+        document.getElementById('categoriesContainer').innerHTML = 
+            '<div class="error">Error loading categories. Please try again.</div>';
+    }
+}
+
+function displayCategories(categories) {
+    const container = document.getElementById('categoriesContainer');
+    
+    if (categories.length === 0) {
+        container.innerHTML = '<div class="error">No categories found.</div>';
+        return;
+    }
+    
+    const html = categories.map(category => `
+        <div class="card-item">
+            <div class="card-title">${category.name}</div>
+            <div class="card-details">
+                <p><strong>Slug:</strong> ${category.slug}</p>
+                <p><strong>Description:</strong> Track spending on ${category.name.toLowerCase()}</p>
+            </div>
+        </div>
+    `).join('');
+    
+    container.innerHTML = html;
+}
+
+// Load categories when page loads
+loadCategories();
+</script>
+{% endblock %}

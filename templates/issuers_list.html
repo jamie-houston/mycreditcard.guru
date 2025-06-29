@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+
+{% block title %}Card Issuers - Credit Card Guru{% endblock %}
+
+{% block content %}
+<h1>🏢 Credit Card Issuers</h1>
+<p style="text-align: center; color: #6b7280; margin-bottom: 40px;">
+    View all credit card issuers and their policies
+</p>
+
+<div id="issuersContainer">
+    <div class="loading">🔄 Loading credit card issuers...</div>
+</div>
+
+<script>
+async function loadIssuers() {
+    try {
+        const response = await fetch(`${API_BASE}/cards/issuers/`);
+        const data = await response.json();
+        const issuers = data.results || data;
+        
+        displayIssuers(issuers);
+        
+    } catch (error) {
+        console.error('Error loading issuers:', error);
+        document.getElementById('issuersContainer').innerHTML = 
+            '<div class="error">Error loading issuers. Please try again.</div>';
+    }
+}
+
+function displayIssuers(issuers) {
+    const container = document.getElementById('issuersContainer');
+    
+    if (issuers.length === 0) {
+        container.innerHTML = '<div class="error">No issuers found.</div>';
+        return;
+    }
+    
+    const html = issuers.map(issuer => `
+        <div class="card-item">
+            <div class="card-title">${issuer.name}</div>
+            <div class="card-details">
+                <p><strong>Card Limit:</strong> Maximum ${issuer.max_cards_per_period} cards per ${issuer.period_months} months</p>
+                <p><strong>Policy:</strong> ${issuer.name === 'Chase' ? 'Subject to 5/24 rule and other restrictions' : 'Standard application rules apply'}</p>
+                <p><strong>Slug:</strong> ${issuer.slug}</p>
+            </div>
+        </div>
+    `).join('');
+    
+    container.innerHTML = html;
+}
+
+// Load issuers when page loads
+loadIssuers();
+</script>
+{% endblock %}

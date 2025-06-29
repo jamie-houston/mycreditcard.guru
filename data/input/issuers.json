@@ -1,0 +1,5 @@
+[
+  {"name": "Chase", "max_cards_per_period": 5, "period_months": 24},
+  {"name": "American Express", "max_cards_per_period": 4, "period_months": 24},
+  {"name": "Capital One", "max_cards_per_period": 6, "period_months": 24}
+]
