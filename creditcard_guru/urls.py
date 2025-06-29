@@ -48,9 +48,13 @@ urlpatterns = [
     path('categories/', categories_list_view, name='categories_list'),
     path('issuers/', issuers_list_view, name='issuers_list'),
     
+    # Authentication
+    path('accounts/', include('allauth.urls')),
+    
     # API endpoints
     path('api/', home_view, name='api_home'),
     path('admin/', admin.site.urls),
     path('api/cards/', include('cards.urls')),
     path('api/roadmaps/', include('roadmaps.urls')),
+    path('api/users/', include('users.urls')),
 ]

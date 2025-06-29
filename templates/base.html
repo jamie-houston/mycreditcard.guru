@@ -57,6 +57,33 @@
             background: #2563eb;
             color: white;
         }
+        .nav-auth {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .nav-user {
+            color: #374151;
+            font-weight: 500;
+        }
+        .nav-login, .nav-logout {
+            background: #2563eb;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: background 0.2s;
+        }
+        .nav-login:hover, .nav-logout:hover {
+            background: #1d4ed8;
+        }
+        .nav-logout {
+            background: #6b7280;
+        }
+        .nav-logout:hover {
+            background: #4b5563;
+        }
         
         /* Main container */
         .container {
@@ -235,6 +262,14 @@
                 <li class="nav-item"><a href="/categories/" {% if request.resolver_match.url_name == 'categories_list' %}class="active"{% endif %}>Categories</a></li>
                 <li class="nav-item"><a href="/issuers/" {% if request.resolver_match.url_name == 'issuers_list' %}class="active"{% endif %}>Issuers</a></li>
             </ul>
+            <div class="nav-auth">
+                {% if user.is_authenticated %}
+                    <span class="nav-user">👤 {{ user.email }}</span>
+                    <a href="/accounts/logout/" class="nav-logout">Logout</a>
+                {% else %}
+                    <a href="/accounts/google/login/" class="nav-login">🔐 Login with Google</a>
+                {% endif %}
+            </div>
         </div>
     </nav>
 
@@ -243,6 +278,10 @@
     </div>
 
     <script>
+        // Global user state
+        let currentUser = null;
+        let isAuthenticated = false;
+
         function getCookie(name) {
             let cookieValue = null;
             if (document.cookie && document.cookie !== '') {
@@ -258,6 +297,161 @@
             return cookieValue;
         }
 
+        // Initialize user authentication state
+        async function initUserState() {
+            try {
+                const response = await fetch(`${API_BASE}/users/status/`);
+                const data = await response.json();
+                isAuthenticated = data.authenticated;
+                currentUser = data.user;
+                return data;
+            } catch (error) {
+                console.error('Error checking user status:', error);
+                isAuthenticated = false;
+                currentUser = null;
+                return { authenticated: false, user: null };
+            }
+        }
+
+        // Local storage utilities for anonymous users
+        class LocalStorage {
+            static getSpending() {
+                try {
+                    return JSON.parse(localStorage.getItem('userSpending') || '{}');
+                } catch {
+                    return {};
+                }
+            }
+
+            static setSpending(spending) {
+                localStorage.setItem('userSpending', JSON.stringify(spending));
+            }
+
+            static getCards() {
+                try {
+                    return JSON.parse(localStorage.getItem('userCards') || '[]');
+                } catch {
+                    return [];
+                }
+            }
+
+            static setCards(cards) {
+                localStorage.setItem('userCards', JSON.stringify(cards));
+            }
+
+            static getPreferences() {
+                try {
+                    return JSON.parse(localStorage.getItem('userPreferences') || '{}');
+                } catch {
+                    return {};
+                }
+            }
+
+            static setPreferences(preferences) {
+                localStorage.setItem('userPreferences', JSON.stringify(preferences));
+            }
+        }
+
+        // Unified data management (handles both authenticated and anonymous users)
+        class UserDataManager {
+            static async saveSpending(spending) {
+                if (isAuthenticated) {
+                    try {
+                        const response = await fetch(`${API_BASE}/users/data/`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRFToken': getCookie('csrftoken')
+                            },
+                            body: JSON.stringify({
+                                spending: spending,
+                                cards: await this.getCards(),
+                                preferences: await this.getPreferences()
+                            })
+                        });
+                        return response.ok;
+                    } catch (error) {
+                        console.error('Error saving spending:', error);
+                        return false;
+                    }
+                } else {
+                    LocalStorage.setSpending(spending);
+                    return true;
+                }
+            }
+
+            static async getSpending() {
+                if (isAuthenticated) {
+                    try {
+                        const response = await fetch(`${API_BASE}/users/data/`);
+                        const data = await response.json();
+                        return data.spending || {};
+                    } catch (error) {
+                        console.error('Error loading spending:', error);
+                        return {};
+                    }
+                } else {
+                    return LocalStorage.getSpending();
+                }
+            }
+
+            static async saveCards(cards) {
+                if (isAuthenticated) {
+                    try {
+                        const response = await fetch(`${API_BASE}/users/data/`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRFToken': getCookie('csrftoken')
+                            },
+                            body: JSON.stringify({
+                                spending: await this.getSpending(),
+                                cards: cards,
+                                preferences: await this.getPreferences()
+                            })
+                        });
+                        return response.ok;
+                    } catch (error) {
+                        console.error('Error saving cards:', error);
+                        return false;
+                    }
+                } else {
+                    LocalStorage.setCards(cards);
+                    return true;
+                }
+            }
+
+            static async getCards() {
+                if (isAuthenticated) {
+                    try {
+                        const response = await fetch(`${API_BASE}/users/data/`);
+                        const data = await response.json();
+                        return data.cards || [];
+                    } catch (error) {
+                        console.error('Error loading cards:', error);
+                        return [];
+                    }
+                } else {
+                    return LocalStorage.getCards();
+                }
+            }
+
+            static async getPreferences() {
+                if (isAuthenticated) {
+                    try {
+                        const response = await fetch(`${API_BASE}/users/data/`);
+                        const data = await response.json();
+                        return data.preferences || {};
+                    } catch (error) {
+                        console.error('Error loading preferences:', error);
+                        return {};
+                    }
+                } else {
+                    return LocalStorage.getPreferences();
+                }
+            }
+        }
+
         async function toggleCardOwnership(cardId, button) {
             try {
                 const hasCard = button.textContent.includes('I have this');
@@ -266,30 +460,38 @@
                 button.disabled = true;
                 button.textContent = '...';
                 
-                const response = await fetch(`${API_BASE}/cards/toggle-ownership/`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': getCookie('csrftoken')
-                    },
-                    body: JSON.stringify({
-                        card_id: cardId,
-                        action: action
-                    })
-                });
-                
-                const data = await response.json();
-                
-                if (data.success) {
-                    if (hasCard) {
-                        button.textContent = '❌ Remove from my cards';
-                        button.className = 'danger';
+                if (isAuthenticated) {
+                    // Use authenticated API
+                    const response = await fetch(`${API_BASE}/users/cards/toggle/`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': getCookie('csrftoken')
+                        },
+                        body: JSON.stringify({
+                            card_id: cardId,
+                            action: action
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        updateButtonState(button, hasCard);
                     } else {
-                        button.textContent = '✅ I have this card';
-                        button.className = 'success';
+                        alert('Error updating card ownership');
                     }
                 } else {
-                    alert('Error updating card ownership');
+                    // Use local storage for anonymous users
+                    const userCards = await UserDataManager.getCards();
+                    if (hasCard) {
+                        userCards.push(cardId);
+                    } else {
+                        const index = userCards.indexOf(cardId);
+                        if (index > -1) userCards.splice(index, 1);
+                    }
+                    await UserDataManager.saveCards(userCards);
+                    updateButtonState(button, hasCard);
                 }
                 
             } catch (error) {
@@ -299,6 +501,21 @@
                 button.disabled = false;
             }
         }
+
+        function updateButtonState(button, hasCard) {
+            if (hasCard) {
+                button.textContent = '❌ Remove from my cards';
+                button.className = 'danger';
+            } else {
+                button.textContent = '✅ I have this card';
+                button.className = 'success';
+            }
+        }
+
+        // Initialize user state when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            initUserState();
+        });
     </script>
     
     {% block extra_js %}{% endblock %}
