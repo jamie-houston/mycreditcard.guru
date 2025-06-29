@@ -71,7 +71,7 @@ def run_server(port=8000):
     run_command(f"python manage.py runserver {port}", f"Starting development server on port {port}")
 
 def import_sample_data():
-    """Import sample credit card data from separate files."""
+    """Interactive import of data files from data/input directory."""
     data_dir = PROJECT_ROOT / "data" / "input"
     
     # Check if data directory exists
@@ -79,21 +79,76 @@ def import_sample_data():
         print("❌ data/input directory not found")
         return
     
-    # Import files in order
-    files_to_import = [
-        "issuers.json",
-        "reward_types.json", 
-        "spending_categories.json",
-        "credit_cards.json"
-    ]
+    # Get all JSON files in the directory
+    json_files = list(data_dir.glob("*.json"))
     
-    for filename in files_to_import:
-        file_path = data_dir / filename
-        if file_path.exists():
-            print(f"📄 Importing {filename}")
-            run_command(f"python manage.py import_cards {file_path}", f"Importing {filename}")
-        else:
-            print(f"⚠️  {filename} not found, skipping")
+    if not json_files:
+        print("❌ No JSON files found in data/input directory")
+        return
+    
+    print("\n📁 Available files in data/input:")
+    print("=" * 40)
+    
+    # Show options
+    options = {}
+    for i, file_path in enumerate(json_files, 1):
+        filename = file_path.name
+        print(f"  {i}. {filename}")
+        options[str(i)] = file_path
+    
+    print("  a. Import all files")
+    print("  q. Cancel")
+    
+    while True:
+        try:
+            choice = input("\nSelect file(s) to import: ").strip().lower()
+            
+            if choice == 'q':
+                print("Import cancelled")
+                return
+            
+            if choice == 'a':
+                # Import all files in a logical order
+                preferred_order = [
+                    "issuers.json",
+                    "reward_types.json", 
+                    "spending_categories.json",
+                    "credit_cards.json",
+                    "chase.json"
+                ]
+                
+                # First import files in preferred order
+                imported_files = set()
+                for preferred_file in preferred_order:
+                    for file_path in json_files:
+                        if file_path.name == preferred_file and file_path not in imported_files:
+                            print(f"\n📄 Importing {file_path.name}")
+                            run_command(f"python manage.py import_cards {file_path}", f"Importing {file_path.name}")
+                            imported_files.add(file_path)
+                
+                # Then import any remaining files
+                for file_path in json_files:
+                    if file_path not in imported_files:
+                        print(f"\n📄 Importing {file_path.name}")
+                        run_command(f"python manage.py import_cards {file_path}", f"Importing {file_path.name}")
+                
+                print("\n✅ All files imported!")
+                return
+            
+            if choice in options:
+                file_path = options[choice]
+                print(f"\n📄 Importing {file_path.name}")
+                run_command(f"python manage.py import_cards {file_path}", f"Importing {file_path.name}")
+                return
+            
+            print("❌ Invalid choice. Please try again.")
+            
+        except KeyboardInterrupt:
+            print("\nImport cancelled")
+            return
+        except EOFError:
+            print("\nImport cancelled")
+            return
 
 def import_data(file_path):
     """Import credit card data from specified file."""
