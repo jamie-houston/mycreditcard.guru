@@ -168,6 +168,9 @@ class RecommendationEngine:
         """Calculate annual rewards for a card based on user spending"""
         total_rewards = 0.0
         
+        # Get the card's reward value multiplier (how much each point/mile is worth)
+        reward_value_multiplier = card.metadata.get('reward_value_multiplier', 0.01)
+        
         for reward_category in card.reward_categories.filter(is_active=True):
             category_slug = reward_category.category.slug
             monthly_spend = float(self.spending_amounts.get(category_slug, 0))
@@ -178,23 +181,22 @@ class RecommendationEngine:
                 annual_spend = min(annual_spend, float(reward_category.max_annual_spend))
             
             reward_rate = float(reward_category.reward_rate)
-            # Reward rate is already in points per dollar (e.g., 2.0 = 2 points per dollar)
-            # Convert to cash value assuming 1 point = 1 cent
-            category_rewards = annual_spend * reward_rate * 0.01
+            # Calculate points/miles earned: spend * rate
+            points_earned = annual_spend * reward_rate
+            # Convert to cash value using card's specific multiplier
+            category_rewards = points_earned * float(reward_value_multiplier)
             total_rewards += category_rewards
         
         return total_rewards
     
     def _get_signup_bonus_value(self, card: CreditCard) -> float:
-        """Get signup bonus value (simplified - assumes 1 point = 1 cent)"""
+        """Get signup bonus value using card's specific reward value multiplier"""
         if card.signup_bonus_amount:
-            # Simple valuation - could be more sophisticated
-            if card.signup_bonus_type.name.lower() in ['points', 'miles']:
-                return float(card.signup_bonus_amount) * 0.01  # 1 cent per point/mile
-            elif card.signup_bonus_type.name.lower() == 'cashback':
-                return float(card.signup_bonus_amount)
-            else:
-                return float(card.signup_bonus_amount) * 0.01
+            reward_value_multiplier = card.metadata.get('reward_value_multiplier', 0.01)
+            
+            # All signup bonus amounts are stored as points/cents and need to be converted
+            # using the card's specific reward value multiplier
+            return float(card.signup_bonus_amount) * float(reward_value_multiplier)
         return 0.0
     
     def _calculate_total_rewards(self, recommendations: List[Dict]) -> Decimal:
