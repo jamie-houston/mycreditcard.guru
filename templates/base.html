@@ -219,6 +219,11 @@
         }
     </style>
     {% block extra_css %}{% endblock %}
+    
+    <!-- Global JavaScript variables -->
+    <script>
+        const API_BASE = '/api';
+    </script>
 </head>
 <body>
     <nav class="navbar">
@@ -238,8 +243,6 @@
     </div>
 
     <script>
-        const API_BASE = '/api';
-        
         function getCookie(name) {
             let cookieValue = null;
             if (document.cookie && document.cookie !== '') {
