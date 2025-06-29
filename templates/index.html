@@ -97,6 +97,7 @@
                 categories.forEach(cat => {
                     spendingCategories[cat.slug] = cat.id;
                 });
+                console.log('📊 Spending categories loaded:', spendingCategories);
                 
                 // Load saved spending and preferences
                 await loadSavedData();
@@ -258,6 +259,8 @@
                     max_recommendations: parseInt(document.getElementById('maxRecs').value)
                 };
 
+                console.log('🚀 Request data:', requestData);
+                
                 const response = await fetch(`${API_BASE}/roadmaps/quick-recommendation/`, {
                     method: 'POST',
                     headers: {
@@ -268,6 +271,7 @@
                 });
 
                 const data = await response.json();
+                console.log('📨 Response data:', data);
 
                 if (data.error) {
                     resultsDiv.innerHTML = `<div class="error">Error: ${data.error}</div>`;
@@ -301,12 +305,26 @@
 
                         // Generate rewards breakdown HTML
                         let breakdownHtml = '';
-                        if (rec.rewards_breakdown && rec.rewards_breakdown.length > 0) {
-                            breakdownHtml = '<div style="margin-top: 15px;"><strong>Rewards Breakdown:</strong><ul style="margin: 5px 0; padding-left: 20px;">';
+                        console.log(`💰 Breakdown for ${rec.card.name}:`, rec.rewards_breakdown);
+                        
+                        // More robust check for breakdown data
+                        const hasBreakdown = rec.rewards_breakdown && 
+                                           Array.isArray(rec.rewards_breakdown) && 
+                                           rec.rewards_breakdown.length > 0;
+                        
+                        if (hasBreakdown) {
+                            breakdownHtml = '<div style="margin-top: 15px; background: #f8f9fa; padding: 10px; border-radius: 6px;"><strong>💰 Rewards Breakdown:</strong><ul style="margin: 8px 0; padding-left: 20px;">';
                             rec.rewards_breakdown.forEach(breakdown => {
-                                breakdownHtml += `<li style="margin: 2px 0; font-family: monospace; font-size: 13px;">${breakdown.category_name}: ${breakdown.calculation}</li>`;
+                                const categoryName = breakdown.category_name || 'Unknown Category';
+                                const calculation = breakdown.calculation || 'No calculation available';
+                                breakdownHtml += `<li style="margin: 4px 0; font-family: monospace; font-size: 14px; color: #2563eb;"><strong>${categoryName}:</strong> ${calculation}</li>`;
                             });
                             breakdownHtml += '</ul></div>';
+                            console.log(`✅ Generated breakdown HTML for ${rec.card.name} with ${rec.rewards_breakdown.length} items`);
+                        } else {
+                            // Add debug info even when no breakdown
+                            breakdownHtml = `<div style="margin-top: 15px; padding: 10px; background: #fee2e2; border-radius: 6px; color: #dc2626;"><strong>⚠️ Debug:</strong> No breakdown data (length: ${rec.rewards_breakdown?.length || 'undefined'}, type: ${typeof rec.rewards_breakdown})</div>`;
+                            console.log(`❌ No breakdown for ${rec.card.name} - data:`, rec.rewards_breakdown);
                         }
 
                         html += `
