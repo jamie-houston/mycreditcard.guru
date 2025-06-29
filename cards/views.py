@@ -34,8 +34,12 @@ class SpendingCategoryListView(generics.ListAPIView):
 class CreditCardListView(generics.ListAPIView):
     queryset = CreditCard.objects.filter(is_active=True).select_related(
         'issuer', 'primary_reward_type', 'signup_bonus_type'
-    ).prefetch_related('reward_categories', 'offers')
-    serializer_class = CreditCardListSerializer
+    ).prefetch_related(
+        'reward_categories__category',
+        'reward_categories__reward_type',
+        'offers'
+    )
+    serializer_class = CreditCardSerializer
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = {
         'issuer__name': ['exact', 'icontains'],

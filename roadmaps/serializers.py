@@ -157,9 +157,9 @@ class GenerateRoadmapSerializer(serializers.Serializer):
                 )
                 roadmap.filters.add(filter_obj)
         
-        # Generate recommendations
+        # Generate recommendations using quick method (includes breakdowns)
         engine = RecommendationEngine(profile)
-        recommendations = engine.generate_roadmap(roadmap)
+        recommendations = engine.generate_quick_recommendations(roadmap)
         
         # Clean up temporary roadmap
         roadmap.delete()

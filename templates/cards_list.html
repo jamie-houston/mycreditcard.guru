@@ -136,12 +136,12 @@ function filterCards() {
         // 'all' shows everything
         
         // Issuer filter
-        if (issuerFilter && card.issuer.toLowerCase() !== issuerFilter) {
+        if (issuerFilter && card.issuer.name.toLowerCase() !== issuerFilter) {
             return false;
         }
         
         // Reward type filter
-        if (rewardTypeFilter && card.primary_reward_type.toLowerCase() !== rewardTypeFilter) {
+        if (rewardTypeFilter && card.primary_reward_type.name.toLowerCase() !== rewardTypeFilter) {
             return false;
         }
         
@@ -182,21 +182,31 @@ function displayCards(cards) {
             <div class="card-item">
                 <div style="display: flex; justify-content: space-between; align-items: start;">
                     <div style="flex: 1;">
-                        <div class="card-title">${card.issuer} ${card.name}</div>
+                        <div class="card-title">${card.issuer.name} ${card.name}</div>
                         <div class="card-details">
                             <p><strong>Annual Fee:</strong> $${card.annual_fee}</p>
                             ${signupBonus ? 
-                                `<p><strong>Signup Bonus:</strong> ${signupBonus.toLocaleString()} ${card.signup_bonus_type}</p>` : 
+                                `<p><strong>Signup Bonus:</strong> ${signupBonus.toLocaleString()} ${card.signup_bonus_type ? card.signup_bonus_type.name : 'points'}</p>` : 
                                 '<p><strong>Signup Bonus:</strong> None</p>'
                             }
                             <p><strong>Reward Type:</strong> 
-                                <span class="badge ${card.primary_reward_type.toLowerCase()}">${card.primary_reward_type}</span>
+                                <span class="badge ${card.primary_reward_type.name.toLowerCase()}">${card.primary_reward_type.name}</span>
                             </p>
                             <p><strong>Point Value:</strong> ${(rewardMultiplier * 100).toFixed(1)}¢ each</p>
                             ${card.reward_categories && card.reward_categories.length > 0 ? 
-                                `<p><strong>Rewards:</strong> ${card.reward_categories.map(cat => 
-                                    `${cat.reward_rate}x ${cat.category}`
-                                ).join(', ')}</p>` : ''
+                                `<div><strong>Reward Categories:</strong>
+                                    <ul style="margin: 5px 0; padding-left: 20px;">
+                                        ${card.reward_categories.filter(cat => cat.is_active).map(cat => {
+                                            const categoryName = (cat.category && cat.category.display_name) || 
+                                                               (cat.category && cat.category.name) || 
+                                                               'Unknown Category';
+                                            const rate = parseFloat(cat.reward_rate || 0);
+                                            const maxSpend = cat.max_annual_spend ? ` (up to $${parseInt(cat.max_annual_spend).toLocaleString()}/year)` : '';
+                                            return `<li style="margin: 2px 0;"><strong>${rate}x</strong> ${categoryName}${maxSpend}</li>`;
+                                        }).join('')}
+                                    </ul>
+                                </div>` : 
+                                '<p><strong>Rewards:</strong> No specific categories</p>'
                             }
                         </div>
                     </div>

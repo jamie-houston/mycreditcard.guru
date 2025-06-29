@@ -143,6 +143,7 @@ def quick_recommendation_view(request):
                         'action': rec['action'],
                         'estimated_rewards': float(rec['estimated_rewards']),
                         'reasoning': rec['reasoning'],
+                        'rewards_breakdown': rec.get('rewards_breakdown', []),
                         'priority': rec['priority']
                     }
                     for rec in recommendations

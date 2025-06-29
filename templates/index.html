@@ -299,6 +299,16 @@
                             'downgrade': '⬇️'
                         }[rec.action] || '📋';
 
+                        // Generate rewards breakdown HTML
+                        let breakdownHtml = '';
+                        if (rec.rewards_breakdown && rec.rewards_breakdown.length > 0) {
+                            breakdownHtml = '<div style="margin-top: 15px;"><strong>Rewards Breakdown:</strong><ul style="margin: 5px 0; padding-left: 20px;">';
+                            rec.rewards_breakdown.forEach(breakdown => {
+                                breakdownHtml += `<li style="margin: 2px 0; font-family: monospace; font-size: 13px;">${breakdown.category_name}: ${breakdown.calculation}</li>`;
+                            });
+                            breakdownHtml += '</ul></div>';
+                        }
+
                         html += `
                             <div class="recommendation ${actionClass}">
                                 <div style="display: flex; justify-content: between; align-items: start;">
@@ -309,6 +319,7 @@
                                         ${rec.card.signup_bonus_amount ? 
                                             `<p><strong>Signup Bonus:</strong> ${rec.card.signup_bonus_amount} points/miles</p>` : ''
                                         }
+                                        ${breakdownHtml}
                                         <p><strong>Why:</strong> ${rec.reasoning}</p>
                                     </div>
                                     <div style="display: flex; flex-direction: column; gap: 8px;">

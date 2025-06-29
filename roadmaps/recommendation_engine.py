@@ -1,9 +1,8 @@
 from datetime import datetime, timedelta
 from decimal import Decimal
-from typing import List, Dict, Tuple
-from django.db.models import Q, Sum
-from cards.models import CreditCard, UserSpendingProfile, UserCard, Issuer, RewardCategory
-from .models import Roadmap, RoadmapRecommendation, RoadmapCalculation
+from typing import List, Dict
+from cards.models import CreditCard, UserSpendingProfile, UserCard
+from .models import Roadmap
 
 
 class RecommendationEngine:
@@ -23,8 +22,9 @@ class RecommendationEngine:
             for sa in profile.spending_amounts.all()
         }
         
-    def generate_roadmap(self, roadmap: Roadmap) -> List[RoadmapRecommendation]:
-        """Generate recommendations for a roadmap"""
+    
+    def generate_quick_recommendations(self, roadmap: Roadmap) -> List[dict]:
+        """Generate recommendations without saving to database (includes breakdowns)"""
         recommendations = []
         
         # Get all eligible cards based on filters
@@ -40,10 +40,6 @@ class RecommendationEngine:
             roadmap.max_recommendations - len(current_card_recommendations)
         )
         recommendations.extend(new_card_recommendations)
-        
-        # Calculate total rewards and save
-        total_rewards = self._calculate_total_rewards(recommendations)
-        self._save_recommendations(roadmap, recommendations, total_rewards)
         
         return recommendations
     
@@ -70,13 +66,14 @@ class RecommendationEngine:
         
         return list(queryset.prefetch_related('reward_categories', 'offers'))
     
-    def _analyze_current_cards(self) -> List[RoadmapRecommendation]:
+    def _analyze_current_cards(self) -> List[dict]:
         """Analyze current cards for keep/cancel/upgrade recommendations"""
         recommendations = []
         
         for user_card in self.user_cards:
             card = user_card.card
-            annual_rewards = self._calculate_card_annual_rewards(card)
+            rewards_breakdown = self._calculate_card_rewards_breakdown(card)
+            annual_rewards = rewards_breakdown['total_rewards']
             annual_fee = float(card.annual_fee)
             
             # Simple logic: keep if rewards > annual fee, otherwise consider canceling
@@ -95,12 +92,13 @@ class RecommendationEngine:
                 'action': action,
                 'estimated_rewards': Decimal(str(annual_rewards)),
                 'reasoning': reasoning,
+                'rewards_breakdown': rewards_breakdown['breakdown'],
                 'priority': 1 if action == 'cancel' else 2
             })
         
         return recommendations
     
-    def _find_new_cards(self, eligible_cards: List[CreditCard], max_cards: int) -> List[RoadmapRecommendation]:
+    def _find_new_cards(self, eligible_cards: List[CreditCard], max_cards: int) -> List[dict]:
         """Find best new cards to apply for"""
         recommendations = []
         
@@ -114,7 +112,8 @@ class RecommendationEngine:
             if not self._is_eligible_for_card(card):
                 continue
                 
-            annual_rewards = self._calculate_card_annual_rewards(card)
+            rewards_breakdown = self._calculate_card_rewards_breakdown(card)
+            annual_rewards = rewards_breakdown['total_rewards']
             signup_bonus_value = self._get_signup_bonus_value(card)
             annual_fee = float(card.annual_fee)
             
@@ -126,6 +125,7 @@ class RecommendationEngine:
                 'score': first_year_value,
                 'annual_rewards': annual_rewards,
                 'signup_bonus': signup_bonus_value,
+                'rewards_breakdown': rewards_breakdown['breakdown'],
                 'reasoning': f"First year value: ${first_year_value:.0f} (${signup_bonus_value:.0f} bonus + ${annual_rewards:.0f} rewards - ${annual_fee} fee)"
             })
         
@@ -138,6 +138,7 @@ class RecommendationEngine:
                 'action': 'apply',
                 'estimated_rewards': Decimal(str(card_data['score'])),
                 'reasoning': card_data['reasoning'],
+                'rewards_breakdown': card_data['rewards_breakdown'],
                 'priority': i + 1
             })
         
@@ -166,28 +167,90 @@ class RecommendationEngine:
     
     def _calculate_card_annual_rewards(self, card: CreditCard) -> float:
         """Calculate annual rewards for a card based on user spending"""
+        breakdown = self._calculate_card_rewards_breakdown(card)
+        return breakdown['total_rewards']
+    
+    def _calculate_card_rewards_breakdown(self, card: CreditCard) -> dict:
+        """Calculate detailed rewards breakdown for a card"""
         total_rewards = 0.0
+        breakdown_details = []
         
         # Get the card's reward value multiplier (how much each point/mile is worth)
         reward_value_multiplier = card.metadata.get('reward_value_multiplier', 0.01)
         
+        # Create a map of spending by category slug and also track all spending
+        all_spending = {}
+        total_spending = 0.0
+        
+        for category_slug, monthly_amount in self.spending_amounts.items():
+            annual_spend = float(monthly_amount) * 12
+            all_spending[category_slug] = annual_spend
+            total_spending += annual_spend
+        
+        # Track which spending has been allocated to specific reward categories
+        allocated_spending = 0.0
+        
+        # Calculate rewards for specific reward categories
         for reward_category in card.reward_categories.filter(is_active=True):
             category_slug = reward_category.category.slug
-            monthly_spend = float(self.spending_amounts.get(category_slug, 0))
-            annual_spend = monthly_spend * 12
+            annual_spend = all_spending.get(category_slug, 0.0)
             
-            # Apply spending caps if they exist
-            if reward_category.max_annual_spend:
-                annual_spend = min(annual_spend, float(reward_category.max_annual_spend))
-            
-            reward_rate = float(reward_category.reward_rate)
-            # Calculate points/miles earned: spend * rate
-            points_earned = annual_spend * reward_rate
-            # Convert to cash value using card's specific multiplier
-            category_rewards = points_earned * float(reward_value_multiplier)
-            total_rewards += category_rewards
+            if annual_spend > 0:  # Only include categories with spending
+                # Apply spending caps if they exist
+                if reward_category.max_annual_spend:
+                    annual_spend = min(annual_spend, float(reward_category.max_annual_spend))
+                
+                allocated_spending += annual_spend
+                reward_rate = float(reward_category.reward_rate)
+                # Calculate points/miles earned: spend * rate
+                points_earned = annual_spend * reward_rate
+                # Convert to cash value using card's specific multiplier
+                category_rewards = points_earned * float(reward_value_multiplier)
+                total_rewards += category_rewards
+                
+                # Add to breakdown
+                breakdown_details.append({
+                    'category_name': reward_category.category.display_name or reward_category.category.name,
+                    'monthly_spend': annual_spend / 12,
+                    'annual_spend': annual_spend,
+                    'reward_rate': reward_rate,
+                    'reward_multiplier': float(reward_value_multiplier),
+                    'points_earned': points_earned,
+                    'category_rewards': category_rewards,
+                    'calculation': f"${annual_spend:,.0f} × {reward_rate:.1f}x × {float(reward_value_multiplier):.3f} = ${category_rewards:.2f}"
+                })
         
-        return total_rewards
+        # Handle unallocated spending - apply to general category if it exists
+        unallocated_spending = total_spending - allocated_spending
+        if unallocated_spending > 0:
+            # Look for a general/catch-all category
+            general_category = card.reward_categories.filter(
+                is_active=True, 
+                category__slug__in=['general', 'other', 'everything-else']
+            ).first()
+            
+            if general_category:
+                reward_rate = float(general_category.reward_rate)
+                points_earned = unallocated_spending * reward_rate
+                category_rewards = points_earned * float(reward_value_multiplier)
+                total_rewards += category_rewards
+                
+                breakdown_details.append({
+                    'category_name': 'Other Spending',
+                    'monthly_spend': unallocated_spending / 12,
+                    'annual_spend': unallocated_spending,
+                    'reward_rate': reward_rate,
+                    'reward_multiplier': float(reward_value_multiplier),
+                    'points_earned': points_earned,
+                    'category_rewards': category_rewards,
+                    'calculation': f"${unallocated_spending:,.0f} × {reward_rate:.1f}x × {float(reward_value_multiplier):.3f} = ${category_rewards:.2f}"
+                })
+        
+        return {
+            'total_rewards': total_rewards,
+            'breakdown': breakdown_details,
+            'reward_multiplier': float(reward_value_multiplier)
+        }
     
     def _get_signup_bonus_value(self, card: CreditCard) -> float:
         """Get signup bonus value using card's specific reward value multiplier"""
@@ -204,27 +267,3 @@ class RecommendationEngine:
         total = sum(rec.get('estimated_rewards', 0) for rec in recommendations)
         return Decimal(str(total))
     
-    def _save_recommendations(self, roadmap: Roadmap, recommendations: List[Dict], total_rewards: Decimal):
-        """Save recommendations to database"""
-        # Clear existing recommendations
-        roadmap.recommendations.all().delete()
-        
-        # Create new recommendations
-        for rec_data in recommendations:
-            RoadmapRecommendation.objects.create(
-                roadmap=roadmap,
-                **rec_data
-            )
-        
-        # Save calculation
-        RoadmapCalculation.objects.update_or_create(
-            roadmap=roadmap,
-            defaults={
-                'total_estimated_rewards': total_rewards,
-                'calculation_data': {
-                    'recommendations_count': len(recommendations),
-                    'calculated_at': datetime.now().isoformat(),
-                    'spending_profile': {k: float(v) for k, v in self.spending_amounts.items()}
-                }
-            }
-        )
