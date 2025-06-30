@@ -10,31 +10,11 @@
         <div class="section">
             <h2>💰 Your Spending Profile</h2>
             <form id="spendingForm">
-                <div class="grid">
-                    <div class="form-group">
-                        <label>Monthly Groceries Spending ($)</label>
-                        <input type="number" id="groceries" placeholder="500" min="0" step="10">
-                    </div>
-                    <div class="form-group">
-                        <label>Monthly Dining Spending ($)</label>
-                        <input type="number" id="dining" placeholder="300" min="0" step="10">
-                    </div>
-                    <div class="form-group">
-                        <label>Monthly Travel Spending ($)</label>
-                        <input type="number" id="travel" placeholder="200" min="0" step="10">
-                    </div>
-                    <div class="form-group">
-                        <label>Monthly Gas Spending ($)</label>
-                        <input type="number" id="gas" placeholder="150" min="0" step="10">
-                    </div>
-                    <div class="form-group">
-                        <label>Monthly Online Shopping ($)</label>
-                        <input type="number" id="online_shopping" placeholder="250" min="0" step="10">
-                    </div>
-                    <div class="form-group">
-                        <label>Other Monthly Spending ($)</label>
-                        <input type="number" id="general" placeholder="800" min="0" step="10">
-                    </div>
+                <div id="spendingCategories" class="grid">
+                    <div class="loading">🔄 Loading spending categories...</div>
+                </div>
+                <div style="margin-top: 20px; padding: 15px; background: #f3f4f6; border-radius: 8px; text-align: center;">
+                    <strong style="font-size: 18px;">Total Monthly Spending: $<span id="totalSpending">0</span></strong>
                 </div>
             </form>
         </div>
@@ -99,9 +79,16 @@
                 const categories = categoriesData.results || categoriesData;
                 
                 if (Array.isArray(categories)) {
+                    // Sort categories by sort_order
+                    categories.sort((a, b) => (a.sort_order || 100) - (b.sort_order || 100));
+                    
+                    // Build spending categories mapping
                     categories.forEach(cat => {
                         spendingCategories[cat.slug] = cat.id;
                     });
+                    
+                    // Render spending categories in the UI
+                    renderSpendingCategories(categories);
                 } else {
                     console.error('Categories response is not an array:', typeof categories);
                 }
@@ -111,9 +98,99 @@
                 
                 // Set up auto-save listeners after data is loaded
                 setupAutoSave();
+                
+                // Set up total calculation
+                setupTotalCalculation();
             } catch (error) {
                 console.error('Error loading data:', error);
+                document.getElementById('spendingCategories').innerHTML = 
+                    '<div class="error">Error loading spending categories. Please try again.</div>';
             }
+        }
+
+        function renderSpendingCategories(categories) {
+            const container = document.getElementById('spendingCategories');
+            
+            // Default icons for categories
+            const defaultIcons = {
+                'groceries': '🛒',
+                'dining': '🍽️',
+                'travel': '✈️',
+                'gas': '⛽',
+                'online-shopping': '📦',
+                'general': '💳',
+                'entertainment': '🎬',
+                'transportation': '🚗',
+                'utilities': '⚡',
+                'drugstores': '💊',
+                'streaming': '📺',
+                'home_improvement': '🔨',
+                'office_supplies': '📄',
+                'telecommunications': '📱',
+                'shopping': '🛍️',
+                'amazon': '📦',
+                'other': '💰'
+            };
+            
+            const html = categories.map(category => {
+                const displayName = category.display_name || category.name;
+                const description = category.description || '';
+                const slug = category.slug;
+                
+                // Handle icon - prefer emoji, fallback to Font Awesome or default
+                let iconHtml = '';
+                if (category.icon && category.icon.includes('fa-')) {
+                    // Font Awesome icon
+                    iconHtml = `<i class="${category.icon}" style="font-size: 18px; margin-right: 8px; width: 20px; text-align: center;"></i>`;
+                } else if (category.icon && !category.icon.includes('fa-')) {
+                    // Emoji or other text icon
+                    iconHtml = `<span style="font-size: 20px; margin-right: 8px;">${category.icon}</span>`;
+                } else {
+                    // Default emoji based on slug
+                    const defaultIcon = defaultIcons[slug] || '💳';
+                    iconHtml = `<span style="font-size: 20px; margin-right: 8px;">${defaultIcon}</span>`;
+                }
+                
+                // Create a safe HTML ID by replacing hyphens with underscores
+                const htmlId = slug.replace(/-/g, '_');
+                
+                return `
+                    <div class="form-group">
+                        <label for="${htmlId}">
+                            ${iconHtml}
+                            Monthly ${displayName} Spending ($)
+                            ${description ? `<div style="font-size: 12px; color: #6b7280; font-weight: normal; margin-top: 4px;">${description}</div>` : ''}
+                        </label>
+                        <input type="number" id="${htmlId}" data-category-slug="${slug}" placeholder="0" min="0" step="10" class="spending-input">
+                    </div>
+                `;
+            }).join('');
+            
+            container.innerHTML = html;
+        }
+
+        function setupTotalCalculation() {
+            // Update total whenever any spending input changes
+            document.addEventListener('input', function(e) {
+                if (e.target.classList.contains('spending-input')) {
+                    updateTotal();
+                }
+            });
+            
+            // Initial calculation
+            updateTotal();
+        }
+
+        function updateTotal() {
+            const spendingInputs = document.querySelectorAll('.spending-input');
+            let total = 0;
+            
+            spendingInputs.forEach(input => {
+                const value = parseFloat(input.value) || 0;
+                total += value;
+            });
+            
+            document.getElementById('totalSpending').textContent = total.toLocaleString();
         }
 
         async function loadSavedData() {
@@ -125,11 +202,16 @@
                 const savedSpending = await UserDataManager.getSpending();
                 Object.keys(savedSpending).forEach(categorySlug => {
                     const amount = savedSpending[categorySlug];
-                    const input = document.getElementById(categorySlug);
+                    // Convert slug to HTML ID (replace hyphens with underscores)
+                    const htmlId = categorySlug.replace(/-/g, '_');
+                    const input = document.getElementById(htmlId);
                     if (input && amount) {
                         input.value = amount;
                     }
                 });
+                
+                // Update total after loading saved data
+                updateTotal();
                 
                 // Load preferences
                 const savedPreferences = await UserDataManager.getPreferences();
@@ -158,10 +240,12 @@
             try {
                 // Save spending data
                 const spendingData = {};
-                Object.keys(spendingCategories).forEach(slug => {
-                    const input = document.getElementById(slug);
-                    if (input && input.value) {
-                        spendingData[slug] = parseFloat(input.value) || 0;
+                const spendingInputs = document.querySelectorAll('.spending-input');
+                spendingInputs.forEach(input => {
+                    const categorySlug = input.dataset.categorySlug;
+                    const value = input.value;
+                    if (value && categorySlug) {
+                        spendingData[categorySlug] = parseFloat(value) || 0;
                     }
                 });
                 
@@ -216,20 +300,12 @@
                 // Build spending amounts object
                 const spendingAmounts = {};
                 
-                // Create a mapping from HTML element IDs to category IDs
-                const htmlIdToCategoryId = {
-                    'groceries': spendingCategories['groceries'],
-                    'dining': spendingCategories['dining'], 
-                    'travel': spendingCategories['travel'],
-                    'gas': spendingCategories['gas'],
-                    'online_shopping': spendingCategories['online-shopping'], // Note: HTML uses underscore, DB uses hyphen
-                    'general': spendingCategories['general']
-                };
-                
-                Object.keys(htmlIdToCategoryId).forEach(htmlId => {
-                    const element = document.getElementById(htmlId);
-                    const amount = element?.value;
-                    const categoryId = htmlIdToCategoryId[htmlId];
+                // Build spending amounts from dynamic inputs
+                const spendingInputs = document.querySelectorAll('.spending-input');
+                spendingInputs.forEach(input => {
+                    const categorySlug = input.dataset.categorySlug;
+                    const amount = input.value;
+                    const categoryId = spendingCategories[categorySlug];
                     
                     if (amount && amount > 0 && categoryId) {
                         spendingAmounts[categoryId] = parseFloat(amount);
@@ -396,10 +472,12 @@
             // Save data synchronously (limited time available)
             try {
                 const spendingData = {};
-                Object.keys(spendingCategories).forEach(slug => {
-                    const input = document.getElementById(slug);
-                    if (input && input.value) {
-                        spendingData[slug] = parseFloat(input.value) || 0;
+                const spendingInputs = document.querySelectorAll('.spending-input');
+                spendingInputs.forEach(input => {
+                    const categorySlug = input.dataset.categorySlug;
+                    const value = input.value;
+                    if (value && categorySlug) {
+                        spendingData[categorySlug] = parseFloat(value) || 0;
                     }
                 });
                 
@@ -435,12 +513,16 @@
         }
         
         function setupAutoSave() {
-            // Add listeners to spending inputs
-            Object.keys(spendingCategories).forEach(slug => {
-                const input = document.getElementById(slug);
-                if (input) {
-                    input.addEventListener('input', debouncedSave);
-                    input.addEventListener('change', debouncedSave);
+            // Add listeners to all spending inputs (dynamic)
+            document.addEventListener('input', function(e) {
+                if (e.target.classList.contains('spending-input')) {
+                    debouncedSave();
+                }
+            });
+            
+            document.addEventListener('change', function(e) {
+                if (e.target.classList.contains('spending-input')) {
+                    debouncedSave();
                 }
             });
             
