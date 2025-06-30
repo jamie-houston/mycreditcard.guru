@@ -93,11 +93,18 @@
             try {
                 // Load spending categories
                 const categoriesResponse = await fetch(`${API_BASE}/cards/spending-categories/`);
-                const categories = await categoriesResponse.json();
-                categories.forEach(cat => {
-                    spendingCategories[cat.slug] = cat.id;
-                });
-                console.log('📊 Spending categories loaded:', spendingCategories);
+                const categoriesData = await categoriesResponse.json();
+                
+                // Handle both paginated and non-paginated responses
+                const categories = categoriesData.results || categoriesData;
+                
+                if (Array.isArray(categories)) {
+                    categories.forEach(cat => {
+                        spendingCategories[cat.slug] = cat.id;
+                    });
+                } else {
+                    console.error('Categories response is not an array:', typeof categories);
+                }
                 
                 // Load saved spending and preferences
                 await loadSavedData();
@@ -208,10 +215,24 @@
             try {
                 // Build spending amounts object
                 const spendingAmounts = {};
-                Object.keys(spendingCategories).forEach(slug => {
-                    const amount = document.getElementById(slug)?.value;
-                    if (amount && amount > 0) {
-                        spendingAmounts[spendingCategories[slug]] = parseFloat(amount);
+                
+                // Create a mapping from HTML element IDs to category IDs
+                const htmlIdToCategoryId = {
+                    'groceries': spendingCategories['groceries'],
+                    'dining': spendingCategories['dining'], 
+                    'travel': spendingCategories['travel'],
+                    'gas': spendingCategories['gas'],
+                    'online_shopping': spendingCategories['online-shopping'], // Note: HTML uses underscore, DB uses hyphen
+                    'general': spendingCategories['general']
+                };
+                
+                Object.keys(htmlIdToCategoryId).forEach(htmlId => {
+                    const element = document.getElementById(htmlId);
+                    const amount = element?.value;
+                    const categoryId = htmlIdToCategoryId[htmlId];
+                    
+                    if (amount && amount > 0 && categoryId) {
+                        spendingAmounts[categoryId] = parseFloat(amount);
                     }
                 });
 
@@ -259,8 +280,6 @@
                     max_recommendations: parseInt(document.getElementById('maxRecs').value)
                 };
 
-                console.log('🚀 Request data:', requestData);
-                
                 const response = await fetch(`${API_BASE}/roadmaps/quick-recommendation/`, {
                     method: 'POST',
                     headers: {
@@ -271,7 +290,6 @@
                 });
 
                 const data = await response.json();
-                console.log('📨 Response data:', data);
 
                 if (data.error) {
                     resultsDiv.innerHTML = `<div class="error">Error: ${data.error}</div>`;
@@ -281,6 +299,7 @@
                 // Display recommendations
                 const recommendations = data.recommendations || [];
                 const totalValue = data.total_estimated_rewards || 0;
+                
 
                 let html = `
                     <div class="results">
@@ -305,14 +324,8 @@
 
                         // Generate rewards breakdown HTML
                         let breakdownHtml = '';
-                        console.log(`💰 Breakdown for ${rec.card.name}:`, rec.rewards_breakdown);
                         
-                        // More robust check for breakdown data
-                        const hasBreakdown = rec.rewards_breakdown && 
-                                           Array.isArray(rec.rewards_breakdown) && 
-                                           rec.rewards_breakdown.length > 0;
-                        
-                        if (hasBreakdown) {
+                        if (rec.rewards_breakdown && Array.isArray(rec.rewards_breakdown) && rec.rewards_breakdown.length > 0) {
                             breakdownHtml = '<div style="margin-top: 15px; background: #f8f9fa; padding: 10px; border-radius: 6px;"><strong>💰 Rewards Breakdown:</strong><ul style="margin: 8px 0; padding-left: 20px;">';
                             rec.rewards_breakdown.forEach(breakdown => {
                                 const categoryName = breakdown.category_name || 'Unknown Category';
@@ -320,11 +333,6 @@
                                 breakdownHtml += `<li style="margin: 4px 0; font-family: monospace; font-size: 14px; color: #2563eb;"><strong>${categoryName}:</strong> ${calculation}</li>`;
                             });
                             breakdownHtml += '</ul></div>';
-                            console.log(`✅ Generated breakdown HTML for ${rec.card.name} with ${rec.rewards_breakdown.length} items`);
-                        } else {
-                            // Add debug info even when no breakdown
-                            breakdownHtml = `<div style="margin-top: 15px; padding: 10px; background: #fee2e2; border-radius: 6px; color: #dc2626;"><strong>⚠️ Debug:</strong> No breakdown data (length: ${rec.rewards_breakdown?.length || 'undefined'}, type: ${typeof rec.rewards_breakdown})</div>`;
-                            console.log(`❌ No breakdown for ${rec.card.name} - data:`, rec.rewards_breakdown);
                         }
 
                         html += `
