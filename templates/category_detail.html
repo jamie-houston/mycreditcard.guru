@@ -203,7 +203,7 @@ function displayCards(cards) {
                 ${cards.map(card => {
                     const hasCard = userCards.has(card.id);
                     return `
-                        <div class="card-item">
+                        <div class="card-item modal-card-clickable" onclick="openCardModal(${card.id})">
                             <div style="display: flex; justify-content: space-between; align-items: start;">
                                 <div style="flex: 1;">
                                     <div class="card-title">${card.issuer} ${card.name}</div>
@@ -224,7 +224,7 @@ function displayCards(cards) {
                                         ${card.reward_rate}x
                                     </div>
                                     <button 
-                                        onclick="toggleCardOwnership(${card.id}, this)" 
+                                        onclick="event.stopPropagation(); toggleCardOwnership(${card.id}, this)" 
                                         class="${hasCard ? 'danger' : 'success'}"
                                         style="font-size: 12px; padding: 6px 12px;"
                                     >

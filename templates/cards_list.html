@@ -179,7 +179,7 @@ function displayCards(cards) {
         const rewardMultiplier = card.metadata?.reward_value_multiplier || 0.01;
         
         return `
-            <div class="card-item">
+            <div class="card-item modal-card-clickable" onclick="openCardModal(${card.id})">
                 <div style="display: flex; justify-content: space-between; align-items: start;">
                     <div style="flex: 1;">
                         <div class="card-title">${card.issuer.name} ${card.name}</div>
@@ -212,7 +212,7 @@ function displayCards(cards) {
                     </div>
                     <div class="card-actions">
                         <button 
-                            onclick="toggleCardOwnership(${card.id}, this)" 
+                            onclick="event.stopPropagation(); toggleCardOwnership(${card.id}, this)" 
                             class="${hasCard ? 'danger' : 'success'}"
                         >
                             ${hasCard ? '❌ Remove from my cards' : '✅ I have this card'}

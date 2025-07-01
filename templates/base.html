@@ -245,6 +245,159 @@
             padding: 6px 12px;
             font-size: 14px;
         }
+        
+        /* Card Detail Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            overflow-y: auto;
+        }
+        .modal-content {
+            background-color: white;
+            margin: 2% auto;
+            padding: 0;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+            box-shadow: 0 10px 50px rgba(0,0,0,0.3);
+        }
+        .modal-header {
+            padding: 25px 30px 20px;
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            color: white;
+            border-radius: 12px 12px 0 0;
+            position: relative;
+        }
+        .modal-close {
+            position: absolute;
+            right: 20px;
+            top: 20px;
+            color: white;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            background: none;
+            border: none;
+            padding: 5px;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+        .modal-close:hover {
+            background: rgba(255,255,255,0.2);
+        }
+        .modal-title {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 600;
+        }
+        .modal-subtitle {
+            margin: 5px 0 0 0;
+            font-size: 16px;
+            opacity: 0.9;
+        }
+        .modal-body {
+            padding: 30px;
+        }
+        .modal-section {
+            margin-bottom: 25px;
+        }
+        .modal-section h3 {
+            margin: 0 0 15px 0;
+            color: #1f2937;
+            font-size: 18px;
+            font-weight: 600;
+            border-bottom: 2px solid #e5e7eb;
+            padding-bottom: 8px;
+        }
+        .modal-info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .modal-info-item {
+            background: #f9fafb;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+        }
+        .modal-info-label {
+            font-weight: 600;
+            color: #6b7280;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+        .modal-info-value {
+            color: #1f2937;
+            font-size: 16px;
+            font-weight: 500;
+        }
+        .modal-rewards-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .modal-rewards-item {
+            background: #f0fdf4;
+            border: 1px solid #dcfce7;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .modal-rewards-category {
+            font-weight: 600;
+            color: #166534;
+        }
+        .modal-rewards-rate {
+            background: #10b981;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        .modal-rewards-limit {
+            font-size: 14px;
+            color: #6b7280;
+            margin-top: 5px;
+        }
+        .modal-card-clickable {
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .modal-card-clickable:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        @media (max-width: 768px) {
+            .modal-content {
+                width: 95%;
+                margin: 5% auto;
+                max-height: 85vh;
+            }
+            .modal-info-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            .modal-header {
+                padding: 20px;
+            }
+            .modal-body {
+                padding: 20px;
+            }
+        }
     </style>
     {% block extra_css %}{% endblock %}
     
@@ -258,7 +411,7 @@
         <div class="nav-container">
             <a href="/" class="nav-brand">🏦 Credit Card Guru</a>
             <ul class="nav-menu">
-                <li class="nav-item"><a href="/" {% if request.resolver_match.url_name == 'index' %}class="active"{% endif %}>Profile</a></li>
+                <li class="nav-item"><a href="/" {% if request.resolver_match.url_name == 'index' %}class="active"{% endif %}>Roadmap</a></li>
                 <li class="nav-item"><a href="/cards/" {% if request.resolver_match.url_name == 'cards_list' %}class="active"{% endif %}>Credit Cards</a></li>
                 <li class="nav-item"><a href="/categories/" {% if request.resolver_match.url_name == 'categories_list' %}class="active"{% endif %}>Categories</a></li>
                 <li class="nav-item"><a href="/issuers/" {% if request.resolver_match.url_name == 'issuers_list' %}class="active"{% endif %}>Issuers</a></li>
@@ -276,6 +429,71 @@
 
     <div class="container">
         {% block content %}{% endblock %}
+    </div>
+
+    <!-- Card Detail Modal -->
+    <div id="cardModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button class="modal-close" onclick="closeCardModal()">&times;</button>
+                <h2 class="modal-title" id="modalCardName">Card Name</h2>
+                <p class="modal-subtitle" id="modalCardIssuer">Card Issuer</p>
+            </div>
+            <div class="modal-body">
+                <div class="modal-section">
+                    <h3>💳 Card Details</h3>
+                    <div class="modal-info-grid">
+                        <div class="modal-info-item">
+                            <div class="modal-info-label">Annual Fee</div>
+                            <div class="modal-info-value" id="modalAnnualFee">$0</div>
+                        </div>
+                        <div class="modal-info-item">
+                            <div class="modal-info-label">Reward Type</div>
+                            <div class="modal-info-value" id="modalRewardType">Points</div>
+                        </div>
+                        <div class="modal-info-item">
+                            <div class="modal-info-label">Point Value</div>
+                            <div class="modal-info-value" id="modalPointValue">1.0¢ each</div>
+                        </div>
+                        <div class="modal-info-item">
+                            <div class="modal-info-label">Network</div>
+                            <div class="modal-info-value" id="modalNetwork">Visa</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="modal-section" id="modalSignupBonusSection">
+                    <h3>🎁 Signup Bonus</h3>
+                    <div class="modal-info-item">
+                        <div class="modal-info-label">Bonus Amount</div>
+                        <div class="modal-info-value" id="modalSignupBonus">None</div>
+                    </div>
+                    <div class="modal-info-item" id="modalSignupRequirement" style="display: none;">
+                        <div class="modal-info-label">Spending Requirement</div>
+                        <div class="modal-info-value" id="modalSignupSpending">$0 in 3 months</div>
+                    </div>
+                </div>
+                
+                <div class="modal-section" id="modalRewardsSection">
+                    <h3>🏆 Reward Categories</h3>
+                    <ul class="modal-rewards-list" id="modalRewardsList">
+                        <!-- Rewards will be populated here -->
+                    </ul>
+                </div>
+                
+                <div class="modal-section">
+                    <h3>⚙️ Actions</h3>
+                    <div style="display: flex; gap: 15px; justify-content: center;">
+                        <button id="modalOwnershipButton" onclick="toggleCardOwnershipModal()" class="success">
+                            ✅ I have this card
+                        </button>
+                        <button onclick="closeCardModal()" class="secondary">
+                            Close
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -530,6 +748,205 @@
                 button.className = 'success';
             }
         }
+
+        // Card Detail Modal functionality
+        let currentModalCard = null;
+        
+        async function openCardModal(cardId) {
+            try {
+                // Show loading modal first
+                const modal = document.getElementById('cardModal');
+                document.getElementById('modalCardName').textContent = 'Loading...';
+                document.getElementById('modalCardIssuer').textContent = '';
+                modal.style.display = 'block';
+                
+                // Fetch card details
+                const response = await fetch(`${API_BASE}/cards/cards/${cardId}/`);
+                if (!response.ok) {
+                    throw new Error('Failed to fetch card details');
+                }
+                const card = await response.json();
+                currentModalCard = card;
+                
+                // Populate modal with card data
+                populateCardModal(card);
+                
+            } catch (error) {
+                console.error('Error loading card details:', error);
+                closeCardModal();
+                alert('Error loading card details. Please try again.');
+            }
+        }
+        
+        function populateCardModal(card) {
+            // Basic card info
+            document.getElementById('modalCardName').textContent = card.name;
+            document.getElementById('modalCardIssuer').textContent = card.issuer?.name || 'Unknown Issuer';
+            document.getElementById('modalAnnualFee').textContent = `$${card.annual_fee || 0}`;
+            document.getElementById('modalRewardType').textContent = card.primary_reward_type?.name || 'Unknown';
+            
+            // Point value
+            const rewardMultiplier = card.metadata?.reward_value_multiplier || 0.01;
+            document.getElementById('modalPointValue').textContent = `${(rewardMultiplier * 100).toFixed(1)}¢ each`;
+            
+            // Network (if available in metadata)
+            const network = card.metadata?.network || 'Not specified';
+            document.getElementById('modalNetwork').textContent = network;
+            
+            // Signup bonus
+            const signupBonus = card.signup_bonus_amount;
+            const signupBonusSection = document.getElementById('modalSignupBonusSection');
+            const signupRequirement = document.getElementById('modalSignupRequirement');
+            
+            if (signupBonus && signupBonus > 0) {
+                const bonusType = card.signup_bonus_type?.name || 'points';
+                document.getElementById('modalSignupBonus').textContent = 
+                    `${signupBonus.toLocaleString()} ${bonusType}`;
+                    
+                // Show spending requirement if available
+                const spendingReq = card.metadata?.signup_spending_requirement;
+                const timeLimit = card.metadata?.signup_time_limit_months || 3;
+                if (spendingReq) {
+                    document.getElementById('modalSignupSpending').textContent = 
+                        `$${spendingReq.toLocaleString()} in ${timeLimit} months`;
+                    signupRequirement.style.display = 'block';
+                } else {
+                    signupRequirement.style.display = 'none';
+                }
+                signupBonusSection.style.display = 'block';
+            } else {
+                document.getElementById('modalSignupBonus').textContent = 'None';
+                signupRequirement.style.display = 'none';
+                signupBonusSection.style.display = 'block';
+            }
+            
+            // Reward categories
+            populateRewardCategories(card.reward_categories || []);
+            
+            // Update ownership button
+            updateModalOwnershipButton(card.id);
+        }
+        
+        function populateRewardCategories(rewardCategories) {
+            const rewardsList = document.getElementById('modalRewardsList');
+            const rewardsSection = document.getElementById('modalRewardsSection');
+            
+            if (!rewardCategories || rewardCategories.length === 0) {
+                rewardsList.innerHTML = '<li style="text-align: center; color: #6b7280; padding: 20px;">No specific reward categories</li>';
+                rewardsSection.style.display = 'block';
+                return;
+            }
+            
+            const activeRewards = rewardCategories.filter(cat => cat.is_active);
+            
+            if (activeRewards.length === 0) {
+                rewardsList.innerHTML = '<li style="text-align: center; color: #6b7280; padding: 20px;">No active reward categories</li>';
+                rewardsSection.style.display = 'block';
+                return;
+            }
+            
+            const rewardsHtml = activeRewards.map(reward => {
+                const categoryName = reward.category?.display_name || reward.category?.name || 'Unknown Category';
+                const rate = parseFloat(reward.reward_rate || 0);
+                const maxSpend = reward.max_annual_spend;
+                
+                let limitHtml = '';
+                if (maxSpend) {
+                    limitHtml = `<div class="modal-rewards-limit">Up to $${parseInt(maxSpend).toLocaleString()}/year</div>`;
+                }
+                
+                return `
+                    <li class="modal-rewards-item">
+                        <div>
+                            <div class="modal-rewards-category">${categoryName}</div>
+                            ${limitHtml}
+                        </div>
+                        <div class="modal-rewards-rate">${rate}x</div>
+                    </li>
+                `;
+            }).join('');
+            
+            rewardsList.innerHTML = rewardsHtml;
+            rewardsSection.style.display = 'block';
+        }
+        
+        async function updateModalOwnershipButton(cardId) {
+            try {
+                const userCards = await UserDataManager.getCards();
+                const hasCard = userCards.includes(cardId);
+                const button = document.getElementById('modalOwnershipButton');
+                
+                if (hasCard) {
+                    button.textContent = '❌ Remove from my cards';
+                    button.className = 'danger';
+                } else {
+                    button.textContent = '✅ I have this card';
+                    button.className = 'success';
+                }
+            } catch (error) {
+                console.error('Error checking card ownership:', error);
+            }
+        }
+        
+        async function toggleCardOwnershipModal() {
+            if (!currentModalCard) return;
+            
+            const button = document.getElementById('modalOwnershipButton');
+            const cardId = currentModalCard.id;
+            
+            try {
+                const userCards = await UserDataManager.getCards();
+                const hasCard = userCards.includes(cardId);
+                
+                button.disabled = true;
+                button.textContent = '...';
+                
+                if (hasCard) {
+                    // Remove card
+                    const index = userCards.indexOf(cardId);
+                    if (index > -1) userCards.splice(index, 1);
+                } else {
+                    // Add card
+                    userCards.push(cardId);
+                }
+                
+                await UserDataManager.saveCards(userCards);
+                await updateModalOwnershipButton(cardId);
+                
+                // If there's a global filterCards or similar function, refresh the display
+                if (typeof filterCards === 'function') {
+                    filterCards();
+                } else if (typeof displayCards === 'function' && typeof allCards !== 'undefined') {
+                    displayCards(allCards);
+                }
+                
+            } catch (error) {
+                console.error('Error updating card ownership:', error);
+                alert('Error updating card ownership');
+            } finally {
+                button.disabled = false;
+            }
+        }
+        
+        function closeCardModal() {
+            document.getElementById('cardModal').style.display = 'none';
+            currentModalCard = null;
+        }
+        
+        // Close modal when clicking outside of it
+        window.onclick = function(event) {
+            const modal = document.getElementById('cardModal');
+            if (event.target === modal) {
+                closeCardModal();
+            }
+        }
+        
+        // Close modal with Escape key
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeCardModal();
+            }
+        });
 
         // Initialize user state when page loads
         document.addEventListener('DOMContentLoaded', function() {

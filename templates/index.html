@@ -433,7 +433,7 @@
                         }
 
                         html += `
-                            <div class="recommendation ${actionClass}">
+                            <div class="recommendation ${actionClass} modal-card-clickable" onclick="openCardModal(${rec.card.id})">
                                 <div style="display: flex; justify-content: between; align-items: start;">
                                     <div>
                                         <h3>${actionEmoji} ${rec.action.toUpperCase()}: ${rec.card.issuer} ${rec.card.name}</h3>
@@ -450,7 +450,7 @@
                                             #${rec.priority}
                                         </div>
                                         ${rec.action === 'apply' ? 
-                                            `<button onclick="toggleCardOwnership(${rec.card.id}, this)" style="padding: 6px 12px; font-size: 12px; background: #10b981;">
+                                            `<button onclick="event.stopPropagation(); toggleCardOwnership(${rec.card.id}, this)" style="padding: 6px 12px; font-size: 12px; background: #10b981;">
                                                 ✅ I have this card
                                             </button>` : ''
                                         }
