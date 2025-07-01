@@ -15,9 +15,12 @@
 <script>
 async function loadCategories() {
     try {
-        const response = await fetch(`${API_BASE}/cards/spending-categories/`);
-        const data = await response.json();
-        const categories = data.results || data;
+        const response = await fetch(`${API_BASE}/cards/categories-with-rewards/`);
+        const categories = await response.json();
+        
+        if (categories.error) {
+            throw new Error(categories.error);
+        }
         
         displayCategories(categories);
         
@@ -36,24 +39,72 @@ function displayCategories(categories) {
         return;
     }
     
-    // Sort categories by sort_order
-    categories.sort((a, b) => (a.sort_order || 100) - (b.sort_order || 100));
-    
-    const html = categories.map(category => `
-        <div class="card-item">
-            <div style="display: flex; align-items: center; margin-bottom: 10px;">
-                ${category.icon ? `<i class="${category.icon}" style="font-size: 24px; margin-right: 15px; color: #2563eb;"></i>` : ''}
-                <div>
-                    <div class="card-title">${category.display_name || category.name}</div>
-                    <div style="color: #6b7280; font-size: 12px; font-weight: normal;">Sort: ${category.sort_order || 100}</div>
+    const html = categories.map(category => {
+        // Handle icon display
+        let iconHtml = '';
+        if (category.icon && category.icon.includes('fa-')) {
+            iconHtml = `<i class="${category.icon}" style="font-size: 32px; margin-right: 15px; color: #2563eb;"></i>`;
+        } else if (category.icon) {
+            iconHtml = `<span style="font-size: 32px; margin-right: 15px;">${category.icon}</span>`;
+        } else {
+            // Default emoji icons
+            const defaultIcons = {
+                'groceries': '🛒',
+                'dining': '🍽️',
+                'travel': '✈️',
+                'gas': '⛽',
+                'online-shopping': '📦',
+                'general': '💳',
+                'entertainment': '🎬',
+                'transportation': '🚗',
+                'utilities': '⚡',
+                'drugstores': '💊',
+                'streaming': '📺',
+                'home_improvement': '🔨',
+                'office_supplies': '📄',
+                'telecommunications': '📱',
+                'shopping': '🛍️',
+                'amazon': '📦',
+                'other': '💰'
+            };
+            const defaultIcon = defaultIcons[category.slug] || '💳';
+            iconHtml = `<span style="font-size: 32px; margin-right: 15px;">${defaultIcon}</span>`;
+        }
+        
+        return `
+            <div class="card-item">
+                <div style="display: flex; justify-content: space-between; align-items: start;">
+                    <div style="display: flex; align-items: center; flex: 1;">
+                        ${iconHtml}
+                        <div style="flex: 1;">
+                            <div class="card-title">${category.display_name}</div>
+                            <div style="color: #6b7280; margin: 5px 0; line-height: 1.4;">
+                                ${category.description || `Track spending on ${category.name.toLowerCase()}`}
+                            </div>
+                            <div style="margin-top: 10px;">
+                                <div style="display: inline-block; background: #10b981; color: white; padding: 4px 12px; border-radius: 16px; font-size: 14px; font-weight: bold; margin-right: 10px;">
+                                    Top Rate: ${category.top_reward_rate}x
+                                </div>
+                                <span style="color: #6b7280; font-size: 14px;">
+                                    ${category.cards_with_rewards_count} cards with rewards > 1%
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="text-align: center; padding-left: 20px;">
+                        ${category.cards_with_rewards_count > 0 ? 
+                            `<a href="/categories/${category.id}/" style="display: inline-block; background: #3b82f6; color: white; padding: 10px 20px; border-radius: 6px; text-decoration: none; font-weight: 500;">
+                                View ${category.cards_with_rewards_count} Cards
+                            </a>` :
+                            `<div style="color: #9ca3af; font-size: 14px; text-align: center;">
+                                No rewards<br>cards available
+                            </div>`
+                        }
+                    </div>
                 </div>
             </div>
-            <div class="card-details">
-                <p><strong>Description:</strong> ${category.description || `Track spending on ${category.name.toLowerCase()}`}</p>
-                <p><strong>Category Slug:</strong> ${category.slug}</p>
-            </div>
-        </div>
-    `).join('');
+        `;
+    }).join('');
     
     container.innerHTML = html;
 }

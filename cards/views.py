@@ -166,6 +166,105 @@ def card_search_view(request):
 
 
 @api_view(['GET'])
+def category_detail_view(request, category_id):
+    """Get detailed information about a spending category including top reward rates and cards"""
+    try:
+        from cards.models import SpendingCategory, RewardCategory
+        from django.db.models import Max
+        
+        # Get the category
+        category = get_object_or_404(SpendingCategory, id=category_id)
+        
+        # Get all reward categories for this spending category with reward rate > 1%
+        reward_categories = RewardCategory.objects.filter(
+            category=category,
+            is_active=True,
+            reward_rate__gt=1.0
+        ).select_related('card', 'card__issuer').order_by('-reward_rate')
+        
+        # Get top reward rate for this category
+        top_rate = reward_categories.aggregate(max_rate=Max('reward_rate'))['max_rate'] or 0
+        
+        # Build response
+        category_data = {
+            'id': category.id,
+            'name': category.name,
+            'display_name': category.display_name,
+            'description': category.description,
+            'icon': category.icon,
+            'slug': category.slug,
+            'sort_order': category.sort_order,
+            'top_reward_rate': float(top_rate),
+            'cards_with_rewards': [
+                {
+                    'id': rc.card.id,
+                    'name': rc.card.name,
+                    'issuer': rc.card.issuer.name,
+                    'reward_rate': float(rc.reward_rate),
+                    'annual_fee': float(rc.card.annual_fee),
+                    'max_annual_spend': float(rc.max_annual_spend) if rc.max_annual_spend else None,
+                    'signup_bonus_amount': rc.card.signup_bonus_amount
+                }
+                for rc in reward_categories
+            ]
+        }
+        
+        return Response(category_data)
+        
+    except Exception as e:
+        return Response(
+            {'error': f'Failed to get category details: {str(e)}'}, 
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+
+@api_view(['GET'])
+def categories_with_rewards_view(request):
+    """Get all categories with their top reward rates"""
+    try:
+        from cards.models import SpendingCategory, RewardCategory
+        from django.db.models import Max
+        
+        # Get all categories with their top reward rates
+        categories = SpendingCategory.objects.all().order_by('sort_order', 'name')
+        
+        categories_data = []
+        for category in categories:
+            # Get top reward rate for this category
+            top_rate = RewardCategory.objects.filter(
+                category=category,
+                is_active=True
+            ).aggregate(max_rate=Max('reward_rate'))['max_rate'] or 0
+            
+            # Count cards with rewards > 1% for this category
+            cards_count = RewardCategory.objects.filter(
+                category=category,
+                is_active=True,
+                reward_rate__gt=1.0
+            ).count()
+            
+            categories_data.append({
+                'id': category.id,
+                'name': category.name,
+                'display_name': category.display_name or category.name,
+                'description': category.description,
+                'icon': category.icon,
+                'slug': category.slug,
+                'sort_order': category.sort_order,
+                'top_reward_rate': float(top_rate),
+                'cards_with_rewards_count': cards_count
+            })
+        
+        return Response(categories_data)
+        
+    except Exception as e:
+        return Response(
+            {'error': f'Failed to get categories: {str(e)}'}, 
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+
+@api_view(['GET'])
 def card_recommendations_preview(request):
     """Preview card recommendations without saving"""
     from roadmaps.serializers import GenerateRoadmapSerializer
@@ -212,6 +311,10 @@ def cards_list_view(request):
 def categories_list_view(request):
     """Spending categories listing page"""
     return render(request, 'categories_list.html')
+
+def category_detail_page_view(request, category_id):
+    """Category detail page"""
+    return render(request, 'category_detail.html', {'category_id': category_id})
 
 def issuers_list_view(request):
     """Issuers listing page"""

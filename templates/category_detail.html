@@ -1,0 +1,139 @@
+{% extends 'base.html' %}
+
+{% block title %}Category Details - Credit Card Guru{% endblock %}
+
+{% block content %}
+<div id="categoryContainer">
+    <div class="loading">🔄 Loading category details...</div>
+</div>
+
+<div id="cardsContainer">
+    <!-- Cards will be loaded here -->
+</div>
+
+<script>
+async function loadCategoryDetail() {
+    try {
+        // Get category ID from URL - assuming it's passed via JavaScript or URL parameter
+        const urlParams = new URLSearchParams(window.location.search);
+        const categoryId = urlParams.get('id') || window.location.pathname.split('/').pop();
+        
+        if (!categoryId || categoryId === 'categories') {
+            document.getElementById('categoryContainer').innerHTML = 
+                '<div class="error">Category ID not found in URL</div>';
+            return;
+        }
+        
+        const response = await fetch(`${API_BASE}/cards/categories/${categoryId}/`);
+        const category = await response.json();
+        
+        if (category.error) {
+            document.getElementById('categoryContainer').innerHTML = 
+                `<div class="error">Error: ${category.error}</div>`;
+            return;
+        }
+        
+        displayCategoryDetail(category);
+        
+    } catch (error) {
+        console.error('Error loading category details:', error);
+        document.getElementById('categoryContainer').innerHTML = 
+            '<div class="error">Error loading category details. Please try again.</div>';
+    }
+}
+
+function displayCategoryDetail(category) {
+    const container = document.getElementById('categoryContainer');
+    
+    // Handle icon display
+    let iconHtml = '';
+    if (category.icon && category.icon.includes('fa-')) {
+        iconHtml = `<i class="${category.icon}" style="font-size: 48px; margin-right: 20px; color: #2563eb;"></i>`;
+    } else if (category.icon) {
+        iconHtml = `<span style="font-size: 48px; margin-right: 20px;">${category.icon}</span>`;
+    } else {
+        iconHtml = `<span style="font-size: 48px; margin-right: 20px;">💳</span>`;
+    }
+    
+    const html = `
+        <div style="margin-bottom: 30px;">
+            <div style="display: flex; align-items: center; margin-bottom: 20px;">
+                ${iconHtml}
+                <div>
+                    <h1 style="margin: 0; color: #1f2937;">${category.display_name || category.name}</h1>
+                    <p style="margin: 5px 0 0 0; color: #6b7280; font-size: 18px;">${category.description || `Track spending on ${category.name.toLowerCase()}`}</p>
+                </div>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px;">
+                <div style="background: #f3f4f6; padding: 20px; border-radius: 8px; text-align: center;">
+                    <div style="font-size: 32px; font-weight: bold; color: #10b981;">${category.top_reward_rate}x</div>
+                    <div style="color: #6b7280; margin-top: 5px;">Top Reward Rate</div>
+                </div>
+                <div style="background: #f3f4f6; padding: 20px; border-radius: 8px; text-align: center;">
+                    <div style="font-size: 32px; font-weight: bold; color: #3b82f6;">${category.cards_with_rewards.length}</div>
+                    <div style="color: #6b7280; margin-top: 5px;">Cards with Rewards > 1%</div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    container.innerHTML = html;
+    
+    // Display cards
+    displayCards(category.cards_with_rewards);
+}
+
+function displayCards(cards) {
+    const container = document.getElementById('cardsContainer');
+    
+    if (cards.length === 0) {
+        container.innerHTML = `
+            <div style="text-align: center; padding: 40px; background: #f9fafb; border-radius: 8px; margin-top: 20px;">
+                <h3 style="color: #6b7280; margin: 0;">No cards offer rewards > 1% for this category</h3>
+                <p style="color: #9ca3af; margin: 10px 0 0 0;">Check other categories or browse all cards.</p>
+            </div>
+        `;
+        return;
+    }
+    
+    const html = `
+        <div>
+            <h2 style="margin-bottom: 20px;">💳 Cards Earning Rewards for This Category</h2>
+            <div style="display: grid; gap: 20px;">
+                ${cards.map(card => `
+                    <div class="card-item">
+                        <div style="display: flex; justify-content: space-between; align-items: start;">
+                            <div style="flex: 1;">
+                                <div class="card-title">${card.issuer} ${card.name}</div>
+                                <div class="card-details">
+                                    <p><strong>Reward Rate:</strong> <span style="color: #10b981; font-weight: bold; font-size: 18px;">${card.reward_rate}x points/miles</span></p>
+                                    <p><strong>Annual Fee:</strong> $${card.annual_fee}</p>
+                                    ${card.max_annual_spend ? 
+                                        `<p><strong>Annual Spending Cap:</strong> $${card.max_annual_spend.toLocaleString()}</p>` : 
+                                        '<p><strong>Annual Spending Cap:</strong> None</p>'
+                                    }
+                                    ${card.signup_bonus_amount ? 
+                                        `<p><strong>Signup Bonus:</strong> ${card.signup_bonus_amount.toLocaleString()} points/miles</p>` : ''
+                                    }
+                                </div>
+                            </div>
+                            <div style="text-align: center; padding: 10px;">
+                                <div style="background: #10b981; color: white; padding: 8px 16px; border-radius: 20px; font-weight: bold; font-size: 16px;">
+                                    ${card.reward_rate}x
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+        </div>
+    `;
+    
+    container.innerHTML = html;
+}
+
+// Load category details when page loads
+loadCategoryDetail();
+</script>
+{% endblock %}

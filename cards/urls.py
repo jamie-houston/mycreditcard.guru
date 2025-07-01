@@ -8,6 +8,8 @@ urlpatterns = [
     path('issuers/', views.IssuerListView.as_view(), name='issuer-list'),
     path('reward-types/', views.RewardTypeListView.as_view(), name='reward-type-list'),
     path('spending-categories/', views.SpendingCategoryListView.as_view(), name='spending-category-list'),
+    path('categories-with-rewards/', views.categories_with_rewards_view, name='categories-with-rewards'),
+    path('categories/<int:category_id>/', views.category_detail_view, name='category-detail'),
     
     # Credit card endpoints
     path('cards/', views.CreditCardListView.as_view(), name='card-list'),
