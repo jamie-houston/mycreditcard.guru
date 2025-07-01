@@ -8,11 +8,43 @@
     View all spending categories tracked by the system
 </p>
 
+<!-- Filters Section -->
+<div class="section">
+    <h2>🔍 Filter Categories</h2>
+    <div class="grid">
+        <div class="form-group">
+            <label for="filterOwnership">Ownership</label>
+            <select id="filterOwnership" onchange="filterCategories()">
+                <option value="all" selected>All Categories</option>
+                <option value="owned">From My Cards</option>
+                <option value="not_owned">Not From My Cards</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="filterRewardRate">Minimum Reward Rate</label>
+            <select id="filterRewardRate" onchange="filterCategories()">
+                <option value="">Any Rate</option>
+                <option value="2">2x or higher</option>
+                <option value="3">3x or higher</option>
+                <option value="4">4x or higher</option>
+                <option value="5">5x or higher</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="searchCategories">Search Categories</label>
+            <input type="text" id="searchCategories" placeholder="Search by name..." oninput="filterCategories()">
+        </div>
+    </div>
+</div>
+
 <div id="categoriesContainer">
     <div class="loading">🔄 Loading spending categories...</div>
 </div>
 
 <script>
+let allCategories = [];
+let userCards = new Set();
+
 async function loadCategories() {
     try {
         const response = await fetch(`${API_BASE}/cards/categories-with-rewards/`);
@@ -22,13 +54,85 @@ async function loadCategories() {
             throw new Error(categories.error);
         }
         
-        displayCategories(categories);
+        allCategories = categories;
+        
+        // Load user's current cards (if any)
+        await loadUserCards();
+        
+        filterCategories();
         
     } catch (error) {
         console.error('Error loading categories:', error);
         document.getElementById('categoriesContainer').innerHTML = 
             '<div class="error">Error loading categories. Please try again.</div>';
     }
+}
+
+async function loadUserCards() {
+    try {
+        const cards = await UserDataManager.getCards();
+        userCards = new Set(cards);
+    } catch (error) {
+        console.error('Error loading user cards:', error);
+    }
+}
+
+async function filterCategories() {
+    const ownershipFilter = document.getElementById('filterOwnership').value;
+    const rewardRateFilter = document.getElementById('filterRewardRate').value;
+    const searchFilter = document.getElementById('searchCategories').value.toLowerCase();
+    
+    // For ownership filtering, we need to get cards that user owns and their categories
+    let userCategoryIds = new Set();
+    if (ownershipFilter !== 'all' && userCards.size > 0) {
+        try {
+            // Get cards data to find which categories they have
+            const cardsResponse = await fetch(`${API_BASE}/cards/cards/`);
+            const cardsData = await cardsResponse.json();
+            const cards = cardsData.results || cardsData;
+            
+            // Filter to user's cards and collect their category IDs
+            cards.filter(card => userCards.has(card.id))
+                 .forEach(card => {
+                     if (card.reward_categories) {
+                         card.reward_categories.forEach(rewardCat => {
+                             if (rewardCat.category && rewardCat.category.id) {
+                                 userCategoryIds.add(rewardCat.category.id);
+                             }
+                         });
+                     }
+                 });
+        } catch (error) {
+            console.error('Error loading cards for category filtering:', error);
+        }
+    }
+    
+    let filteredCategories = allCategories.filter(category => {
+        // Ownership filter
+        if (ownershipFilter === 'owned' && !userCategoryIds.has(category.id)) {
+            return false;
+        }
+        if (ownershipFilter === 'not_owned' && userCategoryIds.has(category.id)) {
+            return false;
+        }
+        
+        // Reward rate filter
+        if (rewardRateFilter) {
+            const minRate = parseFloat(rewardRateFilter);
+            if (category.top_reward_rate < minRate) {
+                return false;
+            }
+        }
+        
+        // Search filter
+        if (searchFilter && !category.display_name.toLowerCase().includes(searchFilter)) {
+            return false;
+        }
+        
+        return true;
+    });
+    
+    displayCategories(filteredCategories);
 }
 
 function displayCategories(categories) {

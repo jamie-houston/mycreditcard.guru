@@ -7,11 +7,53 @@
     <div class="loading">🔄 Loading category details...</div>
 </div>
 
+<!-- Filter Cards Section -->
+<div id="filterCardsSection" style="display: none;" class="section">
+    <h2>🔍 Filter Cards</h2>
+    <div class="grid">
+        <div class="form-group">
+            <label for="filterOwnership">Ownership</label>
+            <select id="filterOwnership" onchange="filterCards()">
+                <option value="all" selected>All Cards</option>
+                <option value="owned">Owned</option>
+                <option value="not_owned">Not Owned</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="filterFee">Annual Fee</label>
+            <select id="filterFee" onchange="filterCards()">
+                <option value="">Any Fee</option>
+                <option value="0">No Annual Fee</option>
+                <option value="1-95">$1 - $95</option>
+                <option value="96-250">$96 - $250</option>
+                <option value="251+">$251+</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="filterRewardRate">Minimum Reward Rate</label>
+            <select id="filterRewardRate" onchange="filterCards()">
+                <option value="">Any Rate</option>
+                <option value="2">2x or higher</option>
+                <option value="3">3x or higher</option>
+                <option value="4">4x or higher</option>
+                <option value="5">5x or higher</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="searchCards">Search Cards</label>
+            <input type="text" id="searchCards" placeholder="Search by name..." oninput="filterCards()">
+        </div>
+    </div>
+</div>
+
 <div id="cardsContainer">
     <!-- Cards will be loaded here -->
 </div>
 
 <script>
+let allCategoryCards = [];
+let userCards = new Set();
+
 async function loadCategoryDetail() {
     try {
         // Get category ID from URL - assuming it's passed via JavaScript or URL parameter
@@ -33,12 +75,31 @@ async function loadCategoryDetail() {
             return;
         }
         
+        allCategoryCards = category.cards_with_rewards || [];
+        
+        // Load user's current cards (if any)
+        await loadUserCards();
+        
         displayCategoryDetail(category);
+        
+        // Show filters if there are cards
+        if (allCategoryCards.length > 0) {
+            document.getElementById('filterCardsSection').style.display = 'block';
+        }
         
     } catch (error) {
         console.error('Error loading category details:', error);
         document.getElementById('categoryContainer').innerHTML = 
             '<div class="error">Error loading category details. Please try again.</div>';
+    }
+}
+
+async function loadUserCards() {
+    try {
+        const cards = await UserDataManager.getCards();
+        userCards = new Set(cards);
+    } catch (error) {
+        console.error('Error loading user cards:', error);
     }
 }
 
@@ -80,8 +141,46 @@ function displayCategoryDetail(category) {
     
     container.innerHTML = html;
     
-    // Display cards
-    displayCards(category.cards_with_rewards);
+    // Filter and display cards
+    filterCards();
+}
+
+function filterCards() {
+    const ownershipFilter = document.getElementById('filterOwnership').value;
+    const feeFilter = document.getElementById('filterFee').value;
+    const rewardRateFilter = document.getElementById('filterRewardRate').value;
+    const searchFilter = document.getElementById('searchCards').value.toLowerCase();
+    
+    let filteredCards = allCategoryCards.filter(card => {
+        // Ownership filter
+        const hasCard = userCards.has(card.id);
+        if (ownershipFilter === 'owned' && !hasCard) return false;
+        if (ownershipFilter === 'not_owned' && hasCard) return false;
+        
+        // Fee filter
+        if (feeFilter) {
+            const fee = card.annual_fee;
+            if (feeFilter === '0' && fee !== 0) return false;
+            if (feeFilter === '1-95' && (fee < 1 || fee > 95)) return false;
+            if (feeFilter === '96-250' && (fee < 96 || fee > 250)) return false;
+            if (feeFilter === '251+' && fee < 251) return false;
+        }
+        
+        // Reward rate filter
+        if (rewardRateFilter) {
+            const minRate = parseFloat(rewardRateFilter);
+            if (card.reward_rate < minRate) return false;
+        }
+        
+        // Search filter
+        if (searchFilter && !card.name.toLowerCase().includes(searchFilter)) {
+            return false;
+        }
+        
+        return true;
+    });
+    
+    displayCards(filteredCards);
 }
 
 function displayCards(cards) {
@@ -101,36 +200,76 @@ function displayCards(cards) {
         <div>
             <h2 style="margin-bottom: 20px;">💳 Cards Earning Rewards for This Category</h2>
             <div style="display: grid; gap: 20px;">
-                ${cards.map(card => `
-                    <div class="card-item">
-                        <div style="display: flex; justify-content: space-between; align-items: start;">
-                            <div style="flex: 1;">
-                                <div class="card-title">${card.issuer} ${card.name}</div>
-                                <div class="card-details">
-                                    <p><strong>Reward Rate:</strong> <span style="color: #10b981; font-weight: bold; font-size: 18px;">${card.reward_rate}x points/miles</span></p>
-                                    <p><strong>Annual Fee:</strong> $${card.annual_fee}</p>
-                                    ${card.max_annual_spend ? 
-                                        `<p><strong>Annual Spending Cap:</strong> $${card.max_annual_spend.toLocaleString()}</p>` : 
-                                        '<p><strong>Annual Spending Cap:</strong> None</p>'
-                                    }
-                                    ${card.signup_bonus_amount ? 
-                                        `<p><strong>Signup Bonus:</strong> ${card.signup_bonus_amount.toLocaleString()} points/miles</p>` : ''
-                                    }
+                ${cards.map(card => {
+                    const hasCard = userCards.has(card.id);
+                    return `
+                        <div class="card-item">
+                            <div style="display: flex; justify-content: space-between; align-items: start;">
+                                <div style="flex: 1;">
+                                    <div class="card-title">${card.issuer} ${card.name}</div>
+                                    <div class="card-details">
+                                        <p><strong>Reward Rate:</strong> <span style="color: #10b981; font-weight: bold; font-size: 18px;">${card.reward_rate}x points/miles</span></p>
+                                        <p><strong>Annual Fee:</strong> $${card.annual_fee}</p>
+                                        ${card.max_annual_spend ? 
+                                            `<p><strong>Annual Spending Cap:</strong> $${card.max_annual_spend.toLocaleString()}</p>` : 
+                                            '<p><strong>Annual Spending Cap:</strong> None</p>'
+                                        }
+                                        ${card.signup_bonus_amount ? 
+                                            `<p><strong>Signup Bonus:</strong> ${card.signup_bonus_amount.toLocaleString()} points/miles</p>` : ''
+                                        }
+                                    </div>
                                 </div>
-                            </div>
-                            <div style="text-align: center; padding: 10px;">
-                                <div style="background: #10b981; color: white; padding: 8px 16px; border-radius: 20px; font-weight: bold; font-size: 16px;">
-                                    ${card.reward_rate}x
+                                <div style="text-align: center; padding: 10px; display: flex; flex-direction: column; gap: 10px;">
+                                    <div style="background: #10b981; color: white; padding: 8px 16px; border-radius: 20px; font-weight: bold; font-size: 16px;">
+                                        ${card.reward_rate}x
+                                    </div>
+                                    <button 
+                                        onclick="toggleCardOwnership(${card.id}, this)" 
+                                        class="${hasCard ? 'danger' : 'success'}"
+                                        style="font-size: 12px; padding: 6px 12px;"
+                                    >
+                                        ${hasCard ? '❌ Remove' : '✅ I have this'}
+                                    </button>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                `).join('')}
+                    `;
+                }).join('')}
             </div>
         </div>
     `;
     
     container.innerHTML = html;
+}
+
+async function toggleCardOwnership(cardId, button) {
+    try {
+        const hasCard = userCards.has(cardId);
+        
+        button.disabled = true;
+        button.textContent = '...';
+        
+        if (hasCard) {
+            userCards.delete(cardId);
+            button.textContent = '✅ I have this';
+            button.className = 'success';
+        } else {
+            userCards.add(cardId);
+            button.textContent = '❌ Remove';
+            button.className = 'danger';
+        }
+        
+        await UserDataManager.saveCards([...userCards]);
+        
+        // Refresh the display to apply ownership filter
+        filterCards();
+        
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error updating card ownership');
+    } finally {
+        button.disabled = false;
+    }
 }
 
 // Load category details when page loads

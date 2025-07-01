@@ -8,24 +8,103 @@
     View all credit card issuers and their policies
 </p>
 
+<!-- Filters Section -->
+<div class="section">
+    <h2>🔍 Filter Issuers</h2>
+    <div class="grid">
+        <div class="form-group">
+            <label for="filterOwnership">Ownership</label>
+            <select id="filterOwnership" onchange="filterIssuers()">
+                <option value="all" selected>All Issuers</option>
+                <option value="owned">I have cards from</option>
+                <option value="not_owned">I don't have cards from</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="searchIssuers">Search Issuers</label>
+            <input type="text" id="searchIssuers" placeholder="Search by name..." oninput="filterIssuers()">
+        </div>
+    </div>
+</div>
+
 <div id="issuersContainer">
     <div class="loading">🔄 Loading credit card issuers...</div>
 </div>
 
 <script>
+let allIssuers = [];
+let userCards = new Set();
+
 async function loadIssuers() {
     try {
         const response = await fetch(`${API_BASE}/cards/issuers/`);
         const data = await response.json();
-        const issuers = data.results || data;
+        allIssuers = data.results || data;
         
-        displayIssuers(issuers);
+        // Load user's current cards (if any)
+        await loadUserCards();
+        
+        filterIssuers();
         
     } catch (error) {
         console.error('Error loading issuers:', error);
         document.getElementById('issuersContainer').innerHTML = 
             '<div class="error">Error loading issuers. Please try again.</div>';
     }
+}
+
+async function loadUserCards() {
+    try {
+        const cards = await UserDataManager.getCards();
+        userCards = new Set(cards);
+    } catch (error) {
+        console.error('Error loading user cards:', error);
+    }
+}
+
+async function filterIssuers() {
+    const ownershipFilter = document.getElementById('filterOwnership').value;
+    const searchFilter = document.getElementById('searchIssuers').value.toLowerCase();
+    
+    // For ownership filtering, we need to get cards that user owns and their issuers
+    let userIssuerIds = new Set();
+    if (ownershipFilter !== 'all' && userCards.size > 0) {
+        try {
+            // Get cards data to find which issuers they have
+            const cardsResponse = await fetch(`${API_BASE}/cards/cards/`);
+            const cardsData = await cardsResponse.json();
+            const cards = cardsData.results || cardsData;
+            
+            // Filter to user's cards and collect their issuer IDs
+            cards.filter(card => userCards.has(card.id))
+                 .forEach(card => {
+                     if (card.issuer && card.issuer.id) {
+                         userIssuerIds.add(card.issuer.id);
+                     }
+                 });
+        } catch (error) {
+            console.error('Error loading cards for issuer filtering:', error);
+        }
+    }
+    
+    let filteredIssuers = allIssuers.filter(issuer => {
+        // Ownership filter
+        if (ownershipFilter === 'owned' && !userIssuerIds.has(issuer.id)) {
+            return false;
+        }
+        if (ownershipFilter === 'not_owned' && userIssuerIds.has(issuer.id)) {
+            return false;
+        }
+        
+        // Search filter
+        if (searchFilter && !issuer.name.toLowerCase().includes(searchFilter)) {
+            return false;
+        }
+        
+        return true;
+    });
+    
+    displayIssuers(filteredIssuers);
 }
 
 function displayIssuers(issuers) {
