@@ -1,0 +1,272 @@
+[
+  {
+    "name": "Blue Cash Preferred® Card",
+    "issuer": "American Express",
+    "annual_fee": 95,
+    "signup_bonus": {
+      "bonus_amount": 25000,
+      "spending_requirement": 3000,
+      "time_limit_months": 6
+    },
+    "reward_type": "Cash Back",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      { "category": "Groceries", "reward_rate": 6.0, "max_annual_spend": 6000 },
+      { "category": "Gas Stations", "reward_rate": 3.0, "max_annual_spend": 6000 },
+      { "category": "General", "reward_rate": 1.0 }
+    ]
+  },
+  {
+    "name": "Freedom Unlimited",
+    "issuer": "Chase",
+    "annual_fee": 0,
+    "signup_bonus": {
+      "bonus_amount": 20000,
+      "spending_requirement": 500,
+      "time_limit_months": 3
+    },
+    "reward_type": "Points",
+    "reward_value_multiplier": 0.015,
+    "reward_categories": [
+      { "category": "General", "reward_rate": 1.5 }
+    ]
+  },
+  {
+    "name": "Chase Sapphire Preferred® Card",
+    "issuer": "Chase",
+    "annual_fee": 95,
+    "signup_bonus": {
+      "bonus_amount": 60000,
+      "spending_requirement": 4000,
+      "time_limit_months": 3
+    },
+    "reward_type": "Points",
+    "reward_value_multiplier": 0.0125,
+    "reward_categories": [
+      { "category": "Travel", "reward_rate": 2.0 },
+      { "category": "Dining & Restaurants", "reward_rate": 2.0 },
+      { "category": "General", "reward_rate": 1.0 }
+    ]
+  },
+  {
+    "name": "Chase Sapphire Reserve®",
+    "issuer": "Chase",
+    "annual_fee": 550,
+    "signup_bonus": {
+      "bonus_amount": 60000,
+      "spending_requirement": 4000,
+      "time_limit_months": 3
+    },
+    "reward_type": "Points",
+    "reward_value_multiplier": 0.015,
+    "reward_categories": [
+      { "category": "Travel", "reward_rate": 3.0 },
+      { "category": "Dining & Restaurants", "reward_rate": 3.0 },
+      { "category": "General", "reward_rate": 1.0 }
+    ]
+  },
+  {
+    "name": "Venture Rewards Credit Card",
+    "issuer": "Capital One",
+    "annual_fee": 95,
+    "signup_bonus": {
+      "bonus_amount": 75000,
+      "spending_requirement": 4000,
+      "time_limit_months": 3
+    },
+    "reward_type": "Miles",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      { "category": "General", "reward_rate": 2.0 }
+    ]
+  },
+  {
+    "name": "Quicksilver Cash Rewards Credit Card",
+    "issuer": "Capital One",
+    "annual_fee": 0,
+    "signup_bonus": {
+      "bonus_amount": 15000,
+      "spending_requirement": 500,
+      "time_limit_months": 3
+    },
+    "reward_type": "Cash Back",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      { "category": "General", "reward_rate": 1.5 }
+    ]
+  },
+  {
+    "name": "SavorOne Cash Rewards Credit Card",
+    "issuer": "Capital One",
+    "annual_fee": 95,
+    "signup_bonus": {
+      "bonus_amount": 30000,
+      "spending_requirement": 3000,
+      "time_limit_months": 3
+    },
+    "reward_type": "Cash Back",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      { "category": "Dining & Restaurants", "reward_rate": 4.0 },
+      { "category": "General", "reward_rate": 1.0 }
+    ]
+  },
+  {
+    "name": "The Platinum Card®",
+    "issuer": "American Express",
+    "annual_fee": 695,
+    "signup_bonus": {
+      "bonus_amount": 100000,
+      "spending_requirement": 6000,
+      "time_limit_months": 6
+    },
+    "reward_type": "Points",
+    "reward_value_multiplier": 0.02,
+    "reward_categories": [
+      { "category": "Travel", "reward_rate": 5.0 },
+      { "category": "General", "reward_rate": 1.0 }
+    ]
+  },
+  {
+    "name": "Gold Card",
+    "issuer": "American Express",
+    "annual_fee": 250,
+    "signup_bonus": {
+      "bonus_amount": 60000,
+      "spending_requirement": 4000,
+      "time_limit_months": 6
+    },
+    "reward_type": "Points",
+    "reward_value_multiplier": 0.02,
+    "reward_categories": [
+      { "category": "Dining & Restaurants", "reward_rate": 4.0 },
+      { "category": "Groceries", "reward_rate": 4.0, "max_annual_spend": 25000 },
+      { "category": "General", "reward_rate": 1.0 }
+    ]
+  },
+  {
+    "name": "Costco Anywhere Visa® Card",
+    "issuer": "Capital One",
+    "annual_fee": 0,
+    "signup_bonus": {
+      "bonus_amount": 0,
+      "spending_requirement": 0,
+      "time_limit_months": 0
+    },
+    "reward_type": "Cash Back",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      { "category": "Gas Stations", "reward_rate": 4.0 },
+      { "category": "Groceries", "reward_rate": 2.0 },
+      { "category": "General", "reward_rate": 1.0 }
+    ]
+  },
+  {
+    "name": "Low Value Card",
+    "issuer": "Chase",
+    "annual_fee": 95,
+    "signup_bonus": {
+      "bonus_amount": 0,
+      "spending_requirement": 0,
+      "time_limit_months": 0
+    },
+    "reward_type": "Points",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      { "category": "General", "reward_rate": 1.0 }
+    ]
+  },
+  {
+    "name": "Better Card",
+    "issuer": "American Express",
+    "annual_fee": 0,
+    "signup_bonus": {
+      "bonus_amount": 15000,
+      "spending_requirement": 1000,
+      "time_limit_months": 3
+    },
+    "reward_type": "Cash Back",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      { "category": "General", "reward_rate": 1.5 }
+    ]
+  },
+  {
+    "name": "Expensive Premium Card",
+    "issuer": "American Express",
+    "annual_fee": 550,
+    "signup_bonus": {
+      "bonus_amount": 0,
+      "spending_requirement": 0,
+      "time_limit_months": 0
+    },
+    "reward_type": "Points",
+    "reward_value_multiplier": 0.02,
+    "reward_categories": [
+      { "category": "Travel", "reward_rate": 5.0 },
+      { "category": "General", "reward_rate": 1.0 }
+    ]
+  },
+  {
+    "name": "No Fee Alternative",
+    "issuer": "Chase",
+    "annual_fee": 0,
+    "signup_bonus": {
+      "bonus_amount": 20000,
+      "spending_requirement": 500,
+      "time_limit_months": 3
+    },
+    "reward_type": "Points",
+    "reward_value_multiplier": 0.015,
+    "reward_categories": [
+      { "category": "General", "reward_rate": 1.5 }
+    ]
+  },
+  {
+    "name": "Basic Card",
+    "issuer": "Chase",
+    "annual_fee": 0,
+    "signup_bonus": {
+      "bonus_amount": 0,
+      "spending_requirement": 0,
+      "time_limit_months": 0
+    },
+    "reward_type": "Points",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      { "category": "General", "reward_rate": 1.0 }
+    ]
+  },
+  {
+    "name": "Travel Card",
+    "issuer": "Chase",
+    "annual_fee": 95,
+    "signup_bonus": {
+      "bonus_amount": 0,
+      "spending_requirement": 0,
+      "time_limit_months": 0
+    },
+    "reward_type": "Points",
+    "reward_value_multiplier": 0.0125,
+    "reward_categories": [
+      { "category": "Travel", "reward_rate": 2.0 },
+      { "category": "General", "reward_rate": 1.0 }
+    ]
+  },
+  {
+    "name": "Grocery Specialist",
+    "issuer": "American Express",
+    "annual_fee": 95,
+    "signup_bonus": {
+      "bonus_amount": 25000,
+      "spending_requirement": 2000,
+      "time_limit_months": 3
+    },
+    "reward_type": "Cash Back",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      { "category": "Groceries", "reward_rate": 6.0, "max_annual_spend": 6000 },
+      { "category": "General", "reward_rate": 1.0 }
+    ]
+  }
+]

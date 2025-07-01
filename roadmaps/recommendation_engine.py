@@ -35,13 +35,13 @@ class RecommendationEngine:
         recommendations.extend(current_card_recommendations)
         
         # Find new cards to apply for
-        new_card_recommendations = self._find_new_cards(
-            eligible_cards, 
-            roadmap.max_recommendations - len(current_card_recommendations)
-        )
-        recommendations.extend(new_card_recommendations)
+        remaining_slots = max(0, roadmap.max_recommendations - len(current_card_recommendations))
+        if remaining_slots > 0:
+            new_card_recommendations = self._find_new_cards(eligible_cards, remaining_slots)
+            recommendations.extend(new_card_recommendations)
         
-        return recommendations
+        # Ensure we don't exceed max_recommendations
+        return recommendations[:roadmap.max_recommendations]
     
     def _get_filtered_cards(self, roadmap: Roadmap) -> List[CreditCard]:
         """Apply roadmap filters to get eligible cards"""

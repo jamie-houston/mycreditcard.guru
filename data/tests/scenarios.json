@@ -1,0 +1,171 @@
+{
+  "scenarios": [
+    {
+      "name": "Young Professional - Dining Focus",
+      "description": "Recent graduate with high dining expenses, low income",
+      "user_profile": {
+        "spending": {
+          "groceries": 300,
+          "dining": 800,
+          "gas": 100,
+          "general": 400
+        },
+        "preferences": {
+          "max_annual_fee": 100,
+          "preferred_reward_type": "cashback"
+        }
+      },
+      "owned_cards": [],
+      "available_cards": ["SavorOne Cash Rewards Credit Card", "Quicksilver Cash Rewards Credit Card", "Freedom Unlimited", "Blue Cash Preferred® Card"],
+      "expected_recommendations": {
+        "actions": ["apply"],
+        "min_total_value": 300,
+        "must_include_cards": ["SavorOne Cash Rewards Credit Card"],
+        "reasoning_must_contain": ["dining"]
+      }
+    },
+    {
+      "name": "Business Traveler",
+      "description": "High travel and dining expenses, values points for travel",
+      "user_profile": {
+        "spending": {
+          "travel": 1500,
+          "dining": 600,
+          "groceries": 200,
+          "gas": 200,
+          "general": 800
+        },
+        "preferences": {
+          "max_annual_fee": 550,
+          "preferred_reward_type": "points"
+        }
+      },
+      "owned_cards": [],
+      "available_cards": ["Chase Sapphire Reserve®", "The Platinum Card®", "Chase Sapphire Preferred® Card", "Gold Card"],
+      "expected_recommendations": {
+        "actions": ["apply"],
+        "min_total_value": 800,
+        "must_include_cards": ["Chase Sapphire Reserve®"],
+        "reasoning_must_contain": ["travel"]
+      }
+    },
+    {
+      "name": "Family with High Grocery Spend",
+      "description": "Large family with substantial grocery and gas expenses",
+      "user_profile": {
+        "spending": {
+          "groceries": 1200,
+          "gas": 400,
+          "dining": 300,
+          "general": 600
+        }
+      },
+      "owned_cards": [],
+      "available_cards": ["Blue Cash Preferred® Card", "Costco Anywhere Visa® Card", "Gold Card", "Grocery Specialist"],
+      "expected_recommendations": {
+        "actions": ["apply"],
+        "min_total_value": 500,
+        "must_include_cards": ["Blue Cash Preferred® Card"],
+        "reasoning_must_contain": ["groceries"]
+      }
+    },
+    {
+      "name": "Existing High-Fee Card Review",
+      "description": "User with expensive card that may not be worth keeping",
+      "user_profile": {
+        "spending": {
+          "groceries": 200,
+          "dining": 150,
+          "travel": 100,
+          "general": 300
+        }
+      },
+      "owned_cards": ["Expensive Premium Card"],
+      "available_cards": ["Expensive Premium Card", "No Fee Alternative", "Freedom Unlimited", "Quicksilver Cash Rewards Credit Card"],
+      "expected_recommendations": {
+        "actions": ["cancel", "apply"],
+        "min_total_value": 50,
+        "must_include_cards": ["No Fee Alternative"],
+        "reasoning_must_contain": ["cancel"]
+      }
+    },
+    {
+      "name": "Multiple Cards Optimization",
+      "description": "User with several cards, needs optimization strategy",
+      "user_profile": {
+        "spending": {
+          "groceries": 500,
+          "dining": 400,
+          "travel": 600,
+          "gas": 200,
+          "general": 700
+        }
+      },
+      "owned_cards": ["Basic Card", "Travel Card"],
+      "available_cards": ["Basic Card", "Travel Card", "Grocery Specialist", "Chase Sapphire Preferred® Card", "Gold Card"],
+      "expected_recommendations": {
+        "actions": ["keep", "apply"],
+        "min_total_value": 300,
+        "must_include_cards": ["Grocery Specialist"],
+        "reasoning_must_contain": ["keep"]
+      }
+    },
+    {
+      "name": "High Grocery Spender",
+      "description": "Someone who spends heavily on groceries",
+      "user_profile": {
+        "spending": {
+          "groceries": 1000,
+          "dining": 200,
+          "gas": 150,
+          "general": 500
+        }
+      },
+      "owned_cards": [],
+      "available_cards": ["Blue Cash Preferred® Card", "Freedom Unlimited", "Grocery Specialist"],
+      "expected_recommendations": {
+        "actions": ["apply"],
+        "min_total_value": 400,
+        "must_include_cards": ["Blue Cash Preferred® Card"]
+      }
+    },
+    {
+      "name": "Travel Enthusiast",
+      "description": "High travel and dining spending, values points",
+      "user_profile": {
+        "spending": {
+          "travel": 800,
+          "dining": 400,
+          "groceries": 300,
+          "general": 700
+        }
+      },
+      "owned_cards": [],
+      "available_cards": ["Chase Sapphire Preferred® Card", "Venture Rewards Credit Card", "Chase Sapphire Reserve®"],
+      "expected_recommendations": {
+        "actions": ["apply"],
+        "min_total_value": 600,
+        "must_include_cards": ["Chase Sapphire Preferred® Card"]
+      }
+    },
+    {
+      "name": "Existing Card Optimization",
+      "description": "User with low-value card that should be optimized",
+      "user_profile": {
+        "spending": {
+          "groceries": 200,
+          "dining": 150,
+          "gas": 100,
+          "general": 300
+        }
+      },
+      "owned_cards": ["Low Value Card"],
+      "available_cards": ["Low Value Card", "Better Card"],
+      "expected_recommendations": {
+        "actions": ["cancel", "apply"],
+        "min_total_value": 50,
+        "must_include_cards": ["Better Card"]
+      }
+    }
+  ]
+}

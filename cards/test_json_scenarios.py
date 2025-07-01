@@ -1,0 +1,171 @@
+"""
+JSON-based data-driven test suite for credit card recommendations.
+
+This test suite loads scenarios from JSON files, making it easy to add
+new test cases without modifying Python code.
+
+Usage:
+    python manage.py test cards.test_json_scenarios
+    
+To add new scenarios:
+    1. Edit data/tests/scenarios.json
+    2. Add your scenario to the "scenarios" array
+    3. Run the tests
+"""
+
+from django.test import TestCase
+from .test_base import JSONScenarioTestBase
+
+
+class JSONScenarioTest(JSONScenarioTestBase):
+    """Test cases that load scenarios from JSON files."""
+    
+    def test_young_professional_dining_focus(self):
+        """Test the Young Professional - Dining Focus scenario."""
+        if not self.scenarios:
+            self.skipTest("No scenarios found in JSON file")
+        scenario = self.scenarios[0]  # Young Professional - Dining Focus
+        recommendations = self.run_scenario_test(scenario)
+        self.print_scenario_results(scenario, recommendations)
+        
+    def test_business_traveler(self):
+        """Test the Business Traveler scenario."""
+        if not self.scenarios:
+            self.skipTest("No scenarios found in JSON file")
+        scenario = self.scenarios[1]  # Business Traveler
+        recommendations = self.run_scenario_test(scenario)
+        self.print_scenario_results(scenario, recommendations)
+        
+    def test_family_high_grocery_spend(self):
+        """Test the Family with High Grocery Spend scenario."""
+        if not self.scenarios:
+            self.skipTest("No scenarios found in JSON file")
+        scenario = self.scenarios[2]  # Family with High Grocery Spend
+        recommendations = self.run_scenario_test(scenario)
+        self.print_scenario_results(scenario, recommendations)
+        
+    def test_existing_high_fee_card_review(self):
+        """Test the Existing High-Fee Card Review scenario."""
+        if not self.scenarios:
+            self.skipTest("No scenarios found in JSON file")
+        scenario = self.scenarios[3]  # Existing High-Fee Card Review
+        recommendations = self.run_scenario_test(scenario)
+        self.print_scenario_results(scenario, recommendations)
+        
+    def test_multiple_cards_optimization(self):
+        """Test the Multiple Cards Optimization scenario."""
+        if not self.scenarios:
+            self.skipTest("No scenarios found in JSON file")
+        scenario = self.scenarios[4]  # Multiple Cards Optimization
+        recommendations = self.run_scenario_test(scenario)
+        self.print_scenario_results(scenario, recommendations)
+        
+
+
+class ScenarioValidationTest(TestCase):
+    """Test the JSON scenario validation and loading."""
+    
+    def test_json_file_exists(self):
+        """Test that the JSON scenarios file exists."""
+        scenarios_file = os.path.join(
+            os.path.dirname(os.path.dirname(__file__)), 
+            'data', 'tests', 'scenarios.json'
+        )
+        self.assertTrue(
+            os.path.exists(scenarios_file),
+            f"Scenarios file not found at {scenarios_file}"
+        )
+    
+    def test_json_file_valid(self):
+        """Test that the JSON file is valid JSON."""
+        scenarios_file = os.path.join(
+            os.path.dirname(os.path.dirname(__file__)), 
+            'data', 'tests', 'scenarios.json'
+        )
+        
+        if not os.path.exists(scenarios_file):
+            self.skipTest("Scenarios file not found")
+        
+        with open(scenarios_file, 'r') as f:
+            try:
+                data = json.load(f)
+                self.assertIsInstance(data, dict)
+                self.assertIn('scenarios', data)
+                self.assertIsInstance(data['scenarios'], list)
+            except json.JSONDecodeError as e:
+                self.fail(f"Invalid JSON in scenarios file: {e}")
+    
+    def test_scenario_structure(self):
+        """Test that each scenario has the required structure."""
+        scenarios_file = os.path.join(
+            os.path.dirname(os.path.dirname(__file__)), 
+            'data', 'tests', 'scenarios.json'
+        )
+        
+        if not os.path.exists(scenarios_file):
+            self.skipTest("Scenarios file not found")
+        
+        with open(scenarios_file, 'r') as f:
+            data = json.load(f)
+            
+        required_fields = ['name', 'user_profile', 'available_cards']
+        
+        for i, scenario in enumerate(data.get('scenarios', [])):
+            for field in required_fields:
+                self.assertIn(
+                    field, 
+                    scenario, 
+                    f"Scenario {i} missing required field '{field}'"
+                )
+            
+            # Validate user_profile structure
+            self.assertIn(
+                'spending', 
+                scenario['user_profile'],
+                f"Scenario {i} user_profile missing 'spending'"
+            )
+            
+            # Validate available_cards structure
+            self.assertIsInstance(
+                scenario['available_cards'],
+                list,
+                f"Scenario {i} available_cards should be a list"
+            )
+            
+            for j, card in enumerate(scenario['available_cards']):
+                card_required_fields = ['name', 'issuer', 'primary_reward_type']
+                for field in card_required_fields:
+                    self.assertIn(
+                        field,
+                        card,
+                        f"Scenario {i} card {j} missing required field '{field}'"
+                    )
+
+
+def print_scenario_results(scenario_name, recommendations):
+    """Utility function to print scenario results in a readable format."""
+    print(f"\n{'='*50}")
+    print(f"SCENARIO: {scenario_name}")
+    print(f"{'='*50}")
+    
+    if not recommendations:
+        print("No recommendations generated.")
+        return
+    
+    total_value = sum(float(rec['estimated_rewards']) for rec in recommendations)
+    print(f"Total Estimated Value: ${total_value:.2f}")
+    print(f"Number of Recommendations: {len(recommendations)}")
+    
+    for i, rec in enumerate(recommendations, 1):
+        print(f"\n{i}. {rec['action'].upper()}: {rec['card'].name}")
+        print(f"   Annual Fee: ${rec['card'].annual_fee}")
+        print(f"   Estimated Annual Value: ${rec['estimated_rewards']}")
+        print(f"   Priority: {rec.get('priority', 'N/A')}")
+        print(f"   Reasoning: {rec['reasoning']}")
+        
+        if rec.get('rewards_breakdown'):
+            print("   Detailed Breakdown:")
+            for breakdown in rec['rewards_breakdown']:
+                print(f"     • {breakdown['category_name']}: {breakdown['calculation']}")
+    
+    print(f"\n{'='*50}")
