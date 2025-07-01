@@ -444,6 +444,10 @@
                     <h3>💳 Card Details</h3>
                     <div class="modal-info-grid">
                         <div class="modal-info-item">
+                            <div class="modal-info-label">Card Type</div>
+                            <div class="modal-info-value" id="modalCardType">Personal</div>
+                        </div>
+                        <div class="modal-info-item">
                             <div class="modal-info-label">Annual Fee</div>
                             <div class="modal-info-value" id="modalAnnualFee">$0</div>
                         </div>
@@ -782,6 +786,7 @@
             // Basic card info
             document.getElementById('modalCardName').textContent = card.name;
             document.getElementById('modalCardIssuer').textContent = card.issuer?.name || 'Unknown Issuer';
+            document.getElementById('modalCardType').textContent = card.card_type ? card.card_type.charAt(0).toUpperCase() + card.card_type.slice(1) : 'Personal';
             document.getElementById('modalAnnualFee').textContent = `$${card.annual_fee || 0}`;
             document.getElementById('modalRewardType').textContent = card.primary_reward_type?.name || 'Unknown';
             

@@ -36,8 +36,8 @@ class CardOfferInline(admin.TabularInline):
 
 @admin.register(CreditCard)
 class CreditCardAdmin(admin.ModelAdmin):
-    list_display = ['name', 'issuer', 'annual_fee', 'signup_bonus_amount', 'is_active']
-    list_filter = ['issuer', 'primary_reward_type', 'is_active']
+    list_display = ['name', 'issuer', 'card_type', 'annual_fee', 'signup_bonus_amount', 'is_active']
+    list_filter = ['issuer', 'card_type', 'primary_reward_type', 'is_active']
     search_fields = ['name', 'issuer__name']
     inlines = [RewardCategoryInline, CardOfferInline]
 

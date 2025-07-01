@@ -52,6 +52,8 @@ class RecommendationEngine:
                 queryset = queryset.filter(issuer__name__icontains=filter_obj.value)
             elif filter_obj.filter_type == 'reward_type':
                 queryset = queryset.filter(primary_reward_type__name__icontains=filter_obj.value)
+            elif filter_obj.filter_type == 'card_type':
+                queryset = queryset.filter(card_type=filter_obj.value)
             elif filter_obj.filter_type == 'annual_fee':
                 # Expect format like "0" or "0-95" or "95+"
                 if '+' in filter_obj.value:

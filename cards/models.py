@@ -40,8 +40,14 @@ class SpendingCategory(models.Model):
 
 
 class CreditCard(models.Model):
+    CARD_TYPES = [
+        ('personal', 'Personal'),
+        ('business', 'Business'),
+    ]
+    
     name = models.CharField(max_length=200)
     issuer = models.ForeignKey(Issuer, on_delete=models.CASCADE)
+    card_type = models.CharField(max_length=20, choices=CARD_TYPES, default='personal')
     annual_fee = models.DecimalField(max_digits=8, decimal_places=2, default=0)
     signup_bonus_amount = models.IntegerField(null=True, blank=True)
     signup_bonus_type = models.ForeignKey(RewardType, on_delete=models.CASCADE, related_name='signup_bonus_cards')

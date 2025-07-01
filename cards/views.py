@@ -44,6 +44,7 @@ class CreditCardListView(generics.ListAPIView):
     filterset_fields = {
         'issuer__name': ['exact', 'icontains'],
         'primary_reward_type__name': ['exact', 'icontains'],
+        'card_type': ['exact'],
         'annual_fee': ['exact', 'lte', 'gte'],
         'signup_bonus_amount': ['gte', 'lte'],
     }
@@ -115,6 +116,11 @@ def card_search_view(request):
     reward_type = request.GET.get('reward_type')
     if reward_type:
         queryset = queryset.filter(primary_reward_type__name__icontains=reward_type)
+    
+    # Filter by card type
+    card_type = request.GET.get('card_type')
+    if card_type:
+        queryset = queryset.filter(card_type=card_type)
     
     # Filter by annual fee range
     min_fee = request.GET.get('min_fee')

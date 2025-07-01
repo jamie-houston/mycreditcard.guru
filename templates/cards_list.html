@@ -21,6 +21,14 @@
             </select>
         </div>
         <div class="form-group">
+            <label for="filterCardType">Card Type</label>
+            <select id="filterCardType" onchange="filterCards()">
+                <option value="personal" selected>Personal</option>
+                <option value="business">Business</option>
+                <option value="all">All Types</option>
+            </select>
+        </div>
+        <div class="form-group">
             <label for="filterIssuer">Issuer</label>
             <select id="filterIssuer" onchange="filterCards()">
                 <option value="">All Issuers</option>
@@ -123,6 +131,7 @@ async function saveUserCards() {
 
 function filterCards() {
     const ownershipFilter = document.getElementById('filterOwnership').value;
+    const cardTypeFilter = document.getElementById('filterCardType').value;
     const issuerFilter = document.getElementById('filterIssuer').value.toLowerCase();
     const rewardTypeFilter = document.getElementById('filterRewardType').value.toLowerCase();
     const feeFilter = document.getElementById('filterFee').value;
@@ -134,6 +143,11 @@ function filterCards() {
         if (ownershipFilter === 'owned' && !hasCard) return false;
         if (ownershipFilter === 'not_owned' && hasCard) return false;
         // 'all' shows everything
+        
+        // Card type filter
+        if (cardTypeFilter !== 'all' && card.card_type !== cardTypeFilter) {
+            return false;
+        }
         
         // Issuer filter
         if (issuerFilter && card.issuer.name.toLowerCase() !== issuerFilter) {

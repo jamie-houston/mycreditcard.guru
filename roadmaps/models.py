@@ -7,6 +7,7 @@ class RoadmapFilter(models.Model):
     FILTER_TYPES = [
         ('issuer', 'Issuer'),
         ('reward_type', 'Reward Type'),
+        ('card_type', 'Card Type'),
         ('annual_fee', 'Annual Fee'),
         ('signup_bonus', 'Signup Bonus'),
     ]

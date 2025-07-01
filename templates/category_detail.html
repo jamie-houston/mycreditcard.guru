@@ -20,6 +20,14 @@
             </select>
         </div>
         <div class="form-group">
+            <label for="filterCardType">Card Type</label>
+            <select id="filterCardType" onchange="filterCards()">
+                <option value="personal" selected>Personal</option>
+                <option value="business">Business</option>
+                <option value="all">All Types</option>
+            </select>
+        </div>
+        <div class="form-group">
             <label for="filterFee">Annual Fee</label>
             <select id="filterFee" onchange="filterCards()">
                 <option value="">Any Fee</option>
@@ -147,6 +155,7 @@ function displayCategoryDetail(category) {
 
 function filterCards() {
     const ownershipFilter = document.getElementById('filterOwnership').value;
+    const cardTypeFilter = document.getElementById('filterCardType').value;
     const feeFilter = document.getElementById('filterFee').value;
     const rewardRateFilter = document.getElementById('filterRewardRate').value;
     const searchFilter = document.getElementById('searchCards').value.toLowerCase();
@@ -156,6 +165,11 @@ function filterCards() {
         const hasCard = userCards.has(card.id);
         if (ownershipFilter === 'owned' && !hasCard) return false;
         if (ownershipFilter === 'not_owned' && hasCard) return false;
+        
+        // Card type filter
+        if (cardTypeFilter !== 'all' && card.card_type !== cardTypeFilter) {
+            return false;
+        }
         
         // Fee filter
         if (feeFilter) {

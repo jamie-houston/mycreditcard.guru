@@ -13,6 +13,14 @@
             <h2>🔍 Preferences</h2>
             <div class="grid">
                 <div class="form-group">
+                    <label>Card Type</label>
+                    <select id="cardType">
+                        <option value="personal" selected>Personal</option>
+                        <option value="business">Business</option>
+                        <option value="all">All Types</option>
+                    </select>
+                </div>
+                <div class="form-group">
                     <label>Preferred Issuer</label>
                     <select id="issuer">
                         <option value="">Any Issuer</option>
@@ -344,10 +352,18 @@
 
                 // Build filters array
                 const filters = [];
+                const cardType = document.getElementById('cardType').value;
                 const issuer = document.getElementById('issuer').value;
                 const rewardType = document.getElementById('rewardType').value;
                 const maxFee = document.getElementById('maxFee').value;
 
+                if (cardType && cardType !== 'all') {
+                    filters.push({
+                        name: 'Card Type Filter',
+                        filter_type: 'card_type',
+                        value: cardType
+                    });
+                }
                 if (issuer) {
                     filters.push({
                         name: 'Issuer Filter',

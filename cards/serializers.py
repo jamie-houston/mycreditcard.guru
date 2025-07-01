@@ -55,7 +55,7 @@ class CreditCardSerializer(serializers.ModelSerializer):
     class Meta:
         model = CreditCard
         fields = [
-            'id', 'name', 'issuer', 'annual_fee', 'signup_bonus_amount',
+            'id', 'name', 'issuer', 'card_type', 'annual_fee', 'signup_bonus_amount',
             'signup_bonus_type', 'signup_bonus_requirement', 'primary_reward_type',
             'reward_categories', 'offers', 'is_active', 'created_at', 'metadata'
         ]
@@ -70,7 +70,7 @@ class CreditCardListSerializer(serializers.ModelSerializer):
     class Meta:
         model = CreditCard
         fields = [
-            'id', 'name', 'issuer', 'annual_fee', 'signup_bonus_amount',
+            'id', 'name', 'issuer', 'card_type', 'annual_fee', 'signup_bonus_amount',
             'signup_bonus_type', 'primary_reward_type'
         ]
 
