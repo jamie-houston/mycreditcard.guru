@@ -3,7 +3,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
 from django.db.models import Q
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 
 from .models import (
     Issuer, RewardType, SpendingCategory, CreditCard,
@@ -172,14 +172,14 @@ def card_search_view(request):
 
 
 @api_view(['GET'])
-def category_detail_view(request, category_id):
+def category_detail_view(request, category_slug):
     """Get detailed information about a spending category including top reward rates and cards"""
     try:
         from cards.models import SpendingCategory, RewardCategory
         from django.db.models import Max
         
         # Get the category
-        category = get_object_or_404(SpendingCategory, id=category_id)
+        category = get_object_or_404(SpendingCategory, slug=category_slug)
         
         # Get all reward categories for this spending category with reward rate > 1%
         reward_categories = RewardCategory.objects.filter(
@@ -318,9 +318,9 @@ def categories_list_view(request):
     """Spending categories listing page"""
     return render(request, 'categories_list.html')
 
-def category_detail_page_view(request, category_id):
+def category_detail_page_view(request, category_slug):
     """Category detail page"""
-    return render(request, 'category_detail.html', {'category_id': category_id})
+    return render(request, 'category_detail.html', {'category_slug': category_slug})
 
 def issuers_list_view(request):
     """Issuers listing page"""

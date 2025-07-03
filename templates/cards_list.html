@@ -41,6 +41,12 @@
             </select>
         </div>
         <div class="form-group">
+            <label for="filterRewardCategory">Reward Category</label>
+            <select id="filterRewardCategory" onchange="filterCards()">
+                <option value="">All Categories</option>
+            </select>
+        </div>
+        <div class="form-group">
             <label for="filterFee">Annual Fee</label>
             <select id="filterFee" onchange="filterCards()">
                 <option value="">Any Fee</option>
@@ -99,8 +105,24 @@ async function loadCards() {
             rewardTypeSelect.appendChild(option);
         });
         
+        // Load spending categories for filter
+        const categoriesResponse = await fetch(`${API_BASE}/cards/spending-categories/`);
+        const categoriesData = await categoriesResponse.json();
+        const categories = categoriesData.results || categoriesData;
+        
+        const categorySelect = document.getElementById('filterRewardCategory');
+        categories.forEach(category => {
+            const option = document.createElement('option');
+            option.value = category.slug;
+            option.textContent = category.display_name || category.name;
+            categorySelect.appendChild(option);
+        });
+        
         // Load user's current cards (if any)
         await loadUserCards();
+        
+        // Check for URL parameters to pre-select filters
+        loadURLFilters();
         
         // Display all cards
         filterCards();
@@ -129,11 +151,36 @@ async function saveUserCards() {
     }
 }
 
+function loadURLFilters() {
+    const urlParams = new URLSearchParams(window.location.search);
+    
+    // Pre-select category filter if provided in URL
+    const categoryParam = urlParams.get('category');
+    if (categoryParam) {
+        const categorySelect = document.getElementById('filterRewardCategory');
+        categorySelect.value = categoryParam;
+    }
+    
+    // Pre-select other filters if provided
+    const issuerParam = urlParams.get('issuer');
+    if (issuerParam) {
+        const issuerSelect = document.getElementById('filterIssuer');
+        issuerSelect.value = issuerParam;
+    }
+    
+    const rewardTypeParam = urlParams.get('reward_type');
+    if (rewardTypeParam) {
+        const rewardTypeSelect = document.getElementById('filterRewardType');
+        rewardTypeSelect.value = rewardTypeParam;
+    }
+}
+
 function filterCards() {
     const ownershipFilter = document.getElementById('filterOwnership').value;
     const cardTypeFilter = document.getElementById('filterCardType').value;
     const issuerFilter = document.getElementById('filterIssuer').value.toLowerCase();
     const rewardTypeFilter = document.getElementById('filterRewardType').value.toLowerCase();
+    const rewardCategoryFilter = document.getElementById('filterRewardCategory').value;
     const feeFilter = document.getElementById('filterFee').value;
     const searchFilter = document.getElementById('searchCards').value.toLowerCase();
     
@@ -157,6 +204,14 @@ function filterCards() {
         // Reward type filter
         if (rewardTypeFilter && card.primary_reward_type.name.toLowerCase() !== rewardTypeFilter) {
             return false;
+        }
+        
+        // Reward category filter
+        if (rewardCategoryFilter && card.reward_categories) {
+            const hasCategory = card.reward_categories.some(rewardCat => 
+                rewardCat.category.slug === rewardCategoryFilter
+            );
+            if (!hasCategory) return false;
         }
         
         // Fee filter

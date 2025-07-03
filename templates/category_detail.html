@@ -64,17 +64,17 @@ let userCards = new Set();
 
 async function loadCategoryDetail() {
     try {
-        // Get category ID from URL - assuming it's passed via JavaScript or URL parameter
+        // Get category slug from URL
         const urlParams = new URLSearchParams(window.location.search);
-        const categoryId = urlParams.get('id') || window.location.pathname.split('/').pop();
+        const categorySlug = urlParams.get('slug') || window.location.pathname.split('/').filter(Boolean).pop();
         
-        if (!categoryId || categoryId === 'categories') {
+        if (!categorySlug || categorySlug === 'categories') {
             document.getElementById('categoryContainer').innerHTML = 
-                '<div class="error">Category ID not found in URL</div>';
+                '<div class="error">Category slug not found in URL</div>';
             return;
         }
         
-        const response = await fetch(`${API_BASE}/cards/categories/${categoryId}/`);
+        const response = await fetch(`${API_BASE}/cards/categories/${categorySlug}/`);
         const category = await response.json();
         
         if (category.error) {

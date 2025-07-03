@@ -46,7 +46,7 @@ urlpatterns = [
     path('', index_view, name='index'),
     path('cards/', cards_list_view, name='cards_list'),
     path('categories/', categories_list_view, name='categories_list'),
-    path('categories/<int:category_id>/', category_detail_page_view, name='category_detail'),
+    path('categories/<slug:category_slug>/', category_detail_page_view, name='category_detail'),
     path('issuers/', issuers_list_view, name='issuers_list'),
     
     # Authentication

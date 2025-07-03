@@ -197,7 +197,7 @@ function displayCategories(categories) {
                     </div>
                     <div style="text-align: center; padding-left: 20px;">
                         ${category.cards_with_rewards_count > 0 ? 
-                            `<a href="/categories/${category.id}/" style="display: inline-block; background: #3b82f6; color: white; padding: 10px 20px; border-radius: 6px; text-decoration: none; font-weight: 500;">
+                            `<a href="/cards/?category=${category.slug}" style="display: inline-block; background: #3b82f6; color: white; padding: 10px 20px; border-radius: 6px; text-decoration: none; font-weight: 500;">
                                 View ${category.cards_with_rewards_count} Cards
                             </a>` :
                             `<div style="color: #9ca3af; font-size: 14px; text-align: center;">
