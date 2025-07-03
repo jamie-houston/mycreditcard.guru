@@ -21,6 +21,20 @@
             </select>
         </div>
         <div class="form-group">
+            <label for="filterCardType">Card Type</label>
+            <select id="filterCardType" onchange="filterCategories()">
+                <option value="">All Types</option>
+                <option value="personal">Personal</option>
+                <option value="business">Business</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="filterIssuer">Issuer</label>
+            <select id="filterIssuer" onchange="filterCategories()">
+                <option value="">All Issuers</option>
+            </select>
+        </div>
+        <div class="form-group">
             <label for="filterRewardRate">Minimum Reward Rate</label>
             <select id="filterRewardRate" onchange="filterCategories()">
                 <option value="">Any Rate</option>
@@ -33,6 +47,11 @@
         <div class="form-group">
             <label for="searchCategories">Search Categories</label>
             <input type="text" id="searchCategories" placeholder="Search by name..." oninput="filterCategories()">
+        </div>
+        <div class="form-group" style="display: flex; align-items: end;">
+            <button onclick="resetFilters()" style="background: #6b7280; color: white; padding: 12px 20px; border: none; border-radius: 6px; cursor: pointer; font-weight: 500;">
+                Reset Filters
+            </button>
         </div>
     </div>
 </div>
@@ -55,6 +74,19 @@ async function loadCategories() {
         }
         
         allCategories = categories;
+        
+        // Load issuers for filter
+        const issuersResponse = await fetch(`${API_BASE}/cards/issuers/`);
+        const issuersData = await issuersResponse.json();
+        const issuers = issuersData.results || issuersData;
+        
+        const issuerSelect = document.getElementById('filterIssuer');
+        issuers.forEach(issuer => {
+            const option = document.createElement('option');
+            option.value = issuer.name;
+            option.textContent = issuer.name;
+            issuerSelect.appendChild(option);
+        });
         
         // Load user's current cards (if any)
         await loadUserCards();
@@ -79,32 +111,42 @@ async function loadUserCards() {
 
 async function filterCategories() {
     const ownershipFilter = document.getElementById('filterOwnership').value;
+    const cardTypeFilter = document.getElementById('filterCardType').value;
+    const issuerFilter = document.getElementById('filterIssuer').value;
     const rewardRateFilter = document.getElementById('filterRewardRate').value;
     const searchFilter = document.getElementById('searchCategories').value.toLowerCase();
     
-    // For ownership filtering, we need to get cards that user owns and their categories
+    // Get cards data for filtering by card type, issuer, and ownership
+    let cards = [];
     let userCategoryIds = new Set();
-    if (ownershipFilter !== 'all' && userCards.size > 0) {
-        try {
-            // Get cards data to find which categories they have
-            const cardsResponse = await fetch(`${API_BASE}/cards/cards/`);
-            const cardsData = await cardsResponse.json();
-            const cards = cardsData.results || cardsData;
-            
-            // Filter to user's cards and collect their category IDs
-            cards.filter(card => userCards.has(card.id))
-                 .forEach(card => {
-                     if (card.reward_categories) {
-                         card.reward_categories.forEach(rewardCat => {
-                             if (rewardCat.category && rewardCat.category.id) {
-                                 userCategoryIds.add(rewardCat.category.id);
-                             }
-                         });
-                     }
-                 });
-        } catch (error) {
-            console.error('Error loading cards for category filtering:', error);
-        }
+    let categoryCardData = new Map(); // category.id -> array of cards
+    
+    try {
+        const cardsResponse = await fetch(`${API_BASE}/cards/cards/`);
+        const cardsData = await cardsResponse.json();
+        cards = cardsData.results || cardsData;
+        
+        // Build category to cards mapping
+        cards.forEach(card => {
+            if (card.reward_categories) {
+                card.reward_categories.forEach(rewardCat => {
+                    if (rewardCat.category && rewardCat.category.id) {
+                        const categoryId = rewardCat.category.id;
+                        if (!categoryCardData.has(categoryId)) {
+                            categoryCardData.set(categoryId, []);
+                        }
+                        categoryCardData.get(categoryId).push(card);
+                        
+                        // For ownership filtering
+                        if (userCards.has(card.id)) {
+                            userCategoryIds.add(categoryId);
+                        }
+                    }
+                });
+            }
+        });
+    } catch (error) {
+        console.error('Error loading cards for category filtering:', error);
     }
     
     let filteredCategories = allCategories.filter(category => {
@@ -114,6 +156,24 @@ async function filterCategories() {
         }
         if (ownershipFilter === 'not_owned' && userCategoryIds.has(category.id)) {
             return false;
+        }
+        
+        // Card type filter
+        if (cardTypeFilter) {
+            const categoryCards = categoryCardData.get(category.id) || [];
+            const hasCardType = categoryCards.some(card => card.card_type === cardTypeFilter);
+            if (!hasCardType) {
+                return false;
+            }
+        }
+        
+        // Issuer filter
+        if (issuerFilter) {
+            const categoryCards = categoryCardData.get(category.id) || [];
+            const hasIssuer = categoryCards.some(card => card.issuer.name === issuerFilter);
+            if (!hasIssuer) {
+                return false;
+            }
         }
         
         // Reward rate filter
@@ -133,6 +193,15 @@ async function filterCategories() {
     });
     
     displayCategories(filteredCategories);
+}
+
+function resetFilters() {
+    document.getElementById('filterOwnership').value = 'all';
+    document.getElementById('filterCardType').value = '';
+    document.getElementById('filterIssuer').value = '';
+    document.getElementById('filterRewardRate').value = '';
+    document.getElementById('searchCategories').value = '';
+    filterCategories();
 }
 
 function displayCategories(categories) {
