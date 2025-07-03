@@ -27,7 +27,7 @@ This guide provides step-by-step instructions for deploying the Credit Card Guru
 
 1. Create a virtual environment:
    ```bash
-   mkvirtualenv --python=/usr/bin/python3.10 creditcard_guru
+   mkvirtualenv --python=/usr/bin/python3.13 creditcard_guru
    ```
 
 2. Install dependencies:
@@ -106,7 +106,7 @@ python manage.py collectstatic --noinput
 2. Create a new web app:
    - Choose "Manual configuration"
    - Select Python 3.10
-   - Set the source code directory: `/home/yourusername/mycreditcard.guru`
+   - Set the source code directory: `/home/foresterh/mycreditcard.guru`
 
 3. Edit the WSGI configuration file (`/var/www/yourusername_pythonanywhere_com_wsgi.py`):
    ```python
@@ -114,7 +114,7 @@ python manage.py collectstatic --noinput
    import sys
    
    # Add your project directory to the sys.path
-   path = '/home/yourusername/mycreditcard.guru'
+   path = '/home/foresterh/mycreditcard.guru'
    if path not in sys.path:
        sys.path.insert(0, path)
    
@@ -129,7 +129,7 @@ python manage.py collectstatic --noinput
    application = get_wsgi_application()
    ```
 
-4. Set the virtual environment path: `/home/yourusername/.virtualenvs/creditcard_guru`
+4. Set the virtual environment path: `/home/foresterh/.virtualenvs/creditcard_guru`
 
 ## Step 8: Configure Static Files
 
@@ -137,8 +137,8 @@ In the Web tab, add these static file mappings:
 
 | URL     | Directory                                    |
 |---------|----------------------------------------------|
-| /static/ | /home/yourusername/mycreditcard.guru/staticfiles |
-| /media/  | /home/yourusername/mycreditcard.guru/media      |
+| /static/ | /home/foresterh/mycreditcard.guru/staticfiles |
+| /media/  | /home/foresterh/mycreditcard.guru/media      |
 
 ## Step 9: Load Initial Data
 

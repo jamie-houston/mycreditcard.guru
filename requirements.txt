@@ -13,3 +13,7 @@ django-allauth>=0.57.0
 dj-database-url>=1.0.0
 whitenoise>=6.5.0
 gunicorn>=21.0.0
+PyJWT>=2.8.0
+cryptography>=41.0.0
+# uncomment for mysql db
+# mysqlclient>=2.2.0
