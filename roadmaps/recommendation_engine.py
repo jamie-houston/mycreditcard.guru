@@ -119,16 +119,16 @@ class RecommendationEngine:
             signup_bonus_value = self._get_signup_bonus_value(card)
             annual_fee = float(card.annual_fee)
             
-            # Simple scoring: first year value
-            first_year_value = annual_rewards + signup_bonus_value - annual_fee
+            # Scoring: use annual rewards only (no signup bonus) for consistency with owned cards
+            annual_value = annual_rewards - annual_fee
             
             card_scores.append({
                 'card': card,
-                'score': first_year_value,
+                'score': annual_value,
                 'annual_rewards': annual_rewards,
                 'signup_bonus': signup_bonus_value,
                 'rewards_breakdown': rewards_breakdown['breakdown'],
-                'reasoning': f"First year value: ${first_year_value:.0f} (${signup_bonus_value:.0f} bonus + ${annual_rewards:.0f} rewards - ${annual_fee} fee)"
+                'reasoning': f"Annual value: ${annual_value:.0f} (${annual_rewards:.0f} rewards - ${annual_fee} fee)"
             })
         
         # Sort by score and take top cards

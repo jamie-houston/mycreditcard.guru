@@ -411,15 +411,11 @@
 
                 // Display recommendations
                 const recommendations = data.recommendations || [];
-                const totalValue = data.total_estimated_rewards || 0;
                 
 
                 let html = `
                     <div class="results">
                         <h2>🎯 Your Personalized Credit Card Roadmap</h2>
-                        <p style="background: #10b981; color: white; padding: 15px; border-radius: 8px; text-align: center; font-size: 18px; font-weight: 600;">
-                            💰 Total Estimated First-Year Value: $${totalValue.toFixed(0)}
-                        </p>
                 `;
 
                 if (recommendations.length === 0) {
@@ -455,7 +451,7 @@
                                         <h3>${actionEmoji} ${rec.action.toUpperCase()}: ${rec.card.issuer} ${rec.card.name}</h3>
                                         <p><strong>Estimated Value:</strong> $${rec.estimated_rewards.toFixed(0)}</p>
                                         <p><strong>Annual Fee:</strong> $${rec.card.annual_fee}</p>
-                                        ${rec.card.signup_bonus_amount ? 
+                                        ${rec.card.signup_bonus_amount && rec.action === 'apply' ? 
                                             `<p><strong>Signup Bonus:</strong> ${rec.card.signup_bonus_amount} points/miles</p>` : ''
                                         }
                                         ${breakdownHtml}

@@ -175,32 +175,54 @@ class Command(BaseCommand):
                 # For signup bonus type, use the card's reward type
                 signup_bonus_type = primary_reward_type
                 
-                card, created = CreditCard.objects.get_or_create(
-                    name=card_data['name'],
-                    issuer=issuer,
-                    defaults={
-                        'annual_fee': card_data.get('annual_fee', 0),
-                        'signup_bonus_amount': signup_bonus_amount,
-                        'signup_bonus_type': signup_bonus_type,
-                        'signup_bonus_requirement': signup_bonus_requirement,
-                        'primary_reward_type': primary_reward_type,
-                        'metadata': {
+                # Find existing card by name and issuer
+                try:
+                    card = CreditCard.objects.get(name=card_data['name'], issuer=issuer)
+                    # Update existing card with imported data
+                    card.annual_fee = card_data.get('annual_fee', 0)
+                    card.signup_bonus_amount = signup_bonus_amount
+                    card.signup_bonus_type = signup_bonus_type
+                    card.signup_bonus_requirement = signup_bonus_requirement
+                    card.primary_reward_type = primary_reward_type
+                    card.card_type = card_data.get('card_type', 'personal')
+                    card.metadata = {
+                        'reward_value_multiplier': card_data.get('reward_value_multiplier', 0.01),
+                        **card_data.get('metadata', {})
+                    }
+                    card.save()
+                    
+                    # Clear existing reward categories and offers to replace with imported data
+                    card.reward_categories.all().delete()
+                    card.offers.all().delete()
+                    
+                    self.stdout.write(f'Updated card: {card}')
+                    created = False
+                except CreditCard.DoesNotExist:
+                    # Create new card
+                    card = CreditCard.objects.create(
+                        name=card_data['name'],
+                        issuer=issuer,
+                        annual_fee=card_data.get('annual_fee', 0),
+                        signup_bonus_amount=signup_bonus_amount,
+                        signup_bonus_type=signup_bonus_type,
+                        signup_bonus_requirement=signup_bonus_requirement,
+                        primary_reward_type=primary_reward_type,
+                        card_type=card_data.get('card_type', 'personal'),
+                        metadata={
                             'reward_value_multiplier': card_data.get('reward_value_multiplier', 0.01),
                             **card_data.get('metadata', {})
-                        },
-                    }
-                )
-                
-                if created:
+                        }
+                    )
                     self.stdout.write(f'Created card: {card}')
-                    
-                    # Import reward categories
-                    if 'reward_categories' in card_data:
-                        self.import_reward_categories(card, card_data['reward_categories'])
-                    
-                    # Import offers
-                    if 'offers' in card_data:
-                        self.import_card_offers(card, card_data['offers'])
+                    created = True
+                
+                # Import reward categories (for both new and updated cards)
+                if 'reward_categories' in card_data:
+                    self.import_reward_categories(card, card_data['reward_categories'])
+                
+                # Import offers (for both new and updated cards)
+                if 'offers' in card_data:
+                    self.import_card_offers(card, card_data['offers'])
                         
             except (Issuer.DoesNotExist, RewardType.DoesNotExist) as e:
                 self.stdout.write(
@@ -214,16 +236,15 @@ class Command(BaseCommand):
                 # Use card's reward type since we removed it from categories
                 reward_type = card.primary_reward_type
                 
-                RewardCategory.objects.get_or_create(
+                # Create new reward category (existing ones were already deleted)
+                RewardCategory.objects.create(
                     card=card,
                     category=category,
+                    reward_rate=category_data['reward_rate'],
+                    reward_type=reward_type,
                     start_date=category_data.get('start_date'),
-                    defaults={
-                        'reward_rate': category_data['reward_rate'],
-                        'reward_type': reward_type,
-                        'end_date': category_data.get('end_date'),
-                        'max_annual_spend': category_data.get('max_annual_spend'),
-                    }
+                    end_date=category_data.get('end_date'),
+                    max_annual_spend=category_data.get('max_annual_spend'),
                 )
                 
             except (SpendingCategory.DoesNotExist, RewardType.DoesNotExist) as e:
@@ -233,13 +254,12 @@ class Command(BaseCommand):
 
     def import_card_offers(self, card, offers):
         for offer_data in offers:
-            CardOffer.objects.get_or_create(
+            # Create new card offer (existing ones were already deleted)
+            CardOffer.objects.create(
                 card=card,
                 title=offer_data['title'],
-                defaults={
-                    'description': offer_data.get('description', ''),
-                    'value': offer_data.get('value', ''),
-                    'start_date': offer_data.get('start_date'),
-                    'end_date': offer_data.get('end_date'),
-                }
+                description=offer_data.get('description', ''),
+                value=offer_data.get('value', ''),
+                start_date=offer_data.get('start_date'),
+                end_date=offer_data.get('end_date'),
             )
