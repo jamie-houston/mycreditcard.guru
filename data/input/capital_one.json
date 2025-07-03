@@ -12,7 +12,7 @@
     "reward_value_multiplier": 0.01,
     "reward_categories": [
       { "category": "Travel", "reward_rate": 5.0 },
-      { "category": "General", "reward_rate": 1.25 }
+      { "category": "other", "reward_rate": 1.25 }
     ],
     "offers": [
       {
@@ -40,8 +40,8 @@
     "reward_value_multiplier": 0.01,
     "reward_categories": [
       { "category": "Dining", "reward_rate": 4.0 },
-      { "category": "Online Shopping", "reward_rate": 8.0 },
-      { "category": "General", "reward_rate": 1.0 }
+      { "category": "shopping", "reward_rate": 8.0 },
+      { "category": "other", "reward_rate": 1.0 }
     ],
     "offers": [
       {
@@ -69,7 +69,7 @@
     "reward_value_multiplier": 0.01,
     "reward_categories": [
       { "category": "Travel", "reward_rate": 5.0 },
-      { "category": "General", "reward_rate": 1.5 }
+      { "category": "other", "reward_rate": 1.5 }
     ],
     "offers": [
       {
@@ -97,7 +97,7 @@
     "reward_value_multiplier": 0.01,
     "reward_categories": [
       { "category": "Travel", "reward_rate": 5.0 },
-      { "category": "General", "reward_rate": 2.0 }
+      { "category": "other", "reward_rate": 2.0 }
     ],
     "offers": [
       {

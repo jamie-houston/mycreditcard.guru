@@ -1,59 +1,69 @@
 [
   {
-    "name": "Chase Sapphire Preferred® Card",
+    "name": "Chase Sapphire Preferred Card",
     "issuer": "Chase",
     "annual_fee": 95,
     "signup_bonus": {
-      "bonus_amount": 60000,
-      "spending_requirement": 5000,
+      "bonus_amount": 80000,
+      "spending_requirement": 4000,
       "time_limit_months": 3
     },
     "reward_type": "Points",
     "reward_value_multiplier": 0.0125,
     "reward_categories": [
-      { "category": "Dining", "reward_rate": 3.0 },
-      { "category": "Travel", "reward_rate": 2.0 },
-      { "category": "General", "reward_rate": 1.0 }
+      { "category": "dining", "reward_rate": 3.0 },
+      { "category": "travel", "reward_rate": 2.0 },
+      { "category": "other", "reward_rate": 1.0 }
     ],
     "offers": [
       {
-        "title": "Annual Fee Waived",
-        "description": "First year annual fee waived",
-        "value": "$95"
+        "title": "Travel Portal Bonus",
+        "description": "25% more value when booking through Chase Ultimate Rewards",
+        "value": "High travel value"
+      },
+      {
+        "title": "Annual Travel Credit",
+        "description": "$50 annual Ultimate Rewards hotel credit",
+        "value": "$50"
       }
     ]
   },
   {
-    "name": "Chase Sapphire Reserve® Card",
+    "name": "Chase Sapphire Reserve",
     "issuer": "Chase",
     "annual_fee": 550,
     "signup_bonus": {
-      "bonus_amount": 60000,
+      "bonus_amount": 80000,
       "spending_requirement": 4000,
       "time_limit_months": 3
     },
     "reward_type": "Points",
     "reward_value_multiplier": 0.015,
     "reward_categories": [
-      { "category": "Travel", "reward_rate": 3.0 },
-      { "category": "Dining", "reward_rate": 3.0 },
-      { "category": "General", "reward_rate": 1.0 }
+      { "category": "travel", "reward_rate": 3.0 },
+      { "category": "dining", "reward_rate": 3.0 },
+      { "category": "other", "reward_rate": 1.0 }
     ],
     "offers": [
       {
-        "title": "Premium Travel Benefits",
-        "description": "Airport lounge access and travel credits",
-        "value": "$300"
+        "title": "Travel Portal Bonus",
+        "description": "50% more value when booking through Chase Ultimate Rewards",
+        "value": "Excellent travel value"
       },
       {
         "title": "Annual Travel Credit",
         "description": "$300 annual travel credit",
         "value": "$300"
+      },
+      {
+        "title": "Priority Pass",
+        "description": "Complimentary Priority Pass Select membership",
+        "value": "$400+"
       }
     ]
   },
   {
-    "name": "Chase Freedom Unlimited®",
+    "name": "Chase Freedom Unlimited",
     "issuer": "Chase",
     "annual_fee": 0,
     "signup_bonus": {
@@ -64,19 +74,24 @@
     "reward_type": "Cashback",
     "reward_value_multiplier": 0.01,
     "reward_categories": [
-      { "category": "Dining", "reward_rate": 3.0 },
-      { "category": "General", "reward_rate": 1.5 }
+      { "category": "dining", "reward_rate": 3.0 },
+      { "category": "other", "reward_rate": 1.5 }
     ],
     "offers": [
       {
-        "title": "No Annual Fee",
-        "description": "No annual fee ever",
-        "value": "$0"
+        "title": "Flat Rate Rewards",
+        "description": "1.5% cash back on all purchases",
+        "value": "Simplicity"
+      },
+      {
+        "title": "Intro APR",
+        "description": "0% intro APR for 15 months",
+        "value": "$200+"
       }
     ]
   },
   {
-    "name": "Chase Freedom Flex®",
+    "name": "Chase Freedom Flex",
     "issuer": "Chase",
     "annual_fee": 0,
     "signup_bonus": {
@@ -87,15 +102,20 @@
     "reward_type": "Cashback",
     "reward_value_multiplier": 0.01,
     "reward_categories": [
-      { "category": "Gas", "reward_rate": 5.0 },
-      { "category": "Dining", "reward_rate": 3.0 },
-      { "category": "General", "reward_rate": 1.0 }
+      { "category": "gas", "reward_rate": 5.0 },
+      { "category": "dining", "reward_rate": 3.0 },
+      { "category": "other", "reward_rate": 1.0 }
     ],
     "offers": [
       {
-        "title": "Quarterly Categories",
-        "description": "5% cash back on rotating quarterly categories",
-        "value": "Up to $75"
+        "title": "Rotating Categories",
+        "description": "5% cash back on rotating quarterly categories up to $1,500",
+        "value": "High earning potential"
+      },
+      {
+        "title": "Intro APR",
+        "description": "0% intro APR for 15 months",
+        "value": "$200+"
       }
     ]
   }

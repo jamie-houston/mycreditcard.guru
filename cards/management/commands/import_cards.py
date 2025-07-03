@@ -232,7 +232,13 @@ class Command(BaseCommand):
     def import_reward_categories(self, card, reward_categories):
         for category_data in reward_categories:
             try:
-                category = SpendingCategory.objects.get(name=category_data['category'])
+                # Try case-sensitive match first
+                try:
+                    category = SpendingCategory.objects.get(name=category_data['category'])
+                except SpendingCategory.DoesNotExist:
+                    # Try case-insensitive match as fallback
+                    category = SpendingCategory.objects.get(name__iexact=category_data['category'])
+                
                 # Use card's reward type since we removed it from categories
                 reward_type = card.primary_reward_type
                 
@@ -249,7 +255,7 @@ class Command(BaseCommand):
                 
             except (SpendingCategory.DoesNotExist, RewardType.DoesNotExist) as e:
                 self.stdout.write(
-                    self.style.WARNING(f'Skipping reward category: {e}')
+                    self.style.WARNING(f'Skipping reward category "{category_data["category"]}": {e}')
                 )
 
     def import_card_offers(self, card, offers):
