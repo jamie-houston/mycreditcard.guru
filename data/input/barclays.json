@@ -1,0 +1,481 @@
+[
+  {
+    "name": "AAdvantage Aviator Red World Elite",
+    "issuer": "Barclays",
+    "annual_fee": 99,
+    "signup_bonus": {
+      "bonus_amount": 50000,
+      "spending_requirement": 99,
+      "time_limit_months": 3
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "personal",
+    "network": "Mastercard",
+    "url": "https://cards.barclaycardus.com/banking/cards/aadvantage-aviator-red-world-elite-mastercard/",
+    "image_url": "/images/barclays/aadvantage-aviator-red-world-elite.png",
+    "discontinued": false
+  },
+  {
+    "name": "AAdvantage Aviator World Elite Business",
+    "issuer": "Barclays",
+    "annual_fee": 95,
+    "signup_bonus": null,
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "business",
+    "network": "Mastercard",
+    "url": "https://creditcards.aa.com/barclay-credit-card-aviator-business-american-airlines-aadvantage/",
+    "image_url": "/images/barclays/aadvantage-aviator-world-elite-business.png",
+    "discontinued": false
+  },
+  {
+    "name": "AARP Essential Rewards",
+    "issuer": "Barclays",
+    "annual_fee": 0,
+    "signup_bonus": {
+      "bonus_amount": 100,
+      "spending_requirement": 500,
+      "time_limit_months": 3
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "personal",
+    "network": "Mastercard",
+    "url": "https://www.aarp.org/membership/benefits/finance/aarp-essential-rewards-mastercard-from-barclays/",
+    "image_url": "/images/barclays/aarp-essential-rewards.png",
+    "discontinued": false
+  },
+  {
+    "name": "AARP Travel Rewards",
+    "issuer": "Barclays",
+    "annual_fee": 0,
+    "signup_bonus": {
+      "bonus_amount": 100,
+      "spending_requirement": 500,
+      "time_limit_months": 3
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "personal",
+    "network": "Mastercard",
+    "url": "https://www.aarp.org/membership/benefits/finance/aarp-travel-rewards-mastercard-from-barclays/",
+    "image_url": "/images/barclays/aarp-travel-rewards.png",
+    "discontinued": false
+  },
+  {
+    "name": "Carnival World Mastercard",
+    "issuer": "Barclays",
+    "annual_fee": 0,
+    "signup_bonus": {
+      "bonus_amount": 20000,
+      "spending_requirement": 1000,
+      "time_limit_months": 3
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "personal",
+    "network": "Mastercard",
+    "url": "https://cards.barclaycardus.com/banking/cards/carnival-world-mastercard/",
+    "image_url": "/images/barclays/carnival-world-mastercard.png",
+    "discontinued": false
+  },
+  {
+    "name": "Emirates Skywards Premium World Elite",
+    "issuer": "Barclays",
+    "annual_fee": 499,
+    "signup_bonus": {
+      "bonus_amount": 70000,
+      "spending_requirement": 3000,
+      "time_limit_months": 3
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "personal",
+    "network": "Mastercard",
+    "url": "https://cards.barclaycardus.com/banking/cards/emirates-skywards-premium-world-elite-mastercard/",
+    "image_url": "/images/barclays/emirates-skywards-premium-world-elite.png",
+    "discontinued": false
+  },
+  {
+    "name": "Emirates Skywards Rewards World Elite",
+    "issuer": "Barclays",
+    "annual_fee": 99,
+    "signup_bonus": {
+      "bonus_amount": 40000,
+      "spending_requirement": 3000,
+      "time_limit_months": 3
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "personal",
+    "network": "Mastercard",
+    "url": "https://cards.barclaycardus.com/banking/cards/emirates-skywards-rewards-world-elite-mastercard/",
+    "image_url": "/images/barclays/emirates-skywards-rewards-world-elite.png",
+    "discontinued": false
+  },
+  {
+    "name": "Frontier Airlines World",
+    "issuer": "Barclays",
+    "annual_fee": 89,
+    "signup_bonus": {
+      "bonus_amount": 40000,
+      "spending_requirement": 500,
+      "time_limit_months": 3
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "personal",
+    "network": "Mastercard",
+    "url": "https://cards.barclaycardus.com/banking/cards/frontier-airlines-world-mastercard/",
+    "image_url": "/images/barclays/frontier-airlines-world.png",
+    "discontinued": false
+  },
+  {
+    "name": "Hawaiian Airlines World Elite",
+    "issuer": "Barclays",
+    "annual_fee": 99,
+    "signup_bonus": {
+      "bonus_amount": 60000,
+      "spending_requirement": 2000,
+      "time_limit_months": 3
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "personal",
+    "network": "Mastercard",
+    "url": "https://cards.barclaycardus.com/banking/cards/hawaiian-airlines-world-elite-mastercard/",
+    "image_url": "/images/barclays/hawaiian-airlines-world-elite.png",
+    "discontinued": false
+  },
+  {
+    "name": "JetBlue",
+    "issuer": "Barclays",
+    "annual_fee": 0,
+    "signup_bonus": {
+      "bonus_amount": 10000,
+      "spending_requirement": 1000,
+      "time_limit_months": 3
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "personal",
+    "network": "Mastercard",
+    "url": "https://cards.barclaycardus.com/banking/cards/jetblue-card/",
+    "image_url": "/images/barclays/jetblue.png",
+    "discontinued": false
+  },
+  {
+    "name": "JetBlue Business",
+    "issuer": "Barclays",
+    "annual_fee": 99,
+    "signup_bonus": {
+      "bonus_amount": 60000,
+      "spending_requirement": 2000,
+      "time_limit_months": 3
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "business",
+    "network": "Mastercard",
+    "url": "https://cards.barclaycardus.com/banking/cards/jetblue-business-card/",
+    "image_url": "/images/barclays/jetblue-business.png",
+    "discontinued": false
+  },
+  {
+    "name": "JetBlue Plus",
+    "issuer": "Barclays",
+    "annual_fee": 99,
+    "signup_bonus": {
+      "bonus_amount": 60000,
+      "spending_requirement": 1000,
+      "time_limit_months": 3
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "personal",
+    "network": "Mastercard",
+    "url": "https://cards.barclaycardus.com/banking/cards/jetblue-plus-card/",
+    "image_url": "/images/barclays/jetblue-plus.png",
+    "discontinued": false
+  },
+  {
+    "name": "JetBlue Premier",
+    "issuer": "Barclays",
+    "annual_fee": 499,
+    "signup_bonus": {
+      "bonus_amount": 60000,
+      "spending_requirement": 5000,
+      "time_limit_months": 3
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "personal",
+    "network": "Mastercard",
+    "url": "https://cards.barclaycardus.com/banking/cards/jetblue-premier-card/",
+    "image_url": "/images/barclays/jetblue-premier.png",
+    "discontinued": false
+  },
+  {
+    "name": "Lufthansa Miles & More",
+    "issuer": "Barclays",
+    "annual_fee": 89,
+    "signup_bonus": {
+      "bonus_amount": 60000,
+      "spending_requirement": 3000,
+      "time_limit_months": 3
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "personal",
+    "network": "Mastercard",
+    "url": "https://cards.barclaycardus.com/banking/cards/lufthansa-miles-more-world-elite-mastercard",
+    "image_url": "/images/barclays/lufthansa-miles-and-more.png",
+    "discontinued": false
+  },
+  {
+    "name": "Upromise",
+    "issuer": "Barclays",
+    "annual_fee": 0,
+    "signup_bonus": {
+      "bonus_amount": 100,
+      "spending_requirement": 500,
+      "time_limit_months": 3
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "personal",
+    "network": "Mastercard",
+    "url": "https://cards.barclaycardus.com/banking/cards/upromise-world-mastercard/",
+    "image_url": "/images/barclays/upromise.png",
+    "discontinued": false
+  },
+  {
+    "name": "Wyndham Rewards Earner",
+    "issuer": "Barclays",
+    "annual_fee": 0,
+    "signup_bonus": {
+      "bonus_amount": 60000,
+      "spending_requirement": 2000,
+      "time_limit_months": 3
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "personal",
+    "network": "Visa",
+    "url": "https://www.wyndhamrewardscreditcard.com/#earner",
+    "image_url": "/images/barclays/wyndham-rewards-earner.svg",
+    "discontinued": false
+  },
+  {
+    "name": "Wyndham Rewards Earner Business",
+    "issuer": "Barclays",
+    "annual_fee": 95,
+    "signup_bonus": {
+      "bonus_amount": 75000,
+      "spending_requirement": 4000,
+      "time_limit_months": 3
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "business",
+    "network": "Visa",
+    "url": "https://www.wyndhamrewardscreditcard.com/#earnerbusiness",
+    "image_url": "/images/barclays/wyndham-rewards-earner-business.png",
+    "discontinued": false
+  },
+  {
+    "name": "Wyndham Rewards Earner Plus",
+    "issuer": "Barclays",
+    "annual_fee": 75,
+    "signup_bonus": {
+      "bonus_amount": 90000,
+      "spending_requirement": 2000,
+      "time_limit_months": 3
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "personal",
+    "network": "Visa",
+    "url": "https://www.wyndhamrewardscreditcard.com/#earnerplus",
+    "image_url": "/images/barclays/wyndham-rewards-earner-plus.png",
+    "discontinued": false
+  },
+  {
+    "name": "Hawaiian Airlines World Elite Business",
+    "issuer": "Barclays",
+    "annual_fee": 99,
+    "signup_bonus": {
+      "bonus_amount": 50000,
+      "spending_requirement": 4000,
+      "time_limit_months": 3
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "business",
+    "network": "Mastercard",
+    "url": "https://cards.barclaycardus.com/banking/cards/hawaiian-airlines-world-elite-business-mastercard/",
+    "image_url": "/images/barclays/hawaiian-airlines-world-elite-business.png",
+    "discontinued": false
+  },
+  {
+    "name": "Breeze",
+    "issuer": "Barclays",
+    "annual_fee": 89,
+    "signup_bonus": {
+      "bonus_amount": 50000,
+      "spending_requirement": 1000,
+      "time_limit_months": 3
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "personal",
+    "network": "Visa",
+    "url": "https://cards.barclaycardus.com/banking/credit-card/breeze-airways/visa-visa-signature-preferred/partner-banner/d4de94d1-c1da-4237-9eff-df975fb4bb87",
+    "image_url": "/images/barclays/breeze.png",
+    "discontinued": false
+  },
+  {
+    "name": "Xbox",
+    "issuer": "Barclays",
+    "annual_fee": 0,
+    "signup_bonus": {
+      "bonus_amount": 5000,
+      "spending_requirement": 0.01,
+      "time_limit_months": 6
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "personal",
+    "network": "Mastercard",
+    "url": "https://cards.barclaycardus.com/banking/cards/xbox-mastercard/",
+    "image_url": "/images/barclays/xbox.png",
+    "discontinued": false
+  }
+]

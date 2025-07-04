@@ -15,17 +15,17 @@
         <div class="form-group">
             <label for="filterOwnership">Ownership</label>
             <select id="filterOwnership" onchange="filterCards()">
-                <option value="not_owned" selected>Not Owned</option>
+                <option value="not_owned">Not Owned</option>
                 <option value="owned">Owned</option>
-                <option value="all">All Cards</option>
+                <option value="all" selected>All Cards</option>
             </select>
         </div>
         <div class="form-group">
             <label for="filterCardType">Card Type</label>
             <select id="filterCardType" onchange="filterCards()">
-                <option value="personal" selected>Personal</option>
+                <option value="personal">Personal</option>
                 <option value="business">Business</option>
-                <option value="all">All Types</option>
+                <option value="all" selected>All Types</option>
             </select>
         </div>
         <div class="form-group">
@@ -74,15 +74,18 @@
 </div>
 
 <script>
+// Fixed pagination issue: 2025-07-04-v3
 let allCards = [];
 let userCards = new Set();
 
 async function loadCards() {
     try {
-        // Load cards
-        const cardsResponse = await fetch(`${API_BASE}/cards/cards/`);
+        // Load cards - all cards without pagination
+        const cardsResponse = await fetch(`${API_BASE}/cards/cards/`, {
+            cache: 'no-cache'
+        });
         const cardsData = await cardsResponse.json();
-        allCards = cardsData.results || cardsData;
+        allCards = cardsData; // No pagination, so no 'results' wrapper
         
         // Load issuers for filter
         const issuersResponse = await fetch(`${API_BASE}/cards/issuers/`);
@@ -189,6 +192,12 @@ function filterCards() {
     const feeFilter = document.getElementById('filterFee').value;
     const searchFilter = document.getElementById('searchCards').value.toLowerCase();
     
+    console.log('Filtering with:', {
+        issuerFilter,
+        totalCards: allCards.length,
+        uniqueIssuers: [...new Set(allCards.map(c => c.issuer.name.toLowerCase()))]
+    });
+    
     let filteredCards = allCards.filter(card => {
         // Ownership filter
         const hasCard = userCards.has(card.id);
@@ -221,7 +230,7 @@ function filterCards() {
         
         // Fee filter
         if (feeFilter) {
-            const fee = card.annual_fee;
+            const fee = parseFloat(card.annual_fee) || 0;
             if (feeFilter === '0' && fee !== 0) return false;
             if (feeFilter === '1-95' && (fee < 1 || fee > 95)) return false;
             if (feeFilter === '96-250' && (fee < 96 || fee > 250)) return false;
@@ -240,8 +249,8 @@ function filterCards() {
 }
 
 function resetFilters() {
-    document.getElementById('filterOwnership').value = 'not_owned';
-    document.getElementById('filterCardType').value = 'personal';
+    document.getElementById('filterOwnership').value = 'all';
+    document.getElementById('filterCardType').value = 'all';
     document.getElementById('filterIssuer').value = '';
     document.getElementById('filterRewardType').value = '';
     document.getElementById('filterRewardCategory').value = '';

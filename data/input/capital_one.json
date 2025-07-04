@@ -1,91 +1,140 @@
 [
   {
-    "name": "Capital One VentureOne Rewards Credit Card",
+    "name": "Quicksilver",
+    "issuer": "Capital One",
+    "annual_fee": 0,
+    "signup_bonus": {
+      "bonus_amount": 200,
+      "spending_requirement": 500,
+      "time_limit_months": 3
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "personal",
+    "network": "Visa",
+    "url": "https://www.capitalone.com/credit-cards/quicksilver/",
+    "image_url": "/images/capitalone/quicksilver.webp",
+    "discontinued": false
+  },
+  {
+    "name": "Savor",
+    "issuer": "Capital One",
+    "annual_fee": 0,
+    "signup_bonus": {
+      "bonus_amount": 200,
+      "spending_requirement": 500,
+      "time_limit_months": 3
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "personal",
+    "network": "Visa",
+    "url": "https://www.capitalone.com/credit-cards/savor/",
+    "image_url": "/images/capitalone/savor.webp",
+    "discontinued": false
+  },
+  {
+    "name": "Spark 1.5% Cash Select",
+    "issuer": "Capital One",
+    "annual_fee": 0,
+    "signup_bonus": {
+      "bonus_amount": 500,
+      "spending_requirement": 4500,
+      "time_limit_months": 3
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "business",
+    "network": "Visa",
+    "url": "https://www.capitalone.com/small-business/credit-cards/spark-cash-select",
+    "image_url": "/images/capitalone/spark-cash.webp",
+    "discontinued": false
+  },
+  {
+    "name": "Spark 1.5% Miles Select",
     "issuer": "Capital One",
     "annual_fee": 0,
     "signup_bonus": {
       "bonus_amount": 50000,
-      "spending_requirement": 1000,
-      "time_limit_months": 3
-    },
-    "reward_type": "Miles",
-    "reward_value_multiplier": 0.01,
-    "reward_categories": [
-      { "category": "Travel", "reward_rate": 5.0 },
-      { "category": "other", "reward_rate": 1.25 }
-    ],
-    "offers": [
-      {
-        "title": "No Annual Fee",
-        "description": "No annual fee ever",
-        "value": "$0"
-      },
-      {
-        "title": "Travel Portal Bonus",
-        "description": "5X miles on hotels and rental cars via Capital One Travel",
-        "value": "High earning"
-      }
-    ]
-  },
-  {
-    "name": "Capital One Savor Cash Rewards Credit Card",
-    "issuer": "Capital One",
-    "annual_fee": 0,
-    "signup_bonus": {
-      "bonus_amount": 20000,
-      "spending_requirement": 500,
+      "spending_requirement": 4500,
       "time_limit_months": 3
     },
     "reward_type": "Cashback",
     "reward_value_multiplier": 0.01,
     "reward_categories": [
-      { "category": "Dining", "reward_rate": 4.0 },
-      { "category": "shopping", "reward_rate": 8.0 },
-      { "category": "other", "reward_rate": 1.0 }
-    ],
-    "offers": [
       {
-        "title": "High Entertainment Rewards",
-        "description": "8% cash back on streaming, 4% on dining and entertainment",
-        "value": "High earning"
-      },
-      {
-        "title": "No Annual Fee",
-        "description": "No annual fee ever",
-        "value": "$0"
+        "category": "other",
+        "reward_rate": 1
       }
-    ]
+    ],
+    "card_type": "business",
+    "network": "Visa",
+    "url": "https://www.capitalone.com/small-business/credit-cards/spark-miles-select/",
+    "image_url": "/images/capitalone/spark-miles.webp",
+    "discontinued": false
   },
   {
-    "name": "Capital One Quicksilver Cash Rewards Credit Card",
+    "name": "Spark 2% Cash Plus",
     "issuer": "Capital One",
-    "annual_fee": 0,
+    "annual_fee": 150,
+    "signup_bonus": null,
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "business",
+    "network": "Visa",
+    "url": "https://www.capitalone.com/small-business/credit-cards/spark-cash-plus/",
+    "image_url": "/images/capitalone/spark-cash.webp",
+    "discontinued": false
+  },
+  {
+    "name": "Spark 2x Miles Plus",
+    "issuer": "Capital One",
+    "annual_fee": 99,
     "signup_bonus": {
-      "bonus_amount": 20000,
-      "spending_requirement": 500,
+      "bonus_amount": 50000,
+      "spending_requirement": 4500,
       "time_limit_months": 3
     },
     "reward_type": "Cashback",
     "reward_value_multiplier": 0.01,
     "reward_categories": [
-      { "category": "Travel", "reward_rate": 5.0 },
-      { "category": "other", "reward_rate": 1.5 }
-    ],
-    "offers": [
       {
-        "title": "Flat Rate Rewards",
-        "description": "Unlimited 1.5% cash back on every purchase",
-        "value": "Simplicity"
-      },
-      {
-        "title": "Intro APR Offer",
-        "description": "0% intro APR for 15 months on purchases",
-        "value": "$200+"
+        "category": "other",
+        "reward_rate": 1
       }
-    ]
+    ],
+    "card_type": "business",
+    "network": "Visa",
+    "url": "https://www.capitalone.com/small-business/credit-cards/spark-miles/",
+    "image_url": "/images/capitalone/spark-miles.webp",
+    "discontinued": false
   },
   {
-    "name": "Capital One Venture Rewards Credit Card",
+    "name": "Venture Rewards",
     "issuer": "Capital One",
     "annual_fee": 95,
     "signup_bonus": {
@@ -93,23 +142,83 @@
       "spending_requirement": 4000,
       "time_limit_months": 3
     },
-    "reward_type": "Miles",
+    "reward_type": "Cashback",
     "reward_value_multiplier": 0.01,
     "reward_categories": [
-      { "category": "Travel", "reward_rate": 5.0 },
-      { "category": "other", "reward_rate": 2.0 }
-    ],
-    "offers": [
       {
-        "title": "High Flat Rate",
-        "description": "2X miles on every purchase",
-        "value": "Simple earning"
-      },
-      {
-        "title": "Travel Portal Bonus",
-        "description": "5X miles on hotels and rental cars via Capital One Travel",
-        "value": "High travel earning"
+        "category": "other",
+        "reward_rate": 1
       }
-    ]
+    ],
+    "card_type": "personal",
+    "network": "Visa",
+    "url": "https://www.capitalone.com/credit-cards/venture/",
+    "image_url": "/images/capitalone/venture-rewards.webp",
+    "discontinued": false
+  },
+  {
+    "name": "Venture X",
+    "issuer": "Capital One",
+    "annual_fee": 395,
+    "signup_bonus": {
+      "bonus_amount": 75000,
+      "spending_requirement": 4000,
+      "time_limit_months": 3
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 2
+      }
+    ],
+    "card_type": "personal",
+    "network": "Visa",
+    "url": "https://www.capitalone.com/credit-cards/venture-x/",
+    "image_url": "/images/capitalone/venture-x.webp",
+    "discontinued": false
+  },
+  {
+    "name": "Venture X Business",
+    "issuer": "Capital One",
+    "annual_fee": 395,
+    "signup_bonus": null,
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 2
+      }
+    ],
+    "card_type": "business",
+    "network": "Visa",
+    "url": "https://www.capitalone.com/small-business/credit-cards/venture-x-business/",
+    "image_url": "/images/capitalone/venture-x-business.png",
+    "discontinued": false
+  },
+  {
+    "name": "VentureOne",
+    "issuer": "Capital One",
+    "annual_fee": 0,
+    "signup_bonus": {
+      "bonus_amount": 20000,
+      "spending_requirement": 500,
+      "time_limit_months": 3
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "personal",
+    "network": "Visa",
+    "url": "https://www.capitalone.com/credit-cards/ventureone/",
+    "image_url": "/images/capitalone/venture-one.webp",
+    "discontinued": false
   }
 ]

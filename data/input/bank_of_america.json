@@ -1,0 +1,301 @@
+[
+  {
+    "name": "Air France KLM",
+    "issuer": "Bank of America",
+    "annual_fee": 89,
+    "signup_bonus": {
+      "bonus_amount": 70000,
+      "spending_requirement": 3000,
+      "time_limit_months": 3
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "personal",
+    "network": "Mastercard",
+    "url": "https://wwws.airfrance.us/information/flyingblue/carte-bancaire-partenaire",
+    "image_url": "/images/bankofamerica/air-france-klm.webp",
+    "discontinued": false
+  },
+  {
+    "name": "Alaska Airlines",
+    "issuer": "Bank of America",
+    "annual_fee": 95,
+    "signup_bonus": {
+      "bonus_amount": 50000,
+      "spending_requirement": 3000,
+      "time_limit_months": 3
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "personal",
+    "network": "Visa",
+    "url": "https://www.bankofamerica.com/credit-cards/products/alaska-airlines-credit-card/",
+    "image_url": "/images/bankofamerica/alaska-airlines.png",
+    "discontinued": false
+  },
+  {
+    "name": "Alaska Airlines Business",
+    "issuer": "Bank of America",
+    "annual_fee": 75,
+    "signup_bonus": {
+      "bonus_amount": 60000,
+      "spending_requirement": 3000,
+      "time_limit_months": 3
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "business",
+    "network": "Visa",
+    "url": "https://www.alaskaair.com/content/credit-card/visa-small-business-card",
+    "image_url": "/images/bankofamerica/alaska-airlines-business.png",
+    "discontinued": false
+  },
+  {
+    "name": "Customized Cash Rewards",
+    "issuer": "Bank of America",
+    "annual_fee": 0,
+    "signup_bonus": {
+      "bonus_amount": 200,
+      "spending_requirement": 1000,
+      "time_limit_months": 3
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "personal",
+    "network": "Visa",
+    "url": "https://www.bankofamerica.com/credit-cards/products/cash-back-credit-card/",
+    "image_url": "/images/bankofamerica/customized-cash-rewards.jpg",
+    "discontinued": false
+  },
+  {
+    "name": "Premium Rewards",
+    "issuer": "Bank of America",
+    "annual_fee": 95,
+    "signup_bonus": {
+      "bonus_amount": 60000,
+      "spending_requirement": 4000,
+      "time_limit_months": 3
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "personal",
+    "network": "Visa",
+    "url": "https://www.bankofamerica.com/credit-cards/products/premium-rewards-credit-card/",
+    "image_url": "/images/bankofamerica/premium-rewards.png",
+    "discontinued": false
+  },
+  {
+    "name": "Premium Rewards Elite",
+    "issuer": "Bank of America",
+    "annual_fee": 550,
+    "signup_bonus": {
+      "bonus_amount": 75000,
+      "spending_requirement": 5000,
+      "time_limit_months": 3
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "personal",
+    "network": "Visa",
+    "url": "https://www.bankofamerica.com/credit-cards/products/premium-rewards-elite-credit-card/",
+    "image_url": "/images/bankofamerica/premium-rewards-elite.png",
+    "discontinued": false
+  },
+  {
+    "name": "Travel Rewards",
+    "issuer": "Bank of America",
+    "annual_fee": 0,
+    "signup_bonus": {
+      "bonus_amount": 25000,
+      "spending_requirement": 1000,
+      "time_limit_months": 3
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1.5
+      }
+    ],
+    "card_type": "personal",
+    "network": "Visa",
+    "url": "https://www.bankofamerica.com/credit-cards/products/travel-rewards-credit-card/",
+    "image_url": "/images/bankofamerica/travel-rewards.png",
+    "discontinued": false
+  },
+  {
+    "name": "Unlimited Cash Rewards",
+    "issuer": "Bank of America",
+    "annual_fee": 0,
+    "signup_bonus": {
+      "bonus_amount": 200,
+      "spending_requirement": 1000,
+      "time_limit_months": 3
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1.5
+      }
+    ],
+    "card_type": "personal",
+    "network": "Visa",
+    "url": "https://www.bankofamerica.com/credit-cards/products/unlimited-cash-back-credit-card/",
+    "image_url": "/images/bankofamerica/unlimited-cash-rewards.png",
+    "discontinued": false
+  },
+  {
+    "name": "Business Advantage Customized Cash",
+    "issuer": "Bank of America",
+    "annual_fee": 0,
+    "signup_bonus": {
+      "bonus_amount": 300,
+      "spending_requirement": 3000,
+      "time_limit_months": 3
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1.5
+      }
+    ],
+    "card_type": "business",
+    "network": "Mastercard",
+    "url": "https://www.bankofamerica.com/smallbusiness/credit-cards/products/cash-rewards-business-credit-card",
+    "image_url": "/images/bankofamerica/business-advantage-customized-cash.jpg",
+    "discontinued": false
+  },
+  {
+    "name": "Business Advantage Unlimited Cash",
+    "issuer": "Bank of America",
+    "annual_fee": 0,
+    "signup_bonus": {
+      "bonus_amount": 300,
+      "spending_requirement": 3000,
+      "time_limit_months": 3
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1.5
+      }
+    ],
+    "card_type": "business",
+    "network": "Mastercard",
+    "url": "https://www.bankofamerica.com/smallbusiness/credit-cards/products/unlimited-cash-rewards-business-credit-card",
+    "image_url": "/images/bankofamerica/business-advantage-unlimited-cash.webp",
+    "discontinued": false
+  },
+  {
+    "name": "Business Advantage Travel Rewards",
+    "issuer": "Bank of America",
+    "annual_fee": 0,
+    "signup_bonus": {
+      "bonus_amount": 30000,
+      "spending_requirement": 3000,
+      "time_limit_months": 3
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1.5
+      }
+    ],
+    "card_type": "business",
+    "network": "Mastercard",
+    "url": "https://www.bankofamerica.com/smallbusiness/credit-cards/products/travel-rewards-business-credit-card",
+    "image_url": "/images/bankofamerica/business-advantage-travel-rewards.webp",
+    "discontinued": false
+  },
+  {
+    "name": "Platinum Plus",
+    "issuer": "Bank of America",
+    "annual_fee": 0,
+    "signup_bonus": {
+      "bonus_amount": 300,
+      "spending_requirement": 3000,
+      "time_limit_months": 3
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1.5
+      }
+    ],
+    "card_type": "business",
+    "network": "Mastercard",
+    "url": "https://www.bankofamerica.com/smallbusiness/credit-cards/products/platinum-plus-business-credit-card",
+    "image_url": "/images/bankofamerica/platinum-plus.webp",
+    "discontinued": false
+  },
+  {
+    "name": "Free Spirit",
+    "issuer": "Bank of America",
+    "annual_fee": 79,
+    "signup_bonus": {
+      "bonus_amount": 50000,
+      "spending_requirement": 1000,
+      "time_limit_months": 3
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1.5
+      }
+    ],
+    "card_type": "personal",
+    "network": "Mastercard",
+    "url": "https://www.bankofamerica.com/credit-cards/products/spirit-airlines-credit-card/",
+    "image_url": "/images/bankofamerica/free-spirit.webp",
+    "discontinued": false
+  }
+]

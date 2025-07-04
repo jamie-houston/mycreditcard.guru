@@ -1,90 +1,205 @@
 [
   {
-    "name": "Citi Double Cash Card",
+    "name": "AAdvantage Executive",
+    "issuer": "Citi",
+    "annual_fee": 595,
+    "signup_bonus": {
+      "bonus_amount": 100000,
+      "spending_requirement": 10000,
+      "time_limit_months": 3
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "personal",
+    "network": "Mastercard",
+    "url": "https://creditcards.aa.com/citi-executive-card-american-airlines-direct/",
+    "image_url": "/images/citi/aadvantage-executive.webp",
+    "discontinued": false
+  },
+  {
+    "name": "AAdvantage MileUp",
     "issuer": "Citi",
     "annual_fee": 0,
     "signup_bonus": {
-      "bonus_amount": 20000,
-      "spending_requirement": 1500,
+      "bonus_amount": 15000,
+      "spending_requirement": 500,
+      "time_limit_months": 3
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "personal",
+    "network": "Mastercard",
+    "url": "https://creditcards.aa.com/citi-mileup-card-american-airlines-direct/",
+    "image_url": "/images/citi/aadvantage-mileup.webp",
+    "discontinued": false
+  },
+  {
+    "name": "AAdvantage Platinum Select",
+    "issuer": "Citi",
+    "annual_fee": 99,
+    "signup_bonus": {
+      "bonus_amount": 50000,
+      "spending_requirement": 2500,
+      "time_limit_months": 3
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "personal",
+    "network": "Mastercard",
+    "url": "https://creditcards.aa.com/",
+    "image_url": "/images/citi/aadvantage-platinum-select.webp",
+    "discontinued": false
+  },
+  {
+    "name": "AAdvantage Platinum Select Business",
+    "issuer": "Citi",
+    "annual_fee": 99,
+    "signup_bonus": {
+      "bonus_amount": 65000,
+      "spending_requirement": 4000,
       "time_limit_months": 4
     },
     "reward_type": "Cashback",
     "reward_value_multiplier": 0.01,
     "reward_categories": [
-      { "category": "other", "reward_rate": 2.0 }
-    ],
-    "offers": [
       {
-        "title": "Flat Rate Rewards",
-        "description": "2% cash back on all purchases (1% when you buy, 1% when you pay)",
-        "value": "Simplicity"
-      },
-      {
-        "title": "Intro APR",
-        "description": "0% intro APR for 18 months on balance transfers",
-        "value": "$300+"
+        "category": "other",
+        "reward_rate": 1
       }
-    ]
+    ],
+    "card_type": "business",
+    "network": "Mastercard",
+    "url": "https://creditcards.aa.com/cards/citi-business-card-american-airlines-direct/",
+    "image_url": "/images/citi/aadvantage-platinum-select-business.webp",
+    "discontinued": false
   },
   {
-    "name": "Citi Premier Card",
+    "name": "Double Cash",
+    "issuer": "Citi",
+    "annual_fee": 0,
+    "signup_bonus": {
+      "bonus_amount": 200,
+      "spending_requirement": 1500,
+      "time_limit_months": 6
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 2
+      }
+    ],
+    "card_type": "personal",
+    "network": "Mastercard",
+    "url": "https://www.citi.com/credit-cards/citi-double-cash-credit-card",
+    "image_url": "/images/citi/double-cash.png",
+    "discontinued": false
+  },
+  {
+    "name": "Custom Cash",
+    "issuer": "Citi",
+    "annual_fee": 0,
+    "signup_bonus": {
+      "bonus_amount": 200,
+      "spending_requirement": 1500,
+      "time_limit_months": 6
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 2
+      }
+    ],
+    "card_type": "personal",
+    "network": "Mastercard",
+    "url": "https://www.citi.com/credit-cards/citi-custom-cash-credit-card",
+    "image_url": "/images/citi/custom-cash.png",
+    "discontinued": false
+  },
+  {
+    "name": "Strata Premier",
     "issuer": "Citi",
     "annual_fee": 95,
     "signup_bonus": {
-      "bonus_amount": 80000,
+      "bonus_amount": 60000,
       "spending_requirement": 4000,
       "time_limit_months": 3
     },
-    "reward_type": "Points",
+    "reward_type": "Cashback",
     "reward_value_multiplier": 0.01,
     "reward_categories": [
-      { "category": "travel", "reward_rate": 2.0 },
-      { "category": "dining", "reward_rate": 2.0 },
-      { "category": "gas", "reward_rate": 2.0 },
-      { "category": "other", "reward_rate": 1.0 }
-    ],
-    "offers": [
       {
-        "title": "Annual Fee Waived",
-        "description": "First year annual fee waived",
-        "value": "$95"
-      },
-      {
-        "title": "Travel Portal Bonus",
-        "description": "10% points back on eligible travel purchases through ThankYou portal",
-        "value": "High travel value"
+        "category": "other",
+        "reward_rate": 2
       }
-    ]
+    ],
+    "card_type": "personal",
+    "network": "Mastercard",
+    "url": "https://www.citi.com/credit-cards/citi-strata-premier-credit-card",
+    "image_url": "/images/citi/strata-premier.png",
+    "discontinued": false
   },
   {
-    "name": "Citi Strata Premier Card",
+    "name": "Rewards+",
     "issuer": "Citi",
-    "annual_fee": 95,
-    "signup_bonus": {
-      "bonus_amount": 70000,
-      "spending_requirement": 4000,
-      "time_limit_months": 3
-    },
-    "reward_type": "Points",
+    "annual_fee": 0,
+    "signup_bonus": null,
+    "reward_type": "Cashback",
     "reward_value_multiplier": 0.01,
     "reward_categories": [
-      { "category": "travel", "reward_rate": 10.0 },
-      { "category": "dining", "reward_rate": 3.0 },
-      { "category": "groceries", "reward_rate": 3.0 },
-      { "category": "gas", "reward_rate": 3.0 },
-      { "category": "other", "reward_rate": 1.0 }
-    ],
-    "offers": [
       {
-        "title": "High Travel Earning",
-        "description": "10X points on hotels, car rentals, and attractions",
-        "value": "Excellent travel earning"
-      },
-      {
-        "title": "Annual Fee Waived",
-        "description": "First year annual fee waived",
-        "value": "$95"
+        "category": "other",
+        "reward_rate": 2
       }
-    ]
+    ],
+    "card_type": "personal",
+    "network": "Mastercard",
+    "url": "https://www.citi.com/credit-cards/citi-rewards-plus-credit-card",
+    "image_url": "/images/citi/rewards-plus.png",
+    "discontinued": false
+  },
+  {
+    "name": "AT&T Points Plus",
+    "issuer": "Citi",
+    "annual_fee": 0,
+    "signup_bonus": {
+      "bonus_amount": 200,
+      "spending_requirement": 1000,
+      "time_limit_months": 3
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "personal",
+    "network": "Mastercard",
+    "url": "https://www.att.com/deals/att-points-plus-citi/",
+    "image_url": "/images/citi/att-points-plus.jpg",
+    "discontinued": false
   }
 ]

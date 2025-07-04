@@ -1,0 +1,71 @@
+[
+  {
+    "name": "Power Cash Rewards",
+    "issuer": "Penfed",
+    "annual_fee": 0,
+    "signup_bonus": {
+      "bonus_amount": 100,
+      "spending_requirement": 1500,
+      "time_limit_months": 3
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1.5
+      }
+    ],
+    "card_type": "personal",
+    "network": "Visa",
+    "url": "https://www.penfed.org/credit-cards/power-cash-rewards-visa",
+    "image_url": "/images/penfed/power-cash-rewards.png",
+    "discontinued": false
+  },
+  {
+    "name": "Platinum Rewards",
+    "issuer": "Penfed",
+    "annual_fee": 0,
+    "signup_bonus": {
+      "bonus_amount": 15000,
+      "spending_requirement": 1500,
+      "time_limit_months": 3
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "personal",
+    "network": "Visa",
+    "url": "https://www.penfed.org/credit-cards/platinum-rewards-visa",
+    "image_url": "/images/penfed/platinum-rewards.webp",
+    "discontinued": false
+  },
+  {
+    "name": "Pathfinder",
+    "issuer": "Penfed",
+    "annual_fee": 95,
+    "signup_bonus": {
+      "bonus_amount": 50000,
+      "spending_requirement": 3000,
+      "time_limit_months": 3
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "personal",
+    "network": "Visa",
+    "url": "https://www.penfed.org/credit-cards/pathfinder-rewards",
+    "image_url": "/images/penfed/pathfinder.webp",
+    "discontinued": false
+  }
+]

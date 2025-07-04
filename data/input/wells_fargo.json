@@ -1,0 +1,205 @@
+[
+  {
+    "name": "Signify Business Cash",
+    "issuer": "Wells Fargo",
+    "annual_fee": 0,
+    "signup_bonus": {
+      "bonus_amount": 500,
+      "spending_requirement": 5000,
+      "time_limit_months": 3
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 2
+      }
+    ],
+    "card_type": "business",
+    "network": "Mastercard",
+    "url": "https://creditcards.wellsfargo.com/business-credit-cards/signify-business-cash-credit-card",
+    "image_url": "/images/wellsfargo/signify-business-cash.png",
+    "discontinued": false
+  },
+  {
+    "name": "Active Cash",
+    "issuer": "Wells Fargo",
+    "annual_fee": 0,
+    "signup_bonus": {
+      "bonus_amount": 200,
+      "spending_requirement": 500,
+      "time_limit_months": 3
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 2
+      }
+    ],
+    "card_type": "personal",
+    "network": "Visa",
+    "url": "https://creditcards.wellsfargo.com/active-cash-credit-card/",
+    "image_url": "/images/wellsfargo/active-cash.png",
+    "discontinued": false
+  },
+  {
+    "name": "Autograph",
+    "issuer": "Wells Fargo",
+    "annual_fee": 0,
+    "signup_bonus": {
+      "bonus_amount": 20000,
+      "spending_requirement": 1000,
+      "time_limit_months": 3
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 2
+      }
+    ],
+    "card_type": "personal",
+    "network": "Visa",
+    "url": "https://creditcards.wellsfargo.com/autograph-visa-credit-card",
+    "image_url": "/images/wellsfargo/autograph.png",
+    "discontinued": false
+  },
+  {
+    "name": "Autograph Journey",
+    "issuer": "Wells Fargo",
+    "annual_fee": 95,
+    "signup_bonus": {
+      "bonus_amount": 60000,
+      "spending_requirement": 4000,
+      "time_limit_months": 3
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "personal",
+    "network": "Visa",
+    "url": "https://creditcards.wellsfargo.com/autograph-journey-visa-credit-card",
+    "image_url": "/images/wellsfargo/autograph.png",
+    "discontinued": false
+  },
+  {
+    "name": "Choice Privileges",
+    "issuer": "Wells Fargo",
+    "annual_fee": 0,
+    "signup_bonus": {
+      "bonus_amount": 60000,
+      "spending_requirement": 1000,
+      "time_limit_months": 3
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "personal",
+    "network": "Visa",
+    "url": "https://creditcards.wellsfargo.com/wells-fargo-choice-privileges-credit-cards",
+    "image_url": "/images/wellsfargo/choice-privileges.png",
+    "discontinued": false
+  },
+  {
+    "name": "Choice Privileges Select",
+    "issuer": "Wells Fargo",
+    "annual_fee": 95,
+    "signup_bonus": {
+      "bonus_amount": 60000,
+      "spending_requirement": 3000,
+      "time_limit_months": 3
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "personal",
+    "network": "Visa",
+    "url": "https://creditcards.wellsfargo.com/wells-fargo-choice-privileges-credit-cards",
+    "image_url": "/images/wellsfargo/choice-privileges-select.png",
+    "discontinued": false
+  },
+  {
+    "name": "Bilt",
+    "issuer": "Wells Fargo",
+    "annual_fee": 0,
+    "signup_bonus": null,
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "personal",
+    "network": "Mastercard",
+    "url": "https://www.biltrewards.com/card",
+    "image_url": "/images/wellsfargo/bilt.png",
+    "discontinued": false
+  },
+  {
+    "name": "Expedia One Key",
+    "issuer": "Wells Fargo",
+    "annual_fee": 0,
+    "signup_bonus": {
+      "bonus_amount": 400,
+      "spending_requirement": 1000,
+      "time_limit_months": 3
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1.5
+      }
+    ],
+    "card_type": "personal",
+    "network": "Mastercard",
+    "url": "https://www.expedia.com/one-key-cards",
+    "image_url": "/images/wellsfargo/one-key.png",
+    "discontinued": false
+  },
+  {
+    "name": "Expedia One Key+",
+    "issuer": "Wells Fargo",
+    "annual_fee": 99,
+    "signup_bonus": {
+      "bonus_amount": 600,
+      "spending_requirement": 3000,
+      "time_limit_months": 3
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 2
+      }
+    ],
+    "card_type": "personal",
+    "network": "Mastercard",
+    "url": "https://www.expedia.com/one-key-cards",
+    "image_url": "/images/wellsfargo/one-key.png",
+    "discontinued": false
+  }
+]

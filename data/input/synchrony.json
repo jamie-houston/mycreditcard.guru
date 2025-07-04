@@ -1,0 +1,48 @@
+[
+  {
+    "name": "Cathay Pacific",
+    "issuer": "Synchrony",
+    "annual_fee": 99,
+    "signup_bonus": {
+      "bonus_amount": 38000,
+      "spending_requirement": 3000,
+      "time_limit_months": 3
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "personal",
+    "network": "Visa",
+    "url": "https://pay.cathaypacific.com/en_US/offers/uscreditcard.html",
+    "image_url": "/images/synchrony/cathay-pacific.jpg",
+    "discontinued": false
+  },
+  {
+    "name": "Virgin Red Rewards",
+    "issuer": "Synchrony",
+    "annual_fee": 99,
+    "signup_bonus": {
+      "bonus_amount": 40000,
+      "spending_requirement": 3000,
+      "time_limit_months": 3
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "personal",
+    "network": "Mastercard",
+    "url": "https://www.virgin.com/en-us/virgin-red/rewards-credit-card",
+    "image_url": "/images/synchrony/virgin-red-rewards.webp",
+    "discontinued": false
+  }
+]

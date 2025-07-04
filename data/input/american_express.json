@@ -1,122 +1,707 @@
 [
   {
-    "name": "American Express Blue Cash Preferred Card",
+    "name": "Blue Business Cash",
+    "issuer": "American Express",
+    "annual_fee": 0,
+    "signup_bonus": {
+      "bonus_amount": 200,
+      "spending_requirement": 3000,
+      "time_limit_months": 3
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 2
+      }
+    ],
+    "card_type": "business",
+    "network": "American Express",
+    "url": "https://www.americanexpress.com/en-us/business/credit-cards/blue-business-cash/",
+    "image_url": "/images/amex/blue-business-cash.webp",
+    "discontinued": false
+  },
+  {
+    "name": "Blue Business Plus",
+    "issuer": "American Express",
+    "annual_fee": 0,
+    "signup_bonus": {
+      "bonus_amount": 15000,
+      "spending_requirement": 3000,
+      "time_limit_months": 3
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 2
+      }
+    ],
+    "card_type": "business",
+    "network": "American Express",
+    "url": "https://www.americanexpress.com/us/credit-cards/business/business-credit-cards/american-express-blue-business-plus-credit-card-amex/",
+    "image_url": "/images/amex/blue-business-plus.webp",
+    "discontinued": false
+  },
+  {
+    "name": "Blue Cash Everyday",
+    "issuer": "American Express",
+    "annual_fee": 0,
+    "signup_bonus": {
+      "bonus_amount": 250,
+      "spending_requirement": 2000,
+      "time_limit_months": 6
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 2
+      }
+    ],
+    "card_type": "personal",
+    "network": "American Express",
+    "url": "https://www.americanexpress.com/us/credit-cards/card/blue-cash-everyday/",
+    "image_url": "/images/amex/blue-cash-everyday.webp",
+    "discontinued": false
+  },
+  {
+    "name": "Blue Cash Preferred",
     "issuer": "American Express",
     "annual_fee": 95,
     "signup_bonus": {
-      "bonus_amount": 30000,
+      "bonus_amount": 300,
       "spending_requirement": 3000,
       "time_limit_months": 6
     },
     "reward_type": "Cashback",
     "reward_value_multiplier": 0.01,
     "reward_categories": [
-      { "category": "groceries", "reward_rate": 6.0 },
-      { "category": "gas", "reward_rate": 3.0 },
-      { "category": "other", "reward_rate": 1.0 }
-    ],
-    "offers": [
       {
-        "title": "High Grocery Rewards",
-        "description": "6% cash back at US supermarkets up to $6,000 per year",
-        "value": "High earning"
-      },
-      {
-        "title": "Annual Fee Waived",
-        "description": "First year annual fee waived",
-        "value": "$95"
+        "category": "other",
+        "reward_rate": 2
       }
-    ]
+    ],
+    "card_type": "personal",
+    "network": "American Express",
+    "url": "https://www.americanexpress.com/us/credit-cards/card/blue-cash-preferred/",
+    "image_url": "/images/amex/blue-cash-preferred.webp",
+    "discontinued": false
   },
   {
-    "name": "American Express Gold Card",
+    "name": "Blue Cash Preferred (Morgan Stanley)",
     "issuer": "American Express",
-    "annual_fee": 250,
+    "annual_fee": 95,
+    "signup_bonus": {
+      "bonus_amount": 250,
+      "spending_requirement": 3000,
+      "time_limit_months": 6
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 2
+      }
+    ],
+    "card_type": "personal",
+    "network": "American Express",
+    "url": "https://apply.americanexpress.com/amex-morgan-stanley-credit-cards/",
+    "image_url": "/images/amex/blue-cash-preferred-morgan-stanley.png",
+    "discontinued": false
+  },
+  {
+    "name": "Business Gold",
+    "issuer": "American Express",
+    "annual_fee": 375,
+    "signup_bonus": {
+      "bonus_amount": 100000,
+      "spending_requirement": 10000,
+      "time_limit_months": 3
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "business",
+    "network": "American Express",
+    "url": "https://www.americanexpress.com/us/credit-cards/business/business-credit-cards/american-express-business-gold-card-amex/",
+    "image_url": "/images/amex/business-gold.webp",
+    "discontinued": false
+  },
+  {
+    "name": "Business Green",
+    "issuer": "American Express",
+    "annual_fee": 95,
+    "signup_bonus": {
+      "bonus_amount": 25000,
+      "spending_requirement": 3000,
+      "time_limit_months": 3
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "business",
+    "network": "American Express",
+    "url": "https://www.americanexpress.com/us/credit-cards/business/business-credit-cards/american-express-business-green-card-amex/",
+    "image_url": "/images/amex/business-green.webp",
+    "discontinued": false
+  },
+  {
+    "name": "Business Platinum",
+    "issuer": "American Express",
+    "annual_fee": 695,
+    "signup_bonus": {
+      "bonus_amount": 150000,
+      "spending_requirement": 20000,
+      "time_limit_months": 3
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "business",
+    "network": "American Express",
+    "url": "https://www.americanexpress.com/us/credit-cards/business/business-credit-cards/american-express-business-platinum-credit-card-amex/",
+    "image_url": "/images/amex/business-platinum.webp",
+    "discontinued": false
+  },
+  {
+    "name": "Cash Magnet",
+    "issuer": "American Express",
+    "annual_fee": 0,
+    "signup_bonus": {
+      "bonus_amount": 200,
+      "spending_requirement": 2000,
+      "time_limit_months": 6
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1.5
+      }
+    ],
+    "card_type": "personal",
+    "network": "American Express",
+    "url": "https://www.americanexpress.com/us/credit-cards/card/cash-magnet/",
+    "image_url": "/images/amex/cash-magnet.webp",
+    "discontinued": false
+  },
+  {
+    "name": "Delta SkyMiles Blue",
+    "issuer": "American Express",
+    "annual_fee": 0,
+    "signup_bonus": {
+      "bonus_amount": 10000,
+      "spending_requirement": 1000,
+      "time_limit_months": 6
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "personal",
+    "network": "American Express",
+    "url": "https://www.americanexpress.com/us/credit-cards/card/delta-skymiles-blue-american-express-card/",
+    "image_url": "/images/amex/delta-skymiles-blue.jpg",
+    "discontinued": false
+  },
+  {
+    "name": "Delta SkyMiles Gold",
+    "issuer": "American Express",
+    "annual_fee": 150,
+    "signup_bonus": {
+      "bonus_amount": 80000,
+      "spending_requirement": 3000,
+      "time_limit_months": 6
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "personal",
+    "network": "American Express",
+    "url": "https://www.americanexpress.com/us/credit-cards/card/delta-skymiles-gold-american-express-card/",
+    "image_url": "/images/amex/delta-skymiles-gold.jpg",
+    "discontinued": false
+  },
+  {
+    "name": "Delta SkyMiles Gold Business",
+    "issuer": "American Express",
+    "annual_fee": 150,
     "signup_bonus": {
       "bonus_amount": 90000,
       "spending_requirement": 4000,
       "time_limit_months": 6
     },
-    "reward_type": "Points",
+    "reward_type": "Cashback",
     "reward_value_multiplier": 0.01,
     "reward_categories": [
-      { "category": "dining", "reward_rate": 4.0, "max_annual_spend": 4000 },
-      { "category": "groceries", "reward_rate": 4.0 },
-      { "category": "travel", "reward_rate": 3.0 },
-      { "category": "other", "reward_rate": 1.0 }
-    ],
-    "offers": [
       {
-        "title": "Dining Credits",
-        "description": "$120 annual dining credit ($10 monthly)",
-        "value": "$120"
-      },
-      {
-        "title": "Uber Credits",
-        "description": "$120 annual Uber credit ($10 monthly)",
-        "value": "$120"
+        "category": "other",
+        "reward_rate": 1
       }
-    ]
+    ],
+    "card_type": "business",
+    "network": "American Express",
+    "url": "https://www.americanexpress.com/en-us/business/credit-cards/delta-skymiles-gold/",
+    "image_url": "/images/amex/delta-skymiles-gold-business.webp",
+    "discontinued": false
   },
   {
-    "name": "American Express Platinum Card",
+    "name": "Delta SkyMiles Platinum",
+    "issuer": "American Express",
+    "annual_fee": 350,
+    "signup_bonus": {
+      "bonus_amount": 90000,
+      "spending_requirement": 4000,
+      "time_limit_months": 6
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "personal",
+    "network": "American Express",
+    "url": "https://www.americanexpress.com/us/credit-cards/card/delta-skymiles-platinum-american-express-card/",
+    "image_url": "/images/amex/delta-skymiles-platinum.webp",
+    "discontinued": false
+  },
+  {
+    "name": "Delta SkyMiles Platinum Business",
+    "issuer": "American Express",
+    "annual_fee": 350,
+    "signup_bonus": {
+      "bonus_amount": 100000,
+      "spending_requirement": 8000,
+      "time_limit_months": 6
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "business",
+    "network": "American Express",
+    "url": "https://www.americanexpress.com/en-us/business/credit-cards/delta-skymiles-platinum/",
+    "image_url": "/images/amex/delta-skymiles-platinum-business.webp",
+    "discontinued": false
+  },
+  {
+    "name": "Delta SkyMiles Reserve",
+    "issuer": "American Express",
+    "annual_fee": 650,
+    "signup_bonus": {
+      "bonus_amount": 100000,
+      "spending_requirement": 5000,
+      "time_limit_months": 6
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "personal",
+    "network": "American Express",
+    "url": "https://www.americanexpress.com/us/credit-cards/card/delta-skymiles-reserve-american-express-card/",
+    "image_url": "/images/amex/delta-skymiles-reserve.webp",
+    "discontinued": false
+  },
+  {
+    "name": "Delta SkyMiles Reserve Business",
+    "issuer": "American Express",
+    "annual_fee": 550,
+    "signup_bonus": {
+      "bonus_amount": 110000,
+      "spending_requirement": 10000,
+      "time_limit_months": 6
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "business",
+    "network": "American Express",
+    "url": "https://www.americanexpress.com/en-us/business/credit-cards/delta-skymiles-reserve/",
+    "image_url": "/images/amex/delta-skymiles-reserve-business.webp",
+    "discontinued": false
+  },
+  {
+    "name": "Gold",
+    "issuer": "American Express",
+    "annual_fee": 350,
+    "signup_bonus": {
+      "bonus_amount": 75000,
+      "spending_requirement": 6000,
+      "time_limit_months": 6
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "personal",
+    "network": "American Express",
+    "url": "https://www.americanexpress.com/us/credit-cards/card/gold-card/",
+    "image_url": "/images/amex/gold.webp",
+    "discontinued": false
+  },
+  {
+    "name": "Green",
+    "issuer": "American Express",
+    "annual_fee": 150,
+    "signup_bonus": {
+      "bonus_amount": 40000,
+      "spending_requirement": 3000,
+      "time_limit_months": 6
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "personal",
+    "network": "American Express",
+    "url": "https://www.americanexpress.com/us/credit-cards/card/green/",
+    "image_url": "/images/amex/green.webp",
+    "discontinued": false
+  },
+  {
+    "name": "Hilton Honors",
+    "issuer": "American Express",
+    "annual_fee": 0,
+    "signup_bonus": {
+      "bonus_amount": 100000,
+      "spending_requirement": 2000,
+      "time_limit_months": 6
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "personal",
+    "network": "American Express",
+    "url": "https://www.hilton.com/en/hilton-honors/credit-cards/",
+    "image_url": "/images/amex/hilton-honors.png",
+    "discontinued": false
+  },
+  {
+    "name": "Hilton Honors Aspire",
+    "issuer": "American Express",
+    "annual_fee": 550,
+    "signup_bonus": {
+      "bonus_amount": 175000,
+      "spending_requirement": 6000,
+      "time_limit_months": 6
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "personal",
+    "network": "American Express",
+    "url": "https://www.hilton.com/en/hilton-honors/credit-cards/",
+    "image_url": "/images/amex/hilton-honors-aspire.png",
+    "discontinued": false
+  },
+  {
+    "name": "Hilton Honors Business",
+    "issuer": "American Express",
+    "annual_fee": 175,
+    "signup_bonus": {
+      "bonus_amount": 175000,
+      "spending_requirement": 6000,
+      "time_limit_months": 6
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 5
+      }
+    ],
+    "card_type": "business",
+    "network": "American Express",
+    "url": "https://www.hilton.com/en/hilton-honors/credit-cards/",
+    "image_url": "/images/amex/hilton-honors-business.png",
+    "discontinued": false
+  },
+  {
+    "name": "Hilton Honors Surpass",
+    "issuer": "American Express",
+    "annual_fee": 95,
+    "signup_bonus": {
+      "bonus_amount": 130000,
+      "spending_requirement": 3000,
+      "time_limit_months": 6
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "personal",
+    "network": "American Express",
+    "url": "https://www.hilton.com/en/hilton-honors/credit-cards/",
+    "image_url": "/images/amex/hilton-honors-surpass.jpg",
+    "discontinued": false
+  },
+  {
+    "name": "Marriott Bonvoy Brilliant",
+    "issuer": "American Express",
+    "annual_fee": 650,
+    "signup_bonus": {
+      "bonus_amount": 150000,
+      "spending_requirement": 6000,
+      "time_limit_months": 6
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "personal",
+    "network": "American Express",
+    "url": "https://www.americanexpress.com/us/credit-cards/card/marriott-bonvoy-brilliant/",
+    "image_url": "/images/amex/marriott-bonvoy-brilliant.webp",
+    "discontinued": false
+  },
+  {
+    "name": "Marriott Bonvoy Business",
+    "issuer": "American Express",
+    "annual_fee": 125,
+    "signup_bonus": null,
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "business",
+    "network": "American Express",
+    "url": "https://www.americanexpress.com/us/credit-cards/business/business-credit-cards/amex-marriott-bonvoy-business-credit-card/",
+    "image_url": "/images/amex/marriott-bonvoy-business.webp",
+    "discontinued": false
+  },
+  {
+    "name": "Platinum",
     "issuer": "American Express",
     "annual_fee": 695,
     "signup_bonus": {
       "bonus_amount": 100000,
-      "spending_requirement": 6000,
+      "spending_requirement": 8000,
       "time_limit_months": 6
     },
-    "reward_type": "Points",
+    "reward_type": "Cashback",
     "reward_value_multiplier": 0.01,
     "reward_categories": [
-      { "category": "travel", "reward_rate": 12.0 },
-      { "category": "dining", "reward_rate": 6.0 },
-      { "category": "groceries", "reward_rate": 6.0 },
-      { "category": "gas", "reward_rate": 6.0 },
-      { "category": "other", "reward_rate": 3.0 }
-    ],
-    "offers": [
       {
-        "title": "Travel Credits",
-        "description": "$200 annual airline fee credit + $200 hotel credit",
-        "value": "$400"
-      },
-      {
-        "title": "Premium Benefits",
-        "description": "Airport lounge access, hotel elite status, and more",
-        "value": "$1000+"
+        "category": "other",
+        "reward_rate": 1
       }
-    ]
+    ],
+    "card_type": "personal",
+    "network": "American Express",
+    "url": "https://www.americanexpress.com/us/credit-cards/card/platinum/",
+    "image_url": "/images/amex/platinum.webp",
+    "discontinued": false
   },
   {
-    "name": "American Express Green Card",
+    "name": "Platinum (Schwab)",
     "issuer": "American Express",
-    "annual_fee": 150,
+    "annual_fee": 695,
     "signup_bonus": {
-      "bonus_amount": 50000,
-      "spending_requirement": 2000,
+      "bonus_amount": 80000,
+      "spending_requirement": 8000,
       "time_limit_months": 6
     },
-    "reward_type": "Points",
+    "reward_type": "Cashback",
     "reward_value_multiplier": 0.01,
     "reward_categories": [
-      { "category": "travel", "reward_rate": 3.0 },
-      { "category": "dining", "reward_rate": 2.0 },
-      { "category": "groceries", "reward_rate": 2.0 },
-      { "category": "other", "reward_rate": 1.0 }
-    ],
-    "offers": [
       {
-        "title": "CLEAR Credit",
-        "description": "Up to $189 annual CLEAR credit",
-        "value": "$189"
-      },
-      {
-        "title": "LoungeBuddy Credit",
-        "description": "$100 annual LoungeBuddy credit",
-        "value": "$100"
+        "category": "other",
+        "reward_rate": 1
       }
-    ]
+    ],
+    "card_type": "personal",
+    "network": "American Express",
+    "url": "https://www.schwab.com/credit-cards#panel--50-media-right-117911",
+    "image_url": "/images/amex/platinum-schwab.webp",
+    "discontinued": false
+  },
+  {
+    "name": "Platinum (Morgan Stanley)",
+    "issuer": "American Express",
+    "annual_fee": 695,
+    "signup_bonus": null,
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "personal",
+    "network": "American Express",
+    "url": "https://apply.americanexpress.com/amex-morgan-stanley-credit-cards/",
+    "image_url": "/images/amex/platinum-morgan-stanley.webp",
+    "discontinued": false
+  },
+  {
+    "name": "Marriott Bonvoy Bevy",
+    "issuer": "American Express",
+    "annual_fee": 250,
+    "signup_bonus": {
+      "bonus_amount": 135000,
+      "spending_requirement": 7000,
+      "time_limit_months": 6
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "personal",
+    "network": "American Express",
+    "url": "https://www.americanexpress.com/us/credit-cards/card/marriott-bonvoy-bevy/",
+    "image_url": "/images/amex/marriott-bonvoy-bevy.png",
+    "discontinued": false
+  },
+  {
+    "name": "Lowes",
+    "issuer": "American Express",
+    "annual_fee": 0,
+    "signup_bonus": {
+      "bonus_amount": 250,
+      "spending_requirement": 1000,
+      "time_limit_months": 3
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "business",
+    "network": "American Express",
+    "url": "https://www.americanexpress.com/us/credit-cards/business/business-credit-cards/lowes-credit-cards/",
+    "image_url": "/images/amex/lowes-business.webp",
+    "discontinued": false
+  },
+  {
+    "name": "Schwab Investor",
+    "issuer": "American Express",
+    "annual_fee": 0,
+    "signup_bonus": {
+      "bonus_amount": 200,
+      "spending_requirement": 1000,
+      "time_limit_months": 3
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "personal",
+    "network": "American Express",
+    "url": "https://www.schwab.com/public/schwab/investing/accounts_products/credit_cards",
+    "image_url": "/images/amex/schwab-investor.webp",
+    "discontinued": false
+  },
+  {
+    "name": "Amazon Business",
+    "issuer": "American Express",
+    "annual_fee": 0,
+    "signup_bonus": {
+      "bonus_amount": 400,
+      "spending_requirement": 4000,
+      "time_limit_months": 3
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "business",
+    "network": "American Express",
+    "url": "https://www.americanexpress.com/us/credit-cards/business/business-credit-cards/amazon-business-card/",
+    "image_url": "/images/amex/amazon-business.avif",
+    "discontinued": false
   }
 ]

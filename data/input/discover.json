@@ -1,0 +1,25 @@
+[
+  {
+    "name": "Discover It",
+    "issuer": "Discover",
+    "annual_fee": 0,
+    "signup_bonus": {
+      "bonus_amount": 100,
+      "spending_requirement": 0.01,
+      "time_limit_months": 3
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "personal",
+    "network": "Discover",
+    "url": "https://www.discover.com/credit-cards/",
+    "image_url": "/images/discover/it.webp",
+    "discontinued": false
+  }
+]

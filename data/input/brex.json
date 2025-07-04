@@ -1,0 +1,21 @@
+[
+  {
+    "name": "Brex",
+    "issuer": "Brex",
+    "annual_fee": 0,
+    "signup_bonus": null,
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "personal",
+    "network": "Mastercard",
+    "url": "https://www.brex.com/product/credit-card/",
+    "image_url": "/images/brex/brex.png",
+    "discontinued": false
+  }
+]

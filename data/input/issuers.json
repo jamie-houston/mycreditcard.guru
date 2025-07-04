@@ -2,5 +2,17 @@
   {"name": "Chase", "max_cards_per_period": 5, "period_months": 24},
   {"name": "American Express", "max_cards_per_period": 4, "period_months": 24},
   {"name": "Capital One", "max_cards_per_period": 6, "period_months": 24},
-  {"name": "Citi", "max_cards_per_period": 8, "period_months": 24}
+  {"name": "Citi", "max_cards_per_period": 8, "period_months": 24},
+  {"name": "Bank of America", "max_cards_per_period": 6, "period_months": 24},
+  {"name": "Barclays", "max_cards_per_period": 4, "period_months": 24},
+  {"name": "US Bank", "max_cards_per_period": 4, "period_months": 24},
+  {"name": "Wells Fargo", "max_cards_per_period": 5, "period_months": 24},
+  {"name": "Discover", "max_cards_per_period": 2, "period_months": 24},
+  {"name": "First", "max_cards_per_period": 3, "period_months": 24},
+  {"name": "Fnbo", "max_cards_per_period": 3, "period_months": 24},
+  {"name": "Penfed", "max_cards_per_period": 2, "period_months": 24},
+  {"name": "Synchrony", "max_cards_per_period": 8, "period_months": 24},
+  {"name": "Brex", "max_cards_per_period": 2, "period_months": 24},
+  {"name": "Pnc", "max_cards_per_period": 3, "period_months": 24},
+  {"name": "Web Bank", "max_cards_per_period": 2, "period_months": 24}
 ]

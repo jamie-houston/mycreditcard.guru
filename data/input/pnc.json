@@ -1,0 +1,21 @@
+[
+  {
+    "name": "Cash Rewards Visa Signature Business",
+    "issuer": "Pnc",
+    "annual_fee": 0,
+    "signup_bonus": null,
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1.5
+      }
+    ],
+    "card_type": "business",
+    "network": "Visa",
+    "url": "https://www.pnc.com/en/small-business/borrowing/business-credit-cards/pnc-cash-rewards-visa-signature-business-credit-card.html",
+    "image_url": "/images/pnc/cash-rewards-visa-signature-business.webp",
+    "discontinued": false
+  }
+]

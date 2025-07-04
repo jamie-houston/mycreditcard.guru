@@ -1,0 +1,278 @@
+[
+  {
+    "name": "Business Altitude Power",
+    "issuer": "US Bank",
+    "annual_fee": 195,
+    "signup_bonus": {
+      "bonus_amount": 75000,
+      "spending_requirement": 10000,
+      "time_limit_months": 4
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 2
+      }
+    ],
+    "card_type": "business",
+    "network": "Mastercard",
+    "url": "https://www.usbank.com/business-banking/business-credit-cards/business-altitude-power-world-elite-mastercard.html",
+    "image_url": "/images/usbank/altitude-power.webp",
+    "discontinued": false
+  },
+  {
+    "name": "Business Altitude Connect",
+    "issuer": "US Bank",
+    "annual_fee": 95,
+    "signup_bonus": {
+      "bonus_amount": 60000,
+      "spending_requirement": 6000,
+      "time_limit_months": 6
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 2
+      }
+    ],
+    "card_type": "business",
+    "network": "Mastercard",
+    "url": "https://www.usbank.com/business-banking/business-credit-cards/business-altitude-connect-world-elite-mastercard.html",
+    "image_url": "/images/usbank/business-altitude-connect.webp",
+    "discontinued": false
+  },
+  {
+    "name": "Altitude Connect",
+    "issuer": "US Bank",
+    "annual_fee": 0,
+    "signup_bonus": {
+      "bonus_amount": 20000,
+      "spending_requirement": 1000,
+      "time_limit_months": 3
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 2
+      }
+    ],
+    "card_type": "personal",
+    "network": "Visa",
+    "url": "https://www.usbank.com/credit-cards/altitude-connect-visa-signature-credit-card.html",
+    "image_url": "/images/usbank/altitude-connect.png",
+    "discontinued": false
+  },
+  {
+    "name": "Altitude Go",
+    "issuer": "US Bank",
+    "annual_fee": 0,
+    "signup_bonus": {
+      "bonus_amount": 20000,
+      "spending_requirement": 1000,
+      "time_limit_months": 3
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 2
+      }
+    ],
+    "card_type": "personal",
+    "network": "Visa",
+    "url": "https://www.usbank.com/credit-cards/altitude-go-visa-signature-credit-card.html",
+    "image_url": "/images/usbank/altitude-go.jpg",
+    "discontinued": false
+  },
+  {
+    "name": "Cash+",
+    "issuer": "US Bank",
+    "annual_fee": 0,
+    "signup_bonus": {
+      "bonus_amount": 200,
+      "spending_requirement": 1000,
+      "time_limit_months": 3
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 2
+      }
+    ],
+    "card_type": "personal",
+    "network": "Visa",
+    "url": "https://www.usbank.com/credit-cards/cash-plus-visa-signature-credit-card.html",
+    "image_url": "/images/usbank/cash-plus.jpg",
+    "discontinued": false
+  },
+  {
+    "name": "Business Leverage",
+    "issuer": "US Bank",
+    "annual_fee": 95,
+    "signup_bonus": {
+      "bonus_amount": 750,
+      "spending_requirement": 7500,
+      "time_limit_months": 4
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "business",
+    "network": "Visa",
+    "url": "https://www.usbank.com/business-banking/business-credit-cards/business-leverage-rewards-credit-card.html",
+    "image_url": "/images/usbank/business-leverage.webp",
+    "discontinued": false
+  },
+  {
+    "name": "Business Triple Cash Rewards",
+    "issuer": "US Bank",
+    "annual_fee": 0,
+    "signup_bonus": {
+      "bonus_amount": 500,
+      "spending_requirement": 4500,
+      "time_limit_months": 6
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "business",
+    "network": "Mastercard",
+    "url": "https://www.usbank.com/business-banking/business-credit-cards/business-triple-cash-back-credit-card.html",
+    "image_url": "/images/usbank/business-triple-cash-rewards.webp",
+    "discontinued": false
+  },
+  {
+    "name": "Skypass Blue",
+    "issuer": "US Bank",
+    "annual_fee": 95,
+    "signup_bonus": {
+      "bonus_amount": 10000,
+      "spending_requirement": 1000,
+      "time_limit_months": 3
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "personal",
+    "network": "Visa",
+    "url": "https://www.skypassvisa.com/credit/visaSkyBlueCard.do",
+    "image_url": "/images/usbank/skypass.png",
+    "discontinued": false
+  },
+  {
+    "name": "Skypass",
+    "issuer": "US Bank",
+    "annual_fee": 95,
+    "signup_bonus": {
+      "bonus_amount": 40000,
+      "spending_requirement": 4000,
+      "time_limit_months": 3
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "personal",
+    "network": "Visa",
+    "url": "https://www.skypassvisa.com/credit/visaSignatureCard.do",
+    "image_url": "/images/usbank/skypass.png",
+    "discontinued": false
+  },
+  {
+    "name": "Skypass Select",
+    "issuer": "US Bank",
+    "annual_fee": 450,
+    "signup_bonus": {
+      "bonus_amount": 60000,
+      "spending_requirement": 5000,
+      "time_limit_months": 3
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "personal",
+    "network": "Visa",
+    "url": "https://www.skypassvisa.com/credit/visaSelectCard.do",
+    "image_url": "/images/usbank/skypass-select.png",
+    "discontinued": false
+  },
+  {
+    "name": "Skypass Business",
+    "issuer": "US Bank",
+    "annual_fee": 99,
+    "signup_bonus": {
+      "bonus_amount": 50000,
+      "spending_requirement": 5000,
+      "time_limit_months": 3
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "business",
+    "network": "Visa",
+    "url": "https://www.skypassvisa.com/credit/visaBusinessCard.do",
+    "image_url": "/images/usbank/skypass-business.png",
+    "discontinued": false
+  },
+  {
+    "name": "Shopper Cash Rewards",
+    "issuer": "US Bank",
+    "annual_fee": 95,
+    "signup_bonus": {
+      "bonus_amount": 250,
+      "spending_requirement": 2000,
+      "time_limit_months": 4
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1.5
+      }
+    ],
+    "card_type": "personal",
+    "network": "Visa",
+    "url": "https://www.usbank.com/credit-cards/shopper-cash-rewards-visa-signature-credit-card.html",
+    "image_url": "/images/usbank/shopper-cash-rewards.webp",
+    "discontinued": false
+  }
+]

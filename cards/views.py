@@ -40,6 +40,7 @@ class CreditCardListView(generics.ListAPIView):
         'offers'
     )
     serializer_class = CreditCardSerializer
+    pagination_class = None  # Disable pagination for this view
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = {
         'issuer__name': ['exact', 'icontains'],

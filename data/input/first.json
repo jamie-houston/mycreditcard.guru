@@ -1,0 +1,163 @@
+[
+  {
+    "name": "LATAM Airlines",
+    "issuer": "First",
+    "annual_fee": 0,
+    "signup_bonus": {
+      "bonus_amount": 15000,
+      "spending_requirement": 1000,
+      "time_limit_months": 3
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "personal",
+    "network": "Mastercard",
+    "url": "https://latampass.latam.com/en_us/earn-miles/latam-airlines-credit-cards",
+    "image_url": "/images/first/latam-airlines.svg",
+    "discontinued": false
+  },
+  {
+    "name": "LATAM Airlines World Elite",
+    "issuer": "First",
+    "annual_fee": 99,
+    "signup_bonus": {
+      "bonus_amount": 40000,
+      "spending_requirement": 3500,
+      "time_limit_months": 3
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "personal",
+    "network": "Mastercard",
+    "url": "https://latampass.latam.com/en_us/earn-miles/latam-airlines-credit-cards",
+    "image_url": "/images/first/latam-airlines-world-elite.webp",
+    "discontinued": false
+  },
+  {
+    "name": "Cardless Qatar Signature",
+    "issuer": "First",
+    "annual_fee": 99,
+    "signup_bonus": {
+      "bonus_amount": 40000,
+      "spending_requirement": 3000,
+      "time_limit_months": 3
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "personal",
+    "network": "Visa",
+    "url": "https://qatarairways.cardless.com/compare",
+    "image_url": "/images/first/cardless-qatar-signature.jpg",
+    "discontinued": false
+  },
+  {
+    "name": "Cardless Qatar Infinite",
+    "issuer": "First",
+    "annual_fee": 499,
+    "signup_bonus": {
+      "bonus_amount": 50000,
+      "spending_requirement": 6000,
+      "time_limit_months": 3
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "personal",
+    "network": "Visa",
+    "url": "https://qatarairways.cardless.com/compare",
+    "image_url": "/images/first/cardless-qatar-infinite.jpg",
+    "discontinued": false
+  },
+  {
+    "name": "Avianca LifeMiles",
+    "issuer": "First",
+    "annual_fee": 99,
+    "signup_bonus": {
+      "bonus_amount": 50000,
+      "spending_requirement": 3000,
+      "time_limit_months": 3
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "personal",
+    "network": "American Express",
+    "url": "https://www.lifemiles.com/credit-card/get-credit-card",
+    "image_url": "/images/first/avianca-lifemiles.webp",
+    "discontinued": false
+  },
+  {
+    "name": "Avianca LifeMiles Elite",
+    "issuer": "First",
+    "annual_fee": 250,
+    "signup_bonus": {
+      "bonus_amount": 80000,
+      "spending_requirement": 4500,
+      "time_limit_months": 3
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "personal",
+    "network": "American Express",
+    "url": "https://www.lifemiles.com/credit-card/get-credit-card",
+    "image_url": "/images/first/avianca-lifemiles-elite.webp",
+    "discontinued": false
+  },
+  {
+    "name": "ANA Card USA Plus",
+    "issuer": "First",
+    "annual_fee": 85,
+    "signup_bonus": {
+      "bonus_amount": 5000,
+      "spending_requirement": 7000,
+      "time_limit_months": 3
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "business",
+    "network": "Visa",
+    "url": "https://www.anacardusa.com/en/",
+    "image_url": "/images/first/ana-card-usa.png",
+    "discontinued": false
+  }
+]

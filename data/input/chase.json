@@ -1,6 +1,29 @@
 [
   {
-    "name": "Chase Sapphire Preferred Card",
+    "name": "Marriott Bonvoy Bountiful",
+    "issuer": "Chase",
+    "annual_fee": 250,
+    "signup_bonus": {
+      "bonus_amount": 85000,
+      "spending_requirement": 4000,
+      "time_limit_months": 3
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "personal",
+    "network": "Visa",
+    "url": "https://creditcards.chase.com/travel-credit-cards/marriott-bonvoy/bountiful",
+    "image_url": "/images/chase/marriott-bonvoy-bountiful.png",
+    "discontinued": false
+  },
+  {
+    "name": "Aer Lingus Signature",
     "issuer": "Chase",
     "annual_fee": 95,
     "signup_bonus": {
@@ -8,29 +31,409 @@
       "spending_requirement": 5000,
       "time_limit_months": 3
     },
-    "reward_type": "Points",
-    "reward_value_multiplier": 0.0125,
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
     "reward_categories": [
-      { "category": "dining", "reward_rate": 3.0 },
-      { "category": "streaming", "reward_rate": 3.0 },
-      { "category": "travel", "reward_rate": 2.0 },
-      { "category": "other", "reward_rate": 1.0 }
-    ],
-    "offers": [
       {
-        "title": "Travel Portal Bonus",
-        "description": "25% more value when booking through Chase Ultimate Rewards",
-        "value": "High travel value"
-      },
-      {
-        "title": "Annual Travel Credit",
-        "description": "$50 annual Ultimate Rewards hotel credit",
-        "value": "$50"
+        "category": "other",
+        "reward_rate": 1
       }
-    ]
+    ],
+    "card_type": "personal",
+    "network": "Visa",
+    "url": "https://creditcards.chase.com/travel-credit-cards/avios/aer-lingus",
+    "image_url": "/images/chase/aer-lingus-signature.png",
+    "discontinued": false
   },
   {
-    "name": "Chase Sapphire Reserve",
+    "name": "Aeroplan",
+    "issuer": "Chase",
+    "annual_fee": 95,
+    "signup_bonus": {
+      "bonus_amount": 75000,
+      "spending_requirement": 3000,
+      "time_limit_months": 3
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "personal",
+    "network": "Mastercard",
+    "url": "https://creditcards.chase.com/travel-credit-cards/aircanada/aeroplan",
+    "image_url": "/images/chase/aeroplan.jpg",
+    "discontinued": false
+  },
+  {
+    "name": "British Airways Signature",
+    "issuer": "Chase",
+    "annual_fee": 95,
+    "signup_bonus": {
+      "bonus_amount": 75000,
+      "spending_requirement": 5000,
+      "time_limit_months": 3
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "personal",
+    "network": "Visa",
+    "url": "https://creditcards.chase.com/travel-credit-cards/avios/british-airways",
+    "image_url": "/images/chase/british-airways.png",
+    "discontinued": false
+  },
+  {
+    "name": "Disney Premier",
+    "issuer": "Chase",
+    "annual_fee": 49,
+    "signup_bonus": {
+      "bonus_amount": 400,
+      "spending_requirement": 1000,
+      "time_limit_months": 3
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "personal",
+    "network": "Visa",
+    "url": "https://creditcards.chase.com/rewards-credit-cards/disney/premier",
+    "image_url": "/images/chase/disney.png",
+    "discontinued": false
+  },
+  {
+    "name": "Disney",
+    "issuer": "Chase",
+    "annual_fee": 0,
+    "signup_bonus": {
+      "bonus_amount": 150,
+      "spending_requirement": 500,
+      "time_limit_months": 3
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "personal",
+    "network": "Visa",
+    "url": "https://creditcards.chase.com/rewards-credit-cards/disney/rewards",
+    "image_url": "/images/chase/disney.png",
+    "discontinued": false
+  },
+  {
+    "name": "Freedom Flex",
+    "issuer": "Chase",
+    "annual_fee": 0,
+    "signup_bonus": {
+      "bonus_amount": 20000,
+      "spending_requirement": 500,
+      "time_limit_months": 3
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "personal",
+    "network": "Mastercard",
+    "url": "https://creditcards.chase.com/cash-back-credit-cards/freedom/flex",
+    "image_url": "/images/chase/freedom-flex.png",
+    "discontinued": false
+  },
+  {
+    "name": "Freedom Unlimited",
+    "issuer": "Chase",
+    "annual_fee": 0,
+    "signup_bonus": {
+      "bonus_amount": 20000,
+      "spending_requirement": 500,
+      "time_limit_months": 3
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1.5
+      }
+    ],
+    "card_type": "personal",
+    "network": "Visa",
+    "url": "https://creditcards.chase.com/cash-back-credit-cards/freedom/unlimited",
+    "image_url": "/images/chase/freedom-unlimited.png",
+    "discontinued": false
+  },
+  {
+    "name": "Iberia Signature",
+    "issuer": "Chase",
+    "annual_fee": 95,
+    "signup_bonus": {
+      "bonus_amount": 75000,
+      "spending_requirement": 5000,
+      "time_limit_months": 3
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "personal",
+    "network": "Visa",
+    "url": "https://creditcards.chase.com/travel-credit-cards/avios/iberia",
+    "image_url": "/images/chase/iberia-signature.png",
+    "discontinued": false
+  },
+  {
+    "name": "IHG Premier",
+    "issuer": "Chase",
+    "annual_fee": 99,
+    "signup_bonus": null,
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "personal",
+    "network": "Mastercard",
+    "url": "https://creditcards.chase.com/travel-credit-cards/ihg-rewards-club/premier",
+    "image_url": "/images/chase/ihg-rewards-premier.jpg",
+    "discontinued": false
+  },
+  {
+    "name": "IHG Premier Business",
+    "issuer": "Chase",
+    "annual_fee": 99,
+    "signup_bonus": {
+      "bonus_amount": 140000,
+      "spending_requirement": 4000,
+      "time_limit_months": 3
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "business",
+    "network": "Mastercard",
+    "url": "https://creditcards.chase.com/business-credit-cards/IHG/business-premier",
+    "image_url": "/images/chase/ihg-rewards-premier-business.png",
+    "discontinued": false
+  },
+  {
+    "name": "IHG Traveler",
+    "issuer": "Chase",
+    "annual_fee": 0,
+    "signup_bonus": {
+      "bonus_amount": 80000,
+      "spending_requirement": 2000,
+      "time_limit_months": 3
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "personal",
+    "network": "Mastercard",
+    "url": "https://creditcards.chase.com/travel-credit-cards/ihg-rewards-club/traveler",
+    "image_url": "/images/chase/ihg-rewards-traveler.jpeg",
+    "discontinued": false
+  },
+  {
+    "name": "Ink Business Cash",
+    "issuer": "Chase",
+    "annual_fee": 0,
+    "signup_bonus": {
+      "bonus_amount": 75000,
+      "spending_requirement": 6000,
+      "time_limit_months": 6
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "business",
+    "network": "Visa",
+    "url": "https://creditcards.chase.com/business-credit-cards/ink/cash",
+    "image_url": "/images/chase/ink-business-cash.png",
+    "discontinued": false
+  },
+  {
+    "name": "Ink Business Preferred",
+    "issuer": "Chase",
+    "annual_fee": 95,
+    "signup_bonus": {
+      "bonus_amount": 90000,
+      "spending_requirement": 8000,
+      "time_limit_months": 3
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "business",
+    "network": "Visa",
+    "url": "https://creditcards.chase.com/business-credit-cards/ink/business-preferred",
+    "image_url": "/images/chase/ink-business-preferred.png",
+    "discontinued": false
+  },
+  {
+    "name": "Ink Business Unlimited",
+    "issuer": "Chase",
+    "annual_fee": 0,
+    "signup_bonus": {
+      "bonus_amount": 75000,
+      "spending_requirement": 6000,
+      "time_limit_months": 3
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "business",
+    "network": "Visa",
+    "url": "https://creditcards.chase.com/business-credit-cards/ink/unlimited",
+    "image_url": "/images/chase/ink-business-unlimited.png",
+    "discontinued": false
+  },
+  {
+    "name": "Ink Business Premier",
+    "issuer": "Chase",
+    "annual_fee": 195,
+    "signup_bonus": {
+      "bonus_amount": 1000,
+      "spending_requirement": 10000,
+      "time_limit_months": 3
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 2
+      }
+    ],
+    "card_type": "business",
+    "network": "Visa",
+    "url": "https://creditcards.chase.com/business-credit-cards/ink/premier",
+    "image_url": "/images/chase/ink-business-premier.png",
+    "discontinued": false
+  },
+  {
+    "name": "Marriott Bonvoy Bold",
+    "issuer": "Chase",
+    "annual_fee": 0,
+    "signup_bonus": {
+      "bonus_amount": 60000,
+      "spending_requirement": 1000,
+      "time_limit_months": 3
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "personal",
+    "network": "Visa",
+    "url": "https://creditcards.chase.com/travel-credit-cards/marriott-bonvoy/bold",
+    "image_url": "/images/chase/marriott-bonvoy-bold.jpeg",
+    "discontinued": false
+  },
+  {
+    "name": "Marriott Bonvoy Boundless",
+    "issuer": "Chase",
+    "annual_fee": 95,
+    "signup_bonus": {
+      "bonus_amount": 250000,
+      "spending_requirement": 3000,
+      "time_limit_months": 3
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "personal",
+    "network": "Visa",
+    "url": "https://creditcards.chase.com/travel-credit-cards/marriott-bonvoy/boundless",
+    "image_url": "/images/chase/marriott-bonvoy-boundless.jpeg",
+    "discontinued": false
+  },
+  {
+    "name": "Sapphire Preferred",
+    "issuer": "Chase",
+    "annual_fee": 95,
+    "signup_bonus": {
+      "bonus_amount": 75000,
+      "spending_requirement": 5000,
+      "time_limit_months": 3
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "personal",
+    "network": "Visa",
+    "url": "https://creditcards.chase.com/rewards-credit-cards/sapphire/preferred",
+    "image_url": "/images/chase/sapphire-preferred.png",
+    "discontinued": false
+  },
+  {
+    "name": "Sapphire Reserve",
     "issuer": "Chase",
     "annual_fee": 795,
     "signup_bonus": {
@@ -38,115 +441,340 @@
       "spending_requirement": 5000,
       "time_limit_months": 3
     },
-    "reward_type": "Points",
-    "reward_value_multiplier": 0.015,
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
     "reward_categories": [
-      { "category": "travel", "reward_rate": 4.0 },
-      { "category": "dining", "reward_rate": 3.0 },
-      { "category": "other", "reward_rate": 1.0 }
-    ],
-    "offers": [
       {
-        "title": "Travel Portal Bonus",
-        "description": "50% more value when booking through Chase Ultimate Rewards",
-        "value": "Excellent travel value"
-      },
-      {
-        "title": "Annual Travel Credit",
-        "description": "$300 annual travel credit",
-        "value": "$300"
-      },
-      {
-        "title": "Priority Pass",
-        "description": "Complimentary Priority Pass Select membership",
-        "value": "$400+"
+        "category": "other",
+        "reward_rate": 1
       }
-    ]
+    ],
+    "card_type": "personal",
+    "network": "Visa",
+    "url": "https://creditcards.chase.com/rewards-credit-cards/sapphire/reserve",
+    "image_url": "/images/chase/sapphire-reserve.png",
+    "discontinued": false
   },
   {
-    "name": "Chase Freedom Unlimited",
+    "name": "Southwest Performance Business",
     "issuer": "Chase",
-    "annual_fee": 0,
+    "annual_fee": 199,
     "signup_bonus": {
-      "bonus_amount": 20000,
-      "spending_requirement": 500,
+      "bonus_amount": 80000,
+      "spending_requirement": 5000,
       "time_limit_months": 3
     },
     "reward_type": "Cashback",
     "reward_value_multiplier": 0.01,
     "reward_categories": [
-      { "category": "dining", "reward_rate": 3.0 },
-      { "category": "other", "reward_rate": 1.5 }
-    ],
-    "offers": [
       {
-        "title": "Flat Rate Rewards",
-        "description": "1.5% cash back on all purchases",
-        "value": "Simplicity"
-      },
-      {
-        "title": "Intro APR",
-        "description": "0% intro APR for 15 months",
-        "value": "$200+"
+        "category": "other",
+        "reward_rate": 1
       }
-    ]
+    ],
+    "card_type": "business",
+    "network": "Visa",
+    "url": "https://creditcards.chase.com/business-credit-cards/southwest/performance-business",
+    "image_url": "/images/chase/southwest-rapid-rewards-performance-business.png",
+    "discontinued": false
   },
   {
-    "name": "Chase Freedom Flex",
+    "name": "Southwest Plus",
     "issuer": "Chase",
-    "annual_fee": 0,
+    "annual_fee": 69,
     "signup_bonus": {
-      "bonus_amount": 20000,
-      "spending_requirement": 500,
+      "bonus_amount": 50000,
+      "spending_requirement": 1000,
       "time_limit_months": 3
     },
     "reward_type": "Cashback",
     "reward_value_multiplier": 0.01,
     "reward_categories": [
-      { "category": "gas", "reward_rate": 5.0 },
-      { "category": "dining", "reward_rate": 3.0 },
-      { "category": "other", "reward_rate": 1.0 }
-    ],
-    "offers": [
       {
-        "title": "Rotating Categories",
-        "description": "5% cash back on rotating quarterly categories up to $1,500",
-        "value": "High earning potential"
-      },
-      {
-        "title": "Intro APR",
-        "description": "0% intro APR for 15 months",
-        "value": "$200+"
+        "category": "other",
+        "reward_rate": 1
       }
-    ]
+    ],
+    "card_type": "personal",
+    "network": "Visa",
+    "url": "https://creditcards.chase.com/travel-credit-cards/southwest/plus",
+    "image_url": "/images/chase/southwest-rapid-rewards-plus.png",
+    "discontinued": false
   },
   {
-    "name": "Ink Business Unlimited® Credit Card",
+    "name": "Southwest Premier",
     "issuer": "Chase",
-    "annual_fee": 0,
+    "annual_fee": 99,
     "signup_bonus": {
-      "bonus_amount": 750,
-      "spending_requirement": 6000,
+      "bonus_amount": 50000,
+      "spending_requirement": 1000,
       "time_limit_months": 3
     },
     "reward_type": "Cashback",
     "reward_value_multiplier": 0.01,
     "reward_categories": [
-      { "category": "gas", "reward_rate": 5.0 },
-      { "category": "dining", "reward_rate": 3.0 },
-      { "category": "other", "reward_rate": 1.0 }
-    ],
-    "offers": [
       {
-        "title": "Rotating Categories",
-        "description": "5% cash back on rotating quarterly categories up to $1,500",
-        "value": "High earning potential"
-      },
-      {
-        "title": "Intro APR",
-        "description": "0% intro APR for 15 months",
-        "value": "$200+"
+        "category": "other",
+        "reward_rate": 1
       }
-    ]
+    ],
+    "card_type": "personal",
+    "network": "Visa",
+    "url": "https://creditcards.chase.com/travel-credit-cards/southwest/premier",
+    "image_url": "/images/chase/southwest-rapid-rewards-premier.png",
+    "discontinued": false
+  },
+  {
+    "name": "Southwest Premier Business",
+    "issuer": "Chase",
+    "annual_fee": 99,
+    "signup_bonus": {
+      "bonus_amount": 60000,
+      "spending_requirement": 3000,
+      "time_limit_months": 3
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "business",
+    "network": "Visa",
+    "url": "https://creditcards.chase.com/business-credit-cards/southwest/premier-business",
+    "image_url": "/images/chase/southwest-rapid-rewards-premier-business.png",
+    "discontinued": false
+  },
+  {
+    "name": "Southwest Priority",
+    "issuer": "Chase",
+    "annual_fee": 149,
+    "signup_bonus": {
+      "bonus_amount": 50000,
+      "spending_requirement": 1000,
+      "time_limit_months": 3
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "personal",
+    "network": "Visa",
+    "url": "https://creditcards.chase.com/travel-credit-cards/southwest/priority",
+    "image_url": "/images/chase/southwest-rapid-rewards-priority.png",
+    "discontinued": false
+  },
+  {
+    "name": "United Business",
+    "issuer": "Chase",
+    "annual_fee": 150,
+    "signup_bonus": {
+      "bonus_amount": 75000,
+      "spending_requirement": 5000,
+      "time_limit_months": 3
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "business",
+    "network": "Visa",
+    "url": "https://www.theexplorercard.com/business-rewards-cards/business-card",
+    "image_url": "/images/chase/united-business.png",
+    "discontinued": false
+  },
+  {
+    "name": "United Club Infinite",
+    "issuer": "Chase",
+    "annual_fee": 695,
+    "signup_bonus": {
+      "bonus_amount": 90000,
+      "spending_requirement": 5000,
+      "time_limit_months": 3
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "personal",
+    "network": "Visa",
+    "url": "https://www.theexplorercard.com/rewards-cards/club-card",
+    "image_url": "/images/chase/united-club-infinite.png",
+    "discontinued": false
+  },
+  {
+    "name": "United Club Business",
+    "issuer": "Chase",
+    "annual_fee": 695,
+    "signup_bonus": {
+      "bonus_amount": 80000,
+      "spending_requirement": 5000,
+      "time_limit_months": 3
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "business",
+    "network": "Visa",
+    "url": "https://www.theexplorercard.com/business-rewards-cards/club-card",
+    "image_url": "/images/chase/united-club-business.png",
+    "discontinued": false
+  },
+  {
+    "name": "United Explorer",
+    "issuer": "Chase",
+    "annual_fee": 150,
+    "signup_bonus": {
+      "bonus_amount": 60000,
+      "spending_requirement": 3000,
+      "time_limit_months": 3
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "personal",
+    "network": "Visa",
+    "url": "https://www.theexplorercard.com/rewards-cards/explorer-card",
+    "image_url": "/images/chase/united-explorer.png",
+    "discontinued": false
+  },
+  {
+    "name": "United Gateway",
+    "issuer": "Chase",
+    "annual_fee": 0,
+    "signup_bonus": {
+      "bonus_amount": 30000,
+      "spending_requirement": 1000,
+      "time_limit_months": 3
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "personal",
+    "network": "Visa",
+    "url": "https://www.theexplorercard.com/rewards-cards/gateway-card",
+    "image_url": "/images/chase/united-gateway.png",
+    "discontinued": false
+  },
+  {
+    "name": "United Quest",
+    "issuer": "Chase",
+    "annual_fee": 350,
+    "signup_bonus": {
+      "bonus_amount": 100000,
+      "spending_requirement": 4000,
+      "time_limit_months": 3
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "personal",
+    "network": "Visa",
+    "url": "https://www.theexplorercard.com/rewards-cards/quest-card",
+    "image_url": "/images/chase/united-quest.png",
+    "discontinued": false
+  },
+  {
+    "name": "World of Hyatt",
+    "issuer": "Chase",
+    "annual_fee": 95,
+    "signup_bonus": {
+      "bonus_amount": 30000,
+      "spending_requirement": 3000,
+      "time_limit_months": 3
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "personal",
+    "network": "Visa",
+    "url": "https://world.hyatt.com/content/gp/en/rewards/hyatt-credit-card.html",
+    "image_url": "/images/chase/world-of-hyatt.png",
+    "discontinued": false
+  },
+  {
+    "name": "World of Hyatt Business",
+    "issuer": "Chase",
+    "annual_fee": 199,
+    "signup_bonus": {
+      "bonus_amount": 60000,
+      "spending_requirement": 5000,
+      "time_limit_months": 3
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "personal",
+    "network": "Visa",
+    "url": "https://world.hyatt.com/content/gp/en/rewards/hyatt-credit-card.html",
+    "image_url": "/images/chase/world-of-hyatt.png",
+    "discontinued": false
+  },
+  {
+    "name": "Amazon Prime",
+    "issuer": "Chase",
+    "annual_fee": 0,
+    "signup_bonus": {
+      "bonus_amount": 200,
+      "spending_requirement": 0.01,
+      "time_limit_months": 12
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "personal",
+    "network": "Visa",
+    "url": "https://www.amazon.com/dp/BT00LN946S",
+    "image_url": "/images/chase/amazon-prime.png",
+    "discontinued": false
   }
 ]

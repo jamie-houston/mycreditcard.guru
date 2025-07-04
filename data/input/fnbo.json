@@ -1,0 +1,94 @@
+[
+  {
+    "name": "Amtrak Guest Rewards",
+    "issuer": "Fnbo",
+    "annual_fee": 0,
+    "signup_bonus": {
+      "bonus_amount": 12000,
+      "spending_requirement": 1000,
+      "time_limit_months": 3
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "personal",
+    "network": "Mastercard",
+    "url": "https://www.amtrak.com/Apply",
+    "image_url": "/images/fnbo/amtrak-guest-rewards.png",
+    "discontinued": false
+  },
+  {
+    "name": "Amtrak Guest Rewards Preferred",
+    "issuer": "Fnbo",
+    "annual_fee": 99,
+    "signup_bonus": {
+      "bonus_amount": 40000,
+      "spending_requirement": 2000,
+      "time_limit_months": 3
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "personal",
+    "network": "Mastercard",
+    "url": "https://www.amtrak.com/Apply",
+    "image_url": "/images/fnbo/amtrak-guest-rewards-preferred.jpg",
+    "discontinued": false
+  },
+  {
+    "name": "Best Western Rewards",
+    "issuer": "Fnbo",
+    "annual_fee": 0,
+    "signup_bonus": {
+      "bonus_amount": 40000,
+      "spending_requirement": 1000,
+      "time_limit_months": 3
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "personal",
+    "network": "Mastercard",
+    "url": "https://www.bestwestern.com/en_US/offers/hotel-discounts/best-western-rewards-visa.html",
+    "image_url": "/images/fnbo/best-western-rewards.jpg",
+    "discontinued": false
+  },
+  {
+    "name": "Best Western Rewards Premium",
+    "issuer": "Fnbo",
+    "annual_fee": 89,
+    "signup_bonus": {
+      "bonus_amount": 80000,
+      "spending_requirement": 3000,
+      "time_limit_months": 3
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "personal",
+    "network": "Mastercard",
+    "url": "https://www.bestwestern.com/en_US/offers/hotel-discounts/best-western-rewards-visa.html",
+    "image_url": "/images/fnbo/best-western-rewards-premium.jpg",
+    "discontinued": false
+  }
+]
