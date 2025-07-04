@@ -73,81 +73,148 @@ def run_server(port=8000):
 def import_sample_data():
     """Interactive import of data files from data/input directory."""
     data_dir = PROJECT_ROOT / "data" / "input"
+    system_dir = data_dir / "system"
+    cards_dir = data_dir / "cards"
     
-    # Check if data directory exists
+    # Check if directories exist
     if not data_dir.exists():
         print("❌ data/input directory not found")
         return
     
-    # Get all JSON files in the directory
-    json_files = list(data_dir.glob("*.json"))
+    # Get JSON files from both subdirectories
+    system_files = list(system_dir.glob("*.json")) if system_dir.exists() else []
+    card_files = list(cards_dir.glob("*.json")) if cards_dir.exists() else []
     
-    if not json_files:
-        print("❌ No JSON files found in data/input directory")
+    # Also check for any JSON files in the root data/input directory (legacy)
+    legacy_files = list(data_dir.glob("*.json"))
+    
+    all_files = system_files + card_files + legacy_files
+    
+    if not all_files:
+        print("❌ No JSON files found in data/input directories")
         return
     
-    print("\n📁 Available files in data/input:")
-    print("=" * 40)
-    
-    # Show options
-    options = {}
-    for i, file_path in enumerate(json_files, 1):
-        filename = file_path.name
-        print(f"  {i}. {filename}")
-        options[str(i)] = file_path
-    
-    print("  a. Import all files")
-    print("  q. Cancel")
+    # Track imported files to show status
+    imported_files = set()
     
     while True:
+        print("\n📁 Available files for import:")
+        print("=" * 50)
+        
+        # Show options with import status, organized by category
+        options = {}
+        option_num = 1
+        
+        # Show system files first
+        if system_files:
+            print("\n🔧 System Files (import these first):")
+            for file_path in sorted(system_files, key=lambda x: x.name):
+                filename = file_path.name
+                status = " ✅" if file_path in imported_files else ""
+                print(f"  {option_num}. {filename}{status}")
+                options[str(option_num)] = file_path
+                option_num += 1
+        
+        # Show card files
+        if card_files:
+            print("\n💳 Card Files:")
+            for file_path in sorted(card_files, key=lambda x: x.name):
+                filename = file_path.name
+                status = " ✅" if file_path in imported_files else ""
+                print(f"  {option_num}. {filename}{status}")
+                options[str(option_num)] = file_path
+                option_num += 1
+        
+        # Show legacy files if any
+        if legacy_files:
+            print("\n📄 Legacy Files (in root):")
+            for file_path in sorted(legacy_files, key=lambda x: x.name):
+                filename = file_path.name
+                status = " ✅" if file_path in imported_files else ""
+                print(f"  {option_num}. {filename}{status}")
+                options[str(option_num)] = file_path
+                option_num += 1
+        
+        print("  a. Import all remaining files")
+        print("  q. Finish/Cancel")
+        
         try:
             choice = input("\nSelect file(s) to import: ").strip().lower()
             
             if choice == 'q':
-                print("Import cancelled")
+                if imported_files:
+                    print(f"✅ Import session completed! Imported {len(imported_files)} file(s).")
+                else:
+                    print("Import cancelled")
                 return
             
             if choice == 'a':
-                # Import all files in a logical order
-                preferred_order = [
+                # Import all files in a logical order: system files first, then cards
+                
+                # System files in dependency order
+                system_order = [
                     "issuers.json",
                     "reward_types.json", 
                     "spending_categories.json",
-                    "credit_cards.json",
-                    "chase.json"
+                    "credit_cards.json"
                 ]
                 
-                # First import files in preferred order
-                imported_files = set()
-                for preferred_file in preferred_order:
-                    for file_path in json_files:
+                print("\n🔧 Importing system files first...")
+                # Import system files in preferred order
+                for preferred_file in system_order:
+                    for file_path in system_files:
                         if file_path.name == preferred_file and file_path not in imported_files:
                             print(f"\n📄 Importing {file_path.name}")
                             run_command(f"python manage.py import_cards {file_path}", f"Importing {file_path.name}")
                             imported_files.add(file_path)
                 
-                # Then import any remaining files
-                for file_path in json_files:
+                # Import any remaining system files
+                for file_path in system_files:
                     if file_path not in imported_files:
                         print(f"\n📄 Importing {file_path.name}")
                         run_command(f"python manage.py import_cards {file_path}", f"Importing {file_path.name}")
+                        imported_files.add(file_path)
                 
-                print("\n✅ All files imported!")
+                print("\n💳 Importing card files...")
+                # Import all card files (alphabetically)
+                for file_path in sorted(card_files, key=lambda x: x.name):
+                    if file_path not in imported_files:
+                        print(f"\n📄 Importing {file_path.name}")
+                        run_command(f"python manage.py import_cards {file_path}", f"Importing {file_path.name}")
+                        imported_files.add(file_path)
+                
+                # Import any legacy files
+                for file_path in legacy_files:
+                    if file_path not in imported_files:
+                        print(f"\n📄 Importing {file_path.name}")
+                        run_command(f"python manage.py import_cards {file_path}", f"Importing {file_path.name}")
+                        imported_files.add(file_path)
+                
+                print(f"\n✅ All files imported! Total: {len(imported_files)} files.")
                 return
             
             if choice in options:
                 file_path = options[choice]
+                if file_path in imported_files:
+                    print(f"⚠️  {file_path.name} has already been imported.")
+                    continue_choice = input("Import again? (y/n): ").strip().lower()
+                    if continue_choice != 'y':
+                        continue
+                
                 print(f"\n📄 Importing {file_path.name}")
                 run_command(f"python manage.py import_cards {file_path}", f"Importing {file_path.name}")
-                return
+                imported_files.add(file_path)
+                print(f"✅ {file_path.name} imported successfully!")
+                # Continue to show menu again
+                continue
             
             print("❌ Invalid choice. Please try again.")
             
         except KeyboardInterrupt:
-            print("\nImport cancelled")
+            print(f"\nImport session ended. Imported {len(imported_files)} file(s).")
             return
         except EOFError:
-            print("\nImport cancelled")
+            print(f"\nImport session ended. Imported {len(imported_files)} file(s).")
             return
 
 def import_data(file_path):
