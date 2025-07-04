@@ -166,6 +166,80 @@
         "min_total_value": 50,
         "must_include_cards": ["Better Card"]
       }
+    },
+    {
+      "name": "Zero Annual Fee Filter with Signup Bonus",
+      "description": "Tests filtering by $0 annual fee and signup bonus inclusion in estimated value",
+      "user_profile": {
+        "spending": {
+          "dining": 100,
+          "general": 200
+        },
+        "preferences": {
+          "max_annual_fee": 0,
+          "preferred_reward_type": "cashback",
+          "card_type": "personal"
+        }
+      },
+      "owned_cards": [],
+      "filters": [
+        {
+          "name": "Card Type Filter",
+          "filter_type": "card_type", 
+          "value": "personal"
+        },
+        {
+          "name": "Reward Type Filter",
+          "filter_type": "reward_type",
+          "value": "Cashback"
+        },
+        {
+          "name": "Annual Fee Filter",
+          "filter_type": "annual_fee",
+          "value": "0-0"
+        }
+      ],
+      "available_cards": ["Freedom Unlimited", "Blue Cash Everyday", "Quicksilver Cash Rewards Credit Card", "Discover it Cash Back"],
+      "expected_recommendations": {
+        "actions": ["apply"],
+        "min_cards": 1,
+        "estimated_value_includes_signup_bonus": true,
+        "reasoning_must_contain": ["signup bonus"],
+        "test_conditions": [
+          "All recommended cards have $0 annual fee",
+          "Estimated value includes signup bonus amount",
+          "Cards with Decimal annual_fee=0.00 are properly filtered",
+          "Break-even cards (annual_value >= 0) are included"
+        ]
+      }
+    },
+    {
+      "name": "Minimal Spending with Zero Fee Cards",
+      "description": "Tests edge case of very low spending with $0 annual fee cards",
+      "user_profile": {
+        "spending": {
+          "general": 50
+        }
+      },
+      "owned_cards": [],
+      "filters": [
+        {
+          "name": "Annual Fee Filter", 
+          "filter_type": "annual_fee",
+          "value": "0"
+        }
+      ],
+      "available_cards": ["Freedom Unlimited", "Quicksilver Cash Rewards Credit Card", "Blue Cash Everyday"],
+      "expected_recommendations": {
+        "actions": ["apply"],
+        "min_cards": 1,
+        "reasoning_must_contain": ["signup bonus"],
+        "test_conditions": [
+          "Cards are recommended even with minimal spending",
+          "Signup bonus provides positive estimated value",
+          "Annual value calculation handles low rewards correctly"
+        ]
+      }
     }
   ]
 }

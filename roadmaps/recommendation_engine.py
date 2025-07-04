@@ -56,14 +56,15 @@ class RecommendationEngine:
                 queryset = queryset.filter(card_type=filter_obj.value)
             elif filter_obj.filter_type == 'annual_fee':
                 # Expect format like "0" or "0-95" or "95+"
+                from decimal import Decimal
                 if '+' in filter_obj.value:
-                    min_fee = int(filter_obj.value.replace('+', ''))
+                    min_fee = Decimal(filter_obj.value.replace('+', ''))
                     queryset = queryset.filter(annual_fee__gte=min_fee)
                 elif '-' in filter_obj.value:
-                    min_fee, max_fee = map(int, filter_obj.value.split('-'))
+                    min_fee, max_fee = map(Decimal, filter_obj.value.split('-'))
                     queryset = queryset.filter(annual_fee__gte=min_fee, annual_fee__lte=max_fee)
                 else:
-                    fee = int(filter_obj.value)
+                    fee = Decimal(filter_obj.value)
                     queryset = queryset.filter(annual_fee=fee)
         
         return list(queryset.prefetch_related('reward_categories', 'offers'))
@@ -122,23 +123,28 @@ class RecommendationEngine:
             # Scoring: use annual rewards only (no signup bonus) for consistency with owned cards
             annual_value = annual_rewards - annual_fee
             
-            card_scores.append({
-                'card': card,
-                'score': annual_value,
-                'annual_rewards': annual_rewards,
-                'signup_bonus': signup_bonus_value,
-                'rewards_breakdown': rewards_breakdown['breakdown'],
-                'reasoning': f"Annual value: ${annual_value:.0f} (${annual_rewards:.0f} rewards - ${annual_fee} fee)"
-            })
+            # Only consider cards with non-negative estimated value (positive value or break-even)
+            if annual_value >= 0:
+                card_scores.append({
+                    'card': card,
+                    'score': annual_value,
+                    'annual_rewards': annual_rewards,
+                    'signup_bonus': signup_bonus_value,
+                    'rewards_breakdown': rewards_breakdown['breakdown'],
+                    'reasoning': f"Annual value: ${annual_value:.0f} (${annual_rewards:.0f} rewards - ${annual_fee} fee) + ${signup_bonus_value:.0f} signup bonus"
+                })
         
         # Sort by score and take top cards
         card_scores.sort(key=lambda x: x['score'], reverse=True)
         
         for i, card_data in enumerate(card_scores[:max_cards]):
+            # For new card recommendations, include signup bonus in estimated rewards
+            total_estimated_value = card_data['score'] + card_data['signup_bonus']
+            
             recommendations.append({
                 'card': card_data['card'],
                 'action': 'apply',
-                'estimated_rewards': Decimal(str(card_data['score'])),
+                'estimated_rewards': Decimal(str(total_estimated_value)),
                 'reasoning': card_data['reasoning'],
                 'rewards_breakdown': card_data['rewards_breakdown'],
                 'priority': i + 1

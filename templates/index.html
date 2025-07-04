@@ -24,9 +24,6 @@
                     <label>Preferred Issuer</label>
                     <select id="issuer">
                         <option value="">Any Issuer</option>
-                        <option value="Chase">Chase</option>
-                        <option value="American Express">American Express</option>
-                        <option value="Capital One">Capital One</option>
                     </select>
                 </div>
                 <div class="form-group">
@@ -83,6 +80,7 @@
     </div>
 
     <script>
+        // Dynamic issuer loading: 2025-07-04-v1
         let spendingCategories = {};
 
         function toggleSpendingProfile() {
@@ -122,6 +120,9 @@
                     console.error('Categories response is not an array:', typeof categories);
                 }
                 
+                // Load issuers for the dropdown
+                await loadIssuers();
+                
                 // Load saved spending and preferences
                 await loadSavedData();
                 
@@ -134,6 +135,30 @@
                 console.error('Error loading data:', error);
                 document.getElementById('spendingCategories').innerHTML = 
                     '<div class="error">Error loading spending categories. Please try again.</div>';
+            }
+        }
+
+        async function loadIssuers() {
+            try {
+                const issuersResponse = await fetch(`${API_BASE}/cards/issuers/`);
+                const issuersData = await issuersResponse.json();
+                const issuers = issuersData.results || issuersData;
+                
+                const issuerSelect = document.getElementById('issuer');
+                
+                // Sort issuers alphabetically
+                issuers.sort((a, b) => a.name.localeCompare(b.name));
+                
+                // Add each issuer as an option
+                issuers.forEach(issuer => {
+                    const option = document.createElement('option');
+                    option.value = issuer.name;
+                    option.textContent = issuer.name;
+                    issuerSelect.appendChild(option);
+                });
+                
+            } catch (error) {
+                console.error('Error loading issuers:', error);
             }
         }
 
