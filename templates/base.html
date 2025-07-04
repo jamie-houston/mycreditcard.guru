@@ -42,6 +42,27 @@
             padding: 0;
             gap: 30px;
         }
+        
+        @media (min-width: 769px) {
+            .nav-menu {
+                display: flex !important;
+                position: static !important;
+                flex-direction: row !important;
+                background: transparent !important;
+                box-shadow: none !important;
+                border: none !important;
+                padding: 0 !important;
+            }
+            
+            .nav-auth {
+                display: flex !important;
+                position: static !important;
+                background: transparent !important;
+                box-shadow: none !important;
+                border: none !important;
+                padding: 0 !important;
+            }
+        }
         .nav-item a {
             text-decoration: none;
             color: #374151;
@@ -122,8 +143,11 @@
             padding: 10px;
             border: 1px solid #d1d5db;
             border-radius: 6px;
-            font-size: 14px;
+            font-size: 16px;
             box-sizing: border-box;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
         }
         button {
             background: #2563eb;
@@ -193,18 +217,188 @@
             grid-template-columns: 1fr 1fr;
             gap: 20px;
         }
+        /* Mobile Navigation */
+        .nav-toggle {
+            display: none;
+            flex-direction: column;
+            cursor: pointer;
+            padding: 5px;
+        }
+        .nav-toggle span {
+            width: 25px;
+            height: 3px;
+            background: #374151;
+            margin: 3px 0;
+            transition: 0.3s;
+        }
+        
         @media (max-width: 768px) {
+            .container {
+                margin: 0 10px;
+                padding: 20px;
+            }
+            
             .grid {
                 grid-template-columns: 1fr;
+                gap: 15px;
             }
+            
+            /* Mobile Navigation */
+            .nav-toggle {
+                display: flex;
+            }
+            
             .nav-menu {
+                display: none;
                 flex-direction: column;
                 gap: 10px;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                right: 0;
+                background: white;
+                box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+                border-top: 1px solid #e5e7eb;
+                padding: 20px;
+                z-index: 1000;
             }
+            
+            .nav-menu.active {
+                display: flex;
+            }
+            
             .nav-container {
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+                position: relative;
+            }
+            
+            .nav-auth {
+                position: absolute;
+                top: 100%;
+                right: 0;
+                background: white;
+                box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+                border-top: 1px solid #e5e7eb;
+                padding: 15px;
+                display: none;
+                z-index: 1001;
+            }
+            
+            .nav-auth.active {
+                display: flex;
+            }
+            
+            /* Mobile form improvements */
+            .form-group {
+                margin-bottom: 20px;
+            }
+            
+            input, select, button {
+                font-size: 16px;
+                padding: 12px;
+            }
+            
+            .section {
+                margin-bottom: 20px;
+                padding: 15px;
+            }
+            
+            h1 {
+                font-size: 28px;
+                margin-bottom: 20px;
+            }
+            
+            h2 {
+                font-size: 22px;
+                margin-bottom: 15px;
+            }
+            
+            .card-item {
+                padding: 15px;
+                margin-bottom: 15px;
+            }
+            
+            .card-layout {
                 flex-direction: column;
-                align-items: flex-start;
                 gap: 15px;
+            }
+            
+            .card-actions {
+                flex-direction: column;
+                gap: 8px;
+                margin-top: 15px;
+            }
+            
+            .card-actions button {
+                width: 100%;
+                padding: 12px;
+                font-size: 14px;
+            }
+            
+            .recommendation {
+                padding: 15px;
+                margin-bottom: 15px;
+            }
+            
+            .recommendation > div {
+                flex-direction: column !important;
+                gap: 15px !important;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .container {
+                margin: 0 5px;
+                padding: 15px;
+            }
+            
+            .navbar {
+                padding: 0 10px;
+            }
+            
+            .nav-brand {
+                font-size: 20px;
+            }
+            
+            h1 {
+                font-size: 24px;
+            }
+            
+            h2 {
+                font-size: 20px;
+            }
+            
+            .modal-content {
+                width: 100%;
+                margin: 0;
+                border-radius: 0;
+                max-height: 100vh;
+            }
+            
+            .modal-header {
+                padding: 15px;
+            }
+            
+            .modal-body {
+                padding: 15px;
+            }
+            
+            .modal-title {
+                font-size: 20px;
+            }
+            
+            .modal-subtitle {
+                font-size: 14px;
+            }
+            
+            .section {
+                padding: 10px;
+            }
+            
+            .card-item {
+                padding: 10px;
             }
         }
         .results {
@@ -244,6 +438,17 @@
         .card-actions button {
             padding: 6px 12px;
             font-size: 14px;
+        }
+        
+        .card-layout {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            gap: 15px;
+        }
+        
+        .card-content {
+            flex: 1;
         }
         
         /* Card Detail Modal */
@@ -410,13 +615,18 @@
     <nav class="navbar">
         <div class="nav-container">
             <a href="/" class="nav-brand">🏦 Credit Card Guru</a>
-            <ul class="nav-menu">
+            <div class="nav-toggle" onclick="toggleMobileMenu()">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+            <ul class="nav-menu" id="navMenu">
                 <li class="nav-item"><a href="/" {% if request.resolver_match.url_name == 'index' %}class="active"{% endif %}>Roadmap</a></li>
                 <li class="nav-item"><a href="/cards/" {% if request.resolver_match.url_name == 'cards_list' %}class="active"{% endif %}>Credit Cards</a></li>
                 <li class="nav-item"><a href="/categories/" {% if request.resolver_match.url_name == 'categories_list' %}class="active"{% endif %}>Categories</a></li>
                 <li class="nav-item"><a href="/issuers/" {% if request.resolver_match.url_name == 'issuers_list' %}class="active"{% endif %}>Issuers</a></li>
             </ul>
-            <div class="nav-auth">
+            <div class="nav-auth" id="navAuth">
                 {% if user.is_authenticated %}
                     <span class="nav-user">👤 {{ user.email }}</span>
                     <a href="/accounts/logout/" class="nav-logout">Logout</a>
@@ -950,6 +1160,36 @@
         document.addEventListener('keydown', function(event) {
             if (event.key === 'Escape') {
                 closeCardModal();
+            }
+        });
+
+        // Mobile menu toggle
+        function toggleMobileMenu() {
+            const navMenu = document.getElementById('navMenu');
+            const navAuth = document.getElementById('navAuth');
+            navMenu.classList.toggle('active');
+            navAuth.classList.toggle('active');
+        }
+        
+        // Close mobile menu when clicking outside
+        document.addEventListener('click', function(event) {
+            const navMenu = document.getElementById('navMenu');
+            const navAuth = document.getElementById('navAuth');
+            const navToggle = document.querySelector('.nav-toggle');
+            
+            if (!navToggle.contains(event.target) && !navMenu.contains(event.target) && !navAuth.contains(event.target)) {
+                navMenu.classList.remove('active');
+                navAuth.classList.remove('active');
+            }
+        });
+        
+        // Close mobile menu when window is resized to desktop
+        window.addEventListener('resize', function() {
+            if (window.innerWidth > 768) {
+                const navMenu = document.getElementById('navMenu');
+                const navAuth = document.getElementById('navAuth');
+                navMenu.classList.remove('active');
+                navAuth.classList.remove('active');
             }
         });
 

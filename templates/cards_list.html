@@ -265,8 +265,8 @@ function displayCards(cards) {
         
         return `
             <div class="card-item modal-card-clickable" onclick="openCardModal(${card.id})">
-                <div style="display: flex; justify-content: space-between; align-items: start;">
-                    <div style="flex: 1;">
+                <div class="card-layout">
+                    <div class="card-content">
                         <div class="card-title">${card.name}</div>
                         <div class="card-details">
                             <p><strong>Annual Fee:</strong> $${card.annual_fee}</p>
