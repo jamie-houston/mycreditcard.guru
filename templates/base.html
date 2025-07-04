@@ -1,6 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-3YBDVN11MC"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-3YBDVN11MC');
+    </script>
+    
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Credit Card Guru{% endblock %}</title>
@@ -395,6 +405,118 @@
             
             .section {
                 padding: 10px;
+                margin-bottom: 15px;
+            }
+            
+            /* Compact preferences section for mobile */
+            .preferences-mobile {
+                padding: 8px !important;
+                margin-bottom: 15px !important;
+            }
+            
+            .preferences-mobile .grid {
+                gap: 10px !important;
+            }
+            
+            .preferences-mobile .form-group {
+                margin-bottom: 10px !important;
+            }
+            
+            .preferences-mobile label {
+                font-size: 14px !important;
+                margin-bottom: 3px !important;
+            }
+            
+            .preferences-mobile input,
+            .preferences-mobile select {
+                padding: 8px !important;
+                font-size: 14px !important;
+            }
+            
+            /* Compact spending profile for mobile */
+            .spending-mobile {
+                padding: 8px !important;
+            }
+            
+            .spending-mobile .grid {
+                gap: 8px !important;
+            }
+            
+            .spending-mobile .form-group {
+                margin-bottom: 8px !important;
+            }
+            
+            .spending-mobile label {
+                font-size: 13px !important;
+                margin-bottom: 2px !important;
+            }
+            
+            .spending-mobile input {
+                padding: 6px !important;
+                font-size: 14px !important;
+            }
+            
+            /* Compact action button */
+            .action-button-mobile {
+                padding: 12px 20px !important;
+                font-size: 16px !important;
+                margin: 15px 0 !important;
+            }
+            
+            /* Compact section headers */
+            .section h2 {
+                font-size: 18px !important;
+                margin-bottom: 10px !important;
+            }
+            
+            /* Reduce vertical spacing in form groups */
+            .form-group label > div {
+                margin-top: 2px !important;
+            }
+            
+            /* Compact toggle indicators */
+            .section h2 span {
+                font-size: 12px !important;
+            }
+            
+            /* Mobile-optimized results section */
+            .results-mobile .recommendation {
+                padding: 10px !important;
+                margin-bottom: 10px !important;
+            }
+            
+            .results-mobile .recommendation h3 {
+                font-size: 16px !important;
+                margin-bottom: 8px !important;
+            }
+            
+            .results-mobile .recommendation p {
+                font-size: 14px !important;
+                margin-bottom: 6px !important;
+            }
+            
+            .results-mobile .recommendation ul {
+                padding-left: 15px !important;
+            }
+            
+            .results-mobile .recommendation li {
+                font-size: 12px !important;
+                margin: 2px 0 !important;
+            }
+            
+            /* Compact priority badges */
+            .results-mobile .recommendation > div > div:last-child {
+                gap: 4px !important;
+            }
+            
+            .results-mobile .recommendation > div > div:last-child > div {
+                padding: 4px 8px !important;
+                font-size: 12px !important;
+            }
+            
+            .results-mobile .recommendation > div > div:last-child button {
+                padding: 4px 8px !important;
+                font-size: 11px !important;
             }
             
             .card-item {
