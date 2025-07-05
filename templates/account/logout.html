@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+{% load allauth account %}
+
+{% block title %}Sign Out - Credit Card Guru{% endblock %}
+
+{% block content %}
+<div style="max-width: 400px; margin: 0 auto;">
+    <div class="section" style="text-align: center;">
+        <div style="font-size: 48px; margin-bottom: 20px;">👋</div>
+        <h1>Sign Out</h1>
+        <p style="color: #6b7280; margin-bottom: 30px;">
+            Are you sure you want to sign out of your Credit Card Guru account?
+        </p>
+
+        <div style="background: rgba(102, 126, 234, 0.1); padding: 20px; border-radius: 16px; 
+                    margin-bottom: 30px; border: 1px solid rgba(102, 126, 234, 0.2);">
+            <p style="color: #667eea; font-weight: 600; margin-bottom: 10px;">
+                📊 Your data is safe
+            </p>
+            <p style="color: #6b7280; font-size: 14px; margin: 0;">
+                Your spending preferences and card portfolio will be saved and available when you sign back in.
+            </p>
+        </div>
+
+        <form method="post" action="{% url 'account_logout' %}">
+            {% csrf_token %}
+            
+            <div style="display: flex; gap: 12px; flex-direction: column;">
+                <button type="submit" 
+                        style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+                               box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);
+                               width: 100%;">
+                    👋 Yes, Sign Me Out
+                </button>
+                
+                <a href="{% url 'index' %}" 
+                   style="display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                          color: white; padding: 14px 28px; border-radius: 12px; 
+                          text-decoration: none; font-weight: 600; text-align: center;
+                          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                          box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);">
+                    🏠 No, Take Me Home
+                </a>
+            </div>
+        </form>
+
+        <div style="margin-top: 30px; padding-top: 20px; 
+                    border-top: 1px solid rgba(255, 255, 255, 0.3);">
+            <p style="color: #6b7280; font-size: 14px;">
+                Need help? <a href="mailto:support@creditcardguru.com" 
+                            style="color: #667eea; text-decoration: none;">Contact support</a>
+            </p>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Hover effects for buttons */
+button[type="submit"]:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(239, 68, 68, 0.6) !important;
+}
+
+a[href*="index"]:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.6) !important;
+}
+</style>
+{% endblock %}

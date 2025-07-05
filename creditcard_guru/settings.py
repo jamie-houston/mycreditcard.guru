@@ -195,12 +195,8 @@ SOCIALACCOUNT_PROVIDERS = {
     }
 }
 
-# Google OAuth settings (to be configured)
-SOCIALACCOUNT_PROVIDERS['google']['APP'] = {
-    'client_id': config('GOOGLE_OAUTH_CLIENT_ID', default=''),
-    'secret': config('GOOGLE_OAUTH_CLIENT_SECRET', default=''),
-    'key': ''
-}
+# Google OAuth settings are configured via SocialApp in database
+# Removed duplicate APP configuration to avoid conflicts
 
 # CORS settings
 CORS_ALLOWED_ORIGINS = config(
