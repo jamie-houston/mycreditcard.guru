@@ -241,6 +241,36 @@ def flush_database():
     else:
         print("Operation cancelled.")
 
+def wipe_database():
+    """Completely wipe and recreate the database (WARNING: This will delete everything)."""
+    print("⚠️  This will completely wipe the database and recreate it from scratch.")
+    print("   All data, tables, and migrations will be reset.")
+    response = input("Are you absolutely sure? (type 'WIPE' to confirm): ")
+    
+    if response == 'WIPE':
+        print("🗑️  Wiping database completely...")
+        
+        # Remove the database file (SQLite)
+        db_file = PROJECT_ROOT / "db.sqlite3"
+        if db_file.exists():
+            db_file.unlink()
+            print(f"✅ Removed database file: {db_file}")
+        
+        # Remove all migration files (but keep __init__.py and the migration folders)
+        apps = ['cards', 'roadmaps', 'users']
+        for app in apps:
+            migrations_dir = PROJECT_ROOT / app / "migrations"
+            if migrations_dir.exists():
+                for migration_file in migrations_dir.glob("*.py"):
+                    if migration_file.name != "__init__.py":
+                        migration_file.unlink()
+                        print(f"✅ Removed migration: {migration_file}")
+        
+        print("✅ Database wiped successfully!")
+        print("💡 Next steps: Run 'python admin.py setup-db' to recreate the database")
+    else:
+        print("Operation cancelled.")
+
 def show_urls():
     """Show all URL patterns."""
     run_command("python manage.py show_urls", "Showing URL patterns")
@@ -252,10 +282,80 @@ def check_deployment():
 def full_setup():
     """Complete project setup from scratch."""
     print("🚀 Starting full project setup...")
+    
+    # Ask if user wants to wipe the database first
+    print("\n🗃️  Database Setup Options:")
+    print("1. Keep existing database (just add missing tables)")
+    print("2. Completely wipe and recreate database from scratch")
+    
+    while True:
+        choice = input("Choose option (1 or 2): ").strip()
+        if choice == '1':
+            break
+        elif choice == '2':
+            print("\n⚠️  This will completely wipe your existing database!")
+            confirm = input("Type 'WIPE' to confirm: ").strip()
+            if confirm == 'WIPE':
+                # Wipe the database without interactive prompts
+                print("🗑️  Wiping database completely...")
+                
+                # Remove the database file (SQLite)
+                db_file = PROJECT_ROOT / "db.sqlite3"
+                if db_file.exists():
+                    db_file.unlink()
+                    print(f"✅ Removed database file: {db_file}")
+                
+                # Remove all migration files (but keep __init__.py and the migration folders)
+                apps = ['cards', 'roadmaps', 'users']
+                for app in apps:
+                    migrations_dir = PROJECT_ROOT / app / "migrations"
+                    if migrations_dir.exists():
+                        for migration_file in migrations_dir.glob("*.py"):
+                            if migration_file.name != "__init__.py":
+                                migration_file.unlink()
+                                print(f"✅ Removed migration: {migration_file}")
+                
+                print("✅ Database wiped successfully!")
+                break
+            else:
+                print("❌ Database wipe cancelled. Keeping existing database.")
+                break
+        else:
+            print("❌ Invalid choice. Please enter 1 or 2.")
+    
     install_dependencies()
     setup_database()
-    import_sample_data()
-    print("✅ Full setup complete!")
+    
+    # Import the 4 essential system files automatically
+    print("\n📥 Importing essential system data...")
+    data_dir = PROJECT_ROOT / "data" / "input" / "system"
+    
+    if data_dir.exists():
+        essential_files = [
+            "issuers.json",
+            "reward_types.json", 
+            "spending_categories.json",
+            "credit_cards.json"
+        ]
+        
+        for filename in essential_files:
+            file_path = data_dir / filename
+            if file_path.exists():
+                print(f"📄 Importing {filename}")
+                run_command(f"python manage.py import_cards {file_path}", f"Importing {filename}")
+            else:
+                print(f"⚠️  Essential file not found: {filename}")
+        
+        print("✅ Essential system data imported!")
+    else:
+        print("⚠️  System data directory not found. Skipping automatic import.")
+        print("💡 You can manually import data later with 'python admin.py import-sample'")
+    
+    print("\n✅ Full setup complete!")
+    print("💡 Next steps:")
+    print("  - Run 'python admin.py server' to start the development server")
+    print("  - Run 'python admin.py import-sample' to import additional card data")
+    print("  - Visit http://localhost:8000 to see your application")
 
 def show_interactive_menu():
     """Show interactive menu for task selection."""
@@ -269,6 +369,7 @@ def show_interactive_menu():
         '3': ('Import Sample Data', 'import-sample', 'Import all sample JSON files'),
         '4': ('Run Tests', 'test', 'Execute Django test suite'),
         '5': ('Open Django Shell', 'shell', 'Interactive Python shell'),
+        '6': ('Wipe Database', 'wipe-db', 'Completely wipe and recreate database'),
     }
     
     print("\n📋 Common Workflows:")
@@ -322,6 +423,7 @@ def show_all_commands():
         'shell': 'Open Django interactive shell',
         'collectstatic': 'Collect static files for production',
         'flush': 'Flush database (WARNING: deletes all data)',
+        'wipe-db': 'Completely wipe and recreate database (WARNING: deletes everything)',
         'urls': 'Show all URL patterns',
         'check': 'Check deployment readiness',
     }
@@ -343,6 +445,7 @@ def execute_task(task, args=None):
         'collectstatic': collect_static,
         'shell': shell,
         'flush': flush_database,
+        'wipe-db': wipe_database,
         'urls': show_urls,
         'check': check_deployment,
         'setup': full_setup,
@@ -383,6 +486,7 @@ def main():
     subparsers.add_parser('collectstatic', help='Collect static files')
     subparsers.add_parser('shell', help='Open Django shell')
     subparsers.add_parser('flush', help='Flush database (WARNING: deletes all data)')
+    subparsers.add_parser('wipe-db', help='Completely wipe and recreate database (WARNING: deletes everything)')
     subparsers.add_parser('urls', help='Show URL patterns')
     subparsers.add_parser('check', help='Check deployment readiness')
     subparsers.add_parser('setup', help='Complete project setup')

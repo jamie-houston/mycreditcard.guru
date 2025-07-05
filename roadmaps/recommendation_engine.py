@@ -43,6 +43,53 @@ class RecommendationEngine:
         # Ensure we don't exceed max_recommendations
         return recommendations[:roadmap.max_recommendations]
     
+    def generate_roadmap(self, roadmap: 'Roadmap') -> List[dict]:
+        """Generate recommendations and save them to the database"""
+        from .models import RoadmapRecommendation, RoadmapCalculation
+        
+        # Clear existing recommendations for this roadmap
+        roadmap.recommendations.all().delete()
+        
+        # Generate new recommendations using the same logic as quick recommendations
+        recommendations = self.generate_quick_recommendations(roadmap)
+        
+        # Save recommendations to database
+        saved_recommendations = []
+        for rec in recommendations:
+            recommendation = RoadmapRecommendation.objects.create(
+                roadmap=roadmap,
+                card=rec['card'],
+                action=rec['action'],
+                priority=rec['priority'],
+                estimated_rewards=rec['estimated_rewards'],
+                reasoning=rec['reasoning']
+            )
+            saved_recommendations.append(recommendation)
+        
+        # Calculate and save total estimated rewards
+        total_rewards = self._calculate_total_rewards(recommendations)
+        calculation, _ = RoadmapCalculation.objects.update_or_create(
+            roadmap=roadmap,
+            defaults={
+                'total_estimated_rewards': total_rewards,
+                'calculation_data': {
+                    'breakdown': [
+                        {
+                            'card_name': rec['card'].name,
+                            'action': rec['action'],
+                            'estimated_rewards': float(rec['estimated_rewards']),
+                            'reasoning': rec['reasoning'],
+                            'rewards_breakdown': rec.get('rewards_breakdown', [])
+                        }
+                        for rec in recommendations
+                    ],
+                    'total_rewards': float(total_rewards)
+                }
+            }
+        )
+        
+        return recommendations
+    
     def _get_filtered_cards(self, roadmap: Roadmap) -> List[CreditCard]:
         """Apply roadmap filters to get eligible cards"""
         queryset = CreditCard.objects.filter(is_active=True)
@@ -159,8 +206,10 @@ class RecommendationEngine:
         # Check issuer-specific rules
         if issuer.name.lower() == 'chase':
             # Simplified 5/24 rule check
+            # Only count cards with known opening dates
             recent_cards = UserCard.objects.filter(
                 profile=self.profile,
+                opened_date__isnull=False,
                 opened_date__gte=datetime.now().date() - timedelta(days=24*30)
             ).count()
             

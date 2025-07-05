@@ -15,6 +15,8 @@ urlpatterns = [
     path('cards/', views.UserCardListView.as_view(), name='user-cards'),
     path('cards/<int:pk>/', views.UserCardDetailView.as_view(), name='user-card-detail'),
     path('cards/toggle/', views.toggle_user_card, name='toggle-user-card'),
+    path('cards/update-details/', views.update_user_card_details, name='update-user-card-details'),
+    path('cards/details/', views.get_user_cards_details, name='get-user-cards-details'),
     
     # User spending management
     path('spending/', views.UserSpendingListView.as_view(), name='user-spending'),

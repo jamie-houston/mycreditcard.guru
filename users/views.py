@@ -114,7 +114,7 @@ def toggle_user_card(request):
             user_card, created = UserCard.objects.get_or_create(
                 profile=profile,
                 card=card,
-                defaults={'is_active': True, 'opened_date': '2023-01-01'}  # Default date
+                defaults={'is_active': True}  # No default date, will be null
             )
             if not created and not user_card.is_active:
                 user_card.is_active = True
@@ -129,6 +129,82 @@ def toggle_user_card(request):
             'message': message,
             'card_id': card_id,
             'action': action
+        })
+        
+    except Exception as e:
+        return Response(
+            {'error': str(e)}, 
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def update_user_card_details(request):
+    """Update nickname and opening date for a user's card"""
+    try:
+        card_id = request.data.get('card_id')
+        nickname = request.data.get('nickname', '')
+        opened_date = request.data.get('opened_date')
+        
+        if not card_id:
+            return Response(
+                {'error': 'card_id is required'}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        from cards.models import CreditCard
+        try:
+            card = CreditCard.objects.get(id=card_id)
+        except CreditCard.DoesNotExist:
+            return Response(
+                {'error': 'Card not found'}, 
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        profile, _ = UserSpendingProfile.objects.get_or_create(user=request.user)
+        
+        try:
+            user_card = UserCard.objects.get(profile=profile, card=card, is_active=True)
+        except UserCard.DoesNotExist:
+            return Response(
+                {'error': 'Card not in your collection'}, 
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        # Update the card details
+        user_card.nickname = nickname
+        if opened_date:
+            user_card.opened_date = opened_date
+        user_card.save()
+        
+        # Return updated card data
+        serializer = UserCardSerializer(user_card)
+        return Response({
+            'success': True,
+            'message': 'Card details updated successfully',
+            'user_card': serializer.data
+        })
+        
+    except Exception as e:
+        return Response(
+            {'error': str(e)}, 
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_user_cards_details(request):
+    """Get detailed user cards with nickname and opening date"""
+    try:
+        profile, _ = UserSpendingProfile.objects.get_or_create(user=request.user)
+        user_cards = UserCard.objects.filter(profile=profile, is_active=True).select_related('card', 'card__issuer', 'card__primary_reward_type')
+        
+        serializer = UserCardSerializer(user_cards, many=True)
+        return Response({
+            'success': True,
+            'user_cards': serializer.data
         })
         
     except Exception as e:

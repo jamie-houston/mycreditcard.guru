@@ -131,8 +131,10 @@ class UserCard(models.Model):
     profile = models.ForeignKey(UserSpendingProfile, on_delete=models.CASCADE, related_name='user_cards')
     card = models.ForeignKey(CreditCard, on_delete=models.CASCADE)
     nickname = models.CharField(max_length=100, blank=True)
-    opened_date = models.DateField()
+    opened_date = models.DateField(null=True, blank=True)
     is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
     
     class Meta:
         unique_together = ['profile', 'card']
@@ -140,3 +142,9 @@ class UserCard(models.Model):
     def __str__(self):
         name = self.nickname or str(self.card)
         return f"{self.profile} - {name}"
+    
+    def display_name(self):
+        """Return card name with nickname if available"""
+        if self.nickname:
+            return f"{self.card.name} ({self.nickname})"
+        return self.card.name

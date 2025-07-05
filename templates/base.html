@@ -932,6 +932,25 @@
                     </div>
                 </div>
                 
+                <div class="modal-section" id="modalUserDetailsSection" style="display: none;">
+                    <h3>👤 Your Card Details</h3>
+                    <div class="modal-info-grid">
+                        <div class="modal-info-item">
+                            <div class="modal-info-label">Nickname</div>
+                            <div class="modal-info-value" id="modalUserNickname">None</div>
+                        </div>
+                        <div class="modal-info-item">
+                            <div class="modal-info-label">Opening Date</div>
+                            <div class="modal-info-value" id="modalUserOpeningDate">Not set</div>
+                        </div>
+                    </div>
+                    <div style="margin-top: 15px;">
+                        <button onclick="openEditCardDetailsModal()" class="secondary" style="background: #10b981; color: white;">
+                            ✏️ Edit Details
+                        </button>
+                    </div>
+                </div>
+                
                 <div class="modal-section" id="modalSignupBonusSection">
                     <h3>🎁 Signup Bonus</h3>
                     <div class="modal-info-item">
@@ -962,6 +981,46 @@
                         </button>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Card Details Modal -->
+    <div id="editCardDetailsModal" class="modal">
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-header">
+                <button class="modal-close" onclick="closeEditCardDetailsModal()">&times;</button>
+                <h2 class="modal-title">Edit Card Details</h2>
+                <p class="modal-subtitle" id="editModalCardName">Card Name</p>
+            </div>
+            <div class="modal-body">
+                <form onsubmit="saveCardDetails(event)">
+                    <div class="form-group" style="margin-bottom: 20px;">
+                        <label for="cardNickname" style="display: block; margin-bottom: 8px; font-weight: 600;">Nickname (Optional)</label>
+                        <input 
+                            type="text" 
+                            id="cardNickname" 
+                            placeholder="e.g., My Travel Card, Daily Driver..."
+                            style="width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 16px;"
+                        >
+                    </div>
+                    <div class="form-group" style="margin-bottom: 30px;">
+                        <label for="cardOpeningDate" style="display: block; margin-bottom: 8px; font-weight: 600;">Opening Date (Optional)</label>
+                        <input 
+                            type="date" 
+                            id="cardOpeningDate"
+                            style="width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 16px;"
+                        >
+                    </div>
+                    <div style="display: flex; gap: 15px; justify-content: center;">
+                        <button type="submit" class="success" style="padding: 12px 24px;">
+                            💾 Save Details
+                        </button>
+                        <button type="button" onclick="closeEditCardDetailsModal()" class="secondary" style="padding: 12px 24px;">
+                            Cancel
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
@@ -1038,6 +1097,20 @@
 
             static setPreferences(preferences) {
                 localStorage.setItem('userPreferences', JSON.stringify(preferences));
+            }
+
+            static getCardDetails() {
+                try {
+                    return JSON.parse(localStorage.getItem('userCardDetails') || '{}');
+                } catch {
+                    return {};
+                }
+            }
+
+            static setCardDetails(cardId, details) {
+                const cardDetails = this.getCardDetails();
+                cardDetails[cardId] = details;
+                localStorage.setItem('userCardDetails', JSON.stringify(cardDetails));
             }
         }
 
@@ -1137,6 +1210,67 @@
                     }
                 } else {
                     return LocalStorage.getPreferences();
+                }
+            }
+            
+            // New methods for handling detailed user cards
+            static async getUserCardsDetails() {
+                if (isAuthenticated) {
+                    try {
+                        const response = await fetch(`${API_BASE}/users/cards/details/`);
+                        const data = await response.json();
+                        return data.user_cards || [];
+                    } catch (error) {
+                        console.error('Error fetching user cards details:', error);
+                        return [];
+                    }
+                } else {
+                    // For anonymous users, return simple card objects with IDs
+                    const cardIds = LocalStorage.getCards();
+                    const cardDetails = LocalStorage.getCardDetails();
+                    return cardIds.map(id => ({
+                        card: { id: id },
+                        nickname: cardDetails[id]?.nickname || '',
+                        opened_date: cardDetails[id]?.opened_date || null
+                    }));
+                }
+            }
+            
+            static async updateCardDetails(cardId, nickname, openedDate) {
+                if (isAuthenticated) {
+                    try {
+                        const response = await fetch(`${API_BASE}/users/cards/update-details/`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRFToken': getCookie('csrftoken')
+                            },
+                            body: JSON.stringify({
+                                card_id: cardId,
+                                nickname: nickname,
+                                opened_date: openedDate
+                            })
+                        });
+                        const data = await response.json();
+                        return data.success;
+                    } catch (error) {
+                        console.error('Error updating card details:', error);
+                        return false;
+                    }
+                } else {
+                    // For anonymous users, store in localStorage
+                    LocalStorage.setCardDetails(cardId, { nickname, opened_date: openedDate });
+                    return true;
+                }
+            }
+            
+            static async getCardDetails(cardId) {
+                if (isAuthenticated) {
+                    const userCards = await this.getUserCardsDetails();
+                    return userCards.find(uc => uc.card.id === cardId) || null;
+                } else {
+                    const cardDetails = LocalStorage.getCardDetails();
+                    return cardDetails[cardId] || { nickname: '', opened_date: null };
                 }
             }
         }
@@ -1248,9 +1382,21 @@
             }
         }
         
-        function populateCardModal(card) {
+        async function populateCardModal(card) {
+            // Check if user owns this card and has a nickname
+            const userCards = await UserDataManager.getCards();
+            const hasCard = userCards.includes(card.id);
+            let displayName = card.name;
+            
+            if (hasCard) {
+                const cardDetails = await UserDataManager.getCardDetails(card.id);
+                if (cardDetails?.nickname) {
+                    displayName = `${card.name} (${cardDetails.nickname})`;
+                }
+            }
+            
             // Basic card info
-            document.getElementById('modalCardName').textContent = card.name;
+            document.getElementById('modalCardName').textContent = displayName;
             document.getElementById('modalCardIssuer').textContent = card.issuer?.name || 'Unknown Issuer';
             document.getElementById('modalCardType').textContent = card.card_type ? card.card_type.charAt(0).toUpperCase() + card.card_type.slice(1) : 'Personal';
             document.getElementById('modalAnnualFee').textContent = `$${card.annual_fee || 0}`;
@@ -1291,11 +1437,46 @@
                 signupBonusSection.style.display = 'block';
             }
             
+            // User-specific card details
+            await populateUserCardDetails(card.id);
+            
             // Reward categories
             populateRewardCategories(card.reward_categories || []);
             
             // Update ownership button
             updateModalOwnershipButton(card.id);
+        }
+        
+        async function populateUserCardDetails(cardId) {
+            try {
+                const userCards = await UserDataManager.getCards();
+                const hasCard = userCards.includes(cardId);
+                const userDetailsSection = document.getElementById('modalUserDetailsSection');
+                
+                if (hasCard) {
+                    const cardDetails = await UserDataManager.getCardDetails(cardId);
+                    
+                    // Show nickname
+                    const nicknameEl = document.getElementById('modalUserNickname');
+                    nicknameEl.textContent = cardDetails?.nickname || 'None';
+                    
+                    // Show opening date
+                    const openingDateEl = document.getElementById('modalUserOpeningDate');
+                    if (cardDetails?.opened_date) {
+                        const date = new Date(cardDetails.opened_date);
+                        openingDateEl.textContent = date.toLocaleDateString();
+                    } else {
+                        openingDateEl.textContent = 'Not set';
+                    }
+                    
+                    userDetailsSection.style.display = 'block';
+                } else {
+                    userDetailsSection.style.display = 'none';
+                }
+            } catch (error) {
+                console.error('Error loading user card details:', error);
+                document.getElementById('modalUserDetailsSection').style.display = 'none';
+            }
         }
         
         function populateRewardCategories(rewardCategories) {
@@ -1404,18 +1585,91 @@
             currentModalCard = null;
         }
         
+        // Edit Card Details Modal Functions
+        async function openEditCardDetailsModal() {
+            if (!currentModalCard) return;
+            
+            try {
+                const cardDetails = await UserDataManager.getCardDetails(currentModalCard.id);
+                
+                // Populate form with current values
+                document.getElementById('editModalCardName').textContent = currentModalCard.name;
+                document.getElementById('cardNickname').value = cardDetails?.nickname || '';
+                document.getElementById('cardOpeningDate').value = cardDetails?.opened_date || '';
+                
+                // Show edit modal
+                document.getElementById('editCardDetailsModal').style.display = 'block';
+            } catch (error) {
+                console.error('Error loading card details for editing:', error);
+                alert('Error loading card details for editing');
+            }
+        }
+        
+        function closeEditCardDetailsModal() {
+            document.getElementById('editCardDetailsModal').style.display = 'none';
+            // Clear form
+            document.getElementById('cardNickname').value = '';
+            document.getElementById('cardOpeningDate').value = '';
+        }
+        
+        async function saveCardDetails(event) {
+            event.preventDefault();
+            
+            if (!currentModalCard) return;
+            
+            try {
+                const nickname = document.getElementById('cardNickname').value.trim();
+                const openingDate = document.getElementById('cardOpeningDate').value;
+                
+                const success = await UserDataManager.updateCardDetails(
+                    currentModalCard.id, 
+                    nickname, 
+                    openingDate
+                );
+                
+                if (success) {
+                    // Close edit modal
+                    closeEditCardDetailsModal();
+                    
+                    // Refresh the main modal display
+                    await populateUserCardDetails(currentModalCard.id);
+                    
+                    // Also refresh the card list display if needed
+                    if (typeof filterCards === 'function') {
+                        filterCards();
+                    }
+                } else {
+                    alert('Error saving card details. Please try again.');
+                }
+            } catch (error) {
+                console.error('Error saving card details:', error);
+                alert('Error saving card details. Please try again.');
+            }
+        }
+        
         // Close modal when clicking outside of it
         window.onclick = function(event) {
-            const modal = document.getElementById('cardModal');
-            if (event.target === modal) {
+            const cardModal = document.getElementById('cardModal');
+            const editModal = document.getElementById('editCardDetailsModal');
+            
+            if (event.target === cardModal) {
                 closeCardModal();
+            } else if (event.target === editModal) {
+                closeEditCardDetailsModal();
             }
         }
         
         // Close modal with Escape key
         document.addEventListener('keydown', function(event) {
             if (event.key === 'Escape') {
-                closeCardModal();
+                const editModal = document.getElementById('editCardDetailsModal');
+                const cardModal = document.getElementById('cardModal');
+                
+                if (editModal.style.display === 'block') {
+                    closeEditCardDetailsModal();
+                } else if (cardModal.style.display === 'block') {
+                    closeCardModal();
+                }
             }
         });
 

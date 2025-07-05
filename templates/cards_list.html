@@ -146,6 +146,10 @@ async function loadUserCards() {
     try {
         const cards = await UserDataManager.getCards();
         userCards = new Set(cards);
+        
+        // Also load detailed card information for display
+        const userCardsDetails = await UserDataManager.getUserCardsDetails();
+        window.userCardsDetails = userCardsDetails;
     } catch (error) {
         console.error('Error loading user cards:', error);
     }
@@ -272,11 +276,20 @@ function displayCards(cards) {
         const signupBonus = card.signup_bonus_amount || 0;
         const rewardMultiplier = card.metadata?.reward_value_multiplier || 0.01;
         
+        // Get user's nickname for this card if they own it
+        let displayName = card.name;
+        if (hasCard && window.userCardsDetails) {
+            const userCard = window.userCardsDetails.find(uc => uc.card.id === card.id);
+            if (userCard && userCard.nickname) {
+                displayName = `${card.name} (${userCard.nickname})`;
+            }
+        }
+        
         return `
             <div class="card-item modal-card-clickable" onclick="openCardModal(${card.id})">
                 <div class="card-layout">
                     <div class="card-content">
-                        <div class="card-title">${card.name}</div>
+                        <div class="card-title">${displayName}</div>
                         <div class="card-details">
                             <p><strong>Annual Fee:</strong> $${card.annual_fee}</p>
                             ${signupBonus ? 
@@ -338,6 +351,9 @@ async function toggleCardOwnership(cardId, button) {
         }
         
         await saveUserCards();
+        
+        // Reload user cards details to get updated information
+        await loadUserCards();
         
         // Refresh the display to apply ownership filter
         filterCards();
