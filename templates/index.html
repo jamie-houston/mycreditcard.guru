@@ -646,6 +646,140 @@
             });
         }
         
+        // Card ownership functions for roadmap page
+        async function toggleCardOwnership(cardId, button) {
+            try {
+                button.disabled = true;
+                button.textContent = '...';
+                
+                // Show nickname/opening date popup
+                const cardDetails = await showCardDetailsPopupRoadmap(cardId);
+                if (cardDetails === null) {
+                    // User cancelled
+                    button.disabled = false;
+                    button.textContent = '✅ I have this card';
+                    return;
+                }
+                
+                // Add card with details
+                const success = await UserDataManager.addCardWithDetails(cardId, cardDetails.nickname, cardDetails.openingDate);
+                if (success) {
+                    button.textContent = '✅ Added!';
+                    button.disabled = true;
+                    alert(`Added ${cardDetails.nickname} to your collection!`);
+                } else {
+                    throw new Error('Failed to add card');
+                }
+                
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error adding card');
+                button.disabled = false;
+                button.textContent = '✅ I have this card';
+            }
+        }
+        
+        function showCardDetailsPopupRoadmap(cardId) {
+            return new Promise((resolve) => {
+                // Clean up any existing modal first
+                const existingModal = document.getElementById('cardDetailsModalRoadmap');
+                if (existingModal) {
+                    existingModal.remove();
+                }
+                
+                // Create modal HTML  
+                const modalHtml = `
+                    <div id="cardDetailsModalRoadmap" class="modal" style="display: block;">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h2>Add Card to Your Collection</h2>
+                                <span class="close" onclick="closeCardDetailsPopupRoadmap()">&times;</span>
+                            </div>
+                            <div class="modal-body">
+                                <form id="cardDetailsFormRoadmap">
+                                    <div class="form-group">
+                                        <label for="cardNicknameRoadmap">Nickname (required):</label>
+                                        <input type="text" id="cardNicknameRoadmap" name="nickname" 
+                                               placeholder="e.g., My Travel Card, Personal Card, etc." 
+                                               required maxlength="100">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="cardOpeningDateRoadmap">Opening Date (optional):</label>
+                                        <input type="date" id="cardOpeningDateRoadmap" name="openingDate">
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn secondary" onclick="closeCardDetailsPopupRoadmap()">Cancel</button>
+                                <button type="button" class="btn primary" onclick="saveCardDetailsPopupRoadmap()">Add Card</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                // Add modal to page
+                document.body.insertAdjacentHTML('beforeend', modalHtml);
+                
+                // Store resolve function for callbacks first
+                window.cardDetailsResolveRoadmap = resolve;
+                
+                // Focus on nickname input with delay
+                setTimeout(() => {
+                    const nicknameInput = document.getElementById('cardNicknameRoadmap');
+                    if (nicknameInput) {
+                        nicknameInput.focus();
+                    }
+                }, 100);
+            });
+        }
+
+        function closeCardDetailsPopupRoadmap() {
+            const modal = document.getElementById('cardDetailsModalRoadmap');
+            if (modal) {
+                modal.remove();
+            }
+            if (window.cardDetailsResolveRoadmap) {
+                window.cardDetailsResolveRoadmap(null); // Return null for cancelled
+            }
+        }
+
+        function saveCardDetailsPopupRoadmap() {
+            // Use multiple fallback methods to ensure we get the input value
+            const nicknameInput = document.getElementById('cardNicknameRoadmap') || document.querySelector('#cardNicknameRoadmap') || document.querySelector('input[name="nickname"]');
+            const openingDateInput = document.getElementById('cardOpeningDateRoadmap');
+            
+            if (!nicknameInput) {
+                alert('Error: Could not find nickname input field');
+                return;
+            }
+            
+            const nickname = (nicknameInput.value || '').trim();
+            const openingDate = openingDateInput ? openingDateInput.value : '';
+            
+            if (!nickname) {
+                alert('Please enter a nickname for this card');
+                nicknameInput.focus();
+                return;
+            }
+            
+            // Store the values before removing modal
+            const cardDetails = {
+                nickname: nickname,
+                openingDate: openingDate || null
+            };
+            
+            // Remove modal
+            const modal = document.getElementById('cardDetailsModalRoadmap');
+            if (modal) {
+                modal.remove();
+            }
+            
+            // Resolve with the stored values
+            if (window.cardDetailsResolveRoadmap) {
+                window.cardDetailsResolveRoadmap(cardDetails);
+            }
+        }
+        
     </script>
 {% endblock %}
 

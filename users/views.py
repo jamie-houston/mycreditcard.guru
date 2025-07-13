@@ -111,14 +111,17 @@ def toggle_user_card(request):
         profile, _ = UserSpendingProfile.objects.get_or_create(user=request.user)
         
         if action == 'add':
-            user_card, created = UserCard.objects.get_or_create(
+            # Always create a new UserCard instance to allow multiple of same card
+            nickname = request.data.get('nickname', '')
+            opened_date = request.data.get('opened_date')
+            
+            user_card = UserCard.objects.create(
                 profile=profile,
                 card=card,
-                defaults={'is_active': True}  # No default date, will be null
+                nickname=nickname,
+                opened_date=opened_date,
+                is_active=True
             )
-            if not created and not user_card.is_active:
-                user_card.is_active = True
-                user_card.save()
             message = 'Card added to your collection'
         else:  # remove
             UserCard.objects.filter(profile=profile, card=card).update(is_active=False)

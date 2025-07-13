@@ -137,7 +137,7 @@ class UserCard(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     
     class Meta:
-        unique_together = ['profile', 'card']
+        pass
     
     def __str__(self):
         name = self.nickname or str(self.card)

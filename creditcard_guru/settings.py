@@ -182,17 +182,19 @@ ACCOUNT_EMAIL_VERIFICATION = 'none'
 ACCOUNT_LOGIN_ON_EMAIL_CONFIRMATION = True
 
 # Social account settings
+# Temporarily disable Google OAuth to avoid DoesNotExist error
+# Re-enable when SocialApp is properly configured in database
 SOCIALACCOUNT_PROVIDERS = {
-    'google': {
-        'SCOPE': [
-            'profile',
-            'email',
-        ],
-        'AUTH_PARAMS': {
-            'access_type': 'online',
-        },
-        'OAUTH_PKCE_ENABLED': True,
-    }
+    # 'google': {
+    #     'SCOPE': [
+    #         'profile',
+    #         'email',
+    #     ],
+    #     'AUTH_PARAMS': {
+    #         'access_type': 'online',
+    #     },
+    #     'OAUTH_PKCE_ENABLED': True,
+    # }
 }
 
 # Google OAuth settings are configured via SocialApp in database

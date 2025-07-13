@@ -318,12 +318,28 @@ function displayCards(cards) {
                         </div>
                     </div>
                     <div class="card-actions">
-                        <button 
-                            onclick="event.stopPropagation(); toggleCardOwnership(${card.id}, this)" 
-                            class="${hasCard ? 'danger' : 'success'}"
-                        >
-                            ${hasCard ? '❌ Remove from my cards' : '✅ I have this card'}
-                        </button>
+                        ${hasCard ? `
+                            <button 
+                                onclick="event.stopPropagation(); removeLastCard(${card.id}, this)" 
+                                class="danger"
+                                style="margin-right: 8px;"
+                            >
+                                ❌ Remove from my cards
+                            </button>
+                            <button 
+                                onclick="event.stopPropagation(); addAnotherCard(${card.id}, this)" 
+                                class="success secondary"
+                            >
+                                ➕ Add another card
+                            </button>
+                        ` : `
+                            <button 
+                                onclick="event.stopPropagation(); toggleCardOwnership(${card.id}, this)" 
+                                class="success"
+                            >
+                                ✅ I have this card
+                            </button>
+                        `}
                     </div>
                 </div>
             </div>
@@ -331,6 +347,168 @@ function displayCards(cards) {
     }).join('');
     
     container.innerHTML = html;
+}
+
+function showCardDetailsPopup(cardId) {
+    return new Promise((resolve) => {
+        // Clean up any existing modal first
+        const existingModal = document.getElementById('cardDetailsModal');
+        if (existingModal) {
+            existingModal.remove();
+        }
+        
+        // Find the card data
+        const card = allCards.find(c => c.id === cardId);
+        const cardName = card ? card.name : 'Card';
+        
+        // Create modal HTML
+        const modalHtml = `
+            <div id="cardDetailsModal" class="modal" style="display: block;">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2>Add ${cardName} to Your Collection</h2>
+                        <span class="close" onclick="closeCardDetailsPopup()">&times;</span>
+                    </div>
+                    <div class="modal-body">
+                        <form id="cardDetailsForm">
+                            <div class="form-group">
+                                <label for="cardNickname">Nickname (required):</label>
+                                <input type="text" id="cardNickname" name="nickname" 
+                                       placeholder="e.g., My Travel Card, Personal Card, etc." 
+                                       required maxlength="100">
+                            </div>
+                            <div class="form-group">
+                                <label for="cardOpeningDate">Opening Date (optional):</label>
+                                <input type="date" id="cardOpeningDate" name="openingDate">
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn secondary" onclick="closeCardDetailsPopup()">Cancel</button>
+                        <button type="button" class="btn primary" onclick="saveCardDetailsPopup()">Add Card</button>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        // Add modal to page
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+        
+        // Store resolve function for callbacks first
+        window.cardDetailsResolve = resolve;
+        
+        // Focus on nickname input with a small delay to ensure DOM is ready
+        setTimeout(() => {
+            const nicknameInput = document.getElementById('cardNickname');
+            if (nicknameInput) {
+                nicknameInput.focus();
+            }
+        }, 100);
+    });
+}
+
+function closeCardDetailsPopup() {
+    const modal = document.getElementById('cardDetailsModal');
+    if (modal) {
+        modal.remove();
+    }
+    if (window.cardDetailsResolve) {
+        window.cardDetailsResolve(null); // Return null for cancelled
+    }
+}
+
+function saveCardDetailsPopup() {
+    // Use multiple fallback methods to ensure we get the input value
+    const nicknameInput = document.getElementById('cardNickname') || document.querySelector('#cardNickname') || document.querySelector('input[name="nickname"]');
+    const openingDateInput = document.getElementById('cardOpeningDate');
+    
+    if (!nicknameInput) {
+        alert('Error: Could not find nickname input field');
+        return;
+    }
+    
+    const nickname = (nicknameInput.value || '').trim();
+    const openingDate = openingDateInput ? openingDateInput.value : '';
+    
+    if (!nickname) {
+        alert('Please enter a nickname for this card');
+        nicknameInput.focus();
+        return;
+    }
+    
+    // Store the values before removing modal
+    const cardDetails = {
+        nickname: nickname,
+        openingDate: openingDate || null
+    };
+    
+    // Remove modal
+    const modal = document.getElementById('cardDetailsModal');
+    if (modal) {
+        modal.remove();
+    }
+    
+    // Resolve with the values we stored
+    if (window.cardDetailsResolve) {
+        window.cardDetailsResolve(cardDetails);
+    }
+}
+
+async function addAnotherCard(cardId, button) {
+    try {
+        button.disabled = true;
+        button.textContent = '...';
+        
+        // Show nickname/opening date popup
+        const cardDetails = await showCardDetailsPopup(cardId);
+        if (cardDetails === null) {
+            // User cancelled
+            button.disabled = false;
+            button.textContent = '➕ Add another card';
+            return;
+        }
+        
+        // Add another instance of the card with details
+        const success = await UserDataManager.addCardWithDetails(cardId, cardDetails.nickname, cardDetails.openingDate);
+        if (success) {
+            // Reload user cards details to get updated information
+            await loadUserCards();
+            
+            // Refresh the display to show updated button states
+            filterCards();
+            
+            alert(`Added another ${cardDetails.nickname} to your collection!`);
+        } else {
+            throw new Error('Failed to add another card');
+        }
+        
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error adding another card');
+    } finally {
+        button.disabled = false;
+        button.textContent = '➕ Add another card';
+    }
+}
+
+async function removeLastCard(cardId, button) {
+    try {
+        button.disabled = true;
+        button.textContent = '...';
+        
+        // For now, just use the existing removal logic
+        userCards.delete(cardId);
+        
+        await saveUserCards();
+        await loadUserCards();
+        filterCards();
+        
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error removing card');
+    } finally {
+        button.disabled = false;
+    }
 }
 
 async function toggleCardOwnership(cardId, button) {
@@ -341,16 +519,31 @@ async function toggleCardOwnership(cardId, button) {
         button.textContent = '...';
         
         if (hasCard) {
+            // Remove card
             userCards.delete(cardId);
             button.textContent = '✅ I have this card';
             button.className = 'success';
+            
+            await saveUserCards();
         } else {
-            userCards.add(cardId);
-            button.textContent = '❌ Remove from my cards';
-            button.className = 'danger';
+            // Show nickname/opening date popup before adding card
+            const cardDetails = await showCardDetailsPopup(cardId);
+            if (cardDetails === null) {
+                // User cancelled
+                button.disabled = false;
+                return;
+            }
+            
+            // Add card with details
+            const success = await UserDataManager.addCardWithDetails(cardId, cardDetails.nickname, cardDetails.openingDate);
+            if (success) {
+                userCards.add(cardId);
+                button.textContent = '❌ Remove from my cards';
+                button.className = 'danger';
+            } else {
+                throw new Error('Failed to add card');
+            }
         }
-        
-        await saveUserCards();
         
         // Reload user cards details to get updated information
         await loadUserCards();

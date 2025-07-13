@@ -887,7 +887,8 @@
                     <span class="nav-user">👤 {{ user.email }}</span>
                     <a href="{% url 'account_logout' %}" class="nav-logout">Logout</a>
                 {% else %}
-                    <a href="{% provider_login_url 'google' %}" class="nav-login">🔐 Sign In with Google</a>
+                    <!-- Google OAuth temporarily disabled -->
+                    <a href="/accounts/login/" class="nav-login">🔐 Sign In</a>
                 {% endif %}
             </div>
         </div>
@@ -972,9 +973,12 @@
                 
                 <div class="modal-section">
                     <h3>⚙️ Actions</h3>
-                    <div style="display: flex; gap: 15px; justify-content: center;">
+                    <div id="modalActionButtons" style="display: flex; gap: 15px; justify-content: center;">
                         <button id="modalOwnershipButton" onclick="toggleCardOwnershipModal()" class="success">
                             ✅ I have this card
+                        </button>
+                        <button id="modalAddAnotherButton" onclick="addAnotherCardModal()" class="success secondary" style="display: none;">
+                            ➕ Add another card
                         </button>
                         <button onclick="closeCardModal()" class="secondary">
                             Close
@@ -1236,6 +1240,38 @@
                 }
             }
             
+            static async addCardWithDetails(cardId, nickname, openedDate) {
+                if (isAuthenticated) {
+                    try {
+                        const response = await fetch(`${API_BASE}/users/cards/toggle/`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRFToken': getCookie('csrftoken')
+                            },
+                            body: JSON.stringify({
+                                card_id: cardId,
+                                action: 'add',
+                                nickname: nickname,
+                                opened_date: openedDate
+                            })
+                        });
+                        const data = await response.json();
+                        return data.success;
+                    } catch (error) {
+                        console.error('Error adding card with details:', error);
+                        return false;
+                    }
+                } else {
+                    // For anonymous users, add to cards list and store details
+                    const cards = await this.getCards();
+                    cards.push(cardId);
+                    await this.saveCards(cards);
+                    LocalStorage.setCardDetails(cardId, { nickname, opened_date: openedDate });
+                    return true;
+                }
+            }
+
             static async updateCardDetails(cardId, nickname, openedDate) {
                 if (isAuthenticated) {
                     try {
@@ -1526,17 +1562,97 @@
             try {
                 const userCards = await UserDataManager.getCards();
                 const hasCard = userCards.includes(cardId);
-                const button = document.getElementById('modalOwnershipButton');
+                const ownershipButton = document.getElementById('modalOwnershipButton');
+                const addAnotherButton = document.getElementById('modalAddAnotherButton');
                 
                 if (hasCard) {
-                    button.textContent = '❌ Remove from my cards';
-                    button.className = 'danger';
+                    ownershipButton.textContent = '❌ Remove from my cards';
+                    ownershipButton.className = 'danger';
+                    ownershipButton.onclick = removeLastCardModal;
+                    addAnotherButton.style.display = 'inline-block';
                 } else {
-                    button.textContent = '✅ I have this card';
-                    button.className = 'success';
+                    ownershipButton.textContent = '✅ I have this card';
+                    ownershipButton.className = 'success';
+                    ownershipButton.onclick = toggleCardOwnershipModal;
+                    addAnotherButton.style.display = 'none';
                 }
             } catch (error) {
                 console.error('Error checking card ownership:', error);
+            }
+        }
+        
+        async function addAnotherCardModal() {
+            if (!currentModalCard) return;
+            
+            const button = document.getElementById('modalAddAnotherButton');
+            const cardId = currentModalCard.id;
+            
+            try {
+                button.disabled = true;
+                button.textContent = '...';
+                
+                // Show nickname/opening date popup
+                const cardDetails = await showCardDetailsPopupModal(cardId);
+                if (cardDetails === null) {
+                    // User cancelled
+                    button.disabled = false;
+                    button.textContent = '➕ Add another card';
+                    return;
+                }
+                
+                // Add another instance of the card with details
+                const success = await UserDataManager.addCardWithDetails(cardId, cardDetails.nickname, cardDetails.openingDate);
+                if (success) {
+                    alert(`Added another ${cardDetails.nickname} to your collection!`);
+                    
+                    // Refresh displays
+                    if (typeof filterCards === 'function') {
+                        filterCards();
+                    } else if (typeof displayCards === 'function' && typeof allCards !== 'undefined') {
+                        displayCards(allCards);
+                    }
+                } else {
+                    throw new Error('Failed to add another card');
+                }
+                
+            } catch (error) {
+                console.error('Error adding another card:', error);
+                alert('Error adding another card');
+            } finally {
+                button.disabled = false;
+                button.textContent = '➕ Add another card';
+            }
+        }
+        
+        async function removeLastCardModal() {
+            if (!currentModalCard) return;
+            
+            const button = document.getElementById('modalOwnershipButton');
+            const cardId = currentModalCard.id;
+            
+            try {
+                const userCards = await UserDataManager.getCards();
+                const index = userCards.indexOf(cardId);
+                if (index > -1) userCards.splice(index, 1);
+                
+                button.disabled = true;
+                button.textContent = '...';
+                
+                await UserDataManager.saveCards(userCards);
+                await updateModalOwnershipButton(cardId);
+                
+                // Refresh displays
+                if (typeof filterCards === 'function') {
+                    filterCards();
+                } else if (typeof displayCards === 'function' && typeof allCards !== 'undefined') {
+                    displayCards(allCards);
+                }
+                
+            } catch (error) {
+                console.error('Error removing card:', error);
+                alert('Error removing card');
+            } finally {
+                button.disabled = false;
             }
         }
         
@@ -1557,12 +1673,27 @@
                     // Remove card
                     const index = userCards.indexOf(cardId);
                     if (index > -1) userCards.splice(index, 1);
+                    
+                    await UserDataManager.saveCards(userCards);
                 } else {
-                    // Add card
+                    // Show nickname/opening date popup before adding card
+                    const cardDetails = await showCardDetailsPopupModal(cardId);
+                    if (cardDetails === null) {
+                        // User cancelled
+                        button.disabled = false;
+                        return;
+                    }
+                    
+                    // Add card with details
+                    const success = await UserDataManager.addCardWithDetails(cardId, cardDetails.nickname, cardDetails.openingDate);
+                    if (!success) {
+                        throw new Error('Failed to add card');
+                    }
+                    
+                    // Update local userCards array for immediate UI feedback
                     userCards.push(cardId);
                 }
                 
-                await UserDataManager.saveCards(userCards);
                 await updateModalOwnershipButton(cardId);
                 
                 // If there's a global filterCards or similar function, refresh the display
@@ -1577,6 +1708,110 @@
                 alert('Error updating card ownership');
             } finally {
                 button.disabled = false;
+            }
+        }
+        
+        function showCardDetailsPopupModal(cardId) {
+            return new Promise((resolve) => {
+                // Clean up any existing modal first
+                const existingModal = document.getElementById('cardDetailsModalPopup');
+                if (existingModal) {
+                    existingModal.remove();
+                }
+                
+                // Find the card data
+                const cardName = currentModalCard ? currentModalCard.name : 'Card';
+                
+                // Create modal HTML
+                const modalHtml = `
+                    <div id="cardDetailsModalPopup" class="modal" style="display: block; z-index: 10001;">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h2>Add ${cardName} to Your Collection</h2>
+                                <span class="close" onclick="closeCardDetailsPopupModal()">&times;</span>
+                            </div>
+                            <div class="modal-body">
+                                <form id="cardDetailsFormModal">
+                                    <div class="form-group">
+                                        <label for="cardNicknameModal">Nickname (required):</label>
+                                        <input type="text" id="cardNicknameModal" name="nickname" 
+                                               placeholder="e.g., My Travel Card, Personal Card, etc." 
+                                               required maxlength="100">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="cardOpeningDateModal">Opening Date (optional):</label>
+                                        <input type="date" id="cardOpeningDateModal" name="openingDate">
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn secondary" onclick="closeCardDetailsPopupModal()">Cancel</button>
+                                <button type="button" class="btn primary" onclick="saveCardDetailsPopupModal()">Add Card</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                // Add modal to page
+                document.body.insertAdjacentHTML('beforeend', modalHtml);
+                
+                // Store resolve function for callbacks first
+                window.cardDetailsResolveModal = resolve;
+                
+                // Focus on nickname input with delay
+                setTimeout(() => {
+                    const nicknameInput = document.getElementById('cardNicknameModal');
+                    if (nicknameInput) {
+                        nicknameInput.focus();
+                    }
+                }, 100);
+            });
+        }
+
+        function closeCardDetailsPopupModal() {
+            const modal = document.getElementById('cardDetailsModalPopup');
+            if (modal) {
+                modal.remove();
+            }
+            if (window.cardDetailsResolveModal) {
+                window.cardDetailsResolveModal(null); // Return null for cancelled
+            }
+        }
+
+        function saveCardDetailsPopupModal() {
+            // Use multiple fallback methods to ensure we get the input value
+            const nicknameInput = document.getElementById('cardNicknameModal') || document.querySelector('#cardNicknameModal') || document.querySelector('input[name="nickname"]');
+            const openingDateInput = document.getElementById('cardOpeningDateModal');
+            
+            if (!nicknameInput) {
+                alert('Error: Could not find nickname input field');
+                return;
+            }
+            
+            const nickname = (nicknameInput.value || '').trim();
+            const openingDate = openingDateInput ? openingDateInput.value : '';
+            
+            if (!nickname) {
+                alert('Please enter a nickname for this card');
+                nicknameInput.focus();
+                return;
+            }
+            
+            // Store the values before removing modal
+            const cardDetails = {
+                nickname: nickname,
+                openingDate: openingDate || null
+            };
+            
+            // Remove modal
+            const modal = document.getElementById('cardDetailsModalPopup');
+            if (modal) {
+                modal.remove();
+            }
+            
+            // Resolve with the stored values
+            if (window.cardDetailsResolveModal) {
+                window.cardDetailsResolveModal(cardDetails);
             }
         }
         
