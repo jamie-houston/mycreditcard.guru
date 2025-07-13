@@ -41,13 +41,14 @@ def setup_environment():
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'creditcard_guru.settings')
     
     # Load .env file if it exists
-    env_file = PROJECT_ROOT / 'django.env'
+    env_file = PROJECT_ROOT / '.env'
     if env_file.exists():
         with open(env_file) as f:
             for line in f:
                 if line.strip() and not line.startswith('#'):
-                    key, value = line.strip().split('=', 1)
-                    os.environ.setdefault(key, value)
+                    if '=' in line:
+                        key, value = line.strip().split('=', 1)
+                        os.environ.setdefault(key, value)
 
 def install_dependencies():
     """Install Python dependencies."""
@@ -57,6 +58,56 @@ def setup_database():
     """Set up the database with migrations."""
     run_command("python manage.py makemigrations", "Creating migrations")
     run_command("python manage.py migrate", "Running migrations")
+
+def setup_google_oauth():
+    """Set up Google OAuth SocialApp from environment variables."""
+    # Django setup
+    import django
+    django.setup()
+    
+    from allauth.socialaccount.models import SocialApp
+    from django.contrib.sites.models import Site
+    
+    client_id = os.environ.get('GOOGLE_OAUTH_CLIENT_ID')
+    client_secret = os.environ.get('GOOGLE_OAUTH_CLIENT_SECRET')
+    
+    if not client_id or not client_secret:
+        print("⚠️  Google OAuth credentials not found in environment variables")
+        print("   Set GOOGLE_OAUTH_CLIENT_ID and GOOGLE_OAUTH_CLIENT_SECRET in .env file")
+        return
+    
+    try:
+        # Get or create the default site
+        site = Site.objects.get(pk=1)
+        
+        # Check if Google SocialApp already exists
+        social_app, created = SocialApp.objects.get_or_create(
+            provider='google',
+            defaults={
+                'name': 'Google',
+                'client_id': client_id,
+                'secret': client_secret,
+            }
+        )
+        
+        if created:
+            social_app.sites.add(site)
+            print("✅ Created Google OAuth SocialApp")
+        else:
+            # Update existing app with new credentials
+            social_app.client_id = client_id
+            social_app.secret = client_secret
+            social_app.save()
+            if site not in social_app.sites.all():
+                social_app.sites.add(site)
+            print("✅ Updated Google OAuth SocialApp with new credentials")
+        
+        print(f"   Client ID: {client_id}")
+        print(f"   Site: {site.domain}")
+        
+    except Exception as e:
+        print(f"❌ Failed to set up Google OAuth: {e}")
+        print("   Make sure the database is migrated first")
 
 def create_superuser():
     """Create Django superuser."""
@@ -325,6 +376,7 @@ def full_setup():
     
     install_dependencies()
     setup_database()
+    setup_google_oauth()
     
     # Import the 4 essential system files automatically
     print("\n📥 Importing essential system data...")
@@ -415,6 +467,7 @@ def show_all_commands():
         'setup': 'Complete project setup from scratch',
         'install': 'Install Python dependencies',
         'setup-db': 'Set up database with migrations',
+        'setup-oauth': 'Set up Google OAuth from .env file',
         'createsuperuser': 'Create Django superuser account',
         'server': 'Run development server (default port 8000)',
         'test': 'Run Django test suite',
@@ -438,6 +491,7 @@ def execute_task(task, args=None):
     task_map = {
         'install': install_dependencies,
         'setup-db': setup_database,
+        'setup-oauth': setup_google_oauth,
         'createsuperuser': create_superuser,
         'test': run_tests,
         'server': lambda: run_server(8000),
@@ -472,6 +526,7 @@ def main():
     # Define tasks
     subparsers.add_parser('install', help='Install dependencies')
     subparsers.add_parser('setup-db', help='Set up database with migrations')
+    subparsers.add_parser('setup-oauth', help='Set up Google OAuth from .env file')
     subparsers.add_parser('createsuperuser', help='Create Django superuser')
     subparsers.add_parser('test', help='Run tests')
     
