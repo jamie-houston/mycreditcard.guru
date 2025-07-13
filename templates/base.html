@@ -887,8 +887,7 @@
                     <span class="nav-user">👤 {{ user.email }}</span>
                     <a href="{% url 'account_logout' %}" class="nav-logout">Logout</a>
                 {% else %}
-                    <!-- Google OAuth temporarily disabled -->
-                    <a href="/accounts/login/" class="nav-login">🔐 Sign In</a>
+                    <a href="{% provider_login_url 'google' %}" class="nav-login">🔐 Sign In with Google</a>
                 {% endif %}
             </div>
         </div>
