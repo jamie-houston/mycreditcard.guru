@@ -240,6 +240,96 @@
           "Annual value calculation handles low rewards correctly"
         ]
       }
+    },
+    {
+      "name": "Satisfied Card Holder - No New Cards Needed",
+      "description": "User with existing cards who doesn't spend enough to justify new cards or annual fees",
+      "user_profile": {
+        "spending": {
+          "groceries": 250,
+          "dining": 200,
+          "gas": 120,
+          "general": 300
+        },
+        "preferences": {
+          "max_annual_fee": 50,
+          "preferred_reward_type": "cashback"
+        }
+      },
+      "owned_cards": ["Blue Cash Everyday", "Freedom Unlimited"],
+      "available_cards": ["Blue Cash Everyday", "Freedom Unlimited", "Blue Cash Preferred® Card", "SavorOne Cash Rewards Credit Card", "Chase Sapphire Preferred® Card"],
+      "expected_recommendations": {
+        "actions": ["keep"],
+        "min_total_value": 0,
+        "max_cards": 0,
+        "reasoning_must_contain": ["already have", "low spending", "not worth"],
+        "test_conditions": [
+          "No new cards recommended due to low spending",
+          "Annual fees outweigh potential rewards",
+          "User already has optimal cards for spending patterns"
+        ]
+      }
+    },
+    {
+      "name": "Card Portfolio Upgrade with Cancellation",
+      "description": "User with suboptimal cards who should cancel and upgrade",
+      "user_profile": {
+        "spending": {
+          "dining": 600,
+          "travel": 400,
+          "groceries": 300,
+          "general": 500
+        },
+        "preferences": {
+          "max_annual_fee": 400,
+          "preferred_reward_type": "points"
+        }
+      },
+      "owned_cards": ["Basic Travel Card", "Low Reward Card"],
+      "available_cards": ["Basic Travel Card", "Low Reward Card", "Chase Sapphire Preferred® Card", "Gold Card", "SavorOne Cash Rewards Credit Card"],
+      "expected_recommendations": {
+        "actions": ["cancel", "apply"],
+        "min_total_value": 200,
+        "must_include_cards": ["Chase Sapphire Preferred® Card"],
+        "cards_to_cancel": ["Basic Travel Card"],
+        "reasoning_must_contain": ["cancel", "upgrade", "better rewards"],
+        "test_conditions": [
+          "Recommends canceling inferior cards",
+          "Suggests better alternatives with higher rewards",
+          "Net value improvement despite annual fees"
+        ]
+      }
+    },
+    {
+      "name": "Portfolio Expansion - Add Complementary Cards",
+      "description": "User with good cards who should add complementary cards for better coverage",
+      "user_profile": {
+        "spending": {
+          "groceries": 800,
+          "dining": 500,
+          "travel": 300,
+          "gas": 250,
+          "general": 600
+        },
+        "preferences": {
+          "max_annual_fee": 200,
+          "preferred_reward_type": "cashback"
+        }
+      },
+      "owned_cards": ["Freedom Unlimited", "SavorOne Cash Rewards Credit Card"],
+      "available_cards": ["Freedom Unlimited", "SavorOne Cash Rewards Credit Card", "Blue Cash Preferred® Card", "Costco Anywhere Visa® Card", "Gold Card"],
+      "expected_recommendations": {
+        "actions": ["keep", "apply"],
+        "min_total_value": 300,
+        "must_include_cards": ["Blue Cash Preferred® Card"],
+        "cards_to_keep": ["Freedom Unlimited", "SavorOne Cash Rewards Credit Card"],
+        "reasoning_must_contain": ["keep", "add", "groceries", "complement"],
+        "test_conditions": [
+          "Keeps existing good cards",
+          "Adds cards for uncovered high-spend categories",
+          "Maximizes rewards across all spending categories"
+        ]
+      }
     }
   ]
 }

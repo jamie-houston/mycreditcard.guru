@@ -13,6 +13,8 @@ To add new scenarios:
     3. Run the tests
 """
 
+import os
+import json
 from django.test import TestCase
 from .test_base import JSONScenarioTestBase
 
@@ -132,14 +134,25 @@ class ScenarioValidationTest(TestCase):
                 f"Scenario {i} available_cards should be a list"
             )
             
+            # Cards can be either strings (card names) or objects
             for j, card in enumerate(scenario['available_cards']):
-                card_required_fields = ['name', 'issuer', 'primary_reward_type']
-                for field in card_required_fields:
-                    self.assertIn(
-                        field,
-                        card,
-                        f"Scenario {i} card {j} missing required field '{field}'"
+                if isinstance(card, str):
+                    # Card name string - just validate it's not empty
+                    self.assertTrue(
+                        len(card.strip()) > 0,
+                        f"Scenario {i} card {j} name should not be empty"
                     )
+                elif isinstance(card, dict):
+                    # Card object - validate required fields
+                    card_required_fields = ['name', 'issuer', 'primary_reward_type']
+                    for field in card_required_fields:
+                        self.assertIn(
+                            field,
+                            card,
+                            f"Scenario {i} card {j} missing required field '{field}'"
+                        )
+                else:
+                    self.fail(f"Scenario {i} card {j} should be string or dict, got {type(card)}")
 
 
 def print_scenario_results(scenario_name, recommendations):

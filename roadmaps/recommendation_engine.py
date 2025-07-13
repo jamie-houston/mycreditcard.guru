@@ -170,8 +170,11 @@ class RecommendationEngine:
             # Scoring: use annual rewards only (no signup bonus) for consistency with owned cards
             annual_value = annual_rewards - annual_fee
             
-            # Only consider cards with non-negative estimated value (positive value or break-even)
-            if annual_value >= 0:
+            # Include signup bonus in total value assessment for filtering
+            total_value = annual_value + signup_bonus_value
+            
+            # Only consider cards with non-negative total estimated value (including signup bonus)
+            if total_value >= 0:
                 card_scores.append({
                     'card': card,
                     'score': annual_value,

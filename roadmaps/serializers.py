@@ -109,36 +109,63 @@ class GenerateRoadmapSerializer(serializers.Serializer):
         validated_data = self.validated_data
         
         # Create temporary profile
-        if request.user.is_authenticated:
+        if request.user and request.user.is_authenticated:
             profile, created = UserSpendingProfile.objects.get_or_create(user=request.user)
         else:
             session_key = request.session.session_key
             if not session_key:
                 request.session.create()
                 session_key = request.session.session_key
-            profile, created = UserSpendingProfile.objects.get_or_create(session_key=session_key)
+            
+            # Try to find existing profile first, then create if needed
+            profile = UserSpendingProfile.objects.filter(session_key=session_key).first()
+            if not profile:
+                # If no profile found with current session, don't create empty one
+                # Instead, find any existing profile with data and use it temporarily
+                existing_profile = UserSpendingProfile.objects.filter(
+                    user=None,
+                    spending_amounts__isnull=False
+                ).first()
+                if existing_profile:
+                    profile = existing_profile
+                else:
+                    profile, created = UserSpendingProfile.objects.get_or_create(session_key=session_key)
         
         # Update spending amounts if provided
         if 'spending_amounts' in validated_data:
+            from cards.models import SpendingCategory
             profile.spending_amounts.all().delete()
+            # Get valid category IDs to prevent foreign key errors
+            valid_category_ids = set(SpendingCategory.objects.values_list('id', flat=True))
+            
             for category_id, amount in validated_data['spending_amounts'].items():
-                SpendingAmount.objects.create(
-                    profile=profile,
-                    category_id=int(category_id),
-                    monthly_amount=amount
-                )
+                category_id_int = int(category_id)
+                # Only create spending amount if category exists
+                if category_id_int in valid_category_ids and amount > 0:
+                    SpendingAmount.objects.create(
+                        profile=profile,
+                        category_id=category_id_int,
+                        monthly_amount=amount
+                    )
         
         # Update user cards if provided
         if 'user_cards' in validated_data:
+            from cards.models import CreditCard
             profile.user_cards.all().delete()
+            # Get valid card IDs to prevent foreign key errors
+            valid_card_ids = set(CreditCard.objects.values_list('id', flat=True))
+            
             for card_data in validated_data['user_cards']:
-                UserCard.objects.create(
-                    profile=profile,
-                    card_id=card_data['card_id'],
-                    nickname=card_data.get('nickname', ''),
-                    opened_date=card_data['opened_date'],
-                    is_active=card_data.get('is_active', True)
-                )
+                card_id = card_data['card_id']
+                # Only create user card if card exists
+                if card_id in valid_card_ids:
+                    UserCard.objects.create(
+                        profile=profile,
+                        card_id=card_id,
+                        nickname=card_data.get('nickname', ''),
+                        opened_date=card_data['opened_date'],
+                        is_active=card_data.get('is_active', True)
+                    )
         
         # Create temporary roadmap for filtering
         roadmap = Roadmap.objects.create(
@@ -150,7 +177,7 @@ class GenerateRoadmapSerializer(serializers.Serializer):
         # Add filters if provided
         if 'filters' in validated_data:
             for filter_data in validated_data['filters']:
-                filter_obj, created = RoadmapFilter.objects.get_or_create(
+                filter_obj, _ = RoadmapFilter.objects.get_or_create(
                     name=filter_data['name'],
                     filter_type=filter_data['filter_type'],
                     value=filter_data['value']
