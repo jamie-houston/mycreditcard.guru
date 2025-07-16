@@ -327,6 +327,7 @@ class Command(BaseCommand):
         for card_data in owned_cards:
             card_name = card_data.get('card_name')
             issuer_name = card_data.get('issuer')
+            card_type = card_data.get('card_type') or "personal"
             nickname = card_data.get('nickname', '')
             opened_date_str = card_data.get('opened_date')
             
@@ -339,7 +340,7 @@ class Command(BaseCommand):
             try:
                 # Find the credit card
                 issuer = Issuer.objects.get(name=issuer_name)
-                credit_card = CreditCard.objects.get(name=card_name, issuer=issuer)
+                credit_card = CreditCard.objects.get(name=card_name, issuer=issuer, card_type=card_type)
                 
                 # Parse opened date
                 opened_date = None

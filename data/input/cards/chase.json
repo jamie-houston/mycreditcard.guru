@@ -477,6 +477,37 @@
     "discontinued": false
   },
   {
+    "name": "Sapphire Reserve Business",
+    "issuer": "Chase",
+    "annual_fee": 795,
+    "signup_bonus": {
+      "bonus_amount": 100000,
+      "spending_requirement": 5000,
+      "time_limit_months": 3
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "dining",
+        "reward_rate": 3
+      },
+      {
+        "category": "travel",
+        "reward_rate": 4
+      },
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "business",
+    "network": "Visa",
+    "url": "https://creditcards.chase.com/rewards-credit-cards/sapphire/reserve",
+    "image_url": "/images/chase/sapphire-reserve.png",
+    "discontinued": false
+  },
+  {
     "name": "Sapphire Reserve",
     "issuer": "Chase",
     "annual_fee": 795,
