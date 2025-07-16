@@ -138,6 +138,26 @@
     "discontinued": false
   },
   {
+    "name": "Freedom Legacy",
+    "issuer": "Chase",
+    "annual_fee": 0,
+    "reward_type": "Points",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "amazon",
+        "reward_rate": 5,
+        "start_date": "2026-01-01",
+        "end_date": "2026-03-31"
+      }
+    ],
+    "card_type": "personal",
+    "network": "Mastercard",
+    "url": "https://creditcards.chase.com/cash-back-credit-cards/freedom",
+    "image_url": "/images/chase/freedom.png",
+    "discontinued": true
+  },
+  {
     "name": "Freedom Flex",
     "issuer": "Chase",
     "annual_fee": 0,
@@ -172,6 +192,14 @@
     "reward_type": "Cashback",
     "reward_value_multiplier": 0.01,
     "reward_categories": [
+      {
+        "category": "drugstores",
+        "reward_rate": 3
+      },
+      {
+        "category": "dining",
+        "reward_rate": 3
+      },
       {
         "category": "other",
         "reward_rate": 1.5
@@ -307,6 +335,10 @@
     "reward_value_multiplier": 0.01,
     "reward_categories": [
       {
+        "category": "travel",
+        "reward_rate": 3
+      },
+      {
         "category": "other",
         "reward_rate": 1
       }
@@ -419,8 +451,20 @@
       "time_limit_months": 3
     },
     "reward_type": "Cashback",
-    "reward_value_multiplier": 0.01,
+    "reward_value_multiplier": 0.0125,
     "reward_categories": [
+      {
+        "category": "dining",
+        "reward_rate": 3
+      },
+      {
+        "category": "streaming",
+        "reward_rate": 3
+      },
+      {
+        "category": "travel",
+        "reward_rate": 2
+      },
       {
         "category": "other",
         "reward_rate": 1
@@ -444,6 +488,14 @@
     "reward_type": "Cashback",
     "reward_value_multiplier": 0.01,
     "reward_categories": [
+      {
+        "category": "dining",
+        "reward_rate": 3
+      },
+      {
+        "category": "travel",
+        "reward_rate": 4
+      },
       {
         "category": "other",
         "reward_rate": 1
@@ -766,6 +818,10 @@
     "reward_type": "Cashback",
     "reward_value_multiplier": 0.01,
     "reward_categories": [
+      {
+        "category": "amazon",
+        "reward_rate": 5
+      },
       {
         "category": "other",
         "reward_rate": 1

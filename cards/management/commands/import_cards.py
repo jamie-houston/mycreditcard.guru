@@ -1,10 +1,12 @@
 import json
 import os
+from datetime import datetime
 from django.core.management.base import BaseCommand
 from django.utils.text import slugify
+from django.contrib.auth.models import User
 from cards.models import (
     Issuer, RewardType, SpendingCategory, CreditCard, 
-    RewardCategory, CardOffer
+    RewardCategory, CardOffer, UserSpendingProfile, UserCard
 )
 
 
@@ -49,6 +51,8 @@ class Command(BaseCommand):
         elif filename in ['chase.json', 'american_express.json', 'citi.json', 'capital_one.json']:
             # Issuer-specific credit card files (array of cards)
             self.import_credit_cards(data)
+        elif filename == 'personal.json':
+            self.import_personal_cards(data)
         else:
             # Check if it's an array of credit cards vs legacy combined format
             if isinstance(data, list) and data and 'name' in data[0] and 'issuer' in data[0]:
@@ -269,3 +273,115 @@ class Command(BaseCommand):
                 start_date=offer_data.get('start_date'),
                 end_date=offer_data.get('end_date'),
             )
+
+    def import_personal_cards(self, data):
+        """
+        Import personal card ownership data.
+        Expected JSON format:
+        {
+            "user_email": "user@example.com",
+            "owned_cards": [
+                {
+                    "card_name": "Chase Sapphire Preferred",
+                    "issuer": "Chase",
+                    "nickname": "Travel Card",
+                    "opened_date": "2023-01-15"
+                }
+            ]
+        }
+        """
+        user_email = data.get('user_email') or "foresterh@gmail.com"
+        if not user_email:
+            self.stdout.write(
+                self.style.ERROR('user_email is required in personal.json')
+            )
+            return
+        
+        try:
+            user = User.objects.get(email=user_email)
+        except User.DoesNotExist:
+            self.stdout.write(
+                self.style.ERROR(f'User with email {user_email} not found. Create user account first.')
+            )
+            return
+        
+        # Get or create user spending profile
+        profile, created = UserSpendingProfile.objects.get_or_create(
+            user=user,
+            defaults={'session_key': None}
+        )
+        
+        if created:
+            self.stdout.write(f'Created spending profile for {user.email}')
+        
+        # Clear existing cards for clean import
+        existing_count = profile.user_cards.count()
+        if existing_count > 0:
+            profile.user_cards.all().delete()
+            self.stdout.write(f'Removed {existing_count} existing cards from profile')
+        
+        # Import owned cards
+        owned_cards = data.get('owned_cards', [])
+        imported_count = 0
+        
+        for card_data in owned_cards:
+            card_name = card_data.get('card_name')
+            issuer_name = card_data.get('issuer')
+            nickname = card_data.get('nickname', '')
+            opened_date_str = card_data.get('opened_date')
+            
+            if not card_name or not issuer_name:
+                self.stdout.write(
+                    self.style.WARNING(f'Skipping card: missing card_name or issuer')
+                )
+                continue
+            
+            try:
+                # Find the credit card
+                issuer = Issuer.objects.get(name=issuer_name)
+                credit_card = CreditCard.objects.get(name=card_name, issuer=issuer)
+                
+                # Parse opened date
+                opened_date = None
+                if opened_date_str:
+                    try:
+                        opened_date = datetime.strptime(opened_date_str, '%Y-%m-%d').date()
+                    except ValueError:
+                        self.stdout.write(
+                            self.style.WARNING(f'Invalid date format for {card_name}: {opened_date_str}. Use YYYY-MM-DD format.')
+                        )
+                
+                # Create user card
+                user_card = UserCard.objects.create(
+                    profile=profile,
+                    card=credit_card,
+                    nickname=nickname,
+                    opened_date=opened_date,
+                    is_active=True
+                )
+                
+                display_name = f"{credit_card.name}"
+                if nickname:
+                    display_name += f" ({nickname})"
+                if opened_date:
+                    display_name += f" - opened {opened_date}"
+                
+                self.stdout.write(f'✅ Added card: {display_name}')
+                imported_count += 1
+                
+            except Issuer.DoesNotExist:
+                self.stdout.write(
+                    self.style.ERROR(f'Issuer "{issuer_name}" not found for card "{card_name}"')
+                )
+            except CreditCard.DoesNotExist:
+                self.stdout.write(
+                    self.style.ERROR(f'Credit card "{card_name}" from "{issuer_name}" not found')
+                )
+            except Exception as e:
+                self.stdout.write(
+                    self.style.ERROR(f'Error importing card "{card_name}": {e}')
+                )
+        
+        self.stdout.write(
+            self.style.SUCCESS(f'Successfully imported {imported_count} cards for {user.email}')
+        )

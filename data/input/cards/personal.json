@@ -1,0 +1,47 @@
+{
+  "user_email": "foresterh@gmail.com",
+  "owned_cards": [
+    {
+      "card_name": "Sapphire Reserve",
+      "issuer": "Chase",
+      "nickname": "Reserve 4904",
+      "opened_date": "2016-08-29"
+    },
+    {
+      "card_name": "Freedom Legacy",
+      "issuer": "Chase", 
+      "nickname": "Freedom 9560",
+      "opened_date": "2005-12-12"
+    },
+    {
+      "card_name": "Freedom Legacy",
+      "issuer": "Chase", 
+      "nickname": "Freedom 6407",
+      "opened_date": "2007-04-16"
+    },
+    {
+      "card_name": "Amazon Prime",
+      "issuer": "Chase", 
+      "nickname": "Amazon Prime 4085",
+      "opened_date": "2010-01-05"
+    },
+    {
+      "card_name": "The Platinum Card® from American Express",
+      "issuer": "American Express", 
+      "nickname": "Amex 42006",
+      "opened_date": "2025-04-14"
+    },
+    {
+      "card_name": "Ink Business Preferred",
+      "issuer": "Chase", 
+      "nickname": "Ink Business 5994",
+      "opened_date": "2024-05-20"
+    },
+    {
+      "card_name": "Blue Cash Preferred",
+      "issuer": "American Express", 
+      "nickname": "Amex 01008",
+      "opened_date": "2024-06-22"
+    }
+  ]
+}

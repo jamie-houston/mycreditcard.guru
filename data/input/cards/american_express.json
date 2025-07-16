@@ -81,6 +81,23 @@
     "reward_value_multiplier": 0.01,
     "reward_categories": [
       {
+        "category": "streaming",
+        "reward_rate": 6
+      },
+      {
+        "category": "groceries",
+        "reward_rate": 6,
+        "max_bonus_amount": 6000
+      },
+      {
+        "category": "gas",
+        "reward_rate": 3
+      },
+      {
+        "category": "transportation",
+        "reward_rate": 3
+      },
+      {
         "category": "other",
         "reward_rate": 2
       }
@@ -548,7 +565,7 @@
     "discontinued": false
   },
   {
-    "name": "Platinum",
+    "name": "The Platinum Card® from American Express",
     "issuer": "American Express",
     "annual_fee": 695,
     "signup_bonus": {
@@ -557,8 +574,12 @@
       "time_limit_months": 6
     },
     "reward_type": "Cashback",
-    "reward_value_multiplier": 0.01,
+    "reward_value_multiplier": 0.02,
     "reward_categories": [
+      {
+        "category": "travel",
+        "reward_rate": 5
+      },
       {
         "category": "other",
         "reward_rate": 1
