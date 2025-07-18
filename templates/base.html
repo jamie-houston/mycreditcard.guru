@@ -885,9 +885,9 @@
             <div class="nav-auth" id="navAuth">
                 {% if user.is_authenticated %}
                     <span class="nav-user">👤 {{ user.email }}</span>
-                    <a href="{% url 'account_logout' %}" class="nav-logout">Logout</a>
+                    <a href="{% url 'account_logout' %}" class="nav-logout" onclick="handleLogout()">Logout</a>
                 {% else %}
-                    <a href="{% provider_login_url 'google' %}" class="nav-login">🔐 Sign In with Google</a>
+                    <a href="{% provider_login_url 'google' %}" class="nav-login" onclick="handleLogin()">🔐 Sign In with Google</a>
                 {% endif %}
             </div>
         </div>
@@ -1053,14 +1053,98 @@
             try {
                 const response = await fetch(`${API_BASE}/users/status/`);
                 const data = await response.json();
+                const wasAuthenticated = isAuthenticated;
+                const previousUser = currentUser;
+                
                 isAuthenticated = data.authenticated;
                 currentUser = data.user;
+                
+                // Handle user state changes
+                if (wasAuthenticated !== isAuthenticated || 
+                    (previousUser && currentUser && previousUser.id !== currentUser.id)) {
+                    await handleUserStateChange(wasAuthenticated, isAuthenticated, previousUser, currentUser);
+                }
+                
                 return data;
             } catch (error) {
                 console.error('Error checking user status:', error);
                 isAuthenticated = false;
                 currentUser = null;
                 return { authenticated: false, user: null };
+            }
+        }
+
+        // Handle user authentication state changes
+        async function handleUserStateChange(wasAuthenticated, isNowAuthenticated, previousUser, newUser) {
+            console.log('User state changed:', { wasAuthenticated, isNowAuthenticated, previousUser, newUser });
+            
+            if (wasAuthenticated && !isNowAuthenticated) {
+                // User logged out - clear all local data
+                console.log('🔓 User logged out, clearing local data');
+                clearUserData();
+            } else if (!wasAuthenticated && isNowAuthenticated) {
+                // User logged in - sync with server data
+                console.log('🔒 User logged in, syncing with server data');
+                await syncUserDataFromServer();
+            } else if (wasAuthenticated && isNowAuthenticated && previousUser && newUser && previousUser.id !== newUser.id) {
+                // Different user logged in - clear old data and sync new
+                console.log('🔄 Different user logged in, switching user data');
+                clearUserData();
+                await syncUserDataFromServer();
+            }
+            
+            // Refresh current page data
+            console.log('🔄 Refreshing page data after state change');
+            if (typeof loadUserCards === 'function') {
+                await loadUserCards();
+            }
+            if (typeof filterCategories === 'function') {
+                await filterCategories();
+            }
+            if (typeof filterCards === 'function') {
+                filterCards();
+            }
+        }
+
+        // Clear all user data from localStorage
+        function clearUserData() {
+            console.log('🗑️ Clearing user data from localStorage...');
+            console.log('Before clear - userCards:', localStorage.getItem('userCards'));
+            console.log('Before clear - userSpending:', localStorage.getItem('userSpending'));
+            console.log('Before clear - userPreferences:', localStorage.getItem('userPreferences'));
+            console.log('Before clear - userCardDetails:', localStorage.getItem('userCardDetails'));
+            
+            localStorage.removeItem('userSpending');
+            localStorage.removeItem('userCards');
+            localStorage.removeItem('userPreferences');
+            localStorage.removeItem('userCardDetails');
+            
+            console.log('After clear - userCards:', localStorage.getItem('userCards'));
+            console.log('After clear - userSpending:', localStorage.getItem('userSpending'));
+            console.log('✅ All user data cleared from localStorage');
+        }
+
+        // Sync user data from server when logging in
+        async function syncUserDataFromServer() {
+            try {
+                // Force refresh of user data from server
+                const serverData = await fetch(`${API_BASE}/users/data/`);
+                const data = await serverData.json();
+                
+                // Update localStorage with server data
+                if (data.spending) {
+                    localStorage.setItem('userSpending', JSON.stringify(data.spending));
+                }
+                if (data.cards) {
+                    localStorage.setItem('userCards', JSON.stringify(data.cards));
+                }
+                if (data.preferences) {
+                    localStorage.setItem('userPreferences', JSON.stringify(data.preferences));
+                }
+                
+                console.log('User data synced from server:', data);
+            } catch (error) {
+                console.error('Error syncing user data from server:', error);
             }
         }
 
@@ -1937,9 +2021,61 @@
             }
         });
 
+        // Manual functions for immediate state changes
+        window.handleLogout = function() {
+            console.log('Manual logout triggered');
+            clearUserData();
+            isAuthenticated = false;
+            currentUser = null;
+            
+            // Refresh current page data immediately
+            if (typeof loadUserCards === 'function') {
+                loadUserCards();
+            }
+            if (typeof filterCategories === 'function') {
+                filterCategories();
+            }
+            if (typeof filterCards === 'function') {
+                filterCards();
+            }
+            
+            // Also check again after a short delay to catch any async logout
+            setTimeout(async () => {
+                console.log('Checking logout state after delay');
+                await initUserState();
+            }, 1000);
+        };
+
+        window.handleLogin = async function() {
+            console.log('Manual login triggered');
+            await initUserState();
+        };
+
+        // Test function to manually trigger logout
+        window.testLogout = function() {
+            console.log('🧪 Testing logout manually');
+            handleLogout();
+        };
+
+        // Test function to check localStorage state
+        window.testLocalStorage = function() {
+            console.log('🧪 Current localStorage state:');
+            console.log('userCards:', localStorage.getItem('userCards'));
+            console.log('userSpending:', localStorage.getItem('userSpending'));
+            console.log('userPreferences:', localStorage.getItem('userPreferences'));
+            console.log('userCardDetails:', localStorage.getItem('userCardDetails'));
+            console.log('isAuthenticated:', isAuthenticated);
+            console.log('currentUser:', currentUser);
+        };
+
         // Initialize user state when page loads
         document.addEventListener('DOMContentLoaded', function() {
             initUserState();
+            
+            // Check for user state changes periodically
+            setInterval(async () => {
+                await initUserState();
+            }, 30000); // Check every 30 seconds
         });
     </script>
     
