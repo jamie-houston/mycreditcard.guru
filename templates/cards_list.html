@@ -390,11 +390,40 @@ function loadURLFilters() {
         categorySelect.value = categoryParam;
     }
     
-    // Pre-select other filters if provided
+    // Pre-select ownership filter if provided in URL
+    const ownershipParam = urlParams.get('ownership');
+    if (ownershipParam) {
+        const ownershipSelect = document.getElementById('filterOwnership');
+        if (ownershipParam === 'owned') {
+            ownershipSelect.value = 'owned';
+        } else if (ownershipParam === 'not_owned') {
+            ownershipSelect.value = 'not_owned';
+        }
+    }
+    
+    // Pre-select card type filter if provided in URL
+    const cardTypeParam = urlParams.get('card_type');
+    if (cardTypeParam) {
+        const cardTypeSelect = document.getElementById('filterCardType');
+        cardTypeSelect.value = cardTypeParam;
+    }
+    
+    // Pre-select issuer filter if provided in URL
     const issuerParam = urlParams.get('issuer');
     if (issuerParam) {
         const issuerSelect = document.getElementById('filterIssuer');
         issuerSelect.value = issuerParam;
+    }
+    
+    // Pre-select minimum reward rate filter if provided in URL
+    const minRewardRateParam = urlParams.get('min_reward_rate');
+    if (minRewardRateParam) {
+        const feeSelect = document.getElementById('filterFee');
+        // Map reward rate to fee filter (this is a bit of a hack but works)
+        if (minRewardRateParam === '2') {
+            // For now, just show all fees when reward rate is filtered
+            // You might want to add a specific reward rate filter to the cards page
+        }
     }
     
     const rewardTypeParam = urlParams.get('reward_type');

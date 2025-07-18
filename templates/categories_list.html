@@ -223,6 +223,7 @@
 <script>
 let allCategories = [];
 let userCards = new Set();
+let allCards = []; // Cache cards data to avoid repeated API calls
 
 async function loadCategories() {
     try {
@@ -234,6 +235,11 @@ async function loadCategories() {
         }
         
         allCategories = categories;
+        
+        // Load cards data once for filtering
+        const cardsResponse = await fetch(`${API_BASE}/cards/cards/`);
+        const cardsData = await cardsResponse.json();
+        allCards = cardsData.results || cardsData;
         
         // Load issuers for filter
         const issuersResponse = await fetch(`${API_BASE}/cards/issuers/`);
@@ -251,7 +257,7 @@ async function loadCategories() {
         // Load user's current cards (if any)
         await loadUserCards();
         
-        filterCategories();
+        await filterCategories();
         
     } catch (error) {
         console.error('Error loading categories:', error);
@@ -264,50 +270,65 @@ async function loadUserCards() {
     try {
         const cards = await UserDataManager.getCards();
         userCards = new Set(cards);
+        console.log('UserDataManager.getCards() returned:', cards);
+        console.log('UserCards set:', [...userCards]);
+        
+        // Also check if we can access the authentication state
+        if (typeof isAuthenticated !== 'undefined') {
+            console.log('isAuthenticated:', isAuthenticated);
+        }
     } catch (error) {
         console.error('Error loading user cards:', error);
     }
 }
 
 async function filterCategories() {
+    // Ensure user cards are loaded first
+    await loadUserCards();
+    
     const ownershipFilter = document.getElementById('filterOwnership').value;
     const cardTypeFilter = document.getElementById('filterCardType').value;
     const issuerFilter = document.getElementById('filterIssuer').value;
     const rewardRateFilter = document.getElementById('filterRewardRate').value;
     const searchFilter = document.getElementById('searchCategories').value.toLowerCase();
     
-    // Get cards data for filtering by card type, issuer, and ownership
-    let cards = [];
+    console.log('=== FILTERING DEBUG ===');
+    console.log('Ownership filter:', ownershipFilter);
+    console.log('User cards:', [...userCards]);
+    console.log('Total categories:', allCategories.length);
+    console.log('Total cards:', allCards.length);
+    
+    // Quick test to see if any cards match any userCards
+    const matchedCards = allCards.filter(card => 
+        userCards.has(card.id) || userCards.has(String(card.id)) || userCards.has(Number(card.id))
+    );
+    console.log('Matched user cards:', matchedCards.length, matchedCards.map(c => `${c.id} (${c.name})`));
+    
+    // Build category to cards mapping and user category IDs
     let userCategoryIds = new Set();
     let categoryCardData = new Map(); // category.id -> array of cards
     
-    try {
-        const cardsResponse = await fetch(`${API_BASE}/cards/cards/`);
-        const cardsData = await cardsResponse.json();
-        cards = cardsData.results || cardsData;
-        
-        // Build category to cards mapping
-        cards.forEach(card => {
-            if (card.reward_categories) {
-                card.reward_categories.forEach(rewardCat => {
-                    if (rewardCat.category && rewardCat.category.id) {
-                        const categoryId = rewardCat.category.id;
-                        if (!categoryCardData.has(categoryId)) {
-                            categoryCardData.set(categoryId, []);
-                        }
-                        categoryCardData.get(categoryId).push(card);
-                        
-                        // For ownership filtering
-                        if (userCards.has(card.id)) {
-                            userCategoryIds.add(categoryId);
-                        }
+    allCards.forEach(card => {
+        if (card.reward_categories) {
+            card.reward_categories.forEach(rewardCat => {
+                if (rewardCat.category && rewardCat.category.id) {
+                    const categoryId = rewardCat.category.id;
+                    if (!categoryCardData.has(categoryId)) {
+                        categoryCardData.set(categoryId, []);
                     }
-                });
-            }
-        });
-    } catch (error) {
-        console.error('Error loading cards for category filtering:', error);
-    }
+                    categoryCardData.get(categoryId).push(card);
+                    
+                    // For ownership filtering
+                    if (userCards.has(card.id) || userCards.has(String(card.id)) || userCards.has(Number(card.id))) {
+                        userCategoryIds.add(categoryId);
+                        console.log(`✓ Card ${card.id} (${card.name}) is owned, adding category ${categoryId}`);
+                    }
+                }
+            });
+        }
+    });
+    
+    console.log('User category IDs:', [...userCategoryIds]);
     
     let filteredCategories = allCategories.filter(category => {
         // Ownership filter
@@ -352,16 +373,17 @@ async function filterCategories() {
         return true;
     });
     
+    console.log('Filtered categories:', filteredCategories.length, 'out of', allCategories.length);
     displayCategories(filteredCategories);
 }
 
-function resetFilters() {
+async function resetFilters() {
     document.getElementById('filterOwnership').value = 'all';
     document.getElementById('filterCardType').value = '';
     document.getElementById('filterIssuer').value = '';
     document.getElementById('filterRewardRate').value = '';
     document.getElementById('searchCategories').value = '';
-    filterCategories();
+    await filterCategories();
 }
 
 function displayCategories(categories) {
@@ -413,7 +435,7 @@ function displayCategories(categories) {
                     <div class="category-card-count">${category.cards_with_rewards_count} cards</div>
                 </div>
                 ${category.cards_with_rewards_count > 0 ? 
-                    `<a href="/cards/?category=${category.slug}" class="category-link">View Cards</a>` :
+                    `<a href="${buildCardsUrl(category.slug)}" class="category-link">View Cards</a>` :
                     `<div class="category-no-cards">No cards</div>`
                 }
             </div>
@@ -423,7 +445,50 @@ function displayCategories(categories) {
     container.innerHTML = `<div class="categories-grid">${html}</div>`;
 }
 
+function buildCardsUrl(categorySlug) {
+    const ownershipFilter = document.getElementById('filterOwnership').value;
+    const cardTypeFilter = document.getElementById('filterCardType').value;
+    const issuerFilter = document.getElementById('filterIssuer').value;
+    const rewardRateFilter = document.getElementById('filterRewardRate').value;
+    
+    const params = new URLSearchParams();
+    params.set('category', categorySlug);
+    
+    // Add current filters to the URL
+    if (ownershipFilter && ownershipFilter !== 'all') {
+        params.set('ownership', ownershipFilter);
+    }
+    if (cardTypeFilter) {
+        params.set('card_type', cardTypeFilter);
+    }
+    if (issuerFilter) {
+        params.set('issuer', issuerFilter);
+    }
+    if (rewardRateFilter) {
+        params.set('min_reward_rate', rewardRateFilter);
+    }
+    
+    return `/cards/?${params.toString()}`;
+}
+
 // Load categories when page loads
 loadCategories();
+
+// Test function to manually add a card for testing
+window.testAddCard = function(cardId) {
+    console.log('Adding card', cardId, 'to user cards for testing');
+    userCards.add(cardId);
+    userCards.add(String(cardId));
+    userCards.add(Number(cardId));
+    console.log('User cards after adding:', [...userCards]);
+    filterCategories();
+};
+
+// Test function to clear all cards
+window.testClearCards = function() {
+    console.log('Clearing all user cards');
+    userCards.clear();
+    filterCategories();
+};
 </script>
 {% endblock %}
