@@ -370,6 +370,11 @@
             margin-bottom: 10px;
         }
         
+        .subcategory-item {
+            margin-left: 20px;
+            margin-bottom: 5px;
+        }
+        
         .input-group {
             display: flex;
             align-items: stretch;
@@ -479,6 +484,43 @@
             flex: 1;
             font-size: 14px;
             font-weight: 500;
+        }
+        
+        .credits-simple-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 8px;
+            margin-top: 15px;
+        }
+        
+        .credit-item-simple {
+            display: flex;
+            align-items: center;
+            padding: 6px 8px;
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 4px;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        
+        .credit-item-simple:hover {
+            background: #f9fafb;
+            border-color: #d1d5db;
+        }
+        
+        .credit-item-simple input[type="checkbox"] {
+            margin-right: 8px;
+            margin-left: 0;
+        }
+        
+        .credit-item-simple label {
+            margin: 0;
+            cursor: pointer;
+            flex: 1;
+            font-size: 13px;
+            font-weight: 500;
+            color: #374151;
         }
         
         .tooltip-icon {

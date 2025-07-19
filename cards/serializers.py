@@ -19,9 +19,27 @@ class RewardTypeSerializer(serializers.ModelSerializer):
 
 
 class SpendingCategorySerializer(serializers.ModelSerializer):
+    subcategories = serializers.SerializerMethodField()
+    parent = serializers.SerializerMethodField()
+    
     class Meta:
         model = SpendingCategory
-        fields = ['id', 'name', 'slug', 'display_name', 'description', 'icon', 'sort_order']
+        fields = ['id', 'name', 'slug', 'display_name', 'description', 'icon', 'sort_order', 'parent', 'subcategories']
+    
+    def get_subcategories(self, obj):
+        if obj.subcategories.exists():
+            return SpendingCategorySerializer(obj.subcategories.all(), many=True).data
+        return []
+    
+    def get_parent(self, obj):
+        if obj.parent:
+            return {
+                'id': obj.parent.id,
+                'name': obj.parent.name,
+                'slug': obj.parent.slug,
+                'display_name': obj.parent.display_name
+            }
+        return None
 
 
 class RewardCategorySerializer(serializers.ModelSerializer):

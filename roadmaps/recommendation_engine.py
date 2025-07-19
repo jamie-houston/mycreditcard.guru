@@ -169,10 +169,14 @@ class RecommendationEngine:
             rewards_breakdown = self._calculate_card_rewards_breakdown(card)
             annual_rewards = rewards_breakdown['total_rewards']
             signup_bonus_value = self._get_signup_bonus_value(card)
+            
+            # Check if annual fee is waived first year for new applications
             annual_fee = float(card.annual_fee)
+            annual_fee_waived_first_year = card.metadata.get('annual_fee_waived_first_year', False)
+            effective_annual_fee = 0 if annual_fee_waived_first_year else annual_fee
             
             # Scoring: use annual rewards only (no signup bonus) for consistency with owned cards
-            annual_value = annual_rewards - annual_fee
+            annual_value = annual_rewards - effective_annual_fee
             
             # Include signup bonus in total value assessment for filtering
             total_value = annual_value + signup_bonus_value
@@ -185,7 +189,7 @@ class RecommendationEngine:
                     'annual_rewards': annual_rewards,
                     'signup_bonus': signup_bonus_value,
                     'rewards_breakdown': rewards_breakdown['breakdown'],
-                    'reasoning': f"Annual value: ${annual_value:.0f} (${annual_rewards:.0f} rewards - ${annual_fee} fee) + ${signup_bonus_value:.0f} signup bonus"
+                    'reasoning': f"Annual value: ${annual_value:.0f} (${annual_rewards:.0f} rewards - ${effective_annual_fee} fee{' - first year fee waived' if annual_fee_waived_first_year else ''}) + ${signup_bonus_value:.0f} signup bonus"
                 })
         
         # Sort by score and take top cards
@@ -251,13 +255,34 @@ class RecommendationEngine:
             all_spending[category_slug] = annual_spend
             total_spending += annual_spend
         
+        # Build a map of parent category spending by aggregating subcategory spending
+        from cards.models import SpendingCategory
+        parent_category_spending = {}
+        
+        # For each spending category, if it's a subcategory, add its spending to the parent
+        for category_slug, annual_spend in all_spending.items():
+            try:
+                spending_category = SpendingCategory.objects.get(slug=category_slug)
+                if spending_category.is_subcategory:
+                    # This is a subcategory, add its spending to the parent
+                    parent_slug = spending_category.parent.slug
+                    parent_category_spending[parent_slug] = parent_category_spending.get(parent_slug, 0.0) + annual_spend
+                else:
+                    # This is a parent category, include its direct spending
+                    parent_category_spending[category_slug] = parent_category_spending.get(category_slug, 0.0) + annual_spend
+            except SpendingCategory.DoesNotExist:
+                # Category doesn't exist in database, treat as parent category
+                parent_category_spending[category_slug] = parent_category_spending.get(category_slug, 0.0) + annual_spend
+        
         # Track which spending has been allocated to specific reward categories
         allocated_spending = 0.0
         
         # Calculate rewards for specific reward categories
         for reward_category in card.reward_categories.filter(is_active=True):
             category_slug = reward_category.category.slug
-            annual_spend = all_spending.get(category_slug, 0.0)
+            
+            # Check if this reward category applies to a parent category that has aggregated spending
+            annual_spend = parent_category_spending.get(category_slug, 0.0)
             
             if annual_spend > 0:  # Only include categories with spending
                 # Apply spending caps if they exist
@@ -285,7 +310,9 @@ class RecommendationEngine:
                 })
         
         # Handle unallocated spending - apply to general category if it exists
-        unallocated_spending = total_spending - allocated_spending
+        # Use the total spending from parent categories (not subcategories)
+        total_parent_spending = sum(parent_category_spending.values())
+        unallocated_spending = total_parent_spending - allocated_spending
         if unallocated_spending > 0:
             # Look for a general/catch-all category
             general_category = card.reward_categories.filter(

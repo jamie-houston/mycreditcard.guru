@@ -69,53 +69,6 @@
     "discontinued": false
   },
   {
-    "name": "Blue Cash Preferred",
-    "issuer": "American Express",
-    "annual_fee": 95,
-    "signup_bonus": {
-      "bonus_amount": 300,
-      "spending_requirement": 3000,
-      "time_limit_months": 6
-    },
-    "reward_type": "Cashback",
-    "reward_value_multiplier": 0.01,
-    "reward_categories": [
-      {
-        "category": "streaming",
-        "reward_rate": 6
-      },
-      {
-        "category": "groceries",
-        "reward_rate": 6,
-        "max_bonus_amount": 6000
-      },
-      {
-        "category": "gas",
-        "reward_rate": 3
-      },
-      {
-        "category": "transportation",
-        "reward_rate": 3
-      },
-      {
-        "category": "other",
-        "reward_rate": 2
-      }
-    ],
-    "card_type": "personal",
-    "network": "American Express",
-    "url": "https://www.americanexpress.com/us/credit-cards/card/blue-cash-preferred/",
-    "image_url": "/images/amex/blue-cash-preferred.webp",
-    "discontinued": false,
-    "credits": [
-      {
-        "description": "$7/mo Disney Bundle Credit",
-        "value": 84,
-        "weight": 0.25
-      }
-    ]
-  },
-  {
     "name": "Blue Cash Preferred (Morgan Stanley)",
     "issuer": "American Express",
     "annual_fee": 95,
@@ -504,29 +457,6 @@
     "network": "American Express",
     "url": "https://www.americanexpress.com/en-us/business/credit-cards/delta-skymiles-reserve/",
     "image_url": "/images/amex/delta-skymiles-reserve-business.webp",
-    "discontinued": false
-  },
-  {
-    "name": "Gold",
-    "issuer": "American Express",
-    "annual_fee": 350,
-    "signup_bonus": {
-      "bonus_amount": 75000,
-      "spending_requirement": 6000,
-      "time_limit_months": 6
-    },
-    "reward_type": "Cashback",
-    "reward_value_multiplier": 0.01,
-    "reward_categories": [
-      {
-        "category": "other",
-        "reward_rate": 1
-      }
-    ],
-    "card_type": "personal",
-    "network": "American Express",
-    "url": "https://www.americanexpress.com/us/credit-cards/card/gold-card/",
-    "image_url": "/images/amex/gold.webp",
     "discontinued": false
   },
   {

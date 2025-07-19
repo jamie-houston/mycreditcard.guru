@@ -4,21 +4,62 @@
     "display_name": "Dining & Restaurants",
     "description": "Restaurants, bars, cafes, and food delivery services",
     "icon": "fas fa-utensils",
-    "sort_order": 10
+    "sort_order": 10,
+    "subcategories": [{ "name": "uber", "display_name": "Uber Eats" }]
   },
   {
     "name": "travel",
     "display_name": "Travel",
     "description": "Airlines, hotels, rental cars, and travel booking services",
     "icon": "fas fa-plane",
-    "sort_order": 20
+    "sort_order": 20,
+    "subcategories": [
+      {
+        "name": "hotels",
+        "display_name": "Hotels",
+        "description": "Hotels and accommodations",
+        "icon": "fas fa-hotel",
+        "sort_order": 10
+      },
+      {
+        "name": "airlines",
+        "display_name": "Airlines",
+        "description": "Airlines and travel bookings",
+        "icon": "fas fa-plane",
+        "sort_order": 20
+      },
+      {
+        "name": "rental_cars",
+        "display_name": "Rental Cars",
+        "description": "Rental cars and car rentals",
+        "icon": "fas fa-car",
+        "sort_order": 30
+      },
+      {
+        "name": "chase_travel",
+        "display_name": "Book through Chase Travel",
+        "description": "travel purchased through Chase Travel",
+        "icon": "fas fa-plane",
+        "sort_order": 40
+      },
+      {
+        "name": "capital_one_travel",
+        "display_name": "Book through Capital One Travel",
+        "description": "travel purchased through Capital One Travel",
+        "icon": "fas fa-plane",
+        "sort_order": 50
+      }
+    ]
   },
   {
     "name": "groceries",
     "display_name": "Groceries",
     "description": "Supermarkets and grocery stores",
     "icon": "fas fa-shopping-cart",
-    "sort_order": 30
+    "sort_order": 30,
+    "subcategories": [
+      { "name": "online_groceries", "display_name": "Online Groceries" }
+    ]
   },
   {
     "name": "gas",
@@ -32,14 +73,32 @@
     "display_name": "Entertainment",
     "description": "Movies, concerts, streaming services, and entertainment venues",
     "icon": "fas fa-film",
-    "sort_order": 50
+    "sort_order": 50,
+    "subcategories": [
+      {
+        "name": "streaming",
+        "display_name": "Streaming Services",
+        "description": "Video and music streaming subscriptions",
+        "icon": "fas fa-tv",
+        "sort_order": 80
+      }
+    ]
   },
   {
     "name": "shopping",
     "display_name": "Shopping",
     "description": "Online and retail shopping, department stores",
     "icon": "fas fa-shopping-bag",
-    "sort_order": 60
+    "sort_order": 60,
+    "subcategories": [
+      {
+        "name": "amazon",
+        "display_name": "Amazon",
+        "description": "Amazon purchases",
+        "icon": "fab fa-amazon",
+        "sort_order": 150
+      }
+    ]
   },
   {
     "name": "transportation",
@@ -47,13 +106,6 @@
     "description": "Public transit, taxis, rideshare services",
     "icon": "fas fa-car",
     "sort_order": 70
-  },
-  {
-    "name": "streaming",
-    "display_name": "Streaming Services",
-    "description": "Video and music streaming subscriptions",
-    "icon": "fas fa-tv",
-    "sort_order": 80
   },
   {
     "name": "drugstores",
@@ -89,13 +141,6 @@
     "description": "Electricity, water, gas, internet, phone, and other utility bills",
     "icon": "fas fa-bolt",
     "sort_order": 125
-  },
-  {
-    "name": "amazon",
-    "display_name": "Amazon",
-    "description": "Amazon purchases",
-    "icon": "fab fa-amazon",
-    "sort_order": 150
   },
   {
     "name": "other",

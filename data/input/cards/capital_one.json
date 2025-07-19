@@ -134,41 +134,6 @@
     "discontinued": false
   },
   {
-    "name": "Venture Rewards",
-    "issuer": "Capital One",
-    "annual_fee": 95,
-    "signup_bonus": {
-      "bonus_amount": 75000,
-      "spending_requirement": 4000,
-      "time_limit_months": 3
-    },
-    "reward_type": "Cashback",
-    "reward_value_multiplier": 0.01,
-    "reward_categories": [
-      {
-        "category": "other",
-        "reward_rate": 1
-      }
-    ],
-    "card_type": "personal",
-    "network": "Visa",
-    "url": "https://www.capitalone.com/credit-cards/venture/",
-    "image_url": "/images/capitalone/venture-rewards.webp",
-    "discontinued": false,
-    "credits": [
-      {
-        "description": "2x Capital One Lounge Visits",
-        "value": 100,
-        "weight": 0.25
-      },
-      {
-        "description": "Global Entry / TSA PreCheck Credit",
-        "value": 100,
-        "weight": 0.4
-      }
-    ]
-  },
-  {
     "name": "Venture X",
     "issuer": "Capital One",
     "annual_fee": 395,

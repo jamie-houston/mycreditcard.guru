@@ -181,37 +181,6 @@
     "discontinued": false
   },
   {
-    "name": "Freedom Unlimited",
-    "issuer": "Chase",
-    "annual_fee": 0,
-    "signup_bonus": {
-      "bonus_amount": 20000,
-      "spending_requirement": 500,
-      "time_limit_months": 3
-    },
-    "reward_type": "Cashback",
-    "reward_value_multiplier": 0.01,
-    "reward_categories": [
-      {
-        "category": "drugstores",
-        "reward_rate": 3
-      },
-      {
-        "category": "dining",
-        "reward_rate": 3
-      },
-      {
-        "category": "other",
-        "reward_rate": 1.5
-      }
-    ],
-    "card_type": "personal",
-    "network": "Visa",
-    "url": "https://creditcards.chase.com/cash-back-credit-cards/freedom/unlimited",
-    "image_url": "/images/chase/freedom-unlimited.png",
-    "discontinued": false
-  },
-  {
     "name": "Iberia Signature",
     "issuer": "Chase",
     "annual_fee": 95,
@@ -442,48 +411,6 @@
     "discontinued": false
   },
   {
-    "name": "Sapphire Preferred",
-    "issuer": "Chase",
-    "annual_fee": 95,
-    "signup_bonus": {
-      "bonus_amount": 75000,
-      "spending_requirement": 5000,
-      "time_limit_months": 3
-    },
-    "reward_type": "Cashback",
-    "reward_value_multiplier": 0.0125,
-    "reward_categories": [
-      {
-        "category": "dining",
-        "reward_rate": 3
-      },
-      {
-        "category": "streaming",
-        "reward_rate": 3
-      },
-      {
-        "category": "travel",
-        "reward_rate": 2
-      },
-      {
-        "category": "other",
-        "reward_rate": 1
-      }
-    ],
-    "card_type": "personal",
-    "network": "Visa",
-    "url": "https://creditcards.chase.com/rewards-credit-cards/sapphire/preferred",
-    "image_url": "/images/chase/sapphire-preferred.png",
-    "discontinued": false,
-    "credits": [
-      {
-        "description": "Hotel Credit",
-        "value": 50,
-        "weight": 0.9
-      }
-    ]
-  },
-  {
     "name": "Sapphire Reserve Business",
     "issuer": "Chase",
     "annual_fee": 795,
@@ -568,74 +495,6 @@
         "description": "Gift Card Credit",
         "value": 100,
         "weight": 0.5
-      }
-    ]
-  },
-  {
-    "name": "Sapphire Reserve",
-    "issuer": "Chase",
-    "annual_fee": 795,
-    "signup_bonus": {
-      "bonus_amount": 100000,
-      "spending_requirement": 5000,
-      "time_limit_months": 3
-    },
-    "reward_type": "Cashback",
-    "reward_value_multiplier": 0.01,
-    "reward_categories": [
-      {
-        "category": "dining",
-        "reward_rate": 3
-      },
-      {
-        "category": "travel",
-        "reward_rate": 4
-      },
-      {
-        "category": "other",
-        "reward_rate": 1
-      }
-    ],
-    "card_type": "personal",
-    "network": "Visa",
-    "url": "https://creditcards.chase.com/rewards-credit-cards/sapphire/reserve",
-    "image_url": "/images/chase/sapphire-reserve.png",
-    "discontinued": false,
-    "credits": [
-      {
-        "description": "Travel Credit",
-        "value": 300,
-        "weight": 1
-      },
-      {
-        "description": "Travel Credit (The Edit)",
-        "value": 500,
-        "weight": 0.8
-      },
-      {
-        "description": "Lounge Access",
-        "value": 469,
-        "weight": 0.2
-      },
-      {
-        "description": "PreCheck Credit",
-        "value": 100,
-        "weight": 0.5
-      },
-      {
-        "description": "Dining Credit",
-        "value": 300,
-        "weight": 0.75
-      },
-      {
-        "description": "Apple TV / Apple Music",
-        "value": 250,
-        "weight": 0.4
-      },
-      {
-        "description": "Dashpass",
-        "value": 120,
-        "weight": 0.4
       }
     ]
   },

@@ -30,6 +30,7 @@ class SpendingCategory(models.Model):
     description = models.TextField(blank=True)
     icon = models.CharField(max_length=50, blank=True)
     sort_order = models.IntegerField(default=100)
+    parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='subcategories')
     
     class Meta:
         ordering = ['sort_order', 'name']
@@ -37,6 +38,16 @@ class SpendingCategory(models.Model):
     
     def __str__(self):
         return self.display_name or self.name
+    
+    @property
+    def is_parent_category(self):
+        """Returns True if this is a parent category (has subcategories)"""
+        return self.subcategories.exists()
+    
+    @property
+    def is_subcategory(self):
+        """Returns True if this is a subcategory (has a parent)"""
+        return self.parent is not None
 
 
 class CreditCard(models.Model):

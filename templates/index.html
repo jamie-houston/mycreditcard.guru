@@ -253,7 +253,10 @@
                 'other': '💰'
             };
             
-            const html = categories.map(category => {
+            // Filter to only show parent categories (no parent field)
+            const parentCategories = categories.filter(cat => !cat.parent);
+            
+            const html = parentCategories.map(category => {
                 const displayName = category.display_name || category.name;
                 const description = category.description || '';
                 const slug = category.slug;
@@ -279,7 +282,7 @@
                 const tooltipHtml = description ? 
                     `<span class="tooltip-icon" title="${description}">❓</span>` : '';
                 
-                return `
+                let categoryHtml = `
                     <div class="spending-item">
                         <div class="input-group">
                             <span class="input-group-text fw-bold" style="min-width: 140px;">
@@ -291,6 +294,43 @@
                         </div>
                     </div>
                 `;
+                
+                // Add subcategories if they exist
+                if (category.subcategories && category.subcategories.length > 0) {
+                    category.subcategories.forEach(subcat => {
+                        const subDisplayName = subcat.display_name || subcat.name;
+                        const subSlug = subcat.slug;
+                        const subHtmlId = subSlug.replace(/-/g, '_');
+                        const subDescription = subcat.description || '';
+                        const subTooltipHtml = subDescription ? 
+                            `<span class="tooltip-icon" title="${subDescription}">❓</span>` : '';
+                        
+                        // Handle subcategory icon
+                        let subIconHtml = '';
+                        if (subcat.icon && subcat.icon.includes('fa-')) {
+                            subIconHtml = `<i class="${subcat.icon}" style="font-size: 16px; margin-right: 6px; width: 18px; text-align: center;"></i>`;
+                        } else if (subcat.icon && !subcat.icon.includes('fa-')) {
+                            subIconHtml = `<span style="font-size: 16px; margin-right: 6px;">${subcat.icon}</span>`;
+                        } else {
+                            subIconHtml = `<span style="font-size: 16px; margin-right: 6px;">└</span>`;
+                        }
+                        
+                        categoryHtml += `
+                            <div class="spending-item subcategory-item">
+                                <div class="input-group">
+                                    <span class="input-group-text" style="min-width: 140px; background: #f8f9fa; font-size: 13px;">
+                                        ${subIconHtml}${subDisplayName} ${subTooltipHtml}
+                                    </span>
+                                    <span class="input-group-text">$</span>
+                                    <input type="number" id="${subHtmlId}" data-category-slug="${subSlug}" 
+                                           placeholder="0" min="0" step="10" class="form-control spending-input">
+                                </div>
+                            </div>
+                        `;
+                    });
+                }
+                
+                return categoryHtml;
             }).join('');
             
             container.innerHTML = html;
@@ -299,50 +339,33 @@
         function renderCreditTypes(categorizedCredits) {
             const container = document.getElementById('creditTypes');
             
-            // Category display names and order
-            const categoryOrder = ['travel', 'dining', 'entertainment', 'transportation', 'shopping', 'tech', 'misc'];
-            const categoryNames = {
-                'travel': 'Travel & Transportation',
-                'dining': 'Dining & Food',
-                'entertainment': 'Entertainment & Streaming', 
-                'transportation': 'Transportation',
-                'shopping': 'Shopping & Retail',
-                'tech': 'Technology & Business',
-                'misc': 'Other Benefits'
-            };
-            
-            let html = '';
-            
-            categoryOrder.forEach(category => {
-                if (categorizedCredits[category] && categorizedCredits[category].length > 0) {
-                    const categoryName = categoryNames[category] || category;
-                    const credits = categorizedCredits[category];
-                    
-                    html += `<div class="credit-category" style="margin-bottom: 25px;">
-                        <h4 style="margin-bottom: 12px; color: #4b5563; font-size: 16px; font-weight: 600;">
-                            ${categoryName}
-                        </h4>
-                        <div class="credits-grid">`;
-                    
-                    credits.forEach(creditType => {
-                        const tooltipHtml = creditType.description ? 
-                            `title="${creditType.description}"` : '';
-                        
-                        html += `
-                            <div class="credit-checkbox-simple">
-                                <input type="checkbox" id="credit_${creditType.slug}" name="credit_preferences" 
-                                       value="${creditType.slug}" onchange="handleCreditChange(this)">
-                                <label for="credit_${creditType.slug}" ${tooltipHtml}>
-                                    ${creditType.icon ? `${creditType.icon} ` : ''}${creditType.name}${creditType.description ? ` <span class="tooltip-icon" title="${creditType.description}">❓</span>` : ''}
-                                </label>
-                            </div>
-                        `;
-                    });
-                    
-                    html += '</div></div>';
-                }
+            // Flatten all credit types into a single list
+            const allCredits = [];
+            Object.values(categorizedCredits).forEach(categoryCredits => {
+                allCredits.push(...categoryCredits);
             });
             
+            // Sort alphabetically by name
+            allCredits.sort((a, b) => a.name.localeCompare(b.name));
+            
+            let html = '<div class="credits-simple-grid">';
+            
+            allCredits.forEach(creditType => {
+                const tooltipHtml = creditType.description ? 
+                    `title="${creditType.description}"` : '';
+                
+                html += `
+                    <div class="credit-item-simple">
+                        <input type="checkbox" id="credit_${creditType.slug}" name="credit_preferences" 
+                               value="${creditType.slug}" onchange="handleCreditChange(this)">
+                        <label for="credit_${creditType.slug}" ${tooltipHtml}>
+                            ${creditType.icon ? `${creditType.icon} ` : ''}${creditType.name}
+                        </label>
+                    </div>
+                `;
+            });
+            
+            html += '</div>';
             container.innerHTML = html;
         }
 
@@ -664,7 +687,7 @@
                                     <div>
                                         <h3>${actionEmoji} ${rec.action.toUpperCase()}: ${rec.card.name}</h3>
                                         <p><strong>Estimated Value:</strong> $${rec.estimated_rewards.toFixed(0)}</p>
-                                        <p><strong>Annual Fee:</strong> $${rec.card.annual_fee}</p>
+                                        <p><strong>Annual Fee:</strong> $${rec.card.effective_annual_fee}${rec.card.annual_fee_waived_first_year && rec.action === 'apply' ? ' (first year waived)' : ''}</p>
                                         ${rec.card.signup_bonus_amount && rec.action === 'apply' ? 
                                             `<p><strong>Signup Bonus:</strong> ${rec.card.signup_bonus_amount} points/miles</p>` : ''
                                         }

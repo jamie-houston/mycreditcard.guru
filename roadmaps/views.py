@@ -138,6 +138,8 @@ def quick_recommendation_view(request):
                             'name': rec['card'].name,
                             'issuer': rec['card'].issuer.name,
                             'annual_fee': float(rec['card'].annual_fee),
+                            'effective_annual_fee': 0 if (rec['action'] == 'apply' and rec['card'].metadata.get('annual_fee_waived_first_year', False)) else float(rec['card'].annual_fee),
+                            'annual_fee_waived_first_year': rec['card'].metadata.get('annual_fee_waived_first_year', False),
                             'signup_bonus_amount': rec['card'].signup_bonus_amount,
                         },
                         'action': rec['action'],

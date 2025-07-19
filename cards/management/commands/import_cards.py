@@ -157,6 +157,58 @@ class Command(BaseCommand):
                 if updated:
                     category.save()
                     self.stdout.write(f'Updated spending category: {category.display_name or category.name}')
+            
+            # Import subcategories if they exist
+            if 'subcategories' in category_data and category_data['subcategories']:
+                for subcat_data in category_data['subcategories']:
+                    subcategory = None
+                    try:
+                        subcategory = SpendingCategory.objects.get(name=subcat_data['name'])
+                        subcat_created = False
+                    except SpendingCategory.DoesNotExist:
+                        try:
+                            # Try to find by the new slug
+                            subcategory = SpendingCategory.objects.get(slug=slugify(subcat_data['name']))
+                            subcat_created = False
+                        except SpendingCategory.DoesNotExist:
+                            # Create new subcategory
+                            subcategory = SpendingCategory.objects.create(
+                                name=subcat_data['name'],
+                                slug=slugify(subcat_data['name']),
+                                display_name=subcat_data.get('display_name', ''),
+                                description=subcat_data.get('description', ''),
+                                icon=subcat_data.get('icon', ''),
+                                sort_order=subcat_data.get('sort_order', 100),
+                                parent=category,  # Set the parent category
+                            )
+                            subcat_created = True
+                    
+                    # Set parent if not already set
+                    if subcategory.parent != category:
+                        subcategory.parent = category
+                        subcategory.save()
+                        
+                    if subcat_created:
+                        self.stdout.write(f'Created subcategory: {subcategory.display_name or subcategory.name} under {category.display_name or category.name}')
+                    else:
+                        # Update existing subcategories with new fields if they don't have them
+                        subcat_updated = False
+                        if not subcategory.display_name and subcat_data.get('display_name'):
+                            subcategory.display_name = subcat_data['display_name']
+                            subcat_updated = True
+                        if not subcategory.description and subcat_data.get('description'):
+                            subcategory.description = subcat_data['description']
+                            subcat_updated = True
+                        if not subcategory.icon and subcat_data.get('icon'):
+                            subcategory.icon = subcat_data['icon']
+                            subcat_updated = True
+                        if subcategory.sort_order == 100 and subcat_data.get('sort_order', 100) != 100:
+                            subcategory.sort_order = subcat_data['sort_order']
+                            subcat_updated = True
+                            
+                        if subcat_updated:
+                            subcategory.save()
+                            self.stdout.write(f'Updated subcategory: {subcategory.display_name or subcategory.name}')
 
     def import_credit_cards(self, cards):
         for card_data in cards:
