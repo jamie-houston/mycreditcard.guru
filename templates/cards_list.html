@@ -228,59 +228,76 @@
 <!-- Filters Section -->
 <div class="section">
     <h2>🔍 Filter Cards</h2>
-    <div class="grid">
-        <div class="form-group">
-            <label for="filterOwnership">Ownership</label>
-            <select id="filterOwnership" onchange="filterCards()">
-                <option value="not_owned">Not Owned</option>
-                <option value="owned">Owned</option>
-                <option value="all" selected>All Cards</option>
-            </select>
+    <div class="spending-grid">
+        <div class="preferences-inline">
+            <div class="input-group">
+                <span class="input-group-text">Ownership</span>
+                <select id="filterOwnership" onchange="filterCards()">
+                    <option value="not_owned">Not Owned</option>
+                    <option value="owned">Owned</option>
+                    <option value="all" selected>All Cards</option>
+                </select>
+            </div>
         </div>
-        <div class="form-group">
-            <label for="filterCardType">Card Type</label>
-            <select id="filterCardType" onchange="filterCards()">
-                <option value="personal">Personal</option>
-                <option value="business">Business</option>
-                <option value="all" selected>All Types</option>
-            </select>
+        <div class="preferences-inline">
+            <div class="input-group">
+                <span class="input-group-text">Card Type</span>
+                <select id="filterCardType" onchange="filterCards()">
+                    <option value="personal">Personal</option>
+                    <option value="business">Business</option>
+                    <option value="all" selected>All Types</option>
+                </select>
+            </div>
         </div>
-        <div class="form-group">
-            <label for="filterIssuer">Issuer</label>
-            <select id="filterIssuer" onchange="filterCards()">
-                <option value="">All Issuers</option>
-            </select>
+        <div class="preferences-inline">
+            <div class="input-group">
+                <span class="input-group-text">Issuer</span>
+                <select id="filterIssuer" onchange="filterCards()">
+                    <option value="">All Issuers</option>
+                </select>
+            </div>
         </div>
-        <div class="form-group">
-            <label for="filterRewardType">Reward Type</label>
-            <select id="filterRewardType" onchange="filterCards()">
-                <option value="">All Reward Types</option>
-            </select>
+        <div class="preferences-inline">
+            <div class="input-group">
+                <span class="input-group-text">Reward Type</span>
+                <select id="filterRewardType" onchange="filterCards()">
+                    <option value="">All Reward Types</option>
+                </select>
+            </div>
         </div>
-        <div class="form-group">
-            <label for="filterRewardCategory">Reward Category</label>
-            <select id="filterRewardCategory" onchange="filterCards()">
-                <option value="">All Categories</option>
-            </select>
+        <div class="preferences-inline">
+            <div class="input-group">
+                <span class="input-group-text">Reward Category</span>
+                <select id="filterRewardCategory" onchange="filterCards()">
+                    <option value="">All Categories</option>
+                </select>
+            </div>
         </div>
-        <div class="form-group">
-            <label for="filterFee">Annual Fee</label>
-            <select id="filterFee" onchange="filterCards()">
-                <option value="">Any Fee</option>
-                <option value="0">No Annual Fee</option>
-                <option value="1-95">$1 - $95</option>
-                <option value="96-250">$96 - $250</option>
-                <option value="251+">$251+</option>
-            </select>
+        <div class="preferences-inline">
+            <div class="input-group">
+                <span class="input-group-text">Annual Fee</span>
+                <select id="filterFee" onchange="filterCards()">
+                    <option value="">Any Fee</option>
+                    <option value="0">No Annual Fee</option>
+                    <option value="1-95">$1 - $95</option>
+                    <option value="96-250">$96 - $250</option>
+                    <option value="251+">$251+</option>
+                </select>
+            </div>
         </div>
-        <div class="form-group">
-            <label for="searchCards">Search Cards</label>
-            <input type="text" id="searchCards" placeholder="Search by name..." oninput="filterCards()">
+        <div class="preferences-inline">
+            <div class="input-group">
+                <span class="input-group-text">Search Cards</span>
+                <input type="text" id="searchCards" placeholder="Search by name..." oninput="filterCards()">
+            </div>
         </div>
-        <div class="form-group" style="display: flex; align-items: end;">
-            <button onclick="resetFilters()" style="background: #6b7280; color: white; padding: 12px 20px; border: none; border-radius: 6px; cursor: pointer; font-weight: 500;">
-                Reset Filters
-            </button>
+        <div class="preferences-inline">
+            <div class="input-group">
+                <span class="input-group-text" style="background: transparent; border: none;"></span>
+                <button onclick="resetFilters()" style="background: #6b7280; color: white; padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; font-weight: 500; font-size: 14px; flex: 1;">
+                    Reset Filters
+                </button>
+            </div>
         </div>
     </div>
 </div>

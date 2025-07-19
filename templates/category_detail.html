@@ -10,46 +10,56 @@
 <!-- Filter Cards Section -->
 <div id="filterCardsSection" style="display: none;" class="section">
     <h2>🔍 Filter Cards</h2>
-    <div class="grid">
-        <div class="form-group">
-            <label for="filterOwnership">Ownership</label>
-            <select id="filterOwnership" onchange="filterCards()">
-                <option value="all" selected>All Cards</option>
-                <option value="owned">Owned</option>
-                <option value="not_owned">Not Owned</option>
-            </select>
+    <div class="spending-grid">
+        <div class="preferences-inline">
+            <div class="input-group">
+                <span class="input-group-text">Ownership</span>
+                <select id="filterOwnership" onchange="filterCards()">
+                    <option value="all" selected>All Cards</option>
+                    <option value="owned">Owned</option>
+                    <option value="not_owned">Not Owned</option>
+                </select>
+            </div>
         </div>
-        <div class="form-group">
-            <label for="filterCardType">Card Type</label>
-            <select id="filterCardType" onchange="filterCards()">
-                <option value="personal" selected>Personal</option>
-                <option value="business">Business</option>
-                <option value="all">All Types</option>
-            </select>
+        <div class="preferences-inline">
+            <div class="input-group">
+                <span class="input-group-text">Card Type</span>
+                <select id="filterCardType" onchange="filterCards()">
+                    <option value="personal" selected>Personal</option>
+                    <option value="business">Business</option>
+                    <option value="all">All Types</option>
+                </select>
+            </div>
         </div>
-        <div class="form-group">
-            <label for="filterFee">Annual Fee</label>
-            <select id="filterFee" onchange="filterCards()">
-                <option value="">Any Fee</option>
-                <option value="0">No Annual Fee</option>
-                <option value="1-95">$1 - $95</option>
-                <option value="96-250">$96 - $250</option>
-                <option value="251+">$251+</option>
-            </select>
+        <div class="preferences-inline">
+            <div class="input-group">
+                <span class="input-group-text">Annual Fee</span>
+                <select id="filterFee" onchange="filterCards()">
+                    <option value="">Any Fee</option>
+                    <option value="0">No Annual Fee</option>
+                    <option value="1-95">$1 - $95</option>
+                    <option value="96-250">$96 - $250</option>
+                    <option value="251+">$251+</option>
+                </select>
+            </div>
         </div>
-        <div class="form-group">
-            <label for="filterRewardRate">Minimum Reward Rate</label>
-            <select id="filterRewardRate" onchange="filterCards()">
-                <option value="">Any Rate</option>
-                <option value="2">2x or higher</option>
-                <option value="3">3x or higher</option>
-                <option value="4">4x or higher</option>
-                <option value="5">5x or higher</option>
-            </select>
+        <div class="preferences-inline">
+            <div class="input-group">
+                <span class="input-group-text">Min Reward Rate</span>
+                <select id="filterRewardRate" onchange="filterCards()">
+                    <option value="">Any Rate</option>
+                    <option value="2">2x or higher</option>
+                    <option value="3">3x or higher</option>
+                    <option value="4">4x or higher</option>
+                    <option value="5">5x or higher</option>
+                </select>
+            </div>
         </div>
-        <div class="form-group">
-            <label for="searchCards">Search Cards</label>
-            <input type="text" id="searchCards" placeholder="Search by name..." oninput="filterCards()">
+        <div class="preferences-inline">
+            <div class="input-group">
+                <span class="input-group-text">Search Cards</span>
+                <input type="text" id="searchCards" placeholder="Search by name..." oninput="filterCards()">
+            </div>
         </div>
     </div>
 </div>

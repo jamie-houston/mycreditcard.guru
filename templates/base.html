@@ -174,6 +174,58 @@
         .form-group {
             margin-bottom: 15px;
         }
+        
+        /* Inline preferences form group */
+        .preferences-inline {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .preferences-inline .input-group {
+            display: flex;
+            align-items: stretch;
+            width: 100%;
+        }
+        
+        .preferences-inline .input-group-text {
+            display: flex;
+            align-items: center;
+            padding: 8px 12px;
+            font-size: 14px;
+            font-weight: 600;
+            background-color: #f3f4f6;
+            border: 1px solid #d1d5db;
+            border-right: none;
+            border-top-left-radius: 8px;
+            border-bottom-left-radius: 8px;
+            min-width: 140px;
+            white-space: nowrap;
+        }
+        
+        .preferences-inline select,
+        .preferences-inline input {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid #d1d5db;
+            border-left: none;
+            border-top-right-radius: 8px;
+            border-bottom-right-radius: 8px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s;
+            background: rgba(255, 255, 255, 0.9);
+            margin: 0;
+            width: auto;
+        }
+        
+        .preferences-inline select:focus,
+        .preferences-inline input:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);
+            transform: none;
+        }
+        
         label {
             display: block;
             margin-bottom: 8px;
@@ -306,6 +358,112 @@
             gap: 24px;
         }
         
+        /* Spending profile responsive grid */
+        .spending-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .spending-item {
+            margin-bottom: 10px;
+        }
+        
+        .input-group {
+            display: flex;
+            align-items: stretch;
+        }
+        
+        .input-group-text {
+            display: flex;
+            align-items: center;
+            padding: 8px 12px;
+            font-size: 14px;
+            font-weight: 500;
+            background-color: #f3f4f6;
+            border: 1px solid #d1d5db;
+            border-right: none;
+        }
+        
+        .input-group-text:first-child {
+            border-top-left-radius: 8px;
+            border-bottom-left-radius: 8px;
+        }
+        
+        .form-control {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid #d1d5db;
+            border-left: none;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        
+        .form-control:last-child {
+            border-top-right-radius: 8px;
+            border-bottom-right-radius: 8px;
+        }
+        
+        .form-control:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        /* Credits grid */
+        .credits-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .credit-checkbox {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        
+        .credit-checkbox:hover {
+            background: #f3f4f6;
+            border-color: #d1d5db;
+        }
+        
+        .credit-checkbox.selected {
+            background: #eff6ff;
+            border-color: #667eea;
+        }
+        
+        .credit-checkbox input[type="checkbox"] {
+            margin-right: 10px;
+            transform: scale(1.1);
+        }
+        
+        .credit-checkbox label {
+            margin: 0;
+            cursor: pointer;
+            flex: 1;
+            font-size: 14px;
+        }
+        
+        .tooltip-icon {
+            margin-left: 5px;
+            font-size: 12px;
+            color: #6b7280;
+            cursor: help;
+            opacity: 0.7;
+        }
+        
+        .tooltip-icon:hover {
+            opacity: 1;
+        }
+        
         /* Modern badge styles */
         .badge {
             display: inline-block;
@@ -382,6 +540,33 @@
             .grid {
                 grid-template-columns: 1fr;
                 gap: 15px;
+            }
+            
+            .spending-grid {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+            
+            .credits-grid {
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+            
+            .input-group-text {
+                min-width: 120px !important;
+                font-size: 13px;
+                padding: 6px 8px;
+            }
+            
+            .preferences-inline .input-group-text {
+                min-width: 100px !important;
+                font-size: 12px;
+            }
+            
+            .preferences-inline select,
+            .preferences-inline input {
+                font-size: 13px;
+                padding: 6px 8px;
             }
             
             /* Mobile Navigation */
