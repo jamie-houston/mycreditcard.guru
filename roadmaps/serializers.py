@@ -99,6 +99,11 @@ class GenerateRoadmapSerializer(serializers.Serializer):
         required=False
     )
     max_recommendations = serializers.IntegerField(default=5, min_value=1, max_value=20)
+    credit_preferences = serializers.ListField(
+        child=serializers.CharField(),
+        required=False,
+        default=list
+    )
     
     def generate_recommendations(self):
         """Generate recommendations without saving to database"""
@@ -165,6 +170,23 @@ class GenerateRoadmapSerializer(serializers.Serializer):
                         nickname=card_data.get('nickname', ''),
                         opened_date=card_data['opened_date'],
                         is_active=card_data.get('is_active', True)
+                    )
+        
+        # Update credit preferences if provided
+        if 'credit_preferences' in validated_data:
+            from cards.models import CreditType, UserCreditPreference
+            # Clear existing preferences
+            profile.credit_preferences.all().delete()
+            # Get valid credit type slugs
+            valid_credit_slugs = set(CreditType.objects.values_list('slug', flat=True))
+            
+            for credit_slug in validated_data['credit_preferences']:
+                if credit_slug in valid_credit_slugs:
+                    credit_type = CreditType.objects.get(slug=credit_slug)
+                    UserCreditPreference.objects.create(
+                        profile=profile,
+                        credit_type=credit_type,
+                        values_credit=True
                     )
         
         # Create temporary roadmap for filtering

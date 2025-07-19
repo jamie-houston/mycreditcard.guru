@@ -452,6 +452,35 @@
             font-size: 14px;
         }
         
+        .credit-checkbox-simple {
+            display: flex;
+            align-items: center;
+            padding: 8px 12px;
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        
+        .credit-checkbox-simple:hover {
+            background: #f9fafb;
+            border-color: #d1d5db;
+        }
+        
+        .credit-checkbox-simple input[type="checkbox"] {
+            margin-right: 8px;
+            transform: scale(1.1);
+        }
+        
+        .credit-checkbox-simple label {
+            margin: 0;
+            cursor: pointer;
+            flex: 1;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
         .tooltip-icon {
             margin-left: 5px;
             font-size: 12px;
@@ -1019,6 +1048,42 @@
             color: #6b7280;
             margin-top: 5px;
         }
+        .modal-credits-list {
+            display: grid;
+            gap: 12px;
+        }
+        .modal-credit-item {
+            background: #f0f9ff;
+            border: 1px solid #e0f2fe;
+            border-radius: 8px;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .modal-credit-content {
+            flex: 1;
+        }
+        .modal-credit-name {
+            font-weight: 600;
+            color: #0c4a6e;
+            margin-bottom: 4px;
+        }
+        .modal-credit-description {
+            font-size: 14px;
+            color: #475569;
+            line-height: 1.4;
+        }
+        .modal-credit-value {
+            background: #0284c7;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 16px;
+            font-weight: 600;
+            font-size: 14px;
+            white-space: nowrap;
+            margin-left: 12px;
+        }
         .modal-card-clickable {
             cursor: pointer;
             transition: transform 0.2s, box-shadow 0.2s;
@@ -1153,6 +1218,13 @@
                     <ul class="modal-rewards-list" id="modalRewardsList">
                         <!-- Rewards will be populated here -->
                     </ul>
+                </div>
+                
+                <div class="modal-section" id="modalCreditsSection">
+                    <h3>💎 Card Benefits & Credits</h3>
+                    <div id="modalCreditsList">
+                        <!-- Credits will be populated here -->
+                    </div>
                 </div>
                 
                 <div class="modal-section">
@@ -1747,6 +1819,9 @@
             // Reward categories
             populateRewardCategories(card.reward_categories || []);
             
+            // Credits/Benefits
+            populateCardCredits(card.credits || []);
+            
             // Update ownership button
             updateModalOwnershipButton(card.id);
         }
@@ -1824,6 +1899,59 @@
             
             rewardsList.innerHTML = rewardsHtml;
             rewardsSection.style.display = 'block';
+        }
+        
+        function populateCardCredits(credits) {
+            const creditsList = document.getElementById('modalCreditsList');
+            const creditsSection = document.getElementById('modalCreditsSection');
+            
+            if (!credits || credits.length === 0) {
+                creditsList.innerHTML = '<div style="text-align: center; color: #6b7280; padding: 20px;">No special benefits or credits listed for this card</div>';
+                creditsSection.style.display = 'block';
+                return;
+            }
+            
+            const activeCredits = credits.filter(credit => credit.is_active);
+            
+            if (activeCredits.length === 0) {
+                creditsList.innerHTML = '<div style="text-align: center; color: #6b7280; padding: 20px;">No active benefits or credits</div>';
+                creditsSection.style.display = 'block';
+                return;
+            }
+            
+            const creditsHtml = activeCredits.map(credit => {
+                const value = parseFloat(credit.value || 0);
+                const currency = credit.currency || 'USD';
+                
+                // Format value display
+                let valueDisplay = '';
+                if (value > 0) {
+                    if (currency === 'USD') {
+                        valueDisplay = `$${value.toLocaleString()}`;
+                    } else {
+                        valueDisplay = `${value.toLocaleString()} ${currency}`;
+                    }
+                } else {
+                    valueDisplay = 'Included';
+                }
+                
+                // Use credit type name if available, otherwise use description
+                const creditName = credit.credit_type?.name || 'Benefit';
+                const creditDescription = credit.description || '';
+                
+                return `
+                    <div class="modal-credit-item">
+                        <div class="modal-credit-content">
+                            <div class="modal-credit-name">${creditName}</div>
+                            ${creditDescription ? `<div class="modal-credit-description">${creditDescription}</div>` : ''}
+                        </div>
+                        <div class="modal-credit-value">${valueDisplay}</div>
+                    </div>
+                `;
+            }).join('');
+            
+            creditsList.innerHTML = `<div class="modal-credits-list">${creditsHtml}</div>`;
+            creditsSection.style.display = 'block';
         }
         
         async function updateModalOwnershipButton(cardId) {

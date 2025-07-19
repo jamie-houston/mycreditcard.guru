@@ -310,6 +310,22 @@ class RecommendationEngine:
                     'calculation': f"${unallocated_spending:,.0f} × {reward_rate:.1f}x × {float(reward_value_multiplier):.3f} = ${category_rewards:.2f}"
                 })
         
+        # Add card credits to the total rewards if user has selected them
+        credits_value = self._calculate_card_credits_value(card)
+        total_rewards += credits_value
+        
+        if credits_value > 0:
+            breakdown_details.append({
+                'category_name': 'Card Benefits & Credits',
+                'monthly_spend': 0,
+                'annual_spend': 0,
+                'reward_rate': 0,
+                'reward_multiplier': 1.0,
+                'points_earned': credits_value,
+                'category_rewards': credits_value,
+                'calculation': f"Selected card benefits worth ${credits_value:.2f} annually"
+            })
+        
         return {
             'total_rewards': total_rewards,
             'breakdown': breakdown_details,
@@ -325,6 +341,30 @@ class RecommendationEngine:
             # using the card's specific reward value multiplier
             return float(card.signup_bonus_amount) * float(reward_value_multiplier)
         return 0.0
+    
+    def _calculate_card_credits_value(self, card: CreditCard) -> float:
+        """Calculate the annual value of card credits that user has selected as valuable"""
+        credits_value = 0.0
+        
+        # Get user's selected credit preferences
+        user_credit_preferences = set()
+        if hasattr(self.profile, 'credit_preferences'):
+            user_credit_preferences = set(
+                pref.credit_type.slug 
+                for pref in self.profile.credit_preferences.filter(values_credit=True)
+            )
+        
+        # If no credit preferences are set, try to get them from session/localStorage
+        # This will be handled by the frontend passing credit preferences in the request
+        # For now, we'll use what's in the database
+        
+        # Calculate value of card credits that match user preferences
+        for card_credit in card.credits.filter(is_active=True):
+            if card_credit.credit_type and card_credit.credit_type.slug in user_credit_preferences:
+                # Use the credit's value directly (should be annual value)
+                credits_value += float(card_credit.value)
+        
+        return credits_value
     
     def _calculate_total_rewards(self, recommendations: List[Dict]) -> Decimal:
         """Calculate total estimated rewards from all recommendations"""

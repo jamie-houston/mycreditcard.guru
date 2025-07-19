@@ -329,13 +329,11 @@
                             `title="${creditType.description}"` : '';
                         
                         html += `
-                            <div class="credit-checkbox" onclick="toggleCreditSelection('${creditType.slug}', this)">
+                            <div class="credit-checkbox-simple">
                                 <input type="checkbox" id="credit_${creditType.slug}" name="credit_preferences" 
                                        value="${creditType.slug}" onchange="handleCreditChange(this)">
                                 <label for="credit_${creditType.slug}" ${tooltipHtml}>
-                                    ${creditType.icon ? `<span style="margin-right: 6px;">${creditType.icon}</span>` : ''}
-                                    ${creditType.name}
-                                    ${creditType.description ? `<span class="tooltip-icon" title="${creditType.description}">❓</span>` : ''}
+                                    ${creditType.icon ? `${creditType.icon} ` : ''}${creditType.name}${creditType.description ? ` <span class="tooltip-icon" title="${creditType.description}">❓</span>` : ''}
                                 </label>
                             </div>
                         `;
@@ -348,22 +346,7 @@
             container.innerHTML = html;
         }
 
-        function toggleCreditSelection(slug, element) {
-            const checkbox = element.querySelector('input[type="checkbox"]');
-            if (checkbox) {
-                checkbox.checked = !checkbox.checked;
-                handleCreditChange(checkbox);
-            }
-        }
-
         function handleCreditChange(checkbox) {
-            const container = checkbox.closest('.credit-checkbox');
-            if (checkbox.checked) {
-                container.classList.add('selected');
-            } else {
-                container.classList.remove('selected');
-            }
-            
             // Save credit preferences
             saveCreditPreferences();
         }
@@ -469,7 +452,6 @@
                     const checkbox = document.querySelector(`input[value="${creditSlug}"]`);
                     if (checkbox) {
                         checkbox.checked = true;
-                        handleCreditChange(checkbox);
                     }
                 });
                 
@@ -610,11 +592,19 @@
                     });
                 }
 
+                // Get selected credit preferences
+                const selectedCredits = [];
+                const creditCheckboxes = document.querySelectorAll('input[name="credit_preferences"]:checked');
+                creditCheckboxes.forEach(checkbox => {
+                    selectedCredits.push(checkbox.value);
+                });
+
                 const requestData = {
                     spending_amounts: spendingAmounts,
                     user_cards: userCards,
                     filters: filters,
-                    max_recommendations: parseInt(document.getElementById('maxRecs').value)
+                    max_recommendations: parseInt(document.getElementById('maxRecs').value),
+                    credit_preferences: selectedCredits
                 };
 
                 const response = await fetch(`${API_BASE}/roadmaps/quick-recommendation/`, {

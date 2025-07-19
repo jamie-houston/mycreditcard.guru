@@ -147,7 +147,7 @@
       "spending_requirement": 10000,
       "time_limit_months": 3
     },
-    "reward_type": "Cashback",
+    "reward_type": "Points",
     "reward_value_multiplier": 0.01,
     "reward_categories": [
       {
@@ -170,7 +170,7 @@
       "spending_requirement": 3000,
       "time_limit_months": 3
     },
-    "reward_type": "Cashback",
+    "reward_type": "Points",
     "reward_value_multiplier": 0.01,
     "reward_categories": [
       {
