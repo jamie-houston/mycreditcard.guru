@@ -89,7 +89,14 @@
     "network": "Mastercard",
     "url": "https://creditcards.aa.com/cards/citi-business-card-american-airlines-direct/",
     "image_url": "/images/citi/aadvantage-platinum-select-business.webp",
-    "discontinued": false
+    "discontinued": false,
+    "credits": [
+      {
+        "description": "First checked bag free",
+        "value": 50,
+        "weight": 0.5
+      }
+    ]
   },
   {
     "name": "Double Cash",
@@ -158,7 +165,14 @@
     "network": "Mastercard",
     "url": "https://www.citi.com/credit-cards/citi-strata-premier-credit-card",
     "image_url": "/images/citi/strata-premier.png",
-    "discontinued": false
+    "discontinued": false,
+    "credits": [
+      {
+        "description": "Hotel Credit ($500 min purchase)",
+        "value": 100,
+        "weight": 0.9
+      }
+    ]
   },
   {
     "name": "Rewards+",

@@ -1,8 +1,8 @@
 from django.contrib import admin
 from .models import (
     Issuer, RewardType, SpendingCategory, CreditCard,
-    RewardCategory, CardOffer, UserSpendingProfile,
-    SpendingAmount, UserCard
+    RewardCategory, CardCredit, CreditType, UserSpendingProfile,
+    SpendingAmount, UserCard, UserCreditPreference
 )
 
 
@@ -29,8 +29,8 @@ class RewardCategoryInline(admin.TabularInline):
     extra = 1
 
 
-class CardOfferInline(admin.TabularInline):
-    model = CardOffer
+class CardCreditInline(admin.TabularInline):
+    model = CardCredit
     extra = 1
 
 
@@ -39,7 +39,7 @@ class CreditCardAdmin(admin.ModelAdmin):
     list_display = ['name', 'issuer', 'card_type', 'annual_fee', 'signup_bonus_amount', 'is_active']
     list_filter = ['issuer', 'card_type', 'primary_reward_type', 'is_active']
     search_fields = ['name', 'issuer__name']
-    inlines = [RewardCategoryInline, CardOfferInline]
+    inlines = [RewardCategoryInline, CardCreditInline]
 
 
 @admin.register(RewardCategory)
@@ -48,10 +48,18 @@ class RewardCategoryAdmin(admin.ModelAdmin):
     list_filter = ['reward_type', 'category', 'is_active']
     
 
-@admin.register(CardOffer)
-class CardOfferAdmin(admin.ModelAdmin):
-    list_display = ['card', 'title', 'value', 'start_date', 'end_date', 'is_active']
-    list_filter = ['is_active']
+@admin.register(CreditType)
+class CreditTypeAdmin(admin.ModelAdmin):
+    list_display = ['name', 'category', 'sort_order']
+    list_filter = ['category']
+    search_fields = ['name', 'description']
+    prepopulated_fields = {'slug': ('name',)}
+
+
+@admin.register(CardCredit)
+class CardCreditAdmin(admin.ModelAdmin):
+    list_display = ['card', 'description', 'value', 'weight', 'currency', 'credit_type', 'is_active']
+    list_filter = ['is_active', 'currency', 'credit_type']
 
 
 class SpendingAmountInline(admin.TabularInline):
@@ -64,7 +72,12 @@ class UserCardInline(admin.TabularInline):
     extra = 1
 
 
+class UserCreditPreferenceInline(admin.TabularInline):
+    model = UserCreditPreference
+    extra = 1
+
+
 @admin.register(UserSpendingProfile)
 class UserSpendingProfileAdmin(admin.ModelAdmin):
     list_display = ['__str__', 'user', 'session_key', 'created_at']
-    inlines = [SpendingAmountInline, UserCardInline]
+    inlines = [SpendingAmountInline, UserCardInline, UserCreditPreferenceInline]

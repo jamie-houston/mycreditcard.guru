@@ -474,7 +474,14 @@
     "network": "Visa",
     "url": "https://creditcards.chase.com/rewards-credit-cards/sapphire/preferred",
     "image_url": "/images/chase/sapphire-preferred.png",
-    "discontinued": false
+    "discontinued": false,
+    "credits": [
+      {
+        "description": "Hotel Credit",
+        "value": 50,
+        "weight": 0.9
+      }
+    ]
   },
   {
     "name": "Sapphire Reserve Business",
@@ -505,7 +512,64 @@
     "network": "Visa",
     "url": "https://creditcards.chase.com/rewards-credit-cards/sapphire/reserve",
     "image_url": "/images/chase/sapphire-reserve.png",
-    "discontinued": false
+    "discontinued": false,
+    "credits": [A
+      {
+        "description": "Travel Credit",
+        "value": 300,
+        "weight": 1
+      },
+      {
+        "description": "Travel Credit (The Edit)",
+        "value": 500,
+        "weight": 0.8
+      },
+      {
+        "description": "Lounge Access",
+        "value": 469,
+        "weight": 0.2
+      },
+      {
+        "description": "PreCheck Credit",
+        "value": 120,
+        "weight": 0.5
+      },
+      {
+        "description": "Apple TV / Apple Music",
+        "value": 250,
+        "weight": 0.4
+      },
+      {
+        "description": "Dashpass",
+        "value": 120,
+        "weight": 0.3
+      },
+      {
+        "description": "$25/mo DoorDash Promos",
+        "value": 300,
+        "weight": 0.3
+      },
+      {
+        "description": "Google Workspace Credit",
+        "value": 200,
+        "weight": 0.5
+      },
+      {
+        "description": "ZipRecruiter Credit",
+        "value": 400,
+        "weight": 0.25
+      },
+      {
+        "description": "$10/mo Lyft Credit",
+        "value": 120,
+        "weight": 0.25
+      },
+      {
+        "description": "Gift Card Credit",
+        "value": 100,
+        "weight": 0.5
+      }
+    ]
   },
   {
     "name": "Sapphire Reserve",
@@ -536,7 +600,44 @@
     "network": "Visa",
     "url": "https://creditcards.chase.com/rewards-credit-cards/sapphire/reserve",
     "image_url": "/images/chase/sapphire-reserve.png",
-    "discontinued": false
+    "discontinued": false,
+    "credits": [
+      {
+        "description": "Travel Credit",
+        "value": 300,
+        "weight": 1
+      },
+      {
+        "description": "Travel Credit (The Edit)",
+        "value": 500,
+        "weight": 0.8
+      },
+      {
+        "description": "Lounge Access",
+        "value": 469,
+        "weight": 0.2
+      },
+      {
+        "description": "PreCheck Credit",
+        "value": 100,
+        "weight": 0.5
+      },
+      {
+        "description": "Dining Credit",
+        "value": 300,
+        "weight": 0.75
+      },
+      {
+        "description": "Apple TV / Apple Music",
+        "value": 250,
+        "weight": 0.4
+      },
+      {
+        "description": "Dashpass",
+        "value": 120,
+        "weight": 0.4
+      }
+    ]
   },
   {
     "name": "Southwest Performance Business",
@@ -559,7 +660,19 @@
     "network": "Visa",
     "url": "https://creditcards.chase.com/business-credit-cards/southwest/performance-business",
     "image_url": "/images/chase/southwest-rapid-rewards-performance-business.png",
-    "discontinued": false
+    "discontinued": false,
+    "credits": [
+      {
+        "description": "4x Upgraded Boardings",
+        "value": 100,
+        "weight": 0.5
+      },
+      {
+        "description": "Global Entry / TSA PreCheck / NEXUS Credit",
+        "value": 100,
+        "weight": 0.4
+      }
+    ]
   },
   {
     "name": "Southwest Plus",
@@ -651,7 +764,14 @@
     "network": "Visa",
     "url": "https://creditcards.chase.com/travel-credit-cards/southwest/priority",
     "image_url": "/images/chase/southwest-rapid-rewards-priority.png",
-    "discontinued": false
+    "discontinued": false,
+    "credits": [
+      {
+        "description": "Southwest Credit",
+        "value": 75,
+        "weight": 0.8
+      }
+    ]
   },
   {
     "name": "United Business",
@@ -674,7 +794,44 @@
     "network": "Visa",
     "url": "https://www.theexplorercard.com/business-rewards-cards/business-card",
     "image_url": "/images/chase/united-business.png",
-    "discontinued": false
+    "discontinued": false,
+    "credits": [
+      {
+        "description": "Free Checked Bag",
+        "value": 100,
+        "weight": 0.8
+      },
+      {
+        "description": "2x Lounge Pass",
+        "value": 100,
+        "weight": 0.4
+      },
+      {
+        "description": "United Credit",
+        "value": 125,
+        "weight": 0.8
+      },
+      {
+        "description": "United Hotels",
+        "value": 100,
+        "weight": 0.8
+      },
+      {
+        "description": "Rideshare",
+        "value": 100,
+        "weight": 0.5
+      },
+      {
+        "description": "Instacard",
+        "value": 120,
+        "weight": 0.5
+      },
+      {
+        "description": "Avis/Budget",
+        "value": 50,
+        "weight": 0.5
+      }
+    ]
   },
   {
     "name": "United Club Infinite",
@@ -697,7 +854,44 @@
     "network": "Visa",
     "url": "https://www.theexplorercard.com/rewards-cards/club-card",
     "image_url": "/images/chase/united-club-infinite.png",
-    "discontinued": false
+    "discontinued": false,
+    "credits": [
+      {
+        "description": "2x Checked Bags",
+        "value": 150,
+        "weight": 0.75
+      },
+      {
+        "description": "United Lounge",
+        "value": 750,
+        "weight": 0.25
+      },
+      {
+        "description": "United Hotels",
+        "value": 200,
+        "weight": 0.75
+      },
+      {
+        "description": "Rideshare",
+        "value": 150,
+        "weight": 0.5
+      },
+      {
+        "description": "Instacart",
+        "value": 240,
+        "weight": 0.5
+      },
+      {
+        "description": "Avis/Budget",
+        "value": 100,
+        "weight": 0.5
+      },
+      {
+        "description": "Global Entry, TSA PreCheck, or NEXUS Credit",
+        "value": 100,
+        "weight": 0.4
+      }
+    ]
   },
   {
     "name": "United Club Business",
@@ -720,7 +914,44 @@
     "network": "Visa",
     "url": "https://www.theexplorercard.com/business-rewards-cards/club-card",
     "image_url": "/images/chase/united-club-business.png",
-    "discontinued": false
+    "discontinued": false,
+    "credits": [
+      {
+        "description": "2x Checked Bags",
+        "value": 150,
+        "weight": 0.8
+      },
+      {
+        "description": "United Credit",
+        "value": 125,
+        "weight": 0.8
+      },
+      {
+        "description": "United Hotels",
+        "value": 200,
+        "weight": 0.8
+      },
+      {
+        "description": "Rideshare",
+        "value": 150,
+        "weight": 0.5
+      },
+      {
+        "description": "Instacart",
+        "value": 240,
+        "weight": 0.5
+      },
+      {
+        "description": "Avis/Budget",
+        "value": 100,
+        "weight": 0.5
+      },
+      {
+        "description": "United Lounge",
+        "value": 750,
+        "weight": 0.25
+      }
+    ]
   },
   {
     "name": "United Explorer",
@@ -743,7 +974,64 @@
     "network": "Visa",
     "url": "https://www.theexplorercard.com/rewards-cards/explorer-card",
     "image_url": "/images/chase/united-explorer.png",
-    "discontinued": false
+    "discontinued": false,
+    "credits": [
+      {
+        "description": "Free Checked Bag",
+        "value": 100,
+        "weight": 0.8
+      },
+      {
+        "description": "2x Lounge Pass",
+        "value": 100,
+        "weight": 0.4
+      },
+      {
+        "description": "Global Entry, TSA PreCheck, NEXUS Credit",
+        "value": 100,
+        "weight": 0.4
+      },
+      {
+        "description": "Rideshare Credits",
+        "value": 60,
+        "weight": 0.5
+      },
+      {
+        "description": "10k award flight discount",
+        "value": 10000,
+        "weight": 0.75,
+        "currency": "UNITED"
+      },
+      {
+        "description": "United Travel",
+        "value": 100,
+        "weight": 0.8,
+        "currency": "USD"
+      },
+      {
+        "description": "United Hotels",
+        "value": 100,
+        "weight": 0.5,
+        "currency": "USD"
+      },
+      {
+        "description": "Avis/Budget",
+        "value": 50,
+        "weight": 0.5,
+        "currency": "USD"
+      },
+      {
+        "description": "Instacart+",
+        "value": 120,
+        "weight": 0.4,
+        "currency": "USD"
+      },
+      {
+        "description": "Global Entry, TSA PreCheck, NEXUS Credit",
+        "value": 100,
+        "weight": 0.4
+      }
+    ]
   },
   {
     "name": "United Gateway",
@@ -789,7 +1077,45 @@
     "network": "Visa",
     "url": "https://www.theexplorercard.com/rewards-cards/quest-card",
     "image_url": "/images/chase/united-quest.png",
-    "discontinued": false
+    "discontinued": false,
+    "credits": [
+      {
+        "description": "United Credit",
+        "value": 200,
+        "weight": 0.8
+      },
+      {
+        "description": "United Hotels",
+        "value": 150,
+        "weight": 0.5
+      },
+      {
+        "description": "Rideshare",
+        "value": 100,
+        "weight": 0.5
+      },
+      {
+        "description": "Instacart+",
+        "value": 180,
+        "weight": 0.5
+      },
+      {
+        "description": "Avis/Budget",
+        "value": 80,
+        "weight": 0.5
+      },
+      {
+        "description": "10k award flight discount",
+        "value": 10000,
+        "weight": 0.8,
+        "currency": "UNITED"
+      },
+      {
+        "description": "2x Checked Bags",
+        "value": 150,
+        "weight": 0.8
+      }
+    ]
   },
   {
     "name": "World of Hyatt",
@@ -812,7 +1138,15 @@
     "network": "Visa",
     "url": "https://world.hyatt.com/content/gp/en/rewards/hyatt-credit-card.html",
     "image_url": "/images/chase/world-of-hyatt.png",
-    "discontinued": false
+    "discontinued": false,
+    "credits": [
+      {
+        "description": "FNC @ Category 1-4 Property",
+        "value": 225,
+        "weight": 0.7,
+        "currency": "HYATT"
+      }
+    ]
   },
   {
     "name": "World of Hyatt Business",

@@ -154,7 +154,19 @@
     "network": "Visa",
     "url": "https://www.capitalone.com/credit-cards/venture/",
     "image_url": "/images/capitalone/venture-rewards.webp",
-    "discontinued": false
+    "discontinued": false,
+    "credits": [
+      {
+        "description": "2x Capital One Lounge Visits",
+        "value": 100,
+        "weight": 0.25
+      },
+      {
+        "description": "Global Entry / TSA PreCheck Credit",
+        "value": 100,
+        "weight": 0.4
+      }
+    ]
   },
   {
     "name": "Venture X",
@@ -177,7 +189,24 @@
     "network": "Visa",
     "url": "https://www.capitalone.com/credit-cards/venture-x/",
     "image_url": "/images/capitalone/venture-x.webp",
-    "discontinued": false
+    "discontinued": false,
+    "credits": [
+      {
+        "description": "Travel Credit",
+        "value": 300,
+        "weight": 0.9
+      },
+      {
+        "description": "Global Entry / TSA PreCheck Credit",
+        "value": 100,
+        "weight": 0.4
+      },
+      {
+        "description": "Capital One Lounge Access",
+        "value": 300,
+        "weight": 0.25
+      }
+    ]
   },
   {
     "name": "Venture X Business",
@@ -196,7 +225,24 @@
     "network": "Visa",
     "url": "https://www.capitalone.com/small-business/credit-cards/venture-x-business/",
     "image_url": "/images/capitalone/venture-x-business.png",
-    "discontinued": false
+    "discontinued": false,
+    "credits": [
+      {
+        "description": "Travel Credit",
+        "value": 300,
+        "weight": 0.9
+      },
+      {
+        "description": "Global Entry / TSA PreCheck Credit",
+        "value": 100,
+        "weight": 0.4
+      },
+      {
+        "description": "Capital One Lounge Access",
+        "value": 300,
+        "weight": 0.25
+      }
+    ]
   },
   {
     "name": "VentureOne",

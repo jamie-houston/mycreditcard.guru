@@ -181,7 +181,14 @@
     "network": "Visa",
     "url": "https://www.skypassvisa.com/credit/visaSkyBlueCard.do",
     "image_url": "/images/usbank/skypass.png",
-    "discontinued": false
+    "discontinued": false,
+    "credits": [
+      {
+        "description": "$50 Korean Air credit",
+        "value": 50,
+        "weight": 0.8
+      }
+    ]
   },
   {
     "name": "Skypass",
@@ -204,7 +211,24 @@
     "network": "Visa",
     "url": "https://www.skypassvisa.com/credit/visaSignatureCard.do",
     "image_url": "/images/usbank/skypass.png",
-    "discontinued": false
+    "discontinued": false,
+    "credits": [
+      {
+        "description": "$200 travel credit",
+        "value": 200,
+        "weight": 0.8
+      },
+      {
+        "description": "Korean Air credit",
+        "value": 50,
+        "weight": 0.8
+      },
+      {
+        "description": "TSA PreCheck or Global Entry fee credit",
+        "value": 100,
+        "weight": 0.4
+      }
+    ]
   },
   {
     "name": "Skypass Select",
@@ -250,7 +274,19 @@
     "network": "Visa",
     "url": "https://www.skypassvisa.com/credit/visaBusinessCard.do",
     "image_url": "/images/usbank/skypass-business.png",
-    "discontinued": false
+    "discontinued": false,
+    "credits": [
+      {
+        "description": "Korean Air credit",
+        "value": 50,
+        "weight": 0.8
+      },
+      {
+        "description": "TSA PreCheck or Global Entry fee credit",
+        "value": 100,
+        "weight": 0.4
+      }
+    ]
   },
   {
     "name": "Shopper Cash Rewards",

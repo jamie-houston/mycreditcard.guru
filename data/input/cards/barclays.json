@@ -39,7 +39,14 @@
     "network": "Mastercard",
     "url": "https://creditcards.aa.com/barclay-credit-card-aviator-business-american-airlines-aadvantage/",
     "image_url": "/images/barclays/aadvantage-aviator-world-elite-business.png",
-    "discontinued": false
+    "discontinued": false,
+    "credits": [
+      {
+        "description": "First checked bag free",
+        "value": 50,
+        "weight": 0.5
+      }
+    ]
   },
   {
     "name": "AARP Essential Rewards",
@@ -223,7 +230,25 @@
     "network": "Mastercard",
     "url": "https://cards.barclaycardus.com/banking/cards/jetblue-card/",
     "image_url": "/images/barclays/jetblue.png",
-    "discontinued": false
+    "discontinued": false,
+    "credits": [
+      {
+        "description": "$120 credit for Global Entry or TSA PreCheck",
+        "value": 120,
+        "weight": 0.4
+      },
+      {
+        "description": "$300 credit for Paisly, JetBlue's portal.",
+        "value": 300,
+        "weight": 0.7
+      },
+      {
+        "description": "5k yearly anniversary credit",
+        "value": 5000,
+        "weight": 1,
+        "currency": "JETBLUE"
+      }
+    ]
   },
   {
     "name": "JetBlue Business",
@@ -246,7 +271,14 @@
     "network": "Mastercard",
     "url": "https://cards.barclaycardus.com/banking/cards/jetblue-business-card/",
     "image_url": "/images/barclays/jetblue-business.png",
-    "discontinued": false
+    "discontinued": false,
+    "credits": [
+      {
+        "description": "Free checked bag",
+        "value": 50,
+        "weight": 0.5
+      }
+    ]
   },
   {
     "name": "JetBlue Plus",
@@ -361,7 +393,15 @@
     "network": "Visa",
     "url": "https://www.wyndhamrewardscreditcard.com/#earner",
     "image_url": "/images/barclays/wyndham-rewards-earner.svg",
-    "discontinued": false
+    "discontinued": false,
+    "credits": [
+      {
+        "description": "Anniversary bonus points",
+        "value": 7500,
+        "weight": 1,
+        "currency": "WYNDHAM"
+      }
+    ]
   },
   {
     "name": "Wyndham Rewards Earner Business",
@@ -384,7 +424,15 @@
     "network": "Visa",
     "url": "https://www.wyndhamrewardscreditcard.com/#earnerbusiness",
     "image_url": "/images/barclays/wyndham-rewards-earner-business.png",
-    "discontinued": false
+    "discontinued": false,
+    "credits": [
+      {
+        "description": "Anniversary bonus points",
+        "value": 15000,
+        "weight": 1,
+        "currency": "WYNDHAM"
+      }
+    ]
   },
   {
     "name": "Wyndham Rewards Earner Plus",
@@ -430,7 +478,14 @@
     "network": "Mastercard",
     "url": "https://cards.barclaycardus.com/banking/cards/hawaiian-airlines-world-elite-business-mastercard/",
     "image_url": "/images/barclays/hawaiian-airlines-world-elite-business.png",
-    "discontinued": false
+    "discontinued": false,
+    "credits": [
+      {
+        "description": "Hawaiian statement credit",
+        "value": 99,
+        "weight": 0.8
+      }
+    ]
   },
   {
     "name": "Breeze",

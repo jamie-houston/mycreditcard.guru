@@ -6,7 +6,7 @@ from django.utils.text import slugify
 from django.contrib.auth.models import User
 from cards.models import (
     Issuer, RewardType, SpendingCategory, CreditCard, 
-    RewardCategory, CardOffer, UserSpendingProfile, UserCard
+    RewardCategory, CardCredit, UserSpendingProfile, UserCard
 )
 
 
@@ -191,13 +191,14 @@ class Command(BaseCommand):
                     card.card_type = card_data.get('card_type', 'personal')
                     card.metadata = {
                         'reward_value_multiplier': card_data.get('reward_value_multiplier', 0.01),
+                        'discontinued': card_data.get('discontinued', False),
                         **card_data.get('metadata', {})
                     }
                     card.save()
                     
-                    # Clear existing reward categories and offers to replace with imported data
+                    # Clear existing reward categories and credits to replace with imported data
                     card.reward_categories.all().delete()
-                    card.offers.all().delete()
+                    card.credits.all().delete()
                     
                     self.stdout.write(f'Updated card: {card}')
                     created = False
@@ -214,6 +215,7 @@ class Command(BaseCommand):
                         card_type=card_data.get('card_type', 'personal'),
                         metadata={
                             'reward_value_multiplier': card_data.get('reward_value_multiplier', 0.01),
+                            'discontinued': card_data.get('discontinued', False),
                             **card_data.get('metadata', {})
                         }
                     )
@@ -224,9 +226,9 @@ class Command(BaseCommand):
                 if 'reward_categories' in card_data:
                     self.import_reward_categories(card, card_data['reward_categories'])
                 
-                # Import offers (for both new and updated cards)
-                if 'offers' in card_data:
-                    self.import_card_offers(card, card_data['offers'])
+                # Import credits (for both new and updated cards)
+                if 'credits' in card_data:
+                    self.import_card_credits(card, card_data['credits'])
                         
             except (Issuer.DoesNotExist, RewardType.DoesNotExist) as e:
                 self.stdout.write(
@@ -262,16 +264,15 @@ class Command(BaseCommand):
                     self.style.WARNING(f'Skipping reward category "{category_data["category"]}": {e}')
                 )
 
-    def import_card_offers(self, card, offers):
-        for offer_data in offers:
-            # Create new card offer (existing ones were already deleted)
-            CardOffer.objects.create(
+    def import_card_credits(self, card, credits):
+        for credit_data in credits:
+            # Create new card credit (existing ones were already deleted)
+            CardCredit.objects.create(
                 card=card,
-                title=offer_data['title'],
-                description=offer_data.get('description', ''),
-                value=offer_data.get('value', ''),
-                start_date=offer_data.get('start_date'),
-                end_date=offer_data.get('end_date'),
+                description=credit_data.get('description', ''),
+                value=credit_data.get('value', 0),
+                weight=credit_data.get('weight', 1.0),
+                currency=credit_data.get('currency', 'USD'),
             )
 
     def import_personal_cards(self, data):

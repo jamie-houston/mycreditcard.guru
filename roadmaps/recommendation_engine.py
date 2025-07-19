@@ -114,7 +114,11 @@ class RecommendationEngine:
                     fee = Decimal(filter_obj.value)
                     queryset = queryset.filter(annual_fee=fee)
         
-        return list(queryset.prefetch_related('reward_categories', 'offers'))
+        # Filter out discontinued cards
+        all_cards = list(queryset.prefetch_related('reward_categories', 'credits'))
+        active_cards = [card for card in all_cards if not card.metadata.get('discontinued', False)]
+        
+        return active_cards
     
     def _analyze_current_cards(self) -> List[dict]:
         """Analyze current cards for keep/cancel/upgrade recommendations"""

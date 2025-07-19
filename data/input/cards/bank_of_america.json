@@ -43,7 +43,14 @@
     "network": "Visa",
     "url": "https://www.bankofamerica.com/credit-cards/products/alaska-airlines-credit-card/",
     "image_url": "/images/bankofamerica/alaska-airlines.png",
-    "discontinued": false
+    "discontinued": false,
+    "credits": [
+      {
+        "description": "Companion Fare",
+        "value": 200,
+        "weight": 0.8
+      }
+    ]
   },
   {
     "name": "Alaska Airlines Business",
@@ -66,7 +73,19 @@
     "network": "Visa",
     "url": "https://www.alaskaair.com/content/credit-card/visa-small-business-card",
     "image_url": "/images/bankofamerica/alaska-airlines-business.png",
-    "discontinued": false
+    "discontinued": false,
+    "credits": [
+      {
+        "description": "Free checked bag",
+        "value": 50,
+        "weight": 0.5
+      },
+      {
+        "description": "Companion fee",
+        "value": 100,
+        "weight": 0.8
+      }
+    ]
   },
   {
     "name": "Customized Cash Rewards",
@@ -112,7 +131,24 @@
     "network": "Visa",
     "url": "https://www.bankofamerica.com/credit-cards/products/premium-rewards-credit-card/",
     "image_url": "/images/bankofamerica/premium-rewards.png",
-    "discontinued": false
+    "discontinued": false,
+    "credits": [
+      {
+        "description": "Incidental Airline Statement Credits",
+        "value": 300,
+        "weight": 0.3
+      },
+      {
+        "description": "Annaul $150 streaming, delivery, fitness, and transit credit",
+        "value": 150,
+        "weight": 0.8
+      },
+      {
+        "description": "$100 credit for Global Entry or TSA PreCheck",
+        "value": 100,
+        "weight": 0.4
+      }
+    ]
   },
   {
     "name": "Premium Rewards Elite",
@@ -296,6 +332,13 @@
     "network": "Mastercard",
     "url": "https://www.bankofamerica.com/credit-cards/products/spirit-airlines-credit-card/",
     "image_url": "/images/bankofamerica/free-spirit.webp",
-    "discontinued": false
+    "discontinued": false,
+    "credits": [
+      {
+        "description": "Companion Flight Voucher",
+        "value": 100,
+        "weight": 0.6
+      }
+    ]
   }
 ]

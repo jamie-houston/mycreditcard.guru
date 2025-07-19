@@ -66,7 +66,15 @@
     "network": "Visa",
     "url": "https://creditcards.wellsfargo.com/autograph-visa-credit-card",
     "image_url": "/images/wellsfargo/autograph.png",
-    "discontinued": false
+    "discontinued": false,
+    "credits": [
+      {
+        "description": "$50 Credit for $50+ Airline Purchase",
+        "value": 50,
+        "weight": 0.7,
+        "currency": "USD"
+      }
+    ]
   },
   {
     "name": "Autograph Journey",
@@ -177,7 +185,19 @@
     "network": "Mastercard",
     "url": "https://www.expedia.com/one-key-cards",
     "image_url": "/images/wellsfargo/one-key.png",
-    "discontinued": false
+    "discontinued": false,
+    "credits": [
+      {
+        "description": "$100 anniversary bonus",
+        "value": 100,
+        "weight": 0.9
+      },
+      {
+        "description": "$120 PreCheck / Global Entry Credit",
+        "value": 120,
+        "weight": 0.4
+      }
+    ]
   },
   {
     "name": "Expedia One Key+",

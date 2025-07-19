@@ -6,13 +6,13 @@ from django.db.models import Q
 from django.shortcuts import render, get_object_or_404
 
 from .models import (
-    Issuer, RewardType, SpendingCategory, CreditCard,
+    Issuer, RewardType, SpendingCategory, CreditCard, CreditType,
     UserSpendingProfile
 )
 from .serializers import (
     IssuerSerializer, RewardTypeSerializer, SpendingCategorySerializer,
     CreditCardSerializer, CreditCardListSerializer, UserSpendingProfileSerializer,
-    CreateSpendingProfileSerializer
+    CreateSpendingProfileSerializer, CreditTypeSerializer
 )
 
 
@@ -31,13 +31,18 @@ class SpendingCategoryListView(generics.ListAPIView):
     serializer_class = SpendingCategorySerializer
 
 
+class CreditTypeListView(generics.ListAPIView):
+    queryset = CreditType.objects.all().order_by('sort_order', 'name')
+    serializer_class = CreditTypeSerializer
+
+
 class CreditCardListView(generics.ListAPIView):
     queryset = CreditCard.objects.filter(is_active=True).select_related(
         'issuer', 'primary_reward_type', 'signup_bonus_type'
     ).prefetch_related(
         'reward_categories__category',
         'reward_categories__reward_type',
-        'offers'
+        'credits'
     )
     serializer_class = CreditCardSerializer
     pagination_class = None  # Disable pagination for this view
@@ -60,7 +65,7 @@ class CreditCardDetailView(generics.RetrieveAPIView):
     ).prefetch_related(
         'reward_categories__category',
         'reward_categories__reward_type',
-        'offers'
+        'credits'
     )
     serializer_class = CreditCardSerializer
 

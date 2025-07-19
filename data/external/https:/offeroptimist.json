@@ -301,8 +301,7 @@
         "spend": 20000,
         "amount": [{ "amount": 150000 }],
         "days": 90,
-        "credits": [],
-        "details": "250k available via referral, see USCreditCardGuide."
+        "credits": []
       }
     ],
     "historicalOffers": [
@@ -311,13 +310,6 @@
         "amount": [{ "amount": 250000 }],
         "days": 90,
         "expiration": "2024-03-01",
-        "credits": []
-      },
-      {
-        "spend": 15000,
-        "amount": [{ "amount": 180000 }],
-        "days": 90,
-        "expiration": "2022-12-01",
         "credits": []
       }
     ],
@@ -336,15 +328,7 @@
     "url": "https://www.americanexpress.com/us/credit-cards/card/cash-magnet/",
     "imageUrl": "/images/amex/cash-magnet.webp",
     "credits": [],
-    "offers": [
-      {
-        "spend": 2000,
-        "amount": [{ "amount": 200 }],
-        "days": 180,
-        "credits": [],
-        "url": "https://www.americanexpress.com/us/credit-cards/card/cash-magnet/"
-      }
-    ],
+    "offers": [],
     "historicalOffers": [
       {
         "spend": 2500,
@@ -410,10 +394,11 @@
     "offers": [
       {
         "spend": 3000,
-        "amount": [{ "amount": 80000 }],
+        "amount": [{ "amount": 60000 }],
         "days": 180,
         "expiration": "2025-07-16",
-        "credits": []
+        "credits": [],
+        "details": "Sometimes 90k, try incognito."
       }
     ],
     "historicalOffers": [
@@ -2029,7 +2014,7 @@
     "offers": [
       {
         "spend": 2000,
-        "amount": [{ "amount": 60000 }],
+        "amount": [{ "amount": 50000 }],
         "days": 90,
         "credits": []
       }
@@ -2037,9 +2022,9 @@
     "historicalOffers": [
       {
         "spend": 2000,
-        "amount": [{ "amount": 70000 }],
+        "amount": [{ "amount": 60000 }],
         "days": 90,
-        "expiration": "2023-05-01",
+        "expiration": "2025-06-01",
         "credits": []
       }
     ],
@@ -2071,7 +2056,6 @@
         "spend": 1000,
         "amount": [{ "amount": 80000 }],
         "days": 90,
-        "expiration": "2022-12-01",
         "credits": []
       }
     ],
@@ -2457,7 +2441,7 @@
         "amount": [{ "amount": 85000 }],
         "days": 90,
         "credits": [],
-        "referralUrl": "https://www.referyourchasecard.com/252a/YV4FE606LH"
+        "referralUrl": "https://www.referyourchasecard.com/252p/HAZXLB93C3"
       }
     ],
     "historicalOffers": [
@@ -2518,8 +2502,8 @@
     "credits": [],
     "offers": [
       {
-        "spend": 3000,
-        "amount": [{ "amount": 75000 }],
+        "spend": 4000,
+        "amount": [{ "amount": 85000 }],
         "days": 90,
         "credits": []
       }
@@ -2581,12 +2565,6 @@
     "imageUrl": "/images/chase/disney.png",
     "credits": [],
     "offers": [
-      {
-        "spend": 1000,
-        "amount": [{ "amount": 400 }],
-        "days": 90,
-        "credits": []
-      },
       {
         "spend": 1000,
         "amount": [{ "amount": 300 }],
@@ -2747,7 +2725,7 @@
             "currency": "IHG"
           }
         ],
-        "url": "https://creditcards.chase.com/a1/ihg/PremierOnPropertyAEP"
+        "details": "Marked as ending soon."
       },
       {
         "spend": 4000,
@@ -2827,6 +2805,13 @@
     "offers": [
       {
         "spend": 2000,
+        "amount": [{ "amount": 120000 }],
+        "days": 90,
+        "credits": [],
+        "details": "Marked as ending soon."
+      },
+      {
+        "spend": 2000,
         "amount": [{ "amount": 80000 }],
         "days": 90,
         "credits": []
@@ -2861,7 +2846,7 @@
         "amount": [{ "amount": 75000 }],
         "days": 180,
         "credits": [],
-        "referralUrl": "https://www.referyourchasecard.com/21s/9BZH8BJC1Z"
+        "referralUrl": "https://www.referyourchasecard.com/21u/5P2JOG1KV1"
       }
     ],
     "historicalOffers": [
@@ -2894,7 +2879,7 @@
         "amount": [{ "amount": 90000 }],
         "days": 90,
         "credits": [],
-        "referralUrl": "https://www.referyourchasecard.com/21s/9BZH8BJC1Z"
+        "referralUrl": "https://www.referyourchasecard.com/21u/5P2JOG1KV1"
       }
     ],
     "historicalOffers": [
@@ -2926,7 +2911,7 @@
         "amount": [{ "amount": 75000 }],
         "days": 90,
         "credits": [],
-        "referralUrl": "https://www.referyourchasecard.com/21s/9BZH8BJC1Z"
+        "referralUrl": "https://www.referyourchasecard.com/21u/5P2JOG1KV1"
       }
     ],
     "historicalOffers": [
@@ -2961,7 +2946,7 @@
         "amount": [{ "amount": 1000, "currency": "USD" }],
         "days": 90,
         "credits": [],
-        "referralUrl": "https://www.referyourchasecard.com/21s/9BZH8BJC1Z"
+        "referralUrl": "https://www.referyourchasecard.com/21u/5P2JOG1KV1"
       }
     ],
     "historicalOffers": [
@@ -3000,7 +2985,7 @@
             "currency": "MARRIOTT"
           }
         ],
-        "referralUrl": "https://www.referyourchasecard.com/252a/YV4FE606LH"
+        "referralUrl": "https://www.referyourchasecard.com/252p/HAZXLB93C3"
       }
     ],
     "historicalOffers": [
@@ -3032,7 +3017,7 @@
         "amount": [{ "amount": 250000, "currency": "MARRIOTT" }],
         "days": 90,
         "credits": [],
-        "referralUrl": "https://www.referyourchasecard.com/252a/YV4FE606LH"
+        "referralUrl": "https://www.referyourchasecard.com/252p/HAZXLB93C3"
       }
     ],
     "historicalOffers": [
@@ -3042,7 +3027,7 @@
         "days": 90,
         "credits": [],
         "details": "5x FNC, <= 50k per",
-        "referralUrl": "https://www.referyourchasecard.com/252a/YV4FE606LH"
+        "referralUrl": "https://www.referyourchasecard.com/252p/HAZXLB93C3"
       }
     ],
     "discontinued": false
@@ -3110,17 +3095,70 @@
         "spend": 5000,
         "amount": [{ "amount": 100000 }],
         "days": 90,
-        "credits": [],
+        "credits": [
+          { "description": "Chase Travel Credit", "value": 500, "weight": 0.8 }
+        ],
         "referralUrl": "https://www.referyourchasecard.com/19t/F0DZZK1XD0"
       }
     ],
     "historicalOffers": [
       {
         "spend": 5000,
-        "amount": [{ "amount": 75000 }],
+        "amount": [{ "amount": 100000 }],
         "days": 90,
-        "expiration": "2024-06-08",
-        "credits": []
+        "credits": [
+          { "description": "Chase Travel Credit", "value": 500, "weight": 0.8 }
+        ],
+        "referralUrl": "https://www.referyourchasecard.com/19t/F0DZZK1XD0"
+      }
+    ],
+    "discontinued": false
+  },
+  {
+    "cardId": "5d8c589d1e7c1294d04fa6e4a2685624",
+    "name": "Sapphire Reserve Business",
+    "issuer": "CHASE",
+    "network": "VISA",
+    "currency": "CHASE",
+    "isBusiness": true,
+    "annualFee": 795,
+    "isAnnualFeeWaived": false,
+    "universalCashbackPercent": 1,
+    "url": "https://creditcards.chase.com/business-credit-cards/sapphire/reserve",
+    "imageUrl": "/images/chase/sapphire-reserve-business.jpg",
+    "credits": [
+      { "description": "Travel Credit", "value": 300, "weight": 1 },
+      {
+        "description": "Travel Credit (The Edit)",
+        "value": 500,
+        "weight": 0.8
+      },
+      { "description": "Lounge Access", "value": 469, "weight": 0.2 },
+      { "description": "PreCheck Credit", "value": 120, "weight": 0.5 },
+      { "description": "Apple TV / Apple Music", "value": 250, "weight": 0.4 },
+      { "description": "Dashpass", "value": 120, "weight": 0.3 },
+      { "description": "$25/mo DoorDash Promos", "value": 300, "weight": 0.3 },
+      { "description": "Google Workspace Credit", "value": 200, "weight": 0.5 },
+      { "description": "ZipRecruiter Credit", "value": 400, "weight": 0.25 },
+      { "description": "$10/mo Lyft Credit", "value": 120, "weight": 0.25 },
+      { "description": "Gift Card Credit", "value": 100, "weight": 0.5 }
+    ],
+    "offers": [
+      {
+        "spend": 30000,
+        "amount": [{ "amount": 200000 }],
+        "days": 180,
+        "credits": [],
+        "referralUrl": "https://www.referyourchasecard.com/21u/5P2JOG1KV1"
+      }
+    ],
+    "historicalOffers": [
+      {
+        "spend": 30000,
+        "amount": [{ "amount": 200000 }],
+        "days": 180,
+        "credits": [],
+        "referralUrl": "https://www.referyourchasecard.com/21u/5P2JOG1KV1"
       }
     ],
     "discontinued": false
@@ -3687,6 +3725,13 @@
     "offers": [
       {
         "spend": 0.01,
+        "amount": [{ "amount": 250 }],
+        "days": 365,
+        "expiration": "2025-07-14",
+        "credits": []
+      },
+      {
+        "spend": 0.01,
         "amount": [{ "amount": 200 }],
         "days": 365,
         "credits": []
@@ -3695,14 +3740,9 @@
     "historicalOffers": [
       {
         "spend": 0.01,
-        "amount": [{ "amount": 200 }],
+        "amount": [{ "amount": 250 }],
         "days": 365,
-        "credits": []
-      },
-      {
-        "spend": 2500,
-        "amount": [{ "amount": 275 }],
-        "days": 90,
+        "expiration": "2025-07-14",
         "credits": []
       }
     ],
@@ -4115,7 +4155,7 @@
   },
   {
     "cardId": "a497d6ba509538db9e3e4a3e5e313fe9",
-    "name": "AAdvantage Platinum Select",
+    "name": "AAdvantage Platinum Select World Elite",
     "issuer": "CITI",
     "network": "MASTERCARD",
     "currency": "AMERICAN",
@@ -4123,21 +4163,21 @@
     "annualFee": 99,
     "isAnnualFeeWaived": true,
     "universalCashbackPercent": 1,
-    "url": "https://creditcards.aa.com/",
+    "url": "https://creditcards.aa.com/credit-cards/citi-platinum-card-american-airlines-direct/",
     "imageUrl": "/images/citi/aadvantage-platinum-select.webp",
     "credits": [],
     "offers": [
       {
-        "spend": 2500,
-        "amount": [{ "amount": 50000 }],
-        "days": 90,
+        "spend": 3500,
+        "amount": [{ "amount": 80000 }],
+        "days": 120,
         "credits": []
       }
     ],
     "historicalOffers": [
       {
         "spend": 3500,
-        "amount": [{ "amount": 75000 }],
+        "amount": [{ "amount": 80000 }],
         "days": 120,
         "credits": []
       },
@@ -4496,7 +4536,7 @@
     "credits": [],
     "offers": [
       {
-        "spend": 6000,
+        "spend": 5000,
         "amount": [{ "amount": 50000 }],
         "days": 90,
         "credits": [],
@@ -4525,17 +4565,10 @@
     "annualFee": 99,
     "isAnnualFeeWaived": false,
     "universalCashbackPercent": 1,
-    "url": "https://www.lifemiles.com/credit-card/get-credit-card",
+    "url": "https://www.lifemiles.com/discover/landing-page/avianca-lifemiles-creditcard",
     "imageUrl": "/images/first/avianca-lifemiles.webp",
     "credits": [],
     "offers": [
-      {
-        "spend": 3000,
-        "amount": [{ "amount": 50000 }],
-        "days": 90,
-        "credits": [],
-        "expires": "2025-01-21"
-      },
       {
         "spend": 3000,
         "amount": [{ "amount": 40000 }],
@@ -4563,18 +4596,10 @@
     "annualFee": 250,
     "isAnnualFeeWaived": false,
     "universalCashbackPercent": 1,
-    "url": "https://www.lifemiles.com/credit-card/get-credit-card",
+    "url": "https://www.lifemiles.com/discover/landing-page/avianca-lifemiles-creditcard",
     "imageUrl": "/images/first/avianca-lifemiles-elite.webp",
     "credits": [],
     "offers": [
-      {
-        "spend": 4500,
-        "amount": [{ "amount": 80000 }],
-        "days": 90,
-        "credits": [],
-        "details": "Extra 40k on 25k spend in 1yr.",
-        "expires": "2025-01-21"
-      },
       {
         "spend": 4500,
         "amount": [{ "amount": 60000 }],
@@ -4925,7 +4950,7 @@
     "offers": [
       {
         "spend": 3000,
-        "amount": [{ "amount": 40000 }],
+        "amount": [{ "amount": 60000 }],
         "days": 90,
         "credits": []
       }
@@ -4935,7 +4960,6 @@
         "spend": 3000,
         "amount": [{ "amount": 60000 }],
         "days": 90,
-        "expiration": "2025-03-31",
         "credits": []
       }
     ],
@@ -5187,7 +5211,7 @@
       {
         "spend": 4500,
         "amount": [{ "amount": 500 }],
-        "days": 180,
+        "days": 150,
         "credits": []
       }
     ],
@@ -5195,7 +5219,7 @@
       {
         "spend": 6000,
         "amount": [{ "amount": 750 }],
-        "days": 180,
+        "days": 150,
         "credits": []
       }
     ],

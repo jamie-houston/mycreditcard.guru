@@ -87,17 +87,32 @@ class RewardCategory(models.Model):
         return f"{self.card} - {self.reward_rate}x {self.category}{period}"
 
 
-class CardOffer(models.Model):
-    card = models.ForeignKey(CreditCard, on_delete=models.CASCADE, related_name='offers')
-    title = models.CharField(max_length=200)
-    description = models.TextField()
-    value = models.CharField(max_length=100, blank=True)  # e.g., "$12" or "2 free"
-    start_date = models.DateField(null=True, blank=True)
-    end_date = models.DateField(null=True, blank=True)
+class CreditType(models.Model):
+    name = models.CharField(max_length=200, unique=True)
+    slug = models.SlugField(unique=True)
+    description = models.TextField(blank=True)
+    icon = models.CharField(max_length=50, blank=True)
+    category = models.CharField(max_length=100, blank=True)  # e.g., 'travel', 'dining', 'misc'
+    sort_order = models.IntegerField(default=100)
+    
+    class Meta:
+        ordering = ['sort_order', 'name']
+    
+    def __str__(self):
+        return self.name
+
+
+class CardCredit(models.Model):
+    card = models.ForeignKey(CreditCard, on_delete=models.CASCADE, related_name='credits')
+    credit_type = models.ForeignKey(CreditType, on_delete=models.CASCADE, related_name='card_credits', null=True, blank=True)
+    description = models.CharField(max_length=500)
+    value = models.DecimalField(max_digits=10, decimal_places=2)
+    weight = models.FloatField(default=1.0)
+    currency = models.CharField(max_length=20, default='USD', blank=True)
     is_active = models.BooleanField(default=True)
     
     def __str__(self):
-        return f"{self.card} - {self.title}"
+        return f"{self.card} - {self.description}"
 
 
 class UserSpendingProfile(models.Model):
@@ -148,3 +163,15 @@ class UserCard(models.Model):
         if self.nickname:
             return f"{self.card.name} ({self.nickname})"
         return self.card.name
+
+
+class UserCreditPreference(models.Model):
+    profile = models.ForeignKey(UserSpendingProfile, on_delete=models.CASCADE, related_name='credit_preferences')
+    credit_type = models.ForeignKey(CreditType, on_delete=models.CASCADE)
+    values_credit = models.BooleanField(default=False)
+    
+    class Meta:
+        unique_together = ['profile', 'credit_type']
+    
+    def __str__(self):
+        return f"{self.profile} - {self.credit_type.name}: {self.values_credit}"

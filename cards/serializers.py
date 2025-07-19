@@ -1,8 +1,8 @@
 from rest_framework import serializers
 from .models import (
     Issuer, RewardType, SpendingCategory, CreditCard,
-    RewardCategory, CardOffer, UserSpendingProfile,
-    SpendingAmount, UserCard
+    RewardCategory, CardCredit, CreditType, UserSpendingProfile,
+    SpendingAmount, UserCard, UserCreditPreference
 )
 
 
@@ -36,12 +36,19 @@ class RewardCategorySerializer(serializers.ModelSerializer):
         ]
 
 
-class CardOfferSerializer(serializers.ModelSerializer):
+class CreditTypeSerializer(serializers.ModelSerializer):
     class Meta:
-        model = CardOffer
+        model = CreditType
+        fields = ['id', 'name', 'slug', 'description', 'icon', 'category', 'sort_order']
+
+
+class CardCreditSerializer(serializers.ModelSerializer):
+    credit_type = CreditTypeSerializer(read_only=True)
+    
+    class Meta:
+        model = CardCredit
         fields = [
-            'id', 'title', 'description', 'value',
-            'start_date', 'end_date', 'is_active'
+            'id', 'description', 'value', 'weight', 'currency', 'credit_type', 'is_active'
         ]
 
 
@@ -50,14 +57,14 @@ class CreditCardSerializer(serializers.ModelSerializer):
     primary_reward_type = RewardTypeSerializer(read_only=True)
     signup_bonus_type = RewardTypeSerializer(read_only=True)
     reward_categories = RewardCategorySerializer(many=True, read_only=True)
-    offers = CardOfferSerializer(many=True, read_only=True)
+    credits = CardCreditSerializer(many=True, read_only=True)
     
     class Meta:
         model = CreditCard
         fields = [
             'id', 'name', 'issuer', 'card_type', 'annual_fee', 'signup_bonus_amount',
             'signup_bonus_type', 'signup_bonus_requirement', 'primary_reward_type',
-            'reward_categories', 'offers', 'is_active', 'created_at', 'metadata'
+            'reward_categories', 'credits', 'is_active', 'created_at', 'metadata'
         ]
 
 
