@@ -525,23 +525,59 @@
         
         /* Simple checkbox list for credit preferences */
         .credits-checkbox-list {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 12px 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 12px;
             margin-top: 15px;
         }
         
         .credit-checkbox-item {
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 8px;
         }
         
         .credit-checkbox-item input[type="checkbox"] {
-            margin: 0;
-            width: auto;
-            padding: 0;
-            transform: none;
+            margin: 0 !important;
+            width: 16px !important;
+            height: 16px !important;
+            padding: 0 !important;
+            transform: none !important;
+            background: white !important;
+            border: 2px solid #d1d5db !important;
+            border-radius: 3px !important;
+            appearance: none !important;
+            -webkit-appearance: none !important;
+            -moz-appearance: none !important;
+            cursor: pointer;
+            flex-shrink: 0;
+            box-shadow: none !important;
+            backdrop-filter: none !important;
+            transition: none !important;
+        }
+        
+        .credit-checkbox-item input[type="checkbox"]:checked {
+            background: #3b82f6 !important;
+            border-color: #3b82f6 !important;
+            position: relative;
+        }
+        
+        .credit-checkbox-item input[type="checkbox"]:checked::after {
+            content: '✓';
+            position: absolute;
+            top: -1px;
+            left: 2px;
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .credit-checkbox-item input[type="checkbox"]:focus {
+            outline: 2px solid #3b82f6 !important;
+            outline-offset: 2px !important;
+            box-shadow: none !important;
+            transform: none !important;
+            border-color: #3b82f6 !important;
         }
         
         .credit-checkbox-item label {
@@ -553,6 +589,19 @@
             padding: 0;
             background: none;
             border: none;
+            user-select: none;
+        }
+        
+        /* Mobile responsive */
+        @media (max-width: 768px) {
+            .credits-checkbox-list {
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                gap: 10px;
+            }
+            
+            .credit-checkbox-item label {
+                font-size: 13px;
+            }
         }
         
         .tooltip-icon {
