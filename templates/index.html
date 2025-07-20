@@ -699,12 +699,58 @@
 
                 // Display recommendations
                 const recommendations = data.recommendations || [];
-                
+                const portfolioSummary = data.portfolio_summary || {};
 
                 let html = `
                     <div class="results">
                         <h2>🎯 Your Personalized Credit Card Roadmap</h2>
                 `;
+
+                // Add portfolio summary if we have recommendations
+                if (recommendations.length > 0 && portfolioSummary.card_count > 0) {
+                    const categoryOptimization = portfolioSummary.category_optimization || {};
+                    const categoryOptimizationEntries = Object.entries(categoryOptimization);
+                    
+                    html += `
+                        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 12px; margin-bottom: 25px;">
+                            <h3 style="margin: 0 0 15px 0; color: white;">📊 Portfolio Summary</h3>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 15px;">
+                                <div style="background: rgba(255,255,255,0.2); padding: 15px; border-radius: 8px; text-align: center;">
+                                    <div style="font-size: 24px; font-weight: bold;">$${portfolioSummary.total_annual_fees.toFixed(0)}</div>
+                                    <div style="opacity: 0.9; font-size: 14px;">Total Annual Fees</div>
+                                </div>
+                                <div style="background: rgba(255,255,255,0.2); padding: 15px; border-radius: 8px; text-align: center;">
+                                    <div style="font-size: 24px; font-weight: bold;">$${portfolioSummary.total_portfolio_rewards.toFixed(0)}</div>
+                                    <div style="opacity: 0.9; font-size: 14px;">Total Portfolio Rewards</div>
+                                </div>
+                                <div style="background: rgba(255,255,255,0.2); padding: 15px; border-radius: 8px; text-align: center;">
+                                    <div style="font-size: 24px; font-weight: bold; color: ${portfolioSummary.net_portfolio_value >= 0 ? '#10b981' : '#ef4444'};">$${portfolioSummary.net_portfolio_value.toFixed(0)}</div>
+                                    <div style="opacity: 0.9; font-size: 14px;">Net Portfolio Value</div>
+                                </div>
+                                <div style="background: rgba(255,255,255,0.2); padding: 15px; border-radius: 8px; text-align: center;">
+                                    <div style="font-size: 24px; font-weight: bold;">${portfolioSummary.card_count}</div>
+                                    <div style="opacity: 0.9; font-size: 14px;">Recommended Cards</div>
+                                </div>
+                            </div>
+                            ${categoryOptimizationEntries.length > 0 ? `
+                                <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 8px;">
+                                    <h4 style="margin: 0 0 10px 0; color: white; font-size: 16px;">🎯 Optimized Reward Rates by Category</h4>
+                                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 10px;">
+                                        ${categoryOptimizationEntries.map(([slug, data]) => `
+                                            <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.1); padding: 8px 12px; border-radius: 6px;">
+                                                <div>
+                                                    <div style="font-weight: 600; font-size: 14px;">${data.category_name}</div>
+                                                    <div style="opacity: 0.8; font-size: 12px;">${data.best_card}</div>
+                                                </div>
+                                                <div style="font-weight: bold; font-size: 16px;">${data.best_rate}x</div>
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                </div>
+                            ` : ''}
+                        </div>
+                    `;
+                }
 
                 if (recommendations.length === 0) {
                     html += '<p>No recommendations found with your current criteria. Try adjusting your filters.</p>';

@@ -130,6 +130,9 @@ def quick_recommendation_view(request):
         try:
             recommendations = serializer.generate_recommendations()
             
+            # Get portfolio summary from the first recommendation (they all have the same summary)
+            portfolio_summary = recommendations[0].get('portfolio_summary', {}) if recommendations else {}
+            
             return Response({
                 'recommendations': [
                     {
@@ -152,7 +155,15 @@ def quick_recommendation_view(request):
                 ],
                 'total_estimated_rewards': sum(
                     float(rec['estimated_rewards']) for rec in recommendations
-                )
+                ),
+                'portfolio_summary': {
+                    'total_annual_fees': portfolio_summary.get('total_annual_fees', 0),
+                    'total_portfolio_rewards': portfolio_summary.get('total_portfolio_rewards', 0),
+                    'net_portfolio_value': portfolio_summary.get('net_portfolio_value', 0),
+                    'category_optimization': portfolio_summary.get('category_optimization', {}),
+                    'card_count': portfolio_summary.get('card_count', 0),
+                    'total_credits_value': portfolio_summary.get('total_credits_value', 0)
+                }
             })
             
         except Exception as e:

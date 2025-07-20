@@ -41,7 +41,16 @@ class RecommendationEngine:
             recommendations.extend(new_card_recommendations)
         
         # Ensure we don't exceed max_recommendations
-        return recommendations[:roadmap.max_recommendations]
+        recommendations = recommendations[:roadmap.max_recommendations]
+        
+        # Calculate portfolio summary for the recommended cards
+        portfolio_summary = self._calculate_portfolio_summary(recommendations)
+        
+        # Add portfolio summary to each recommendation for frontend access
+        for rec in recommendations:
+            rec['portfolio_summary'] = portfolio_summary
+        
+        return recommendations
     
     def generate_roadmap(self, roadmap: 'Roadmap') -> List[dict]:
         """Generate recommendations and save them to the database"""
@@ -397,4 +406,196 @@ class RecommendationEngine:
         """Calculate total estimated rewards from all recommendations"""
         total = sum(rec.get('estimated_rewards', 0) for rec in recommendations)
         return Decimal(str(total))
+    
+    def _calculate_portfolio_summary(self, recommendations: List[dict]) -> dict:
+        """Calculate portfolio-optimized summary considering card overlap and total fees"""
+        if not recommendations:
+            return {
+                'total_annual_fees': 0,
+                'total_portfolio_rewards': 0,
+                'net_portfolio_value': 0,
+                'category_optimization': {},
+                'card_count': 0
+            }
+        
+        # Separate cards by action type
+        cards_to_keep = []
+        cards_to_apply = []
+        
+        for rec in recommendations:
+            if rec['action'] in ['keep', 'apply']:
+                card_data = {
+                    'card': rec['card'],
+                    'action': rec['action'],
+                    'rewards_breakdown': rec.get('rewards_breakdown', [])
+                }
+                if rec['action'] == 'keep':
+                    cards_to_keep.append(card_data)
+                else:  # apply
+                    cards_to_apply.append(card_data)
+        
+        all_portfolio_cards = cards_to_keep + cards_to_apply
+        
+        # Calculate total annual fees
+        total_annual_fees = 0
+        for card_data in all_portfolio_cards:
+            card = card_data['card']
+            if card_data['action'] == 'apply' and card.metadata.get('annual_fee_waived_first_year', False):
+                # First year fee is waived for new applications
+                total_annual_fees += 0
+            else:
+                total_annual_fees += float(card.annual_fee)
+        
+        # Build category optimization map (highest reward rate per category)
+        category_optimization = {}
+        
+        # For each spending category, find the best reward rate among all portfolio cards
+        for card_data in all_portfolio_cards:
+            card = card_data['card']
+            for reward_category in card.reward_categories.filter(is_active=True):
+                category_slug = reward_category.category.slug
+                category_name = reward_category.category.display_name or reward_category.category.name
+                reward_rate = float(reward_category.reward_rate)
+                
+                if category_slug not in category_optimization:
+                    category_optimization[category_slug] = {
+                        'category_name': category_name,
+                        'best_rate': reward_rate,
+                        'best_card': card.name,
+                        'max_annual_spend': reward_category.max_annual_spend
+                    }
+                else:
+                    # Update if this card has a better rate
+                    if reward_rate > category_optimization[category_slug]['best_rate']:
+                        category_optimization[category_slug].update({
+                            'best_rate': reward_rate,
+                            'best_card': card.name,
+                            'max_annual_spend': reward_category.max_annual_spend
+                        })
+                    # If same rate but higher spending cap, prefer this card
+                    elif (reward_rate == category_optimization[category_slug]['best_rate'] and
+                          reward_category.max_annual_spend and
+                          (not category_optimization[category_slug]['max_annual_spend'] or
+                           float(reward_category.max_annual_spend) > float(category_optimization[category_slug]['max_annual_spend'] or 0))):
+                        category_optimization[category_slug].update({
+                            'best_card': card.name,
+                            'max_annual_spend': reward_category.max_annual_spend
+                        })
+        
+        # Calculate optimized portfolio rewards based on user spending
+        total_portfolio_rewards = 0
+        allocated_spending = 0
+        
+        # Create a map of spending by category slug and also track all spending
+        all_spending = {}
+        total_spending = 0.0
+        
+        for category_slug, monthly_amount in self.spending_amounts.items():
+            annual_spend = float(monthly_amount) * 12
+            all_spending[category_slug] = annual_spend
+            total_spending += annual_spend
+        
+        # Build a map of parent category spending by aggregating subcategory spending
+        from cards.models import SpendingCategory
+        parent_category_spending = {}
+        
+        for category_slug, annual_spend in all_spending.items():
+            try:
+                spending_category = SpendingCategory.objects.get(slug=category_slug)
+                if spending_category.is_subcategory:
+                    parent_slug = spending_category.parent.slug
+                    parent_category_spending[parent_slug] = parent_category_spending.get(parent_slug, 0.0) + annual_spend
+                else:
+                    parent_category_spending[category_slug] = parent_category_spending.get(category_slug, 0.0) + annual_spend
+            except SpendingCategory.DoesNotExist:
+                parent_category_spending[category_slug] = parent_category_spending.get(category_slug, 0.0) + annual_spend
+        
+        # Calculate rewards using the best rate for each category
+        for category_slug, optimization_data in category_optimization.items():
+            annual_spend = parent_category_spending.get(category_slug, 0.0)
+            
+            if annual_spend > 0:
+                # Apply spending caps if they exist
+                if optimization_data['max_annual_spend']:
+                    annual_spend = min(annual_spend, float(optimization_data['max_annual_spend']))
+                
+                allocated_spending += annual_spend
+                reward_rate = optimization_data['best_rate']
+                
+                # Get the reward value multiplier from the best card for this category
+                best_card = None
+                for card_data in all_portfolio_cards:
+                    if card_data['card'].name == optimization_data['best_card']:
+                        best_card = card_data['card']
+                        break
+                
+                if best_card:
+                    reward_value_multiplier = best_card.metadata.get('reward_value_multiplier', 0.01)
+                    points_earned = annual_spend * reward_rate
+                    category_rewards = points_earned * float(reward_value_multiplier)
+                    total_portfolio_rewards += category_rewards
+                    
+                    # Update optimization data with calculated rewards
+                    category_optimization[category_slug]['annual_spend'] = annual_spend
+                    category_rewards_data = category_rewards
+                    category_optimization[category_slug]['annual_rewards'] = category_rewards_data
+        
+        # Handle unallocated spending with general categories
+        total_parent_spending = sum(parent_category_spending.values())
+        unallocated_spending = total_parent_spending - allocated_spending
+        
+        if unallocated_spending > 0:
+            # Find the best general/catch-all category from all cards
+            best_general_rate = 0
+            best_general_card = None
+            
+            for card_data in all_portfolio_cards:
+                card = card_data['card']
+                general_category = card.reward_categories.filter(
+                    is_active=True, 
+                    category__slug__in=['general', 'other', 'everything-else']
+                ).first()
+                
+                if general_category:
+                    rate = float(general_category.reward_rate)
+                    if rate > best_general_rate:
+                        best_general_rate = rate
+                        best_general_card = card
+            
+            if best_general_card and best_general_rate > 0:
+                reward_value_multiplier = best_general_card.metadata.get('reward_value_multiplier', 0.01)
+                points_earned = unallocated_spending * best_general_rate
+                general_rewards = points_earned * float(reward_value_multiplier)
+                total_portfolio_rewards += general_rewards
+                
+                # Add to category optimization
+                category_optimization['other_spending'] = {
+                    'category_name': 'Other Spending',
+                    'best_rate': best_general_rate,
+                    'best_card': best_general_card.name,
+                    'annual_spend': unallocated_spending,
+                    'annual_rewards': general_rewards,
+                    'max_annual_spend': None
+                }
+        
+        # Add card benefits/credits to total rewards
+        total_credits_value = 0
+        for card_data in all_portfolio_cards:
+            card = card_data['card']
+            credits_value = self._calculate_card_credits_value(card)
+            total_credits_value += credits_value
+        
+        total_portfolio_rewards += total_credits_value
+        
+        # Calculate net portfolio value (rewards - fees)
+        net_portfolio_value = total_portfolio_rewards - total_annual_fees
+        
+        return {
+            'total_annual_fees': total_annual_fees,
+            'total_portfolio_rewards': total_portfolio_rewards,
+            'net_portfolio_value': net_portfolio_value,
+            'category_optimization': category_optimization,
+            'card_count': len(all_portfolio_cards),
+            'total_credits_value': total_credits_value
+        }
     
