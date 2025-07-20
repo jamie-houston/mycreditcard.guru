@@ -36,11 +36,25 @@ class RecommendationEngine:
         for rec in recommendations:
             print(f"  - {rec['action'].upper()}: {rec['card'].name} (priority: {rec['priority']})")
         
-        # Ensure we don't exceed max_recommendations
-        recommendations = recommendations[:roadmap.max_recommendations]
+        # Separate recommendations by action type for smart filtering
+        keeps_and_applies = [rec for rec in recommendations if rec['action'] in ['keep', 'apply', 'upgrade', 'downgrade']]
+        cancels = [rec for rec in recommendations if rec['action'] == 'cancel']
         
-        # DEBUG: Print recommendations after filtering
-        print(f"DEBUG: Final {len(recommendations)} recommendations after max limit:")
+        # Always include cancels, but limit keeps/applies to respect max_recommendations
+        # Reserve space for cancels if they exist
+        max_keeps_applies = roadmap.max_recommendations
+        if cancels:
+            # Reserve at least 1-2 slots for cancels, but don't go below 2 keeps/applies
+            cancel_slots = min(len(cancels), max(1, roadmap.max_recommendations // 3))
+            max_keeps_applies = max(2, roadmap.max_recommendations - cancel_slots)
+        
+        # Take top keeps/applies and all cancels
+        filtered_keeps_applies = keeps_and_applies[:max_keeps_applies]
+        recommendations = filtered_keeps_applies + cancels
+        
+        # DEBUG: Print smart filtering details
+        print(f"DEBUG: Smart filtering - keeps/applies: {len(filtered_keeps_applies)}, cancels: {len(cancels)}")
+        print(f"DEBUG: Final {len(recommendations)} recommendations after smart filtering:")
         for rec in recommendations:
             print(f"  - {rec['action'].upper()}: {rec['card'].name} (priority: {rec['priority']})")
         
@@ -317,7 +331,7 @@ class RecommendationEngine:
                     'card': uc.card,
                     'action': 'cancel',
                     'reasoning': f"Cancel - provides no additional portfolio value (${annual_rewards:.0f} rewards vs ${annual_fee} fee)",
-                    'priority': 99  # Low priority for display
+                    'priority': 50  # Medium priority - important to show user
                 })
         
         portfolio_value = self._calculate_scenario_portfolio_value(actions)
