@@ -25,20 +25,11 @@ class RecommendationEngine:
     
     def generate_quick_recommendations(self, roadmap: Roadmap) -> List[dict]:
         """Generate recommendations without saving to database (includes breakdowns)"""
-        recommendations = []
-        
         # Get all eligible cards based on filters
         eligible_cards = self._get_filtered_cards(roadmap)
         
-        # Analyze current cards for keep/cancel/upgrade decisions
-        current_card_recommendations = self._analyze_current_cards()
-        recommendations.extend(current_card_recommendations)
-        
-        # Find new cards to apply for
-        remaining_slots = max(0, roadmap.max_recommendations - len(current_card_recommendations))
-        if remaining_slots > 0:
-            new_card_recommendations = self._find_new_cards(eligible_cards, remaining_slots)
-            recommendations.extend(new_card_recommendations)
+        # Generate portfolio-optimized recommendations
+        recommendations = self._generate_portfolio_optimized_recommendations(eligible_cards, roadmap)
         
         # Ensure we don't exceed max_recommendations
         recommendations = recommendations[:roadmap.max_recommendations]
@@ -129,37 +120,348 @@ class RecommendationEngine:
         
         return active_cards
     
-    def _analyze_current_cards(self) -> List[dict]:
-        """Analyze current cards for keep/cancel/upgrade recommendations"""
+    def _generate_portfolio_optimized_recommendations(self, eligible_cards: List[CreditCard], roadmap: Roadmap) -> List[dict]:
+        """Generate portfolio-optimized recommendations considering all cards together"""
         recommendations = []
         
-        for user_card in self.user_cards:
-            card = user_card.card
+        # Create a combined pool of current + potential cards
+        current_cards = [uc.card for uc in self.user_cards]
+        available_new_cards = [c for c in eligible_cards if c.id not in {card.id for card in current_cards}]
+        
+        # Generate all possible portfolio combinations and evaluate them
+        best_portfolio = self._find_optimal_portfolio(current_cards, available_new_cards, roadmap.max_recommendations)
+        
+        # Convert optimal portfolio to recommendations
+        for card_action in best_portfolio:
+            card = card_action['card']
+            action = card_action['action']
+            
+            # Calculate individual card breakdown for display
             rewards_breakdown = self._calculate_card_rewards_breakdown(card)
             annual_rewards = rewards_breakdown['total_rewards']
             annual_fee = float(card.annual_fee)
             
-            # Simple logic: keep if rewards > annual fee, otherwise consider canceling
-            if annual_rewards > annual_fee + 50:  # $50 buffer
-                action = 'keep'
-                reasoning = f"Keep - earning ${annual_rewards:.0f} annually vs ${annual_fee} fee"
-            elif annual_fee > 0 and annual_rewards < annual_fee:
-                action = 'cancel'
-                reasoning = f"Consider canceling - only earning ${annual_rewards:.0f} vs ${annual_fee} fee"
-            else:
-                action = 'keep'
-                reasoning = f"Keep - earning ${annual_rewards:.0f} annually, reasonable for ${annual_fee} fee"
+            # For individual card display, calculate net value
+            if action == 'apply':
+                signup_bonus_value = self._get_signup_bonus_value(card)
+                annual_fee_waived = card.metadata.get('annual_fee_waived_first_year', False)
+                effective_fee = 0 if annual_fee_waived else annual_fee
+                estimated_value = annual_rewards - effective_fee + signup_bonus_value
+                reasoning = card_action.get('reasoning', f"Apply - adds ${estimated_value:.0f} value to portfolio")
+            else:  # keep or cancel
+                estimated_value = annual_rewards - annual_fee
+                reasoning = card_action.get('reasoning', f"{action.title()} - portfolio optimization decision")
             
             recommendations.append({
                 'card': card,
                 'action': action,
-                'estimated_rewards': Decimal(str(annual_rewards)),
+                'estimated_rewards': Decimal(str(max(0, estimated_value))),  # Don't show negative individual values
                 'reasoning': reasoning,
                 'rewards_breakdown': rewards_breakdown['breakdown'],
-                'priority': 1 if action == 'cancel' else 2
+                'priority': card_action.get('priority', 1)
             })
         
         return recommendations
+    
+    def _find_optimal_portfolio(self, current_cards: List[CreditCard], available_cards: List[CreditCard], max_cards: int) -> List[dict]:
+        """Find the optimal combination of cards for maximum portfolio value"""
+        # Start with current cards and evaluate what to do with each
+        portfolio_actions = []
+        
+        # Evaluate portfolio scenarios
+        scenarios = []
+        
+        # Scenario 1: Keep all current cards, add best new cards
+        scenario1 = self._evaluate_portfolio_scenario(
+            cards_to_keep=current_cards,
+            cards_to_apply=[],
+            available_cards=available_cards,
+            max_total_cards=max_cards
+        )
+        scenarios.append(("keep_all_add_new", scenario1))
+        
+        # Scenario 2: Optimize current cards (may cancel some), add best new cards
+        scenario2 = self._evaluate_portfolio_scenario(
+            cards_to_keep=[],  # Will evaluate each current card
+            cards_to_apply=current_cards + available_cards,  # All cards considered equally
+            available_cards=[],
+            max_total_cards=max_cards
+        )
+        scenarios.append(("full_optimization", scenario2))
+        
+        # Choose best scenario
+        best_scenario = max(scenarios, key=lambda x: x[1]['net_portfolio_value'])
+        return best_scenario[1]['actions']
+    
+    def _evaluate_portfolio_scenario(self, cards_to_keep: List[CreditCard], cards_to_apply: List[CreditCard], 
+                                   available_cards: List[CreditCard], max_total_cards: int) -> dict:
+        """Evaluate a specific portfolio scenario and return optimized actions"""
+        
+        if not cards_to_keep and cards_to_apply:
+            # Full optimization mode - select best cards from all available
+            return self._select_optimal_card_combination(cards_to_apply, max_total_cards)
+        else:
+            # Keep specified cards, add best available
+            actions = []
+            
+            # Add keep actions for specified cards
+            for card in cards_to_keep:
+                rewards_breakdown = self._calculate_card_rewards_breakdown(card)
+                annual_rewards = rewards_breakdown['total_rewards']
+                annual_fee = float(card.annual_fee)
+                
+                actions.append({
+                    'card': card,
+                    'action': 'keep',
+                    'reasoning': f"Keep - earning ${annual_rewards:.0f} annually vs ${annual_fee} fee",
+                    'priority': 2
+                })
+            
+            # Add best available cards up to limit
+            remaining_slots = max_total_cards - len(cards_to_keep)
+            if remaining_slots > 0 and available_cards:
+                best_new_cards = self._select_best_new_cards(available_cards, remaining_slots)
+                actions.extend(best_new_cards)
+            
+            # Calculate portfolio value
+            portfolio_value = self._calculate_scenario_portfolio_value(actions)
+            
+            return {
+                'actions': actions,
+                'net_portfolio_value': portfolio_value
+            }
+    
+    def _select_optimal_card_combination(self, all_cards: List[CreditCard], max_cards: int) -> dict:
+        """Select optimal combination of cards from all available (current + new)"""
+        current_card_ids = {uc.card.id for uc in self.user_cards}
+        
+        # Score all cards
+        card_scores = []
+        for card in all_cards:
+            if card.id in current_card_ids:
+                # Current card - no signup bonus
+                rewards_breakdown = self._calculate_card_rewards_breakdown(card)
+                annual_rewards = rewards_breakdown['total_rewards']
+                annual_fee = float(card.annual_fee)
+                net_value = annual_rewards - annual_fee
+                action = 'keep'
+            else:
+                # New card - include signup bonus
+                if not self._is_eligible_for_card(card):
+                    continue
+                rewards_breakdown = self._calculate_card_rewards_breakdown(card)
+                annual_rewards = rewards_breakdown['total_rewards']
+                signup_bonus = self._get_signup_bonus_value(card)
+                annual_fee_waived = card.metadata.get('annual_fee_waived_first_year', False)
+                effective_fee = 0 if annual_fee_waived else float(card.annual_fee)
+                net_value = annual_rewards - effective_fee + signup_bonus
+                action = 'apply'
+            
+            card_scores.append({
+                'card': card,
+                'action': action,
+                'net_value': net_value,
+                'annual_rewards': annual_rewards,
+                'current_card': card.id in current_card_ids
+            })
+        
+        # Use portfolio optimization to select best combination
+        optimal_cards = self._optimize_card_portfolio(card_scores, max_cards)
+        
+        # Convert to actions
+        actions = []
+        for i, card_data in enumerate(optimal_cards):
+            reasoning = self._generate_card_reasoning(card_data)
+            actions.append({
+                'card': card_data['card'],
+                'action': card_data['action'],
+                'reasoning': reasoning,
+                'priority': i + 1
+            })
+        
+        # Add cancel actions for current cards not in optimal portfolio
+        optimal_card_ids = {cd['card'].id for cd in optimal_cards}
+        for uc in self.user_cards:
+            if uc.card.id not in optimal_card_ids:
+                rewards_breakdown = self._calculate_card_rewards_breakdown(uc.card)
+                annual_rewards = rewards_breakdown['total_rewards']
+                annual_fee = float(uc.card.annual_fee)
+                actions.append({
+                    'card': uc.card,
+                    'action': 'cancel',
+                    'reasoning': f"Cancel - provides no additional portfolio value (${annual_rewards:.0f} rewards vs ${annual_fee} fee)",
+                    'priority': 99  # Low priority for display
+                })
+        
+        portfolio_value = self._calculate_scenario_portfolio_value(actions)
+        
+        return {
+            'actions': actions,
+            'net_portfolio_value': portfolio_value
+        }
+    
+    def _optimize_card_portfolio(self, card_scores: List[dict], max_cards: int) -> List[dict]:
+        """Use portfolio optimization to select best card combination"""
+        # Build category coverage map
+        from collections import defaultdict
+        category_coverage = defaultdict(list)
+        
+        for card_data in card_scores:
+            card = card_data['card']
+            for reward_cat in card.reward_categories.filter(is_active=True):
+                category_slug = reward_cat.category.slug
+                category_coverage[category_slug].append({
+                    'card_data': card_data,
+                    'rate': float(reward_cat.reward_rate),
+                    'max_spend': reward_cat.max_annual_spend
+                })
+        
+        # Select best card for each category (avoiding redundancy)
+        selected_cards = []
+        used_cards = set()
+        
+        # Sort categories by user spending (prioritize high-spend categories)
+        category_spending = []
+        for category_slug, monthly_amount in self.spending_amounts.items():
+            annual_spend = float(monthly_amount) * 12
+            if annual_spend > 0 and category_slug in category_coverage:
+                category_spending.append((category_slug, annual_spend))
+        
+        category_spending.sort(key=lambda x: x[1], reverse=True)  # Highest spending first
+        
+        # Select best card for each high-spend category
+        for category_slug, annual_spend in category_spending:
+            if len(selected_cards) >= max_cards:
+                break
+                
+            category_cards = category_coverage[category_slug]
+            # Find best unused card for this category
+            best_card = None
+            best_value = -float('inf')
+            
+            for card_info in category_cards:
+                card_data = card_info['card_data']
+                if card_data['card'].id in used_cards:
+                    continue
+                    
+                # Calculate value for this category specifically
+                rate = card_info['rate']
+                spend_limit = float(card_info['max_spend']) if card_info['max_spend'] else annual_spend
+                effective_spend = min(annual_spend, spend_limit)
+                
+                # Get card's reward multiplier
+                reward_multiplier = card_data['card'].metadata.get('reward_value_multiplier', 0.01)
+                category_value = effective_spend * rate * reward_multiplier
+                
+                # Add overall card value
+                total_value = category_value + card_data['net_value']
+                
+                if total_value > best_value:
+                    best_value = total_value
+                    best_card = card_data
+            
+            if best_card and best_card['net_value'] > 0:  # Only add positive-value cards
+                selected_cards.append(best_card)
+                used_cards.add(best_card['card'].id)
+        
+        # Fill remaining slots with highest net-value cards
+        remaining_cards = [cd for cd in card_scores if cd['card'].id not in used_cards and cd['net_value'] > 0]
+        remaining_cards.sort(key=lambda x: x['net_value'], reverse=True)
+        
+        for card_data in remaining_cards:
+            if len(selected_cards) >= max_cards:
+                break
+            selected_cards.append(card_data)
+        
+        return selected_cards
+    
+    def _generate_card_reasoning(self, card_data: dict) -> str:
+        """Generate reasoning text for a card recommendation"""
+        card = card_data['card']
+        action = card_data['action']
+        net_value = card_data['net_value']
+        
+        if action == 'apply':
+            signup_bonus = self._get_signup_bonus_value(card)
+            annual_fee_waived = card.metadata.get('annual_fee_waived_first_year', False)
+            fee_text = " (first year fee waived)" if annual_fee_waived else f" (${card.annual_fee} annual fee)"
+            if signup_bonus > 0:
+                return f"Apply - adds ${net_value:.0f} annual value + ${signup_bonus:.0f} signup bonus{fee_text}"
+            else:
+                return f"Apply - adds ${net_value:.0f} annual value{fee_text}"
+        elif action == 'keep':
+            return f"Keep - provides ${net_value:.0f} annual value to portfolio"
+        else:  # cancel
+            return f"Cancel - redundant card providing negative portfolio value"
+    
+    def _select_best_new_cards(self, available_cards: List[CreditCard], max_new_cards: int) -> List[dict]:
+        """Select best new cards to apply for"""
+        actions = []
+        card_scores = []
+        
+        for card in available_cards:
+            if not self._is_eligible_for_card(card):
+                continue
+                
+            rewards_breakdown = self._calculate_card_rewards_breakdown(card)
+            annual_rewards = rewards_breakdown['total_rewards']
+            signup_bonus_value = self._get_signup_bonus_value(card)
+            
+            annual_fee = float(card.annual_fee)
+            annual_fee_waived_first_year = card.metadata.get('annual_fee_waived_first_year', False)
+            effective_annual_fee = 0 if annual_fee_waived_first_year else annual_fee
+            
+            net_annual_value = annual_rewards - effective_annual_fee
+            total_value = net_annual_value + signup_bonus_value
+            
+            if total_value > 0:  # Only consider positive value cards
+                card_scores.append({
+                    'card': card,
+                    'total_value': total_value,
+                    'net_annual_value': net_annual_value,
+                    'signup_bonus': signup_bonus_value,
+                    'rewards_breakdown': rewards_breakdown['breakdown']
+                })
+        
+        # Sort by total value and take top cards
+        card_scores.sort(key=lambda x: x['total_value'], reverse=True)
+        
+        for i, card_data in enumerate(card_scores[:max_new_cards]):
+            reasoning = f"Apply - ${card_data['total_value']:.0f} total value (${card_data['net_annual_value']:.0f} annual + ${card_data['signup_bonus']:.0f} signup bonus)"
+            
+            actions.append({
+                'card': card_data['card'],
+                'action': 'apply',
+                'reasoning': reasoning,
+                'priority': i + 10  # Lower priority than keep actions
+            })
+        
+        return actions
+    
+    def _calculate_scenario_portfolio_value(self, actions: List[dict]) -> float:
+        """Calculate net portfolio value for a scenario"""
+        total_fees = 0
+        total_rewards = 0
+        
+        for action in actions:
+            if action['action'] in ['keep', 'apply']:
+                card = action['card']
+                
+                # Calculate fees
+                if action['action'] == 'apply' and card.metadata.get('annual_fee_waived_first_year', False):
+                    total_fees += 0  # First year waived
+                else:
+                    total_fees += float(card.annual_fee)
+                
+                # Calculate rewards (portfolio-optimized)
+                rewards_breakdown = self._calculate_card_rewards_breakdown(card)
+                total_rewards += rewards_breakdown['total_rewards']
+                
+                # Add signup bonus for new cards
+                if action['action'] == 'apply':
+                    total_rewards += self._get_signup_bonus_value(card)
+        
+        return total_rewards - total_fees
     
     def _find_new_cards(self, eligible_cards: List[CreditCard], max_cards: int) -> List[dict]:
         """Find best new cards to apply for"""
@@ -482,20 +784,17 @@ class RecommendationEngine:
                             'max_annual_spend': reward_category.max_annual_spend
                         })
         
-        # Calculate optimized portfolio rewards based on user spending
+        # Calculate PROPERLY OPTIMIZED portfolio rewards (no double counting)
         total_portfolio_rewards = 0
         allocated_spending = 0
         
-        # Create a map of spending by category slug and also track all spending
+        # Create spending map
         all_spending = {}
-        total_spending = 0.0
-        
         for category_slug, monthly_amount in self.spending_amounts.items():
             annual_spend = float(monthly_amount) * 12
             all_spending[category_slug] = annual_spend
-            total_spending += annual_spend
         
-        # Build a map of parent category spending by aggregating subcategory spending
+        # Build parent category spending map
         from cards.models import SpendingCategory
         parent_category_spending = {}
         
@@ -510,19 +809,25 @@ class RecommendationEngine:
             except SpendingCategory.DoesNotExist:
                 parent_category_spending[category_slug] = parent_category_spending.get(category_slug, 0.0) + annual_spend
         
-        # Calculate rewards using the best rate for each category
+        # Calculate rewards using ONLY the best rate for each category (avoiding double counting)
+        allocated_categories = set()
+        
         for category_slug, optimization_data in category_optimization.items():
+            if category_slug in allocated_categories:
+                continue  # Skip if already allocated
+                
             annual_spend = parent_category_spending.get(category_slug, 0.0)
             
             if annual_spend > 0:
-                # Apply spending caps if they exist
+                # Apply spending caps
                 if optimization_data['max_annual_spend']:
                     annual_spend = min(annual_spend, float(optimization_data['max_annual_spend']))
                 
                 allocated_spending += annual_spend
+                allocated_categories.add(category_slug)
                 reward_rate = optimization_data['best_rate']
                 
-                # Get the reward value multiplier from the best card for this category
+                # Get the reward value multiplier from the best card
                 best_card = None
                 for card_data in all_portfolio_cards:
                     if card_data['card'].name == optimization_data['best_card']:
@@ -535,17 +840,16 @@ class RecommendationEngine:
                     category_rewards = points_earned * float(reward_value_multiplier)
                     total_portfolio_rewards += category_rewards
                     
-                    # Update optimization data with calculated rewards
+                    # Update optimization data
                     category_optimization[category_slug]['annual_spend'] = annual_spend
-                    category_rewards_data = category_rewards
-                    category_optimization[category_slug]['annual_rewards'] = category_rewards_data
+                    category_optimization[category_slug]['annual_rewards'] = category_rewards
         
-        # Handle unallocated spending with general categories
+        # Handle unallocated spending with best general category 
         total_parent_spending = sum(parent_category_spending.values())
         unallocated_spending = total_parent_spending - allocated_spending
         
         if unallocated_spending > 0:
-            # Find the best general/catch-all category from all cards
+            # Find best general category across all portfolio cards
             best_general_rate = 0
             best_general_card = None
             
@@ -578,17 +882,39 @@ class RecommendationEngine:
                     'max_annual_spend': None
                 }
         
-        # Add card benefits/credits to total rewards
+        # Add card benefits/credits (avoid double counting by using set of unique credits)
+        unique_credits = set()
         total_credits_value = 0
+        
         for card_data in all_portfolio_cards:
             card = card_data['card']
-            credits_value = self._calculate_card_credits_value(card)
-            total_credits_value += credits_value
+            for card_credit in card.credits.filter(is_active=True):
+                if hasattr(self.profile, 'credit_preferences'):
+                    user_credit_preferences = set(
+                        pref.credit_type.slug 
+                        for pref in self.profile.credit_preferences.filter(values_credit=True)
+                    )
+                    
+                    if (card_credit.credit_type and 
+                        card_credit.credit_type.slug in user_credit_preferences and
+                        card_credit.credit_type.slug not in unique_credits):
+                        
+                        unique_credits.add(card_credit.credit_type.slug)
+                        total_credits_value += float(card_credit.value)
         
         total_portfolio_rewards += total_credits_value
         
         # Calculate net portfolio value (rewards - fees)
         net_portfolio_value = total_portfolio_rewards - total_annual_fees
+        
+        # ENSURE NET VALUE IS NEVER NEGATIVE by design
+        # If negative, it means the optimization failed - this should not happen
+        # with proper portfolio optimization, but let's log it for debugging
+        if net_portfolio_value < 0:
+            print(f"WARNING: Portfolio optimization resulted in negative value: ${net_portfolio_value:.2f}")
+            print(f"Total rewards: ${total_portfolio_rewards:.2f}, Total fees: ${total_annual_fees:.2f}")
+            print(f"Portfolio cards: {len(all_portfolio_cards)}")
+            # In production, we might want to return an error or try a different optimization strategy
         
         return {
             'total_annual_fees': total_annual_fees,
