@@ -84,7 +84,7 @@
                         <p style="color: #6b7280; margin-bottom: 20px; font-size: 14px;">
                             Select credits/benefits that are valuable to you. This helps us recommend cards with benefits you'll actually use.
                         </p>
-                        <div id="creditTypes" class="credits-grid">
+                        <div id="creditTypes" class="credits-checkbox-list">
                             <div class="loading">🔄 Loading credit types...</div>
                         </div>
                     </div>
@@ -348,14 +348,14 @@
             // Sort alphabetically by name
             allCredits.sort((a, b) => a.name.localeCompare(b.name));
             
-            let html = '<div class="credits-simple-grid">';
+            let html = '<div class="credits-checkbox-list">';
             
             allCredits.forEach(creditType => {
                 const tooltipHtml = creditType.description ? 
                     `title="${creditType.description}"` : '';
                 
                 html += `
-                    <div class="credit-item-simple">
+                    <div class="credit-checkbox-item">
                         <input type="checkbox" id="credit_${creditType.slug}" name="credit_preferences" 
                                value="${creditType.slug}" onchange="handleCreditChange(this)">
                         <label for="credit_${creditType.slug}" ${tooltipHtml}>
