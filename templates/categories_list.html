@@ -415,6 +415,16 @@ function displayCategories(categories, categoryCardData, ownershipFilter, cardTy
         });
         
         const filteredCardCount = filteredCards.length;
+        
+        // Calculate the top reward rate from filtered cards
+        let topRewardRate = 0;
+        if (filteredCards.length > 0) {
+            topRewardRate = Math.max(...filteredCards.map(card => {
+                const cardRewardCategory = card.reward_categories.find(rc => rc.category.id === category.id);
+                return parseFloat(cardRewardCategory?.reward_rate || 0);
+            }));
+        }
+        
         // Handle icon display
         let iconHtml = '';
         if (category.icon && category.icon.includes('fa-')) {
@@ -451,7 +461,10 @@ function displayCategories(categories, categoryCardData, ownershipFilter, cardTy
                 <div class="category-icon">${iconHtml}</div>
                 <div class="category-name">${category.display_name}</div>
                 <div class="category-reward-info">
-                    <div class="category-reward-rate">${category.top_reward_rate}x</div>
+                    ${filteredCardCount > 0 ? 
+                        `<div class="category-reward-rate">${topRewardRate}x</div>` : 
+                        `<div class="category-reward-rate" style="color: #9ca3af;">No cards</div>`
+                    }
                     <div class="category-card-count">${filteredCardCount} cards</div>
                 </div>
                 ${filteredCardCount > 0 ? 
