@@ -31,8 +31,18 @@ class RecommendationEngine:
         # Generate portfolio-optimized recommendations
         recommendations = self._generate_portfolio_optimized_recommendations(eligible_cards, roadmap)
         
+        # DEBUG: Print recommendations before filtering
+        print(f"DEBUG: Generated {len(recommendations)} recommendations before filtering:")
+        for rec in recommendations:
+            print(f"  - {rec['action'].upper()}: {rec['card'].name} (priority: {rec['priority']})")
+        
         # Ensure we don't exceed max_recommendations
         recommendations = recommendations[:roadmap.max_recommendations]
+        
+        # DEBUG: Print recommendations after filtering
+        print(f"DEBUG: Final {len(recommendations)} recommendations after max limit:")
+        for rec in recommendations:
+            print(f"  - {rec['action'].upper()}: {rec['card'].name} (priority: {rec['priority']})")
         
         # Calculate portfolio summary for the recommended cards
         portfolio_summary = self._calculate_portfolio_summary(recommendations)
@@ -128,6 +138,13 @@ class RecommendationEngine:
         current_cards = [uc.card for uc in self.user_cards]
         available_new_cards = [c for c in eligible_cards if c.id not in {card.id for card in current_cards}]
         
+        # DEBUG: Print current cards
+        print(f"DEBUG: User has {len(current_cards)} current cards:")
+        for card in current_cards:
+            print(f"  - {card.name}")
+        print(f"DEBUG: Found {len(available_new_cards)} available new cards")
+        print(f"DEBUG: Max recommendations allowed: {roadmap.max_recommendations}")
+        
         # Generate all possible portfolio combinations and evaluate them
         best_portfolio = self._find_optimal_portfolio(current_cards, available_new_cards, roadmap.max_recommendations)
         
@@ -189,8 +206,18 @@ class RecommendationEngine:
         )
         scenarios.append(("full_optimization", scenario2))
         
+        # DEBUG: Print scenario comparison
+        print(f"DEBUG: Scenario comparison:")
+        for name, scenario in scenarios:
+            actions_summary = {}
+            for action in scenario['actions']:
+                action_type = action['action']
+                actions_summary[action_type] = actions_summary.get(action_type, 0) + 1
+            print(f"  {name}: value=${scenario['net_portfolio_value']:.2f}, actions={actions_summary}")
+        
         # Choose best scenario
         best_scenario = max(scenarios, key=lambda x: x[1]['net_portfolio_value'])
+        print(f"DEBUG: Selected scenario: {best_scenario[0]} with value ${best_scenario[1]['net_portfolio_value']:.2f}")
         return best_scenario[1]['actions']
     
     def _evaluate_portfolio_scenario(self, cards_to_keep: List[CreditCard], cards_to_apply: List[CreditCard], 
