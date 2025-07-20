@@ -76,6 +76,11 @@
                     
                     <div style="margin-top: 20px; padding: 15px; background: #f3f4f6; border-radius: 8px; text-align: center;">
                         <strong style="font-size: 18px;">Total Monthly Spending: $<span id="totalSpending">0</span></strong>
+                        <div style="margin-top: 12px;">
+                            <button onclick="resetSpendingProfile()" style="background: #6b7280; color: white; padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; font-weight: 500; font-size: 14px; transition: background 0.2s;" onmouseover="this.style.background='#4b5563'" onmouseout="this.style.background='#6b7280'">
+                                🗑️ Reset All Data
+                            </button>
+                        </div>
                     </div>
                     
                     <!-- Credits Section -->
@@ -396,6 +401,52 @@
             });
             
             document.getElementById('totalSpending').textContent = total.toLocaleString();
+        }
+
+        function resetSpendingProfile() {
+            if (confirm('Are you sure you want to reset all spending amounts and credit preferences? This action cannot be undone.')) {
+                // Clear all spending inputs
+                const spendingInputs = document.querySelectorAll('.spending-input');
+                spendingInputs.forEach(input => {
+                    input.value = '';
+                });
+                
+                // Clear all credit preference checkboxes
+                const creditCheckboxes = document.querySelectorAll('input[name="credit_preferences"]');
+                creditCheckboxes.forEach(checkbox => {
+                    checkbox.checked = false;
+                });
+                
+                // Update the total display
+                updateTotal();
+                
+                // Clear saved data
+                clearSavedData();
+                
+                // Show success message
+                const totalSection = document.getElementById('totalSpending').parentElement;
+                const originalBg = totalSection.style.background;
+                totalSection.style.background = '#d1fae5';
+                setTimeout(() => {
+                    totalSection.style.background = originalBg;
+                }, 2000);
+                
+                console.log('Spending profile and credit preferences have been reset');
+            }
+        }
+
+        async function clearSavedData() {
+            try {
+                // Clear spending data
+                await UserDataManager.saveSpending({});
+                
+                // Clear credit preferences from localStorage
+                localStorage.removeItem('userCreditPreferences');
+                
+                console.log('Saved data cleared successfully');
+            } catch (error) {
+                console.error('Error clearing saved data:', error);
+            }
         }
 
         async function loadSavedData() {
