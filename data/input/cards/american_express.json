@@ -651,33 +651,6 @@
     "discontinued": false
   },
   {
-    "name": "The Platinum Card\u00ae from American Express",
-    "issuer": "American Express",
-    "annual_fee": 695,
-    "signup_bonus": {
-      "bonus_amount": 100000,
-      "spending_requirement": 8000,
-      "time_limit_months": 6
-    },
-    "reward_type": "Cashback",
-    "reward_value_multiplier": 0.02,
-    "reward_categories": [
-      {
-        "category": "travel",
-        "reward_rate": 5
-      },
-      {
-        "category": "other",
-        "reward_rate": 1
-      }
-    ],
-    "card_type": "personal",
-    "network": "American Express",
-    "url": "https://www.americanexpress.com/us/credit-cards/card/platinum/",
-    "image_url": "/images/amex/platinum.webp",
-    "discontinued": false
-  },
-  {
     "name": "Platinum (Schwab)",
     "issuer": "American Express",
     "annual_fee": 695,

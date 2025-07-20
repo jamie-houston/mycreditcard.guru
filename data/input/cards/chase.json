@@ -292,33 +292,6 @@
     "discontinued": false
   },
   {
-    "name": "Ink Business Preferred",
-    "issuer": "Chase",
-    "annual_fee": 95,
-    "signup_bonus": {
-      "bonus_amount": 90000,
-      "spending_requirement": 8000,
-      "time_limit_months": 3
-    },
-    "reward_type": "Cashback",
-    "reward_value_multiplier": 0.01,
-    "reward_categories": [
-      {
-        "category": "travel",
-        "reward_rate": 3
-      },
-      {
-        "category": "other",
-        "reward_rate": 1
-      }
-    ],
-    "card_type": "business",
-    "network": "Visa",
-    "url": "https://creditcards.chase.com/business-credit-cards/ink/business-preferred",
-    "image_url": "/images/chase/ink-business-preferred.png",
-    "discontinued": false
-  },
-  {
     "name": "Ink Business Unlimited",
     "issuer": "Chase",
     "annual_fee": 0,
@@ -409,94 +382,6 @@
     "url": "https://creditcards.chase.com/travel-credit-cards/marriott-bonvoy/boundless",
     "image_url": "/images/chase/marriott-bonvoy-boundless.jpeg",
     "discontinued": false
-  },
-  {
-    "name": "Sapphire Reserve Business",
-    "issuer": "Chase",
-    "annual_fee": 795,
-    "signup_bonus": {
-      "bonus_amount": 100000,
-      "spending_requirement": 5000,
-      "time_limit_months": 3
-    },
-    "reward_type": "Cashback",
-    "reward_value_multiplier": 0.01,
-    "reward_categories": [
-      {
-        "category": "dining",
-        "reward_rate": 3
-      },
-      {
-        "category": "travel",
-        "reward_rate": 4
-      },
-      {
-        "category": "other",
-        "reward_rate": 1
-      }
-    ],
-    "card_type": "business",
-    "network": "Visa",
-    "url": "https://creditcards.chase.com/rewards-credit-cards/sapphire/reserve",
-    "image_url": "/images/chase/sapphire-reserve.png",
-    "discontinued": false,
-    "credits": [A
-      {
-        "description": "Travel Credit",
-        "value": 300,
-        "weight": 1
-      },
-      {
-        "description": "Travel Credit (The Edit)",
-        "value": 500,
-        "weight": 0.8
-      },
-      {
-        "description": "Lounge Access",
-        "value": 469,
-        "weight": 0.2
-      },
-      {
-        "description": "PreCheck Credit",
-        "value": 120,
-        "weight": 0.5
-      },
-      {
-        "description": "Apple TV / Apple Music",
-        "value": 250,
-        "weight": 0.4
-      },
-      {
-        "description": "Dashpass",
-        "value": 120,
-        "weight": 0.3
-      },
-      {
-        "description": "$25/mo DoorDash Promos",
-        "value": 300,
-        "weight": 0.3
-      },
-      {
-        "description": "Google Workspace Credit",
-        "value": 200,
-        "weight": 0.5
-      },
-      {
-        "description": "ZipRecruiter Credit",
-        "value": 400,
-        "weight": 0.25
-      },
-      {
-        "description": "$10/mo Lyft Credit",
-        "value": 120,
-        "weight": 0.25
-      },
-      {
-        "description": "Gift Card Credit",
-        "value": 100,
-        "weight": 0.5
-      }
-    ]
   },
   {
     "name": "Southwest Performance Business",
