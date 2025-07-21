@@ -608,6 +608,247 @@
           "Reduces complexity while optimizing value"
         ]
       }
+    },
+    {
+      "name": "Zero Fee Cards Protection - Never Cancel",
+      "description": "Tests that $0 annual fee cards are never recommended for cancellation, even when redundant",
+      "user_profile": {
+        "spending": {
+          "groceries": 300,
+          "dining": 200,
+          "general": 400
+        },
+        "preferences": {
+          "max_annual_fee": 200,
+          "preferred_reward_type": "cashback"
+        }
+      },
+      "owned_cards": ["Freedom Unlimited", "Blue Cash Everyday", "Quicksilver Cash Rewards Credit Card", "Expensive Premium Card"],
+      "available_cards": ["Freedom Unlimited", "Blue Cash Everyday", "Quicksilver Cash Rewards Credit Card", "Expensive Premium Card", "Blue Cash Preferred® Card"],
+      "expected_recommendations": {
+        "actions": ["keep", "cancel", "apply"],
+        "zero_fee_protection": {
+          "zero_fee_cards_never_canceled": ["Freedom Unlimited", "Blue Cash Everyday", "Quicksilver Cash Rewards Credit Card"],
+          "only_fee_cards_canceled": ["Expensive Premium Card"],
+          "zero_fee_cards_always_shown": true
+        },
+        "cards_to_keep": ["Freedom Unlimited", "Blue Cash Everyday", "Quicksilver Cash Rewards Credit Card"],
+        "cards_to_cancel": ["Expensive Premium Card"],
+        "reasoning_must_contain": ["no annual fee", "$0 fee", "no cost to maintain"],
+        "test_conditions": [
+          "No $0 annual fee cards appear in cancel recommendations",
+          "All $0 fee cards appear in keep recommendations",
+          "Only fee-bearing cards are recommended for cancellation",
+          "Zero fee cards show reasoning like 'Keep - no annual fee card'"
+        ]
+      }
+    },
+    {
+      "name": "Zero Fee Cards Always Visible",
+      "description": "Tests that $0 fee cards always appear in recommendations regardless of max_recommendations limit",
+      "user_profile": {
+        "spending": {
+          "groceries": 200,
+          "dining": 150,
+          "general": 300
+        },
+        "preferences": {
+          "max_annual_fee": 100,
+          "preferred_reward_type": "cashback",
+          "max_recommendations": 3
+        }
+      },
+      "owned_cards": ["Freedom Unlimited", "Blue Cash Everyday", "Quicksilver Cash Rewards Credit Card", "Discover it Cash Back", "Citi Double Cash Card"],
+      "available_cards": ["Freedom Unlimited", "Blue Cash Everyday", "Quicksilver Cash Rewards Credit Card", "Discover it Cash Back", "Citi Double Cash Card", "High Value Premium Card", "Mid Tier Card"],
+      "expected_recommendations": {
+        "actions": ["keep", "apply"],
+        "smart_filtering": {
+          "max_recommendations": 3,
+          "zero_fee_cards_count": 5,
+          "all_zero_fee_cards_shown": true,
+          "priority_protection": true
+        },
+        "cards_to_keep": ["Freedom Unlimited", "Blue Cash Everyday", "Quicksilver Cash Rewards Credit Card", "Discover it Cash Back", "Citi Double Cash Card"],
+        "reasoning_must_contain": ["no annual fee", "guaranteed inclusion"],
+        "test_conditions": [
+          "All $0 fee cards appear despite max_recommendations=3 limit",
+          "Smart filtering reserves slots for $0 fee cards",
+          "Total recommendations exceed max_recommendations when $0 fee cards present",
+          "Zero fee cards have protected status in filtering logic"
+        ]
+      }
+    },
+    {
+      "name": "Mixed Portfolio Zero Fee Protection",
+      "description": "Tests portfolio optimization with mix of $0 fee and fee-bearing cards",
+      "user_profile": {
+        "spending": {
+          "groceries": 600,
+          "dining": 400,
+          "travel": 300,
+          "gas": 250,
+          "general": 500
+        },
+        "preferences": {
+          "max_annual_fee": 300,
+          "preferred_reward_type": "points"
+        }
+      },
+      "owned_cards": ["Freedom Unlimited", "Chase Sapphire Reserve®", "Chase Sapphire Reserve Business", "Blue Cash Everyday", "Expensive Dining Card"],
+      "available_cards": ["Freedom Unlimited", "Chase Sapphire Reserve®", "Chase Sapphire Reserve Business", "Blue Cash Everyday", "Expensive Dining Card", "Blue Cash Preferred® Card", "Gold Card"],
+      "expected_recommendations": {
+        "actions": ["keep", "cancel", "apply"],
+        "portfolio_optimization": {
+          "zero_fee_cards_protected": ["Freedom Unlimited", "Blue Cash Everyday"],
+          "redundant_fee_cards_canceled": ["Chase Sapphire Reserve Business"],
+          "optimal_mix_achieved": true
+        },
+        "cards_to_keep": ["Freedom Unlimited", "Blue Cash Everyday", "Chase Sapphire Reserve®"],
+        "cards_to_cancel": ["Chase Sapphire Reserve Business", "Expensive Dining Card"],
+        "reasoning_must_contain": ["no annual fee", "redundant card", "portfolio optimization"],
+        "test_conditions": [
+          "Zero fee cards are always kept regardless of portfolio overlap",
+          "Only fee-bearing redundant cards are recommended for cancellation",
+          "Portfolio optimization considers $0 fee cards as 'free value'",
+          "Mixed portfolio maintains cost-effectiveness while protecting no-fee cards"
+        ]
+      }
+    },
+    {
+      "name": "Low Value Zero Fee Cards Still Protected",
+      "description": "Tests that even low-reward $0 fee cards are never canceled",
+      "user_profile": {
+        "spending": {
+          "groceries": 800,
+          "dining": 600,
+          "general": 400
+        },
+        "preferences": {
+          "max_annual_fee": 200,
+          "preferred_reward_type": "cashback"
+        }
+      },
+      "owned_cards": ["Low Reward Zero Fee Card", "Freedom Unlimited", "Premium Grocery Card"],
+      "available_cards": ["Low Reward Zero Fee Card", "Freedom Unlimited", "Premium Grocery Card", "Blue Cash Preferred® Card", "SavorOne Cash Rewards Credit Card"],
+      "expected_recommendations": {
+        "actions": ["keep", "apply"],
+        "zero_fee_protection": {
+          "low_value_zero_fee_protected": ["Low Reward Zero Fee Card"],
+          "no_cancellation_regardless_of_value": true,
+          "free_value_principle": true
+        },
+        "cards_to_keep": ["Low Reward Zero Fee Card", "Freedom Unlimited"],
+        "reasoning_must_contain": ["no annual fee", "no cost to maintain", "free value"],
+        "test_conditions": [
+          "Low-reward $0 fee cards are never recommended for cancellation",
+          "Portfolio logic treats $0 fee cards as 'free value' regardless of rewards",
+          "No minimum reward threshold for keeping $0 fee cards",
+          "Even 1% cashback $0 fee cards are protected from cancellation"
+        ]
+      }
+    },
+    {
+      "name": "Zero Fee Cards in Sectioned Display",
+      "description": "Tests that $0 fee cards appear properly in the 'Keep These Cards' section",
+      "user_profile": {
+        "spending": {
+          "groceries": 400,
+          "dining": 300,
+          "general": 300
+        },
+        "preferences": {
+          "max_annual_fee": 150,
+          "preferred_reward_type": "cashback"
+        }
+      },
+      "owned_cards": ["Freedom Unlimited", "Blue Cash Everyday", "Expensive Premium Card", "Mid-Fee Card"],
+      "available_cards": ["Freedom Unlimited", "Blue Cash Everyday", "Expensive Premium Card", "Mid-Fee Card", "SavorOne Cash Rewards Credit Card"],
+      "expected_recommendations": {
+        "actions": ["keep", "cancel", "apply"],
+        "sectioned_display": {
+          "keep_section": ["Freedom Unlimited", "Blue Cash Everyday"],
+          "cancel_section": ["Expensive Premium Card", "Mid-Fee Card"],
+          "apply_section": ["SavorOne Cash Rewards Credit Card"],
+          "proper_organization": true
+        },
+        "reasoning_must_contain": ["Keep These Cards", "Consider Canceling", "Apply for These Cards"],
+        "test_conditions": [
+          "Zero fee cards appear in 'Keep These Cards' section",
+          "Only fee-bearing cards appear in 'Consider Canceling' section",
+          "Sectioned display properly organizes recommendations by action type",
+          "No $0 fee cards leak into cancellation section"
+        ]
+      }
+    },
+    {
+      "name": "Overlapping Zero Fee Cards Portfolio",
+      "description": "Tests portfolio optimization when multiple $0 fee cards have overlapping categories",
+      "user_profile": {
+        "spending": {
+          "groceries": 300,
+          "dining": 200,
+          "general": 500
+        },
+        "preferences": {
+          "max_annual_fee": 100,
+          "preferred_reward_type": "cashback"
+        }
+      },
+      "owned_cards": ["Freedom Unlimited", "Quicksilver Cash Rewards Credit Card", "Citi Double Cash Card", "Blue Cash Everyday"],
+      "available_cards": ["Freedom Unlimited", "Quicksilver Cash Rewards Credit Card", "Citi Double Cash Card", "Blue Cash Everyday", "Blue Cash Preferred® Card"],
+      "expected_recommendations": {
+        "actions": ["keep", "apply"],
+        "portfolio_optimization": {
+          "overlapping_zero_fee_all_kept": true,
+          "highest_rate_calculation": true,
+          "no_zero_fee_consolidation": true,
+          "portfolio_value_optimized": true
+        },
+        "cards_to_keep": ["Freedom Unlimited", "Quicksilver Cash Rewards Credit Card", "Citi Double Cash Card", "Blue Cash Everyday"],
+        "reasoning_must_contain": ["no annual fee", "no cost to maintain", "portfolio optimization"],
+        "test_conditions": [
+          "All $0 fee cards are kept even with overlapping reward categories",
+          "Portfolio optimization uses highest rate among $0 fee cards for calculations",
+          "No recommendation to consolidate overlapping $0 fee cards",
+          "Portfolio value calculation properly handles multiple $0 fee cards"
+        ]
+      }
+    },
+    {
+      "name": "Zero Fee Card Smart Filtering Priority",
+      "description": "Tests that smart filtering logic properly prioritizes $0 fee cards over other recommendations",
+      "user_profile": {
+        "spending": {
+          "groceries": 200,
+          "dining": 150,
+          "general": 250
+        },
+        "preferences": {
+          "max_annual_fee": 200,
+          "preferred_reward_type": "cashback",
+          "max_recommendations": 2
+        }
+      },
+      "owned_cards": ["Freedom Unlimited", "Blue Cash Everyday", "Premium Card A", "Premium Card B"],
+      "available_cards": ["Freedom Unlimited", "Blue Cash Everyday", "Premium Card A", "Premium Card B", "High Value Premium Card", "Best Apply Card"],
+      "expected_recommendations": {
+        "actions": ["keep", "cancel", "apply"],
+        "smart_filtering": {
+          "zero_fee_priority": true,
+          "reserved_slots": 2,
+          "max_recommendations_exceeded": true,
+          "filtering_logic": "zero_fee_cards + top_other_recommendations + all_cancels"
+        },
+        "cards_to_keep": ["Freedom Unlimited", "Blue Cash Everyday"],
+        "cards_to_cancel": ["Premium Card A", "Premium Card B"],
+        "reasoning_must_contain": ["smart filtering", "reserved slots", "priority protection"],
+        "test_conditions": [
+          "Zero fee cards get reserved slots in smart filtering",
+          "Total recommendations exceed max_recommendations due to zero fee protection",
+          "Smart filtering = top_other_keeps_applies + all_zero_fee + all_cancels",
+          "Zero fee cards cannot be filtered out by recommendation limits"
+        ]
+      }
     }
   ]
 }
