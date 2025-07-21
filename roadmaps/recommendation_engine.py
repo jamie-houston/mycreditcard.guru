@@ -40,23 +40,38 @@ class RecommendationEngine:
         keeps_and_applies = [rec for rec in recommendations if rec['action'] in ['keep', 'apply', 'upgrade', 'downgrade']]
         cancels = [rec for rec in recommendations if rec['action'] == 'cancel']
         
-        # Always include cancels, but limit keeps/applies to respect max_recommendations
-        # Reserve space for cancels if they exist
-        max_keeps_applies = roadmap.max_recommendations
-        if cancels:
-            # Reserve at least 1-2 slots for cancels, but don't go below 2 keeps/applies
-            cancel_slots = min(len(cancels), max(1, roadmap.max_recommendations // 3))
-            max_keeps_applies = max(2, roadmap.max_recommendations - cancel_slots)
+        # Separate $0 fee keeps (always show) from other keeps/applies
+        zero_fee_keeps = [rec for rec in keeps_and_applies if rec['action'] == 'keep' and float(rec['card'].annual_fee) == 0]
+        other_keeps_applies = [rec for rec in keeps_and_applies if not (rec['action'] == 'keep' and float(rec['card'].annual_fee) == 0)]
         
-        # Take top keeps/applies and all cancels
-        filtered_keeps_applies = keeps_and_applies[:max_keeps_applies]
-        recommendations = filtered_keeps_applies + cancels
+        # Sort other keeps/applies by priority (lower number = higher priority)
+        other_keeps_applies.sort(key=lambda x: x['priority'])
+        
+        # Always include $0 fee keeps and cancels, limit other keeps/applies
+        max_other_keeps_applies = roadmap.max_recommendations
+        
+        # Reserve space for zero fee keeps and cancels
+        reserved_slots = len(zero_fee_keeps)
+        if cancels:
+            # Reserve at least 1-2 slots for cancels, but don't go below 2 other keeps/applies
+            cancel_slots = min(len(cancels), max(1, roadmap.max_recommendations // 3))
+            reserved_slots += cancel_slots
+        
+        max_other_keeps_applies = max(1, roadmap.max_recommendations - reserved_slots)
+        
+        # Take top other keeps/applies, all zero fee keeps, and all cancels
+        filtered_other_keeps_applies = other_keeps_applies[:max_other_keeps_applies]
+        recommendations = filtered_other_keeps_applies + zero_fee_keeps + cancels
         
         # DEBUG: Print smart filtering details
-        print(f"DEBUG: Smart filtering - keeps/applies: {len(filtered_keeps_applies)}, cancels: {len(cancels)}")
+        print(f"DEBUG: Smart filtering breakdown:")
+        print(f"  - Other keeps/applies: {len(filtered_other_keeps_applies)}")
+        print(f"  - Zero fee keeps: {len(zero_fee_keeps)}")
+        print(f"  - Cancels: {len(cancels)}")
         print(f"DEBUG: Final {len(recommendations)} recommendations after smart filtering:")
         for rec in recommendations:
-            print(f"  - {rec['action'].upper()}: {rec['card'].name} (priority: {rec['priority']})")
+            fee_info = f" (${rec['card'].annual_fee} fee)" if rec['action'] == 'keep' else ""
+            print(f"  - {rec['action'].upper()}: {rec['card'].name}{fee_info} (priority: {rec['priority']})")
         
         # Calculate portfolio summary for the recommended cards
         portfolio_summary = self._calculate_portfolio_summary(recommendations)
