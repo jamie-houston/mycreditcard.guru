@@ -321,18 +321,35 @@ class RecommendationEngine:
             })
         
         # Add cancel actions for current cards not in optimal portfolio
+        # BUT: Never recommend canceling cards with $0 annual fee
         optimal_card_ids = {cd['card'].id for cd in optimal_cards}
         for uc in self.user_cards:
             if uc.card.id not in optimal_card_ids:
-                rewards_breakdown = self._calculate_card_rewards_breakdown(uc.card)
-                annual_rewards = rewards_breakdown['total_rewards']
                 annual_fee = float(uc.card.annual_fee)
-                actions.append({
-                    'card': uc.card,
-                    'action': 'cancel',
-                    'reasoning': f"Cancel - provides no additional portfolio value (${annual_rewards:.0f} rewards vs ${annual_fee} fee)",
-                    'priority': 50  # Medium priority - important to show user
-                })
+                
+                # Skip cancellation recommendations for $0 annual fee cards
+                if annual_fee == 0:
+                    # Instead, add as a "keep" recommendation with low priority
+                    rewards_breakdown = self._calculate_card_rewards_breakdown(uc.card)
+                    annual_rewards = rewards_breakdown['total_rewards']
+                    print(f"DEBUG: Keeping $0 fee card instead of canceling: {uc.card.name}")
+                    actions.append({
+                        'card': uc.card,
+                        'action': 'keep',
+                        'reasoning': f"Keep - no annual fee card (${annual_rewards:.0f} rewards, $0 fee)",
+                        'priority': 60  # Lower priority than optimal keeps
+                    })
+                else:
+                    # Only recommend canceling cards with annual fees
+                    rewards_breakdown = self._calculate_card_rewards_breakdown(uc.card)
+                    annual_rewards = rewards_breakdown['total_rewards']
+                    print(f"DEBUG: Recommending cancel for fee card: {uc.card.name} (${annual_fee} fee)")
+                    actions.append({
+                        'card': uc.card,
+                        'action': 'cancel',
+                        'reasoning': f"Cancel - provides no additional portfolio value (${annual_rewards:.0f} rewards vs ${annual_fee} fee)",
+                        'priority': 50  # Medium priority - important to show user
+                    })
         
         portfolio_value = self._calculate_scenario_portfolio_value(actions)
         
