@@ -303,12 +303,12 @@
                     `<span class="tooltip-icon" title="${description}">❓</span>` : '';
                 
                 let categoryHtml = `
-                    <div class="spending-item">
+                    <div class="spending-item main-category-item">
                         <div class="input-group">
-                            <span class="input-group-text fw-bold" style="min-width: 140px;">
+                            <span class="input-group-text" style="min-width: 160px;">
                                 ${iconHtml}${displayName} ${tooltipHtml}
                             </span>
-                            <span class="input-group-text">$</span>
+                            <span class="input-group-text" style="background: white; border-left: none;">$</span>
                             <input type="number" id="${htmlId}" data-category-slug="${slug}" 
                                    placeholder="0" min="0" step="10" class="form-control spending-input">
                         </div>
@@ -328,22 +328,22 @@
                         // Handle subcategory icon
                         let subIconHtml = '';
                         if (subcat.icon && subcat.icon.includes('fa-')) {
-                            subIconHtml = `<i class="${subcat.icon}" style="font-size: 16px; margin-right: 6px; width: 18px; text-align: center;"></i>`;
+                            subIconHtml = `<i class="${subcat.icon}" style="font-size: 14px; margin-right: 8px; width: 16px; text-align: center; color: #6b7280;"></i>`;
                         } else if (subcat.icon && !subcat.icon.includes('fa-')) {
-                            subIconHtml = `<span style="font-size: 16px; margin-right: 6px;">${subcat.icon}</span>`;
+                            subIconHtml = `<span style="font-size: 14px; margin-right: 8px; opacity: 0.7;">${subcat.icon}</span>`;
                         } else {
-                            subIconHtml = `<span style="font-size: 16px; margin-right: 6px;">└</span>`;
+                            subIconHtml = `<span style="font-size: 14px; margin-right: 8px; color: #9ca3af;">↳</span>`;
                         }
                         
                         categoryHtml += `
                             <div class="spending-item subcategory-item">
                                 <div class="input-group">
-                                    <span class="input-group-text" style="min-width: 140px; background: #f8f9fa; font-size: 13px;">
+                                    <span class="input-group-text" style="min-width: 140px;">
                                         ${subIconHtml}${subDisplayName} ${subTooltipHtml}
                                     </span>
-                                    <span class="input-group-text">$</span>
+                                    <span class="input-group-text" style="background: #f9fafb; border-left: none;">$</span>
                                     <input type="number" id="${subHtmlId}" data-category-slug="${subSlug}" 
-                                           placeholder="0" min="0" step="10" class="form-control spending-input">
+                                           placeholder="0" min="0" step="10" class="form-control spending-input" style="font-size: 13px;">
                                 </div>
                             </div>
                         `;
