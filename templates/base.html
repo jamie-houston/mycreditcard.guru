@@ -42,15 +42,16 @@
             z-index: 1000;
         }
         .nav-container {
-            display: flex;
-            justify-content: space-between;
+            display: grid;
+            grid-template-columns: 1fr 2fr 1fr;
             align-items: center;
             max-width: 1200px;
             margin: 0 auto;
             padding: 15px 0;
+            gap: 20px;
         }
         .nav-brand {
-            font-size: 24px;
+            font-size: 20px;
             font-weight: 800;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             -webkit-background-clip: text;
@@ -58,13 +59,30 @@
             background-clip: text;
             text-decoration: none;
             letter-spacing: -0.5px;
+            justify-self: start;
+        }
+        .nav-center {
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
         .nav-menu {
             display: flex;
             list-style: none;
             margin: 0;
             padding: 0;
-            gap: 30px;
+            gap: 4px;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 16px;
+            padding: 6px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .nav-auth {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            justify-self: end;
         }
         
         @media (min-width: 769px) {
@@ -91,44 +109,46 @@
             text-decoration: none;
             color: #374151;
             font-weight: 600;
-            padding: 10px 18px;
-            border-radius: 12px;
+            padding: 8px 16px;
+            border-radius: 10px;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
-            overflow: hidden;
+            white-space: nowrap;
+            font-size: 14px;
         }
         .nav-item a:hover {
-            background: rgba(102, 126, 234, 0.1);
+            background: rgba(102, 126, 234, 0.15);
             color: #667eea;
-            transform: translateY(-1px);
         }
         .nav-item a.active {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
-        }
-        .nav-auth {
-            display: flex;
-            align-items: center;
-            gap: 15px;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
         }
         .nav-user {
             color: #374151;
             font-weight: 500;
+            font-size: 14px;
+            max-width: 150px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
         .nav-login, .nav-logout {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            padding: 10px 20px;
-            border-radius: 12px;
+            padding: 8px 16px;
+            border-radius: 10px;
             text-decoration: none;
             font-weight: 600;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+            font-size: 14px;
+            white-space: nowrap;
         }
         .nav-login:hover, .nav-logout:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.6);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
         }
         .nav-logout {
             background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
@@ -689,6 +709,60 @@
                 padding: 20px;
             }
             
+            .nav-container {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                position: relative;
+                padding: 10px 0;
+                gap: 10px;
+            }
+            
+            .nav-center {
+                position: absolute;
+                top: 100%;
+                left: 0;
+                right: 0;
+                z-index: 9999;
+            }
+            
+            .nav-toggle {
+                display: flex;
+                order: 2;
+            }
+            
+            .nav-menu {
+                display: none;
+                flex-direction: column;
+                gap: 5px;
+                background: rgba(255, 255, 255, 0.95);
+                backdrop-filter: blur(20px);
+                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+                border: 1px solid rgba(255, 255, 255, 0.2);
+                border-radius: 16px;
+                padding: 15px;
+                margin-top: 10px;
+            }
+            
+            .nav-menu.active {
+                display: flex;
+            }
+            
+            .nav-auth {
+                order: 3;
+                position: static;
+                justify-self: auto;
+            }
+            
+            .nav-user {
+                display: none; /* Hide email on mobile */
+            }
+            
+            .nav-brand {
+                order: 1;
+                font-size: 18px;
+            }
+            
             .grid {
                 grid-template-columns: 1fr;
                 gap: 15px;
@@ -719,56 +793,6 @@
             .preferences-inline input {
                 font-size: 13px;
                 padding: 6px 8px;
-            }
-            
-            /* Mobile Navigation */
-            .nav-toggle {
-                display: flex;
-            }
-            
-            .nav-menu {
-                display: none;
-                flex-direction: column;
-                gap: 10px;
-                position: absolute;
-                top: 100%;
-                left: 0;
-                right: 0;
-                background: rgba(255, 255, 255, 0.95);
-                backdrop-filter: blur(20px);
-                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
-                border-top: 1px solid rgba(255, 255, 255, 0.2);
-                padding: 20px;
-                z-index: 9999;
-            }
-            
-            .nav-menu.active {
-                display: flex;
-            }
-            
-            .nav-container {
-                flex-direction: row;
-                justify-content: space-between;
-                align-items: center;
-                position: relative;
-            }
-            
-            .nav-auth {
-                position: absolute;
-                top: 100%;
-                right: 0;
-                background: rgba(255, 255, 255, 0.95);
-                backdrop-filter: blur(20px);
-                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
-                border-top: 1px solid rgba(255, 255, 255, 0.2);
-                padding: 15px;
-                display: none;
-                z-index: 9999;
-                border-radius: 0 0 16px 16px;
-            }
-            
-            .nav-auth.active {
-                display: flex;
             }
             
             /* Mobile form improvements */
@@ -1244,24 +1268,28 @@
     <nav class="navbar">
         <div class="nav-container">
             <a href="/" class="nav-brand">🏦 Credit Card Guru</a>
-            <div class="nav-toggle" onclick="toggleMobileMenu()">
-                <span></span>
-                <span></span>
-                <span></span>
+            
+            <div class="nav-center">
+                <div class="nav-toggle" onclick="toggleMobileMenu()">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+                <ul class="nav-menu" id="navMenu">
+                    <li class="nav-item"><a href="/" {% if request.resolver_match.url_name == 'index' %}class="active"{% endif %}>Roadmap</a></li>
+                    <li class="nav-item"><a href="/profile/" {% if request.resolver_match.url_name == 'profile' %}class="active"{% endif %}>Profile</a></li>
+                    <li class="nav-item"><a href="/cards/" {% if request.resolver_match.url_name == 'cards_list' %}class="active"{% endif %}>Cards</a></li>
+                    <li class="nav-item"><a href="/categories/" {% if request.resolver_match.url_name == 'categories_list' %}class="active"{% endif %}>Categories</a></li>
+                    <li class="nav-item"><a href="/issuers/" {% if request.resolver_match.url_name == 'issuers_list' %}class="active"{% endif %}>Issuers</a></li>
+                </ul>
             </div>
-            <ul class="nav-menu" id="navMenu">
-                <li class="nav-item"><a href="/" {% if request.resolver_match.url_name == 'index' %}class="active"{% endif %}>Roadmap</a></li>
-                <li class="nav-item"><a href="/cards/" {% if request.resolver_match.url_name == 'cards_list' %}class="active"{% endif %}>Credit Cards</a></li>
-                <li class="nav-item"><a href="/categories/" {% if request.resolver_match.url_name == 'categories_list' %}class="active"{% endif %}>Categories</a></li>
-                <li class="nav-item"><a href="/issuers/" {% if request.resolver_match.url_name == 'issuers_list' %}class="active"{% endif %}>Issuers</a></li>
-                <li class="nav-item"><a href="/profile/" {% if request.resolver_match.url_name == 'profile' %}class="active"{% endif %}>Profile</a></li>
-            </ul>
+            
             <div class="nav-auth" id="navAuth">
                 {% if user.is_authenticated %}
-                    <span class="nav-user">👤 {{ user.email }}</span>
+                    <span class="nav-user">{{ user.email }}</span>
                     <a href="{% url 'account_logout' %}" class="nav-logout" onclick="handleLogout()">Logout</a>
                 {% else %}
-                    <a href="{% provider_login_url 'google' %}" class="nav-login" onclick="handleLogin()">🔐 Sign In with Google</a>
+                    <a href="{% provider_login_url 'google' %}" class="nav-login" onclick="handleLogin()">Sign In</a>
                 {% endif %}
             </div>
         </div>
