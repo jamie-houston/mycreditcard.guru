@@ -8,7 +8,7 @@
       "opened_date": "2016-08-29"
     },
     {
-      "card_name": "Sapphire Reserve Business",
+      "card_name": "Chase Sapphire Reserve Business",
       "issuer": "Chase",
       "card_type": "business",
       "nickname": "Reserve 4904",
@@ -33,13 +33,13 @@
       "opened_date": "2010-01-05"
     },
     {
-      "card_name": "The Platinum Card® from American Express",
+      "card_name": "The Platinum Card from American Express",
       "issuer": "American Express", 
       "nickname": "Amex 42006",
       "opened_date": "2025-04-14"
     },
     {
-      "card_name": "Ink Business Preferred",
+      "card_name": "Ink Business Preferred Credit Card",
       "issuer": "Chase", 
       "nickname": "Ink Business 5994",
       "card_type": "business",
