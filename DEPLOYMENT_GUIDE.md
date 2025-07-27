@@ -144,17 +144,23 @@ In the Web tab, add these static file mappings:
 
 1. Load initial data for your application:
    ```bash
-   python manage.py loaddata data/input/spending_categories.json
-   python manage.py loaddata data/input/issuers.json
-   python manage.py loaddata data/input/reward_types.json
+   python manage.py loaddata data/input/system/spending_categories.json
+   python manage.py loaddata data/input/system/issuers.json
+   python manage.py loaddata data/input/system/reward_types.json
    ```
 
 2. Import credit cards:
    ```bash
-   python manage.py import_cards data/input/chase.json
-   python manage.py import_cards data/input/american_express.json
-   python manage.py import_cards data/input/capital_one.json
-   python manage.py import_cards data/input/citi.json
+   python manage.py import_cards data/input/cards/chase.json
+   python manage.py import_cards data/input/cards/american_express.json
+   python manage.py import_cards data/input/cards/capital_one.json
+   python manage.py import_cards data/input/cards/citi.json
+   # Add other card files as needed
+   ```
+
+3. Import credit types (offers/benefits for roadmap preferences):
+   ```bash
+   python manage.py import_credit_types
    ```
 
 ## Step 10: Configure Domain (Optional)

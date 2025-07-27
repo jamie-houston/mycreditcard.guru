@@ -31,9 +31,27 @@ pip install -r requirements.txt
 python manage.py migrate
 ```
 
-3. **Import sample credit card data**:
+3. **Import initial data**:
+
+**Option A: Use the setup script (recommended)**:
 ```bash
-python manage.py import_cards sample_cards.json
+python setup_data.py
+```
+
+**Option B: Manual import**:
+```bash
+# Import basic system data
+python manage.py loaddata data/input/system/spending_categories.json
+python manage.py loaddata data/input/system/issuers.json
+python manage.py loaddata data/input/system/reward_types.json
+
+# Import credit cards from all available files
+python manage.py import_cards data/input/cards/chase.json
+python manage.py import_cards data/input/cards/american_express.json
+# ... repeat for other card files
+
+# Import credit types (for offers/benefits in roadmap preferences)
+python manage.py import_credit_types
 ```
 
 4. **Create admin user** (optional):
@@ -102,6 +120,7 @@ creditcard_guru/
 ### Management Commands
 
 - `python manage.py import_cards <file.json>` - Import credit card data
+- `python manage.py import_credit_types` - Import credit types (offers/benefits) from card files
 - `python manage.py shell_plus` - Enhanced Django shell
 
 ### Admin Interface
