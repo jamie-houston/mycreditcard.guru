@@ -139,6 +139,21 @@
             }
         }
 
+        function toggleSection(sectionKey) {
+            const content = document.getElementById(`content-${sectionKey}`);
+            const toggle = document.getElementById(`toggle-${sectionKey}`);
+            
+            if (!content || !toggle) return;
+            
+            if (content.style.display === 'none') {
+                content.style.display = 'block';
+                toggle.style.transform = 'rotate(0deg)';
+            } else {
+                content.style.display = 'none';
+                toggle.style.transform = 'rotate(-90deg)';
+            }
+        }
+
         async function loadData() {
             try {
                 // Load spending categories
@@ -764,8 +779,15 @@
                         downgrade: recommendations.filter(rec => rec.action === 'downgrade')
                     };
 
-                    // Define section metadata
+                    // Define section metadata (reordered: Cancel first, then Keep, then Apply)
                     const sections = [
+                        {
+                            key: 'cancel',
+                            title: '❌ Consider Canceling',
+                            description: 'Cards that provide limited value or overlap with better options',
+                            bgGradient: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
+                            borderColor: '#ef4444'
+                        },
                         {
                             key: 'keep',
                             title: '👍 Keep These Cards',
@@ -779,13 +801,6 @@
                             description: 'New cards that will improve your portfolio',
                             bgGradient: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
                             borderColor: '#3b82f6'
-                        },
-                        {
-                            key: 'cancel',
-                            title: '❌ Consider Canceling',
-                            description: 'Cards that provide limited value or overlap with better options',
-                            bgGradient: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
-                            borderColor: '#ef4444'
                         },
                         {
                             key: 'upgrade',
@@ -809,58 +824,61 @@
                         if (sectionRecs && sectionRecs.length > 0) {
                             html += `
                                 <div style="margin-bottom: 30px;">
-                                    <div style="background: ${section.bgGradient}; color: white; padding: 15px 20px; border-radius: 10px 10px 0 0; margin-bottom: 0;">
-                                        <h3 style="margin: 0 0 5px 0; font-size: 20px; font-weight: 700;">${section.title}</h3>
-                                        <p style="margin: 0; opacity: 0.9; font-size: 14px;">${section.description}</p>
+                                    <div onclick="toggleSection('${section.key}')" style="background: ${section.bgGradient}; color: white; padding: 15px 20px; border-radius: 10px 10px 0 0; margin-bottom: 0; cursor: pointer; user-select: none; display: flex; justify-content: space-between; align-items: center;">
+                                        <div>
+                                            <h3 style="margin: 0 0 5px 0; font-size: 20px; font-weight: 700;">${section.title}</h3>
+                                            <p style="margin: 0; opacity: 0.9; font-size: 14px;">${section.description}</p>
+                                        </div>
+                                        <div id="toggle-${section.key}" style="font-size: 20px; transition: transform 0.3s ease;">▼</div>
                                     </div>
-                                    <div style="border: 1px solid ${section.borderColor}; border-top: none; border-radius: 0 0 10px 10px; padding: 0;">
+                                    <div id="content-${section.key}" style="border: 1px solid ${section.borderColor}; border-top: none; border-radius: 0 0 10px 10px; padding: 0;">
                             `;
 
                             sectionRecs.forEach((rec, index) => {
-                                const actionClass = rec.action.toLowerCase();
+                        const actionClass = rec.action.toLowerCase();
 
-                                // Generate rewards breakdown HTML
-                                let breakdownHtml = '';
-                                
-                                if (rec.rewards_breakdown && Array.isArray(rec.rewards_breakdown) && rec.rewards_breakdown.length > 0) {
-                                    breakdownHtml = '<div style="margin-top: 15px; background: #f8f9fa; padding: 10px; border-radius: 6px;"><strong>💰 Rewards Breakdown:</strong><ul style="margin: 8px 0; padding-left: 20px;">';
-                                    rec.rewards_breakdown.forEach(breakdown => {
-                                        const categoryName = breakdown.category_name || 'Unknown Category';
-                                        const calculation = breakdown.calculation || 'No calculation available';
-                                        breakdownHtml += `<li style="margin: 4px 0; font-family: monospace; font-size: 14px; color: #2563eb;"><strong>${categoryName}:</strong> ${calculation}</li>`;
-                                    });
-                                    breakdownHtml += '</ul></div>';
-                                }
+                        // Generate rewards breakdown HTML
+                        let breakdownHtml = '';
+                        
+                        if (rec.rewards_breakdown && Array.isArray(rec.rewards_breakdown) && rec.rewards_breakdown.length > 0) {
+                            breakdownHtml = '<div style="margin-top: 15px; background: #f8f9fa; padding: 10px; border-radius: 6px;"><strong>💰 Rewards Breakdown:</strong><ul style="margin: 8px 0; padding-left: 20px;">';
+                            rec.rewards_breakdown.forEach(breakdown => {
+                                const categoryName = breakdown.category_name || 'Unknown Category';
+                                const calculation = breakdown.calculation || 'No calculation available';
+                                breakdownHtml += `<li style="margin: 4px 0; font-family: monospace; font-size: 14px; color: #2563eb;"><strong>${categoryName}:</strong> ${calculation}</li>`;
+                            });
+                            breakdownHtml += '</ul></div>';
+                        }
 
                                 const isLast = index === sectionRecs.length - 1;
                                 const borderBottom = isLast ? 'border-bottom: none;' : 'border-bottom: 1px solid #e5e7eb;';
 
-                                html += `
+                        html += `
                                     <div class="recommendation ${actionClass} modal-card-clickable" onclick="openCardModal(${rec.card.id})" style="margin: 0; border-radius: 0; border: none; ${borderBottom} border-left: 4px solid ${section.borderColor};">
                                         <div style="display: flex; justify-content: space-between; align-items: start;">
                                             <div style="flex: 1;">
                                                 <h4 style="margin: 0 0 10px 0; font-size: 18px; color: #1f2937;">${rec.card.name}</h4>
                                                 <p style="margin: 5px 0;"><strong>Estimated Value:</strong> $${rec.estimated_rewards.toFixed(0)}</p>
                                                 <p style="margin: 5px 0;"><strong>Annual Fee:</strong> $${rec.card.effective_annual_fee}${rec.card.annual_fee_waived_first_year && rec.action === 'apply' ? ' (first year waived)' : ''}</p>
-                                                ${rec.card.signup_bonus_amount && rec.action === 'apply' ? 
+                                        ${rec.card.signup_bonus_amount && rec.action === 'apply' ? 
                                                     `<p style="margin: 5px 0;"><strong>Signup Bonus:</strong> ${rec.card.signup_bonus_amount} points/miles</p>` : ''
-                                                }
-                                                ${breakdownHtml}
+                                        }
+                                        ${breakdownHtml}
                                                 <p style="margin: 10px 0 0 0;"><strong>Why:</strong> ${rec.reasoning}</p>
-                                            </div>
+                                    </div>
                                             <div style="display: flex; flex-direction: column; gap: 8px; align-items: center;">
                                                 <div style="background: ${section.borderColor}; color: white; padding: 8px 12px; border-radius: 20px; font-weight: 600; text-align: center; font-size: 14px;">
-                                                    #${rec.priority}
-                                                </div>
-                                                ${rec.action === 'apply' ? 
+                                            #${rec.priority}
+                                        </div>
+                                        ${rec.action === 'apply' ? 
                                                     `<button onclick="event.stopPropagation(); toggleCardOwnership(${rec.card.id}, this)" style="padding: 6px 12px; font-size: 12px; background: #10b981; color: white; border: none; border-radius: 6px; cursor: pointer;">
                                                         ✅ I have this
-                                                    </button>` : ''
-                                                }
-                                            </div>
-                                        </div>
+                                            </button>` : ''
+                                        }
                                     </div>
-                                `;
+                                </div>
+                            </div>
+                        `;
                             });
 
                             html += `
