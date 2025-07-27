@@ -1,0 +1,858 @@
+{% extends 'base.html' %}
+
+{% block title %}My Profile - Credit Card Guru{% endblock %}
+
+{% block content %}
+<h1>My Credit Card Profile</h1>
+
+<!-- Category Optimization Section -->
+<div class="section">
+    <h2>🎯 Which Card to Use for Each Category</h2>
+    <p style="color: #6b7280; margin-bottom: 20px;">Here's which card to use for each category to maximize rewards based on your card collection:</p>
+    <div id="categoryOptimization">
+        <div class="loading">Loading category recommendations...</div>
+    </div>
+</div>
+
+<!-- Profile Summary Section -->
+<div class="section">
+    <h2>📊 Portfolio Summary</h2>
+    <div class="modal-info-grid">
+        <div class="modal-info-item">
+            <div class="modal-info-label">Total Cards</div>
+            <div class="modal-info-value" id="totalCards">Loading...</div>
+        </div>
+        <div class="modal-info-item">
+            <div class="modal-info-label">Total Annual Fees</div>
+            <div class="modal-info-value" id="totalAnnualFees">Loading...</div>
+        </div>
+        <div class="modal-info-item">
+            <div class="modal-info-label">Estimated Annual Rewards</div>
+            <div class="modal-info-value" id="totalAnnualRewards">Loading...</div>
+        </div>
+        <div class="modal-info-item">
+            <div class="modal-info-label">Net Portfolio Value</div>
+            <div class="modal-info-value" id="netPortfolioValue">Loading...</div>
+        </div>
+    </div>
+</div>
+
+<!-- Card Collection Section -->
+<div class="section">
+    <h2>💳 My Card Collection</h2>
+    <div id="cardCollection">
+        <div class="loading">Loading your card collection...</div>
+    </div>
+</div>
+
+<!-- Spending Profile Section -->
+<div class="section">
+    <h2>📈 Your Spending Profile</h2>
+    <div id="spendingProfile">
+        <div class="loading">Loading spending profile...</div>
+    </div>
+</div>
+
+<style>
+.profile-card {
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 16px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.profile-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 15px;
+}
+
+.card-name {
+    font-size: 18px;
+    font-weight: 700;
+    color: #1f2937;
+    margin: 0;
+}
+
+.card-nickname {
+    font-size: 14px;
+    color: #6b7280;
+    margin: 2px 0 0 0;
+}
+
+.card-fee {
+    font-size: 16px;
+    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: 8px;
+    margin-left: 10px;
+}
+
+.fee-zero {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.fee-paid {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.card-details {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.detail-item {
+    background: #f8fafc;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+}
+
+.detail-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+}
+
+.detail-value {
+    font-size: 16px;
+    font-weight: 600;
+    color: #1e293b;
+}
+
+.category-optimization-simple {
+    background: linear-gradient(135deg, rgba(239, 246, 255, 0.9) 0%, rgba(239, 246, 255, 0.7) 100%);
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.category-simple-name {
+    font-size: 16px;
+    font-weight: 600;
+    color: #1e40af;
+    min-width: 120px;
+    flex-shrink: 0;
+}
+
+.rate-simple {
+    background: #10b981;
+    color: white;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 700;
+    min-width: 50px;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.card-simple-name {
+    font-size: 15px;
+    font-weight: 600;
+    color: #1f2937;
+    flex: 1;
+}
+
+.spending-cap-simple {
+    font-size: 12px;
+    color: #64748b;
+    font-style: italic;
+    margin-left: auto;
+    flex-shrink: 0;
+}
+
+/* Legacy styles for backward compatibility */
+.category-optimization-item {
+    background: linear-gradient(135deg, rgba(239, 246, 255, 0.9) 0%, rgba(239, 246, 255, 0.7) 100%);
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.category-info {
+    flex: 1;
+}
+
+.category-name {
+    font-size: 16px;
+    font-weight: 600;
+    color: #1e40af;
+    margin-bottom: 4px;
+}
+
+.category-details {
+    font-size: 14px;
+    color: #64748b;
+}
+
+.category-recommendation {
+    text-align: right;
+    padding-left: 20px;
+}
+
+.recommended-card {
+    font-size: 14px;
+    font-weight: 600;
+    color: #1f2937;
+    margin-bottom: 4px;
+}
+
+.reward-rate {
+    background: #10b981;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    display: inline-block;
+}
+
+.spending-item {
+    background: rgba(255, 255, 255, 0.8);
+    border: 1px solid rgba(229, 231, 235, 0.6);
+    border-radius: 10px;
+    padding: 15px;
+    margin-bottom: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.spending-category {
+    font-size: 16px;
+    font-weight: 600;
+    color: #374151;
+}
+
+.spending-amounts {
+    text-align: right;
+}
+
+.monthly-amount {
+    font-size: 18px;
+    font-weight: 700;
+    color: #059669;
+    margin-bottom: 2px;
+}
+
+.annual-amount {
+    font-size: 14px;
+    color: #6b7280;
+}
+
+.no-data {
+    text-align: center;
+    color: #6b7280;
+    padding: 40px 20px;
+    font-style: italic;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: #6b7280;
+}
+
+.empty-state h3 {
+    color: #374151;
+    margin-bottom: 8px;
+}
+
+.empty-state p {
+    margin-bottom: 20px;
+}
+
+.empty-state a {
+    display: inline-block;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 12px 24px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: transform 0.2s;
+}
+
+.empty-state a:hover {
+    transform: translateY(-2px);
+}
+
+@media (max-width: 768px) {
+    .card-details {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+    
+    .category-optimization-simple {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+    
+    .category-simple-name {
+        min-width: auto;
+    }
+    
+    .rate-simple {
+        min-width: auto;
+        align-self: flex-start;
+    }
+    
+    .spending-cap-simple {
+        margin-left: 0;
+        align-self: flex-start;
+    }
+    
+    .category-optimization-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    
+    .category-recommendation {
+        text-align: left;
+        padding-left: 0;
+    }
+    
+    .card-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+    
+    .card-fee {
+        margin-left: 0;
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', async function() {
+    await loadProfileData();
+});
+
+async function loadProfileData() {
+    try {
+        // Initialize user state first
+        await initUserState();
+        
+        // Load all profile data
+        await Promise.all([
+            loadCardCollection(),
+            loadCategoryOptimization(),
+            loadSpendingProfile()
+        ]);
+        
+        // Calculate and display portfolio summary
+        calculatePortfolioSummary();
+        
+    } catch (error) {
+        console.error('Error loading profile data:', error);
+        showError('Failed to load profile data. Please try refreshing the page.');
+    }
+}
+
+async function loadCardCollection() {
+    try {
+        const userCardsDetails = await UserDataManager.getUserCardsDetails();
+        const cardCollectionContainer = document.getElementById('cardCollection');
+        
+        if (!userCardsDetails || userCardsDetails.length === 0) {
+            cardCollectionContainer.innerHTML = `
+                <div class="empty-state">
+                    <h3>No Cards Added Yet</h3>
+                    <p>Start building your credit card portfolio by adding your cards.</p>
+                    <a href="/cards/">Browse Credit Cards</a>
+                </div>
+            `;
+            return;
+        }
+        
+        // Group cards by card ID and count duplicates
+        const cardGroups = {};
+        for (const userCard of userCardsDetails) {
+            const cardId = userCard.card.id;
+            if (!cardGroups[cardId]) {
+                cardGroups[cardId] = {
+                    card: userCard.card,
+                    instances: []
+                };
+            }
+            cardGroups[cardId].instances.push(userCard);
+        }
+        
+        // Fetch detailed card information
+        const cardIds = Object.keys(cardGroups);
+        const cardDetails = {};
+        
+        for (const cardId of cardIds) {
+            try {
+                const response = await fetch(`${API_BASE}/cards/cards/${cardId}/`);
+                if (response.ok) {
+                    cardDetails[cardId] = await response.json();
+                }
+            } catch (error) {
+                console.error(`Error fetching details for card ${cardId}:`, error);
+            }
+        }
+        
+        let cardsHtml = '';
+        
+        for (const [cardId, group] of Object.entries(cardGroups)) {
+            const cardInfo = cardDetails[cardId];
+            if (!cardInfo) continue;
+            
+            const instances = group.instances;
+            const hasMultiple = instances.length > 1;
+            
+            // Calculate annual fee
+            const annualFee = parseFloat(cardInfo.annual_fee || 0);
+            const feeClass = annualFee === 0 ? 'fee-zero' : 'fee-paid';
+            const feeText = annualFee === 0 ? 'No Fee' : `$${annualFee}/year`;
+            
+            // Get reward type and value
+            const rewardType = cardInfo.primary_reward_type?.name || 'Unknown';
+            const rewardMultiplier = cardInfo.metadata?.reward_value_multiplier || 0.01;
+            const pointValue = `${(rewardMultiplier * 100).toFixed(1)}¢ each`;
+            
+            // Get signup bonus
+            const signupBonus = cardInfo.signup_bonus_amount ? 
+                `${cardInfo.signup_bonus_amount.toLocaleString()} ${rewardType}` : 'None';
+            
+            // Create instances display
+            let instancesHtml = '';
+            if (hasMultiple) {
+                instancesHtml = `
+                    <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #e5e7eb;">
+                        <div class="detail-label">Multiple Cards (${instances.length})</div>
+                        ${instances.map((instance, index) => `
+                            <div style="margin-bottom: 8px; padding: 8px; background: #f1f5f9; border-radius: 6px;">
+                                <div style="font-weight: 600; color: #1e293b;">
+                                    ${instance.nickname || `Card ${index + 1}`}
+                                </div>
+                                ${instance.opened_date ? `
+                                    <div style="font-size: 12px; color: #64748b;">
+                                        Opened: ${new Date(instance.opened_date).toLocaleDateString()}
+                                    </div>
+                                ` : ''}
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            } else {
+                const instance = instances[0];
+                if (instance.nickname || instance.opened_date) {
+                    instancesHtml = `
+                        <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #e5e7eb;">
+                            ${instance.nickname ? `
+                                <div class="detail-item">
+                                    <div class="detail-label">Nickname</div>
+                                    <div class="detail-value">${instance.nickname}</div>
+                                </div>
+                            ` : ''}
+                            ${instance.opened_date ? `
+                                <div class="detail-item" style="margin-top: 10px;">
+                                    <div class="detail-label">Opened</div>
+                                    <div class="detail-value">${new Date(instance.opened_date).toLocaleDateString()}</div>
+                                </div>
+                            ` : ''}
+                        </div>
+                    `;
+                }
+            }
+            
+            cardsHtml += `
+                <div class="profile-card modal-card-clickable" onclick="openCardModal(${cardId})">
+                    <div class="card-header">
+                        <div>
+                            <h3 class="card-name">${cardInfo.name}</h3>
+                            <p class="card-nickname">${cardInfo.issuer?.name || 'Unknown Issuer'}${hasMultiple ? ` • ${instances.length} cards` : ''}</p>
+                        </div>
+                        <div class="card-fee ${feeClass}">${feeText}</div>
+                    </div>
+                    
+                    <div class="card-details">
+                        <div class="detail-item">
+                            <div class="detail-label">Reward Type</div>
+                            <div class="detail-value">${rewardType}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Point Value</div>
+                            <div class="detail-value">${pointValue}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Signup Bonus</div>
+                            <div class="detail-value">${signupBonus}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Card Type</div>
+                            <div class="detail-value">${cardInfo.card_type ? cardInfo.card_type.charAt(0).toUpperCase() + cardInfo.card_type.slice(1) : 'Personal'}</div>
+                        </div>
+                    </div>
+                    
+                    ${instancesHtml}
+                </div>
+            `;
+        }
+        
+        cardCollectionContainer.innerHTML = cardsHtml;
+        
+    } catch (error) {
+        console.error('Error loading card collection:', error);
+        document.getElementById('cardCollection').innerHTML = `
+            <div class="error">Error loading card collection. Please try refreshing the page.</div>
+        `;
+    }
+}
+
+async function loadCategoryOptimization() {
+    try {
+        const userCards = await UserDataManager.getCards();
+        const categoryContainer = document.getElementById('categoryOptimization');
+        
+        if (!userCards || userCards.length === 0) {
+            categoryContainer.innerHTML = `
+                <div class="empty-state">
+                    <h3>Add Cards to See Categories</h3>
+                    <p>Add your credit cards to see which card to use for each spending category.</p>
+                    <a href="/cards/">Add Credit Cards</a>
+                </div>
+            `;
+            return;
+        }
+        
+        // Get detailed card information for all user cards
+        const cardDetails = {};
+        for (const cardId of userCards) {
+            try {
+                const response = await fetch(`${API_BASE}/cards/cards/${cardId}/`);
+                if (response.ok) {
+                    cardDetails[cardId] = await response.json();
+                }
+            } catch (error) {
+                console.error(`Error fetching card ${cardId}:`, error);
+            }
+        }
+        
+        // Load category names for display
+        let categoriesResponse;
+        try {
+            categoriesResponse = await fetch(`${API_BASE}/cards/categories/`);
+            if (!categoriesResponse.ok) throw new Error('Failed to fetch categories');
+        } catch (error) {
+            console.error('Error fetching categories:', error);
+            categoriesResponse = null;
+        }
+        
+        const categories = categoriesResponse ? await categoriesResponse.json() : [];
+        const categoryMap = {};
+        categories.forEach(cat => {
+            categoryMap[cat.slug] = cat.display_name || cat.name;
+        });
+        
+        // Build a map of all reward categories from user's cards
+        const categoryRewards = {};
+        
+        for (const cardId of userCards) {
+            const card = cardDetails[cardId];
+            if (!card || !card.reward_categories) continue;
+            
+            for (const rewardCategory of card.reward_categories) {
+                if (!rewardCategory.is_active) continue;
+                
+                const categorySlug = rewardCategory.category.slug;
+                const categoryName = categoryMap[categorySlug] || rewardCategory.category.display_name || rewardCategory.category.name;
+                const rewardRate = parseFloat(rewardCategory.reward_rate);
+                const cardName = card.name;
+                
+                // Track the best rate for each category
+                if (!categoryRewards[categorySlug] || rewardRate > categoryRewards[categorySlug].rate) {
+                    categoryRewards[categorySlug] = {
+                        categoryName: categoryName,
+                        rate: rewardRate,
+                        cardName: cardName,
+                        maxSpend: rewardCategory.max_annual_spend
+                    };
+                }
+            }
+        }
+        
+        if (Object.keys(categoryRewards).length === 0) {
+            categoryContainer.innerHTML = `
+                <div class="no-data">
+                    Your cards don't have specific reward categories. They may earn a flat rate on all purchases.
+                </div>
+            `;
+            return;
+        }
+        
+        // Sort categories alphabetically for consistent display
+        const sortedCategories = Object.entries(categoryRewards)
+            .sort((a, b) => a[1].categoryName.localeCompare(b[1].categoryName));
+        
+        let optimizationHtml = '';
+        
+        for (const [categorySlug, categoryData] of sortedCategories) {
+            const { categoryName, rate, cardName, maxSpend } = categoryData;
+            
+            // Skip general/catch-all categories at 1x rate
+            if (rate <= 1.0 && ['other', 'general', 'everything-else'].includes(categorySlug)) {
+                continue;
+            }
+            
+            let spendingCapText = '';
+            if (maxSpend) {
+                spendingCapText = ` (up to $${parseFloat(maxSpend).toLocaleString()}/year)`;
+            }
+            
+            optimizationHtml += `
+                <div class="category-optimization-simple">
+                    <div class="category-simple-name">${categoryName}</div>
+                    <div class="rate-simple">${rate}%</div>
+                    <div class="card-simple-name">${cardName}</div>
+                    ${spendingCapText ? `<div class="spending-cap-simple">${spendingCapText}</div>` : ''}
+                </div>
+            `;
+        }
+        
+        if (optimizationHtml === '') {
+            categoryContainer.innerHTML = `
+                <div class="no-data">
+                    Your cards appear to have only general earning rates (1x). Consider adding cards with bonus categories for better optimization.
+                </div>
+            `;
+        } else {
+            categoryContainer.innerHTML = optimizationHtml;
+        }
+        
+    } catch (error) {
+        console.error('Error loading category optimization:', error);
+        document.getElementById('categoryOptimization').innerHTML = `
+            <div class="error">Error loading category optimization. Please try refreshing the page.</div>
+        `;
+    }
+}
+
+async function loadSpendingProfile() {
+    try {
+        const spending = await UserDataManager.getSpending();
+        const spendingContainer = document.getElementById('spendingProfile');
+        
+        if (!spending || Object.keys(spending).length === 0) {
+            spendingContainer.innerHTML = `
+                <div class="empty-state">
+                    <h3>No Spending Profile Set</h3>
+                    <p>Set up your spending profile to see detailed analysis and recommendations.</p>
+                    <a href="/">Set Up Spending Profile</a>
+                </div>
+            `;
+            return;
+        }
+        
+        // Load category names
+        let categoriesResponse;
+        try {
+            categoriesResponse = await fetch(`${API_BASE}/cards/categories/`);
+            if (!categoriesResponse.ok) throw new Error('Failed to fetch categories');
+        } catch (error) {
+            console.error('Error fetching categories:', error);
+            categoriesResponse = null;
+        }
+        
+        const categories = categoriesResponse ? await categoriesResponse.json() : [];
+        const categoryMap = {};
+        categories.forEach(cat => {
+            categoryMap[cat.slug] = cat.display_name || cat.name;
+        });
+        
+        // Sort spending by amount (highest first)
+        const sortedSpending = Object.entries(spending)
+            .filter(([, amount]) => parseFloat(amount) > 0)
+            .sort((a, b) => parseFloat(b[1]) - parseFloat(a[1]));
+        
+        if (sortedSpending.length === 0) {
+            spendingContainer.innerHTML = `
+                <div class="no-data">
+                    No spending categories with positive amounts found.
+                </div>
+            `;
+            return;
+        }
+        
+        let spendingHtml = '';
+        let totalMonthly = 0;
+        
+        for (const [categorySlug, monthlyAmount] of sortedSpending) {
+            const amount = parseFloat(monthlyAmount);
+            const annualAmount = amount * 12;
+            totalMonthly += amount;
+            
+            const categoryName = categoryMap[categorySlug] || categorySlug.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+            
+            spendingHtml += `
+                <div class="spending-item">
+                    <div class="spending-category">${categoryName}</div>
+                    <div class="spending-amounts">
+                        <div class="monthly-amount">$${amount.toLocaleString('en-US', { maximumFractionDigits: 0 })}/mo</div>
+                        <div class="annual-amount">$${annualAmount.toLocaleString('en-US', { maximumFractionDigits: 0 })}/year</div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Add total
+        spendingHtml += `
+            <div class="spending-item" style="border-top: 2px solid #e5e7eb; margin-top: 15px; padding-top: 15px; background: rgba(59, 130, 246, 0.1);">
+                <div class="spending-category" style="font-weight: 700; color: #1e40af;">Total Monthly Spending</div>
+                <div class="spending-amounts">
+                    <div class="monthly-amount" style="color: #1e40af;">$${totalMonthly.toLocaleString('en-US', { maximumFractionDigits: 0 })}/mo</div>
+                    <div class="annual-amount">$${(totalMonthly * 12).toLocaleString('en-US', { maximumFractionDigits: 0 })}/year</div>
+                </div>
+            </div>
+        `;
+        
+        spendingContainer.innerHTML = spendingHtml;
+        
+    } catch (error) {
+        console.error('Error loading spending profile:', error);
+        document.getElementById('spendingProfile').innerHTML = `
+            <div class="error">Error loading spending profile. Please try refreshing the page.</div>
+        `;
+    }
+}
+
+async function calculatePortfolioSummary() {
+    try {
+        const userCards = await UserDataManager.getCards();
+        const spending = await UserDataManager.getSpending();
+        
+        // Initialize default values
+        let totalCards = 0;
+        let totalAnnualFees = 0;
+        let totalAnnualRewards = 0;
+        let netPortfolioValue = 0;
+        
+        if (userCards && userCards.length > 0) {
+            // Get detailed card information and calculate fees
+            const cardDetails = {};
+            for (const cardId of userCards) {
+                try {
+                    const response = await fetch(`${API_BASE}/cards/cards/${cardId}/`);
+                    if (response.ok) {
+                        const card = await response.json();
+                        cardDetails[cardId] = card;
+                        totalAnnualFees += parseFloat(card.annual_fee || 0);
+                    }
+                } catch (error) {
+                    console.error(`Error fetching card ${cardId}:`, error);
+                }
+            }
+            
+            totalCards = userCards.length;
+            
+            // If we have spending data, calculate optimized rewards
+            if (spending && Object.keys(spending).length > 0) {
+                try {
+                    const requestData = {
+                        spending: spending,
+                        cards: userCards,
+                        preferences: await UserDataManager.getPreferences(),
+                        max_recommendations: 10
+                    };
+                    
+                    const response = await fetch(`${API_BASE}/roadmaps/quick-recommendation/`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': getCookie('csrftoken')
+                        },
+                        body: JSON.stringify(requestData)
+                    });
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        const portfolioSummary = data.portfolio_summary;
+                        
+                        if (portfolioSummary) {
+                            totalAnnualRewards = portfolioSummary.total_portfolio_rewards || 0;
+                            netPortfolioValue = portfolioSummary.net_portfolio_value || 0;
+                            // Use the optimized fees from the portfolio summary if available
+                            if (portfolioSummary.total_annual_fees !== undefined) {
+                                totalAnnualFees = portfolioSummary.total_annual_fees;
+                            }
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error calculating portfolio optimization:', error);
+                    // Fall back to simple calculation
+                    netPortfolioValue = Math.max(0, totalAnnualRewards - totalAnnualFees);
+                }
+            } else {
+                // No spending data, so no rewards
+                netPortfolioValue = -totalAnnualFees;
+            }
+        }
+        
+        // Update the display
+        document.getElementById('totalCards').textContent = totalCards.toString();
+        document.getElementById('totalAnnualFees').textContent = `$${totalAnnualFees.toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
+        document.getElementById('totalAnnualRewards').textContent = `$${totalAnnualRewards.toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
+        
+        // Color code the net value
+        const netValueElement = document.getElementById('netPortfolioValue');
+        netValueElement.textContent = `$${netPortfolioValue.toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
+        
+        if (netPortfolioValue > 0) {
+            netValueElement.style.color = '#059669'; // Green for positive
+        } else if (netPortfolioValue < 0) {
+            netValueElement.style.color = '#dc2626'; // Red for negative
+        } else {
+            netValueElement.style.color = '#6b7280'; // Gray for zero
+        }
+        
+    } catch (error) {
+        console.error('Error calculating portfolio summary:', error);
+        // Show error state
+        document.getElementById('totalCards').textContent = 'Error';
+        document.getElementById('totalAnnualFees').textContent = 'Error';
+        document.getElementById('totalAnnualRewards').textContent = 'Error';
+        document.getElementById('netPortfolioValue').textContent = 'Error';
+    }
+}
+
+function showError(message) {
+    const sections = ['cardCollection', 'categoryOptimization', 'spendingProfile'];
+    sections.forEach(sectionId => {
+        const element = document.getElementById(sectionId);
+        if (element && element.innerHTML.includes('Loading')) {
+            element.innerHTML = `<div class="error">${message}</div>`;
+        }
+    });
+}
+</script>
+
+{% endblock %}

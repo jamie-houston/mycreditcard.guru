@@ -332,6 +332,10 @@ def issuers_list_view(request):
     """Issuers listing page"""
     return render(request, 'issuers_list.html')
 
+def profile_view(request):
+    """User profile page showing card collection and category optimization"""
+    return render(request, 'profile.html')
+
 
 @api_view(['POST'])
 def toggle_card_ownership(request):

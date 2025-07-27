@@ -1254,6 +1254,7 @@
                 <li class="nav-item"><a href="/cards/" {% if request.resolver_match.url_name == 'cards_list' %}class="active"{% endif %}>Credit Cards</a></li>
                 <li class="nav-item"><a href="/categories/" {% if request.resolver_match.url_name == 'categories_list' %}class="active"{% endif %}>Categories</a></li>
                 <li class="nav-item"><a href="/issuers/" {% if request.resolver_match.url_name == 'issuers_list' %}class="active"{% endif %}>Issuers</a></li>
+                <li class="nav-item"><a href="/profile/" {% if request.resolver_match.url_name == 'profile' %}class="active"{% endif %}>Profile</a></li>
             </ul>
             <div class="nav-auth" id="navAuth">
                 {% if user.is_authenticated %}

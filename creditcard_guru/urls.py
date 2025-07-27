@@ -18,7 +18,7 @@ from django.contrib import admin
 from django.urls import path, include
 from django.http import JsonResponse
 from django.shortcuts import render
-from cards.views import index_view, cards_list_view, categories_list_view, category_detail_page_view, issuers_list_view
+from cards.views import index_view, cards_list_view, categories_list_view, category_detail_page_view, issuers_list_view, profile_view
 
 def home_view(request):
     if 'text/html' in request.META.get('HTTP_ACCEPT', ''):
@@ -48,6 +48,7 @@ urlpatterns = [
     path('categories/', categories_list_view, name='categories_list'),
     path('categories/<slug:category_slug>/', category_detail_page_view, name='category_detail'),
     path('issuers/', issuers_list_view, name='issuers_list'),
+    path('profile/', profile_view, name='profile'),
     
     # Authentication
     path('accounts/', include('allauth.urls')),
