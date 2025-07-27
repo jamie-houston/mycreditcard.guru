@@ -1,32 +1,115 @@
 [
   {
-    "name": "Chase Sapphire Preferred",
+    "name": "Chase Freedom Unlimited",
+    "issuer": "Chase",
+    "annual_fee": 0,
+    "signup_bonus": {
+      "bonus_amount": 20000,
+      "spending_requirement": 500,
+      "time_limit_months": 3
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "chase_travel",
+        "reward_rate": 5
+      },
+      {
+        "category": "drugstores",
+        "reward_rate": 3
+      },
+      {
+        "category": "dining",
+        "reward_rate": 3
+      },
+      {
+        "category": "other",
+        "reward_rate": 1.5
+      }
+    ],
+    "card_type": "personal",
+    "network": "Visa",
+    "url": "https://creditcards.chase.com/cash-back-credit-cards/freedom/unlimited",
+    "image_url": "/images/chase/freedom-unlimited.png",
+    "discontinued": false,
+    "verified": true
+  },
+  {
+    "name": "Wells Fargo Active Cash® Card",
+    "issuer": "Wells Fargo",
+    "annual_fee": 0,
+    "signup_bonus": {
+      "bonus_amount": 200,
+      "spending_requirement": 500,
+      "time_limit_months": 3
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 2
+      }
+    ],
+    "card_type": "personal",
+    "network": "Visa",
+    "url": "https://creditcards.wellsfargo.com/active-cash-credit-card/",
+    "image_url": "/images/wellsfargo/active-cash.png",
+    "discontinued": false,
+    "verified": true
+  },
+  {
+    "name": "Sapphire Preferred",
     "issuer": "Chase",
     "annual_fee": 95,
     "signup_bonus": {
-      "bonus_amount": 60000,
-      "spending_requirement": 4000,
+      "bonus_amount": 75000,
+      "spending_requirement": 5000,
       "time_limit_months": 3
     },
     "reward_type": "Points",
     "reward_value_multiplier": 0.0125,
     "reward_categories": [
-      { "category": "travel", "reward_rate": 2.0 },
-      { "category": "dining", "reward_rate": 2.0 },
-      { "category": "other", "reward_rate": 1.0 }
-    ],
-    "offers": [
       {
-        "title": "Travel Portal Bonus",
-        "description": "25% more value when you redeem through Chase Ultimate Rewards",
-        "value": "High travel value"
+        "category": "chase_travel",
+        "reward_rate": 5
+      },
+      {
+        "category": "dining",
+        "reward_rate": 3
+      },
+      {
+        "category": "streaming",
+        "reward_rate": 3
+      },
+      {
+        "category": "travel",
+        "reward_rate": 2
+      },
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "personal",
+    "network": "Visa",
+    "url": "https://creditcards.chase.com/rewards-credit-cards/sapphire/preferred",
+    "image_url": "/images/chase/sapphire-preferred.png",
+    "discontinued": false,
+    "credits": [
+      {
+        "description": "Hotel Credit",
+        "value": 50,
+        "weight": 0.9
       }
     ]
   },
   {
-    "name": "Capital One Venture",
+    "name": "Venture Rewards",
     "issuer": "Capital One",
     "annual_fee": 95,
+    "annual_fee_waived_first_year": true,
     "signup_bonus": {
       "bonus_amount": 75000,
       "spending_requirement": 4000,
@@ -34,12 +117,316 @@
     },
     "reward_type": "Miles",
     "reward_value_multiplier": 0.01,
-    "reward_categories": [{ "category": "other", "reward_rate": 1.5 }],
-    "offers": [
+    "reward_categories": [
       {
-        "title": "Flexible Redemption",
-        "description": "Miles can be redeemed for any travel expense",
-        "value": "Flexibility"
+        "category": "capital_one_travel",
+        "reward_rate": 5
+      },
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "personal",
+    "network": "Visa",
+    "url": "https://www.capitalone.com/credit-cards/venture/",
+    "image_url": "/images/capitalone/venture-rewards.webp",
+    "discontinued": false,
+    "credits": [
+      {
+        "description": "2x Capital One Lounge Visits",
+        "value": 100,
+        "weight": 0.25
+      },
+      {
+        "description": "Global Entry / TSA PreCheck Credit",
+        "value": 100,
+        "weight": 0.4
+      }
+    ]
+  },
+  {
+    "name": "Blue Cash Preferred Card from American Express",
+    "issuer": "American Express",
+    "annual_fee": 95,
+    "signup_bonus": {
+      "bonus_amount": 300,
+      "spending_requirement": 3000,
+      "time_limit_months": 6
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "streaming",
+        "reward_rate": 6
+      },
+      {
+        "category": "groceries",
+        "reward_rate": 6,
+        "max_bonus_amount": 6000
+      },
+      {
+        "category": "gas",
+        "reward_rate": 3
+      },
+      {
+        "category": "transportation",
+        "reward_rate": 3
+      },
+      {
+        "category": "other",
+        "reward_rate": 2
+      }
+    ],
+    "card_type": "personal",
+    "network": "American Express",
+    "url": "https://www.americanexpress.com/us/credit-cards/card/blue-cash-preferred/",
+    "image_url": "/images/amex/blue-cash-preferred.webp",
+    "discontinued": false,
+    "credits": [
+      {
+        "description": "$7/mo Disney Bundle Credit",
+        "value": 84,
+        "weight": 0.25
+      }
+    ]
+  },
+  {
+    "name": "American Express Gold Card",
+    "issuer": "American Express",
+    "annual_fee": 325,
+    "signup_bonus": {
+      "bonus_amount": 75000,
+      "spending_requirement": 6000,
+      "time_limit_months": 6
+    },
+    "reward_type": "Points",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      { "category": "dining", "reward_rate": 4, "max_bonus_amount": 50000 },
+      { "category": "groceries", "reward_rate": 4, "max_bonus_amount": 25000 },
+      { "category": "airlines", "reward_rate": 3 },
+      { "category": "hotels", "reward_rate": 2 },
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "personal",
+    "network": "American Express",
+    "url": "https://www.americanexpress.com/us/credit-cards/card/gold-card/",
+    "image_url": "/images/amex/gold.webp",
+    "discontinued": false
+  },
+  {
+    "name": "Chase Sapphire Reserve",
+    "issuer": "Chase",
+    "annual_fee": 795,
+    "signup_bonus": {
+      "bonus_amount": 100000,
+      "spending_requirement": 5000,
+      "time_limit_months": 3
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "dining",
+        "reward_rate": 3
+      },
+      {
+        "category": "travel",
+        "reward_rate": 4
+      },
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "personal",
+    "network": "Visa",
+    "url": "https://creditcards.chase.com/rewards-credit-cards/sapphire/reserve",
+    "image_url": "/images/chase/sapphire-reserve.png",
+    "discontinued": false,
+    "credits": [
+      {
+        "description": "Travel Credit",
+        "value": 300,
+        "weight": 1
+      },
+      {
+        "description": "Travel Credit (The Edit)",
+        "value": 500,
+        "weight": 0.8
+      },
+      {
+        "description": "Lounge Access",
+        "value": 469,
+        "weight": 0.2
+      },
+      {
+        "description": "PreCheck Credit",
+        "value": 100,
+        "weight": 0.5
+      },
+      {
+        "description": "Dining Credit",
+        "value": 300,
+        "weight": 0.75
+      },
+      {
+        "description": "Apple TV / Apple Music",
+        "value": 250,
+        "weight": 0.4
+      },
+      {
+        "description": "Dashpass",
+        "value": 120,
+        "weight": 0.4
+      }
+    ]
+  },
+  {
+    "name": "Ink Business Preferred Credit Card",
+    "issuer": "Chase",
+    "annual_fee": 95,
+    "signup_bonus": {
+      "bonus_amount": 90000,
+      "spending_requirement": 8000,
+      "time_limit_months": 3
+    },
+    "reward_type": "Points",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "travel",
+        "reward_rate": 3
+      },
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "business",
+    "network": "Visa",
+    "url": "https://creditcards.chase.com/business-credit-cards/ink/business-preferred",
+    "image_url": "/images/chase/ink-business-preferred.png",
+    "discontinued": false
+  },
+  {
+    "name": "The Platinum Card from American Express",
+    "issuer": "American Express",
+    "annual_fee": 695,
+    "signup_bonus": {
+      "bonus_amount": 150000,
+      "spending_requirement": 8000,
+      "time_limit_months": 6
+    },
+    "reward_type": "Points",
+    "reward_value_multiplier": 0.02,
+    "reward_categories": [
+      {
+        "category": "travel",
+        "reward_rate": 5
+      },
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "personal",
+    "network": "American Express",
+    "url": "https://www.americanexpress.com/us/credit-cards/card/platinum/",
+    "image_url": "/images/amex/platinum.webp",
+    "discontinued": false
+  },
+  {
+    "name": "Chase Sapphire Reserve Business",
+    "issuer": "Chase",
+    "annual_fee": 795,
+    "signup_bonus": {
+      "bonus_amount": 100000,
+      "spending_requirement": 5000,
+      "time_limit_months": 3
+    },
+    "reward_type": "Points",
+    "reward_value_multiplier": 0.015,
+    "reward_categories": [
+      { "category": "chase_travel", "reward_rate": 8 },
+      {
+        "category": "dining",
+        "reward_rate": 3
+      },
+      {
+        "category": "travel",
+        "reward_rate": 4
+      },
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "business",
+    "network": "Visa",
+    "url": "https://creditcards.chase.com/rewards-credit-cards/sapphire/reserve",
+    "image_url": "/images/chase/sapphire-reserve.png",
+    "discontinued": false,
+    "credits": [
+      {
+        "description": "Travel Credit",
+        "value": 300,
+        "weight": 1
+      },
+      {
+        "description": "Travel Credit (The Edit)",
+        "value": 500,
+        "weight": 0.8
+      },
+      {
+        "description": "Lounge Access",
+        "value": 469,
+        "weight": 0.2
+      },
+      {
+        "description": "PreCheck Credit",
+        "value": 120,
+        "weight": 0.5
+      },
+      {
+        "description": "Apple TV / Apple Music",
+        "value": 250,
+        "weight": 0.4
+      },
+      {
+        "description": "Dashpass",
+        "value": 120,
+        "weight": 0.3
+      },
+      {
+        "description": "$25/mo DoorDash Promos",
+        "value": 300,
+        "weight": 0.3
+      },
+      {
+        "description": "Google Workspace Credit",
+        "value": 200,
+        "weight": 0.5
+      },
+      {
+        "description": "ZipRecruiter Credit",
+        "value": 400,
+        "weight": 0.25
+      },
+      {
+        "description": "$10/mo Lyft Credit",
+        "value": 120,
+        "weight": 0.25
+      },
+      {
+        "description": "Gift Card Credit",
+        "value": 100,
+        "weight": 0.5
       }
     ]
   }
