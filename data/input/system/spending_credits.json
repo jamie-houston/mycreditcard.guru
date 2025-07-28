@@ -49,5 +49,11 @@
     "display_name": "Lyft",
     "description": "Lyft",
     "category": "transportation"
+  },
+  {
+    "name": "shopping",
+    "display_name": "Shopping Credits",
+    "description": "Gift cards and shopping credits",
+    "category": "other"
   }
 ]
