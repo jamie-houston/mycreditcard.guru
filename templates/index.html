@@ -102,7 +102,8 @@
 
     <script>
         // Dynamic issuer loading: 2025-07-04-v1
-        let spendingCategories = {};
+        let spendingCategories = {}; // For slug -> ID mapping
+        let spendingCategoriesArray = []; // For the actual category objects
         let spendingCredits = [];
 
         function toggleSpendingProfile() {
@@ -163,6 +164,9 @@
                 if (Array.isArray(categories)) {
                     // Sort categories by sort_order
                     categories.sort((a, b) => (a.sort_order || 100) - (b.sort_order || 100));
+                    
+                    // Store the categories array for parent/child logic
+                    spendingCategoriesArray = categories;
                     
                     // Build spending categories mapping
                     categories.forEach(cat => {
@@ -395,9 +399,9 @@
 
         function updateParentCategoryTotals() {
             // Update parent category totals based on their subcategories
-            if (!spendingCategories) return;
+            if (!spendingCategoriesArray || spendingCategoriesArray.length === 0) return;
             
-            const parentCategories = spendingCategories.filter(cat => !cat.parent);
+            const parentCategories = spendingCategoriesArray.filter(cat => !cat.parent);
             
             parentCategories.forEach(parentCategory => {
                 // Skip if this parent doesn't have subcategories
