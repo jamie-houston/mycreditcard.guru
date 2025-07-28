@@ -7,12 +7,12 @@ from django.shortcuts import render, get_object_or_404
 
 from .models import (
     Issuer, RewardType, SpendingCategory, CreditCard, CreditType,
-    UserSpendingProfile
+    UserSpendingProfile, SpendingCredit
 )
 from .serializers import (
     IssuerSerializer, RewardTypeSerializer, SpendingCategorySerializer,
     CreditCardSerializer, CreditCardListSerializer, UserSpendingProfileSerializer,
-    CreateSpendingProfileSerializer, CreditTypeSerializer
+    CreateSpendingProfileSerializer, CreditTypeSerializer, SpendingCreditSerializer
 )
 
 
@@ -34,6 +34,11 @@ class SpendingCategoryListView(generics.ListAPIView):
 class CreditTypeListView(generics.ListAPIView):
     queryset = CreditType.objects.all().order_by('sort_order', 'name')
     serializer_class = CreditTypeSerializer
+
+
+class SpendingCreditListView(generics.ListAPIView):
+    queryset = SpendingCredit.objects.all().select_related('category').order_by('category__sort_order', 'sort_order', 'display_name')
+    serializer_class = SpendingCreditSerializer
 
 
 class CreditCardListView(generics.ListAPIView):

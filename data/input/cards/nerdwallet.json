@@ -100,8 +100,8 @@
     "credits": [
       {
         "description": "Hotel Credit",
-        "value": 50,
-        "weight": 0.9
+        "category": "hotels",
+        "value": 50
       }
     ]
   },
@@ -134,12 +134,8 @@
     "discontinued": false,
     "credits": [
       {
-        "description": "2x Capital One Lounge Visits",
-        "value": 100,
-        "weight": 0.25
-      },
-      {
         "description": "Global Entry / TSA PreCheck Credit",
+        "credit_type": "precheck",
         "value": 100,
         "weight": 0.4
       }
@@ -186,9 +182,9 @@
     "discontinued": false,
     "credits": [
       {
-        "description": "$7/mo Disney Bundle Credit",
-        "value": 84,
-        "weight": 0.25
+        "credit_type": "disney_plus",
+        "value": 7,
+        "times_per_year": 12
       }
     ]
   },
@@ -251,39 +247,37 @@
     "discontinued": false,
     "credits": [
       {
-        "description": "Travel Credit",
-        "value": 300,
-        "weight": 1
+        "category": "travel",
+        "value": 150,
+        "times_per_year": 2
       },
       {
-        "description": "Travel Credit (The Edit)",
-        "value": 500,
-        "weight": 0.8
-      },
-      {
-        "description": "Lounge Access",
+        "credit_type": "airport_lounge",
         "value": 469,
-        "weight": 0.2
+        "times_per_year": 1
       },
       {
-        "description": "PreCheck Credit",
-        "value": 100,
-        "weight": 0.5
+        "credit_type": "precheck",
+        "value": 120
       },
       {
-        "description": "Dining Credit",
-        "value": 300,
-        "weight": 0.75
+        "category": "dining",
+        "value": 300
       },
       {
-        "description": "Apple TV / Apple Music",
-        "value": 250,
-        "weight": 0.4
+        "credit_type": "apple_tv",
+        "value": 10,
+        "times_per_year": 12
       },
       {
-        "description": "Dashpass",
-        "value": 120,
-        "weight": 0.4
+        "credit_type": "apple_music",
+        "value": 10,
+        "times_per_year": 12
+      },
+      {
+        "credit_type": "dashpass",
+        "value": 10,
+        "times_per_year": 12
       }
     ]
   },
@@ -374,59 +368,57 @@
     "discontinued": false,
     "credits": [
       {
-        "description": "Travel Credit",
-        "value": 300,
-        "weight": 1
+        "category": "travel",
+        "value": 150,
+        "times_per_year": 2
       },
       {
-        "description": "Travel Credit (The Edit)",
-        "value": 500,
-        "weight": 0.8
-      },
-      {
-        "description": "Lounge Access",
+        "credit_type": "airport_lounge",
         "value": 469,
-        "weight": 0.2
+        "times_per_year": 1
       },
       {
-        "description": "PreCheck Credit",
-        "value": 120,
-        "weight": 0.5
+        "credit_type": "precheck",
+        "value": 120
       },
       {
-        "description": "Apple TV / Apple Music",
-        "value": 250,
-        "weight": 0.4
+        "credit_type": "apple_tv",
+        "value": 10,
+        "times_per_year": 12
       },
       {
-        "description": "Dashpass",
-        "value": 120,
-        "weight": 0.3
+        "credit_type": "apple_music",
+        "value": 10,
+        "times_per_year": 12
       },
       {
-        "description": "$25/mo DoorDash Promos",
-        "value": 300,
-        "weight": 0.3
+        "credit_type": "dashpass",
+        "value": 10,
+        "times_per_year": 12
       },
       {
-        "description": "Google Workspace Credit",
-        "value": 200,
-        "weight": 0.5
+        "credit_type": "doordash",
+        "value": 25,
+        "times_per_year": 12
       },
       {
-        "description": "ZipRecruiter Credit",
-        "value": 400,
-        "weight": 0.25
+        "credit_type": "google_workspace",
+        "value": 20,
+        "times_per_year": 12
       },
       {
-        "description": "$10/mo Lyft Credit",
-        "value": 120,
-        "weight": 0.25
+        "credit_type": "ziprecruiter",
+        "value": 400
+      },
+      {
+        "credit_type": "lyft",
+        "value": 10,
+        "times_per_year": 12
       },
       {
         "description": "Gift Card Credit",
-        "value": 100,
-        "weight": 0.5
+        "credit_type": "shopping",
+        "value": 100
       }
     ]
   }

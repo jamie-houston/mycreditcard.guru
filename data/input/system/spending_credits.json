@@ -1,0 +1,53 @@
+[
+  { "name": "uber_eats", "display_name": "Uber Eats", "category": "dining" },
+  { "name": "dashpass", "display_name": "Dashpass", "category": "dining" },
+  { "name": "doordash", "display_name": "Doordash", "category": "dining" },
+  {
+    "name": "airport_lounge",
+    "display_name": "Airport Lounge",
+    "description": "Airport lounges and airport services",
+    "category": "airlines"
+  },
+  {
+    "name": "precheck",
+    "display_name": "PreCheck",
+    "description": "PreCheck and TSA PreCheck",
+    "category": "airlines"
+  },
+  {
+    "name": "disney_plus",
+    "display_name": "Disney Plus",
+    "description": "Disney Plus",
+    "category": "streaming"
+  },
+  {
+    "name": "apple_tv",
+    "display_name": "Apple TV",
+    "description": "Apple TV",
+    "category": "streaming"
+  },
+  {
+    "name": "apple_music",
+    "display_name": "Apple Music",
+    "description": "Apple Music",
+    "category": "streaming"
+  },
+  {
+    "name": "google_workspace",
+    "display_name": "Google Workspace",
+    "description": "Google Workspace",
+    "category": "business"
+  },
+  {
+    "name": "ziprecruiter",
+    "display_name": "ZipRecruiter",
+    "description": "ZipRecruiter",
+    "category": "business"
+  },
+  {
+    "name": "lyft",
+    "display_name": "Lyft",
+    "description": "Lyft",
+    "category": "transportation"
+  }
+]

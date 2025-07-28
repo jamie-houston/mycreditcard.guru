@@ -2,7 +2,7 @@ from rest_framework import serializers
 from .models import (
     Issuer, RewardType, SpendingCategory, CreditCard,
     RewardCategory, CardCredit, CreditType, UserSpendingProfile,
-    SpendingAmount, UserCard, UserCreditPreference
+    SpendingAmount, UserCard, UserCreditPreference, SpendingCredit
 )
 
 
@@ -40,6 +40,14 @@ class SpendingCategorySerializer(serializers.ModelSerializer):
                 'display_name': obj.parent.display_name
             }
         return None
+
+
+class SpendingCreditSerializer(serializers.ModelSerializer):
+    category = SpendingCategorySerializer(read_only=True)
+    
+    class Meta:
+        model = SpendingCredit
+        fields = ['id', 'name', 'slug', 'display_name', 'description', 'category', 'icon', 'sort_order']
 
 
 class RewardCategorySerializer(serializers.ModelSerializer):

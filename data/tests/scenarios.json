@@ -849,6 +849,254 @@
           "Zero fee cards cannot be filtered out by recommendation limits"
         ]
       }
+    },
+    {
+      "name": "Spending Credits - Basic Credit Type Matching",
+      "description": "Tests that spending credit preferences are properly matched with card credits using spending_credit field",
+      "user_profile": {
+        "spending": {
+          "dining": 400,
+          "travel": 300,
+          "general": 500
+        },
+        "spending_credit_preferences": ["uber_eats", "dashpass", "precheck"]
+      },
+      "owned_cards": [],
+      "available_cards": ["Chase Sapphire Reserve", "Blue Cash Preferred Card from American Express", "Venture Rewards"],
+      "expected_recommendations": {
+        "actions": ["apply"],
+        "spending_credits_integration": {
+          "credit_benefits_included": true,
+          "selected_credits_only": ["uber_eats", "dashpass", "precheck"],
+          "annual_value_calculation": true
+        },
+        "reasoning_must_contain": ["credit", "benefits", "dining"],
+        "test_conditions": [
+          "Only selected spending credits contribute to card value",
+          "Cards with matching spending credits get higher estimated value",
+          "Credit values are included in total portfolio rewards",
+          "Spending credit preferences filter card benefits properly"
+        ]
+      }
+    },
+    {
+      "name": "Spending Credits - Times Per Year Calculation",
+      "description": "Tests proper calculation of credit values with times_per_year multiplier",
+      "user_profile": {
+        "spending": {
+          "dining": 600,
+          "travel": 800,
+          "general": 400
+        },
+        "spending_credit_preferences": ["dashpass", "apple_tv", "doordash"]
+      },
+      "owned_cards": [],
+      "available_cards": ["Chase Sapphire Reserve", "Chase Sapphire Reserve Business"],
+      "expected_recommendations": {
+        "actions": ["apply"],
+        "spending_credits_integration": {
+          "times_per_year_handled": true,
+          "annual_calculations": {
+            "dashpass": {"monthly_value": 10, "times_per_year": 12, "annual_value": 120},
+            "apple_tv": {"monthly_value": 10, "times_per_year": 12, "annual_value": 120},
+            "doordash": {"monthly_value": 25, "times_per_year": 12, "annual_value": 300}
+          },
+          "total_credits_expected": 540
+        },
+        "reasoning_must_contain": ["credit", "annual value", "benefits"],
+        "test_conditions": [
+          "Credit values are multiplied by times_per_year correctly",
+          "Monthly credits (times_per_year=12) are calculated properly",
+          "Annual credits (times_per_year=1) default correctly",
+          "Total credit value reflects proper multiplication"
+        ]
+      }
+    },
+    {
+      "name": "Spending Credits - Category-Based Credits",
+      "description": "Tests category-based credits that are automatically included when user spends in that category",
+      "user_profile": {
+        "spending": {
+          "dining": 500,
+          "travel": 600,
+          "hotels": 300,
+          "general": 400
+        },
+        "spending_credit_preferences": []
+      },
+      "owned_cards": [],
+      "available_cards": ["Chase Sapphire Reserve", "Sapphire Preferred"],
+      "expected_recommendations": {
+        "actions": ["apply"],
+        "spending_credits_integration": {
+          "category_credits_included": true,
+          "automatic_inclusion": true,
+          "category_based_credits": ["travel", "dining", "hotels"]
+        },
+        "reasoning_must_contain": ["travel credit", "dining"],
+        "test_conditions": [
+          "Category-based credits are included when user spends in that category",
+          "No explicit credit preference selection needed for category credits",
+          "Travel credits included for travel spending",
+          "Dining credits included for dining spending",
+          "Hotel credits included for hotel spending"
+        ]
+      }
+    },
+    {
+      "name": "Spending Credits - Mixed Credit Types",
+      "description": "Tests portfolio with both spending_credit and category-based credits",
+      "user_profile": {
+        "spending": {
+          "dining": 400,
+          "travel": 500,
+          "streaming": 50,
+          "general": 600
+        },
+        "spending_credit_preferences": ["disney_plus", "apple_tv", "uber_eats"]
+      },
+      "owned_cards": [],
+      "available_cards": ["Chase Sapphire Reserve", "Blue Cash Preferred Card from American Express"],
+      "expected_recommendations": {
+        "actions": ["apply"],
+        "spending_credits_integration": {
+          "mixed_credit_types": true,
+          "spending_credits": ["disney_plus", "apple_tv", "uber_eats"],
+          "category_credits": ["travel", "dining"],
+          "total_credit_value_positive": true
+        },
+        "reasoning_must_contain": ["credits", "benefits", "streaming", "travel"],
+        "test_conditions": [
+          "Both spending_credit and category-based credits are calculated",
+          "Spending credit preferences apply to spending_credit fields",
+          "Category spending automatically includes category-based credits",
+          "No double counting between different credit types",
+          "Total portfolio value includes all applicable credits"
+        ]
+      }
+    },
+    {
+      "name": "Spending Credits - No Double Counting",
+      "description": "Tests that credits are not double-counted in portfolio optimization",
+      "user_profile": {
+        "spending": {
+          "dining": 600,
+          "travel": 400,
+          "general": 500
+        },
+        "spending_credit_preferences": ["dashpass", "uber_eats"]
+      },
+      "owned_cards": ["Chase Sapphire Reserve", "Chase Sapphire Reserve Business"],
+      "available_cards": ["Chase Sapphire Reserve", "Chase Sapphire Reserve Business", "Blue Cash Preferred Card from American Express"],
+      "expected_recommendations": {
+        "actions": ["keep", "cancel", "apply"],
+        "spending_credits_integration": {
+          "no_double_counting": true,
+          "unique_credits_only": true,
+          "portfolio_deduplication": true
+        },
+        "reasoning_must_contain": ["portfolio optimization", "redundant"],
+        "test_conditions": [
+          "Same credit type across multiple cards is counted only once",
+          "Portfolio optimization prevents credit double counting",
+          "Unique credits are identified by credit slug/type",
+          "Total portfolio credit value reflects deduplicated credits only"
+        ]
+      }
+    },
+    {
+      "name": "Spending Credits - High Value Credit Cards",
+      "description": "Tests recommendation of cards with high-value credits matching user preferences",
+      "user_profile": {
+        "spending": {
+          "dining": 300,
+          "travel": 200,
+          "business": 400,
+          "general": 300
+        },
+        "spending_credit_preferences": ["google_workspace", "ziprecruiter", "lyft"]
+      },
+      "owned_cards": [],
+      "available_cards": ["Chase Sapphire Reserve Business", "The Platinum Card from American Express", "Ink Business Preferred Credit Card"],
+      "expected_recommendations": {
+        "actions": ["apply"],
+        "spending_credits_integration": {
+          "high_value_credits": true,
+          "business_credits_included": ["google_workspace", "ziprecruiter"],
+          "transportation_credits": ["lyft"],
+          "credit_value_justifies_fees": true
+        },
+        "must_include_cards": ["Chase Sapphire Reserve Business"],
+        "reasoning_must_contain": ["business credits", "workspace", "high value"],
+        "test_conditions": [
+          "High-value credits like Google Workspace ($240/year) are properly calculated",
+          "Business-focused spending credits are matched correctly",
+          "Transportation credits like Lyft are included when selected",
+          "Total credit value makes annual fees worthwhile",
+          "Cards with matching business credits are prioritized"
+        ]
+      }
+    },
+    {
+      "name": "Spending Credits - Zero Credit Preferences",
+      "description": "Tests behavior when user selects no spending credit preferences",
+      "user_profile": {
+        "spending": {
+          "dining": 400,
+          "travel": 300,
+          "general": 500
+        },
+        "spending_credit_preferences": []
+      },
+      "owned_cards": [],
+      "available_cards": ["Chase Sapphire Reserve", "Blue Cash Preferred Card from American Express", "Wells Fargo Active Cash® Card"],
+      "expected_recommendations": {
+        "actions": ["apply"],
+        "spending_credits_integration": {
+          "no_spending_credits_selected": true,
+          "category_credits_still_included": true,
+          "focus_on_rewards_not_credits": true
+        },
+        "reasoning_must_contain": ["rewards", "cashback"],
+        "test_conditions": [
+          "No spending_credit based benefits are included in calculations",
+          "Category-based credits are still included when spending in those categories",
+          "Card recommendations focus on reward rates rather than credits",
+          "Portfolio optimization works without credit preferences",
+          "Basic card benefits may still be recommended"
+        ]
+      }
+    },
+    {
+      "name": "Spending Credits - Credit Value vs Annual Fee Analysis",
+      "description": "Tests that credit values are properly weighed against annual fees in recommendations",
+      "user_profile": {
+        "spending": {
+          "dining": 200,
+          "travel": 150,
+          "streaming": 25,
+          "general": 300
+        },
+        "spending_credit_preferences": ["disney_plus", "apple_tv"]
+      },
+      "owned_cards": [],
+      "available_cards": ["Blue Cash Preferred Card from American Express", "Wells Fargo Active Cash® Card", "Chase Sapphire Reserve"],
+      "expected_recommendations": {
+        "actions": ["apply"],
+        "spending_credits_integration": {
+          "credit_value_analysis": true,
+          "low_value_credits": {"disney_plus": 84, "apple_tv": 120},
+          "fee_vs_credit_comparison": true
+        },
+        "reasoning_must_contain": ["annual fee", "credit value", "cost-effective"],
+        "test_conditions": [
+          "Low-value credits don't justify high annual fees",
+          "Credit values are accurately calculated (times_per_year)",
+          "Portfolio optimization considers credit ROI",
+          "Lower fee cards preferred when credit values are minimal",
+          "Net value calculation includes both rewards and credits vs fees"
+        ]
+      }
     }
   ]
 }

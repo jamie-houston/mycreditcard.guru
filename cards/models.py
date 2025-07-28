@@ -113,17 +113,41 @@ class CreditType(models.Model):
         return self.name
 
 
+class SpendingCredit(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+    slug = models.SlugField(unique=True)
+    display_name = models.CharField(max_length=150)
+    description = models.TextField(blank=True)
+    category = models.ForeignKey(SpendingCategory, on_delete=models.CASCADE, related_name='spending_credits')
+    icon = models.CharField(max_length=50, blank=True)
+    sort_order = models.IntegerField(default=100)
+    
+    class Meta:
+        ordering = ['sort_order', 'display_name']
+    
+    def __str__(self):
+        return self.display_name
+
+
 class CardCredit(models.Model):
     card = models.ForeignKey(CreditCard, on_delete=models.CASCADE, related_name='credits')
     credit_type = models.ForeignKey(CreditType, on_delete=models.CASCADE, related_name='card_credits', null=True, blank=True)
+    spending_credit = models.ForeignKey(SpendingCredit, on_delete=models.CASCADE, related_name='card_credits', null=True, blank=True)
+    category = models.ForeignKey(SpendingCategory, on_delete=models.CASCADE, null=True, blank=True)  # For category-based credits
     description = models.CharField(max_length=500)
     value = models.DecimalField(max_digits=10, decimal_places=2)
+    times_per_year = models.IntegerField(default=1)
     weight = models.FloatField(default=1.0)
     currency = models.CharField(max_length=20, default='USD', blank=True)
     is_active = models.BooleanField(default=True)
     
     def __str__(self):
         return f"{self.card} - {self.description}"
+    
+    @property
+    def annual_value(self):
+        """Calculate the total annual value of this credit"""
+        return float(self.value) * self.times_per_year
 
 
 class UserSpendingProfile(models.Model):
@@ -186,3 +210,16 @@ class UserCreditPreference(models.Model):
     
     def __str__(self):
         return f"{self.profile} - {self.credit_type.name}: {self.values_credit}"
+
+
+class UserSpendingCreditPreference(models.Model):
+    """Tracks which spending credits the user values/uses"""
+    profile = models.ForeignKey(UserSpendingProfile, on_delete=models.CASCADE, related_name='spending_credit_preferences')
+    spending_credit = models.ForeignKey(SpendingCredit, on_delete=models.CASCADE)
+    values_credit = models.BooleanField(default=False)
+    
+    class Meta:
+        unique_together = ['profile', 'spending_credit']
+    
+    def __str__(self):
+        return f"{self.profile} - {self.spending_credit.display_name}: {self.values_credit}"

@@ -9,6 +9,7 @@ urlpatterns = [
     path('reward-types/', views.RewardTypeListView.as_view(), name='reward-type-list'),
     path('spending-categories/', views.SpendingCategoryListView.as_view(), name='spending-category-list'),
     path('credit-types/', views.CreditTypeListView.as_view(), name='credit-type-list'),
+    path('spending-credits/', views.SpendingCreditListView.as_view(), name='spending-credit-list'),
     path('categories-with-rewards/', views.categories_with_rewards_view, name='categories-with-rewards'),
     path('categories/<slug:category_slug>/', views.category_detail_view, name='category-detail'),
     

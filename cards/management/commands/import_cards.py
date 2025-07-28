@@ -6,7 +6,8 @@ from django.utils.text import slugify
 from django.contrib.auth.models import User
 from cards.models import (
     Issuer, RewardType, SpendingCategory, CreditCard, 
-    RewardCategory, CardCredit, UserSpendingProfile, UserCard
+    RewardCategory, CardCredit, UserSpendingProfile, UserCard,
+    CreditType, SpendingCredit
 )
 
 
@@ -318,11 +319,45 @@ class Command(BaseCommand):
 
     def import_card_credits(self, card, credits):
         for credit_data in credits:
+            # Determine if this is a category-based credit or credit_type-based credit
+            category = None
+            credit_type = None
+            spending_credit = None
+            
+            if 'category' in credit_data:
+                # Category-based credit (like travel, dining)
+                try:
+                    category = SpendingCategory.objects.get(slug=credit_data['category'])
+                except SpendingCategory.DoesNotExist:
+                    self.stdout.write(
+                        self.style.WARNING(f'Category "{credit_data["category"]}" not found for credit: {credit_data.get("description", "Unknown")}')
+                    )
+                    continue
+                    
+            elif 'credit_type' in credit_data:
+                # Credit type-based credit (like uber_eats, precheck)
+                try:
+                    # First try to find as a spending credit
+                    spending_credit = SpendingCredit.objects.get(name=credit_data['credit_type'])
+                except SpendingCredit.DoesNotExist:
+                    try:
+                        # Fallback to old credit type system
+                        credit_type = CreditType.objects.get(slug=credit_data['credit_type'])
+                    except CreditType.DoesNotExist:
+                        self.stdout.write(
+                            self.style.WARNING(f'Credit type "{credit_data["credit_type"]}" not found for credit: {credit_data.get("description", "Unknown")}')
+                        )
+                        continue
+            
             # Create new card credit (existing ones were already deleted)
             CardCredit.objects.create(
                 card=card,
+                category=category,
+                credit_type=credit_type,
+                spending_credit=spending_credit,
                 description=credit_data.get('description', ''),
                 value=credit_data.get('value', 0),
+                times_per_year=credit_data.get('times_per_year', 1),
                 weight=credit_data.get('weight', 1.0),
                 currency=credit_data.get('currency', 'USD'),
             )

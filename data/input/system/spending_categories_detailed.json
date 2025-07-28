@@ -4,7 +4,8 @@
     "display_name": "Dining & Restaurants",
     "description": "Restaurants, bars, cafes, and food delivery services",
     "icon": "fas fa-utensils",
-    "sort_order": 10
+    "sort_order": 10,
+    "subcategories": [{ "name": "uber", "display_name": "Uber Eats" }]
   },
   {
     "name": "travel",
@@ -55,7 +56,10 @@
     "display_name": "Groceries",
     "description": "Supermarkets and grocery stores",
     "icon": "fas fa-shopping-cart",
-    "sort_order": 30
+    "sort_order": 30,
+    "subcategories": [
+      { "name": "online_groceries", "display_name": "Online Groceries" }
+    ]
   },
   {
     "name": "gas",
@@ -65,18 +69,36 @@
     "sort_order": 40
   },
   {
-    "name": "streaming",
-    "display_name": "Streaming Services",
-    "description": "Video and music streaming subscriptions",
-    "icon": "fas fa-tv",
-    "sort_order": 50
+    "name": "entertainment",
+    "display_name": "Entertainment",
+    "description": "Movies, concerts, streaming services, and entertainment venues",
+    "icon": "fas fa-film",
+    "sort_order": 50,
+    "subcategories": [
+      {
+        "name": "streaming",
+        "display_name": "Streaming Services",
+        "description": "Video and music streaming subscriptions",
+        "icon": "fas fa-tv",
+        "sort_order": 80
+      }
+    ]
   },
   {
     "name": "shopping",
     "display_name": "Shopping",
     "description": "Online and retail shopping, department stores",
     "icon": "fas fa-shopping-bag",
-    "sort_order": 60
+    "sort_order": 60,
+    "subcategories": [
+      {
+        "name": "amazon",
+        "display_name": "Amazon",
+        "description": "Amazon purchases",
+        "icon": "fab fa-amazon",
+        "sort_order": 150
+      }
+    ]
   },
   {
     "name": "transportation",
@@ -93,17 +115,38 @@
     "sort_order": 90
   },
   {
+    "name": "home_improvement",
+    "display_name": "Home Improvement",
+    "description": "Hardware stores, home improvement retailers",
+    "icon": "fas fa-home",
+    "sort_order": 100
+  },
+  {
+    "name": "office_supplies",
+    "display_name": "Office Supplies",
+    "description": "Office supply stores and business expenses",
+    "icon": "fas fa-briefcase",
+    "sort_order": 110
+  },
+  {
+    "name": "telecommunications",
+    "display_name": "Telecommunications",
+    "description": "Phone, internet, and cable services",
+    "icon": "fas fa-phone",
+    "sort_order": 120
+  },
+  {
+    "name": "utilities",
+    "display_name": "Utilities",
+    "description": "Electricity, water, gas, internet, phone, and other utility bills",
+    "icon": "fas fa-bolt",
+    "sort_order": 125
+  },
+  {
     "name": "other",
     "display_name": "Other",
     "description": "Any expenses that don't fit into the above categories",
     "icon": "fas fa-ellipsis-h",
     "sort_order": 140
-  },
-  {
-    "name": "business",
-    "display_name": "Business",
-    "description": "Business expenses",
-    "icon": "fas fa-briefcase",
-    "sort_order": 100
   }
 ]
