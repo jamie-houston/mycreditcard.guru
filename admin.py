@@ -207,6 +207,7 @@ def import_sample_data():
                     "issuers.json",
                     "reward_types.json", 
                     "spending_categories.json",
+                    "spending_credits.json",
                     "credit_cards.json"
                 ]
                 
@@ -216,14 +217,24 @@ def import_sample_data():
                     for file_path in system_files:
                         if file_path.name == preferred_file and file_path not in imported_files:
                             print(f"\n📄 Importing {file_path.name}")
-                            run_command(f"python manage.py import_cards {file_path}", f"Importing {file_path.name}")
+                            
+                            # Use appropriate import command based on file type
+                            if file_path.name == "spending_credits.json":
+                                run_command(f"python manage.py import_spending_credits", f"Importing {file_path.name}")
+                            else:
+                                run_command(f"python manage.py import_cards {file_path}", f"Importing {file_path.name}")
                             imported_files.add(file_path)
                 
                 # Import any remaining system files
                 for file_path in system_files:
                     if file_path not in imported_files:
                         print(f"\n📄 Importing {file_path.name}")
-                        run_command(f"python manage.py import_cards {file_path}", f"Importing {file_path.name}")
+                        
+                        # Use appropriate import command based on file type
+                        if file_path.name == "spending_credits.json":
+                            run_command(f"python manage.py import_spending_credits", f"Importing {file_path.name}")
+                        else:
+                            run_command(f"python manage.py import_cards {file_path}", f"Importing {file_path.name}")
                         imported_files.add(file_path)
                 
                 print("\n💳 Importing card files...")
@@ -253,7 +264,12 @@ def import_sample_data():
                         continue
                 
                 print(f"\n📄 Importing {file_path.name}")
-                run_command(f"python manage.py import_cards {file_path}", f"Importing {file_path.name}")
+                
+                # Use appropriate import command based on file type
+                if file_path.name == "spending_credits.json":
+                    run_command(f"python manage.py import_spending_credits", f"Importing {file_path.name}")
+                else:
+                    run_command(f"python manage.py import_cards {file_path}", f"Importing {file_path.name}")
                 imported_files.add(file_path)
                 print(f"✅ {file_path.name} imported successfully!")
                 # Continue to show menu again
@@ -387,6 +403,7 @@ def full_setup():
             "issuers.json",
             "reward_types.json", 
             "spending_categories.json",
+            "spending_credits.json",
             "credit_cards.json"
         ]
         
@@ -394,7 +411,12 @@ def full_setup():
             file_path = data_dir / filename
             if file_path.exists():
                 print(f"📄 Importing {filename}")
-                run_command(f"python manage.py import_cards {file_path}", f"Importing {filename}")
+                
+                # Use appropriate import command based on file type
+                if filename == "spending_credits.json":
+                    run_command(f"python manage.py import_spending_credits", f"Importing {filename}")
+                else:
+                    run_command(f"python manage.py import_cards {file_path}", f"Importing {filename}")
             else:
                 print(f"⚠️  Essential file not found: {filename}")
         
