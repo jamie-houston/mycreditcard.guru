@@ -270,6 +270,9 @@
                 const tooltipHtml = description ? 
                     `<span class="tooltip-icon" title="${description}">❓</span>` : '';
                 
+                // Check if this category has subcategories
+                const hasSubcategories = category.subcategories && category.subcategories.length > 0;
+                
                 let categoryHtml = `
                     <div class="spending-item main-category-item">
                         <div class="input-group">
@@ -278,8 +281,10 @@
                             </span>
                             <span class="input-group-text" style="background: white; border-left: none;">$</span>
                             <input type="number" id="${htmlId}" data-category-slug="${slug}" 
-                                   placeholder="0" min="0" step="10" class="form-control spending-input">
+                                   placeholder="0" min="0" step="10" class="form-control spending-input"
+                                   ${hasSubcategories ? 'readonly style="background-color: #f8f9fa; color: #6c757d; cursor: not-allowed;"' : ''}>
                         </div>
+                        ${hasSubcategories ? '<div style="font-size: 12px; color: #6b7280; margin-top: 4px; margin-left: 10px;"><em>Total calculated from subcategories below</em></div>' : ''}
                     </div>
                 `;
                 
@@ -367,11 +372,13 @@
             document.addEventListener('input', function(e) {
                 if (e.target.classList.contains('spending-input')) {
                     updateTotal();
+                    updateParentCategoryTotals();
                 }
             });
             
             // Initial calculation
             updateTotal();
+            updateParentCategoryTotals();
         }
 
         function updateTotal() {
@@ -386,11 +393,47 @@
             document.getElementById('totalSpending').textContent = total.toLocaleString();
         }
 
+        function updateParentCategoryTotals() {
+            // Update parent category totals based on their subcategories
+            if (!spendingCategories) return;
+            
+            const parentCategories = spendingCategories.filter(cat => !cat.parent);
+            
+            parentCategories.forEach(parentCategory => {
+                // Skip if this parent doesn't have subcategories
+                if (!parentCategory.subcategories || parentCategory.subcategories.length === 0) {
+                    return;
+                }
+                
+                // Calculate total from all subcategories
+                let subcategoryTotal = 0;
+                parentCategory.subcategories.forEach(subcat => {
+                    const subInput = document.getElementById(subcat.slug.replace(/-/g, '_'));
+                    if (subInput) {
+                        const value = parseFloat(subInput.value) || 0;
+                        subcategoryTotal += value;
+                    }
+                });
+                
+                // Update the parent category input
+                const parentInput = document.getElementById(parentCategory.slug.replace(/-/g, '_'));
+                if (parentInput) {
+                    parentInput.value = subcategoryTotal > 0 ? subcategoryTotal : '';
+                }
+            });
+        }
+
         function resetSpendingProfile() {
             if (confirm('Are you sure you want to reset all spending amounts and spending credit preferences? This action cannot be undone.')) {
-                // Clear all spending inputs
-                const spendingInputs = document.querySelectorAll('.spending-input');
+                // Clear all spending inputs (only editable ones)
+                const spendingInputs = document.querySelectorAll('.spending-input:not([readonly])');
                 spendingInputs.forEach(input => {
+                    input.value = '';
+                });
+                
+                // Clear readonly parent category inputs as well
+                const readonlyInputs = document.querySelectorAll('.spending-input[readonly]');
+                readonlyInputs.forEach(input => {
                     input.value = '';
                 });
                 
@@ -449,8 +492,9 @@
                     }
                 });
                 
-                // Update total after loading saved data
+                // Update total and parent category totals after loading saved data
                 updateTotal();
+                updateParentCategoryTotals();
                 
                 // Load preferences
                 const savedPreferences = await UserDataManager.getPreferences();
@@ -519,9 +563,9 @@
 
         async function saveCurrentData() {
             try {
-                // Save spending data
+                // Save spending data (only from editable inputs - subcategories and standalone categories)
                 const spendingData = {};
-                const spendingInputs = document.querySelectorAll('.spending-input');
+                const spendingInputs = document.querySelectorAll('.spending-input:not([readonly])');
                 spendingInputs.forEach(input => {
                     const categorySlug = input.dataset.categorySlug;
                     const value = input.value;
@@ -541,8 +585,8 @@
                 // Use the unified data manager to save
                 await UserDataManager.saveSpending(spendingData);
                 
-                // Save credit preferences
-                await saveCreditPreferences();
+                // Save spending credit preferences
+                await saveSpendingCreditPreferences();
                 
                 // For preferences, we need to save them separately since UserDataManager 
                 // doesn't have a savePreferences method yet
@@ -592,8 +636,8 @@
                 // Build spending amounts object
                 const spendingAmounts = {};
                 
-                // Build spending amounts from dynamic inputs
-                const spendingInputs = document.querySelectorAll('.spending-input');
+                // Build spending amounts from dynamic inputs (only editable ones - subcategories and standalone categories)
+                const spendingInputs = document.querySelectorAll('.spending-input:not([readonly])');
                 spendingInputs.forEach(input => {
                     const categorySlug = input.dataset.categorySlug;
                     const amount = input.value;
@@ -917,7 +961,7 @@
             // Save data synchronously (limited time available)
             try {
                 const spendingData = {};
-                const spendingInputs = document.querySelectorAll('.spending-input');
+                const spendingInputs = document.querySelectorAll('.spending-input:not([readonly])');
                 spendingInputs.forEach(input => {
                     const categorySlug = input.dataset.categorySlug;
                     const value = input.value;

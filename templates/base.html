@@ -405,6 +405,26 @@
             font-size: 15px;
             border: none;
         }
+
+        /* Styling for read-only parent categories */
+        .main-category-item input[readonly] {
+            background-color: #f8f9fa !important;
+            color: #6c757d !important;
+            cursor: not-allowed !important;
+            font-weight: 600 !important;
+            border: 1px solid #e9ecef !important;
+        }
+
+        /* Styling for editable subcategories */
+        .subcategory-item input:not([readonly]) {
+            background-color: white !important;
+            border: 1px solid #ced4da !important;
+        }
+
+        .subcategory-item input:not([readonly]):focus {
+            border-color: #86b7fe !important;
+            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25) !important;
+        }
         
         .subcategory-item {
             margin-left: 35px;
