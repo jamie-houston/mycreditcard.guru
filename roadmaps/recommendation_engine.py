@@ -757,15 +757,7 @@ class RecommendationEngine:
         """Calculate the annual value of card credits that user has selected as valuable"""
         credits_value = 0.0
         
-        # Get user's selected credit preferences (old system)
-        user_credit_preferences = set()
-        if hasattr(self.profile, 'credit_preferences'):
-            user_credit_preferences = set(
-                pref.credit_type.slug 
-                for pref in self.profile.credit_preferences.filter(values_credit=True)
-            )
-        
-        # Get user's selected spending credit preferences (new system)
+        # Get user's selected spending credit preferences
         user_spending_credit_preferences = set()
         if hasattr(self.profile, 'spending_credit_preferences'):
             user_spending_credit_preferences = set(
@@ -773,28 +765,24 @@ class RecommendationEngine:
                 for pref in self.profile.spending_credit_preferences.filter(values_credit=True)
             )
         
+        # Get user's spending categories (for category-based credits)
+        user_spending_categories = set(
+            spending.category.slug
+            for spending in self.profile.spending_amounts.all()
+            if spending.monthly_amount > 0
+        )
+        
         # Calculate value of card credits that match user preferences
         for card_credit in card.credits.filter(is_active=True):
             credit_matches = False
             
-            # Check old credit_type system
-            if card_credit.credit_type and card_credit.credit_type.slug in user_credit_preferences:
-                credit_matches = True
-            
-            # Check new spending_credit system
+            # Check spending_credit system
             if card_credit.spending_credit and card_credit.spending_credit.slug in user_spending_credit_preferences:
                 credit_matches = True
             
-            # Check category-based credits (always include if spending in that category)
-            if card_credit.category:
-                # For category-based credits, include if user spends in that category
-                user_spending_categories = set(
-                    spending.category.slug
-                    for spending in self.profile.spending_amounts.all()
-                    if spending.monthly_amount > 0
-                )
-                if card_credit.category.slug in user_spending_categories:
-                    credit_matches = True
+            # Check category-based credits (automatically include if spending in that category)
+            elif card_credit.category and card_credit.category.slug in user_spending_categories:
+                credit_matches = True
             
             if credit_matches:
                 # Calculate annual value (value * times_per_year)
@@ -985,14 +973,7 @@ class RecommendationEngine:
         unique_credits = set()
         total_credits_value = 0
         
-        # Get user preferences for both old and new credit systems
-        user_credit_preferences = set()
-        if hasattr(self.profile, 'credit_preferences'):
-            user_credit_preferences = set(
-                pref.credit_type.slug 
-                for pref in self.profile.credit_preferences.filter(values_credit=True)
-            )
-        
+        # Get user preferences for spending credits
         user_spending_credit_preferences = set()
         if hasattr(self.profile, 'spending_credit_preferences'):
             user_spending_credit_preferences = set(
@@ -1012,13 +993,8 @@ class RecommendationEngine:
                 credit_key = None
                 credit_matches = False
                 
-                # Check old credit_type system
-                if card_credit.credit_type and card_credit.credit_type.slug in user_credit_preferences:
-                    credit_key = f"credit_type_{card_credit.credit_type.slug}"
-                    credit_matches = True
-                
-                # Check new spending_credit system
-                elif card_credit.spending_credit and card_credit.spending_credit.slug in user_spending_credit_preferences:
+                # Check spending_credit system
+                if card_credit.spending_credit and card_credit.spending_credit.slug in user_spending_credit_preferences:
                     credit_key = f"spending_credit_{card_credit.spending_credit.slug}"
                     credit_matches = True
                 

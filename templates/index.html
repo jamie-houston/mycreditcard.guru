@@ -217,32 +217,6 @@
             }
         }
 
-        async function loadCreditTypes() {
-            try {
-                const creditTypesResponse = await fetch(`${API_BASE}/cards/credit-types/`);
-                const creditTypesData = await creditTypesResponse.json();
-                const creditTypes = creditTypesData.results || creditTypesData;
-                
-                // Group credit types by category
-                const categorizedCredits = {};
-                creditTypes.forEach(creditType => {
-                    const category = creditType.category || 'misc';
-                    if (!categorizedCredits[category]) {
-                        categorizedCredits[category] = [];
-                    }
-                    categorizedCredits[category].push(creditType);
-                });
-                
-                // Render credit types
-                renderCreditTypes(categorizedCredits);
-                
-            } catch (error) {
-                console.error('Error loading credit types:', error);
-                document.getElementById('creditTypes').innerHTML = 
-                    '<div class="error">Error loading credit types. Please try again.</div>';
-            }
-        }
-
         function renderSpendingCategories(categories) {
             const container = document.getElementById('spendingCategories');
             
@@ -383,44 +357,6 @@
             container.innerHTML = html;
         }
 
-        function renderCreditTypes(categorizedCredits) {
-            const container = document.getElementById('creditTypes');
-            
-            // Flatten all credit types into a single list
-            const allCredits = [];
-            Object.values(categorizedCredits).forEach(categoryCredits => {
-                allCredits.push(...categoryCredits);
-            });
-            
-            // Sort alphabetically by name
-            allCredits.sort((a, b) => a.name.localeCompare(b.name));
-            
-            let html = '<div class="credits-checkbox-list">';
-            
-            allCredits.forEach(creditType => {
-                const tooltipHtml = creditType.description ? 
-                    `title="${creditType.description}"` : '';
-                
-                html += `
-                    <div class="credit-checkbox-item">
-                        <input type="checkbox" id="credit_${creditType.slug}" name="credit_preferences" 
-                               value="${creditType.slug}" onchange="handleCreditChange(this)">
-                        <label for="credit_${creditType.slug}" ${tooltipHtml}>
-                            ${creditType.icon ? `${creditType.icon} ` : ''}${creditType.name}
-                        </label>
-                    </div>
-                `;
-            });
-            
-            html += '</div>';
-            container.innerHTML = html;
-        }
-
-        function handleCreditChange(checkbox) {
-            // Save credit preferences
-            saveCreditPreferences();
-        }
-
         function handleSpendingCreditChange(checkbox) {
             // Save spending credit preferences
             saveSpendingCreditPreferences();
@@ -451,17 +387,11 @@
         }
 
         function resetSpendingProfile() {
-            if (confirm('Are you sure you want to reset all spending amounts and credit preferences? This action cannot be undone.')) {
+            if (confirm('Are you sure you want to reset all spending amounts and spending credit preferences? This action cannot be undone.')) {
                 // Clear all spending inputs
                 const spendingInputs = document.querySelectorAll('.spending-input');
                 spendingInputs.forEach(input => {
                     input.value = '';
-                });
-                
-                // Clear all credit preference checkboxes
-                const creditCheckboxes = document.querySelectorAll('input[name="credit_preferences"]');
-                creditCheckboxes.forEach(checkbox => {
-                    checkbox.checked = false;
                 });
                 
                 // Clear all spending credit preference checkboxes
@@ -493,8 +423,7 @@
                 // Clear spending data
                 await UserDataManager.saveSpending({});
                 
-                // Clear credit preferences from localStorage
-                localStorage.removeItem('userCreditPreferences');
+                // Clear spending credit preferences from localStorage
                 localStorage.removeItem('userSpendingCreditPreferences');
                 
                 console.log('Saved data cleared successfully');
@@ -542,50 +471,12 @@
                     if (maxRecsSelect) maxRecsSelect.value = savedPreferences.default_max_recommendations;
                 }
                 
-                // Load credit preferences after a short delay to ensure credit types are rendered
+                // Load spending credit preferences after a short delay to ensure they are rendered
                 setTimeout(() => {
-                    loadCreditPreferences();
                     loadSpendingCreditPreferences();
                 }, 500);
             } catch (error) {
                 console.error('Error loading saved data:', error);
-            }
-        }
-
-        async function saveCreditPreferences() {
-            try {
-                const selectedCredits = [];
-                const creditCheckboxes = document.querySelectorAll('input[name="credit_preferences"]:checked');
-                creditCheckboxes.forEach(checkbox => {
-                    selectedCredits.push(checkbox.value);
-                });
-                
-                // Save to localStorage for immediate persistence
-                localStorage.setItem('userCreditPreferences', JSON.stringify(selectedCredits));
-                
-                // TODO: Save to server for authenticated users
-                console.log('Credit preferences saved:', selectedCredits);
-                
-            } catch (error) {
-                console.error('Error saving credit preferences:', error);
-            }
-        }
-
-        async function loadCreditPreferences() {
-            try {
-                // Load from localStorage
-                const savedCredits = JSON.parse(localStorage.getItem('userCreditPreferences') || '[]');
-                
-                // Apply saved preferences
-                savedCredits.forEach(creditSlug => {
-                    const checkbox = document.querySelector(`input[value="${creditSlug}"]`);
-                    if (checkbox) {
-                        checkbox.checked = true;
-                    }
-                });
-                
-            } catch (error) {
-                console.error('Error loading credit preferences:', error);
             }
         }
 
@@ -758,13 +649,6 @@
                     });
                 }
 
-                // Get selected credit preferences
-                const selectedCredits = [];
-                const creditCheckboxes = document.querySelectorAll('input[name="credit_preferences"]:checked');
-                creditCheckboxes.forEach(checkbox => {
-                    selectedCredits.push(checkbox.value);
-                });
-
                 // Get selected spending credit preferences
                 const selectedSpendingCredits = [];
                 const spendingCreditCheckboxes = document.querySelectorAll('input[name="spending_credit_preferences"]:checked');
@@ -777,7 +661,6 @@
                     user_cards: userCards,
                     filters: filters,
                     max_recommendations: parseInt(document.getElementById('maxRecs').value),
-                    credit_preferences: selectedCredits,
                     spending_credit_preferences: selectedSpendingCredits
                 };
 
