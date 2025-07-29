@@ -138,19 +138,11 @@
     "discontinued": false
   },
   {
-    "name": "Freedom Legacy",
+    "name": "Chase Freedom Legacy",
     "issuer": "Chase",
     "annual_fee": 0,
     "reward_type": "Points",
     "reward_value_multiplier": 0.01,
-    "reward_categories": [
-      {
-        "category": "amazon",
-        "reward_rate": 5,
-        "start_date": "2026-01-01",
-        "end_date": "2026-03-31"
-      }
-    ],
     "card_type": "personal",
     "network": "Mastercard",
     "url": "https://creditcards.chase.com/cash-back-credit-cards/freedom",

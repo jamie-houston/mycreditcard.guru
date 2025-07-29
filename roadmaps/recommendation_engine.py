@@ -1110,6 +1110,7 @@ class RecommendationEngine:
             'category_optimization': category_optimization,
             'card_count': len(all_portfolio_cards),
             'total_credits_value': total_credits_value,
+            'total_annual_spending': total_parent_spending,
             'category_optimization_cards': {cat_data['best_card'] for cat_data in category_optimization.values()}
         }
     

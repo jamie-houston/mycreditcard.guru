@@ -762,6 +762,10 @@
                                     <div style="opacity: 0.9; font-size: 14px;">Total Portfolio Rewards</div>
                                 </div>
                                 <div style="background: rgba(255,255,255,0.2); padding: 15px; border-radius: 8px; text-align: center;">
+                                    <div style="font-size: 24px; font-weight: bold;">$${(portfolioSummary.total_annual_spending || 0).toFixed(0)}</div>
+                                    <div style="opacity: 0.9; font-size: 14px;">Total Annual Spending</div>
+                                </div>
+                                <div style="background: rgba(255,255,255,0.2); padding: 15px; border-radius: 8px; text-align: center;">
                                     <div style="font-size: 24px; font-weight: bold; color: ${portfolioSummary.net_portfolio_value >= 0 ? '#10b981' : '#ef4444'};">$${portfolioSummary.net_portfolio_value.toFixed(0)}</div>
                                     <div style="opacity: 0.9; font-size: 14px;">Net Portfolio Value</div>
                                 </div>

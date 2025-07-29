@@ -2,26 +2,26 @@
   "user_email": "foresterh@gmail.com",
   "owned_cards": [
     {
-      "card_name": "Chase Sapphire Reserve",
+      "card_name": "Chase Sapphire Reserve®",
       "issuer": "Chase",
       "nickname": "Reserve 4904",
       "opened_date": "2016-08-29"
     },
     {
-      "card_name": "Chase Sapphire Reserve Business",
+      "card_name": "Chase Sapphire Reserve® Business",
       "issuer": "Chase",
       "card_type": "business",
       "nickname": "Reserve 4904",
       "opened_date": "2016-08-29"
     },
     {
-      "card_name": "Freedom Legacy",
+      "card_name": "Chase Freedom Legacy",
       "issuer": "Chase", 
       "nickname": "Freedom 9560",
       "opened_date": "2005-12-12"
     },
     {
-      "card_name": "Freedom Legacy",
+      "card_name": "Chase Freedom Legacy",
       "issuer": "Chase", 
       "nickname": "Freedom 6407",
       "opened_date": "2007-04-16"
