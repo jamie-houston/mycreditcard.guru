@@ -634,6 +634,14 @@
             
             const resultsDiv = document.getElementById('results');
             resultsDiv.innerHTML = '<div class="loading">🔄 Analyzing your profile and generating recommendations...</div>';
+            
+            // Scroll to loading message so user sees immediate feedback
+            setTimeout(() => {
+                resultsDiv.scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'start' 
+                });
+            }, 100);
 
             try {
                 // Build spending amounts object
@@ -733,7 +741,7 @@
 
                 let html = `
                     <div class="results">
-                        <h2>🎯 Your Personalized Credit Card Roadmap</h2>
+                        <h2 id="roadmapResults">🎯 Your Personalized Credit Card Roadmap</h2>
                 `;
 
                 // Add portfolio summary if we have recommendations
@@ -920,10 +928,32 @@
                 
                 // Apply mobile classes after rendering results
                 applyMobileClasses();
+                
+                // Smooth scroll to the roadmap results
+                setTimeout(() => {
+                    const roadmapElement = document.getElementById('roadmapResults');
+                    if (roadmapElement) {
+                        roadmapElement.scrollIntoView({ 
+                            behavior: 'smooth', 
+                            block: 'start' 
+                        });
+                    }
+                }, 100); // Small delay to ensure DOM is updated
 
             } catch (error) {
                 resultsDiv.innerHTML = '<div class="error">Error generating recommendations. Please try again.</div>';
                 console.error('Error:', error);
+                
+                // Scroll to results even on error so user can see the error message
+                setTimeout(() => {
+                    const resultsElement = document.getElementById('results');
+                    if (resultsElement) {
+                        resultsElement.scrollIntoView({ 
+                            behavior: 'smooth', 
+                            block: 'start' 
+                        });
+                    }
+                }, 100);
             }
         }
 
