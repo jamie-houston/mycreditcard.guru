@@ -76,8 +76,20 @@ class RecommendationEngine:
         # Calculate portfolio summary for the recommended cards
         portfolio_summary = self._calculate_portfolio_summary(recommendations)
         
-        # Add portfolio summary to each recommendation for frontend access
+        # Filter rewards breakdown to only show for top-performing cards per category
+        optimal_cards = portfolio_summary.get('category_optimization_cards', set())
         for rec in recommendations:
+            # Only keep rewards breakdown for cards that are optimal for at least one category
+            if rec['card'].name not in optimal_cards:
+                # Keep only the credits breakdown, remove spending-based rewards
+                filtered_breakdown = []
+                for breakdown_item in rec.get('rewards_breakdown', []):
+                    # Keep Card Benefits & Credits breakdown, filter out spending categories
+                    if 'Card Benefits' in breakdown_item.get('category_name', ''):
+                        filtered_breakdown.append(breakdown_item)
+                rec['rewards_breakdown'] = filtered_breakdown
+            
+            # Add portfolio summary to each recommendation for frontend access
             rec['portfolio_summary'] = portfolio_summary
         
         return recommendations
@@ -1051,12 +1063,14 @@ class RecommendationEngine:
             print(f"Portfolio cards: {len(all_portfolio_cards)}")
             # In production, we might want to return an error or try a different optimization strategy
         
+        # Create a summary that includes filtered recommendations
         return {
             'total_annual_fees': total_annual_fees,
             'total_portfolio_rewards': total_portfolio_rewards,
             'net_portfolio_value': net_portfolio_value,
             'category_optimization': category_optimization,
             'card_count': len(all_portfolio_cards),
-            'total_credits_value': total_credits_value
+            'total_credits_value': total_credits_value,
+            'category_optimization_cards': {cat_data['best_card'] for cat_data in category_optimization.values()}
         }
     
