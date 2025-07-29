@@ -268,5 +268,23 @@
       { "category": "Groceries", "reward_rate": 6.0, "max_annual_spend": 6000 },
       { "category": "General", "reward_rate": 1.0 }
     ]
+  },
+  {
+    "name": "Amazon Prime",
+    "issuer": "Chase",
+    "annual_fee": 0,
+    "signup_bonus": {
+      "bonus_amount": 200,
+      "spending_requirement": 0.01,
+      "time_limit_months": 12
+    },
+    "reward_type": "Cashback",
+    "signup_bonus_type": "Cashback",
+    "primary_reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      { "category": "Amazon", "reward_rate": 5.0 },
+      { "category": "General", "reward_rate": 1.0 }
+    ]
   }
 ]

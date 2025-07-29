@@ -425,6 +425,14 @@ class Command(BaseCommand):
         """Create a test scenario from JSON data."""
         # Create user and profile
         username = f"scenario_{scenario_data['name'].lower().replace(' ', '_').replace('-', '_')}"
+        
+        # Clean up existing test user if it exists
+        try:
+            existing_user = User.objects.get(username=username)
+            existing_user.delete()
+        except User.DoesNotExist:
+            pass
+        
         user = User.objects.create_user(
             username=username,
             email=f"{username}@example.com"
@@ -469,7 +477,15 @@ class Command(BaseCommand):
         return profile, created_cards
     
     def create_credit_card_from_name(self, card_name):
-        """Create a credit card from card name using centralized definitions."""
+        """Get or create a credit card from card name."""
+        # First try to find existing card in database
+        try:
+            existing_card = CreditCard.objects.get(name=card_name)
+            return existing_card
+        except CreditCard.DoesNotExist:
+            pass
+        
+        # If not found, try to create from test definitions
         # Load card definitions if not already loaded
         if not hasattr(self, 'card_definitions'):
             cards_file = os.path.join(
@@ -490,7 +506,7 @@ class Command(BaseCommand):
                 break
         
         if not card_def:
-            raise ValueError(f"Card definition not found: {card_name}")
+            raise ValueError(f"Card definition not found: {card_name} (not in database or test definitions)")
         
         return self.create_credit_card(card_def)
     

@@ -1434,7 +1434,7 @@
         }
       },
       "owned_cards": [],
-      "available_cards": ["Amazon Prime", "Chase Freedom Unlimited®", "Blue Cash Preferred® Card", "Chase Sapphire Reserve®", "Wells Fargo Active Cash® Card"],
+      "available_cards": ["Amazon Prime", "Chase Freedom Unlimited®", "Blue Cash Preferred® Card from American Express", "Chase Sapphire Reserve®", "Wells Fargo Active Cash® Card"],
       "expected_recommendations": {
         "actions": ["apply"],
         "card_count_optimization": {
@@ -1448,7 +1448,7 @@
           "prevents_negative_portfolio": true
         },
         "must_include_cards": ["Amazon Prime"],
-        "must_not_include_cards": ["Chase Freedom Unlimited®", "Blue Cash Preferred® Card", "Chase Sapphire Reserve®"],
+        "must_not_include_cards": ["Chase Freedom Unlimited®", "Blue Cash Preferred® Card from American Express", "Chase Sapphire Reserve®"],
         "reasoning_must_contain": ["Amazon", "portfolio"],
         "test_conditions": [
           "Only recommends cards that add positive value",

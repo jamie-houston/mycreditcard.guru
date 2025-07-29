@@ -185,6 +185,8 @@ class RecommendationEngine:
             print(f"  - {card.name}")
         print(f"DEBUG: Found {len(available_new_cards)} available new cards")
         print(f"DEBUG: Max recommendations allowed: {roadmap.max_recommendations}")
+        print(f"DEBUG: Will scenario 1 use optimization? {len(current_cards) == 0}")
+        print(f"DEBUG: Will scenario 2 use optimization? {True}")
         
         # Generate all possible portfolio combinations and evaluate them
         best_portfolio = self._find_optimal_portfolio(current_cards, available_new_cards, roadmap.max_recommendations)
@@ -288,8 +290,14 @@ class RecommendationEngine:
             # Add best available cards up to limit
             remaining_slots = max_total_cards - len(cards_to_keep)
             if remaining_slots > 0 and available_cards:
-                best_new_cards = self._select_best_new_cards(available_cards, remaining_slots)
-                actions.extend(best_new_cards)
+                # If no cards to keep, use full portfolio optimization
+                if len(cards_to_keep) == 0:
+                    print(f"DEBUG: Scenario 1 using portfolio optimization for {len(available_cards)} available cards")
+                    return self._select_optimal_card_combination(available_cards, max_total_cards)
+                else:
+                    # If keeping some cards, use the old logic for now
+                    best_new_cards = self._select_best_new_cards(available_cards, remaining_slots)
+                    actions.extend(best_new_cards)
             
             # Calculate portfolio value
             portfolio_value = self._calculate_scenario_portfolio_value(actions)
@@ -473,9 +481,9 @@ class RecommendationEngine:
         best_combination = []
         best_value = 0  # Start with $0 - only accept positive portfolio values!
         
-        # Always include current cards with positive value (keeps)
-        must_include = [cd for cd in card_scores if cd['action'] == 'keep' and cd['net_value'] > 0]
-        remaining_cards = [cd for cd in card_scores if cd not in must_include and cd['net_value'] > 0]
+        # Always include current cards (keeps) - let portfolio optimization decide profitability
+        must_include = [cd for cd in card_scores if cd['action'] == 'keep']
+        remaining_cards = [cd for cd in card_scores if cd not in must_include]
         
         print(f"DEBUG: Portfolio optimization - must_include: {len(must_include)}, remaining: {len(remaining_cards)}, max_cards: {max_cards}")
         
@@ -1102,6 +1110,16 @@ class RecommendationEngine:
                     total_credits_value += annual_value
         
         total_portfolio_rewards += total_credits_value
+        
+        # Add signup bonuses for new card applications
+        total_signup_bonuses = 0
+        for card_data in all_portfolio_cards:
+            if card_data['action'] == 'apply':
+                signup_bonus = self._get_signup_bonus_value(card_data['card'])
+                total_signup_bonuses += signup_bonus
+        
+        total_portfolio_rewards += total_signup_bonuses
+        print(f"DEBUG: Portfolio Summary - signup bonuses: ${total_signup_bonuses:.2f}")
         
         # Calculate net portfolio value (rewards - fees)
         net_portfolio_value = total_portfolio_rewards - total_annual_fees
