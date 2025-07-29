@@ -711,6 +711,23 @@
             transform: none !important;
             border-color: #3b82f6 !important;
         }
+
+        /* Force single column layout for spending credits */
+        .spending-credits-list {
+            display: block !important;
+            width: 100% !important;
+            grid-template-columns: none !important;
+            columns: 1 !important;
+            column-count: 1 !important;
+        }
+
+        .spending-credit-item {
+            display: flex !important;
+            align-items: center !important;
+            width: 100% !important;
+            break-inside: avoid !important;
+            page-break-inside: avoid !important;
+        }
         
         .credit-checkbox-item label {
             margin: 0;
