@@ -65,14 +65,22 @@ class CreateRoadmapSerializer(serializers.Serializer):
             from cards.models import UserSpendingProfile
             profile, created = UserSpendingProfile.objects.get_or_create(session_key=session_key)
         
-        # Create roadmap
+        # Create or update roadmap
         filters_data = validated_data.pop('filters', [])
-        roadmap = Roadmap.objects.create(
+        roadmap, created = Roadmap.objects.get_or_create(
             profile=profile,
-            **validated_data
+            name=validated_data.get('name', 'Default Roadmap'),
+            defaults=validated_data
         )
         
-        # Create filters
+        # If roadmap already exists, update its fields
+        if not created:
+            for key, value in validated_data.items():
+                setattr(roadmap, key, value)
+            roadmap.save()
+        
+        # Clear existing filters and create new ones
+        roadmap.filters.clear()
         for filter_data in filters_data:
             filter_obj, created = RoadmapFilter.objects.get_or_create(
                 name=filter_data['name'],
@@ -189,14 +197,20 @@ class GenerateRoadmapSerializer(serializers.Serializer):
                         values_credit=True
                     )
         
-        # Create temporary roadmap for filtering
-        roadmap = Roadmap.objects.create(
+        # Create or get temporary roadmap for filtering
+        roadmap, created = Roadmap.objects.get_or_create(
             profile=profile,
             name="Temporary Quick Recommendation",
-            max_recommendations=validated_data.get('max_recommendations', 5)
+            defaults={'max_recommendations': validated_data.get('max_recommendations', 5)}
         )
         
-        # Add filters if provided
+        # Update max_recommendations if roadmap already exists
+        if not created:
+            roadmap.max_recommendations = validated_data.get('max_recommendations', 5)
+            roadmap.save()
+        
+        # Clear existing filters and add new ones if provided
+        roadmap.filters.clear()
         if 'filters' in validated_data:
             for filter_data in validated_data['filters']:
                 filter_obj, _ = RoadmapFilter.objects.get_or_create(
