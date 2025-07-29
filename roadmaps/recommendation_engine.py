@@ -522,8 +522,8 @@ class RecommendationEngine:
             print(f"DEBUG: No Amazon cards found in remaining_cards")
         
         # Only test top cards to limit exponential explosion
-        cards_to_test = remaining_cards[:min(12, len(remaining_cards))]  # Only top 12 cards
-        print(f"DEBUG: Testing only top {len(cards_to_test)} cards for performance")
+        cards_to_test = remaining_cards[:min(20, len(remaining_cards))]  # Top 20 cards to include relevant niche cards
+        print(f"DEBUG: Testing top {len(cards_to_test)} cards for performance")
         
         # Try combinations of different sizes with strict limits
         for combo_size in range(0, min(max_combinations + 1, 4)):  # Max 3 new cards
@@ -747,12 +747,6 @@ class RecommendationEngine:
         parent_category_spending = self._cached_parent_spending
         total_rewards = 0
         
-        # DEBUG: For Amazon cards, show detailed calculation
-        is_amazon_card = 'Amazon' in card.name
-        if is_amazon_card:
-            print(f"DEBUG: Calculating value for {card.name}")
-            print(f"DEBUG: Parent spending: {parent_category_spending}")
-        
         # Pre-fetch reward categories to avoid N+1 queries
         if not hasattr(card, '_cached_reward_categories'):
             card._cached_reward_categories = list(card.reward_categories.filter(is_active=True).select_related('category'))
@@ -760,10 +754,17 @@ class RecommendationEngine:
         # Calculate rewards for categories where user actually spends money
         for reward_category in card._cached_reward_categories:
             category_slug = reward_category.category.slug
+            
+            # Check both parent category spending AND direct subcategory spending
             annual_spend = parent_category_spending.get(category_slug, 0.0)
             
-            if is_amazon_card:
-                print(f"DEBUG:   Category {category_slug}: ${annual_spend:.0f} spend, {reward_category.reward_rate}x rate")
+            # If no parent spending found, check if this is a subcategory with direct spending
+            if annual_spend == 0:
+                # Get original spending amounts for subcategories
+                for orig_category_slug, monthly_amount in self.spending_amounts.items():
+                    if orig_category_slug == category_slug:
+                        annual_spend = float(monthly_amount) * 12
+                        break
             
             if annual_spend > 0:  # Only calculate for categories with actual spending
                 reward_rate = float(reward_category.reward_rate)
@@ -777,18 +778,11 @@ class RecommendationEngine:
                 reward_value_multiplier = card.metadata.get('reward_value_multiplier', 0.01)
                 category_rewards = effective_spend * reward_rate * float(reward_value_multiplier)
                 total_rewards += category_rewards
-                
-                if is_amazon_card:
-                    print(f"DEBUG:     -> ${category_rewards:.0f} rewards (${effective_spend:.0f} * {reward_rate} * {reward_value_multiplier})")
         
         # Add signup bonus if requested
-        signup_value = 0
         if signup_bonus:
             signup_value = self._get_signup_bonus_value(card)
             total_rewards += signup_value
-            
-        if is_amazon_card:
-            print(f"DEBUG: {card.name} total: ${total_rewards:.0f} (rewards: ${total_rewards - signup_value:.0f}, signup: ${signup_value:.0f})")
         
         return total_rewards
     
@@ -1003,11 +997,34 @@ class RecommendationEngine:
     def _get_signup_bonus_value(self, card: CreditCard) -> float:
         """Get signup bonus value using card's specific reward value multiplier"""
         if card.signup_bonus_amount:
-            reward_value_multiplier = card.metadata.get('reward_value_multiplier', 0.01)
+            # Check signup bonus type to determine if conversion is needed
+            signup_bonus_type = getattr(card, 'signup_bonus_type', None)
             
-            # All signup bonus amounts are stored as points/cents and need to be converted
-            # using the card's specific reward value multiplier
-            return float(card.signup_bonus_amount) * float(reward_value_multiplier)
+            if signup_bonus_type and hasattr(signup_bonus_type, 'name'):
+                bonus_type_name = signup_bonus_type.name.lower()
+            elif signup_bonus_type:
+                bonus_type_name = str(signup_bonus_type).lower()
+            else:
+                bonus_type_name = 'unknown'
+            
+            if bonus_type_name in ['cashback', 'cash', 'cash back']:
+                # Cashback signup bonuses are already in dollars
+                bonus_value = float(card.signup_bonus_amount)
+                
+                # Sanity check: If cashback bonus > $5000, it's probably misclassified points
+                if bonus_value > 5000:
+                    # Treat as points with conversion
+                    reward_value_multiplier = card.metadata.get('reward_value_multiplier', 0.01)
+                    bonus_value = bonus_value * float(reward_value_multiplier)
+                    if bonus_value > 10000:  # Still too high, cap it
+                        bonus_value = min(bonus_value, 10000)
+                
+                return bonus_value
+            else:
+                # Points/miles need to be converted using reward value multiplier
+                reward_value_multiplier = card.metadata.get('reward_value_multiplier', 0.01)
+                bonus_value = float(card.signup_bonus_amount) * float(reward_value_multiplier)
+                return bonus_value
         return 0.0
     
     def _calculate_card_credits_value(self, card: CreditCard) -> tuple[float, list]:
