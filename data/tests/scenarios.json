@@ -1626,6 +1626,155 @@
           "Low spending doesn't justify premium card additions"
         ]
       }
+    },
+    {
+      "name": "Signup Bonus Opportunity - Keep Existing Plus New",
+      "description": "User has good existing cards but should get new cards for signup bonuses",
+      "user_profile": {
+        "spending": {
+          "dining": 1000,
+          "groceries": 1000,
+          "travel": 800,
+          "gas": 300,
+          "general": 500
+        },
+        "preferences": {
+          "max_annual_fee": 550,
+          "preferred_reward_type": "points"
+        }
+      },
+      "owned_cards": ["Chase Freedom Unlimited®"],
+      "available_cards": ["Chase Sapphire Preferred® Card", "American Express Gold® Card", "The Platinum Card® from American Express"],
+      "expected_recommendations": {
+        "actions": ["keep", "apply"],
+        "min_card_count": 2,
+        "max_card_count": 4,
+        "must_include_cards": ["Chase Freedom Unlimited®"],
+        "should_include_new_cards": ["Chase Sapphire Preferred® Card", "American Express Gold® Card"],
+        "reasoning_must_contain": ["keep", "signup bonus"],
+        "min_total_value": 2000,
+        "test_conditions": [
+          "Keeps existing profitable cards",
+          "Recommends new cards with valuable signup bonuses",
+          "Total portfolio value includes signup bonuses",
+          "Doesn't double-count category rewards"
+        ]
+      }
+    },
+    {
+      "name": "No Double Counting - Multiple Dining Cards",
+      "description": "User has multiple cards with dining rewards - should only count best rate",
+      "user_profile": {
+        "spending": {
+          "dining": 1500,
+          "groceries": 500,
+          "travel": 300,
+          "general": 200
+        },
+        "preferences": {
+          "max_annual_fee": 550,
+          "preferred_reward_type": "points"
+        }
+      },
+      "owned_cards": ["Chase Sapphire Preferred® Card", "American Express Gold® Card"],
+      "available_cards": ["The Platinum Card® from American Express"],
+      "expected_recommendations": {
+        "actions": ["keep"],
+        "card_count": 2,
+        "must_include_cards": ["Chase Sapphire Preferred® Card", "American Express Gold® Card"],
+        "dining_reward_calculation": {
+          "annual_dining_spend": 18000,
+          "best_dining_rate": 4.0,
+          "best_dining_card": "American Express Gold® Card",
+          "dining_rewards_should_be": 720,
+          "should_not_double_count": "Chase Sapphire Preferred® Card dining rate"
+        },
+        "test_conditions": [
+          "Only counts dining rewards once for the best card (Gold 4x, not CSP 2x + Gold 4x)",
+          "Portfolio value doesn't double-count categories",
+          "Category optimization shows only best rate per category"
+        ]
+      }
+    },
+    {
+      "name": "Signup Bonus vs Keep Decision",
+      "description": "High spending user should get multiple new cards for signup bonuses even with existing cards",
+      "user_profile": {
+        "spending": {
+          "dining": 2000,
+          "groceries": 1500,
+          "travel": 1200,
+          "streaming": 100,
+          "gas": 400,
+          "general": 800
+        },
+        "preferences": {
+          "max_annual_fee": 700,
+          "preferred_reward_type": "points"
+        }
+      },
+      "owned_cards": ["Chase Freedom Unlimited®", "Chase Sapphire Preferred® Card"],
+      "available_cards": ["American Express Gold® Card", "The Platinum Card® from American Express"],
+      "expected_recommendations": {
+        "actions": ["keep", "apply"],
+        "min_card_count": 3,
+        "max_card_count": 4,
+        "must_include_cards": ["Chase Freedom Unlimited®", "Chase Sapphire Preferred® Card"],
+        "should_apply_for": ["American Express Gold® Card"],
+        "reasoning_must_contain": ["signup bonus", "high spending"],
+        "min_signup_bonus_value": 1000,
+        "test_conditions": [
+          "High spending justifies multiple new signup bonuses",
+          "Keeps existing profitable cards",
+          "Recommends new cards despite category overlap",
+          "Total value includes all signup bonuses"
+        ]
+      }
+    },
+    {
+      "name": "Category Optimization Validation",
+      "description": "Test that category rewards are properly allocated to best card only",
+      "user_profile": {
+        "spending": {
+          "dining": 1000,
+          "groceries": 800,
+          "travel": 600,
+          "gas": 200,
+          "general": 400
+        },
+        "preferences": {
+          "max_annual_fee": 400,
+          "preferred_reward_type": "points"
+        }
+      },
+      "owned_cards": [],
+      "available_cards": ["Chase Sapphire Preferred® Card", "American Express Gold® Card", "Blue Cash Preferred® Card from American Express"],
+      "expected_recommendations": {
+        "actions": ["apply"],
+        "min_card_count": 2,
+        "max_card_count": 3,
+        "category_allocation": {
+          "dining": {
+            "best_card": "American Express Gold® Card",
+            "rate": 4.0,
+            "should_not_also_count": "Chase Sapphire Preferred® Card"
+          },
+          "groceries": {
+            "best_card": "Blue Cash Preferred® Card from American Express", 
+            "rate": 6.0,
+            "should_not_also_count": "American Express Gold® Card"
+          },
+          "travel": {
+            "best_card": "Chase Sapphire Preferred® Card",
+            "rate": 2.0
+          }
+        },
+        "test_conditions": [
+          "Each category allocated to exactly one best card",
+          "No double counting of category spending across cards",
+          "Portfolio value reflects optimized allocation"
+        ]
+      }
     }
   ]
 }

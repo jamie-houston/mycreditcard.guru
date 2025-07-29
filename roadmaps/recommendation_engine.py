@@ -501,15 +501,35 @@ class RecommendationEngine:
             best_combination = []
             print(f"DEBUG: Empty portfolio baseline - value: ${best_value:.2f}")
         
-        # Limit search space for performance (try combinations up to max_cards)
+        # Aggressive performance optimization - limit search space dramatically
         max_combinations = min(len(remaining_cards), max_cards - len(must_include))
         
-        # Try combinations of different sizes
-        for combo_size in range(0, max_combinations + 1):
+        # Sort remaining cards by individual net value for smarter search
+        remaining_cards.sort(key=lambda x: x['net_value'], reverse=True)
+        
+        # DEBUG: Show top cards being considered
+        print(f"DEBUG: Top 15 cards by net value:")
+        for i, card_data in enumerate(remaining_cards[:15]):
+            print(f"  {i+1}. {card_data['card'].name}: ${card_data['net_value']:.0f} (annual: ${card_data.get('annual_rewards', 0):.0f}, signup: ${card_data.get('signup_bonus', 0):.0f})")
+        
+        # Only test top cards to limit exponential explosion
+        cards_to_test = remaining_cards[:min(12, len(remaining_cards))]  # Only top 12 cards
+        print(f"DEBUG: Testing only top {len(cards_to_test)} cards for performance")
+        
+        # Try combinations of different sizes with strict limits
+        for combo_size in range(0, min(max_combinations + 1, 4)):  # Max 3 new cards
             if len(must_include) + combo_size > max_cards:
                 break
+            
+            combinations_tested = 0
+            max_combinations_to_test = 30 if combo_size <= 2 else 10  # Fewer tests for larger combos
+            
+            for combination in combinations(cards_to_test, combo_size):
+                combinations_tested += 1
+                if combinations_tested > max_combinations_to_test:
+                    print(f"DEBUG: Hit combination limit for size {combo_size}, moving to next size")
+                    break
                 
-            for combination in combinations(remaining_cards, combo_size):
                 full_combination = must_include + list(combination)
                 portfolio_value = calculate_portfolio_value(full_combination)
                 
@@ -591,29 +611,124 @@ class RecommendationEngine:
         return actions
     
     def _calculate_scenario_portfolio_value(self, actions: List[dict]) -> float:
-        """Calculate net portfolio value for a scenario"""
-        total_fees = 0
-        total_rewards = 0
+        """Calculate net portfolio value for a scenario using fast portfolio optimization (no double counting)"""
+        portfolio_cards = [action for action in actions if action['action'] in ['keep', 'apply']]
         
-        for action in actions:
-            if action['action'] in ['keep', 'apply']:
+        if not portfolio_cards:
+            return 0.0
+        
+        # Calculate total annual fees
+        total_annual_fees = 0
+        total_signup_bonuses = 0
+        
+        for action in portfolio_cards:
+            card = action['card']
+            if action['action'] == 'apply' and card.metadata.get('annual_fee_waived_first_year', False):
+                total_annual_fees += 0  # First year waived
+            else:
+                total_annual_fees += float(card.annual_fee)
+            
+            # Add signup bonus for new cards
+            if action['action'] == 'apply':
+                total_signup_bonuses += self._get_signup_bonus_value(card)
+        
+        # Use cached spending data for performance
+        if not hasattr(self, '_cached_parent_spending'):
+            self._cached_parent_spending = self._build_parent_category_spending()
+        
+        parent_category_spending = self._cached_parent_spending
+        
+        # Fast category optimization: find best rate per category
+        category_best_rates = {}
+        
+        for action in portfolio_cards:
+            card = action['card']
+            # Pre-fetch all reward categories to avoid N+1 queries
+            if not hasattr(card, '_cached_reward_categories'):
+                card._cached_reward_categories = list(card.reward_categories.filter(is_active=True).select_related('category'))
+            
+            for reward_category in card._cached_reward_categories:
+                category_slug = reward_category.category.slug
+                reward_rate = float(reward_category.reward_rate)
+                
+                # Only consider categories where user has spending
+                if parent_category_spending.get(category_slug, 0) > 0:
+                    if category_slug not in category_best_rates or reward_rate > category_best_rates[category_slug]['rate']:
+                        category_best_rates[category_slug] = {
+                            'rate': reward_rate,
+                            'card': card,
+                            'max_spend': reward_category.max_annual_spend
+                        }
+        
+        # Calculate portfolio rewards using ONLY the best rate for each category
+        total_portfolio_rewards = 0
+        allocated_spending = 0
+        
+        for category_slug, rate_data in category_best_rates.items():
+            annual_spend = parent_category_spending.get(category_slug, 0.0)
+            
+            if annual_spend > 0:
+                # Apply spending caps
+                if rate_data['max_spend']:
+                    annual_spend = min(annual_spend, float(rate_data['max_spend']))
+                
+                allocated_spending += annual_spend
+                reward_rate = rate_data['rate']
+                best_card = rate_data['card']
+                
+                reward_value_multiplier = best_card.metadata.get('reward_value_multiplier', 0.01)
+                points_earned = annual_spend * reward_rate
+                category_rewards = points_earned * float(reward_value_multiplier)
+                total_portfolio_rewards += category_rewards
+        
+        # Handle unallocated spending with best general category (simplified)
+        total_parent_spending = sum(parent_category_spending.values())
+        unallocated_spending = total_parent_spending - allocated_spending
+        
+        if unallocated_spending > 0:
+            # Find best general rate among portfolio cards
+            best_general_rate = 1.0  # Default base rate
+            best_general_multiplier = 0.01
+            
+            for action in portfolio_cards:
                 card = action['card']
-                
-                # Calculate fees
-                if action['action'] == 'apply' and card.metadata.get('annual_fee_waived_first_year', False):
-                    total_fees += 0  # First year waived
-                else:
-                    total_fees += float(card.annual_fee)
-                
-                # Calculate rewards (portfolio-optimized)
-                rewards_breakdown = self._calculate_card_rewards_breakdown(card)
-                total_rewards += rewards_breakdown['total_rewards']
-                
-                # Add signup bonus for new cards
-                if action['action'] == 'apply':
-                    total_rewards += self._get_signup_bonus_value(card)
+                for reward_category in card._cached_reward_categories:
+                    if reward_category.category.slug in ['general', 'other', 'everything-else']:
+                        rate = float(reward_category.reward_rate)
+                        if rate > best_general_rate:
+                            best_general_rate = rate
+                            best_general_multiplier = card.metadata.get('reward_value_multiplier', 0.01)
+            
+            general_rewards = unallocated_spending * best_general_rate * float(best_general_multiplier)
+            total_portfolio_rewards += general_rewards
         
-        return total_rewards - total_fees
+        return total_portfolio_rewards + total_signup_bonuses - total_annual_fees
+    
+    def _build_parent_category_spending(self) -> dict:
+        """Build and cache parent category spending map for performance"""
+        all_spending = {}
+        
+        # Get spending amounts
+        for category_slug, monthly_amount in self.spending_amounts.items():
+            annual_spend = float(monthly_amount) * 12
+            all_spending[category_slug] = annual_spend
+        
+        # Build parent category spending map
+        from cards.models import SpendingCategory
+        parent_category_spending = {}
+        
+        for category_slug, annual_spend in all_spending.items():
+            try:
+                spending_category = SpendingCategory.objects.get(slug=category_slug)
+                if spending_category.is_subcategory:
+                    parent_slug = spending_category.parent.slug
+                    parent_category_spending[parent_slug] = parent_category_spending.get(parent_slug, 0.0) + annual_spend
+                else:
+                    parent_category_spending[category_slug] = parent_category_spending.get(category_slug, 0.0) + annual_spend
+            except SpendingCategory.DoesNotExist:
+                parent_category_spending[category_slug] = parent_category_spending.get(category_slug, 0.0) + annual_spend
+        
+        return parent_category_spending
     
     def _find_new_cards(self, eligible_cards: List[CreditCard], max_cards: int) -> List[dict]:
         """Find best new cards to apply for"""
