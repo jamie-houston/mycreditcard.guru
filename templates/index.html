@@ -65,7 +65,7 @@
         <!-- Spending Profile Section (made collapsible) -->
         <div class="section spending-section">
             <h2 onclick="toggleSpendingProfile()" style="cursor: pointer; display: flex; justify-content: space-between; align-items: center;">
-                💰 Your Spending Profile
+                💰 Average Monthly Spending
                 <span id="spendingToggle" style="font-size: 14px; color: #6b7280;">▼ Click to expand</span>
             </h2>
             <div id="spendingProfileContent" style="display: none;">
@@ -280,7 +280,7 @@
                 let categoryHtml = `
                     <div class="spending-item main-category-item">
                         <div class="input-group">
-                            <span class="input-group-text" style="min-width: 160px;">
+                            <span class="input-group-text category-label" style="min-width: 160px;">
                                 ${iconHtml}${displayName} ${tooltipHtml}
                             </span>
                             <span class="input-group-text" style="background: white; border-left: none;">$</span>
@@ -315,7 +315,7 @@
                         categoryHtml += `
                             <div class="spending-item subcategory-item">
                                 <div class="input-group">
-                                    <span class="input-group-text" style="min-width: 140px;">
+                                    <span class="input-group-text subcategory-label" style="min-width: 140px;">
                                         ${subIconHtml}${subDisplayName} ${subTooltipHtml}
                                     </span>
                                     <span class="input-group-text" style="background: #f9fafb; border-left: none;">$</span>
