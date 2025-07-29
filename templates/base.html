@@ -378,10 +378,10 @@
             gap: 24px;
         }
         
-        /* Spending profile responsive grid */
+        /* Spending profile single column layout */
         .spending-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            display: flex;
+            flex-direction: column;
             gap: 15px;
             margin-bottom: 20px;
         }
@@ -898,7 +898,6 @@
             }
             
             .spending-grid {
-                grid-template-columns: 1fr;
                 gap: 10px;
             }
             
