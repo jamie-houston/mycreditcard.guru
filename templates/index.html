@@ -861,6 +861,17 @@
                                 const categoryName = breakdown.category_name || 'Unknown Category';
                                 const calculation = breakdown.calculation || 'No calculation available';
                                 breakdownHtml += `<li style="margin: 4px 0; font-family: monospace; font-size: 14px; color: #2563eb;"><strong>${categoryName}:</strong> ${calculation}</li>`;
+                                
+                                // Add credits breakdown if this is the Card Benefits category
+                                if (breakdown.credits_breakdown && Array.isArray(breakdown.credits_breakdown) && breakdown.credits_breakdown.length > 0) {
+                                    breakdown.credits_breakdown.forEach(credit => {
+                                        const frequencyDisplay = credit.frequency_display || '';
+                                        const creditIcon = credit.type === 'benefit' ? '🎁' : '💳';
+                                        breakdownHtml += `<li style="margin: 2px 0 2px 20px; font-family: monospace; font-size: 13px; color: #059669; font-style: italic;">
+                                            ${creditIcon} ${credit.name}: $${credit.annual_value.toFixed(0)}${frequencyDisplay}
+                                        </li>`;
+                                    });
+                                }
                             });
                             breakdownHtml += '</ul></div>';
                         }

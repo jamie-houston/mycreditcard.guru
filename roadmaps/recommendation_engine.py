@@ -722,7 +722,7 @@ class RecommendationEngine:
                 })
         
         # Add card credits to the total rewards if user has selected them
-        credits_value = self._calculate_card_credits_value(card)
+        credits_value, credits_breakdown = self._calculate_card_credits_value(card)
         total_rewards += credits_value
         
         if credits_value > 0:
@@ -734,7 +734,8 @@ class RecommendationEngine:
                 'reward_multiplier': 1.0,
                 'points_earned': credits_value,
                 'category_rewards': credits_value,
-                'calculation': f"Selected card benefits worth ${credits_value:.2f} annually"
+                'calculation': f"Selected card benefits worth ${credits_value:.2f} annually",
+                'credits_breakdown': credits_breakdown
             })
         
         return {
@@ -753,9 +754,15 @@ class RecommendationEngine:
             return float(card.signup_bonus_amount) * float(reward_value_multiplier)
         return 0.0
     
-    def _calculate_card_credits_value(self, card: CreditCard) -> float:
-        """Calculate the annual value of card credits that user has selected as valuable"""
+    def _calculate_card_credits_value(self, card: CreditCard) -> tuple[float, list]:
+        """Calculate the annual value of card credits that user has selected as valuable
+        
+        Returns:
+            tuple: (total_credits_value, credits_breakdown)
+            credits_breakdown is a list of dicts with credit details
+        """
         credits_value = 0.0
+        credits_breakdown = []
         
         # Get user's selected spending credit preferences
         user_spending_credit_preferences = set()
@@ -775,21 +782,42 @@ class RecommendationEngine:
         # Calculate value of card credits that match user preferences
         for card_credit in card.credits.filter(is_active=True):
             credit_matches = False
+            credit_type = None
+            credit_name = None
             
             # Check spending_credit system
             if card_credit.spending_credit and card_credit.spending_credit.slug in user_spending_credit_preferences:
                 credit_matches = True
+                credit_type = "benefit"
+                credit_name = card_credit.spending_credit.display_name
             
             # Check category-based credits (automatically include if spending in that category)
             elif card_credit.category and card_credit.category.slug in user_spending_categories:
                 credit_matches = True
+                credit_type = "category"
+                credit_name = f"{card_credit.category.display_name} Credit"
             
             if credit_matches:
                 # Calculate annual value (value * times_per_year)
                 annual_value = float(card_credit.value) * card_credit.times_per_year
                 credits_value += annual_value
+                
+                # Add to breakdown
+                frequency_text = ""
+                if card_credit.times_per_year > 1:
+                    frequency_text = f" (${card_credit.value} × {card_credit.times_per_year}/year)"
+                
+                credits_breakdown.append({
+                    'name': credit_name or card_credit.description,
+                    'value': float(card_credit.value),
+                    'times_per_year': card_credit.times_per_year,
+                    'annual_value': annual_value,
+                    'type': credit_type,
+                    'description': card_credit.description,
+                    'frequency_display': frequency_text
+                })
         
-        return credits_value
+        return credits_value, credits_breakdown
     
     def _calculate_total_rewards(self, recommendations: List[Dict]) -> Decimal:
         """Calculate total estimated rewards from all recommendations"""
