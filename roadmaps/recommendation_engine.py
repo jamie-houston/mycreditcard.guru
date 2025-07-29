@@ -318,26 +318,25 @@ class RecommendationEngine:
         """Select optimal combination of cards from all available (current + new)"""
         current_card_ids = {uc.card.id for uc in self.user_cards}
         
-        # Score all cards
+        # Score all cards using smart portfolio-aware calculation
         card_scores = []
         for card in all_cards:
             if card.id in current_card_ids:
                 # Current card - no signup bonus
-                rewards_breakdown = self._calculate_card_rewards_breakdown(card)
-                annual_rewards = rewards_breakdown['total_rewards']
+                annual_rewards = self._calculate_smart_card_value(card, signup_bonus=False)
                 annual_fee = float(card.annual_fee)
                 net_value = annual_rewards - annual_fee
                 action = 'keep'
+                signup_bonus_value = 0
             else:
                 # New card - include signup bonus
                 if not self._is_eligible_for_card(card):
                     continue
-                rewards_breakdown = self._calculate_card_rewards_breakdown(card)
-                annual_rewards = rewards_breakdown['total_rewards']
-                signup_bonus = self._get_signup_bonus_value(card)
+                annual_rewards = self._calculate_smart_card_value(card, signup_bonus=False)
+                signup_bonus_value = self._get_signup_bonus_value(card)
                 annual_fee_waived = card.metadata.get('annual_fee_waived_first_year', False)
                 effective_fee = 0 if annual_fee_waived else float(card.annual_fee)
-                net_value = annual_rewards - effective_fee + signup_bonus
+                net_value = annual_rewards - effective_fee + signup_bonus_value
                 action = 'apply'
             
             card_scores.append({
@@ -345,6 +344,7 @@ class RecommendationEngine:
                 'action': action,
                 'net_value': net_value,
                 'annual_rewards': annual_rewards,
+                'signup_bonus': signup_bonus_value,
                 'current_card': card.id in current_card_ids
             })
         
@@ -511,6 +511,15 @@ class RecommendationEngine:
         print(f"DEBUG: Top 15 cards by net value:")
         for i, card_data in enumerate(remaining_cards[:15]):
             print(f"  {i+1}. {card_data['card'].name}: ${card_data['net_value']:.0f} (annual: ${card_data.get('annual_rewards', 0):.0f}, signup: ${card_data.get('signup_bonus', 0):.0f})")
+        
+        # DEBUG: Specifically look for Amazon Prime card
+        amazon_cards = [cd for cd in remaining_cards if 'Amazon' in cd['card'].name]
+        if amazon_cards:
+            print(f"DEBUG: Amazon cards found:")
+            for i, card_data in enumerate(amazon_cards):
+                print(f"  Amazon {i+1}. {card_data['card'].name}: ${card_data['net_value']:.0f} (annual: ${card_data.get('annual_rewards', 0):.0f}, signup: ${card_data.get('signup_bonus', 0):.0f})")
+        else:
+            print(f"DEBUG: No Amazon cards found in remaining_cards")
         
         # Only test top cards to limit exponential explosion
         cards_to_test = remaining_cards[:min(12, len(remaining_cards))]  # Only top 12 cards
@@ -729,6 +738,59 @@ class RecommendationEngine:
                 parent_category_spending[category_slug] = parent_category_spending.get(category_slug, 0.0) + annual_spend
         
         return parent_category_spending
+    
+    def _calculate_smart_card_value(self, card: CreditCard, signup_bonus: bool = True) -> float:
+        """Calculate card value considering actual user spending and category competition"""
+        if not hasattr(self, '_cached_parent_spending'):
+            self._cached_parent_spending = self._build_parent_category_spending()
+        
+        parent_category_spending = self._cached_parent_spending
+        total_rewards = 0
+        
+        # DEBUG: For Amazon cards, show detailed calculation
+        is_amazon_card = 'Amazon' in card.name
+        if is_amazon_card:
+            print(f"DEBUG: Calculating value for {card.name}")
+            print(f"DEBUG: Parent spending: {parent_category_spending}")
+        
+        # Pre-fetch reward categories to avoid N+1 queries
+        if not hasattr(card, '_cached_reward_categories'):
+            card._cached_reward_categories = list(card.reward_categories.filter(is_active=True).select_related('category'))
+        
+        # Calculate rewards for categories where user actually spends money
+        for reward_category in card._cached_reward_categories:
+            category_slug = reward_category.category.slug
+            annual_spend = parent_category_spending.get(category_slug, 0.0)
+            
+            if is_amazon_card:
+                print(f"DEBUG:   Category {category_slug}: ${annual_spend:.0f} spend, {reward_category.reward_rate}x rate")
+            
+            if annual_spend > 0:  # Only calculate for categories with actual spending
+                reward_rate = float(reward_category.reward_rate)
+                
+                # Apply spending caps
+                effective_spend = annual_spend
+                if reward_category.max_annual_spend:
+                    effective_spend = min(annual_spend, float(reward_category.max_annual_spend))
+                
+                # Calculate rewards: spend * rate * value_multiplier
+                reward_value_multiplier = card.metadata.get('reward_value_multiplier', 0.01)
+                category_rewards = effective_spend * reward_rate * float(reward_value_multiplier)
+                total_rewards += category_rewards
+                
+                if is_amazon_card:
+                    print(f"DEBUG:     -> ${category_rewards:.0f} rewards (${effective_spend:.0f} * {reward_rate} * {reward_value_multiplier})")
+        
+        # Add signup bonus if requested
+        signup_value = 0
+        if signup_bonus:
+            signup_value = self._get_signup_bonus_value(card)
+            total_rewards += signup_value
+            
+        if is_amazon_card:
+            print(f"DEBUG: {card.name} total: ${total_rewards:.0f} (rewards: ${total_rewards - signup_value:.0f}, signup: ${signup_value:.0f})")
+        
+        return total_rewards
     
     def _find_new_cards(self, eligible_cards: List[CreditCard], max_cards: int) -> List[dict]:
         """Find best new cards to apply for"""
