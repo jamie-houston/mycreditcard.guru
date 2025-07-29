@@ -386,9 +386,11 @@ class RecommendationEngine:
         }
     
     def _optimize_card_portfolio(self, card_scores: List[dict], max_cards: int) -> List[dict]:
-        """Use portfolio optimization to select best card combination"""
-        # Build category coverage map
+        """Use portfolio optimization to select best card combination avoiding double counting"""
         from collections import defaultdict
+        from itertools import combinations
+        
+        # Build category coverage map
         category_coverage = defaultdict(list)
         
         for card_data in card_scores:
@@ -401,64 +403,101 @@ class RecommendationEngine:
                     'max_spend': reward_cat.max_annual_spend
                 })
         
-        # Select best card for each category (avoiding redundancy)
-        selected_cards = []
-        used_cards = set()
-        
-        # Sort categories by user spending (prioritize high-spend categories)
-        category_spending = []
+        # Get user spending by category
+        spending_by_category = {}
         for category_slug, monthly_amount in self.spending_amounts.items():
             annual_spend = float(monthly_amount) * 12
-            if annual_spend > 0 and category_slug in category_coverage:
-                category_spending.append((category_slug, annual_spend))
+            if annual_spend > 0:
+                spending_by_category[category_slug] = annual_spend
         
-        category_spending.sort(key=lambda x: x[1], reverse=True)  # Highest spending first
-        
-        # Select best card for each high-spend category
-        for category_slug, annual_spend in category_spending:
-            if len(selected_cards) >= max_cards:
-                break
-                
-            category_cards = category_coverage[category_slug]
-            # Find best unused card for this category
-            best_card = None
-            best_value = -float('inf')
+        # Function to calculate true portfolio value for a set of cards
+        def calculate_portfolio_value(card_combination):
+            total_value = 0
+            total_fees = 0
+            category_allocated = {}  # Track best rate per category
             
-            for card_info in category_cards:
-                card_data = card_info['card_data']
-                if card_data['card'].id in used_cards:
-                    continue
+            # Calculate credits/benefits value for each card
+            for card_data in card_combination:
+                card = card_data['card']
+                
+                # Add annual fee
+                if card_data['action'] == 'apply' and card.metadata.get('annual_fee_waived_first_year', False):
+                    # First year fee waived
+                    pass
+                else:
+                    total_fees += float(card.annual_fee)
+                
+                # Add signup bonus for new cards
+                if card_data['action'] == 'apply':
+                    signup_bonus = self._get_signup_bonus_value(card)
+                    total_value += signup_bonus
+                
+                # Add credits/benefits value
+                credits_value, _ = self._calculate_card_credits_value(card)
+                total_value += credits_value
+                
+                # Track best reward rate per category across all cards
+                for reward_cat in card.reward_categories.filter(is_active=True):
+                    category_slug = reward_cat.category.slug
+                    rate = float(reward_cat.reward_rate)
+                    max_spend = reward_cat.max_annual_spend
                     
-                # Calculate value for this category specifically
-                rate = card_info['rate']
-                spend_limit = float(card_info['max_spend']) if card_info['max_spend'] else annual_spend
-                effective_spend = min(annual_spend, spend_limit)
-                
-                # Get card's reward multiplier
-                reward_multiplier = card_data['card'].metadata.get('reward_value_multiplier', 0.01)
-                category_value = effective_spend * rate * reward_multiplier
-                
-                # Add overall card value
-                total_value = category_value + card_data['net_value']
-                
-                if total_value > best_value:
-                    best_value = total_value
-                    best_card = card_data
+                    if category_slug not in category_allocated or rate > category_allocated[category_slug]['rate']:
+                        category_allocated[category_slug] = {
+                            'rate': rate,
+                            'max_spend': max_spend,
+                            'card': card,
+                            'multiplier': card.metadata.get('reward_value_multiplier', 0.01)
+                        }
             
-            if best_card and best_card['net_value'] > 0:  # Only add positive-value cards
-                selected_cards.append(best_card)
-                used_cards.add(best_card['card'].id)
+            # Calculate spending rewards using ONLY the best rate per category
+            for category_slug, annual_spend in spending_by_category.items():
+                if category_slug in category_allocated:
+                    allocation = category_allocated[category_slug]
+                    rate = allocation['rate']
+                    max_spend = allocation['max_spend']
+                    multiplier = allocation['multiplier']
+                    
+                    # Apply spending caps
+                    effective_spend = annual_spend
+                    if max_spend:
+                        effective_spend = min(annual_spend, float(max_spend))
+                    
+                    # Calculate rewards: spend * rate * value_multiplier
+                    category_rewards = effective_spend * rate * float(multiplier)
+                    total_value += category_rewards
+            
+            return total_value - total_fees
         
-        # Fill remaining slots with highest net-value cards
-        remaining_cards = [cd for cd in card_scores if cd['card'].id not in used_cards and cd['net_value'] > 0]
-        remaining_cards.sort(key=lambda x: x['net_value'], reverse=True)
+                 # Try different combinations to find optimal portfolio
+        best_combination = []
+        best_value = -float('inf')
         
-        for card_data in remaining_cards:
-            if len(selected_cards) >= max_cards:
+        # Always include current cards with positive value (keeps)
+        must_include = [cd for cd in card_scores if cd['action'] == 'keep' and cd['net_value'] > 0]
+        remaining_cards = [cd for cd in card_scores if cd not in must_include and cd['net_value'] > 0]
+        
+        print(f"DEBUG: Portfolio optimization - must_include: {len(must_include)}, remaining: {len(remaining_cards)}, max_cards: {max_cards}")
+        
+        # Limit search space for performance (try combinations up to max_cards)
+        max_combinations = min(len(remaining_cards), max_cards - len(must_include))
+        
+        # Try combinations of different sizes
+        for combo_size in range(0, max_combinations + 1):
+            if len(must_include) + combo_size > max_cards:
                 break
-            selected_cards.append(card_data)
+                
+            for combination in combinations(remaining_cards, combo_size):
+                full_combination = must_include + list(combination)
+                portfolio_value = calculate_portfolio_value(full_combination)
+                
+                if portfolio_value > best_value:
+                    best_value = portfolio_value
+                    best_combination = full_combination
+                    print(f"DEBUG: New best combination - value: ${best_value:.2f}, cards: {[cd['card'].name for cd in best_combination]}")
         
-        return selected_cards
+        # Ensure we don't return more than max_cards
+        return best_combination[:max_cards]
     
     def _generate_card_reasoning(self, card_data: dict) -> str:
         """Generate reasoning text for a card recommendation"""
