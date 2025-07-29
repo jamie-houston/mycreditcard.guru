@@ -335,7 +335,7 @@
                             <div style="font-size: 13px; color: #6b7280; margin-bottom: 8px; font-weight: 500;">
                                 💳 Available Credits/Benefits:
                             </div>
-                            <div class="spending-credits-list" style="display: flex; flex-direction: column; gap: 8px;">
+                            <div class="spending-credits-list" style="display: flex !important; flex-direction: column !important; gap: 8px; width: 100%;">
                     `;
                     
                     categoryCredits.forEach(credit => {
@@ -343,7 +343,7 @@
                             `<span class="tooltip-icon" title="${credit.description}" style="margin-left: 4px;">❓</span>` : '';
                         
                         categoryHtml += `
-                            <div class="spending-credit-item credit-checkbox-item" style="display: flex; align-items: center; gap: 6px; font-size: 12px;">
+                            <div class="spending-credit-item" style="display: flex; align-items: center; gap: 6px; font-size: 12px; width: 100%;">
                                 <input type="checkbox" id="credit_${credit.slug}" name="spending_credit_preferences" 
                                        value="${credit.slug}" onchange="handleSpendingCreditChange(this)">
                                 <label for="credit_${credit.slug}" style="cursor: pointer; color: #4b5563; font-weight: normal; margin: 0;">
