@@ -1367,6 +1367,19 @@
             transform: translateY(-2px);
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
         }
+        
+        /* Dollar sign spacing improvements */
+        .input-group .input-group-text:not(.category-label):not(.subcategory-label) {
+            padding: 8px 8px !important; /* Reduce padding for dollar signs */
+            min-width: auto !important;
+            justify-content: center !important;
+            border-left: none !important;
+        }
+        
+        .spending-input {
+            border-left: none !important; /* Remove gap between $ and input */
+        }
+        
         @media (max-width: 768px) {
             .modal-content {
                 width: 95%;
@@ -1382,6 +1395,16 @@
             }
             .modal-body {
                 padding: 20px;
+            }
+            
+            /* Mobile input spacing fixes */
+            .input-group .input-group-text {
+                padding: 8px 6px !important; /* Reduce padding on mobile */
+            }
+            
+            .spending-input {
+                flex: 1 !important;
+                min-width: 80px !important; /* Ensure minimum width for numbers */
             }
         }
     </style>
