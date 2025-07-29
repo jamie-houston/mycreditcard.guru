@@ -318,14 +318,14 @@ class RecommendationEngine:
         """Select optimal combination of cards from all available (current + new)"""
         current_card_ids = {uc.card.id for uc in self.user_cards}
         
-        # Score all cards using smart portfolio-aware calculation
+        # Score all cards using smart portfolio-aware calculation with efficiency scoring
         card_scores = []
         for card in all_cards:
             if card.id in current_card_ids:
                 # Current card - no signup bonus
                 annual_rewards = self._calculate_smart_card_value(card, signup_bonus=False)
                 annual_fee = float(card.annual_fee)
-                net_value = annual_rewards - annual_fee
+                base_net_value = annual_rewards - annual_fee
                 action = 'keep'
                 signup_bonus_value = 0
             else:
@@ -336,13 +336,24 @@ class RecommendationEngine:
                 signup_bonus_value = self._get_signup_bonus_value(card)
                 annual_fee_waived = card.metadata.get('annual_fee_waived_first_year', False)
                 effective_fee = 0 if annual_fee_waived else float(card.annual_fee)
-                net_value = annual_rewards - effective_fee + signup_bonus_value
+                base_net_value = annual_rewards - effective_fee + signup_bonus_value
                 action = 'apply'
+            
+            # Apply efficiency scoring: boost cards that are highly relevant to user's spending
+            efficiency_score = self._calculate_spending_efficiency(card)
+            if efficiency_score > 0.8:  # Super boost for highly relevant cards
+                efficiency_boost = base_net_value * efficiency_score * 2.0  # Up to 200% boost for perfect efficiency
+            else:
+                efficiency_boost = base_net_value * efficiency_score * 1.0  # Up to 100% boost for normal cards
+            net_value = base_net_value + efficiency_boost
             
             card_scores.append({
                 'card': card,
                 'action': action,
                 'net_value': net_value,
+                'base_net_value': base_net_value,
+                'efficiency_score': efficiency_score,
+                'efficiency_boost': efficiency_boost,
                 'annual_rewards': annual_rewards,
                 'signup_bonus': signup_bonus_value,
                 'current_card': card.id in current_card_ids
@@ -507,17 +518,23 @@ class RecommendationEngine:
         # Sort remaining cards by individual net value for smarter search
         remaining_cards.sort(key=lambda x: x['net_value'], reverse=True)
         
-        # DEBUG: Show top cards being considered
-        print(f"DEBUG: Top 15 cards by net value:")
+        # DEBUG: Show top cards being considered with efficiency scores
+        print(f"DEBUG: Top 15 cards by net value (with efficiency scoring):")
         for i, card_data in enumerate(remaining_cards[:15]):
-            print(f"  {i+1}. {card_data['card'].name}: ${card_data['net_value']:.0f} (annual: ${card_data.get('annual_rewards', 0):.0f}, signup: ${card_data.get('signup_bonus', 0):.0f})")
+            base_val = card_data.get('base_net_value', card_data['net_value'])
+            efficiency = card_data.get('efficiency_score', 0)
+            boost = card_data.get('efficiency_boost', 0)
+            print(f"  {i+1}. {card_data['card'].name}: ${card_data['net_value']:.0f} (base: ${base_val:.0f}, efficiency: {efficiency:.2f}, boost: +${boost:.0f})")
         
         # DEBUG: Specifically look for Amazon Prime card
         amazon_cards = [cd for cd in remaining_cards if 'Amazon' in cd['card'].name]
         if amazon_cards:
-            print(f"DEBUG: Amazon cards found:")
+            print(f"DEBUG: Amazon cards with efficiency:")
             for i, card_data in enumerate(amazon_cards):
-                print(f"  Amazon {i+1}. {card_data['card'].name}: ${card_data['net_value']:.0f} (annual: ${card_data.get('annual_rewards', 0):.0f}, signup: ${card_data.get('signup_bonus', 0):.0f})")
+                base_val = card_data.get('base_net_value', card_data['net_value'])
+                efficiency = card_data.get('efficiency_score', 0)
+                boost = card_data.get('efficiency_boost', 0)
+                print(f"  Amazon {i+1}. {card_data['card'].name}: ${card_data['net_value']:.0f} (base: ${base_val:.0f}, efficiency: {efficiency:.2f}, boost: +${boost:.0f})")
         else:
             print(f"DEBUG: No Amazon cards found in remaining_cards")
         
@@ -711,7 +728,32 @@ class RecommendationEngine:
             general_rewards = unallocated_spending * best_general_rate * float(best_general_multiplier)
             total_portfolio_rewards += general_rewards
         
-        return total_portfolio_rewards + total_signup_bonuses - total_annual_fees
+        base_portfolio_value = total_portfolio_rewards + total_signup_bonuses - total_annual_fees
+        
+        # Add efficiency bonus: boost portfolios that include highly relevant cards
+        total_efficiency_boost = 0
+        for action in portfolio_cards:
+            card = action['card']
+            efficiency_score = self._calculate_spending_efficiency(card)
+            
+            # DEBUG: Show all cards being evaluated in portfolio
+            print(f"DEBUG: Portfolio card {card.name}: efficiency {efficiency_score:.2f}")
+            
+            if efficiency_score > 0.1:  # Boost any somewhat relevant cards (lowered threshold)
+                card_annual_value = self._calculate_smart_card_value(card, signup_bonus=False) - float(card.annual_fee)
+                card_signup_value = self._get_signup_bonus_value(card) if action['action'] == 'apply' else 0
+                card_base_value = card_annual_value + card_signup_value
+                efficiency_boost = card_base_value * efficiency_score * 0.5  # 50% max boost for perfect efficiency
+                total_efficiency_boost += efficiency_boost
+                
+                # DEBUG: Show efficiency boost calculation for relevant cards
+                print(f"DEBUG: Portfolio efficiency boost - {card.name}: {efficiency_score:.2f} efficiency × ${card_base_value:.0f} base × 0.5 = +${efficiency_boost:.0f}")
+        
+        final_value = base_portfolio_value + total_efficiency_boost
+        if total_efficiency_boost > 0:
+            print(f"DEBUG: Portfolio value: ${base_portfolio_value:.0f} base + ${total_efficiency_boost:.0f} efficiency = ${final_value:.0f} total")
+        
+        return final_value
     
     def _build_parent_category_spending(self) -> dict:
         """Build and cache parent category spending map for performance"""
@@ -785,6 +827,61 @@ class RecommendationEngine:
             total_rewards += signup_value
         
         return total_rewards
+    
+    def _calculate_spending_efficiency(self, card: CreditCard) -> float:
+        """Calculate how efficiently a card matches user's actual spending pattern
+        
+        Returns a score from 0.0 to 1.0 where:
+        - 1.0 = Perfect match (high rewards for categories where user spends most)
+        - 0.5 = Average (some relevant categories)
+        - 0.0 = No match (no rewards for user's spending categories)
+        """
+        if not hasattr(self, '_cached_parent_spending'):
+            self._cached_parent_spending = self._build_parent_category_spending()
+        
+        parent_category_spending = self._cached_parent_spending
+        total_user_spending = sum(parent_category_spending.values())
+        
+        if total_user_spending == 0:
+            return 0.0
+        
+        # Pre-fetch reward categories
+        if not hasattr(card, '_cached_reward_categories'):
+            card._cached_reward_categories = list(card.reward_categories.filter(is_active=True).select_related('category'))
+        
+        relevant_spending = 0.0
+        weighted_efficiency = 0.0
+        
+        for reward_category in card._cached_reward_categories:
+            category_slug = reward_category.category.slug
+            
+            # Check both parent category spending AND direct subcategory spending
+            annual_spend = parent_category_spending.get(category_slug, 0.0)
+            
+            # If no parent spending found, check subcategory spending
+            if annual_spend == 0:
+                for orig_category_slug, monthly_amount in self.spending_amounts.items():
+                    if orig_category_slug == category_slug:
+                        annual_spend = float(monthly_amount) * 12
+                        break
+            
+            if annual_spend > 0:
+                reward_rate = float(reward_category.reward_rate)
+                spending_weight = annual_spend / total_user_spending
+                
+                # Efficiency = reward rate above baseline (1x = no efficiency, 5x = high efficiency)
+                efficiency = max(0, (reward_rate - 1.0) / 4.0)  # Normalize to 0-1 scale
+                efficiency = min(1.0, efficiency)  # Cap at 1.0
+                
+                weighted_efficiency += efficiency * spending_weight
+                relevant_spending += annual_spend
+        
+        # Bonus for coverage: how much of user's spending does this card address?
+        coverage_ratio = relevant_spending / total_user_spending
+        
+        # Final efficiency score combines reward efficiency and spending coverage
+        final_score = (weighted_efficiency * 0.7) + (coverage_ratio * 0.3)
+        return min(1.0, final_score)
     
     def _find_new_cards(self, eligible_cards: List[CreditCard], max_cards: int) -> List[dict]:
         """Find best new cards to apply for"""
