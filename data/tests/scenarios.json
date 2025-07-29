@@ -1097,6 +1097,329 @@
           "Net value calculation includes both rewards and credits vs fees"
         ]
       }
+    },
+    {
+      "name": "Optimal Card Count - Single Card Sufficient",
+      "description": "Tests that only 1 card is recommended when user spending only justifies one card, even with max_recommendations=5",
+      "user_profile": {
+        "spending": {
+          "groceries": 200,
+          "general": 300
+        },
+        "preferences": {
+          "max_annual_fee": 200,
+          "preferred_reward_type": "cashback",
+          "max_recommendations": 5
+        }
+      },
+      "owned_cards": [],
+      "available_cards": ["Citi Double Cash Card", "Freedom Unlimited", "Blue Cash Preferred® Card", "SavorOne Cash Rewards Credit Card", "Quicksilver Cash Rewards Credit Card"],
+      "expected_recommendations": {
+        "actions": ["apply"],
+        "card_count_optimization": {
+          "max_recommendations": 5,
+          "expected_actual_count": 1,
+          "reason": "Low spending only justifies one optimal card"
+        },
+        "must_include_cards": ["Citi Double Cash Card"],
+        "must_not_include_cards": ["Freedom Unlimited", "Blue Cash Preferred® Card"],
+        "reasoning_must_contain": ["optimal", "single card"],
+        "test_conditions": [
+          "Only 1 card recommended despite max_recommendations=5",
+          "Portfolio optimization prevents redundant cards",
+          "Low spending doesn't justify multiple signup bonuses",
+          "Best single card provides optimal value",
+          "No overlapping reward categories recommended"
+        ]
+      }
+    },
+    {
+      "name": "Optimal Card Count - High Spending Multiple Cards",
+      "description": "Tests that multiple cards are recommended when high spending justifies signup bonuses and complementary categories",
+      "user_profile": {
+        "spending": {
+          "groceries": 800,
+          "dining": 600,
+          "travel": 500,
+          "gas": 400,
+          "general": 700
+        },
+        "preferences": {
+          "max_annual_fee": 550,
+          "preferred_reward_type": "points",
+          "max_recommendations": 5
+        }
+      },
+      "owned_cards": [],
+      "available_cards": ["Chase Sapphire Reserve®", "Blue Cash Preferred® Card", "Gold Card", "Freedom Unlimited", "Citi Double Cash Card"],
+      "expected_recommendations": {
+        "actions": ["apply"],
+        "card_count_optimization": {
+          "max_recommendations": 5,
+          "expected_actual_count": 3,
+          "reason": "High spending across multiple categories justifies multiple cards"
+        },
+        "must_include_cards": ["Chase Sapphire Reserve®", "Blue Cash Preferred® Card"],
+        "portfolio_optimization": {
+          "no_overlapping_categories": true,
+          "complementary_coverage": true,
+          "signup_bonus_justification": "High annual spending supports multiple signup bonus requirements"
+        },
+        "reasoning_must_contain": ["travel", "groceries", "complementary"],
+        "test_conditions": [
+          "Multiple cards recommended due to high spending",
+          "Each card covers different optimal categories",
+          "Total spending justifies multiple signup bonus requirements",
+          "Portfolio provides better value than single card",
+          "No redundant category coverage between recommended cards"
+        ]
+      }
+    },
+    {
+      "name": "Optimal Card Count - Medium Spending Two Cards",
+      "description": "Tests that exactly 2 cards are recommended when spending justifies complementary cards but not more",
+      "user_profile": {
+        "spending": {
+          "groceries": 500,
+          "dining": 400,
+          "general": 600
+        },
+        "preferences": {
+          "max_annual_fee": 300,
+          "preferred_reward_type": "cashback",
+          "max_recommendations": 5
+        }
+      },
+      "owned_cards": [],
+      "available_cards": ["Blue Cash Preferred® Card", "SavorOne Cash Rewards Credit Card", "Citi Double Cash Card", "Freedom Unlimited", "Quicksilver Cash Rewards Credit Card"],
+      "expected_recommendations": {
+        "actions": ["apply"],
+        "card_count_optimization": {
+          "max_recommendations": 5,
+          "expected_actual_count": 2,
+          "reason": "Medium spending justifies two complementary cards"
+        },
+        "must_include_cards": ["Blue Cash Preferred® Card", "SavorOne Cash Rewards Credit Card"],
+        "portfolio_optimization": {
+          "complementary_categories": ["groceries", "dining"],
+          "no_redundancy": true,
+          "optimal_coverage": true
+        },
+        "reasoning_must_contain": ["groceries", "dining", "complementary"],
+        "test_conditions": [
+          "Exactly 2 cards recommended for medium spending",
+          "Cards cover different primary categories",
+          "Spending levels justify two signup bonuses",
+          "Portfolio optimization selects best category specialists",
+          "No third card adds meaningful portfolio value"
+        ]
+      }
+    },
+    {
+      "name": "Optimal Card Count - Existing Cards Reduce Need",
+      "description": "Tests that fewer new cards are recommended when user already has good coverage",
+      "user_profile": {
+        "spending": {
+          "groceries": 600,
+          "dining": 500,
+          "travel": 400,
+          "gas": 300,
+          "general": 700
+        },
+        "preferences": {
+          "max_annual_fee": 400,
+          "preferred_reward_type": "points",
+          "max_recommendations": 5
+        }
+      },
+      "owned_cards": ["Chase Sapphire Preferred® Card", "Freedom Unlimited"],
+      "available_cards": ["Chase Sapphire Preferred® Card", "Freedom Unlimited", "Blue Cash Preferred® Card", "Gold Card", "Citi Double Cash Card"],
+      "expected_recommendations": {
+        "actions": ["keep", "apply"],
+        "card_count_optimization": {
+          "max_recommendations": 5,
+          "expected_actual_count": 3,
+          "existing_cards": 2,
+          "new_cards": 1,
+          "reason": "Existing cards provide good coverage, only one complementary card needed"
+        },
+        "cards_to_keep": ["Chase Sapphire Preferred® Card", "Freedom Unlimited"],
+        "must_include_cards": ["Blue Cash Preferred® Card"],
+        "portfolio_optimization": {
+          "leverages_existing_coverage": true,
+          "fills_gaps": ["groceries"],
+          "avoids_redundancy": true
+        },
+        "reasoning_must_contain": ["groceries", "gap", "complementary"],
+        "test_conditions": [
+          "Only 1 new card recommended despite high spending",
+          "Existing cards reduce need for additional cards",
+          "New card fills specific category gap (groceries)",
+          "Portfolio optimization considers current holdings",
+          "Total portfolio provides comprehensive coverage"
+        ]
+      }
+    },
+    {
+      "name": "Optimal Card Count - Signup Bonus Spending Threshold",
+      "description": "Tests card count based on whether spending meets signup bonus requirements",
+      "user_profile": {
+        "spending": {
+          "dining": 300,
+          "groceries": 250,
+          "general": 400
+        },
+        "preferences": {
+          "max_annual_fee": 200,
+          "preferred_reward_type": "cashback",
+          "max_recommendations": 4
+        }
+      },
+      "owned_cards": [],
+      "available_cards": ["SavorOne Cash Rewards Credit Card", "Blue Cash Preferred® Card", "Citi Double Cash Card", "Freedom Unlimited"],
+      "expected_recommendations": {
+        "actions": ["apply"],
+        "card_count_optimization": {
+          "max_recommendations": 4,
+          "expected_actual_count": 2,
+          "reason": "Spending meets signup requirements for 2 cards but not more"
+        },
+        "signup_bonus_analysis": {
+          "monthly_spending": 950,
+          "can_meet_multiple_bonuses": true,
+          "optimal_count_for_bonuses": 2
+        },
+        "must_include_cards": ["SavorOne Cash Rewards Credit Card", "Blue Cash Preferred® Card"],
+        "reasoning_must_contain": ["signup bonus", "spending threshold"],
+        "test_conditions": [
+          "Card count limited by signup bonus spending requirements",
+          "Only recommends cards where user can realistically meet bonus",
+          "Considers monthly spending vs signup bonus timeframes",
+          "Optimal balance between bonuses and ongoing rewards",
+          "Portfolio value maximized within spending constraints"
+        ]
+      }
+    },
+    {
+      "name": "Optimal Card Count - Zero Annual Fee Always Counted",
+      "description": "Tests that $0 fee cards don't count against max_recommendations limit for new applications",
+      "user_profile": {
+        "spending": {
+          "groceries": 300,
+          "dining": 200,
+          "general": 500
+        },
+        "preferences": {
+          "max_annual_fee": 0,
+          "preferred_reward_type": "cashback",
+          "max_recommendations": 2
+        }
+      },
+      "owned_cards": [],
+      "available_cards": ["Freedom Unlimited", "Citi Double Cash Card", "Discover it Cash Back", "Blue Cash Everyday", "Quicksilver Cash Rewards Credit Card"],
+      "expected_recommendations": {
+        "actions": ["apply"],
+        "card_count_optimization": {
+          "max_recommendations": 2,
+          "expected_actual_count": 3,
+          "reason": "Multiple $0 fee cards provide different category optimizations"
+        },
+        "zero_fee_optimization": {
+          "all_cards_zero_fee": true,
+          "complementary_categories": true,
+          "no_fee_justifies_multiple": true
+        },
+        "must_include_cards": ["Freedom Unlimited", "Citi Double Cash Card", "Discover it Cash Back"],
+        "reasoning_must_contain": ["no annual fee", "complementary", "zero cost"],
+        "test_conditions": [
+          "More than max_recommendations due to $0 fee cards",
+          "Zero fee cards get special consideration in count",
+          "Portfolio optimization with no fee constraints",
+          "Multiple cards justified by lack of annual fees",
+          "Each card provides unique category value"
+        ]
+      }
+    },
+    {
+      "name": "Optimal Card Count - Minimal Spending Edge Case",
+      "description": "Tests that no cards are recommended when spending is too low to justify any signup bonuses or fees",
+      "user_profile": {
+        "spending": {
+          "general": 100
+        },
+        "preferences": {
+          "max_annual_fee": 100,
+          "preferred_reward_type": "cashback",
+          "max_recommendations": 5
+        }
+      },
+      "owned_cards": [],
+      "available_cards": ["Freedom Unlimited", "Citi Double Cash Card", "SavorOne Cash Rewards Credit Card", "Blue Cash Preferred® Card"],
+      "expected_recommendations": {
+        "actions": ["apply"],
+        "card_count_optimization": {
+          "max_recommendations": 5,
+          "expected_actual_count": 1,
+          "reason": "Minimal spending only justifies one basic rewards card"
+        },
+        "minimal_spending_analysis": {
+          "monthly_spending": 100,
+          "insufficient_for_premium": true,
+          "basic_card_optimal": true
+        },
+        "must_include_cards": ["Citi Double Cash Card"],
+        "must_not_include_cards": ["Blue Cash Preferred® Card"],
+        "reasoning_must_contain": ["low spending", "basic rewards"],
+        "test_conditions": [
+          "Only 1 card recommended for minimal spending",
+          "Simple flat-rate card preferred over category cards",
+          "Portfolio optimization considers spending efficiency",
+          "No premium cards with fees recommended",
+          "Signup bonus ROI considered vs low spending"
+        ]
+      }
+    },
+    {
+      "name": "Optimal Card Count - Portfolio Value Threshold",
+      "description": "Tests that cards are only recommended if they add meaningful portfolio value",
+      "user_profile": {
+        "spending": {
+          "dining": 400,
+          "groceries": 350,
+          "travel": 300,
+          "general": 450
+        },
+        "preferences": {
+          "max_annual_fee": 300,
+          "preferred_reward_type": "points",
+          "max_recommendations": 6
+        }
+      },
+      "owned_cards": [],
+      "available_cards": ["Chase Sapphire Preferred® Card", "Blue Cash Preferred® Card", "Gold Card", "Freedom Unlimited", "Citi Double Cash Card", "SavorOne Cash Rewards Credit Card"],
+      "expected_recommendations": {
+        "actions": ["apply"],
+        "card_count_optimization": {
+          "max_recommendations": 6,
+          "expected_actual_count": 3,
+          "reason": "Only 3 cards add meaningful incremental portfolio value"
+        },
+        "portfolio_value_analysis": {
+          "value_threshold": 50,
+          "diminishing_returns": true,
+          "optimal_stopping_point": 3
+        },
+        "must_include_cards": ["Chase Sapphire Preferred® Card", "Blue Cash Preferred® Card", "Gold Card"],
+        "must_not_include_cards": ["Freedom Unlimited"],
+        "reasoning_must_contain": ["portfolio value", "incremental", "diminishing"],
+        "test_conditions": [
+          "Cards stopped at optimal portfolio value point",
+          "Additional cards don't add meaningful value",
+          "Portfolio optimization prevents over-optimization",
+          "Considers marginal value of each additional card",
+          "Stops before hitting max_recommendations when optimal"
+        ]
+      }
     }
   ]
 }

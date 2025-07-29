@@ -231,12 +231,118 @@ class Command(BaseCommand):
             if card_name not in recommended_cards:
                 issues.append(f'Expected card "{card_name}" not recommended')
         
+        # Check must-not-include cards
+        must_not_include = expected.get('must_not_include_cards', [])
+        for card_name in must_not_include:
+            if card_name in recommended_cards:
+                issues.append(f'Card "{card_name}" should not be recommended but was')
+        
+        # Check card count optimization
+        card_count_opt = expected.get('card_count_optimization')
+        if card_count_opt:
+            issues.extend(self.validate_card_count_optimization(recommendations, card_count_opt))
+        
+        # Check zero fee optimization
+        zero_fee_opt = expected.get('zero_fee_optimization')
+        if zero_fee_opt:
+            issues.extend(self.validate_zero_fee_optimization(recommendations, zero_fee_opt))
+        
+        # Check portfolio optimization
+        portfolio_opt = expected.get('portfolio_optimization')
+        if portfolio_opt:
+            issues.extend(self.validate_portfolio_optimization(recommendations, portfolio_opt))
+        
         if issues:
             self.stdout.write(self.style.ERROR('⚠️  Validation Issues:'))
             for issue in issues:
                 self.stdout.write(self.style.ERROR(f'   • {issue}'))
         else:
             self.stdout.write(self.style.SUCCESS('✓ All expectations met'))
+    
+    def validate_card_count_optimization(self, recommendations, expected):
+        """Validate card count optimization logic."""
+        issues = []
+        
+        expected_count = expected.get('expected_actual_count')
+        if expected_count is not None:
+            actual_count = len(recommendations)
+            if actual_count != expected_count:
+                issues.append(f'Card count optimization failed: expected {expected_count} cards, got {actual_count}')
+        
+        max_recs = expected.get('max_recommendations')
+        if max_recs is not None:
+            actual_count = len(recommendations)
+            # For regular optimization, count should be <= max unless zero fee exception
+            has_zero_fee_exception = any('$0' in rec.get('reasoning', '') or rec['card'].annual_fee == 0 
+                                       for rec in recommendations)
+            if actual_count > max_recs and not has_zero_fee_exception:
+                issues.append(f'Exceeded max_recommendations ({max_recs}) without zero fee justification: got {actual_count}')
+        
+        return issues
+    
+    def validate_zero_fee_optimization(self, recommendations, expected):
+        """Validate zero fee card optimization logic."""
+        issues = []
+        
+        if expected.get('all_cards_zero_fee'):
+            for rec in recommendations:
+                if rec['card'].annual_fee > 0:
+                    issues.append(f'Card "{rec["card"].name}" has annual fee ${rec["card"].annual_fee} but should be $0')
+        
+        if expected.get('no_fee_justifies_multiple'):
+            zero_fee_count = sum(1 for rec in recommendations if rec['card'].annual_fee == 0)
+            if zero_fee_count < 2:
+                issues.append(f'Expected multiple zero fee cards, got {zero_fee_count}')
+        
+        return issues
+    
+    def validate_portfolio_optimization(self, recommendations, expected):
+        """Validate portfolio optimization logic."""
+        issues = []
+        
+        if expected.get('no_overlapping_categories'):
+            # Check that cards don't have overlapping reward categories
+            category_coverage = {}
+            for rec in recommendations:
+                card = rec['card']
+                for reward_cat in card.reward_categories.filter(is_active=True):
+                    category_slug = reward_cat.category.slug
+                    if category_slug in category_coverage:
+                        issues.append(f'Overlapping category "{category_slug}" found in cards: {category_coverage[category_slug]} and {card.name}')
+                    else:
+                        category_coverage[category_slug] = card.name
+        
+        if expected.get('complementary_coverage'):
+            # Ensure recommended cards provide complementary, not redundant coverage
+            apply_cards = [rec for rec in recommendations if rec['action'] == 'apply']
+            if len(apply_cards) > 1:
+                # Check that each card specializes in different categories
+                primary_categories = []
+                for rec in apply_cards:
+                    card = rec['card']
+                    best_rate = 0
+                    best_category = None
+                    for reward_cat in card.reward_categories.filter(is_active=True):
+                        if float(reward_cat.reward_rate) > best_rate:
+                            best_rate = float(reward_cat.reward_rate)
+                            best_category = reward_cat.category.slug
+                    if best_category and best_category in primary_categories:
+                        issues.append(f'Multiple cards optimized for same category "{best_category}"')
+                    elif best_category:
+                        primary_categories.append(best_category)
+        
+        complementary_cats = expected.get('complementary_categories', [])
+        if complementary_cats:
+            recommended_categories = set()
+            for rec in recommendations:
+                for reward_cat in rec['card'].reward_categories.filter(is_active=True):
+                    recommended_categories.add(reward_cat.category.slug)
+            
+            for category in complementary_cats:
+                if category not in recommended_categories:
+                    issues.append(f'Expected complementary category "{category}" not covered by recommendations')
+        
+        return issues
     
     def setup_test_data(self):
         """Set up references to existing data."""
