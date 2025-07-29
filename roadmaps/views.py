@@ -162,7 +162,8 @@ def quick_recommendation_view(request):
                     'net_portfolio_value': portfolio_summary.get('net_portfolio_value', 0),
                     'category_optimization': portfolio_summary.get('category_optimization', {}),
                     'card_count': portfolio_summary.get('card_count', 0),
-                    'total_credits_value': portfolio_summary.get('total_credits_value', 0)
+                    'total_credits_value': portfolio_summary.get('total_credits_value', 0),
+                    'total_annual_spending': portfolio_summary.get('total_annual_spending', 0)
                 }
             })
             

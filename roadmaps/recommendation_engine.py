@@ -25,6 +25,13 @@ class RecommendationEngine:
     
     def generate_quick_recommendations(self, roadmap: Roadmap) -> List[dict]:
         """Generate recommendations without saving to database (includes breakdowns)"""
+        # Reload spending amounts to ensure we have the latest data
+        self.spending_amounts = {
+            sa.category.slug: sa.monthly_amount 
+            for sa in self.profile.spending_amounts.all()
+        }
+        print(f"DEBUG: Reloaded spending_amounts: {dict(self.spending_amounts)}")
+        
         # Get all eligible cards based on filters
         eligible_cards = self._get_filtered_cards(roadmap)
         
@@ -935,41 +942,8 @@ class RecommendationEngine:
             else:
                 total_annual_fees += float(card.annual_fee)
         
-        # Build category optimization map (highest reward rate per category)
+        # Initialize category optimization map (will be built after spending calculation)
         category_optimization = {}
-        
-        # For each spending category, find the best reward rate among all portfolio cards
-        for card_data in all_portfolio_cards:
-            card = card_data['card']
-            for reward_category in card.reward_categories.filter(is_active=True):
-                category_slug = reward_category.category.slug
-                category_name = reward_category.category.display_name or reward_category.category.name
-                reward_rate = float(reward_category.reward_rate)
-                
-                if category_slug not in category_optimization:
-                    category_optimization[category_slug] = {
-                        'category_name': category_name,
-                        'best_rate': reward_rate,
-                        'best_card': card.name,
-                        'max_annual_spend': reward_category.max_annual_spend
-                    }
-                else:
-                    # Update if this card has a better rate
-                    if reward_rate > category_optimization[category_slug]['best_rate']:
-                        category_optimization[category_slug].update({
-                            'best_rate': reward_rate,
-                            'best_card': card.name,
-                            'max_annual_spend': reward_category.max_annual_spend
-                        })
-                    # If same rate but higher spending cap, prefer this card
-                    elif (reward_rate == category_optimization[category_slug]['best_rate'] and
-                          reward_category.max_annual_spend and
-                          (not category_optimization[category_slug]['max_annual_spend'] or
-                           float(reward_category.max_annual_spend) > float(category_optimization[category_slug]['max_annual_spend'] or 0))):
-                        category_optimization[category_slug].update({
-                            'best_card': card.name,
-                            'max_annual_spend': reward_category.max_annual_spend
-                        })
         
         # Calculate PROPERLY OPTIMIZED portfolio rewards (no double counting)
         total_portfolio_rewards = 0
@@ -977,9 +951,11 @@ class RecommendationEngine:
         
         # Create spending map
         all_spending = {}
+        print(f"DEBUG: self.spending_amounts in portfolio summary: {dict(self.spending_amounts)}")
         for category_slug, monthly_amount in self.spending_amounts.items():
             annual_spend = float(monthly_amount) * 12
             all_spending[category_slug] = annual_spend
+            print(f"DEBUG: {category_slug}: ${monthly_amount}/month -> ${annual_spend}/year")
         
         # Build parent category spending map
         from cards.models import SpendingCategory
@@ -1034,6 +1010,10 @@ class RecommendationEngine:
         # Handle unallocated spending with best general category 
         total_parent_spending = sum(parent_category_spending.values())
         unallocated_spending = total_parent_spending - allocated_spending
+        print(f"DEBUG: parent_category_spending: {parent_category_spending}")
+        print(f"DEBUG: total_parent_spending: ${total_parent_spending} (type: {type(total_parent_spending)})")
+        print(f"DEBUG: allocated_spending: ${allocated_spending}")
+        print(f"DEBUG: unallocated_spending: ${unallocated_spending}")
         
         if unallocated_spending > 0:
             # Find best general category across all portfolio cards
@@ -1068,6 +1048,51 @@ class RecommendationEngine:
                     'annual_rewards': general_rewards,
                     'max_annual_spend': None
                 }
+        
+        # Build category optimization map for categories with spending > 0 and rate > 1x
+        for card_data in all_portfolio_cards:
+            card = card_data['card']
+            for reward_category in card.reward_categories.filter(is_active=True):
+                category_slug = reward_category.category.slug
+                category_name = reward_category.category.display_name or reward_category.category.name
+                reward_rate = float(reward_category.reward_rate)
+                
+                # Only include if user has spending in this category AND rate > 1x
+                annual_spend = parent_category_spending.get(category_slug, 0.0)
+                if annual_spend > 0 and reward_rate > 1.0:
+                    if category_slug not in category_optimization:
+                        category_optimization[category_slug] = {
+                            'category_name': category_name,
+                            'best_rate': reward_rate,
+                            'best_card': card.name,
+                            'max_annual_spend': reward_category.max_annual_spend,
+                            'annual_spend': annual_spend
+                        }
+                    else:
+                        # Update if this card has a better rate
+                        if reward_rate > category_optimization[category_slug]['best_rate']:
+                            category_optimization[category_slug].update({
+                                'best_rate': reward_rate,
+                                'best_card': card.name,
+                                'max_annual_spend': reward_category.max_annual_spend,
+                                'annual_spend': annual_spend
+                            })
+                        # If same rate but higher spending cap, prefer this card
+                        elif (reward_rate == category_optimization[category_slug]['best_rate'] and
+                              reward_category.max_annual_spend and
+                              (not category_optimization[category_slug]['max_annual_spend'] or
+                               float(reward_category.max_annual_spend) > float(category_optimization[category_slug]['max_annual_spend'] or 0))):
+                            category_optimization[category_slug].update({
+                                'best_card': card.name,
+                                'max_annual_spend': reward_category.max_annual_spend,
+                                'annual_spend': annual_spend
+                            })
+        
+        # Filter out "other_spending" if rate is 1x or no spending
+        if 'other_spending' in category_optimization:
+            other_data = category_optimization['other_spending']
+            if other_data.get('best_rate', 0) <= 1.0 or other_data.get('annual_spend', 0) <= 0:
+                del category_optimization['other_spending']
         
         # Add card benefits/credits (avoid double counting by using set of unique credits)
         unique_credits = set()
@@ -1134,7 +1159,7 @@ class RecommendationEngine:
             # In production, we might want to return an error or try a different optimization strategy
         
         # Create a summary that includes filtered recommendations
-        return {
+        result = {
             'total_annual_fees': total_annual_fees,
             'total_portfolio_rewards': total_portfolio_rewards,
             'net_portfolio_value': net_portfolio_value,
@@ -1144,4 +1169,5 @@ class RecommendationEngine:
             'total_annual_spending': total_parent_spending,
             'category_optimization_cards': {cat_data['best_card'] for cat_data in category_optimization.values()}
         }
+        return result
     
