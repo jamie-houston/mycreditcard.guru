@@ -421,5 +421,30 @@
         "value": 100
       }
     ]
+  },
+  {
+    "name": "Amazon Prime",
+    "issuer": "Chase",
+    "annual_fee": 0,
+    "signup_bonus": {
+      "bonus_amount": 150
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "amazon",
+        "reward_rate": 5
+      },
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "personal",
+    "network": "Visa",
+    "url": "https://www.amazon.com/dp/BT00LN946S",
+    "image_url": "/images/chase/amazon-prime.png",
+    "discontinued": false
   }
 ]

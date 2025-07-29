@@ -76,7 +76,23 @@
     "display_name": "Shopping",
     "description": "Online and retail shopping, department stores",
     "icon": "fas fa-shopping-bag",
-    "sort_order": 60
+    "sort_order": 60,
+    "subcategories": [
+      {
+        "name": "amazon",
+        "display_name": "Amazon",
+        "description": "Amazon and Amazon Prime",
+        "icon": "fas fa-amazon",
+        "sort_order": 10
+      },
+      {
+        "name": "other_shopping",
+        "display_name": "Other",
+        "description": "Other shopping",
+        "icon": "fas fa-shopping-bag",
+        "sort_order": 20
+      }
+    ]
   },
   {
     "name": "transportation",

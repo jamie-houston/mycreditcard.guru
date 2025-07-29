@@ -471,13 +471,20 @@ class RecommendationEngine:
         
                  # Try different combinations to find optimal portfolio
         best_combination = []
-        best_value = -float('inf')
+        best_value = 0  # Start with $0 - only accept positive portfolio values!
         
         # Always include current cards with positive value (keeps)
         must_include = [cd for cd in card_scores if cd['action'] == 'keep' and cd['net_value'] > 0]
         remaining_cards = [cd for cd in card_scores if cd not in must_include and cd['net_value'] > 0]
         
         print(f"DEBUG: Portfolio optimization - must_include: {len(must_include)}, remaining: {len(remaining_cards)}, max_cards: {max_cards}")
+        
+        # Start with empty portfolio (value = $0) as baseline
+        empty_portfolio_value = calculate_portfolio_value([])
+        if empty_portfolio_value > best_value:
+            best_value = empty_portfolio_value
+            best_combination = []
+            print(f"DEBUG: Empty portfolio baseline - value: ${best_value:.2f}")
         
         # Limit search space for performance (try combinations up to max_cards)
         max_combinations = min(len(remaining_cards), max_cards - len(must_include))
@@ -491,10 +498,16 @@ class RecommendationEngine:
                 full_combination = must_include + list(combination)
                 portfolio_value = calculate_portfolio_value(full_combination)
                 
-                if portfolio_value > best_value:
+                # Only accept portfolios with positive value
+                if portfolio_value > best_value and portfolio_value > 0:
                     best_value = portfolio_value
                     best_combination = full_combination
                     print(f"DEBUG: New best combination - value: ${best_value:.2f}, cards: {[cd['card'].name for cd in best_combination]}")
+        
+        # If no positive portfolio found, return empty (no recommendations)
+        if best_value <= 0:
+            print(f"DEBUG: No profitable portfolio found - returning no recommendations")
+            return []
         
         # Ensure we don't return more than max_cards
         return best_combination[:max_cards]
