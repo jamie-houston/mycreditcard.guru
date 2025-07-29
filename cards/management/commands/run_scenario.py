@@ -300,6 +300,54 @@ class Command(BaseCommand):
         """Validate portfolio optimization logic."""
         issues = []
         
+        # Check for negative portfolio prevention
+        if expected.get('prevents_negative_portfolio'):
+            total_fees = sum(float(rec['card'].annual_fee) for rec in recommendations if rec['action'] in ['keep', 'apply'])
+            total_rewards = sum(float(rec['estimated_rewards']) for rec in recommendations)
+            net_value = total_rewards - total_fees
+            
+            if net_value < 0:
+                issues.append(f'Portfolio has negative net value: ${net_value:.2f} (rewards: ${total_rewards:.2f}, fees: ${total_fees:.2f})')
+        
+        # Check minimum net portfolio value
+        min_net_value = expected.get('net_portfolio_value_min')
+        if min_net_value is not None:
+            total_fees = sum(float(rec['card'].annual_fee) for rec in recommendations if rec['action'] in ['keep', 'apply'])
+            total_rewards = sum(float(rec['estimated_rewards']) for rec in recommendations)
+            net_value = total_rewards - total_fees
+            
+            if net_value < min_net_value:
+                issues.append(f'Net portfolio value ${net_value:.2f} below minimum ${min_net_value}')
+        
+        # Check total annual spending validation
+        expected_spending = expected.get('total_annual_spending')
+        if expected_spending:
+            # Note: This would need to be passed from the recommendation engine
+            # For now, just validate that spending data is being considered
+            pass
+        
+        # Check empty portfolio acceptance
+        if expected.get('empty_portfolio_acceptable') and len(recommendations) == 0:
+            # This is expected and acceptable - no issues
+            pass
+        elif expected.get('empty_portfolio_acceptable') and len(recommendations) > 0:
+            # Verify that the non-empty portfolio is actually better than empty
+            total_fees = sum(float(rec['card'].annual_fee) for rec in recommendations if rec['action'] in ['keep', 'apply'])
+            total_rewards = sum(float(rec['estimated_rewards']) for rec in recommendations)
+            net_value = total_rewards - total_fees
+            
+            if net_value <= 0:
+                issues.append(f'Non-empty portfolio should provide positive value, got ${net_value:.2f}')
+        
+        # Check rejection of high-fee combinations
+        if expected.get('rejects_high_fee_combinations'):
+            total_fees = sum(float(rec['card'].annual_fee) for rec in recommendations if rec['action'] in ['keep', 'apply'])
+            high_fee_cards = [rec for rec in recommendations if float(rec['card'].annual_fee) > 400]
+            
+            if len(high_fee_cards) > 1:
+                card_names = [rec['card'].name for rec in high_fee_cards]
+                issues.append(f'Multiple high-fee cards recommended: {card_names} (combined fees: ${total_fees})')
+        
         if expected.get('no_overlapping_categories'):
             # Check that cards don't have overlapping reward categories
             category_coverage = {}

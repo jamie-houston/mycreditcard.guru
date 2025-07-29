@@ -1420,6 +1420,212 @@
           "Stops before hitting max_recommendations when optimal"
         ]
       }
+    },
+    {
+      "name": "Amazon-Only Spending - Single Card Optimization",
+      "description": "User spends only on Amazon, should recommend only Amazon Prime card",
+      "user_profile": {
+        "spending": {
+          "amazon": 1000
+        },
+        "preferences": {
+          "max_annual_fee": 200,
+          "preferred_reward_type": "cashback"
+        }
+      },
+      "owned_cards": [],
+      "available_cards": ["Amazon Prime", "Chase Freedom Unlimited®", "Blue Cash Preferred® Card", "Chase Sapphire Reserve®", "Wells Fargo Active Cash® Card"],
+      "expected_recommendations": {
+        "actions": ["apply"],
+        "card_count_optimization": {
+          "max_recommendations": 5,
+          "expected_actual_count": 1,
+          "reason": "Only Amazon Prime card provides value for Amazon-only spending"
+        },
+        "portfolio_optimization": {
+          "net_portfolio_value_min": 200,
+          "total_annual_spending": 12000,
+          "prevents_negative_portfolio": true
+        },
+        "must_include_cards": ["Amazon Prime"],
+        "must_not_include_cards": ["Chase Freedom Unlimited®", "Blue Cash Preferred® Card", "Chase Sapphire Reserve®"],
+        "reasoning_must_contain": ["Amazon", "portfolio"],
+        "test_conditions": [
+          "Only recommends cards that add positive value",
+          "Rejects multi-card portfolios with negative net value",
+          "Optimizes for single category spending pattern",
+          "Amazon Prime card provides best rate for Amazon spending"
+        ]
+      }
+    },
+    {
+      "name": "Very Low Spending - Zero Cards Expected",
+      "description": "Minimal spending that doesn't justify any annual fees",
+      "user_profile": {
+        "spending": {
+          "groceries": 50,
+          "dining": 30,
+          "general": 20
+        },
+        "preferences": {
+          "max_annual_fee": 200,
+          "preferred_reward_type": "cashback"
+        }
+      },
+      "owned_cards": [],
+      "available_cards": ["Chase Freedom Unlimited®", "Blue Cash Preferred® Card", "Chase Sapphire Reserve®", "Gold Card"],
+      "expected_recommendations": {
+        "actions": [],
+        "card_count_optimization": {
+          "max_recommendations": 5,
+          "expected_actual_count": 0,
+          "reason": "Annual spending too low to justify any annual fees"
+        },
+        "portfolio_optimization": {
+          "net_portfolio_value_min": 0,
+          "total_annual_spending": 1200,
+          "prevents_negative_portfolio": true,
+          "empty_portfolio_acceptable": true
+        },
+        "must_include_cards": [],
+        "must_not_include_cards": ["Chase Sapphire Reserve®", "Gold Card", "Blue Cash Preferred® Card"],
+        "reasoning_must_contain": [],
+        "test_conditions": [
+          "Returns zero recommendations when no profitable portfolio exists",
+          "Prevents recommending money-losing card combinations",
+          "Low spending doesn't justify annual fees",
+          "Empty portfolio preferred over negative value portfolio"
+        ]
+      }
+    },
+    {
+      "name": "Only No-Fee Cards Justified",
+      "description": "Medium spending that only justifies no annual fee cards",
+      "user_profile": {
+        "spending": {
+          "groceries": 200,
+          "dining": 150,
+          "gas": 100,
+          "general": 300
+        },
+        "preferences": {
+          "max_annual_fee": 300,
+          "preferred_reward_type": "cashback"
+        }
+      },
+      "owned_cards": [],
+      "available_cards": ["Chase Freedom Unlimited®", "Wells Fargo Active Cash® Card", "Chase Sapphire Reserve®", "Blue Cash Preferred® Card", "Gold Card"],
+      "expected_recommendations": {
+        "actions": ["apply"],
+        "card_count_optimization": {
+          "max_recommendations": 5,
+          "expected_actual_count": 1,
+          "reason": "Only no-fee cards provide positive portfolio value"
+        },
+        "zero_fee_protection": {
+          "must_include_zero_fee": true,
+          "must_exclude_fee_cards": ["Chase Sapphire Reserve®", "Gold Card", "Blue Cash Preferred® Card"]
+        },
+        "portfolio_optimization": {
+          "net_portfolio_value_min": 100,
+          "total_annual_spending": 9000,
+          "prevents_negative_portfolio": true
+        },
+        "must_include_cards": ["Chase Freedom Unlimited®"],
+        "must_not_include_cards": ["Chase Sapphire Reserve®", "Gold Card", "Blue Cash Preferred® Card"],
+        "reasoning_must_contain": ["no annual fee", "portfolio"],
+        "test_conditions": [
+          "Selects best no-fee option over fee cards",
+          "Medium spending doesn't justify premium annual fees",
+          "Portfolio value remains positive with no-fee cards",
+          "Rejects fee cards that would create negative value"
+        ]
+      }
+    },
+    {
+      "name": "High Fee Portfolio Prevention",
+      "description": "Edge case where multiple fee cards would create negative portfolio",
+      "user_profile": {
+        "spending": {
+          "travel": 300,
+          "dining": 200,
+          "groceries": 100,
+          "general": 200
+        },
+        "preferences": {
+          "max_annual_fee": 1000,
+          "preferred_reward_type": "points"
+        }
+      },
+      "owned_cards": [],
+      "available_cards": ["Chase Sapphire Reserve®", "The Platinum Card®", "Gold Card", "Green Card", "Chase Freedom Unlimited®"],
+      "expected_recommendations": {
+        "actions": ["apply"],
+        "card_count_optimization": {
+          "max_recommendations": 5,
+          "expected_actual_count": 1,
+          "reason": "Only single card provides positive portfolio value"
+        },
+        "portfolio_optimization": {
+          "net_portfolio_value_min": 50,
+          "total_annual_spending": 9600,
+          "prevents_negative_portfolio": true,
+          "rejects_high_fee_combinations": true
+        },
+        "must_include_cards": ["Green Card"],
+        "must_not_include_cards": ["Chase Sapphire Reserve®", "The Platinum Card®"],
+        "reasoning_must_contain": ["portfolio value"],
+        "test_conditions": [
+          "Prevents multiple premium cards with high combined fees",
+          "Selects single card that provides best value",
+          "Rejects premium card combinations that exceed spending benefits",
+          "Portfolio optimization prevents fee-heavy recommendations"
+        ]
+      }
+    },
+    {
+      "name": "Existing Zero-Fee Cards Protection",
+      "description": "User has existing zero-fee cards that should never be canceled",
+      "user_profile": {
+        "spending": {
+          "groceries": 100,
+          "dining": 100,
+          "general": 200
+        },
+        "preferences": {
+          "max_annual_fee": 200,
+          "preferred_reward_type": "cashback"
+        }
+      },
+      "owned_cards": ["Chase Freedom Unlimited®", "Wells Fargo Active Cash® Card"],
+      "available_cards": ["Blue Cash Preferred® Card", "Chase Sapphire Reserve®", "Gold Card"],
+      "expected_recommendations": {
+        "actions": ["keep", "keep"],
+        "card_count_optimization": {
+          "max_recommendations": 5,
+          "expected_actual_count": 2,
+          "reason": "Keep existing zero-fee cards, don't add fee cards for low spending"
+        },
+        "zero_fee_protection": {
+          "existing_zero_fee_cards": ["Chase Freedom Unlimited®", "Wells Fargo Active Cash® Card"],
+          "must_keep_zero_fee": true,
+          "no_cancel_zero_fee": true
+        },
+        "portfolio_optimization": {
+          "net_portfolio_value_min": 80,
+          "total_annual_spending": 4800,
+          "prevents_negative_portfolio": true
+        },
+        "must_include_cards": ["Chase Freedom Unlimited®", "Wells Fargo Active Cash® Card"],
+        "must_not_include_cards": ["Blue Cash Preferred® Card", "Chase Sapphire Reserve®"],
+        "reasoning_must_contain": ["keep", "no annual fee"],
+        "test_conditions": [
+          "Never recommends canceling zero annual fee cards",
+          "Keeps existing profitable cards",
+          "Rejects new fee cards that don't add sufficient value",
+          "Low spending doesn't justify premium card additions"
+        ]
+      }
     }
   ]
 }
