@@ -1404,7 +1404,8 @@
                     <span></span>
                 </div>
                 <ul class="nav-menu" id="navMenu">
-                    <li class="nav-item"><a href="/" {% if request.resolver_match.url_name == 'index' %}class="active"{% endif %}>Roadmap</a></li>
+                    <li class="nav-item"><a href="/" {% if request.resolver_match.url_name == 'landing' %}class="active"{% endif %}>Home</a></li>
+                    <li class="nav-item"><a href="/roadmap/" {% if request.resolver_match.url_name == 'roadmap' %}class="active"{% endif %}>Roadmap</a></li>
                     <li class="nav-item"><a href="/profile/" {% if request.resolver_match.url_name == 'profile' %}class="active"{% endif %}>Profile</a></li>
                     <li class="nav-item"><a href="/cards/" {% if request.resolver_match.url_name == 'cards_list' %}class="active"{% endif %}>Cards</a></li>
                     <li class="nav-item"><a href="/categories/" {% if request.resolver_match.url_name == 'categories_list' %}class="active"{% endif %}>Categories</a></li>

@@ -312,8 +312,12 @@ def card_recommendations_preview(request):
 
 
 # Template Views
+def landing_view(request):
+    """Landing page - welcome and feature overview"""
+    return render(request, 'landing.html')
+
 def index_view(request):
-    """Main profile page"""
+    """Roadmap creation page"""
     return render(request, 'index.html')
 
 def cards_list_view(request):

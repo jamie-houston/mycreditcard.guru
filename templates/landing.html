@@ -1,0 +1,179 @@
+{% extends 'base.html' %}
+
+{% block title %}Credit Card Guru - Find Your Perfect Credit Card Strategy{% endblock %}
+
+{% block content %}
+<div style="text-align: center; padding: 40px 20px; max-width: 1200px; margin: 0 auto;">
+    <!-- Hero Section -->
+    <div style="margin-bottom: 60px;">
+        <h1 style="font-size: 3rem; font-weight: 700; color: #1f2937; margin-bottom: 20px; line-height: 1.2;">
+            🏆 Credit Card Guru
+        </h1>
+        <p style="font-size: 1.5rem; color: #6b7280; margin-bottom: 30px; font-weight: 300;">
+            Maximize your rewards with personalized credit card recommendations
+        </p>
+        <p style="font-size: 1.1rem; color: #4b5563; max-width: 600px; margin: 0 auto; line-height: 1.6;">
+            Get data-driven insights to optimize your credit card portfolio and maximize rewards based on your actual spending patterns.
+        </p>
+    </div>
+
+    <!-- Main Action -->
+    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 40px; border-radius: 16px; margin-bottom: 50px;">
+        <h2 style="font-size: 2rem; margin-bottom: 20px; color: white;">🚀 Get Started in 2 Minutes</h2>
+        <p style="font-size: 1.1rem; opacity: 0.9; margin-bottom: 30px;">
+            Enter your spending amounts and get personalized credit card recommendations instantly
+        </p>
+        <a href="/roadmap/" class="btn btn-large" style="background: white; color: #667eea; padding: 16px 32px; font-size: 1.2rem; font-weight: 600; text-decoration: none; border-radius: 8px; display: inline-block; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+            🗺️ Create My Roadmap
+        </a>
+    </div>
+
+    <!-- Feature Sections -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 30px; margin-bottom: 50px;">
+        
+        <!-- Roadmap Feature -->
+        <div style="background: #f8f9fa; padding: 30px; border-radius: 12px; border-left: 4px solid #3b82f6;">
+            <h3 style="font-size: 1.5rem; color: #1f2937; margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
+                🗺️ Personal Roadmap
+            </h3>
+            <p style="color: #4b5563; margin-bottom: 20px; line-height: 1.6;">
+                Input your monthly spending by category and get AI-powered recommendations for which cards to keep, cancel, or apply for.
+            </p>
+            <ul style="text-align: left; color: #6b7280; margin-bottom: 20px; line-height: 1.8;">
+                <li>✅ Portfolio optimization (no double counting)</li>
+                <li>✅ Cancel recommendations for redundant cards</li>
+                <li>✅ Consider signup bonuses and annual fees</li>
+                <li>✅ Factor in card benefits and credits</li>
+            </ul>
+            <a href="/roadmap/" style="color: #3b82f6; text-decoration: none; font-weight: 600;">Create Roadmap →</a>
+        </div>
+
+        <!-- Cards Explorer -->
+        <div style="background: #f8f9fa; padding: 30px; border-radius: 12px; border-left: 4px solid #10b981;">
+            <h3 style="font-size: 1.5rem; color: #1f2937; margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
+                💳 Explore Cards
+            </h3>
+            <p style="color: #4b5563; margin-bottom: 20px; line-height: 1.6;">
+                Browse our comprehensive database of credit cards with detailed comparison features and filters.
+            </p>
+            <ul style="text-align: left; color: #6b7280; margin-bottom: 20px; line-height: 1.8;">
+                <li>🔍 Advanced filtering by issuer, fees, rewards</li>
+                <li>📊 Compare cards side by side</li>
+                <li>🏆 See top cards by category</li>
+                <li>📈 Track which cards you own</li>
+            </ul>
+            <a href="/cards/" style="color: #10b981; text-decoration: none; font-weight: 600;">Browse Cards →</a>
+        </div>
+
+        <!-- Categories Analysis -->
+        <div style="background: #f8f9fa; padding: 30px; border-radius: 12px; border-left: 4px solid #f59e0b;">
+            <h3 style="font-size: 1.5rem; color: #1f2937; margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
+                📊 Category Analysis
+            </h3>
+            <p style="color: #4b5563; margin-bottom: 20px; line-height: 1.6;">
+                Discover which cards offer the best rewards for specific spending categories like dining, travel, and groceries.
+            </p>
+            <ul style="text-align: left; color: #6b7280; margin-bottom: 20px; line-height: 1.8;">
+                <li>🍽️ Dining & restaurant rewards</li>
+                <li>✈️ Travel and hotel benefits</li>
+                <li>🛒 Grocery and gas rewards</li>
+                <li>🏪 Shopping and entertainment</li>
+            </ul>
+            <a href="/categories/" style="color: #f59e0b; text-decoration: none; font-weight: 600;">View Categories →</a>
+        </div>
+    </div>
+
+    <!-- How It Works -->
+    <div style="background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%); padding: 40px; border-radius: 16px; margin-bottom: 50px;">
+        <h2 style="font-size: 2rem; color: #1f2937; margin-bottom: 30px;">How It Works</h2>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 30px;">
+            
+            <div style="text-align: center;">
+                <div style="background: #3b82f6; color: white; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: bold; margin: 0 auto 15px;">1</div>
+                <h4 style="color: #1f2937; margin-bottom: 10px;">Add Your Spending</h4>
+                <p style="color: #6b7280; font-size: 0.95rem;">Enter your monthly spending by category (dining, travel, groceries, etc.)</p>
+            </div>
+
+            <div style="text-align: center;">
+                <div style="background: #10b981; color: white; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: bold; margin: 0 auto 15px;">2</div>
+                <h4 style="color: #1f2937; margin-bottom: 10px;">Add Your Cards (Optional)</h4>
+                <p style="color: #6b7280; font-size: 0.95rem;">Tell us which cards you currently have for personalized optimization</p>
+            </div>
+
+            <div style="text-align: center;">
+                <div style="background: #f59e0b; color: white; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: bold; margin: 0 auto 15px;">3</div>
+                <h4 style="color: #1f2937; margin-bottom: 10px;">Get Recommendations</h4>
+                <p style="color: #6b7280; font-size: 0.95rem;">Receive AI-powered suggestions for your optimal credit card strategy</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Two Paths -->
+    <div style="margin-bottom: 50px;">
+        <h2 style="font-size: 2rem; color: #1f2937; margin-bottom: 30px;">Choose Your Path</h2>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; max-width: 800px; margin: 0 auto;">
+            
+            <!-- Quick Start -->
+            <div style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; padding: 30px; border-radius: 12px; text-align: center;">
+                <h3 style="color: white; margin-bottom: 15px; font-size: 1.3rem;">🚀 Quick Start</h3>
+                <p style="opacity: 0.9; margin-bottom: 20px; font-size: 0.95rem;">
+                    Jump right in and create a roadmap based on your spending patterns
+                </p>
+                <a href="/roadmap/" style="background: white; color: #3b82f6; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: 600; display: inline-block;">
+                    Create Roadmap Now
+                </a>
+            </div>
+
+            <!-- Explore First -->
+            <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 30px; border-radius: 12px; text-align: center;">
+                <h3 style="color: white; margin-bottom: 15px; font-size: 1.3rem;">🔍 Explore First</h3>
+                <p style="opacity: 0.9; margin-bottom: 20px; font-size: 0.95rem;">
+                    Add your current cards, then explore categories and top recommendations
+                </p>
+                <a href="/profile/" style="background: white; color: #10b981; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: 600; display: inline-block;">
+                    Manage My Cards
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer Links -->
+    <div style="border-top: 1px solid #e5e7eb; padding-top: 30px; margin-top: 50px;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 20px; text-align: center;">
+            <a href="/cards/" style="color: #6b7280; text-decoration: none; padding: 10px; border-radius: 6px; transition: background-color 0.2s;" onmouseover="this.style.backgroundColor='#f3f4f6'" onmouseout="this.style.backgroundColor='transparent'">
+                💳 All Cards
+            </a>
+            <a href="/categories/" style="color: #6b7280; text-decoration: none; padding: 10px; border-radius: 6px; transition: background-color 0.2s;" onmouseover="this.style.backgroundColor='#f3f4f6'" onmouseout="this.style.backgroundColor='transparent'">
+                📊 Categories
+            </a>
+            <a href="/issuers/" style="color: #6b7280; text-decoration: none; padding: 10px; border-radius: 6px; transition: background-color 0.2s;" onmouseover="this.style.backgroundColor='#f3f4f6'" onmouseout="this.style.backgroundColor='transparent'">
+                🏦 Issuers
+            </a>
+            <a href="/profile/" style="color: #6b7280; text-decoration: none; padding: 10px; border-radius: 6px; transition: background-color 0.2s;" onmouseover="this.style.backgroundColor='#f3f4f6'" onmouseout="this.style.backgroundColor='transparent'">
+                👤 My Profile
+            </a>
+        </div>
+    </div>
+</div>
+
+<style>
+@media (max-width: 768px) {
+    h1 {
+        font-size: 2.5rem !important;
+    }
+    
+    .btn-large {
+        font-size: 1.1rem !important;
+        padding: 14px 28px !important;
+    }
+    
+    div[style*="grid-template-columns: 1fr 1fr"] {
+        grid-template-columns: 1fr !important;
+    }
+    
+    div[style*="grid-template-columns: repeat(auto-fit, minmax(350px, 1fr))"] {
+        grid-template-columns: 1fr !important;
+    }
+}
+</style>
+{% endblock %} 
