@@ -16,12 +16,22 @@
         }
       },
       "owned_cards": [],
-      "available_cards": ["SavorOne Cash Rewards Credit Card", "Quicksilver Cash Rewards Credit Card", "Freedom Unlimited", "Blue Cash Preferred® Card"],
+      "available_cards": [
+        "Dining Card",
+        "Basic Card",
+        "Premium Grocery Card"
+      ],
       "expected_recommendations": {
-        "actions": ["apply"],
+        "actions": [
+          "apply"
+        ],
         "min_total_value": 300,
-        "must_include_cards": ["SavorOne Cash Rewards Credit Card"],
-        "reasoning_must_contain": ["dining"]
+        "must_include_cards": [
+          "Dining Card"
+        ],
+        "reasoning_must_contain": [
+          "dining"
+        ]
       }
     },
     {
@@ -41,12 +51,22 @@
         }
       },
       "owned_cards": [],
-      "available_cards": ["Chase Sapphire Reserve®", "The Platinum Card®", "Chase Sapphire Preferred® Card", "Gold Card"],
+      "available_cards": [
+        "High Value Premium Card",
+        "Expensive Premium Card",
+        "Mid Tier Card"
+      ],
       "expected_recommendations": {
-        "actions": ["apply"],
+        "actions": [
+          "apply"
+        ],
         "min_total_value": 800,
-        "must_include_cards": ["Chase Sapphire Reserve®"],
-        "reasoning_must_contain": ["travel"]
+        "must_include_cards": [
+          "High Value Premium Card"
+        ],
+        "reasoning_must_contain": [
+          "travel"
+        ]
       }
     },
     {
@@ -61,12 +81,22 @@
         }
       },
       "owned_cards": [],
-      "available_cards": ["Blue Cash Preferred® Card", "Costco Anywhere Visa® Card", "Gold Card", "Grocery Specialist"],
+      "available_cards": [
+        "Premium Grocery Card",
+        "Warehouse Card",
+        "Mid Tier Card"
+      ],
       "expected_recommendations": {
-        "actions": ["apply"],
+        "actions": [
+          "apply"
+        ],
         "min_total_value": 500,
-        "must_include_cards": ["Blue Cash Preferred® Card"],
-        "reasoning_must_contain": ["groceries"]
+        "must_include_cards": [
+          "Premium Grocery Card"
+        ],
+        "reasoning_must_contain": [
+          "groceries"
+        ]
       }
     },
     {
@@ -80,13 +110,25 @@
           "general": 300
         }
       },
-      "owned_cards": ["Expensive Premium Card"],
-      "available_cards": ["Expensive Premium Card", "No Fee Alternative", "Freedom Unlimited", "Quicksilver Cash Rewards Credit Card"],
+      "owned_cards": [
+        "Expensive Premium Card"
+      ],
+      "available_cards": [
+        "Expensive Premium Card",
+        "Basic Card"
+      ],
       "expected_recommendations": {
-        "actions": ["cancel", "apply"],
+        "actions": [
+          "cancel",
+          "apply"
+        ],
         "min_total_value": 50,
-        "must_include_cards": ["No Fee Alternative"],
-        "reasoning_must_contain": ["cancel"]
+        "must_include_cards": [
+          "Basic Card"
+        ],
+        "reasoning_must_contain": [
+          "cancel"
+        ]
       }
     },
     {
@@ -101,13 +143,28 @@
           "general": 700
         }
       },
-      "owned_cards": ["Basic Card", "Travel Card"],
-      "available_cards": ["Basic Card", "Travel Card", "Grocery Specialist", "Chase Sapphire Preferred® Card", "Gold Card"],
+      "owned_cards": [
+        "Basic Card",
+        "Travel Card"
+      ],
+      "available_cards": [
+        "Basic Card",
+        "Travel Card",
+        "Premium Grocery Card",
+        "Mid Tier Card"
+      ],
       "expected_recommendations": {
-        "actions": ["keep", "apply"],
+        "actions": [
+          "keep",
+          "apply"
+        ],
         "min_total_value": 300,
-        "must_include_cards": ["Grocery Specialist"],
-        "reasoning_must_contain": ["keep"]
+        "must_include_cards": [
+          "Premium Grocery Card"
+        ],
+        "reasoning_must_contain": [
+          "keep"
+        ]
       }
     },
     {
@@ -122,11 +179,18 @@
         }
       },
       "owned_cards": [],
-      "available_cards": ["Blue Cash Preferred® Card", "Freedom Unlimited", "Grocery Specialist"],
+      "available_cards": [
+        "Premium Grocery Card",
+        "Basic Card"
+      ],
       "expected_recommendations": {
-        "actions": ["apply"],
+        "actions": [
+          "apply"
+        ],
         "min_total_value": 400,
-        "must_include_cards": ["Blue Cash Preferred® Card"]
+        "must_include_cards": [
+          "Premium Grocery Card"
+        ]
       }
     },
     {
@@ -141,11 +205,19 @@
         }
       },
       "owned_cards": [],
-      "available_cards": ["Chase Sapphire Preferred® Card", "Venture Rewards Credit Card", "Chase Sapphire Reserve®"],
+      "available_cards": [
+        "Mid Tier Card",
+        "Travel Card",
+        "High Value Premium Card"
+      ],
       "expected_recommendations": {
-        "actions": ["apply"],
+        "actions": [
+          "apply"
+        ],
         "min_total_value": 600,
-        "must_include_cards": ["Chase Sapphire Preferred® Card"]
+        "must_include_cards": [
+          "Mid Tier Card"
+        ]
       }
     },
     {
@@ -159,12 +231,22 @@
           "general": 300
         }
       },
-      "owned_cards": ["Low Value Card"],
-      "available_cards": ["Low Value Card", "Better Card"],
+      "owned_cards": [
+        "Low Value Card"
+      ],
+      "available_cards": [
+        "Low Value Card",
+        "Better Card"
+      ],
       "expected_recommendations": {
-        "actions": ["cancel", "apply"],
+        "actions": [
+          "cancel",
+          "apply"
+        ],
         "min_total_value": 50,
-        "must_include_cards": ["Better Card"]
+        "must_include_cards": [
+          "Better Card"
+        ]
       }
     },
     {
@@ -185,7 +267,7 @@
       "filters": [
         {
           "name": "Card Type Filter",
-          "filter_type": "card_type", 
+          "filter_type": "card_type",
           "value": "personal"
         },
         {
@@ -199,12 +281,20 @@
           "value": "0-0"
         }
       ],
-      "available_cards": ["Freedom Unlimited", "Blue Cash Everyday", "Quicksilver Cash Rewards Credit Card", "Discover it Cash Back"],
+      "available_cards": [
+        "Basic Card",
+        "Low Reward Zero Fee Card",
+        "Discover it Cash Back"
+      ],
       "expected_recommendations": {
-        "actions": ["apply"],
+        "actions": [
+          "apply"
+        ],
         "min_cards": 1,
         "estimated_value_includes_signup_bonus": true,
-        "reasoning_must_contain": ["signup bonus"],
+        "reasoning_must_contain": [
+          "signup bonus"
+        ],
         "test_conditions": [
           "All recommended cards have $0 annual fee",
           "Estimated value includes signup bonus amount",
@@ -224,16 +314,23 @@
       "owned_cards": [],
       "filters": [
         {
-          "name": "Annual Fee Filter", 
+          "name": "Annual Fee Filter",
           "filter_type": "annual_fee",
           "value": "0"
         }
       ],
-      "available_cards": ["Freedom Unlimited", "Quicksilver Cash Rewards Credit Card", "Blue Cash Everyday"],
+      "available_cards": [
+        "Basic Card",
+        "Low Reward Zero Fee Card"
+      ],
       "expected_recommendations": {
-        "actions": ["apply"],
+        "actions": [
+          "apply"
+        ],
         "min_cards": 1,
-        "reasoning_must_contain": ["signup bonus"],
+        "reasoning_must_contain": [
+          "signup bonus"
+        ],
         "test_conditions": [
           "Cards are recommended even with minimal spending",
           "Signup bonus provides positive estimated value",
@@ -256,13 +353,28 @@
           "preferred_reward_type": "cashback"
         }
       },
-      "owned_cards": ["Blue Cash Everyday", "Freedom Unlimited"],
-      "available_cards": ["Blue Cash Everyday", "Freedom Unlimited", "Blue Cash Preferred® Card", "SavorOne Cash Rewards Credit Card", "Chase Sapphire Preferred® Card"],
+      "owned_cards": [
+        "Low Reward Zero Fee Card",
+        "Basic Card"
+      ],
+      "available_cards": [
+        "Low Reward Zero Fee Card",
+        "Basic Card",
+        "Premium Grocery Card",
+        "Dining Card",
+        "Mid Tier Card"
+      ],
       "expected_recommendations": {
-        "actions": ["keep"],
+        "actions": [
+          "keep"
+        ],
         "min_total_value": 0,
         "max_cards": 0,
-        "reasoning_must_contain": ["already have", "low spending", "not worth"],
+        "reasoning_must_contain": [
+          "already have",
+          "low spending",
+          "not worth"
+        ],
         "test_conditions": [
           "No new cards recommended due to low spending",
           "Annual fees outweigh potential rewards",
@@ -285,14 +397,33 @@
           "preferred_reward_type": "points"
         }
       },
-      "owned_cards": ["Basic Travel Card", "Low Reward Card"],
-      "available_cards": ["Basic Travel Card", "Low Reward Card", "Chase Sapphire Preferred® Card", "Gold Card", "SavorOne Cash Rewards Credit Card"],
+      "owned_cards": [
+        "Basic Travel Card",
+        "Low Reward Card"
+      ],
+      "available_cards": [
+        "Basic Travel Card",
+        "Low Reward Card",
+        "Mid Tier Card",
+        "Dining Card"
+      ],
       "expected_recommendations": {
-        "actions": ["cancel", "apply"],
+        "actions": [
+          "cancel",
+          "apply"
+        ],
         "min_total_value": 200,
-        "must_include_cards": ["Chase Sapphire Preferred® Card"],
-        "cards_to_cancel": ["Basic Travel Card"],
-        "reasoning_must_contain": ["cancel", "upgrade", "better rewards"],
+        "must_include_cards": [
+          "Mid Tier Card"
+        ],
+        "cards_to_cancel": [
+          "Basic Travel Card"
+        ],
+        "reasoning_must_contain": [
+          "cancel",
+          "upgrade",
+          "better rewards"
+        ],
         "test_conditions": [
           "Recommends canceling inferior cards",
           "Suggests better alternatives with higher rewards",
@@ -316,14 +447,36 @@
           "preferred_reward_type": "cashback"
         }
       },
-      "owned_cards": ["Freedom Unlimited", "SavorOne Cash Rewards Credit Card"],
-      "available_cards": ["Freedom Unlimited", "SavorOne Cash Rewards Credit Card", "Blue Cash Preferred® Card", "Costco Anywhere Visa® Card", "Gold Card"],
+      "owned_cards": [
+        "Basic Card",
+        "Dining Card"
+      ],
+      "available_cards": [
+        "Basic Card",
+        "Dining Card",
+        "Premium Grocery Card",
+        "Warehouse Card",
+        "Mid Tier Card"
+      ],
       "expected_recommendations": {
-        "actions": ["keep", "apply"],
+        "actions": [
+          "keep",
+          "apply"
+        ],
         "min_total_value": 300,
-        "must_include_cards": ["Blue Cash Preferred® Card"],
-        "cards_to_keep": ["Freedom Unlimited", "SavorOne Cash Rewards Credit Card"],
-        "reasoning_must_contain": ["keep", "add", "groceries", "complement"],
+        "must_include_cards": [
+          "Premium Grocery Card"
+        ],
+        "cards_to_keep": [
+          "Basic Card",
+          "Dining Card"
+        ],
+        "reasoning_must_contain": [
+          "keep",
+          "add",
+          "groceries",
+          "complement"
+        ],
         "test_conditions": [
           "Keeps existing good cards",
           "Adds cards for uncovered high-spend categories",
@@ -346,20 +499,44 @@
           "preferred_reward_type": "cashback"
         }
       },
-      "owned_cards": ["Blue Cash Everyday", "SavorOne Cash Rewards Credit Card"],
-      "available_cards": ["Blue Cash Everyday", "SavorOne Cash Rewards Credit Card", "Blue Cash Preferred® Card", "Custom Card A", "Custom Card B"],
+      "owned_cards": [
+        "Low Reward Zero Fee Card",
+        "Dining Card"
+      ],
+      "available_cards": [
+        "Low Reward Zero Fee Card",
+        "Dining Card",
+        "Premium Grocery Card",
+        "High Value Premium Card",
+        "Mid Tier Card"
+      ],
       "expected_recommendations": {
-        "actions": ["keep", "apply", "cancel"],
+        "actions": [
+          "keep",
+          "apply",
+          "cancel"
+        ],
         "portfolio_optimization": {
           "total_annual_fees": 190,
           "category_optimization": {
-            "groceries": {"best_rate": 6.0, "best_card": "Blue Cash Preferred® Card"},
-            "dining": {"best_rate": 3.0, "best_card": "SavorOne Cash Rewards Credit Card"}
+            "groceries": {
+              "best_rate": 6.0,
+              "best_card": "Premium Grocery Card"
+            },
+            "dining": {
+              "best_rate": 3.0,
+              "best_card": "Dining Card"
+            }
           },
           "no_duplicate_counting": true,
           "net_portfolio_value_positive": true
         },
-        "reasoning_must_contain": ["portfolio", "optimization", "highest rate", "total fees"],
+        "reasoning_must_contain": [
+          "portfolio",
+          "optimization",
+          "highest rate",
+          "total fees"
+        ],
         "test_conditions": [
           "Only highest reward rate per category counts in portfolio calculation",
           "Total annual fees are sum of all recommended cards",
@@ -382,17 +559,38 @@
           "preferred_reward_type": "cashback"
         }
       },
-      "owned_cards": ["Grocery Card A", "Grocery Card B", "General Card"],
-      "available_cards": ["Grocery Card A", "Grocery Card B", "General Card", "Better Grocery Card"],
+      "owned_cards": [
+        "Premium Grocery Card",
+        "Warehouse Card",
+        "Basic Card"
+      ],
+      "available_cards": [
+        "Premium Grocery Card",
+        "Warehouse Card",
+        "Basic Card"
+      ],
       "expected_recommendations": {
-        "actions": ["cancel", "keep", "apply"],
+        "actions": [
+          "cancel",
+          "keep",
+          "apply"
+        ],
         "portfolio_optimization": {
-          "redundant_cards_identified": ["Grocery Card B"],
+          "redundant_cards_identified": [
+            "Warehouse Card"
+          ],
           "optimal_portfolio_size": 2,
           "fee_reduction_achieved": true
         },
-        "cards_to_cancel": ["Grocery Card B"],
-        "reasoning_must_contain": ["redundant", "same category", "higher annual fee", "no additional value"],
+        "cards_to_cancel": [
+          "Warehouse Card"
+        ],
+        "reasoning_must_contain": [
+          "redundant",
+          "same category",
+          "higher annual fee",
+          "no additional value"
+        ],
         "test_conditions": [
           "Identifies cards that provide no additional portfolio value",
           "Recommends canceling inferior cards with same reward categories",
@@ -416,17 +614,31 @@
           "preferred_reward_type": "points"
         }
       },
-      "owned_cards": ["Expensive Travel Card", "Expensive Dining Card"],
-      "available_cards": ["Expensive Travel Card", "Expensive Dining Card", "No Fee Alternative", "Mid-Tier Card"],
+      "owned_cards": [
+        "Expensive Premium Card"
+      ],
+      "available_cards": [
+        "Expensive Premium Card",
+        "Basic Card",
+        "Mid Tier Card"
+      ],
       "expected_recommendations": {
-        "actions": ["cancel", "apply"],
+        "actions": [
+          "cancel",
+          "apply"
+        ],
         "portfolio_optimization": {
           "total_annual_fees_before": 390,
           "total_annual_fees_after": 95,
           "net_portfolio_improvement": true,
           "fee_to_reward_ratio_improved": true
         },
-        "reasoning_must_contain": ["low spending", "annual fees exceed", "portfolio optimization", "better value"],
+        "reasoning_must_contain": [
+          "low spending",
+          "annual fees exceed",
+          "portfolio optimization",
+          "better value"
+        ],
         "test_conditions": [
           "Portfolio analysis considers total fees vs total optimized rewards",
           "Recommends fee reduction when spending doesn't justify premium cards",
@@ -451,17 +663,39 @@
           "preferred_reward_type": "points"
         }
       },
-      "owned_cards": ["Basic Card"],
-      "available_cards": ["Basic Card", "Grocery Specialist", "Travel Premium", "Gas Rewards Card", "Dining Expert"],
+      "owned_cards": [
+        "Basic Card"
+      ],
+      "available_cards": [
+        "Basic Card",
+        "Premium Grocery Card",
+        "High Value Premium Card",
+        "Dining Card"
+      ],
       "expected_recommendations": {
-        "actions": ["keep", "apply"],
+        "actions": [
+          "keep",
+          "apply"
+        ],
         "portfolio_optimization": {
-          "category_gaps_identified": ["groceries", "travel", "gas"],
+          "category_gaps_identified": [
+            "groceries",
+            "travel",
+            "gas"
+          ],
           "optimal_portfolio_cards": 4,
           "category_coverage_improvement": true
         },
-        "must_include_cards": ["Grocery Specialist", "Travel Premium"],
-        "reasoning_must_contain": ["portfolio gaps", "category coverage", "maximize rewards", "complement existing"],
+        "must_include_cards": [
+          "Premium Grocery Card",
+          "High Value Premium Card"
+        ],
+        "reasoning_must_contain": [
+          "portfolio gaps",
+          "category coverage",
+          "maximize rewards",
+          "complement existing"
+        ],
         "test_conditions": [
           "Identifies high-spend categories with suboptimal reward rates",
           "Recommends cards that fill portfolio gaps without redundancy",
@@ -485,17 +719,32 @@
           "preferred_reward_type": "points"
         }
       },
-      "owned_cards": ["Mid-Tier Card"],
-      "available_cards": ["Mid-Tier Card", "Premium Card with Waived Fee", "Regular Premium Card"],
+      "owned_cards": [
+        "Mid Tier Card"
+      ],
+      "available_cards": [
+        "Mid Tier Card",
+        "High Value Premium Card"
+      ],
       "expected_recommendations": {
-        "actions": ["keep", "apply"],
+        "actions": [
+          "keep",
+          "apply"
+        ],
         "portfolio_optimization": {
           "first_year_fee_waived": true,
           "effective_annual_fees_calculated": true,
           "waived_fee_advantage": true
         },
-        "must_include_cards": ["Premium Card with Waived Fee"],
-        "reasoning_must_contain": ["first year", "fee waived", "effective cost", "portfolio value"],
+        "must_include_cards": [
+          "High Value Premium Card"
+        ],
+        "reasoning_must_contain": [
+          "first year",
+          "fee waived",
+          "effective cost",
+          "portfolio value"
+        ],
         "test_conditions": [
           "Portfolio summary accounts for waived first-year fees",
           "Effective annual fees are calculated correctly for new applications",
@@ -520,17 +769,30 @@
         }
       },
       "owned_cards": [],
-      "available_cards": ["Capped Grocery Card", "Unlimited Grocery Card", "Gas Specialist", "General Card"],
+      "available_cards": [
+        "Premium Grocery Card",
+        "Basic Card"
+      ],
       "expected_recommendations": {
-        "actions": ["apply"],
+        "actions": [
+          "apply"
+        ],
         "portfolio_optimization": {
           "spending_caps_considered": true,
           "cap_optimization": {
-            "groceries": {"annual_cap": 6000, "spending_above_cap": 12000}
+            "groceries": {
+              "annual_cap": 6000,
+              "spending_above_cap": 12000
+            }
           },
           "multi_card_strategy": true
         },
-        "reasoning_must_contain": ["spending cap", "annual limit", "maximize rewards", "portfolio strategy"],
+        "reasoning_must_contain": [
+          "spending cap",
+          "annual limit",
+          "maximize rewards",
+          "portfolio strategy"
+        ],
         "test_conditions": [
           "Portfolio considers annual spending caps on bonus categories",
           "Recommends multiple cards when spending exceeds individual card caps",
@@ -552,19 +814,36 @@
           "max_annual_fee": 400,
           "preferred_reward_type": "points"
         },
-        "credit_preferences": ["travel_credit", "dining_credit", "streaming_credit"]
+        "credit_preferences": [
+          "travel_credit",
+          "dining_credit",
+          "streaming_credit"
+        ]
       },
       "owned_cards": [],
-      "available_cards": ["Premium Card with Credits", "Basic Card", "Credits Specialist"],
+      "available_cards": [
+        "High Value Premium Card",
+        "Basic Card",
+        "Mid Tier Card"
+      ],
       "expected_recommendations": {
-        "actions": ["apply"],
+        "actions": [
+          "apply"
+        ],
         "portfolio_optimization": {
           "credit_benefits_included": true,
           "total_credits_value": 300,
           "net_value_with_credits": true
         },
-        "must_include_cards": ["Premium Card with Credits"],
-        "reasoning_must_contain": ["card benefits", "credits", "total value", "portfolio optimization"],
+        "must_include_cards": [
+          "High Value Premium Card"
+        ],
+        "reasoning_must_contain": [
+          "card benefits",
+          "credits",
+          "total value",
+          "portfolio optimization"
+        ],
         "test_conditions": [
           "Portfolio calculation includes selected card benefits/credits",
           "Credit values are added to total portfolio rewards",
@@ -589,10 +868,30 @@
           "preferred_reward_type": "cashback"
         }
       },
-      "owned_cards": ["Card A", "Card B", "Card C", "Card D", "Card E", "Card F"],
-      "available_cards": ["Card A", "Card B", "Card C", "Card D", "Card E", "Card F", "Optimal Card X", "Optimal Card Y"],
+      "owned_cards": [
+        "Basic Card",
+        "Low Reward Card",
+        "Mid Tier Card",
+        "Premium Grocery Card",
+        "High Value Premium Card",
+        "Expensive Premium Card"
+      ],
+      "available_cards": [
+        "Basic Card",
+        "Low Reward Card",
+        "Mid Tier Card",
+        "Premium Grocery Card",
+        "High Value Premium Card",
+        "Expensive Premium Card",
+        "Travel Card",
+        "Dining Card"
+      ],
       "expected_recommendations": {
-        "actions": ["cancel", "keep", "apply"],
+        "actions": [
+          "cancel",
+          "keep",
+          "apply"
+        ],
         "portfolio_optimization": {
           "portfolio_consolidation": true,
           "recommended_portfolio_size": 3,
@@ -600,7 +899,13 @@
           "simplified_strategy": true
         },
         "max_recommended_cards": 3,
-        "reasoning_must_contain": ["too many cards", "consolidate", "simplify", "portfolio optimization", "redundant"],
+        "reasoning_must_contain": [
+          "too many cards",
+          "consolidate",
+          "simplify",
+          "portfolio optimization",
+          "redundant"
+        ],
         "test_conditions": [
           "Identifies portfolios with excessive number of cards",
           "Recommends consolidation to optimal number of cards",
@@ -623,18 +928,47 @@
           "preferred_reward_type": "cashback"
         }
       },
-      "owned_cards": ["Freedom Unlimited", "Blue Cash Everyday", "Quicksilver Cash Rewards Credit Card", "Expensive Premium Card"],
-      "available_cards": ["Freedom Unlimited", "Blue Cash Everyday", "Quicksilver Cash Rewards Credit Card", "Expensive Premium Card", "Blue Cash Preferred® Card"],
+      "owned_cards": [
+        "Basic Card",
+        "Low Reward Zero Fee Card",
+        "Expensive Premium Card"
+      ],
+      "available_cards": [
+        "Basic Card",
+        "Low Reward Zero Fee Card",
+        "Expensive Premium Card",
+        "Premium Grocery Card"
+      ],
       "expected_recommendations": {
-        "actions": ["keep", "cancel", "apply"],
+        "actions": [
+          "keep",
+          "cancel",
+          "apply"
+        ],
         "zero_fee_protection": {
-          "zero_fee_cards_never_canceled": ["Freedom Unlimited", "Blue Cash Everyday", "Quicksilver Cash Rewards Credit Card"],
-          "only_fee_cards_canceled": ["Expensive Premium Card"],
+          "zero_fee_cards_never_canceled": [
+            "Basic Card",
+            "Low Reward Zero Fee Card",
+            "Basic Card"
+          ],
+          "only_fee_cards_canceled": [
+            "Expensive Premium Card"
+          ],
           "zero_fee_cards_always_shown": true
         },
-        "cards_to_keep": ["Freedom Unlimited", "Blue Cash Everyday", "Quicksilver Cash Rewards Credit Card"],
-        "cards_to_cancel": ["Expensive Premium Card"],
-        "reasoning_must_contain": ["no annual fee", "$0 fee", "no cost to maintain"],
+        "cards_to_keep": [
+          "Basic Card",
+          "Low Reward Zero Fee Card",
+          "Basic Card"
+        ],
+        "cards_to_cancel": [
+          "Expensive Premium Card"
+        ],
+        "reasoning_must_contain": [
+          "no annual fee",
+          "$0 fee",
+          "no cost to maintain"
+        ],
         "test_conditions": [
           "No $0 annual fee cards appear in cancel recommendations",
           "All $0 fee cards appear in keep recommendations",
@@ -658,18 +992,42 @@
           "max_recommendations": 3
         }
       },
-      "owned_cards": ["Freedom Unlimited", "Blue Cash Everyday", "Quicksilver Cash Rewards Credit Card", "Discover it Cash Back", "Citi Double Cash Card"],
-      "available_cards": ["Freedom Unlimited", "Blue Cash Everyday", "Quicksilver Cash Rewards Credit Card", "Discover it Cash Back", "Citi Double Cash Card", "High Value Premium Card", "Mid Tier Card"],
+      "owned_cards": [
+        "Basic Card",
+        "Low Reward Zero Fee Card",
+        "Discover it Cash Back",
+        "Citi Double Cash Card"
+      ],
+      "available_cards": [
+        "Basic Card",
+        "Low Reward Zero Fee Card",
+        "Discover it Cash Back",
+        "Citi Double Cash Card",
+        "High Value Premium Card",
+        "Mid Tier Card"
+      ],
       "expected_recommendations": {
-        "actions": ["keep", "apply"],
+        "actions": [
+          "keep",
+          "apply"
+        ],
         "smart_filtering": {
           "max_recommendations": 3,
           "zero_fee_cards_count": 5,
           "all_zero_fee_cards_shown": true,
           "priority_protection": true
         },
-        "cards_to_keep": ["Freedom Unlimited", "Blue Cash Everyday", "Quicksilver Cash Rewards Credit Card", "Discover it Cash Back", "Citi Double Cash Card"],
-        "reasoning_must_contain": ["no annual fee", "guaranteed inclusion"],
+        "cards_to_keep": [
+          "Basic Card",
+          "Low Reward Zero Fee Card",
+          "Basic Card",
+          "Discover it Cash Back",
+          "Citi Double Cash Card"
+        ],
+        "reasoning_must_contain": [
+          "no annual fee",
+          "guaranteed inclusion"
+        ],
         "test_conditions": [
           "All $0 fee cards appear despite max_recommendations=3 limit",
           "Smart filtering reserves slots for $0 fee cards",
@@ -694,18 +1052,50 @@
           "preferred_reward_type": "points"
         }
       },
-      "owned_cards": ["Freedom Unlimited", "Chase Sapphire Reserve®", "Chase Sapphire Reserve Business", "Blue Cash Everyday", "Expensive Dining Card"],
-      "available_cards": ["Freedom Unlimited", "Chase Sapphire Reserve®", "Chase Sapphire Reserve Business", "Blue Cash Everyday", "Expensive Dining Card", "Blue Cash Preferred® Card", "Gold Card"],
+      "owned_cards": [
+        "Basic Card",
+        "High Value Premium Card",
+        "Low Reward Zero Fee Card",
+        "Expensive Premium Card"
+      ],
+      "available_cards": [
+        "Basic Card",
+        "High Value Premium Card",
+        "Low Reward Zero Fee Card",
+        "Expensive Premium Card",
+        "Premium Grocery Card",
+        "Mid Tier Card"
+      ],
       "expected_recommendations": {
-        "actions": ["keep", "cancel", "apply"],
+        "actions": [
+          "keep",
+          "cancel",
+          "apply"
+        ],
         "portfolio_optimization": {
-          "zero_fee_cards_protected": ["Freedom Unlimited", "Blue Cash Everyday"],
-          "redundant_fee_cards_canceled": ["Chase Sapphire Reserve Business"],
+          "zero_fee_cards_protected": [
+            "Basic Card",
+            "Low Reward Zero Fee Card"
+          ],
+          "redundant_fee_cards_canceled": [
+            "High Value Premium Card"
+          ],
           "optimal_mix_achieved": true
         },
-        "cards_to_keep": ["Freedom Unlimited", "Blue Cash Everyday", "Chase Sapphire Reserve®"],
-        "cards_to_cancel": ["Chase Sapphire Reserve Business", "Expensive Dining Card"],
-        "reasoning_must_contain": ["no annual fee", "redundant card", "portfolio optimization"],
+        "cards_to_keep": [
+          "Basic Card",
+          "Low Reward Zero Fee Card",
+          "High Value Premium Card"
+        ],
+        "cards_to_cancel": [
+          "High Value Premium Card",
+          "Expensive Premium Card"
+        ],
+        "reasoning_must_contain": [
+          "no annual fee",
+          "redundant card",
+          "portfolio optimization"
+        ],
         "test_conditions": [
           "Zero fee cards are always kept regardless of portfolio overlap",
           "Only fee-bearing redundant cards are recommended for cancellation",
@@ -728,17 +1118,38 @@
           "preferred_reward_type": "cashback"
         }
       },
-      "owned_cards": ["Low Reward Zero Fee Card", "Freedom Unlimited", "Premium Grocery Card"],
-      "available_cards": ["Low Reward Zero Fee Card", "Freedom Unlimited", "Premium Grocery Card", "Blue Cash Preferred® Card", "SavorOne Cash Rewards Credit Card"],
+      "owned_cards": [
+        "Low Reward Zero Fee Card",
+        "Basic Card",
+        "Premium Grocery Card"
+      ],
+      "available_cards": [
+        "Low Reward Zero Fee Card",
+        "Basic Card",
+        "Premium Grocery Card",
+        "Dining Card"
+      ],
       "expected_recommendations": {
-        "actions": ["keep", "apply"],
+        "actions": [
+          "keep",
+          "apply"
+        ],
         "zero_fee_protection": {
-          "low_value_zero_fee_protected": ["Low Reward Zero Fee Card"],
+          "low_value_zero_fee_protected": [
+            "Low Reward Zero Fee Card"
+          ],
           "no_cancellation_regardless_of_value": true,
           "free_value_principle": true
         },
-        "cards_to_keep": ["Low Reward Zero Fee Card", "Freedom Unlimited"],
-        "reasoning_must_contain": ["no annual fee", "no cost to maintain", "free value"],
+        "cards_to_keep": [
+          "Low Reward Zero Fee Card",
+          "Basic Card"
+        ],
+        "reasoning_must_contain": [
+          "no annual fee",
+          "no cost to maintain",
+          "free value"
+        ],
         "test_conditions": [
           "Low-reward $0 fee cards are never recommended for cancellation",
           "Portfolio logic treats $0 fee cards as 'free value' regardless of rewards",
@@ -761,17 +1172,44 @@
           "preferred_reward_type": "cashback"
         }
       },
-      "owned_cards": ["Freedom Unlimited", "Blue Cash Everyday", "Expensive Premium Card", "Mid-Fee Card"],
-      "available_cards": ["Freedom Unlimited", "Blue Cash Everyday", "Expensive Premium Card", "Mid-Fee Card", "SavorOne Cash Rewards Credit Card"],
+      "owned_cards": [
+        "Basic Card",
+        "Low Reward Zero Fee Card",
+        "Expensive Premium Card",
+        "Mid-Fee Card"
+      ],
+      "available_cards": [
+        "Basic Card",
+        "Low Reward Zero Fee Card",
+        "Expensive Premium Card",
+        "Mid-Fee Card",
+        "Dining Card"
+      ],
       "expected_recommendations": {
-        "actions": ["keep", "cancel", "apply"],
+        "actions": [
+          "keep",
+          "cancel",
+          "apply"
+        ],
         "sectioned_display": {
-          "keep_section": ["Freedom Unlimited", "Blue Cash Everyday"],
-          "cancel_section": ["Expensive Premium Card", "Mid-Fee Card"],
-          "apply_section": ["SavorOne Cash Rewards Credit Card"],
+          "keep_section": [
+            "Basic Card",
+            "Low Reward Zero Fee Card"
+          ],
+          "cancel_section": [
+            "Expensive Premium Card",
+            "Mid-Fee Card"
+          ],
+          "apply_section": [
+            "Dining Card"
+          ],
           "proper_organization": true
         },
-        "reasoning_must_contain": ["Keep These Cards", "Consider Canceling", "Apply for These Cards"],
+        "reasoning_must_contain": [
+          "Keep These Cards",
+          "Consider Canceling",
+          "Apply for These Cards"
+        ],
         "test_conditions": [
           "Zero fee cards appear in 'Keep These Cards' section",
           "Only fee-bearing cards appear in 'Consider Canceling' section",
@@ -794,18 +1232,39 @@
           "preferred_reward_type": "cashback"
         }
       },
-      "owned_cards": ["Freedom Unlimited", "Quicksilver Cash Rewards Credit Card", "Citi Double Cash Card", "Blue Cash Everyday"],
-      "available_cards": ["Freedom Unlimited", "Quicksilver Cash Rewards Credit Card", "Citi Double Cash Card", "Blue Cash Everyday", "Blue Cash Preferred® Card"],
+      "owned_cards": [
+        "Basic Card",
+        "Citi Double Cash Card",
+        "Low Reward Zero Fee Card"
+      ],
+      "available_cards": [
+        "Basic Card",
+        "Citi Double Cash Card",
+        "Low Reward Zero Fee Card",
+        "Premium Grocery Card"
+      ],
       "expected_recommendations": {
-        "actions": ["keep", "apply"],
+        "actions": [
+          "keep",
+          "apply"
+        ],
         "portfolio_optimization": {
           "overlapping_zero_fee_all_kept": true,
           "highest_rate_calculation": true,
           "no_zero_fee_consolidation": true,
           "portfolio_value_optimized": true
         },
-        "cards_to_keep": ["Freedom Unlimited", "Quicksilver Cash Rewards Credit Card", "Citi Double Cash Card", "Blue Cash Everyday"],
-        "reasoning_must_contain": ["no annual fee", "no cost to maintain", "portfolio optimization"],
+        "cards_to_keep": [
+          "Basic Card",
+          "Basic Card",
+          "Citi Double Cash Card",
+          "Low Reward Zero Fee Card"
+        ],
+        "reasoning_must_contain": [
+          "no annual fee",
+          "no cost to maintain",
+          "portfolio optimization"
+        ],
         "test_conditions": [
           "All $0 fee cards are kept even with overlapping reward categories",
           "Portfolio optimization uses highest rate among $0 fee cards for calculations",
@@ -829,19 +1288,43 @@
           "max_recommendations": 2
         }
       },
-      "owned_cards": ["Freedom Unlimited", "Blue Cash Everyday", "Premium Card A", "Premium Card B"],
-      "available_cards": ["Freedom Unlimited", "Blue Cash Everyday", "Premium Card A", "Premium Card B", "High Value Premium Card", "Best Apply Card"],
+      "owned_cards": [
+        "Basic Card",
+        "Low Reward Zero Fee Card",
+        "High Value Premium Card",
+        "Expensive Premium Card"
+      ],
+      "available_cards": [
+        "Basic Card",
+        "Low Reward Zero Fee Card",
+        "High Value Premium Card",
+        "Expensive Premium Card"
+      ],
       "expected_recommendations": {
-        "actions": ["keep", "cancel", "apply"],
+        "actions": [
+          "keep",
+          "cancel",
+          "apply"
+        ],
         "smart_filtering": {
           "zero_fee_priority": true,
           "reserved_slots": 2,
           "max_recommendations_exceeded": true,
           "filtering_logic": "zero_fee_cards + top_other_recommendations + all_cancels"
         },
-        "cards_to_keep": ["Freedom Unlimited", "Blue Cash Everyday"],
-        "cards_to_cancel": ["Premium Card A", "Premium Card B"],
-        "reasoning_must_contain": ["smart filtering", "reserved slots", "priority protection"],
+        "cards_to_keep": [
+          "Basic Card",
+          "Low Reward Zero Fee Card"
+        ],
+        "cards_to_cancel": [
+          "High Value Premium Card",
+          "Expensive Premium Card"
+        ],
+        "reasoning_must_contain": [
+          "smart filtering",
+          "reserved slots",
+          "priority protection"
+        ],
         "test_conditions": [
           "Zero fee cards get reserved slots in smart filtering",
           "Total recommendations exceed max_recommendations due to zero fee protection",
@@ -859,18 +1342,36 @@
           "travel": 300,
           "general": 500
         },
-        "spending_credit_preferences": ["uber_eats", "dashpass", "precheck"]
+        "spending_credit_preferences": [
+          "uber_eats",
+          "dashpass",
+          "precheck"
+        ]
       },
       "owned_cards": [],
-      "available_cards": ["Chase Sapphire Reserve", "Blue Cash Preferred Card from American Express", "Venture Rewards"],
+      "available_cards": [
+        "High Value Premium Card",
+        "Premium Grocery Card",
+        "Travel Card"
+      ],
       "expected_recommendations": {
-        "actions": ["apply"],
+        "actions": [
+          "apply"
+        ],
         "spending_credits_integration": {
           "credit_benefits_included": true,
-          "selected_credits_only": ["uber_eats", "dashpass", "precheck"],
+          "selected_credits_only": [
+            "uber_eats",
+            "dashpass",
+            "precheck"
+          ],
           "annual_value_calculation": true
         },
-        "reasoning_must_contain": ["credit", "benefits", "dining"],
+        "reasoning_must_contain": [
+          "credit",
+          "benefits",
+          "dining"
+        ],
         "test_conditions": [
           "Only selected spending credits contribute to card value",
           "Cards with matching spending credits get higher estimated value",
@@ -888,22 +1389,46 @@
           "travel": 800,
           "general": 400
         },
-        "spending_credit_preferences": ["dashpass", "apple_tv", "doordash"]
+        "spending_credit_preferences": [
+          "dashpass",
+          "apple_tv",
+          "doordash"
+        ]
       },
       "owned_cards": [],
-      "available_cards": ["Chase Sapphire Reserve", "Chase Sapphire Reserve Business"],
+      "available_cards": [
+        "High Value Premium Card"
+      ],
       "expected_recommendations": {
-        "actions": ["apply"],
+        "actions": [
+          "apply"
+        ],
         "spending_credits_integration": {
           "times_per_year_handled": true,
           "annual_calculations": {
-            "dashpass": {"monthly_value": 10, "times_per_year": 12, "annual_value": 120},
-            "apple_tv": {"monthly_value": 10, "times_per_year": 12, "annual_value": 120},
-            "doordash": {"monthly_value": 25, "times_per_year": 12, "annual_value": 300}
+            "dashpass": {
+              "monthly_value": 10,
+              "times_per_year": 12,
+              "annual_value": 120
+            },
+            "apple_tv": {
+              "monthly_value": 10,
+              "times_per_year": 12,
+              "annual_value": 120
+            },
+            "doordash": {
+              "monthly_value": 25,
+              "times_per_year": 12,
+              "annual_value": 300
+            }
           },
           "total_credits_expected": 540
         },
-        "reasoning_must_contain": ["credit", "annual value", "benefits"],
+        "reasoning_must_contain": [
+          "credit",
+          "annual value",
+          "benefits"
+        ],
         "test_conditions": [
           "Credit values are multiplied by times_per_year correctly",
           "Monthly credits (times_per_year=12) are calculated properly",
@@ -925,15 +1450,27 @@
         "spending_credit_preferences": []
       },
       "owned_cards": [],
-      "available_cards": ["Chase Sapphire Reserve", "Sapphire Preferred"],
+      "available_cards": [
+        "High Value Premium Card",
+        "Mid Tier Card"
+      ],
       "expected_recommendations": {
-        "actions": ["apply"],
+        "actions": [
+          "apply"
+        ],
         "spending_credits_integration": {
           "category_credits_included": true,
           "automatic_inclusion": true,
-          "category_based_credits": ["travel", "dining", "hotels"]
+          "category_based_credits": [
+            "travel",
+            "dining",
+            "hotels"
+          ]
         },
-        "reasoning_must_contain": ["travel credit", "dining"],
+        "reasoning_must_contain": [
+          "travel credit",
+          "dining"
+        ],
         "test_conditions": [
           "Category-based credits are included when user spends in that category",
           "No explicit credit preference selection needed for category credits",
@@ -953,19 +1490,40 @@
           "streaming": 50,
           "general": 600
         },
-        "spending_credit_preferences": ["disney_plus", "apple_tv", "uber_eats"]
+        "spending_credit_preferences": [
+          "disney_plus",
+          "apple_tv",
+          "uber_eats"
+        ]
       },
       "owned_cards": [],
-      "available_cards": ["Chase Sapphire Reserve", "Blue Cash Preferred Card from American Express"],
+      "available_cards": [
+        "High Value Premium Card",
+        "Premium Grocery Card"
+      ],
       "expected_recommendations": {
-        "actions": ["apply"],
+        "actions": [
+          "apply"
+        ],
         "spending_credits_integration": {
           "mixed_credit_types": true,
-          "spending_credits": ["disney_plus", "apple_tv", "uber_eats"],
-          "category_credits": ["travel", "dining"],
+          "spending_credits": [
+            "disney_plus",
+            "apple_tv",
+            "uber_eats"
+          ],
+          "category_credits": [
+            "travel",
+            "dining"
+          ],
           "total_credit_value_positive": true
         },
-        "reasoning_must_contain": ["credits", "benefits", "streaming", "travel"],
+        "reasoning_must_contain": [
+          "credits",
+          "benefits",
+          "streaming",
+          "travel"
+        ],
         "test_conditions": [
           "Both spending_credit and category-based credits are calculated",
           "Spending credit preferences apply to spending_credit fields",
@@ -984,18 +1542,33 @@
           "travel": 400,
           "general": 500
         },
-        "spending_credit_preferences": ["dashpass", "uber_eats"]
+        "spending_credit_preferences": [
+          "dashpass",
+          "uber_eats"
+        ]
       },
-      "owned_cards": ["Chase Sapphire Reserve", "Chase Sapphire Reserve Business"],
-      "available_cards": ["Chase Sapphire Reserve", "Chase Sapphire Reserve Business", "Blue Cash Preferred Card from American Express"],
+      "owned_cards": [
+        "High Value Premium Card"
+      ],
+      "available_cards": [
+        "High Value Premium Card",
+        "Premium Grocery Card"
+      ],
       "expected_recommendations": {
-        "actions": ["keep", "cancel", "apply"],
+        "actions": [
+          "keep",
+          "cancel",
+          "apply"
+        ],
         "spending_credits_integration": {
           "no_double_counting": true,
           "unique_credits_only": true,
           "portfolio_deduplication": true
         },
-        "reasoning_must_contain": ["portfolio optimization", "redundant"],
+        "reasoning_must_contain": [
+          "portfolio optimization",
+          "redundant"
+        ],
         "test_conditions": [
           "Same credit type across multiple cards is counted only once",
           "Portfolio optimization prevents credit double counting",
@@ -1014,20 +1587,41 @@
           "business": 400,
           "general": 300
         },
-        "spending_credit_preferences": ["google_workspace", "ziprecruiter", "lyft"]
+        "spending_credit_preferences": [
+          "google_workspace",
+          "ziprecruiter",
+          "lyft"
+        ]
       },
       "owned_cards": [],
-      "available_cards": ["Chase Sapphire Reserve Business", "The Platinum Card from American Express", "Ink Business Preferred Credit Card"],
+      "available_cards": [
+        "High Value Premium Card",
+        "The Platinum Card from American Express",
+        "Ink Business Preferred Credit Card"
+      ],
       "expected_recommendations": {
-        "actions": ["apply"],
+        "actions": [
+          "apply"
+        ],
         "spending_credits_integration": {
           "high_value_credits": true,
-          "business_credits_included": ["google_workspace", "ziprecruiter"],
-          "transportation_credits": ["lyft"],
+          "business_credits_included": [
+            "google_workspace",
+            "ziprecruiter"
+          ],
+          "transportation_credits": [
+            "lyft"
+          ],
           "credit_value_justifies_fees": true
         },
-        "must_include_cards": ["Chase Sapphire Reserve Business"],
-        "reasoning_must_contain": ["business credits", "workspace", "high value"],
+        "must_include_cards": [
+          "High Value Premium Card"
+        ],
+        "reasoning_must_contain": [
+          "business credits",
+          "workspace",
+          "high value"
+        ],
         "test_conditions": [
           "High-value credits like Google Workspace ($240/year) are properly calculated",
           "Business-focused spending credits are matched correctly",
@@ -1049,15 +1643,24 @@
         "spending_credit_preferences": []
       },
       "owned_cards": [],
-      "available_cards": ["Chase Sapphire Reserve", "Blue Cash Preferred Card from American Express", "Wells Fargo Active Cash® Card"],
+      "available_cards": [
+        "High Value Premium Card",
+        "Premium Grocery Card",
+        "Basic Card"
+      ],
       "expected_recommendations": {
-        "actions": ["apply"],
+        "actions": [
+          "apply"
+        ],
         "spending_credits_integration": {
           "no_spending_credits_selected": true,
           "category_credits_still_included": true,
           "focus_on_rewards_not_credits": true
         },
-        "reasoning_must_contain": ["rewards", "cashback"],
+        "reasoning_must_contain": [
+          "rewards",
+          "cashback"
+        ],
         "test_conditions": [
           "No spending_credit based benefits are included in calculations",
           "Category-based credits are still included when spending in those categories",
@@ -1077,18 +1680,34 @@
           "streaming": 25,
           "general": 300
         },
-        "spending_credit_preferences": ["disney_plus", "apple_tv"]
+        "spending_credit_preferences": [
+          "disney_plus",
+          "apple_tv"
+        ]
       },
       "owned_cards": [],
-      "available_cards": ["Blue Cash Preferred Card from American Express", "Wells Fargo Active Cash® Card", "Chase Sapphire Reserve"],
+      "available_cards": [
+        "Premium Grocery Card",
+        "Basic Card",
+        "High Value Premium Card"
+      ],
       "expected_recommendations": {
-        "actions": ["apply"],
+        "actions": [
+          "apply"
+        ],
         "spending_credits_integration": {
           "credit_value_analysis": true,
-          "low_value_credits": {"disney_plus": 84, "apple_tv": 120},
+          "low_value_credits": {
+            "disney_plus": 84,
+            "apple_tv": 120
+          },
           "fee_vs_credit_comparison": true
         },
-        "reasoning_must_contain": ["annual fee", "credit value", "cost-effective"],
+        "reasoning_must_contain": [
+          "annual fee",
+          "credit value",
+          "cost-effective"
+        ],
         "test_conditions": [
           "Low-value credits don't justify high annual fees",
           "Credit values are accurately calculated (times_per_year)",
@@ -1113,17 +1732,32 @@
         }
       },
       "owned_cards": [],
-      "available_cards": ["Citi Double Cash Card", "Freedom Unlimited", "Blue Cash Preferred® Card", "SavorOne Cash Rewards Credit Card", "Quicksilver Cash Rewards Credit Card"],
+      "available_cards": [
+        "Citi Double Cash Card",
+        "Basic Card",
+        "Premium Grocery Card",
+        "Dining Card"
+      ],
       "expected_recommendations": {
-        "actions": ["apply"],
+        "actions": [
+          "apply"
+        ],
         "card_count_optimization": {
           "max_recommendations": 5,
           "expected_actual_count": 1,
           "reason": "Low spending only justifies one optimal card"
         },
-        "must_include_cards": ["Citi Double Cash Card"],
-        "must_not_include_cards": ["Freedom Unlimited", "Blue Cash Preferred® Card"],
-        "reasoning_must_contain": ["optimal", "single card"],
+        "must_include_cards": [
+          "Citi Double Cash Card"
+        ],
+        "must_not_include_cards": [
+          "Basic Card",
+          "Premium Grocery Card"
+        ],
+        "reasoning_must_contain": [
+          "optimal",
+          "single card"
+        ],
         "test_conditions": [
           "Only 1 card recommended despite max_recommendations=5",
           "Portfolio optimization prevents redundant cards",
@@ -1151,21 +1785,36 @@
         }
       },
       "owned_cards": [],
-      "available_cards": ["Chase Sapphire Reserve®", "Blue Cash Preferred® Card", "Gold Card", "Freedom Unlimited", "Citi Double Cash Card"],
+      "available_cards": [
+        "High Value Premium Card",
+        "Premium Grocery Card",
+        "Mid Tier Card",
+        "Basic Card",
+        "Citi Double Cash Card"
+      ],
       "expected_recommendations": {
-        "actions": ["apply"],
+        "actions": [
+          "apply"
+        ],
         "card_count_optimization": {
           "max_recommendations": 5,
           "expected_actual_count": 3,
           "reason": "High spending across multiple categories justifies multiple cards"
         },
-        "must_include_cards": ["Chase Sapphire Reserve®", "Blue Cash Preferred® Card"],
+        "must_include_cards": [
+          "High Value Premium Card",
+          "Premium Grocery Card"
+        ],
         "portfolio_optimization": {
           "no_overlapping_categories": true,
           "complementary_coverage": true,
           "signup_bonus_justification": "High annual spending supports multiple signup bonus requirements"
         },
-        "reasoning_must_contain": ["travel", "groceries", "complementary"],
+        "reasoning_must_contain": [
+          "travel",
+          "groceries",
+          "complementary"
+        ],
         "test_conditions": [
           "Multiple cards recommended due to high spending",
           "Each card covers different optimal categories",
@@ -1191,21 +1840,38 @@
         }
       },
       "owned_cards": [],
-      "available_cards": ["Blue Cash Preferred® Card", "SavorOne Cash Rewards Credit Card", "Citi Double Cash Card", "Freedom Unlimited", "Quicksilver Cash Rewards Credit Card"],
+      "available_cards": [
+        "Premium Grocery Card",
+        "Dining Card",
+        "Citi Double Cash Card",
+        "Basic Card"
+      ],
       "expected_recommendations": {
-        "actions": ["apply"],
+        "actions": [
+          "apply"
+        ],
         "card_count_optimization": {
           "max_recommendations": 5,
           "expected_actual_count": 2,
           "reason": "Medium spending justifies two complementary cards"
         },
-        "must_include_cards": ["Blue Cash Preferred® Card", "SavorOne Cash Rewards Credit Card"],
+        "must_include_cards": [
+          "Premium Grocery Card",
+          "Dining Card"
+        ],
         "portfolio_optimization": {
-          "complementary_categories": ["groceries", "dining"],
+          "complementary_categories": [
+            "groceries",
+            "dining"
+          ],
           "no_redundancy": true,
           "optimal_coverage": true
         },
-        "reasoning_must_contain": ["groceries", "dining", "complementary"],
+        "reasoning_must_contain": [
+          "groceries",
+          "dining",
+          "complementary"
+        ],
         "test_conditions": [
           "Exactly 2 cards recommended for medium spending",
           "Cards cover different primary categories",
@@ -1232,10 +1898,21 @@
           "max_recommendations": 5
         }
       },
-      "owned_cards": ["Chase Sapphire Preferred® Card", "Freedom Unlimited"],
-      "available_cards": ["Chase Sapphire Preferred® Card", "Freedom Unlimited", "Blue Cash Preferred® Card", "Gold Card", "Citi Double Cash Card"],
+      "owned_cards": [
+        "Mid Tier Card",
+        "Basic Card"
+      ],
+      "available_cards": [
+        "Mid Tier Card",
+        "Basic Card",
+        "Premium Grocery Card",
+        "Citi Double Cash Card"
+      ],
       "expected_recommendations": {
-        "actions": ["keep", "apply"],
+        "actions": [
+          "keep",
+          "apply"
+        ],
         "card_count_optimization": {
           "max_recommendations": 5,
           "expected_actual_count": 3,
@@ -1243,14 +1920,25 @@
           "new_cards": 1,
           "reason": "Existing cards provide good coverage, only one complementary card needed"
         },
-        "cards_to_keep": ["Chase Sapphire Preferred® Card", "Freedom Unlimited"],
-        "must_include_cards": ["Blue Cash Preferred® Card"],
+        "cards_to_keep": [
+          "Mid Tier Card",
+          "Basic Card"
+        ],
+        "must_include_cards": [
+          "Premium Grocery Card"
+        ],
         "portfolio_optimization": {
           "leverages_existing_coverage": true,
-          "fills_gaps": ["groceries"],
+          "fills_gaps": [
+            "groceries"
+          ],
           "avoids_redundancy": true
         },
-        "reasoning_must_contain": ["groceries", "gap", "complementary"],
+        "reasoning_must_contain": [
+          "groceries",
+          "gap",
+          "complementary"
+        ],
         "test_conditions": [
           "Only 1 new card recommended despite high spending",
           "Existing cards reduce need for additional cards",
@@ -1276,9 +1964,16 @@
         }
       },
       "owned_cards": [],
-      "available_cards": ["SavorOne Cash Rewards Credit Card", "Blue Cash Preferred® Card", "Citi Double Cash Card", "Freedom Unlimited"],
+      "available_cards": [
+        "Dining Card",
+        "Premium Grocery Card",
+        "Citi Double Cash Card",
+        "Basic Card"
+      ],
       "expected_recommendations": {
-        "actions": ["apply"],
+        "actions": [
+          "apply"
+        ],
         "card_count_optimization": {
           "max_recommendations": 4,
           "expected_actual_count": 2,
@@ -1289,8 +1984,14 @@
           "can_meet_multiple_bonuses": true,
           "optimal_count_for_bonuses": 2
         },
-        "must_include_cards": ["SavorOne Cash Rewards Credit Card", "Blue Cash Preferred® Card"],
-        "reasoning_must_contain": ["signup bonus", "spending threshold"],
+        "must_include_cards": [
+          "Dining Card",
+          "Premium Grocery Card"
+        ],
+        "reasoning_must_contain": [
+          "signup bonus",
+          "spending threshold"
+        ],
         "test_conditions": [
           "Card count limited by signup bonus spending requirements",
           "Only recommends cards where user can realistically meet bonus",
@@ -1316,9 +2017,16 @@
         }
       },
       "owned_cards": [],
-      "available_cards": ["Freedom Unlimited", "Citi Double Cash Card", "Discover it Cash Back", "Blue Cash Everyday", "Quicksilver Cash Rewards Credit Card"],
+      "available_cards": [
+        "Basic Card",
+        "Citi Double Cash Card",
+        "Discover it Cash Back",
+        "Low Reward Zero Fee Card"
+      ],
       "expected_recommendations": {
-        "actions": ["apply"],
+        "actions": [
+          "apply"
+        ],
         "card_count_optimization": {
           "max_recommendations": 2,
           "expected_actual_count": 3,
@@ -1329,8 +2037,16 @@
           "complementary_categories": true,
           "no_fee_justifies_multiple": true
         },
-        "must_include_cards": ["Freedom Unlimited", "Citi Double Cash Card", "Discover it Cash Back"],
-        "reasoning_must_contain": ["no annual fee", "complementary", "zero cost"],
+        "must_include_cards": [
+          "Basic Card",
+          "Citi Double Cash Card",
+          "Discover it Cash Back"
+        ],
+        "reasoning_must_contain": [
+          "no annual fee",
+          "complementary",
+          "zero cost"
+        ],
         "test_conditions": [
           "More than max_recommendations due to $0 fee cards",
           "Zero fee cards get special consideration in count",
@@ -1354,9 +2070,16 @@
         }
       },
       "owned_cards": [],
-      "available_cards": ["Freedom Unlimited", "Citi Double Cash Card", "SavorOne Cash Rewards Credit Card", "Blue Cash Preferred® Card"],
+      "available_cards": [
+        "Basic Card",
+        "Citi Double Cash Card",
+        "Dining Card",
+        "Premium Grocery Card"
+      ],
       "expected_recommendations": {
-        "actions": ["apply"],
+        "actions": [
+          "apply"
+        ],
         "card_count_optimization": {
           "max_recommendations": 5,
           "expected_actual_count": 1,
@@ -1367,9 +2090,16 @@
           "insufficient_for_premium": true,
           "basic_card_optimal": true
         },
-        "must_include_cards": ["Citi Double Cash Card"],
-        "must_not_include_cards": ["Blue Cash Preferred® Card"],
-        "reasoning_must_contain": ["low spending", "basic rewards"],
+        "must_include_cards": [
+          "Citi Double Cash Card"
+        ],
+        "must_not_include_cards": [
+          "Premium Grocery Card"
+        ],
+        "reasoning_must_contain": [
+          "low spending",
+          "basic rewards"
+        ],
         "test_conditions": [
           "Only 1 card recommended for minimal spending",
           "Simple flat-rate card preferred over category cards",
@@ -1396,9 +2126,17 @@
         }
       },
       "owned_cards": [],
-      "available_cards": ["Chase Sapphire Preferred® Card", "Blue Cash Preferred® Card", "Gold Card", "Freedom Unlimited", "Citi Double Cash Card", "SavorOne Cash Rewards Credit Card"],
+      "available_cards": [
+        "Mid Tier Card",
+        "Premium Grocery Card",
+        "Basic Card",
+        "Citi Double Cash Card",
+        "Dining Card"
+      ],
       "expected_recommendations": {
-        "actions": ["apply"],
+        "actions": [
+          "apply"
+        ],
         "card_count_optimization": {
           "max_recommendations": 6,
           "expected_actual_count": 3,
@@ -1409,9 +2147,19 @@
           "diminishing_returns": true,
           "optimal_stopping_point": 3
         },
-        "must_include_cards": ["Chase Sapphire Preferred® Card", "Blue Cash Preferred® Card", "Gold Card"],
-        "must_not_include_cards": ["Freedom Unlimited"],
-        "reasoning_must_contain": ["portfolio value", "incremental", "diminishing"],
+        "must_include_cards": [
+          "Mid Tier Card",
+          "Premium Grocery Card",
+          "Mid Tier Card"
+        ],
+        "must_not_include_cards": [
+          "Basic Card"
+        ],
+        "reasoning_must_contain": [
+          "portfolio value",
+          "incremental",
+          "diminishing"
+        ],
         "test_conditions": [
           "Cards stopped at optimal portfolio value point",
           "Additional cards don't add meaningful value",
@@ -1434,9 +2182,16 @@
         }
       },
       "owned_cards": [],
-      "available_cards": ["Amazon Prime", "Chase Freedom Unlimited®", "Blue Cash Preferred® Card from American Express", "Chase Sapphire Reserve®", "Wells Fargo Active Cash® Card"],
+      "available_cards": [
+        "Amazon Prime",
+        "Basic Card",
+        "Premium Grocery Card",
+        "High Value Premium Card"
+      ],
       "expected_recommendations": {
-        "actions": ["apply"],
+        "actions": [
+          "apply"
+        ],
         "card_count_optimization": {
           "max_recommendations": 5,
           "expected_actual_count": 1,
@@ -1447,9 +2202,18 @@
           "total_annual_spending": 12000,
           "prevents_negative_portfolio": true
         },
-        "must_include_cards": ["Amazon Prime"],
-        "must_not_include_cards": ["Chase Freedom Unlimited®", "Blue Cash Preferred® Card from American Express", "Chase Sapphire Reserve®"],
-        "reasoning_must_contain": ["Amazon", "portfolio"],
+        "must_include_cards": [
+          "Amazon Prime"
+        ],
+        "must_not_include_cards": [
+          "Basic Card",
+          "Premium Grocery Card",
+          "High Value Premium Card"
+        ],
+        "reasoning_must_contain": [
+          "Amazon",
+          "portfolio"
+        ],
         "test_conditions": [
           "Only recommends cards that add positive value",
           "Rejects multi-card portfolios with negative net value",
@@ -1473,7 +2237,12 @@
         }
       },
       "owned_cards": [],
-      "available_cards": ["Chase Freedom Unlimited®", "Blue Cash Preferred® Card", "Chase Sapphire Reserve®", "Gold Card"],
+      "available_cards": [
+        "Basic Card",
+        "Premium Grocery Card",
+        "High Value Premium Card",
+        "Mid Tier Card"
+      ],
       "expected_recommendations": {
         "actions": [],
         "card_count_optimization": {
@@ -1488,7 +2257,11 @@
           "empty_portfolio_acceptable": true
         },
         "must_include_cards": [],
-        "must_not_include_cards": ["Chase Sapphire Reserve®", "Gold Card", "Blue Cash Preferred® Card"],
+        "must_not_include_cards": [
+          "High Value Premium Card",
+          "Mid Tier Card",
+          "Premium Grocery Card"
+        ],
         "reasoning_must_contain": [],
         "test_conditions": [
           "Returns zero recommendations when no profitable portfolio exists",
@@ -1514,9 +2287,16 @@
         }
       },
       "owned_cards": [],
-      "available_cards": ["Chase Freedom Unlimited®", "Wells Fargo Active Cash® Card", "Chase Sapphire Reserve®", "Blue Cash Preferred® Card", "Gold Card"],
+      "available_cards": [
+        "Basic Card",
+        "High Value Premium Card",
+        "Premium Grocery Card",
+        "Mid Tier Card"
+      ],
       "expected_recommendations": {
-        "actions": ["apply"],
+        "actions": [
+          "apply"
+        ],
         "card_count_optimization": {
           "max_recommendations": 5,
           "expected_actual_count": 1,
@@ -1524,16 +2304,29 @@
         },
         "zero_fee_protection": {
           "must_include_zero_fee": true,
-          "must_exclude_fee_cards": ["Chase Sapphire Reserve®", "Gold Card", "Blue Cash Preferred® Card"]
+          "must_exclude_fee_cards": [
+            "High Value Premium Card",
+            "Mid Tier Card",
+            "Premium Grocery Card"
+          ]
         },
         "portfolio_optimization": {
           "net_portfolio_value_min": 100,
           "total_annual_spending": 9000,
           "prevents_negative_portfolio": true
         },
-        "must_include_cards": ["Chase Freedom Unlimited®"],
-        "must_not_include_cards": ["Chase Sapphire Reserve®", "Gold Card", "Blue Cash Preferred® Card"],
-        "reasoning_must_contain": ["no annual fee", "portfolio"],
+        "must_include_cards": [
+          "Basic Card"
+        ],
+        "must_not_include_cards": [
+          "High Value Premium Card",
+          "Mid Tier Card",
+          "Premium Grocery Card"
+        ],
+        "reasoning_must_contain": [
+          "no annual fee",
+          "portfolio"
+        ],
         "test_conditions": [
           "Selects best no-fee option over fee cards",
           "Medium spending doesn't justify premium annual fees",
@@ -1558,9 +2351,16 @@
         }
       },
       "owned_cards": [],
-      "available_cards": ["Chase Sapphire Reserve®", "The Platinum Card®", "Gold Card", "Green Card", "Chase Freedom Unlimited®"],
+      "available_cards": [
+        "High Value Premium Card",
+        "Expensive Premium Card",
+        "Mid Tier Card",
+        "Basic Card"
+      ],
       "expected_recommendations": {
-        "actions": ["apply"],
+        "actions": [
+          "apply"
+        ],
         "card_count_optimization": {
           "max_recommendations": 5,
           "expected_actual_count": 1,
@@ -1572,9 +2372,16 @@
           "prevents_negative_portfolio": true,
           "rejects_high_fee_combinations": true
         },
-        "must_include_cards": ["Green Card"],
-        "must_not_include_cards": ["Chase Sapphire Reserve®", "The Platinum Card®"],
-        "reasoning_must_contain": ["portfolio value"],
+        "must_include_cards": [
+          "Mid Tier Card"
+        ],
+        "must_not_include_cards": [
+          "High Value Premium Card",
+          "Expensive Premium Card"
+        ],
+        "reasoning_must_contain": [
+          "portfolio value"
+        ],
         "test_conditions": [
           "Prevents multiple premium cards with high combined fees",
           "Selects single card that provides best value",
@@ -1597,17 +2404,29 @@
           "preferred_reward_type": "cashback"
         }
       },
-      "owned_cards": ["Chase Freedom Unlimited®", "Wells Fargo Active Cash® Card"],
-      "available_cards": ["Blue Cash Preferred® Card", "Chase Sapphire Reserve®", "Gold Card"],
+      "owned_cards": [
+        "Basic Card"
+      ],
+      "available_cards": [
+        "Premium Grocery Card",
+        "High Value Premium Card",
+        "Mid Tier Card"
+      ],
       "expected_recommendations": {
-        "actions": ["keep", "keep"],
+        "actions": [
+          "keep",
+          "keep"
+        ],
         "card_count_optimization": {
           "max_recommendations": 5,
           "expected_actual_count": 2,
           "reason": "Keep existing zero-fee cards, don't add fee cards for low spending"
         },
         "zero_fee_protection": {
-          "existing_zero_fee_cards": ["Chase Freedom Unlimited®", "Wells Fargo Active Cash® Card"],
+          "existing_zero_fee_cards": [
+            "Basic Card",
+            "Basic Card"
+          ],
           "must_keep_zero_fee": true,
           "no_cancel_zero_fee": true
         },
@@ -1616,9 +2435,18 @@
           "total_annual_spending": 4800,
           "prevents_negative_portfolio": true
         },
-        "must_include_cards": ["Chase Freedom Unlimited®", "Wells Fargo Active Cash® Card"],
-        "must_not_include_cards": ["Blue Cash Preferred® Card", "Chase Sapphire Reserve®"],
-        "reasoning_must_contain": ["keep", "no annual fee"],
+        "must_include_cards": [
+          "Basic Card",
+          "Basic Card"
+        ],
+        "must_not_include_cards": [
+          "Premium Grocery Card",
+          "High Value Premium Card"
+        ],
+        "reasoning_must_contain": [
+          "keep",
+          "no annual fee"
+        ],
         "test_conditions": [
           "Never recommends canceling zero annual fee cards",
           "Keeps existing profitable cards",
@@ -1643,15 +2471,31 @@
           "preferred_reward_type": "points"
         }
       },
-      "owned_cards": ["Chase Freedom Unlimited®"],
-      "available_cards": ["Chase Sapphire Preferred® Card", "American Express Gold® Card", "The Platinum Card® from American Express"],
+      "owned_cards": [
+        "Basic Card"
+      ],
+      "available_cards": [
+        "Mid Tier Card",
+        "Expensive Premium Card"
+      ],
       "expected_recommendations": {
-        "actions": ["keep", "apply"],
+        "actions": [
+          "keep",
+          "apply"
+        ],
         "min_card_count": 2,
         "max_card_count": 4,
-        "must_include_cards": ["Chase Freedom Unlimited®"],
-        "should_include_new_cards": ["Chase Sapphire Preferred® Card", "American Express Gold® Card"],
-        "reasoning_must_contain": ["keep", "signup bonus"],
+        "must_include_cards": [
+          "Basic Card"
+        ],
+        "should_include_new_cards": [
+          "Mid Tier Card",
+          "Mid Tier Card"
+        ],
+        "reasoning_must_contain": [
+          "keep",
+          "signup bonus"
+        ],
         "min_total_value": 2000,
         "test_conditions": [
           "Keeps existing profitable cards",
@@ -1676,18 +2520,27 @@
           "preferred_reward_type": "points"
         }
       },
-      "owned_cards": ["Chase Sapphire Preferred® Card", "American Express Gold® Card"],
-      "available_cards": ["The Platinum Card® from American Express"],
+      "owned_cards": [
+        "Mid Tier Card"
+      ],
+      "available_cards": [
+        "Expensive Premium Card"
+      ],
       "expected_recommendations": {
-        "actions": ["keep"],
+        "actions": [
+          "keep"
+        ],
         "card_count": 2,
-        "must_include_cards": ["Chase Sapphire Preferred® Card", "American Express Gold® Card"],
+        "must_include_cards": [
+          "Mid Tier Card",
+          "Mid Tier Card"
+        ],
         "dining_reward_calculation": {
           "annual_dining_spend": 18000,
           "best_dining_rate": 4.0,
-          "best_dining_card": "American Express Gold® Card",
+          "best_dining_card": "Mid Tier Card",
           "dining_rewards_should_be": 720,
-          "should_not_double_count": "Chase Sapphire Preferred® Card dining rate"
+          "should_not_double_count": "Mid Tier Card dining rate"
         },
         "test_conditions": [
           "Only counts dining rewards once for the best card (Gold 4x, not CSP 2x + Gold 4x)",
@@ -1713,15 +2566,32 @@
           "preferred_reward_type": "points"
         }
       },
-      "owned_cards": ["Chase Freedom Unlimited®", "Chase Sapphire Preferred® Card"],
-      "available_cards": ["American Express Gold® Card", "The Platinum Card® from American Express"],
+      "owned_cards": [
+        "Basic Card",
+        "Mid Tier Card"
+      ],
+      "available_cards": [
+        "Mid Tier Card",
+        "Expensive Premium Card"
+      ],
       "expected_recommendations": {
-        "actions": ["keep", "apply"],
+        "actions": [
+          "keep",
+          "apply"
+        ],
         "min_card_count": 3,
         "max_card_count": 4,
-        "must_include_cards": ["Chase Freedom Unlimited®", "Chase Sapphire Preferred® Card"],
-        "should_apply_for": ["American Express Gold® Card"],
-        "reasoning_must_contain": ["signup bonus", "high spending"],
+        "must_include_cards": [
+          "Basic Card",
+          "Mid Tier Card"
+        ],
+        "should_apply_for": [
+          "Mid Tier Card"
+        ],
+        "reasoning_must_contain": [
+          "signup bonus",
+          "high spending"
+        ],
         "min_signup_bonus_value": 1000,
         "test_conditions": [
           "High spending justifies multiple new signup bonuses",
@@ -1748,24 +2618,29 @@
         }
       },
       "owned_cards": [],
-      "available_cards": ["Chase Sapphire Preferred® Card", "American Express Gold® Card", "Blue Cash Preferred® Card from American Express"],
+      "available_cards": [
+        "Mid Tier Card",
+        "Premium Grocery Card"
+      ],
       "expected_recommendations": {
-        "actions": ["apply"],
+        "actions": [
+          "apply"
+        ],
         "min_card_count": 2,
         "max_card_count": 3,
         "category_allocation": {
           "dining": {
-            "best_card": "American Express Gold® Card",
+            "best_card": "Mid Tier Card",
             "rate": 4.0,
-            "should_not_also_count": "Chase Sapphire Preferred® Card"
+            "should_not_also_count": "Mid Tier Card"
           },
           "groceries": {
-            "best_card": "Blue Cash Preferred® Card from American Express", 
+            "best_card": "Premium Grocery Card",
             "rate": 6.0,
-            "should_not_also_count": "American Express Gold® Card"
+            "should_not_also_count": "Mid Tier Card"
           },
           "travel": {
-            "best_card": "Chase Sapphire Preferred® Card",
+            "best_card": "Mid Tier Card",
             "rate": 2.0
           }
         },
