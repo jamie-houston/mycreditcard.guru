@@ -84,11 +84,16 @@
             </div>
         </div>
 
-        <!-- Action Button -->
+        <!-- Action Buttons -->
         <div style="text-align: center; margin: 30px 0;">
             <button onclick="getRecommendations()" class="action-button" style="font-size: 18px; padding: 16px 32px;">
                 🚀 Get My Roadmap
             </button>
+            {% if is_dev_user %}
+                <button onclick="exportToScenario()" class="action-button secondary" style="font-size: 16px; padding: 12px 24px; margin-left: 20px; background: #6b7280; border-color: #6b7280;">
+                    📝 Export to Test Scenario
+                </button>
+            {% endif %}
         </div>
 
 
@@ -954,6 +959,174 @@
                         });
                     }
                 }, 100);
+            }
+        }
+
+        // Helper functions for data extraction
+        function getSpendingData() {
+            const spendingData = {};
+            document.querySelectorAll('input[data-category-slug]').forEach(input => {
+                const category = input.getAttribute('data-category-slug');
+                const value = parseFloat(input.value) || 0;
+                if (value > 0) {
+                    spendingData[category] = value;
+                }
+            });
+            return spendingData;
+        }
+
+        async function getSelectedCards() {
+            const selectedCards = {
+                owned: [],
+                available: []
+            };
+            
+            try {
+                // Get owned cards from UserDataManager
+                const userCardIds = await UserDataManager.getCards();
+                
+                // Convert card IDs to names if we have access to the cards data
+                // For now, just return the IDs - the backend can resolve them
+                selectedCards.owned = userCardIds.map(cardId => ({ 
+                    id: cardId,
+                    name: `Card ID: ${cardId}` // Placeholder - backend will resolve
+                }));
+                
+            } catch (error) {
+                console.error('Error getting selected cards:', error);
+            }
+            
+            return selectedCards;
+        }
+
+        function getFilters() {
+            return {
+                cardType: document.getElementById('cardType')?.value || 'personal',
+                issuer: document.getElementById('issuer')?.value || null,
+                rewardType: document.getElementById('rewardType')?.value || 'Points',
+                maxFee: parseFloat(document.getElementById('maxFee')?.value) || null,
+                maxRecommendations: parseInt(document.getElementById('maxRecommendations')?.value) || 5
+            };
+        }
+
+        function getSelectedSpendingCredits() {
+            const selectedCredits = [];
+            document.querySelectorAll('.credit-checkbox-item input[type="checkbox"]:checked').forEach(checkbox => {
+                const creditId = checkbox.getAttribute('data-credit-id');
+                const creditName = checkbox.closest('.spending-credit-item')?.querySelector('label')?.textContent?.trim();
+                if (creditId) {
+                    selectedCredits.push({
+                        id: parseInt(creditId),
+                        name: creditName || 'Unknown Credit'
+                    });
+                }
+            });
+            return selectedCredits;
+        }
+
+        async function exportToScenario() {
+            const spendingData = getSpendingData();
+            const selectedCards = await getSelectedCards();
+            const filters = getFilters();
+            const selectedSpendingCredits = getSelectedSpendingCredits();
+            
+            // Calculate total monthly spending for scaling
+            const totalMonthlySpending = Object.values(spendingData)
+                .reduce((sum, amount) => sum + parseFloat(amount || 0), 0);
+            
+            // Build the test scenario object
+            const scenario = {
+                name: `Custom Scenario - ${new Date().toLocaleDateString()}`,
+                description: `Test scenario exported from user input on ${new Date().toLocaleDateString()}`,
+                user_profile: {
+                    spending: spendingData,
+                    monthly_spending_total: totalMonthlySpending
+                },
+                scenario: {
+                    owned_cards: selectedCards.owned.map(card => card.name),
+                    available_cards: [], // Will be populated with generic cards
+                    filters: {
+                        max_annual_fee: filters.maxFee || null,
+                        card_type: filters.cardType || 'personal',
+                        preferred_reward_type: filters.rewardType || 'Points',
+                        issuer: filters.issuer || null,
+                        max_recommendations: filters.maxRecommendations || 5
+                    },
+                    spending_credit_preferences: selectedSpendingCredits
+                },
+                expected_recommendations: {
+                    actions: ["apply", "keep"],
+                    min_cards: 1,
+                    max_cards: filters.maxRecommendations || 5,
+                    reasoning_must_contain: ["spending", "rewards", "portfolio"],
+                    test_conditions: [
+                        "Validates user input scenario",
+                        "Checks spending pattern optimization",
+                        "Verifies credit preferences integration"
+                    ]
+                }
+            };
+            
+            try {
+                // First, send to API for processing and validation
+                const response = await fetch(`${API_BASE}/roadmaps/export-scenario/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify(scenario)
+                });
+                
+                const apiResult = await response.json();
+                
+                if (apiResult.error) {
+                    alert(`❌ Export failed: ${apiResult.error}`);
+                    return;
+                }
+                
+                // Create downloadable JSON file with the processed scenario
+                const processedScenario = apiResult.scenario || scenario;
+                const jsonString = JSON.stringify(processedScenario, null, 2);
+                const blob = new Blob([jsonString], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                
+                // Create download link
+                const downloadLink = document.createElement('a');
+                downloadLink.href = url;
+                downloadLink.download = `test-scenario-${new Date().toISOString().split('T')[0]}.json`;
+                
+                // Trigger download
+                document.body.appendChild(downloadLink);
+                downloadLink.click();
+                document.body.removeChild(downloadLink);
+                
+                // Clean up the URL object
+                URL.revokeObjectURL(url);
+                
+                // Show success message with debug info
+                console.log('Exported scenario:', processedScenario);
+                alert(`✅ Test scenario exported successfully!\\n\\nThe JSON file contains your current spending profile, cards, and preferences.\\n\\nYou can add this to data/tests/scenarios.json for testing and debugging.\\n\\nCheck the browser console for the full scenario data.`);
+                
+            } catch (error) {
+                console.error('Export error:', error);
+                
+                // Fallback: still create the file even if API fails
+                const jsonString = JSON.stringify(scenario, null, 2);
+                const blob = new Blob([jsonString], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                
+                const downloadLink = document.createElement('a');
+                downloadLink.href = url;
+                downloadLink.download = `test-scenario-${new Date().toISOString().split('T')[0]}.json`;
+                
+                document.body.appendChild(downloadLink);
+                downloadLink.click();
+                document.body.removeChild(downloadLink);
+                
+                URL.revokeObjectURL(url);
+                
+                alert(`✅ Test scenario exported (offline mode)\\n\\nAPI was unavailable, but the scenario file was still created.\\nError: ${error.message}`);
             }
         }
 
