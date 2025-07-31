@@ -557,7 +557,9 @@ class RecommendationEngine:
                     break
                 
                 full_combination = must_include + list(combination)
-                portfolio_value = calculate_portfolio_value(full_combination)
+                # Convert to actions format for efficiency-enhanced portfolio calculation
+                actions = [{'card': cd['card'], 'action': cd['action']} for cd in full_combination]
+                portfolio_value = self._calculate_scenario_portfolio_value(actions)
                 
                 # Only accept portfolios with positive value
                 if portfolio_value > best_value and portfolio_value > 0:
@@ -736,22 +738,14 @@ class RecommendationEngine:
             card = action['card']
             efficiency_score = self._calculate_spending_efficiency(card)
             
-            # DEBUG: Show all cards being evaluated in portfolio
-            print(f"DEBUG: Portfolio card {card.name}: efficiency {efficiency_score:.2f}")
-            
             if efficiency_score > 0.1:  # Boost any somewhat relevant cards (lowered threshold)
                 card_annual_value = self._calculate_smart_card_value(card, signup_bonus=False) - float(card.annual_fee)
                 card_signup_value = self._get_signup_bonus_value(card) if action['action'] == 'apply' else 0
                 card_base_value = card_annual_value + card_signup_value
                 efficiency_boost = card_base_value * efficiency_score * 0.5  # 50% max boost for perfect efficiency
                 total_efficiency_boost += efficiency_boost
-                
-                # DEBUG: Show efficiency boost calculation for relevant cards
-                print(f"DEBUG: Portfolio efficiency boost - {card.name}: {efficiency_score:.2f} efficiency × ${card_base_value:.0f} base × 0.5 = +${efficiency_boost:.0f}")
         
         final_value = base_portfolio_value + total_efficiency_boost
-        if total_efficiency_boost > 0:
-            print(f"DEBUG: Portfolio value: ${base_portfolio_value:.0f} base + ${total_efficiency_boost:.0f} efficiency = ${final_value:.0f} total")
         
         return final_value
     
