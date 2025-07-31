@@ -517,8 +517,8 @@ class Command(BaseCommand):
             issuer=self.issuers[card_data['issuer']],
             annual_fee=Decimal(str(card_data.get('annual_fee', 0))),
             signup_bonus_amount=card_data.get('signup_bonus_amount'),
-            signup_bonus_type=self.reward_types[card_data.get('signup_bonus_type', 'points')],
-            primary_reward_type=self.reward_types[card_data.get('primary_reward_type', 'points')],
+            signup_bonus_type=self.reward_types[card_data.get('signup_bonus_type', 'Points')],
+            primary_reward_type=self.reward_types[card_data.get('primary_reward_type', 'Points')],
             metadata=card_data.get('metadata', {'reward_value_multiplier': 0.01})
         )
         
@@ -527,9 +527,9 @@ class Command(BaseCommand):
             RewardCategory.objects.create(
                 card=card,
                 category=self.categories[category_data['category']],
-                reward_rate=Decimal(str(category_data['rate'])),
-                reward_type=self.reward_types[category_data.get('type', 'points')],
-                max_annual_spend=Decimal(str(category_data['max_spend'])) if category_data.get('max_spend') else None,
+                reward_rate=Decimal(str(category_data.get('reward_rate', category_data.get('rate', 1.0)))),
+                reward_type=self.reward_types[category_data.get('type', 'Points')],
+                max_annual_spend=Decimal(str(category_data.get('max_annual_spend', category_data.get('max_spend')))) if category_data.get('max_annual_spend') or category_data.get('max_spend') else None,
                 is_active=True
             )
         
