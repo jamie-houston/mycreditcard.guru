@@ -1110,9 +1110,34 @@ class RecommendationEngine:
             'reward_multiplier': float(reward_value_multiplier)
         }
     
+    def _can_meet_signup_requirement(self, card: CreditCard) -> bool:
+        """Check if user's total spending can meet the card's signup bonus requirement"""
+        if not card.signup_bonus_requirement or card.signup_bonus_requirement in ['', '$0.01 in 6 months']:
+            return True
+            
+        try:
+            # Parse requirement format like "$5000 in 3 months"
+            import re
+            match = re.search(r'\$(\d+).*?(\d+)\s*months?', card.signup_bonus_requirement)
+            if not match:
+                return True  # If we can't parse, assume achievable
+                
+            required_amount = int(match.group(1))
+            time_months = int(match.group(2))
+            
+            # Calculate user's total monthly spending
+            total_monthly_spending = sum(float(amount) for amount in self.spending_amounts.values())
+            user_spending_in_period = total_monthly_spending * time_months
+            
+            # Add 20% buffer for achievability (user might increase spending slightly)
+            return user_spending_in_period * 1.2 >= required_amount
+            
+        except (ValueError, AttributeError):
+            return True  # If parsing fails, assume achievable
+
     def _get_signup_bonus_value(self, card: CreditCard) -> float:
         """Get signup bonus value using card's specific reward value multiplier"""
-        if card.signup_bonus_amount:
+        if card.signup_bonus_amount and self._can_meet_signup_requirement(card):
             # Check signup bonus type to determine if conversion is needed
             signup_bonus_type = getattr(card, 'signup_bonus_type', None)
             
