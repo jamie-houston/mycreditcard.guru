@@ -20,7 +20,8 @@
     "network": "Mastercard",
     "url": "https://www.usbank.com/business-banking/business-credit-cards/business-altitude-power-world-elite-mastercard.html",
     "image_url": "/images/usbank/altitude-power.webp",
-    "discontinued": false
+    "discontinued": false,
+    "slug": "business-altitude-power"
   },
   {
     "name": "Business Altitude Connect",
@@ -43,7 +44,8 @@
     "network": "Mastercard",
     "url": "https://www.usbank.com/business-banking/business-credit-cards/business-altitude-connect-world-elite-mastercard.html",
     "image_url": "/images/usbank/business-altitude-connect.webp",
-    "discontinued": false
+    "discontinued": false,
+    "slug": "business-altitude-connect"
   },
   {
     "name": "Altitude Connect",
@@ -66,7 +68,8 @@
     "network": "Visa",
     "url": "https://www.usbank.com/credit-cards/altitude-connect-visa-signature-credit-card.html",
     "image_url": "/images/usbank/altitude-connect.png",
-    "discontinued": false
+    "discontinued": false,
+    "slug": "altitude-connect"
   },
   {
     "name": "Altitude Go",
@@ -89,7 +92,8 @@
     "network": "Visa",
     "url": "https://www.usbank.com/credit-cards/altitude-go-visa-signature-credit-card.html",
     "image_url": "/images/usbank/altitude-go.jpg",
-    "discontinued": false
+    "discontinued": false,
+    "slug": "altitude-go"
   },
   {
     "name": "Cash+",
@@ -112,7 +116,8 @@
     "network": "Visa",
     "url": "https://www.usbank.com/credit-cards/cash-plus-visa-signature-credit-card.html",
     "image_url": "/images/usbank/cash-plus.jpg",
-    "discontinued": false
+    "discontinued": false,
+    "slug": "cash"
   },
   {
     "name": "Business Leverage",
@@ -135,7 +140,8 @@
     "network": "Visa",
     "url": "https://www.usbank.com/business-banking/business-credit-cards/business-leverage-rewards-credit-card.html",
     "image_url": "/images/usbank/business-leverage.webp",
-    "discontinued": false
+    "discontinued": false,
+    "slug": "business-leverage"
   },
   {
     "name": "Business Triple Cash Rewards",
@@ -158,7 +164,8 @@
     "network": "Mastercard",
     "url": "https://www.usbank.com/business-banking/business-credit-cards/business-triple-cash-back-credit-card.html",
     "image_url": "/images/usbank/business-triple-cash-rewards.webp",
-    "discontinued": false
+    "discontinued": false,
+    "slug": "business-triple-cash-rewards"
   },
   {
     "name": "Skypass Blue",
@@ -188,7 +195,8 @@
         "value": 50,
         "weight": 0.8
       }
-    ]
+    ],
+    "slug": "skypass-blue"
   },
   {
     "name": "Skypass",
@@ -228,7 +236,8 @@
         "value": 100,
         "weight": 0.4
       }
-    ]
+    ],
+    "slug": "skypass"
   },
   {
     "name": "Skypass Select",
@@ -251,7 +260,8 @@
     "network": "Visa",
     "url": "https://www.skypassvisa.com/credit/visaSelectCard.do",
     "image_url": "/images/usbank/skypass-select.png",
-    "discontinued": false
+    "discontinued": false,
+    "slug": "skypass-select"
   },
   {
     "name": "Skypass Business",
@@ -286,7 +296,8 @@
         "value": 100,
         "weight": 0.4
       }
-    ]
+    ],
+    "slug": "skypass-business"
   },
   {
     "name": "Shopper Cash Rewards",
@@ -309,6 +320,7 @@
     "network": "Visa",
     "url": "https://www.usbank.com/credit-cards/shopper-cash-rewards-visa-signature-credit-card.html",
     "image_url": "/images/usbank/shopper-cash-rewards.webp",
-    "discontinued": false
+    "discontinued": false,
+    "slug": "shopper-cash-rewards"
   }
 ]

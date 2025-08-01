@@ -57,6 +57,7 @@ class CreditCard(models.Model):
     ]
     
     name = models.CharField(max_length=200)
+    slug = models.SlugField(unique=True)
     issuer = models.ForeignKey(Issuer, on_delete=models.CASCADE)
     card_type = models.CharField(max_length=20, choices=CARD_TYPES, default='personal')
     annual_fee = models.DecimalField(max_digits=8, decimal_places=2, default=0)

@@ -1,0 +1,686 @@
+{
+  "description": "Portfolio-level optimization and management scenarios",
+  "category": "portfolio_optimization",
+  "scenarios": [
+    {
+      "name": "Existing High-Fee Card Review",
+      "description": "User with expensive card that may not be worth keeping",
+      "user_profile": {
+        "spending": {
+          "groceries": 200,
+          "dining": 150,
+          "travel": 100,
+          "general": 300
+        }
+      },
+      "owned_cards": [
+        "expensive-premium-card-1"
+      ],
+      "available_cards": [
+        "expensive-premium-card-1",
+        "basic-card-1"
+      ],
+      "expected_recommendations": {
+        "actions": [
+          "cancel",
+          "apply"
+        ],
+        "min_total_value": 50,
+        "must_include_cards": [
+          "basic-card-1"
+        ],
+        "reasoning_must_contain": [
+          "cancel"
+        ]
+      }
+    },
+    {
+      "name": "Multiple Cards Optimization",
+      "description": "User with several cards, needs optimization strategy",
+      "user_profile": {
+        "spending": {
+          "groceries": 500,
+          "dining": 400,
+          "travel": 600,
+          "gas": 200,
+          "general": 700
+        }
+      },
+      "owned_cards": [
+        "basic-card-1",
+        "travel-card-1"
+      ],
+      "available_cards": [
+        "basic-card-1",
+        "travel-card-1",
+        "premium-grocery-card",
+        "mid-tier-card"
+      ],
+      "expected_recommendations": {
+        "actions": [
+          "keep",
+          "apply"
+        ],
+        "min_total_value": 300,
+        "must_include_cards": [
+          "premium-grocery-card"
+        ],
+        "reasoning_must_contain": [
+          "keep"
+        ]
+      }
+    },
+    {
+      "name": "Existing Card Optimization",
+      "description": "User with low-value card that should be optimized",
+      "user_profile": {
+        "spending": {
+          "groceries": 200,
+          "dining": 150,
+          "gas": 100,
+          "general": 300
+        }
+      },
+      "owned_cards": [
+        "low-value-card-1"
+      ],
+      "available_cards": [
+        "low-value-card-1",
+        "better-card-1"
+      ],
+      "expected_recommendations": {
+        "actions": [
+          "cancel",
+          "apply"
+        ],
+        "min_total_value": 50,
+        "must_include_cards": [
+          "better-card-1"
+        ]
+      }
+    },
+    {
+      "name": "Satisfied Card Holder - No New Cards Needed",
+      "description": "User with existing cards who doesn't spend enough to justify new cards or annual fees",
+      "user_profile": {
+        "spending": {
+          "groceries": 250,
+          "dining": 200,
+          "gas": 120,
+          "general": 300
+        },
+        "preferences": {
+          "max_annual_fee": 50,
+          "preferred_reward_type": "cashback"
+        }
+      },
+      "owned_cards": [
+        "low-reward-zero-fee-card",
+        "basic-card-1"
+      ],
+      "available_cards": [
+        "low-reward-zero-fee-card",
+        "basic-card-1",
+        "premium-grocery-card",
+        "dining-card",
+        "mid-tier-card"
+      ],
+      "expected_recommendations": {
+        "actions": [
+          "keep"
+        ],
+        "min_total_value": 0,
+        "max_cards": 0,
+        "reasoning_must_contain": [
+          "already have",
+          "low spending",
+          "not worth"
+        ],
+        "test_conditions": [
+          "No new cards recommended due to low spending",
+          "Annual fees outweigh potential rewards",
+          "User already has optimal cards for spending patterns"
+        ]
+      }
+    },
+    {
+      "name": "Portfolio Optimization - Overlapping Reward Categories",
+      "description": "Tests portfolio logic with multiple cards having overlapping reward categories - should only count highest rate",
+      "user_profile": {
+        "spending": {
+          "groceries": 800,
+          "dining": 600,
+          "gas": 300,
+          "general": 400
+        },
+        "preferences": {
+          "max_annual_fee": 300,
+          "preferred_reward_type": "cashback"
+        }
+      },
+      "owned_cards": [
+        "low-reward-zero-fee-card",
+        "dining-card"
+      ],
+      "available_cards": [
+        "low-reward-zero-fee-card",
+        "dining-card",
+        "premium-grocery-card",
+        "high-value-premium-card",
+        "mid-tier-card"
+      ],
+      "expected_recommendations": {
+        "actions": [
+          "keep",
+          "apply",
+          "cancel"
+        ],
+        "portfolio_optimization": {
+          "total_annual_fees": 190,
+          "category_optimization": {
+            "groceries": {
+              "best_rate": 6.0,
+              "best_card": "premium-grocery-card"
+            },
+            "dining": {
+              "best_rate": 3.0,
+              "best_card": "dining-card"
+            }
+          },
+          "no_duplicate_counting": true,
+          "net_portfolio_value_positive": true
+        },
+        "reasoning_must_contain": [
+          "portfolio",
+          "optimization",
+          "highest rate",
+          "total fees"
+        ],
+        "test_conditions": [
+          "Only highest reward rate per category counts in portfolio calculation",
+          "Total annual fees are sum of all recommended cards",
+          "Net portfolio value = optimized rewards - total fees",
+          "Portfolio summary shows category breakdown with best card for each"
+        ]
+      }
+    },
+    {
+      "name": "Portfolio Optimization - Redundant Cards Detection",
+      "description": "Tests detection and recommendation to cancel redundant cards that provide no additional value",
+      "user_profile": {
+        "spending": {
+          "groceries": 400,
+          "dining": 300,
+          "general": 500
+        },
+        "preferences": {
+          "max_annual_fee": 200,
+          "preferred_reward_type": "cashback"
+        }
+      },
+      "owned_cards": [
+        "premium-grocery-card",
+        "warehouse-card",
+        "basic-card-1"
+      ],
+      "available_cards": [
+        "premium-grocery-card",
+        "warehouse-card",
+        "basic-card-1"
+      ],
+      "expected_recommendations": {
+        "actions": [
+          "cancel",
+          "keep",
+          "apply"
+        ],
+        "portfolio_optimization": {
+          "redundant_cards_identified": [
+            "Warehouse Card"
+          ],
+          "optimal_portfolio_size": 2,
+          "fee_reduction_achieved": true
+        },
+        "cards_to_cancel": [
+          "Warehouse Card"
+        ],
+        "reasoning_must_contain": [
+          "redundant",
+          "same category",
+          "higher annual fee",
+          "no additional value"
+        ],
+        "test_conditions": [
+          "Identifies cards that provide no additional portfolio value",
+          "Recommends canceling inferior cards with same reward categories",
+          "Keeps best card for each spending category",
+          "Total portfolio fees are minimized while maintaining rewards"
+        ]
+      }
+    },
+    {
+      "name": "Portfolio Optimization - Annual Fee vs Rewards Analysis",
+      "description": "Tests portfolio-level analysis of whether annual fees are justified by total portfolio rewards",
+      "user_profile": {
+        "spending": {
+          "groceries": 200,
+          "dining": 150,
+          "travel": 100,
+          "general": 250
+        },
+        "preferences": {
+          "max_annual_fee": 500,
+          "preferred_reward_type": "points"
+        }
+      },
+      "owned_cards": [
+        "expensive-premium-card-1"
+      ],
+      "available_cards": [
+        "expensive-premium-card-1",
+        "basic-card-1",
+        "mid-tier-card"
+      ],
+      "expected_recommendations": {
+        "actions": [
+          "cancel",
+          "apply"
+        ],
+        "portfolio_optimization": {
+          "total_annual_fees_before": 390,
+          "total_annual_fees_after": 95,
+          "net_portfolio_improvement": true,
+          "fee_to_reward_ratio_improved": true
+        },
+        "reasoning_must_contain": [
+          "low spending",
+          "annual fees exceed",
+          "portfolio optimization",
+          "better value"
+        ],
+        "test_conditions": [
+          "Portfolio analysis considers total fees vs total optimized rewards",
+          "Recommends fee reduction when spending doesn't justify premium cards",
+          "Net portfolio value improvement is primary optimization goal",
+          "Individual card value is secondary to portfolio optimization"
+        ]
+      }
+    },
+    {
+      "name": "Portfolio Optimization - Category Gap Analysis",
+      "description": "Tests identification of spending categories not optimally covered by current portfolio",
+      "user_profile": {
+        "spending": {
+          "groceries": 900,
+          "dining": 400,
+          "gas": 350,
+          "travel": 600,
+          "general": 300
+        },
+        "preferences": {
+          "max_annual_fee": 400,
+          "preferred_reward_type": "points"
+        }
+      },
+      "owned_cards": [
+        "basic-card-1"
+      ],
+      "available_cards": [
+        "basic-card-1",
+        "premium-grocery-card",
+        "high-value-premium-card",
+        "dining-card"
+      ],
+      "expected_recommendations": {
+        "actions": [
+          "keep",
+          "apply"
+        ],
+        "portfolio_optimization": {
+          "category_gaps_identified": [
+            "groceries",
+            "travel",
+            "gas"
+          ],
+          "optimal_portfolio_cards": 4,
+          "category_coverage_improvement": true
+        },
+        "must_include_cards": [
+          "premium-grocery-card",
+          "high-value-premium-card"
+        ],
+        "reasoning_must_contain": [
+          "portfolio gaps",
+          "category coverage",
+          "maximize rewards",
+          "complement existing"
+        ],
+        "test_conditions": [
+          "Identifies high-spend categories with suboptimal reward rates",
+          "Recommends cards that fill portfolio gaps without redundancy",
+          "Portfolio optimization maximizes total rewards across all categories",
+          "Maintains cost-effectiveness of total portfolio"
+        ]
+      }
+    },
+    {
+      "name": "Portfolio Optimization - First Year Fee Waived Impact",
+      "description": "Tests portfolio calculations with first-year fee waivers on new card applications",
+      "user_profile": {
+        "spending": {
+          "dining": 600,
+          "travel": 800,
+          "groceries": 300,
+          "general": 400
+        },
+        "preferences": {
+          "max_annual_fee": 200,
+          "preferred_reward_type": "points"
+        }
+      },
+      "owned_cards": [
+        "mid-tier-card"
+      ],
+      "available_cards": [
+        "mid-tier-card",
+        "high-value-premium-card"
+      ],
+      "expected_recommendations": {
+        "actions": [
+          "keep",
+          "apply"
+        ],
+        "portfolio_optimization": {
+          "first_year_fee_waived": true,
+          "effective_annual_fees_calculated": true,
+          "waived_fee_advantage": true
+        },
+        "must_include_cards": [
+          "high-value-premium-card"
+        ],
+        "reasoning_must_contain": [
+          "first year",
+          "fee waived",
+          "effective cost",
+          "portfolio value"
+        ],
+        "test_conditions": [
+          "Portfolio summary accounts for waived first-year fees",
+          "Effective annual fees are calculated correctly for new applications",
+          "Fee waiver impact is clearly shown in portfolio optimization",
+          "Cards with fee waivers get preference in cost-benefit analysis"
+        ]
+      }
+    },
+    {
+      "name": "Portfolio Optimization - Maximum Rewards with Spending Caps",
+      "description": "Tests portfolio optimization when cards have annual spending limits on bonus categories",
+      "user_profile": {
+        "spending": {
+          "groceries": 1500,
+          "gas": 800,
+          "dining": 400,
+          "general": 600
+        },
+        "preferences": {
+          "max_annual_fee": 300,
+          "preferred_reward_type": "cashback"
+        }
+      },
+      "owned_cards": [],
+      "available_cards": [
+        "premium-grocery-card",
+        "basic-card-1"
+      ],
+      "expected_recommendations": {
+        "actions": [
+          "apply"
+        ],
+        "portfolio_optimization": {
+          "spending_caps_considered": true,
+          "cap_optimization": {
+            "groceries": {
+              "annual_cap": 6000,
+              "spending_above_cap": 12000
+            }
+          },
+          "multi_card_strategy": true
+        },
+        "reasoning_must_contain": [
+          "spending cap",
+          "annual limit",
+          "maximize rewards",
+          "portfolio strategy"
+        ],
+        "test_conditions": [
+          "Portfolio considers annual spending caps on bonus categories",
+          "Recommends multiple cards when spending exceeds individual card caps",
+          "Optimizes rewards across all spending levels (capped and uncapped)",
+          "Portfolio strategy maximizes total rewards despite individual card limitations"
+        ]
+      }
+    },
+    {
+      "name": "Portfolio Optimization - Credit Benefits Integration",
+      "description": "Tests portfolio optimization including card benefits/credits in total value calculation",
+      "user_profile": {
+        "spending": {
+          "dining": 400,
+          "travel": 300,
+          "general": 500
+        },
+        "preferences": {
+          "max_annual_fee": 400,
+          "preferred_reward_type": "points"
+        },
+        "credit_preferences": [
+          "travel_credit",
+          "dining_credit",
+          "streaming_credit"
+        ]
+      },
+      "owned_cards": [],
+      "available_cards": [
+        "high-value-premium-card",
+        "basic-card-1",
+        "mid-tier-card"
+      ],
+      "expected_recommendations": {
+        "actions": [
+          "apply"
+        ],
+        "portfolio_optimization": {
+          "credit_benefits_included": true,
+          "total_credits_value": 300,
+          "net_value_with_credits": true
+        },
+        "must_include_cards": [
+          "high-value-premium-card"
+        ],
+        "reasoning_must_contain": [
+          "card benefits",
+          "credits",
+          "total value",
+          "portfolio optimization"
+        ],
+        "test_conditions": [
+          "Portfolio calculation includes selected card benefits/credits",
+          "Credit values are added to total portfolio rewards",
+          "Net portfolio value accounts for both rewards and credits",
+          "Benefits optimization is part of overall portfolio strategy"
+        ]
+      }
+    },
+    {
+      "name": "Portfolio Optimization - Large Portfolio Rationalization",
+      "description": "Tests optimization of user with too many cards - should recommend consolidation",
+      "user_profile": {
+        "spending": {
+          "groceries": 500,
+          "dining": 400,
+          "gas": 200,
+          "travel": 300,
+          "general": 600
+        },
+        "preferences": {
+          "max_annual_fee": 300,
+          "preferred_reward_type": "cashback"
+        }
+      },
+      "owned_cards": [
+        "basic-card-1",
+        "low-reward-card",
+        "mid-tier-card",
+        "premium-grocery-card",
+        "high-value-premium-card",
+        "expensive-premium-card-1"
+      ],
+      "available_cards": [
+        "basic-card-1",
+        "low-reward-card",
+        "mid-tier-card",
+        "premium-grocery-card",
+        "high-value-premium-card",
+        "expensive-premium-card-1",
+        "travel-card-1",
+        "dining-card"
+      ],
+      "expected_recommendations": {
+        "actions": [
+          "cancel",
+          "keep",
+          "apply"
+        ],
+        "portfolio_optimization": {
+          "portfolio_consolidation": true,
+          "recommended_portfolio_size": 3,
+          "total_fee_reduction": true,
+          "simplified_strategy": true
+        },
+        "max_recommended_cards": 3,
+        "reasoning_must_contain": [
+          "too many cards",
+          "consolidate",
+          "simplify",
+          "portfolio optimization",
+          "redundant"
+        ],
+        "test_conditions": [
+          "Identifies portfolios with excessive number of cards",
+          "Recommends consolidation to optimal number of cards",
+          "Maintains or improves total rewards with fewer cards",
+          "Reduces complexity while optimizing value"
+        ]
+      }
+    },
+    {
+      "name": "Existing Zero-Fee Cards Protection",
+      "description": "User has existing zero-fee cards that should never be canceled",
+      "user_profile": {
+        "spending": {
+          "groceries": 100,
+          "dining": 100,
+          "general": 200
+        },
+        "preferences": {
+          "max_annual_fee": 200,
+          "preferred_reward_type": "cashback"
+        }
+      },
+      "owned_cards": [
+        "basic-card-1"
+      ],
+      "available_cards": [
+        "premium-grocery-card",
+        "high-value-premium-card",
+        "mid-tier-card"
+      ],
+      "expected_recommendations": {
+        "actions": [
+          "keep",
+          "keep"
+        ],
+        "card_count_optimization": {
+          "max_recommendations": 5,
+          "expected_actual_count": 2,
+          "reason": "Keep existing zero-fee cards, don't add fee cards for low spending"
+        },
+        "zero_fee_protection": {
+          "existing_zero_fee_cards": [
+            "Basic Card",
+            "Basic Card"
+          ],
+          "must_keep_zero_fee": true,
+          "no_cancel_zero_fee": true
+        },
+        "portfolio_optimization": {
+          "net_portfolio_value_min": 80,
+          "total_annual_spending": 4800,
+          "prevents_negative_portfolio": true
+        },
+        "must_include_cards": [
+          "basic-card-1",
+          "basic-card-1"
+        ],
+        "must_not_include_cards": [
+          "Premium Grocery Card",
+          "High Value Premium Card"
+        ],
+        "reasoning_must_contain": [
+          "keep",
+          "no annual fee"
+        ],
+        "test_conditions": [
+          "Never recommends canceling zero annual fee cards",
+          "Keeps existing profitable cards",
+          "Rejects new fee cards that don't add sufficient value",
+          "Low spending doesn't justify premium card additions"
+        ]
+      }
+    },
+    {
+      "name": "No Double Counting - Multiple Dining Cards",
+      "description": "User has multiple cards with dining rewards - should only count best rate",
+      "user_profile": {
+        "spending": {
+          "dining": 1500,
+          "groceries": 500,
+          "travel": 300,
+          "general": 200
+        },
+        "preferences": {
+          "max_annual_fee": 550,
+          "preferred_reward_type": "points"
+        }
+      },
+      "owned_cards": [
+        "mid-tier-card"
+      ],
+      "available_cards": [
+        "expensive-premium-card-1"
+      ],
+      "expected_recommendations": {
+        "actions": [
+          "keep"
+        ],
+        "card_count": 2,
+        "must_include_cards": [
+          "mid-tier-card",
+          "mid-tier-card"
+        ],
+        "dining_reward_calculation": {
+          "annual_dining_spend": 18000,
+          "best_dining_rate": 4.0,
+          "best_dining_card": "Mid Tier Card",
+          "dining_rewards_should_be": 720,
+          "should_not_double_count": "Mid Tier Card dining rate"
+        },
+        "test_conditions": [
+          "Only counts dining rewards once for the best card (Gold 4x, not CSP 2x + Gold 4x)",
+          "Portfolio value doesn't double-count categories",
+          "Category optimization shows only best rate per category"
+        ]
+      }
+    }
+  ]
+}

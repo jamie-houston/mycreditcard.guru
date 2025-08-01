@@ -20,7 +20,8 @@
     "network": "Visa",
     "url": "https://www.capitalone.com/credit-cards/quicksilver/",
     "image_url": "/images/capitalone/quicksilver.webp",
-    "discontinued": false
+    "discontinued": false,
+    "slug": "quicksilver"
   },
   {
     "name": "Savor",
@@ -43,7 +44,8 @@
     "network": "Visa",
     "url": "https://www.capitalone.com/credit-cards/savor/",
     "image_url": "/images/capitalone/savor.webp",
-    "discontinued": false
+    "discontinued": false,
+    "slug": "savor"
   },
   {
     "name": "Spark 1.5% Cash Select",
@@ -66,7 +68,8 @@
     "network": "Visa",
     "url": "https://www.capitalone.com/small-business/credit-cards/spark-cash-select",
     "image_url": "/images/capitalone/spark-cash.webp",
-    "discontinued": false
+    "discontinued": false,
+    "slug": "spark-15-cash-select"
   },
   {
     "name": "Spark 1.5% Miles Select",
@@ -89,7 +92,8 @@
     "network": "Visa",
     "url": "https://www.capitalone.com/small-business/credit-cards/spark-miles-select/",
     "image_url": "/images/capitalone/spark-miles.webp",
-    "discontinued": false
+    "discontinued": false,
+    "slug": "spark-15-miles-select"
   },
   {
     "name": "Spark 2% Cash Plus",
@@ -108,7 +112,8 @@
     "network": "Visa",
     "url": "https://www.capitalone.com/small-business/credit-cards/spark-cash-plus/",
     "image_url": "/images/capitalone/spark-cash.webp",
-    "discontinued": false
+    "discontinued": false,
+    "slug": "spark-2-cash-plus"
   },
   {
     "name": "Spark 2x Miles Plus",
@@ -131,7 +136,8 @@
     "network": "Visa",
     "url": "https://www.capitalone.com/small-business/credit-cards/spark-miles/",
     "image_url": "/images/capitalone/spark-miles.webp",
-    "discontinued": false
+    "discontinued": false,
+    "slug": "spark-2x-miles-plus"
   },
   {
     "name": "Venture X",
@@ -171,7 +177,8 @@
         "value": 300,
         "weight": 0.25
       }
-    ]
+    ],
+    "slug": "venture-x"
   },
   {
     "name": "Venture X Business",
@@ -207,7 +214,8 @@
         "value": 300,
         "weight": 0.25
       }
-    ]
+    ],
+    "slug": "venture-x-business"
   },
   {
     "name": "VentureOne",
@@ -230,6 +238,7 @@
     "network": "Visa",
     "url": "https://www.capitalone.com/credit-cards/ventureone/",
     "image_url": "/images/capitalone/venture-one.webp",
-    "discontinued": false
+    "discontinued": false,
+    "slug": "ventureone"
   }
 ]

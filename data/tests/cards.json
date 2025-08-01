@@ -1,275 +1,5 @@
 [
   {
-    "name": "Blue Cash Preferred® Card",
-    "issuer": "American Express",
-    "annual_fee": 95,
-    "signup_bonus": {
-      "bonus_amount": 25000,
-      "spending_requirement": 3000,
-      "time_limit_months": 6
-    },
-    "reward_type": "Cash Back",
-    "reward_value_multiplier": 0.01,
-    "reward_categories": [
-      { "category": "groceries", "reward_rate": 6.0, "max_annual_spend": 6000 },
-      { "category": "gas", "reward_rate": 3.0, "max_annual_spend": 6000 },
-      { "category": "other", "reward_rate": 1.0 }
-    ]
-  },
-  {
-    "name": "Freedom Unlimited",
-    "issuer": "Chase",
-    "annual_fee": 0,
-    "signup_bonus": {
-      "bonus_amount": 20000,
-      "spending_requirement": 500,
-      "time_limit_months": 3
-    },
-    "reward_type": "Points",
-    "reward_value_multiplier": 0.015,
-    "reward_categories": [
-      { "category": "other", "reward_rate": 1.5 }
-    ]
-  },
-  {
-    "name": "Chase Sapphire Preferred® Card",
-    "issuer": "Chase",
-    "annual_fee": 95,
-    "signup_bonus": {
-      "bonus_amount": 60000,
-      "spending_requirement": 4000,
-      "time_limit_months": 3
-    },
-    "reward_type": "Points",
-    "reward_value_multiplier": 0.0125,
-    "reward_categories": [
-      { "category": "travel", "reward_rate": 2.0 },
-      { "category": "dining", "reward_rate": 2.0 },
-      { "category": "other", "reward_rate": 1.0 }
-    ]
-  },
-  {
-    "name": "Chase Sapphire Reserve®",
-    "issuer": "Chase",
-    "annual_fee": 550,
-    "signup_bonus": {
-      "bonus_amount": 60000,
-      "spending_requirement": 4000,
-      "time_limit_months": 3
-    },
-    "reward_type": "Points",
-    "reward_value_multiplier": 0.015,
-    "reward_categories": [
-      { "category": "travel", "reward_rate": 3.0 },
-      { "category": "dining", "reward_rate": 3.0 },
-      { "category": "other", "reward_rate": 1.0 }
-    ]
-  },
-  {
-    "name": "Venture Rewards Credit Card",
-    "issuer": "Capital One",
-    "annual_fee": 95,
-    "signup_bonus": {
-      "bonus_amount": 75000,
-      "spending_requirement": 4000,
-      "time_limit_months": 3
-    },
-    "reward_type": "Miles",
-    "reward_value_multiplier": 0.01,
-    "reward_categories": [
-      { "category": "other", "reward_rate": 2.0 }
-    ]
-  },
-  {
-    "name": "Quicksilver Cash Rewards Credit Card",
-    "issuer": "Capital One",
-    "annual_fee": 0,
-    "signup_bonus": {
-      "bonus_amount": 15000,
-      "spending_requirement": 500,
-      "time_limit_months": 3
-    },
-    "reward_type": "Cash Back",
-    "reward_value_multiplier": 0.01,
-    "reward_categories": [
-      { "category": "other", "reward_rate": 1.5 }
-    ]
-  },
-  {
-    "name": "SavorOne Cash Rewards Credit Card",
-    "issuer": "Capital One",
-    "annual_fee": 95,
-    "signup_bonus": {
-      "bonus_amount": 30000,
-      "spending_requirement": 3000,
-      "time_limit_months": 3
-    },
-    "reward_type": "Cash Back",
-    "reward_value_multiplier": 0.01,
-    "reward_categories": [
-      { "category": "dining", "reward_rate": 4.0 },
-      { "category": "other", "reward_rate": 1.0 }
-    ]
-  },
-  {
-    "name": "The Platinum Card®",
-    "issuer": "American Express",
-    "annual_fee": 695,
-    "signup_bonus": {
-      "bonus_amount": 100000,
-      "spending_requirement": 6000,
-      "time_limit_months": 6
-    },
-    "reward_type": "Points",
-    "reward_value_multiplier": 0.02,
-    "reward_categories": [
-      { "category": "travel", "reward_rate": 5.0 },
-      { "category": "other", "reward_rate": 1.0 }
-    ]
-  },
-  {
-    "name": "Gold Card",
-    "issuer": "American Express",
-    "annual_fee": 250,
-    "signup_bonus": {
-      "bonus_amount": 60000,
-      "spending_requirement": 4000,
-      "time_limit_months": 6
-    },
-    "reward_type": "Points",
-    "reward_value_multiplier": 0.02,
-    "reward_categories": [
-      { "category": "dining", "reward_rate": 4.0 },
-      { "category": "groceries", "reward_rate": 4.0, "max_annual_spend": 25000 },
-      { "category": "other", "reward_rate": 1.0 }
-    ]
-  },
-  {
-    "name": "Costco Anywhere Visa® Card",
-    "issuer": "Capital One",
-    "annual_fee": 0,
-    "signup_bonus": {
-      "bonus_amount": 0,
-      "spending_requirement": 0,
-      "time_limit_months": 0
-    },
-    "reward_type": "Cash Back",
-    "reward_value_multiplier": 0.01,
-    "reward_categories": [
-      { "category": "gas", "reward_rate": 4.0 },
-      { "category": "groceries", "reward_rate": 2.0 },
-      { "category": "other", "reward_rate": 1.0 }
-    ]
-  },
-  {
-    "name": "Low Value Card",
-    "issuer": "Chase",
-    "annual_fee": 95,
-    "signup_bonus": {
-      "bonus_amount": 0,
-      "spending_requirement": 0,
-      "time_limit_months": 0
-    },
-    "reward_type": "Points",
-    "reward_value_multiplier": 0.01,
-    "reward_categories": [
-      { "category": "other", "reward_rate": 1.0 }
-    ]
-  },
-  {
-    "name": "Better Card",
-    "issuer": "American Express",
-    "annual_fee": 0,
-    "signup_bonus": {
-      "bonus_amount": 15000,
-      "spending_requirement": 1000,
-      "time_limit_months": 3
-    },
-    "reward_type": "Cash Back",
-    "reward_value_multiplier": 0.01,
-    "reward_categories": [
-      { "category": "other", "reward_rate": 1.5 }
-    ]
-  },
-  {
-    "name": "Expensive Premium Card",
-    "issuer": "American Express",
-    "annual_fee": 550,
-    "signup_bonus": {
-      "bonus_amount": 0,
-      "spending_requirement": 0,
-      "time_limit_months": 0
-    },
-    "reward_type": "Points",
-    "reward_value_multiplier": 0.02,
-    "reward_categories": [
-      { "category": "travel", "reward_rate": 5.0 },
-      { "category": "other", "reward_rate": 1.0 }
-    ]
-  },
-  {
-    "name": "No Fee Alternative",
-    "issuer": "Chase",
-    "annual_fee": 0,
-    "signup_bonus": {
-      "bonus_amount": 20000,
-      "spending_requirement": 500,
-      "time_limit_months": 3
-    },
-    "reward_type": "Points",
-    "reward_value_multiplier": 0.015,
-    "reward_categories": [
-      { "category": "other", "reward_rate": 1.5 }
-    ]
-  },
-  {
-    "name": "Basic Card",
-    "issuer": "Chase",
-    "annual_fee": 0,
-    "signup_bonus": {
-      "bonus_amount": 0,
-      "spending_requirement": 0,
-      "time_limit_months": 0
-    },
-    "reward_type": "Points",
-    "reward_value_multiplier": 0.01,
-    "reward_categories": [
-      { "category": "other", "reward_rate": 1.0 }
-    ]
-  },
-  {
-    "name": "Travel Card",
-    "issuer": "Chase",
-    "annual_fee": 95,
-    "signup_bonus": {
-      "bonus_amount": 0,
-      "spending_requirement": 0,
-      "time_limit_months": 0
-    },
-    "reward_type": "Points",
-    "reward_value_multiplier": 0.0125,
-    "reward_categories": [
-      { "category": "travel", "reward_rate": 2.0 },
-      { "category": "other", "reward_rate": 1.0 }
-    ]
-  },
-  {
-    "name": "Grocery Specialist",
-    "issuer": "American Express",
-    "annual_fee": 95,
-    "signup_bonus": {
-      "bonus_amount": 25000,
-      "spending_requirement": 2000,
-      "time_limit_months": 3
-    },
-    "reward_type": "Cash Back",
-    "reward_value_multiplier": 0.01,
-    "reward_categories": [
-      { "category": "groceries", "reward_rate": 6.0, "max_annual_spend": 6000 },
-      { "category": "other", "reward_rate": 1.0 }
-    ]
-  },
-  {
     "name": "Amazon Prime",
     "issuer": "Chase",
     "annual_fee": 0,
@@ -283,9 +13,16 @@
     "primary_reward_type": "Cashback",
     "reward_value_multiplier": 0.01,
     "reward_categories": [
-      { "category": "amazon", "reward_rate": 5.0 },
-      { "category": "other", "reward_rate": 1.0 }
-    ]
+      {
+        "category": "amazon",
+        "reward_rate": 5.0
+      },
+      {
+        "category": "other",
+        "reward_rate": 1.0
+      }
+    ],
+    "slug": "amazon-prime-test"
   },
   {
     "name": "Citi Double Cash Card",
@@ -299,8 +36,12 @@
       "discontinued": false
     },
     "reward_categories": [
-      { "category": "other", "reward_rate": 2.0 }
-    ]
+      {
+        "category": "other",
+        "reward_rate": 2.0
+      }
+    ],
+    "slug": "citi-double-cash-card"
   },
   {
     "name": "Basic Travel Card",
@@ -314,9 +55,16 @@
       "discontinued": false
     },
     "reward_categories": [
-      { "category": "travel", "reward_rate": 2.0 },
-      { "category": "other", "reward_rate": 1.0 }
-    ]
+      {
+        "category": "travel",
+        "reward_rate": 2.0
+      },
+      {
+        "category": "other",
+        "reward_rate": 1.0
+      }
+    ],
+    "slug": "basic-travel-card"
   },
   {
     "name": "Low Reward Card",
@@ -330,8 +78,12 @@
       "discontinued": false
     },
     "reward_categories": [
-      { "category": "other", "reward_rate": 1.0 }
-    ]
+      {
+        "category": "other",
+        "reward_rate": 1.0
+      }
+    ],
+    "slug": "low-reward-card"
   },
   {
     "name": "Basic Card",
@@ -345,8 +97,12 @@
       "discontinued": false
     },
     "reward_categories": [
-      { "category": "other", "reward_rate": 1.5 }
-    ]
+      {
+        "category": "other",
+        "reward_rate": 1.5
+      }
+    ],
+    "slug": "basic-card-1"
   },
   {
     "name": "Travel Card",
@@ -360,10 +116,20 @@
       "discontinued": false
     },
     "reward_categories": [
-      { "category": "travel", "reward_rate": 2.0 },
-      { "category": "dining", "reward_rate": 2.0 },
-      { "category": "other", "reward_rate": 1.0 }
-    ]
+      {
+        "category": "travel",
+        "reward_rate": 2.0
+      },
+      {
+        "category": "dining",
+        "reward_rate": 2.0
+      },
+      {
+        "category": "other",
+        "reward_rate": 1.0
+      }
+    ],
+    "slug": "travel-card-1"
   },
   {
     "name": "Low Reward Zero Fee Card",
@@ -377,8 +143,12 @@
       "discontinued": false
     },
     "reward_categories": [
-      { "category": "other", "reward_rate": 1.0 }
-    ]
+      {
+        "category": "other",
+        "reward_rate": 1.0
+      }
+    ],
+    "slug": "low-reward-zero-fee-card"
   },
   {
     "name": "Discover it Cash Back",
@@ -392,10 +162,22 @@
       "discontinued": false
     },
     "reward_categories": [
-      { "category": "gas", "reward_rate": 5.0, "max_annual_spend": 1500 },
-      { "category": "groceries", "reward_rate": 5.0, "max_annual_spend": 1500 },
-      { "category": "other", "reward_rate": 1.0 }
-    ]
+      {
+        "category": "gas",
+        "reward_rate": 5.0,
+        "max_annual_spend": 1500
+      },
+      {
+        "category": "groceries",
+        "reward_rate": 5.0,
+        "max_annual_spend": 1500
+      },
+      {
+        "category": "other",
+        "reward_rate": 1.0
+      }
+    ],
+    "slug": "discover-it-cash-back"
   },
   {
     "name": "High Value Premium Card",
@@ -409,10 +191,20 @@
       "discontinued": false
     },
     "reward_categories": [
-      { "category": "travel", "reward_rate": 3.0 },
-      { "category": "dining", "reward_rate": 3.0 },
-      { "category": "other", "reward_rate": 1.0 }
-    ]
+      {
+        "category": "travel",
+        "reward_rate": 3.0
+      },
+      {
+        "category": "dining",
+        "reward_rate": 3.0
+      },
+      {
+        "category": "other",
+        "reward_rate": 1.0
+      }
+    ],
+    "slug": "high-value-premium-card"
   },
   {
     "name": "Mid Tier Card",
@@ -426,9 +218,16 @@
       "discontinued": false
     },
     "reward_categories": [
-      { "category": "travel", "reward_rate": 2.0 },
-      { "category": "other", "reward_rate": 1.0 }
-    ]
+      {
+        "category": "travel",
+        "reward_rate": 2.0
+      },
+      {
+        "category": "other",
+        "reward_rate": 1.0
+      }
+    ],
+    "slug": "mid-tier-card"
   },
   {
     "name": "Low Value Card",
@@ -442,8 +241,12 @@
       "discontinued": false
     },
     "reward_categories": [
-      { "category": "other", "reward_rate": 1.0 }
-    ]
+      {
+        "category": "other",
+        "reward_rate": 1.0
+      }
+    ],
+    "slug": "low-value-card-1"
   },
   {
     "name": "Better Card",
@@ -457,8 +260,12 @@
       "discontinued": false
     },
     "reward_categories": [
-      { "category": "other", "reward_rate": 2.0 }
-    ]
+      {
+        "category": "other",
+        "reward_rate": 2.0
+      }
+    ],
+    "slug": "better-card-1"
   },
   {
     "name": "Expensive Premium Card",
@@ -472,10 +279,20 @@
       "discontinued": false
     },
     "reward_categories": [
-      { "category": "travel", "reward_rate": 3.0 },
-      { "category": "dining", "reward_rate": 2.0 },
-      { "category": "other", "reward_rate": 1.0 }
-    ]
+      {
+        "category": "travel",
+        "reward_rate": 3.0
+      },
+      {
+        "category": "dining",
+        "reward_rate": 2.0
+      },
+      {
+        "category": "other",
+        "reward_rate": 1.0
+      }
+    ],
+    "slug": "expensive-premium-card-1"
   },
   {
     "name": "Mid-Fee Card",
@@ -489,9 +306,16 @@
       "discontinued": false
     },
     "reward_categories": [
-      { "category": "travel", "reward_rate": 2.0 },
-      { "category": "other", "reward_rate": 1.0 }
-    ]
+      {
+        "category": "travel",
+        "reward_rate": 2.0
+      },
+      {
+        "category": "other",
+        "reward_rate": 1.0
+      }
+    ],
+    "slug": "mid-fee-card"
   },
   {
     "name": "Premium Grocery Card",
@@ -505,10 +329,22 @@
       "discontinued": false
     },
     "reward_categories": [
-      { "category": "groceries", "reward_rate": 6.0, "max_annual_spend": 6000 },
-      { "category": "gas", "reward_rate": 3.0, "max_annual_spend": 6000 },
-      { "category": "other", "reward_rate": 1.0 }
-    ]
+      {
+        "category": "groceries",
+        "reward_rate": 6.0,
+        "max_annual_spend": 6000
+      },
+      {
+        "category": "gas",
+        "reward_rate": 3.0,
+        "max_annual_spend": 6000
+      },
+      {
+        "category": "other",
+        "reward_rate": 1.0
+      }
+    ],
+    "slug": "premium-grocery-card"
   },
   {
     "name": "Dining Card",
@@ -522,9 +358,16 @@
       "discontinued": false
     },
     "reward_categories": [
-      { "category": "dining", "reward_rate": 3.0 },
-      { "category": "other", "reward_rate": 1.0 }
-    ]
+      {
+        "category": "dining",
+        "reward_rate": 3.0
+      },
+      {
+        "category": "other",
+        "reward_rate": 1.0
+      }
+    ],
+    "slug": "dining-card"
   },
   {
     "name": "Warehouse Card",
@@ -538,26 +381,19 @@
       "discontinued": false
     },
     "reward_categories": [
-      { "category": "groceries", "reward_rate": 2.0 },
-      { "category": "gas", "reward_rate": 4.0 },
-      { "category": "other", "reward_rate": 1.0 }
-    ]
-  },
-  {
-    "name": "Hotel Card",
-    "issuer": "Generic Bank",
-    "annual_fee": 95,
-    "signup_bonus_amount": 75000,
-    "signup_bonus_type": "Points",
-    "primary_reward_type": "Points",
-    "metadata": {
-      "reward_value_multiplier": 0.008,
-      "discontinued": false
-    },
-    "reward_categories": [
-      { "category": "hotels", "reward_rate": 6.0 },
-      { "category": "travel", "reward_rate": 2.0 },
-      { "category": "other", "reward_rate": 1.0 }
-    ]
+      {
+        "category": "groceries",
+        "reward_rate": 2.0
+      },
+      {
+        "category": "gas",
+        "reward_rate": 4.0
+      },
+      {
+        "category": "other",
+        "reward_rate": 1.0
+      }
+    ],
+    "slug": "warehouse-card"
   }
 ]

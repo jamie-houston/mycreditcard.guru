@@ -20,7 +20,8 @@
     "network": "Mastercard",
     "url": "https://latampass.latam.com/en_us/earn-miles/latam-airlines-credit-cards",
     "image_url": "/images/first/latam-airlines.svg",
-    "discontinued": false
+    "discontinued": false,
+    "slug": "latam-airlines"
   },
   {
     "name": "LATAM Airlines World Elite",
@@ -43,7 +44,8 @@
     "network": "Mastercard",
     "url": "https://latampass.latam.com/en_us/earn-miles/latam-airlines-credit-cards",
     "image_url": "/images/first/latam-airlines-world-elite.webp",
-    "discontinued": false
+    "discontinued": false,
+    "slug": "latam-airlines-world-elite"
   },
   {
     "name": "Cardless Qatar Signature",
@@ -66,7 +68,8 @@
     "network": "Visa",
     "url": "https://qatarairways.cardless.com/compare",
     "image_url": "/images/first/cardless-qatar-signature.jpg",
-    "discontinued": false
+    "discontinued": false,
+    "slug": "cardless-qatar-signature"
   },
   {
     "name": "Cardless Qatar Infinite",
@@ -89,7 +92,8 @@
     "network": "Visa",
     "url": "https://qatarairways.cardless.com/compare",
     "image_url": "/images/first/cardless-qatar-infinite.jpg",
-    "discontinued": false
+    "discontinued": false,
+    "slug": "cardless-qatar-infinite"
   },
   {
     "name": "Avianca LifeMiles",
@@ -112,7 +116,8 @@
     "network": "American Express",
     "url": "https://www.lifemiles.com/credit-card/get-credit-card",
     "image_url": "/images/first/avianca-lifemiles.webp",
-    "discontinued": false
+    "discontinued": false,
+    "slug": "avianca-lifemiles"
   },
   {
     "name": "Avianca LifeMiles Elite",
@@ -135,7 +140,8 @@
     "network": "American Express",
     "url": "https://www.lifemiles.com/credit-card/get-credit-card",
     "image_url": "/images/first/avianca-lifemiles-elite.webp",
-    "discontinued": false
+    "discontinued": false,
+    "slug": "avianca-lifemiles-elite"
   },
   {
     "name": "ANA Card USA Plus",
@@ -158,6 +164,7 @@
     "network": "Visa",
     "url": "https://www.anacardusa.com/en/",
     "image_url": "/images/first/ana-card-usa.png",
-    "discontinued": false
+    "discontinued": false,
+    "slug": "ana-card-usa-plus"
   }
 ]

@@ -20,7 +20,8 @@
     "network": "Visa",
     "url": "https://pay.cathaypacific.com/en_US/offers/uscreditcard.html",
     "image_url": "/images/synchrony/cathay-pacific.jpg",
-    "discontinued": false
+    "discontinued": false,
+    "slug": "cathay-pacific"
   },
   {
     "name": "Virgin Red Rewards",
@@ -43,6 +44,7 @@
     "network": "Mastercard",
     "url": "https://www.virgin.com/en-us/virgin-red/rewards-credit-card",
     "image_url": "/images/synchrony/virgin-red-rewards.webp",
-    "discontinued": false
+    "discontinued": false,
+    "slug": "virgin-red-rewards"
   }
 ]

@@ -1,0 +1,158 @@
+{
+  "description": "Basic user profile scenarios testing different spending patterns and demographics",
+  "category": "basic_profiles",
+  "scenarios": [
+    {
+      "name": "Young Professional - Dining Focus",
+      "description": "Recent graduate with high dining expenses, low income",
+      "user_profile": {
+        "spending": {
+          "groceries": 300,
+          "dining": 800,
+          "gas": 100,
+          "general": 400
+        },
+        "preferences": {
+          "max_annual_fee": 100,
+          "preferred_reward_type": "cashback"
+        }
+      },
+      "owned_cards": [],
+      "available_cards": [
+        "dining-card",
+        "basic-card-1",
+        "premium-grocery-card"
+      ],
+      "expected_recommendations": {
+        "actions": [
+          "apply"
+        ],
+        "min_total_value": 300,
+        "must_include_cards": [
+          "dining-card"
+        ],
+        "reasoning_must_contain": [
+          "dining"
+        ]
+      }
+    },
+    {
+      "name": "Business Traveler",
+      "description": "High travel and dining expenses, values points for travel",
+      "user_profile": {
+        "spending": {
+          "travel": 1500,
+          "dining": 600,
+          "groceries": 200,
+          "gas": 200,
+          "general": 800
+        },
+        "preferences": {
+          "max_annual_fee": 550,
+          "preferred_reward_type": "points"
+        }
+      },
+      "owned_cards": [],
+      "available_cards": [
+        "high-value-premium-card",
+        "expensive-premium-card-1",
+        "mid-tier-card"
+      ],
+      "expected_recommendations": {
+        "actions": [
+          "apply"
+        ],
+        "min_total_value": 800,
+        "must_include_cards": [
+          "high-value-premium-card"
+        ],
+        "reasoning_must_contain": [
+          "travel"
+        ]
+      }
+    },
+    {
+      "name": "Family with High Grocery Spend",
+      "description": "Large family with substantial grocery and gas expenses",
+      "user_profile": {
+        "spending": {
+          "groceries": 1200,
+          "gas": 400,
+          "dining": 300,
+          "general": 600
+        }
+      },
+      "owned_cards": [],
+      "available_cards": [
+        "premium-grocery-card",
+        "warehouse-card",
+        "mid-tier-card"
+      ],
+      "expected_recommendations": {
+        "actions": [
+          "apply"
+        ],
+        "min_total_value": 500,
+        "must_include_cards": [
+          "premium-grocery-card"
+        ],
+        "reasoning_must_contain": [
+          "groceries"
+        ]
+      }
+    },
+    {
+      "name": "High Grocery Spender",
+      "description": "Someone who spends heavily on groceries",
+      "user_profile": {
+        "spending": {
+          "groceries": 1000,
+          "dining": 200,
+          "gas": 150,
+          "general": 500
+        }
+      },
+      "owned_cards": [],
+      "available_cards": [
+        "premium-grocery-card",
+        "basic-card-1"
+      ],
+      "expected_recommendations": {
+        "actions": [
+          "apply"
+        ],
+        "min_total_value": 400,
+        "must_include_cards": [
+          "premium-grocery-card"
+        ]
+      }
+    },
+    {
+      "name": "Travel Enthusiast",
+      "description": "High travel and dining spending, values points",
+      "user_profile": {
+        "spending": {
+          "travel": 800,
+          "dining": 400,
+          "groceries": 300,
+          "general": 700
+        }
+      },
+      "owned_cards": [],
+      "available_cards": [
+        "mid-tier-card",
+        "travel-card-1",
+        "high-value-premium-card"
+      ],
+      "expected_recommendations": {
+        "actions": [
+          "apply"
+        ],
+        "min_total_value": 600,
+        "must_include_cards": [
+          "mid-tier-card"
+        ]
+      }
+    }
+  ]
+}

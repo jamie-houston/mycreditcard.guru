@@ -20,7 +20,8 @@
     "network": "Visa",
     "url": "https://creditcards.chase.com/travel-credit-cards/marriott-bonvoy/bountiful",
     "image_url": "/images/chase/marriott-bonvoy-bountiful.png",
-    "discontinued": false
+    "discontinued": false,
+    "slug": "marriott-bonvoy-bountiful"
   },
   {
     "name": "Aer Lingus Signature",
@@ -43,7 +44,8 @@
     "network": "Visa",
     "url": "https://creditcards.chase.com/travel-credit-cards/avios/aer-lingus",
     "image_url": "/images/chase/aer-lingus-signature.png",
-    "discontinued": false
+    "discontinued": false,
+    "slug": "aer-lingus-signature"
   },
   {
     "name": "Aeroplan",
@@ -66,7 +68,8 @@
     "network": "Mastercard",
     "url": "https://creditcards.chase.com/travel-credit-cards/aircanada/aeroplan",
     "image_url": "/images/chase/aeroplan.jpg",
-    "discontinued": false
+    "discontinued": false,
+    "slug": "aeroplan"
   },
   {
     "name": "British Airways Signature",
@@ -89,7 +92,8 @@
     "network": "Visa",
     "url": "https://creditcards.chase.com/travel-credit-cards/avios/british-airways",
     "image_url": "/images/chase/british-airways.png",
-    "discontinued": false
+    "discontinued": false,
+    "slug": "british-airways-signature"
   },
   {
     "name": "Disney Premier",
@@ -112,7 +116,8 @@
     "network": "Visa",
     "url": "https://creditcards.chase.com/rewards-credit-cards/disney/premier",
     "image_url": "/images/chase/disney.png",
-    "discontinued": false
+    "discontinued": false,
+    "slug": "disney-premier"
   },
   {
     "name": "Disney",
@@ -135,7 +140,8 @@
     "network": "Visa",
     "url": "https://creditcards.chase.com/rewards-credit-cards/disney/rewards",
     "image_url": "/images/chase/disney.png",
-    "discontinued": false
+    "discontinued": false,
+    "slug": "disney"
   },
   {
     "name": "Chase Freedom Legacy",
@@ -147,7 +153,8 @@
     "network": "Mastercard",
     "url": "https://creditcards.chase.com/cash-back-credit-cards/freedom",
     "image_url": "/images/chase/freedom.png",
-    "discontinued": true
+    "discontinued": true,
+    "slug": "chase-freedom-legacy"
   },
   {
     "name": "Freedom Flex",
@@ -170,7 +177,8 @@
     "network": "Mastercard",
     "url": "https://creditcards.chase.com/cash-back-credit-cards/freedom/flex",
     "image_url": "/images/chase/freedom-flex.png",
-    "discontinued": false
+    "discontinued": false,
+    "slug": "freedom-flex"
   },
   {
     "name": "Iberia Signature",
@@ -193,7 +201,8 @@
     "network": "Visa",
     "url": "https://creditcards.chase.com/travel-credit-cards/avios/iberia",
     "image_url": "/images/chase/iberia-signature.png",
-    "discontinued": false
+    "discontinued": false,
+    "slug": "iberia-signature"
   },
   {
     "name": "IHG Premier",
@@ -212,7 +221,8 @@
     "network": "Mastercard",
     "url": "https://creditcards.chase.com/travel-credit-cards/ihg-rewards-club/premier",
     "image_url": "/images/chase/ihg-rewards-premier.jpg",
-    "discontinued": false
+    "discontinued": false,
+    "slug": "ihg-premier"
   },
   {
     "name": "IHG Premier Business",
@@ -235,7 +245,8 @@
     "network": "Mastercard",
     "url": "https://creditcards.chase.com/business-credit-cards/IHG/business-premier",
     "image_url": "/images/chase/ihg-rewards-premier-business.png",
-    "discontinued": false
+    "discontinued": false,
+    "slug": "ihg-premier-business"
   },
   {
     "name": "IHG Traveler",
@@ -258,7 +269,8 @@
     "network": "Mastercard",
     "url": "https://creditcards.chase.com/travel-credit-cards/ihg-rewards-club/traveler",
     "image_url": "/images/chase/ihg-rewards-traveler.jpeg",
-    "discontinued": false
+    "discontinued": false,
+    "slug": "ihg-traveler"
   },
   {
     "name": "Ink Business Cash",
@@ -281,7 +293,8 @@
     "network": "Visa",
     "url": "https://creditcards.chase.com/business-credit-cards/ink/cash",
     "image_url": "/images/chase/ink-business-cash.png",
-    "discontinued": false
+    "discontinued": false,
+    "slug": "ink-business-cash"
   },
   {
     "name": "Ink Business Unlimited",
@@ -304,7 +317,8 @@
     "network": "Visa",
     "url": "https://creditcards.chase.com/business-credit-cards/ink/unlimited",
     "image_url": "/images/chase/ink-business-unlimited.png",
-    "discontinued": false
+    "discontinued": false,
+    "slug": "ink-business-unlimited"
   },
   {
     "name": "Ink Business Premier",
@@ -327,7 +341,8 @@
     "network": "Visa",
     "url": "https://creditcards.chase.com/business-credit-cards/ink/premier",
     "image_url": "/images/chase/ink-business-premier.png",
-    "discontinued": false
+    "discontinued": false,
+    "slug": "ink-business-premier"
   },
   {
     "name": "Marriott Bonvoy Bold",
@@ -350,7 +365,8 @@
     "network": "Visa",
     "url": "https://creditcards.chase.com/travel-credit-cards/marriott-bonvoy/bold",
     "image_url": "/images/chase/marriott-bonvoy-bold.jpeg",
-    "discontinued": false
+    "discontinued": false,
+    "slug": "marriott-bonvoy-bold"
   },
   {
     "name": "Marriott Bonvoy Boundless",
@@ -373,7 +389,8 @@
     "network": "Visa",
     "url": "https://creditcards.chase.com/travel-credit-cards/marriott-bonvoy/boundless",
     "image_url": "/images/chase/marriott-bonvoy-boundless.jpeg",
-    "discontinued": false
+    "discontinued": false,
+    "slug": "marriott-bonvoy-boundless"
   },
   {
     "name": "Southwest Performance Business",
@@ -408,7 +425,8 @@
         "value": 100,
         "weight": 0.4
       }
-    ]
+    ],
+    "slug": "southwest-performance-business"
   },
   {
     "name": "Southwest Plus",
@@ -431,7 +449,8 @@
     "network": "Visa",
     "url": "https://creditcards.chase.com/travel-credit-cards/southwest/plus",
     "image_url": "/images/chase/southwest-rapid-rewards-plus.png",
-    "discontinued": false
+    "discontinued": false,
+    "slug": "southwest-plus"
   },
   {
     "name": "Southwest Premier",
@@ -454,7 +473,8 @@
     "network": "Visa",
     "url": "https://creditcards.chase.com/travel-credit-cards/southwest/premier",
     "image_url": "/images/chase/southwest-rapid-rewards-premier.png",
-    "discontinued": false
+    "discontinued": false,
+    "slug": "southwest-premier"
   },
   {
     "name": "Southwest Premier Business",
@@ -477,7 +497,8 @@
     "network": "Visa",
     "url": "https://creditcards.chase.com/business-credit-cards/southwest/premier-business",
     "image_url": "/images/chase/southwest-rapid-rewards-premier-business.png",
-    "discontinued": false
+    "discontinued": false,
+    "slug": "southwest-premier-business"
   },
   {
     "name": "Southwest Priority",
@@ -507,7 +528,8 @@
         "value": 75,
         "weight": 0.8
       }
-    ]
+    ],
+    "slug": "southwest-priority"
   },
   {
     "name": "United Business",
@@ -567,7 +589,8 @@
         "value": 50,
         "weight": 0.5
       }
-    ]
+    ],
+    "slug": "united-business"
   },
   {
     "name": "United Club Infinite",
@@ -627,7 +650,8 @@
         "value": 100,
         "weight": 0.4
       }
-    ]
+    ],
+    "slug": "united-club-infinite"
   },
   {
     "name": "United Club Business",
@@ -687,7 +711,8 @@
         "value": 750,
         "weight": 0.25
       }
-    ]
+    ],
+    "slug": "united-club-business"
   },
   {
     "name": "United Explorer",
@@ -767,7 +792,8 @@
         "value": 100,
         "weight": 0.4
       }
-    ]
+    ],
+    "slug": "united-explorer"
   },
   {
     "name": "United Gateway",
@@ -790,7 +816,8 @@
     "network": "Visa",
     "url": "https://www.theexplorercard.com/rewards-cards/gateway-card",
     "image_url": "/images/chase/united-gateway.png",
-    "discontinued": false
+    "discontinued": false,
+    "slug": "united-gateway"
   },
   {
     "name": "United Quest",
@@ -851,7 +878,8 @@
         "value": 150,
         "weight": 0.8
       }
-    ]
+    ],
+    "slug": "united-quest"
   },
   {
     "name": "World of Hyatt",
@@ -882,7 +910,8 @@
         "weight": 0.7,
         "currency": "HYATT"
       }
-    ]
+    ],
+    "slug": "world-of-hyatt"
   },
   {
     "name": "World of Hyatt Business",
@@ -905,7 +934,8 @@
     "network": "Visa",
     "url": "https://world.hyatt.com/content/gp/en/rewards/hyatt-credit-card.html",
     "image_url": "/images/chase/world-of-hyatt.png",
-    "discontinued": false
+    "discontinued": false,
+    "slug": "world-of-hyatt-business"
   },
   {
     "name": "Amazon Prime",
@@ -932,6 +962,7 @@
     "network": "Visa",
     "url": "https://www.amazon.com/dp/BT00LN946S",
     "image_url": "/images/chase/amazon-prime.png",
-    "discontinued": false
+    "discontinued": false,
+    "slug": "amazon-prime"
   }
 ]

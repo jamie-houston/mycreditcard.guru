@@ -1,0 +1,162 @@
+{
+  "description": "Signup bonus and new card application scenarios",
+  "category": "signup_bonus",
+  "scenarios": [
+    {
+      "name": "Zero Annual Fee Filter with Signup Bonus",
+      "description": "Tests filtering by $0 annual fee and signup bonus inclusion in estimated value",
+      "user_profile": {
+        "spending": {
+          "dining": 100,
+          "general": 200
+        },
+        "preferences": {
+          "max_annual_fee": 0,
+          "preferred_reward_type": "cashback",
+          "card_type": "personal"
+        }
+      },
+      "owned_cards": [],
+      "filters": [
+        {
+          "name": "Card Type Filter",
+          "filter_type": "card_type",
+          "value": "personal"
+        },
+        {
+          "name": "Reward Type Filter",
+          "filter_type": "reward_type",
+          "value": "Cashback"
+        },
+        {
+          "name": "Annual Fee Filter",
+          "filter_type": "annual_fee",
+          "value": "0-0"
+        }
+      ],
+      "available_cards": [
+        "basic-card-1",
+        "low-reward-zero-fee-card",
+        "discover-it-cash-back"
+      ],
+      "expected_recommendations": {
+        "actions": [
+          "apply"
+        ],
+        "min_cards": 1,
+        "estimated_value_includes_signup_bonus": true,
+        "reasoning_must_contain": [
+          "signup bonus"
+        ],
+        "test_conditions": [
+          "All recommended cards have $0 annual fee",
+          "Estimated value includes signup bonus amount",
+          "Cards with Decimal annual_fee=0.00 are properly filtered",
+          "Break-even cards (annual_value >= 0) are included"
+        ]
+      }
+    },
+    {
+      "name": "Signup Bonus Opportunity - Keep Existing Plus New",
+      "description": "User has good existing cards but should get new cards for signup bonuses",
+      "user_profile": {
+        "spending": {
+          "dining": 1000,
+          "groceries": 1000,
+          "travel": 800,
+          "gas": 300,
+          "general": 500
+        },
+        "preferences": {
+          "max_annual_fee": 550,
+          "preferred_reward_type": "points"
+        }
+      },
+      "owned_cards": [
+        "basic-card-1"
+      ],
+      "available_cards": [
+        "mid-tier-card",
+        "expensive-premium-card-1"
+      ],
+      "expected_recommendations": {
+        "actions": [
+          "keep",
+          "apply"
+        ],
+        "min_card_count": 2,
+        "max_card_count": 4,
+        "must_include_cards": [
+          "basic-card-1"
+        ],
+        "should_include_new_cards": [
+          "Mid Tier Card",
+          "Mid Tier Card"
+        ],
+        "reasoning_must_contain": [
+          "keep",
+          "signup bonus"
+        ],
+        "min_total_value": 2000,
+        "test_conditions": [
+          "Keeps existing profitable cards",
+          "Recommends new cards with valuable signup bonuses",
+          "Total portfolio value includes signup bonuses",
+          "Doesn't double-count category rewards"
+        ]
+      }
+    },
+    {
+      "name": "Signup Bonus vs Keep Decision",
+      "description": "High spending user should get multiple new cards for signup bonuses even with existing cards",
+      "user_profile": {
+        "spending": {
+          "dining": 2000,
+          "groceries": 1500,
+          "travel": 1200,
+          "streaming": 100,
+          "gas": 400,
+          "general": 800
+        },
+        "preferences": {
+          "max_annual_fee": 700,
+          "preferred_reward_type": "points"
+        }
+      },
+      "owned_cards": [
+        "basic-card-1",
+        "mid-tier-card"
+      ],
+      "available_cards": [
+        "mid-tier-card",
+        "expensive-premium-card-1"
+      ],
+      "expected_recommendations": {
+        "actions": [
+          "keep",
+          "apply"
+        ],
+        "min_card_count": 3,
+        "max_card_count": 4,
+        "must_include_cards": [
+          "basic-card-1",
+          "mid-tier-card"
+        ],
+        "should_apply_for": [
+          "Mid Tier Card"
+        ],
+        "reasoning_must_contain": [
+          "signup bonus",
+          "high spending"
+        ],
+        "min_signup_bonus_value": 1000,
+        "test_conditions": [
+          "High spending justifies multiple new signup bonuses",
+          "Keeps existing profitable cards",
+          "Recommends new cards despite category overlap",
+          "Total value includes all signup bonuses"
+        ]
+      }
+    }
+  ]
+}

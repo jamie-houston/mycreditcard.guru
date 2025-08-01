@@ -46,8 +46,8 @@ class Command(BaseCommand):
         parser.add_argument(
             '--file',
             type=str,
-            default='data/tests/scenarios.json',
-            help='JSON file containing scenarios (default: data/tests/scenarios.json)'
+            default=None,
+            help='JSON file or directory containing scenarios (default: auto-detect)'
         )
         parser.add_argument(
             '--verbose',
@@ -57,15 +57,22 @@ class Command(BaseCommand):
     
     def handle(self, *args, **options):
         # Get project root directory (go up from cards/management/commands/ to project root)
-        project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
-        scenarios_file = os.path.join(project_root, options['file'])
+        # Import scenario loader
+        from cards.scenario_loader import ScenarioLoader
         
-        if not os.path.exists(scenarios_file):
-            raise CommandError(f'Scenarios file not found: {scenarios_file}')
-        
-        with open(scenarios_file, 'r') as f:
-            data = json.load(f)
+        try:
+            if options['file']:
+                # Use specific file/directory path
+                project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
+                full_path = os.path.join(project_root, options['file'])
+                data = ScenarioLoader.load_scenarios(full_path)
+            else:
+                # Auto-detect scenarios
+                data = ScenarioLoader.load_scenarios()
+            
             scenarios = data.get('scenarios', [])
+        except FileNotFoundError as e:
+            raise CommandError(f'Scenarios not found: {e}')
         
         if not scenarios:
             raise CommandError('No scenarios found in file')
@@ -226,16 +233,16 @@ class Command(BaseCommand):
         
         # Check must-include cards
         must_include = expected.get('must_include_cards', [])
-        recommended_cards = [rec['card'].name for rec in recommendations]
-        for card_name in must_include:
-            if card_name not in recommended_cards:
-                issues.append(f'Expected card "{card_name}" not recommended')
+        recommended_cards = [rec['card'].slug for rec in recommendations]
+        for card_slug in must_include:
+            if card_slug not in recommended_cards:
+                issues.append(f'Expected card "{card_slug}" not recommended')
         
         # Check must-not-include cards
         must_not_include = expected.get('must_not_include_cards', [])
-        for card_name in must_not_include:
-            if card_name in recommended_cards:
-                issues.append(f'Card "{card_name}" should not be recommended but was')
+        for card_slug in must_not_include:
+            if card_slug in recommended_cards:
+                issues.append(f'Card "{card_slug}" should not be recommended but was')
         
         # Check card count optimization
         card_count_opt = expected.get('card_count_optimization')
@@ -460,24 +467,58 @@ class Command(BaseCommand):
         
         # Create available cards
         created_cards = {}
-        for card_name in scenario_data['available_cards']:
-            card = self.create_credit_card_from_name(card_name)
-            created_cards[card_name] = card
+        for card_slug in scenario_data['available_cards']:
+            card = self.create_credit_card_from_slug(card_slug)
+            created_cards[card_slug] = card
         
         # Create owned cards
-        for owned_card_name in scenario_data.get('owned_cards', []):
-            if owned_card_name in created_cards:
+        for owned_card_slug in scenario_data.get('owned_cards', []):
+            if owned_card_slug in created_cards:
                 UserCard.objects.create(
                     profile=profile,
-                    card=created_cards[owned_card_name],
+                    card=created_cards[owned_card_slug],
                     opened_date=date.today() - timedelta(days=180),
                     is_active=True
                 )
         
         return profile, created_cards
     
+    def create_credit_card_from_slug(self, card_slug):
+        """Get or create a credit card from card slug."""
+        # First try to find existing card in database
+        try:
+            existing_card = CreditCard.objects.get(slug=card_slug)
+            return existing_card
+        except CreditCard.DoesNotExist:
+            pass
+        
+        # If not found, try to create from test definitions
+        # Load card definitions if not already loaded
+        if not hasattr(self, 'card_definitions'):
+            cards_file = os.path.join(
+                os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))), 
+                'data', 'tests', 'cards.json'
+            )
+            if os.path.exists(cards_file):
+                with open(cards_file, 'r') as f:
+                    self.card_definitions = json.load(f)
+            else:
+                self.card_definitions = []
+        
+        # Find card definition by slug
+        card_def = None
+        for card in self.card_definitions:
+            if card['slug'] == card_slug:
+                card_def = card
+                break
+        
+        if not card_def:
+            raise ValueError(f"Card definition not found: {card_slug} (not in database or test definitions)")
+        
+        return self.create_credit_card(card_def)
+
     def create_credit_card_from_name(self, card_name):
-        """Get or create a credit card from card name."""
+        """Get or create a credit card from card name. DEPRECATED: Use create_credit_card_from_slug."""
         # First try to find existing card in database
         try:
             existing_card = CreditCard.objects.get(name=card_name)
@@ -514,6 +555,7 @@ class Command(BaseCommand):
         """Create a credit card from JSON data."""
         card = CreditCard.objects.create(
             name=card_data['name'],
+            slug=card_data['slug'],
             issuer=self.issuers[card_data['issuer']],
             annual_fee=Decimal(str(card_data.get('annual_fee', 0))),
             signup_bonus_amount=card_data.get('signup_bonus_amount'),

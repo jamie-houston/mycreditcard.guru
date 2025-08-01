@@ -20,7 +20,8 @@
     "network": "Mastercard",
     "url": "https://creditcards.aa.com/citi-executive-card-american-airlines-direct/",
     "image_url": "/images/citi/aadvantage-executive.webp",
-    "discontinued": false
+    "discontinued": false,
+    "slug": "aadvantage-executive"
   },
   {
     "name": "AAdvantage MileUp",
@@ -43,7 +44,8 @@
     "network": "Mastercard",
     "url": "https://creditcards.aa.com/citi-mileup-card-american-airlines-direct/",
     "image_url": "/images/citi/aadvantage-mileup.webp",
-    "discontinued": false
+    "discontinued": false,
+    "slug": "aadvantage-mileup"
   },
   {
     "name": "AAdvantage Platinum Select",
@@ -66,7 +68,8 @@
     "network": "Mastercard",
     "url": "https://creditcards.aa.com/",
     "image_url": "/images/citi/aadvantage-platinum-select.webp",
-    "discontinued": false
+    "discontinued": false,
+    "slug": "aadvantage-platinum-select"
   },
   {
     "name": "AAdvantage Platinum Select Business",
@@ -96,7 +99,8 @@
         "value": 50,
         "weight": 0.5
       }
-    ]
+    ],
+    "slug": "aadvantage-platinum-select-business"
   },
   {
     "name": "Double Cash",
@@ -119,7 +123,8 @@
     "network": "Mastercard",
     "url": "https://www.citi.com/credit-cards/citi-double-cash-credit-card",
     "image_url": "/images/citi/double-cash.png",
-    "discontinued": false
+    "discontinued": false,
+    "slug": "double-cash"
   },
   {
     "name": "Custom Cash",
@@ -142,7 +147,8 @@
     "network": "Mastercard",
     "url": "https://www.citi.com/credit-cards/citi-custom-cash-credit-card",
     "image_url": "/images/citi/custom-cash.png",
-    "discontinued": false
+    "discontinued": false,
+    "slug": "custom-cash"
   },
   {
     "name": "Strata Premier",
@@ -172,7 +178,8 @@
         "value": 100,
         "weight": 0.9
       }
-    ]
+    ],
+    "slug": "strata-premier"
   },
   {
     "name": "Rewards+",
@@ -191,7 +198,8 @@
     "network": "Mastercard",
     "url": "https://www.citi.com/credit-cards/citi-rewards-plus-credit-card",
     "image_url": "/images/citi/rewards-plus.png",
-    "discontinued": false
+    "discontinued": false,
+    "slug": "rewards"
   },
   {
     "name": "AT&T Points Plus",
@@ -214,6 +222,7 @@
     "network": "Mastercard",
     "url": "https://www.att.com/deals/att-points-plus-citi/",
     "image_url": "/images/citi/att-points-plus.jpg",
-    "discontinued": false
+    "discontinued": false,
+    "slug": "att-points-plus"
   }
 ]

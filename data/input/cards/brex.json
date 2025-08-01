@@ -16,6 +16,7 @@
     "network": "Mastercard",
     "url": "https://www.brex.com/product/credit-card/",
     "image_url": "/images/brex/brex.png",
-    "discontinued": false
+    "discontinued": false,
+    "slug": "brex"
   }
 ]

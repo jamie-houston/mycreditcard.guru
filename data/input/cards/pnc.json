@@ -16,6 +16,7 @@
     "network": "Visa",
     "url": "https://www.pnc.com/en/small-business/borrowing/business-credit-cards/pnc-cash-rewards-visa-signature-business-credit-card.html",
     "image_url": "/images/pnc/cash-rewards-visa-signature-business.webp",
-    "discontinued": false
+    "discontinued": false,
+    "slug": "cash-rewards-visa-signature-business"
   }
 ]

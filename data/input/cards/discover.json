@@ -20,6 +20,7 @@
     "network": "Discover",
     "url": "https://www.discover.com/credit-cards/",
     "image_url": "/images/discover/it.webp",
-    "discontinued": false
+    "discontinued": false,
+    "slug": "discover-it"
   }
 ]

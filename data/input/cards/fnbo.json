@@ -20,7 +20,8 @@
     "network": "Mastercard",
     "url": "https://www.amtrak.com/Apply",
     "image_url": "/images/fnbo/amtrak-guest-rewards.png",
-    "discontinued": false
+    "discontinued": false,
+    "slug": "amtrak-guest-rewards"
   },
   {
     "name": "Amtrak Guest Rewards Preferred",
@@ -43,7 +44,8 @@
     "network": "Mastercard",
     "url": "https://www.amtrak.com/Apply",
     "image_url": "/images/fnbo/amtrak-guest-rewards-preferred.jpg",
-    "discontinued": false
+    "discontinued": false,
+    "slug": "amtrak-guest-rewards-preferred"
   },
   {
     "name": "Best Western Rewards",
@@ -66,7 +68,8 @@
     "network": "Mastercard",
     "url": "https://www.bestwestern.com/en_US/offers/hotel-discounts/best-western-rewards-visa.html",
     "image_url": "/images/fnbo/best-western-rewards.jpg",
-    "discontinued": false
+    "discontinued": false,
+    "slug": "best-western-rewards"
   },
   {
     "name": "Best Western Rewards Premium",
@@ -89,6 +92,7 @@
     "network": "Mastercard",
     "url": "https://www.bestwestern.com/en_US/offers/hotel-discounts/best-western-rewards-visa.html",
     "image_url": "/images/fnbo/best-western-rewards-premium.jpg",
-    "discontinued": false
+    "discontinued": false,
+    "slug": "best-western-rewards-premium"
   }
 ]

@@ -1,0 +1,48 @@
+{
+  "description": "Index of all scenario test files",
+  "total_scenarios": 53,
+  "files": [
+    {
+      "filename": "basic_profiles.json",
+      "category": "basic_profiles",
+      "scenario_count": 5,
+      "description": "Test scenarios for basic profiles"
+    },
+    {
+      "filename": "portfolio_optimization.json",
+      "category": "portfolio_optimization",
+      "scenario_count": 14,
+      "description": "Test scenarios for portfolio optimization"
+    },
+    {
+      "filename": "zero_fee_cards.json",
+      "category": "zero_fee_cards",
+      "scenario_count": 8,
+      "description": "Test scenarios for zero fee cards"
+    },
+    {
+      "filename": "spending_credits.json",
+      "category": "spending_credits",
+      "scenario_count": 8,
+      "description": "Test scenarios for spending credits"
+    },
+    {
+      "filename": "card_count_optimization.json",
+      "category": "card_count_optimization",
+      "scenario_count": 8,
+      "description": "Test scenarios for card count optimization"
+    },
+    {
+      "filename": "edge_cases.json",
+      "category": "edge_cases",
+      "scenario_count": 7,
+      "description": "Test scenarios for edge cases"
+    },
+    {
+      "filename": "signup_bonus.json",
+      "category": "signup_bonus",
+      "scenario_count": 3,
+      "description": "Test scenarios for signup bonus"
+    }
+  ]
+}

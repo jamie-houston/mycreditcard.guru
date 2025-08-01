@@ -293,6 +293,7 @@ def card_recommendations_preview(request):
                 'recommendations': [
                     {
                         'card_id': rec['card'].id,
+                        'card_slug': rec['card'].slug,
                         'card_name': str(rec['card']),
                         'action': rec['action'],
                         'estimated_rewards': float(rec['estimated_rewards']),

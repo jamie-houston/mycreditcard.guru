@@ -406,22 +406,26 @@ class Command(BaseCommand):
         imported_count = 0
         
         for card_data in owned_cards:
+            card_slug = card_data.get('card_slug')
             card_name = card_data.get('card_name')
             issuer_name = card_data.get('issuer')
             card_type = card_data.get('card_type') or "personal"
             nickname = card_data.get('nickname', '')
             opened_date_str = card_data.get('opened_date')
             
-            if not card_name or not issuer_name:
+            if not (card_slug or card_name) or not issuer_name:
                 self.stdout.write(
-                    self.style.WARNING(f'Skipping card: missing card_name or issuer')
+                    self.style.WARNING(f'Skipping card: missing card_slug/card_name or issuer')
                 )
                 continue
             
             try:
-                # Find the credit card
+                # Find the credit card (prefer slug lookup, fallback to name)
                 issuer = Issuer.objects.get(name=issuer_name)
-                credit_card = CreditCard.objects.get(name=card_name, issuer=issuer, card_type=card_type)
+                if card_slug:
+                    credit_card = CreditCard.objects.get(slug=card_slug, card_type=card_type)
+                else:
+                    credit_card = CreditCard.objects.get(name=card_name, issuer=issuer, card_type=card_type)
                 
                 # Parse opened date
                 opened_date = None
@@ -429,8 +433,9 @@ class Command(BaseCommand):
                     try:
                         opened_date = datetime.strptime(opened_date_str, '%Y-%m-%d').date()
                     except ValueError:
+                        identifier = card_slug or card_name
                         self.stdout.write(
-                            self.style.WARNING(f'Invalid date format for {card_name}: {opened_date_str}. Use YYYY-MM-DD format.')
+                            self.style.WARNING(f'Invalid date format for {identifier}: {opened_date_str}. Use YYYY-MM-DD format.')
                         )
                 
                 # Create user card
@@ -452,16 +457,19 @@ class Command(BaseCommand):
                 imported_count += 1
                 
             except Issuer.DoesNotExist:
+                identifier = card_slug or card_name
                 self.stdout.write(
-                    self.style.ERROR(f'Issuer "{issuer_name}" not found for card "{card_name}"')
+                    self.style.ERROR(f'Issuer "{issuer_name}" not found for card "{identifier}"')
                 )
             except CreditCard.DoesNotExist:
+                identifier = card_slug or card_name
                 self.stdout.write(
-                    self.style.ERROR(f'Credit card "{card_name}" from "{issuer_name}" not found')
+                    self.style.ERROR(f'Credit card "{identifier}" from "{issuer_name}" not found')
                 )
             except Exception as e:
+                identifier = card_slug or card_name
                 self.stdout.write(
-                    self.style.ERROR(f'Error importing card "{card_name}": {e}')
+                    self.style.ERROR(f'Error importing card "{identifier}": {e}')
                 )
         
         self.stdout.write(

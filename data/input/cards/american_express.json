@@ -20,7 +20,8 @@
     "network": "American Express",
     "url": "https://www.americanexpress.com/en-us/business/credit-cards/blue-business-cash/",
     "image_url": "/images/amex/blue-business-cash.webp",
-    "discontinued": false
+    "discontinued": false,
+    "slug": "blue-business-cash"
   },
   {
     "name": "Blue Business Plus",
@@ -43,7 +44,8 @@
     "network": "American Express",
     "url": "https://www.americanexpress.com/us/credit-cards/business/business-credit-cards/american-express-blue-business-plus-credit-card-amex/",
     "image_url": "/images/amex/blue-business-plus.webp",
-    "discontinued": false
+    "discontinued": false,
+    "slug": "blue-business-plus"
   },
   {
     "name": "Blue Cash Everyday",
@@ -66,7 +68,8 @@
     "network": "American Express",
     "url": "https://www.americanexpress.com/us/credit-cards/card/blue-cash-everyday/",
     "image_url": "/images/amex/blue-cash-everyday.webp",
-    "discontinued": false
+    "discontinued": false,
+    "slug": "blue-cash-everyday"
   },
   {
     "name": "Blue Cash Preferred (Morgan Stanley)",
@@ -89,7 +92,8 @@
     "network": "American Express",
     "url": "https://apply.americanexpress.com/amex-morgan-stanley-credit-cards/",
     "image_url": "/images/amex/blue-cash-preferred-morgan-stanley.png",
-    "discontinued": false
+    "discontinued": false,
+    "slug": "blue-cash-preferred-morgan-stanley"
   },
   {
     "name": "Business Gold",
@@ -112,7 +116,8 @@
     "network": "American Express",
     "url": "https://www.americanexpress.com/us/credit-cards/business/business-credit-cards/american-express-business-gold-card-amex/",
     "image_url": "/images/amex/business-gold.webp",
-    "discontinued": false
+    "discontinued": false,
+    "slug": "business-gold"
   },
   {
     "name": "Business Green",
@@ -135,7 +140,8 @@
     "network": "American Express",
     "url": "https://www.americanexpress.com/us/credit-cards/business/business-credit-cards/american-express-business-green-card-amex/",
     "image_url": "/images/amex/business-green.webp",
-    "discontinued": false
+    "discontinued": false,
+    "slug": "business-green"
   },
   {
     "name": "Business Platinum",
@@ -190,7 +196,8 @@
         "value": 200,
         "weight": 0.75
       }
-    ]
+    ],
+    "slug": "business-platinum"
   },
   {
     "name": "Cash Magnet",
@@ -213,7 +220,8 @@
     "network": "American Express",
     "url": "https://www.americanexpress.com/us/credit-cards/card/cash-magnet/",
     "image_url": "/images/amex/cash-magnet.webp",
-    "discontinued": false
+    "discontinued": false,
+    "slug": "cash-magnet"
   },
   {
     "name": "Delta SkyMiles Blue",
@@ -236,7 +244,8 @@
     "network": "American Express",
     "url": "https://www.americanexpress.com/us/credit-cards/card/delta-skymiles-blue-american-express-card/",
     "image_url": "/images/amex/delta-skymiles-blue.jpg",
-    "discontinued": false
+    "discontinued": false,
+    "slug": "delta-skymiles-blue"
   },
   {
     "name": "Delta SkyMiles Gold",
@@ -281,7 +290,8 @@
         "value": 100,
         "weight": 0.8
       }
-    ]
+    ],
+    "slug": "delta-skymiles-gold"
   },
   {
     "name": "Delta SkyMiles Gold Business",
@@ -304,7 +314,8 @@
     "network": "American Express",
     "url": "https://www.americanexpress.com/en-us/business/credit-cards/delta-skymiles-gold/",
     "image_url": "/images/amex/delta-skymiles-gold-business.webp",
-    "discontinued": false
+    "discontinued": false,
+    "slug": "delta-skymiles-gold-business"
   },
   {
     "name": "Delta SkyMiles Platinum",
@@ -364,7 +375,8 @@
         "value": 189,
         "weight": 0.4
       }
-    ]
+    ],
+    "slug": "delta-skymiles-platinum"
   },
   {
     "name": "Delta SkyMiles Platinum Business",
@@ -404,7 +416,8 @@
         "value": 50,
         "weight": 0.5
       }
-    ]
+    ],
+    "slug": "delta-skymiles-platinum-business"
   },
   {
     "name": "Delta SkyMiles Reserve",
@@ -434,7 +447,8 @@
         "value": 240,
         "weight": 0.8
       }
-    ]
+    ],
+    "slug": "delta-skymiles-reserve"
   },
   {
     "name": "Delta SkyMiles Reserve Business",
@@ -457,7 +471,8 @@
     "network": "American Express",
     "url": "https://www.americanexpress.com/en-us/business/credit-cards/delta-skymiles-reserve/",
     "image_url": "/images/amex/delta-skymiles-reserve-business.webp",
-    "discontinued": false
+    "discontinued": false,
+    "slug": "delta-skymiles-reserve-business"
   },
   {
     "name": "Green",
@@ -492,7 +507,8 @@
         "value": 100,
         "weight": 0.25
       }
-    ]
+    ],
+    "slug": "green"
   },
   {
     "name": "Hilton Honors",
@@ -522,7 +538,8 @@
         "value": 250,
         "weight": 0.8
       }
-    ]
+    ],
+    "slug": "hilton-honors"
   },
   {
     "name": "Hilton Honors Aspire",
@@ -545,7 +562,8 @@
     "network": "American Express",
     "url": "https://www.hilton.com/en/hilton-honors/credit-cards/",
     "image_url": "/images/amex/hilton-honors-aspire.png",
-    "discontinued": false
+    "discontinued": false,
+    "slug": "hilton-honors-aspire"
   },
   {
     "name": "Hilton Honors Business",
@@ -576,7 +594,8 @@
         "weight": 0.5,
         "currency": "HILTON"
       }
-    ]
+    ],
+    "slug": "hilton-honors-business"
   },
   {
     "name": "Hilton Honors Surpass",
@@ -599,7 +618,8 @@
     "network": "American Express",
     "url": "https://www.hilton.com/en/hilton-honors/credit-cards/",
     "image_url": "/images/amex/hilton-honors-surpass.jpg",
-    "discontinued": false
+    "discontinued": false,
+    "slug": "hilton-honors-surpass"
   },
   {
     "name": "Marriott Bonvoy Brilliant",
@@ -629,7 +649,8 @@
         "value": 300,
         "weight": 0.8
       }
-    ]
+    ],
+    "slug": "marriott-bonvoy-brilliant"
   },
   {
     "name": "Marriott Bonvoy Business",
@@ -648,7 +669,8 @@
     "network": "American Express",
     "url": "https://www.americanexpress.com/us/credit-cards/business/business-credit-cards/amex-marriott-bonvoy-business-credit-card/",
     "image_url": "/images/amex/marriott-bonvoy-business.webp",
-    "discontinued": false
+    "discontinued": false,
+    "slug": "marriott-bonvoy-business"
   },
   {
     "name": "Platinum (Schwab)",
@@ -703,7 +725,8 @@
         "value": 189,
         "weight": 0.4
       }
-    ]
+    ],
+    "slug": "platinum-schwab"
   },
   {
     "name": "Platinum (Morgan Stanley)",
@@ -754,7 +777,8 @@
         "value": 189,
         "weight": 0.4
       }
-    ]
+    ],
+    "slug": "platinum-morgan-stanley"
   },
   {
     "name": "Marriott Bonvoy Bevy",
@@ -777,7 +801,8 @@
     "network": "American Express",
     "url": "https://www.americanexpress.com/us/credit-cards/card/marriott-bonvoy-bevy/",
     "image_url": "/images/amex/marriott-bonvoy-bevy.png",
-    "discontinued": false
+    "discontinued": false,
+    "slug": "marriott-bonvoy-bevy"
   },
   {
     "name": "Lowes",
@@ -800,7 +825,8 @@
     "network": "American Express",
     "url": "https://www.americanexpress.com/us/credit-cards/business/business-credit-cards/lowes-credit-cards/",
     "image_url": "/images/amex/lowes-business.webp",
-    "discontinued": false
+    "discontinued": false,
+    "slug": "lowes"
   },
   {
     "name": "Schwab Investor",
@@ -823,7 +849,8 @@
     "network": "American Express",
     "url": "https://www.schwab.com/public/schwab/investing/accounts_products/credit_cards",
     "image_url": "/images/amex/schwab-investor.webp",
-    "discontinued": false
+    "discontinued": false,
+    "slug": "schwab-investor"
   },
   {
     "name": "Amazon Business",
@@ -846,6 +873,7 @@
     "network": "American Express",
     "url": "https://www.americanexpress.com/us/credit-cards/business/business-credit-cards/amazon-business-card/",
     "image_url": "/images/amex/amazon-business.avif",
-    "discontinued": false
+    "discontinued": false,
+    "slug": "amazon-business"
   }
 ]

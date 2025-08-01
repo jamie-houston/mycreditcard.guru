@@ -1,7 +1,4 @@
 [
-  { "name": "uber_eats", "display_name": "Uber Eats", "category": "dining" },
-  { "name": "dashpass", "display_name": "Dashpass", "category": "dining" },
-  { "name": "doordash", "display_name": "Doordash", "category": "dining" },
   {
     "name": "airport_lounge",
     "display_name": "Airport Lounge",
@@ -9,15 +6,9 @@
     "category": "airlines"
   },
   {
-    "name": "precheck",
-    "display_name": "PreCheck",
-    "description": "PreCheck and TSA PreCheck",
-    "category": "airlines"
-  },
-  {
-    "name": "disney_plus",
-    "display_name": "Disney Plus",
-    "description": "Disney Plus",
+    "name": "apple_music",
+    "display_name": "Apple Music",
+    "description": "Apple Music",
     "category": "streaming"
   },
   {
@@ -27,21 +18,27 @@
     "category": "streaming"
   },
   {
-    "name": "apple_music",
-    "display_name": "Apple Music",
-    "description": "Apple Music",
+    "name": "dashpass",
+    "display_name": "Dashpass",
+    "description": "Free Dashpash",
+    "category": "dining"
+  },
+  {
+    "name": "disney_plus",
+    "display_name": "Disney Plus",
+    "description": "Disney Plus",
     "category": "streaming"
+  },
+  {
+    "name": "doordash",
+    "display_name": "Doordash",
+    "description": "Doordash Monthly Credit",
+    "category": "dining"
   },
   {
     "name": "google_workspace",
     "display_name": "Google Workspace",
     "description": "Google Workspace",
-    "category": "business"
-  },
-  {
-    "name": "ziprecruiter",
-    "display_name": "ZipRecruiter",
-    "description": "ZipRecruiter",
     "category": "business"
   },
   {
@@ -51,9 +48,27 @@
     "category": "transportation"
   },
   {
+    "name": "precheck",
+    "display_name": "PreCheck",
+    "description": "PreCheck and TSA PreCheck",
+    "category": "airlines"
+  },
+  {
     "name": "shopping",
     "display_name": "Shopping Credits",
     "description": "Gift cards and shopping credits",
     "category": "other"
+  },
+  {
+    "name": "uber_eats",
+    "display_name": "Uber Eats",
+    "description": "Uber Eats Monthly Credit",
+    "category": "dining"
+  },
+  {
+    "name": "ziprecruiter",
+    "display_name": "ZipRecruiter",
+    "description": "ZipRecruiter",
+    "category": "business"
   }
 ]

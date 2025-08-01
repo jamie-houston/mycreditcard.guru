@@ -133,6 +133,7 @@ class RecommendationEngine:
                 'calculation_data': {
                     'breakdown': [
                         {
+                            'card_slug': rec['card'].slug,
                             'card_name': rec['card'].name,
                             'action': rec['action'],
                             'estimated_rewards': float(rec['estimated_rewards']),

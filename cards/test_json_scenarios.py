@@ -8,8 +8,8 @@ Usage:
     python manage.py test cards.test_json_scenarios
     
 To add new scenarios:
-    1. Edit data/tests/scenarios.json
-    2. Add your scenario to the "scenarios" array
+    1. Edit files in data/input/tests/scenarios/
+    2. Add your scenario to the appropriate category file
     3. Run the tests
 """
 

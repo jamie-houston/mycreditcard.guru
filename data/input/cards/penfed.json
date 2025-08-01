@@ -20,7 +20,8 @@
     "network": "Visa",
     "url": "https://www.penfed.org/credit-cards/power-cash-rewards-visa",
     "image_url": "/images/penfed/power-cash-rewards.png",
-    "discontinued": false
+    "discontinued": false,
+    "slug": "power-cash-rewards"
   },
   {
     "name": "Platinum Rewards",
@@ -43,7 +44,8 @@
     "network": "Visa",
     "url": "https://www.penfed.org/credit-cards/platinum-rewards-visa",
     "image_url": "/images/penfed/platinum-rewards.webp",
-    "discontinued": false
+    "discontinued": false,
+    "slug": "platinum-rewards"
   },
   {
     "name": "Pathfinder",
@@ -66,6 +68,7 @@
     "network": "Visa",
     "url": "https://www.penfed.org/credit-cards/pathfinder-rewards",
     "image_url": "/images/penfed/pathfinder.webp",
-    "discontinued": false
+    "discontinued": false,
+    "slug": "pathfinder"
   }
 ]

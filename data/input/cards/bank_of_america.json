@@ -20,7 +20,8 @@
     "network": "Mastercard",
     "url": "https://wwws.airfrance.us/information/flyingblue/carte-bancaire-partenaire",
     "image_url": "/images/bankofamerica/air-france-klm.webp",
-    "discontinued": false
+    "discontinued": false,
+    "slug": "air-france-klm"
   },
   {
     "name": "Alaska Airlines",
@@ -50,7 +51,8 @@
         "value": 200,
         "weight": 0.8
       }
-    ]
+    ],
+    "slug": "alaska-airlines"
   },
   {
     "name": "Alaska Airlines Business",
@@ -85,7 +87,8 @@
         "value": 100,
         "weight": 0.8
       }
-    ]
+    ],
+    "slug": "alaska-airlines-business"
   },
   {
     "name": "Customized Cash Rewards",
@@ -108,7 +111,8 @@
     "network": "Visa",
     "url": "https://www.bankofamerica.com/credit-cards/products/cash-back-credit-card/",
     "image_url": "/images/bankofamerica/customized-cash-rewards.jpg",
-    "discontinued": false
+    "discontinued": false,
+    "slug": "customized-cash-rewards"
   },
   {
     "name": "Premium Rewards",
@@ -148,7 +152,8 @@
         "value": 100,
         "weight": 0.4
       }
-    ]
+    ],
+    "slug": "premium-rewards"
   },
   {
     "name": "Premium Rewards Elite",
@@ -171,7 +176,8 @@
     "network": "Visa",
     "url": "https://www.bankofamerica.com/credit-cards/products/premium-rewards-elite-credit-card/",
     "image_url": "/images/bankofamerica/premium-rewards-elite.png",
-    "discontinued": false
+    "discontinued": false,
+    "slug": "premium-rewards-elite"
   },
   {
     "name": "Travel Rewards",
@@ -194,7 +200,8 @@
     "network": "Visa",
     "url": "https://www.bankofamerica.com/credit-cards/products/travel-rewards-credit-card/",
     "image_url": "/images/bankofamerica/travel-rewards.png",
-    "discontinued": false
+    "discontinued": false,
+    "slug": "travel-rewards"
   },
   {
     "name": "Unlimited Cash Rewards",
@@ -217,7 +224,8 @@
     "network": "Visa",
     "url": "https://www.bankofamerica.com/credit-cards/products/unlimited-cash-back-credit-card/",
     "image_url": "/images/bankofamerica/unlimited-cash-rewards.png",
-    "discontinued": false
+    "discontinued": false,
+    "slug": "unlimited-cash-rewards"
   },
   {
     "name": "Business Advantage Customized Cash",
@@ -240,7 +248,8 @@
     "network": "Mastercard",
     "url": "https://www.bankofamerica.com/smallbusiness/credit-cards/products/cash-rewards-business-credit-card",
     "image_url": "/images/bankofamerica/business-advantage-customized-cash.jpg",
-    "discontinued": false
+    "discontinued": false,
+    "slug": "business-advantage-customized-cash"
   },
   {
     "name": "Business Advantage Unlimited Cash",
@@ -263,7 +272,8 @@
     "network": "Mastercard",
     "url": "https://www.bankofamerica.com/smallbusiness/credit-cards/products/unlimited-cash-rewards-business-credit-card",
     "image_url": "/images/bankofamerica/business-advantage-unlimited-cash.webp",
-    "discontinued": false
+    "discontinued": false,
+    "slug": "business-advantage-unlimited-cash"
   },
   {
     "name": "Business Advantage Travel Rewards",
@@ -286,7 +296,8 @@
     "network": "Mastercard",
     "url": "https://www.bankofamerica.com/smallbusiness/credit-cards/products/travel-rewards-business-credit-card",
     "image_url": "/images/bankofamerica/business-advantage-travel-rewards.webp",
-    "discontinued": false
+    "discontinued": false,
+    "slug": "business-advantage-travel-rewards"
   },
   {
     "name": "Platinum Plus",
@@ -309,7 +320,8 @@
     "network": "Mastercard",
     "url": "https://www.bankofamerica.com/smallbusiness/credit-cards/products/platinum-plus-business-credit-card",
     "image_url": "/images/bankofamerica/platinum-plus.webp",
-    "discontinued": false
+    "discontinued": false,
+    "slug": "platinum-plus"
   },
   {
     "name": "Free Spirit",
@@ -339,6 +351,7 @@
         "value": 100,
         "weight": 0.6
       }
-    ]
+    ],
+    "slug": "free-spirit"
   }
 ]

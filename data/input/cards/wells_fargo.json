@@ -20,7 +20,8 @@
     "network": "Mastercard",
     "url": "https://creditcards.wellsfargo.com/business-credit-cards/signify-business-cash-credit-card",
     "image_url": "/images/wellsfargo/signify-business-cash.png",
-    "discontinued": false
+    "discontinued": false,
+    "slug": "signify-business-cash"
   },
   {
     "name": "Autograph",
@@ -51,7 +52,8 @@
         "weight": 0.7,
         "currency": "USD"
       }
-    ]
+    ],
+    "slug": "autograph"
   },
   {
     "name": "Autograph Journey",
@@ -74,7 +76,8 @@
     "network": "Visa",
     "url": "https://creditcards.wellsfargo.com/autograph-journey-visa-credit-card",
     "image_url": "/images/wellsfargo/autograph.png",
-    "discontinued": false
+    "discontinued": false,
+    "slug": "autograph-journey"
   },
   {
     "name": "Choice Privileges",
@@ -97,7 +100,8 @@
     "network": "Visa",
     "url": "https://creditcards.wellsfargo.com/wells-fargo-choice-privileges-credit-cards",
     "image_url": "/images/wellsfargo/choice-privileges.png",
-    "discontinued": false
+    "discontinued": false,
+    "slug": "choice-privileges"
   },
   {
     "name": "Choice Privileges Select",
@@ -120,7 +124,8 @@
     "network": "Visa",
     "url": "https://creditcards.wellsfargo.com/wells-fargo-choice-privileges-credit-cards",
     "image_url": "/images/wellsfargo/choice-privileges-select.png",
-    "discontinued": false
+    "discontinued": false,
+    "slug": "choice-privileges-select"
   },
   {
     "name": "Bilt",
@@ -139,7 +144,8 @@
     "network": "Mastercard",
     "url": "https://www.biltrewards.com/card",
     "image_url": "/images/wellsfargo/bilt.png",
-    "discontinued": false
+    "discontinued": false,
+    "slug": "bilt"
   },
   {
     "name": "Expedia One Key",
@@ -174,7 +180,8 @@
         "value": 120,
         "weight": 0.4
       }
-    ]
+    ],
+    "slug": "expedia-one-key"
   },
   {
     "name": "Expedia One Key+",
@@ -197,6 +204,7 @@
     "network": "Mastercard",
     "url": "https://www.expedia.com/one-key-cards",
     "image_url": "/images/wellsfargo/one-key.png",
-    "discontinued": false
+    "discontinued": false,
+    "slug": "expedia-one-key-1"
   }
 ]

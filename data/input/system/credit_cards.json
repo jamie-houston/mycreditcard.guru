@@ -33,7 +33,8 @@
     "url": "https://creditcards.chase.com/cash-back-credit-cards/freedom/unlimited",
     "image_url": "/images/chase/freedom-unlimited.png",
     "discontinued": false,
-    "verified": true
+    "verified": true,
+    "slug": "chase-freedom-unlimited"
   },
   {
     "name": "Wells Fargo Active Cash® Card",
@@ -57,7 +58,8 @@
     "url": "https://creditcards.wellsfargo.com/active-cash-credit-card/",
     "image_url": "/images/wellsfargo/active-cash.png",
     "discontinued": false,
-    "verified": true
+    "verified": true,
+    "slug": "wells-fargo-active-cash-card"
   },
   {
     "name": "Chase Sapphire Preferred® Card",
@@ -111,7 +113,8 @@
         "category": "hotels",
         "value": 50
       }
-    ]
+    ],
+    "slug": "chase-sapphire-preferred-card"
   },
   {
     "name": "Capital One Venture Rewards Credit Card",
@@ -147,7 +150,8 @@
         "value": 100,
         "weight": 0.4
       }
-    ]
+    ],
+    "slug": "capital-one-venture-rewards-credit-card"
   },
   {
     "name": "Blue Cash Preferred® Card from American Express",
@@ -194,7 +198,8 @@
         "value": 7,
         "times_per_year": 12
       }
-    ]
+    ],
+    "slug": "blue-cash-preferred-card-from-american-express"
   },
   {
     "name": "American Express Gold® Card",
@@ -208,10 +213,24 @@
     "reward_type": "Points",
     "reward_value_multiplier": 0.01,
     "reward_categories": [
-      { "category": "dining", "reward_rate": 4, "max_bonus_amount": 50000 },
-      { "category": "groceries", "reward_rate": 4, "max_bonus_amount": 25000 },
-      { "category": "airlines", "reward_rate": 3 },
-      { "category": "hotels", "reward_rate": 2 },
+      {
+        "category": "dining",
+        "reward_rate": 4,
+        "max_bonus_amount": 50000
+      },
+      {
+        "category": "groceries",
+        "reward_rate": 4,
+        "max_bonus_amount": 25000
+      },
+      {
+        "category": "airlines",
+        "reward_rate": 3
+      },
+      {
+        "category": "hotels",
+        "reward_rate": 2
+      },
       {
         "category": "other",
         "reward_rate": 1
@@ -221,7 +240,8 @@
     "network": "American Express",
     "url": "https://www.americanexpress.com/us/credit-cards/card/gold-card/",
     "image_url": "/images/amex/gold.webp",
-    "discontinued": false
+    "discontinued": false,
+    "slug": "american-express-gold-card"
   },
   {
     "name": "Chase Sapphire Reserve®",
@@ -287,7 +307,8 @@
         "value": 10,
         "times_per_year": 12
       }
-    ]
+    ],
+    "slug": "chase-sapphire-reserve"
   },
   {
     "name": "Ink Business Preferred® Credit Card",
@@ -314,7 +335,8 @@
     "network": "Visa",
     "url": "https://creditcards.chase.com/business-credit-cards/ink/business-preferred",
     "image_url": "/images/chase/ink-business-preferred.png",
-    "discontinued": false
+    "discontinued": false,
+    "slug": "ink-business-preferred-credit-card"
   },
   {
     "name": "The Platinum Card® from American Express",
@@ -341,7 +363,8 @@
     "network": "American Express",
     "url": "https://www.americanexpress.com/us/credit-cards/card/platinum/",
     "image_url": "/images/amex/platinum.webp",
-    "discontinued": false
+    "discontinued": false,
+    "slug": "the-platinum-card-from-american-express"
   },
   {
     "name": "Chase Sapphire Reserve® Business",
@@ -355,7 +378,10 @@
     "reward_type": "Points",
     "reward_value_multiplier": 0.015,
     "reward_categories": [
-      { "category": "chase_travel", "reward_rate": 8 },
+      {
+        "category": "chase_travel",
+        "reward_rate": 8
+      },
       {
         "category": "dining",
         "reward_rate": 3
@@ -428,7 +454,8 @@
         "credit_type": "shopping",
         "value": 100
       }
-    ]
+    ],
+    "slug": "chase-sapphire-reserve-business"
   },
   {
     "name": "Amazon Prime",
@@ -453,6 +480,7 @@
     "network": "Visa",
     "url": "https://www.amazon.com/dp/BT00LN946S",
     "image_url": "/images/chase/amazon-prime.png",
-    "discontinued": false
+    "discontinued": false,
+    "slug": "amazon-prime-system"
   }
 ]
