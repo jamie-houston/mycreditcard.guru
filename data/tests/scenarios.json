@@ -1596,8 +1596,8 @@
       "owned_cards": [],
       "available_cards": [
         "High Value Premium Card",
-        "The Platinum Card from American Express",
-        "Ink Business Preferred Credit Card"
+        "Expensive Premium Card",
+        "Mid Tier Card"
       ],
       "expected_recommendations": {
         "actions": [
