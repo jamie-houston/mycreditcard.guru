@@ -2,6 +2,7 @@ from rest_framework import generics, status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
 
 from cards.models import UserSpendingProfile
 from .models import Roadmap, RoadmapFilter
@@ -207,3 +208,36 @@ def roadmap_stats_view(request):
             many=True
         ).data
     })
+
+
+@api_view(['POST'])
+def export_scenario_view(request):
+    """Export current user input as a test scenario JSON"""
+    
+    # Only allow for the specific dev user
+    if not request.user.is_authenticated or request.user.email != 'foresterh@gmail.com':
+        return Response(
+            {'error': 'Unauthorized access'}, 
+            status=status.HTTP_403_FORBIDDEN
+        )
+    
+    try:
+        scenario_data = request.data
+        
+        # Add metadata
+        scenario_data['exported_by'] = request.user.email
+        scenario_data['exported_at'] = timezone.now().isoformat()
+        scenario_data['export_type'] = 'debug_scenario'
+        
+        # Return the formatted scenario
+        return Response({
+            'success': True,
+            'scenario': scenario_data,
+            'message': 'Scenario exported successfully'
+        })
+        
+    except Exception as e:
+        return Response(
+            {'error': str(e)}, 
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )

@@ -55,7 +55,23 @@
     "display_name": "Groceries",
     "description": "Supermarkets and grocery stores",
     "icon": "fas fa-shopping-cart",
-    "sort_order": 30
+    "sort_order": 30,
+    "subcategories": [
+      {
+        "name": "in_store_grocery",
+        "display_name": "In-Store Grocery",
+        "description": "In-store grocery purchases",
+        "icon": "fas fa-shopping-cart",
+        "sort_order": 10
+      },
+      {
+        "name": "online_grocery",
+        "display_name": "Online Grocery",
+        "description": "Online grocery purchases",
+        "icon": "fas fa-shopping-cart",
+        "sort_order": 20
+      }
+    ]
   },
   {
     "name": "gas",
@@ -99,7 +115,29 @@
     "display_name": "Transportation",
     "description": "Public transit, taxis, rideshare services",
     "icon": "fas fa-car",
-    "sort_order": 70
+    "sort_order": 70,
+    "subcategories": [
+      {
+        "name": "public_transportation",
+        "display_name": "Public Transport",
+        "description": "Public transport and transit",
+        "icon": "fas fa-bus",
+        "sort_order": 10
+      },
+      {
+        "name": "lyft",
+        "display_name": "Lyft",
+        "description": "Lyft and Lyft Prime",
+        "icon": "fas fa-car",
+        "sort_order": 10
+      },
+      {
+        "name": "uber",
+        "display_name": "Uber",
+        "description": "Uber and Uber Prime",
+        "icon": "fas fa-car",
+        "sort_order": 20
+      }
   },
   {
     "name": "drugstores",

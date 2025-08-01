@@ -318,7 +318,11 @@ def landing_view(request):
 
 def index_view(request):
     """Roadmap creation page"""
-    return render(request, 'index.html')
+    context = {
+        'user_email': request.user.email if request.user.is_authenticated else None,
+        'is_dev_user': request.user.is_authenticated and request.user.email == 'foresterh@gmail.com'
+    }
+    return render(request, 'index.html', context)
 
 def cards_list_view(request):
     """Credit cards listing page"""

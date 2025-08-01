@@ -302,9 +302,23 @@ class RecommendationEngine:
                     print(f"DEBUG: Scenario 1 using portfolio optimization for {len(available_cards)} available cards")
                     return self._select_optimal_card_combination(available_cards, max_total_cards)
                 else:
-                    # If keeping some cards, use the old logic for now
+                    # ALWAYS use full optimization to consider dropping current cards for better new ones
+                    print(f"DEBUG: Scenario 2 using FULL portfolio optimization with {len(cards_to_keep)} current + {len(available_cards)} new cards")
+                    all_cards = list(cards_to_keep) + available_cards
+                    full_optimization = self._select_optimal_card_combination(all_cards, max_total_cards)
+                    
+                    # Compare with keep-all scenario
                     best_new_cards = self._select_best_new_cards(available_cards, remaining_slots)
                     actions.extend(best_new_cards)
+                    keep_all_value = self._calculate_scenario_portfolio_value(actions)
+                    
+                    # Use full optimization if it's better
+                    if full_optimization and full_optimization['net_portfolio_value'] > keep_all_value:
+                        print(f"DEBUG: Full optimization better: ${full_optimization['net_portfolio_value']:.2f} vs ${keep_all_value:.2f}")
+                        return full_optimization
+                    else:
+                        print(f"DEBUG: Keep-all scenario better: ${keep_all_value:.2f} vs ${full_optimization.get('net_portfolio_value', 0):.2f}")
+                        # Keep the current logic (actions already extended above)
             
             # Calculate portfolio value
             portfolio_value = self._calculate_scenario_portfolio_value(actions)

@@ -76,11 +76,19 @@
         "reward_rate": 5
       },
       {
+        "category": "lyft",
+        "reward_rate": 5
+      },
+      {
         "category": "dining",
         "reward_rate": 3
       },
       {
         "category": "streaming",
+        "reward_rate": 3
+      },
+      {
+        "category": "online_grocery",
         "reward_rate": 3
       },
       {

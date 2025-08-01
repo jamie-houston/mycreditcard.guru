@@ -18,4 +18,7 @@ urlpatterns = [
     
     # Stats
     path('stats/', views.roadmap_stats_view, name='roadmap-stats'),
+    
+    # Debug/Development
+    path('export-scenario/', views.export_scenario_view, name='export-scenario'),
 ]
