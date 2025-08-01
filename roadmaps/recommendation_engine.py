@@ -281,18 +281,29 @@ class RecommendationEngine:
             # Keep specified cards, add best available
             actions = []
             
-            # Add keep actions for specified cards
+            # Add keep actions for specified cards, but cancel if they lose money
             for card in cards_to_keep:
                 rewards_breakdown = self._calculate_card_rewards_breakdown(card)
                 annual_rewards = rewards_breakdown['total_rewards']
                 annual_fee = float(card.annual_fee)
+                net_value = annual_rewards - annual_fee
                 
-                actions.append({
-                    'card': card,
-                    'action': 'keep',
-                    'reasoning': f"Keep - earning ${annual_rewards:.0f} annually vs ${annual_fee} fee",
-                    'priority': 2
-                })
+                # Only keep cards that provide positive value, or zero-fee cards
+                if net_value >= 0 or annual_fee == 0:
+                    actions.append({
+                        'card': card,
+                        'action': 'keep',
+                        'reasoning': f"Keep - earning ${annual_rewards:.0f} annually vs ${annual_fee} fee",
+                        'priority': 2
+                    })
+                else:
+                    # Cancel money-losing cards
+                    actions.append({
+                        'card': card,
+                        'action': 'cancel',
+                        'reasoning': f"Cancel - provides no additional portfolio value (${annual_rewards:.0f} rewards vs ${annual_fee} fee)",
+                        'priority': 1
+                    })
             
             # Add best available cards up to limit
             remaining_slots = max_total_cards - len(cards_to_keep)
