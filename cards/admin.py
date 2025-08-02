@@ -67,11 +67,6 @@ class SpendingAmountInline(admin.TabularInline):
     extra = 1
 
 
-class UserCardInline(admin.TabularInline):
-    model = UserCard
-    extra = 1
-
-
 class UserCreditPreferenceInline(admin.TabularInline):
     model = UserCreditPreference
     extra = 1
@@ -79,5 +74,14 @@ class UserCreditPreferenceInline(admin.TabularInline):
 
 @admin.register(UserSpendingProfile)
 class UserSpendingProfileAdmin(admin.ModelAdmin):
-    list_display = ['__str__', 'user', 'session_key', 'created_at']
-    inlines = [SpendingAmountInline, UserCardInline, UserCreditPreferenceInline]
+    list_display = ['__str__', 'user', 'session_key', 'privacy_setting', 'created_at']
+    inlines = [SpendingAmountInline, UserCreditPreferenceInline]
+
+
+@admin.register(UserCard)
+class UserCardAdmin(admin.ModelAdmin):
+    list_display = ['user', 'card', 'display_name', 'opened_date', 'closed_date', 'is_active']
+    list_filter = ['card__issuer', 'opened_date', 'closed_date']
+    search_fields = ['user__username', 'card__name', 'nickname']
+    date_hierarchy = 'opened_date'
+    readonly_fields = ['created_at', 'updated_at']

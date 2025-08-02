@@ -27,4 +27,9 @@ urlpatterns = [
     
     # Card ownership management
     path('toggle-ownership/', views.toggle_card_ownership, name='toggle-ownership'),
+    path('user-cards/', views.get_user_cards, name='user-cards'),
+    path('user-cards/add/', views.add_user_card, name='add-user-card'),
+    path('user-cards/<int:user_card_id>/', views.update_user_card, name='update-user-card'),
+    path('user-cards/<int:user_card_id>/delete/', views.remove_user_card, name='remove-user-card'),
+    path('cards/<int:card_id>/ownership/', views.check_card_ownership, name='check-card-ownership'),
 ]

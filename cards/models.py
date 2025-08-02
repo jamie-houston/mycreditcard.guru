@@ -232,26 +232,39 @@ class SpendingAmount(models.Model):
 
 
 class UserCard(models.Model):
-    profile = models.ForeignKey(UserSpendingProfile, on_delete=models.CASCADE, related_name='user_cards')
-    card = models.ForeignKey(CreditCard, on_delete=models.CASCADE)
-    nickname = models.CharField(max_length=100, blank=True)
-    opened_date = models.DateField(null=True, blank=True)
-    is_active = models.BooleanField(default=True)
+    """Tracks detailed information about cards owned by users"""
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='owned_cards')
+    card = models.ForeignKey(CreditCard, on_delete=models.CASCADE, related_name='user_ownerships')
+    
+    # Card details
+    nickname = models.CharField(max_length=100, blank=True, help_text="Optional nickname for this card")
+    opened_date = models.DateField(null=True, blank=True, help_text="Date when the card was opened/approved")
+    closed_date = models.DateField(null=True, blank=True, help_text="Date when the card was closed (if applicable)")
+    
+    # Metadata
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    notes = models.TextField(blank=True, help_text="Additional notes about this card")
     
     class Meta:
-        pass
+        unique_together = ['user', 'card']
+        ordering = ['-opened_date', '-created_at']
     
     def __str__(self):
-        name = self.nickname or str(self.card)
-        return f"{self.profile} - {name}"
+        card_name = self.nickname if self.nickname else str(self.card)
+        status = " (Closed)" if self.closed_date else ""
+        return f"{self.user.username}'s {card_name}{status}"
     
+    @property
+    def is_active(self):
+        """Check if the card is currently active (not closed)"""
+        return self.closed_date is None
+    
+    @property
     def display_name(self):
-        """Return card name with nickname if available"""
-        if self.nickname:
-            return f"{self.card.name} ({self.nickname})"
-        return self.card.name
+        """Get the display name (nickname if available, otherwise card name)"""
+        return self.nickname if self.nickname else str(self.card)
+
 
 
 class UserCreditPreference(models.Model):

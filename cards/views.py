@@ -8,12 +8,13 @@ from django.http import Http404
 
 from .models import (
     Issuer, RewardType, SpendingCategory, CreditCard,
-    UserSpendingProfile, SpendingCredit
+    UserSpendingProfile, SpendingCredit, UserCard
 )
 from .serializers import (
     IssuerSerializer, RewardTypeSerializer, SpendingCategorySerializer,
     CreditCardSerializer, CreditCardListSerializer, UserSpendingProfileSerializer,
-    CreateSpendingProfileSerializer, SpendingCreditSerializer
+    CreateSpendingProfileSerializer, SpendingCreditSerializer, UserCardSerializer,
+    UserCardCreateUpdateSerializer
 )
 
 
@@ -484,3 +485,169 @@ def shared_profile_view(request, share_uuid):
         
     except (ValueError, UserSpendingProfile.DoesNotExist):
         raise Http404("Profile not found or not public")
+
+
+@api_view(['GET'])
+def get_user_cards(request):
+    """Get all cards owned by the current user"""
+    if not request.user.is_authenticated:
+        return Response(
+            {'error': 'Authentication required'}, 
+            status=status.HTTP_401_UNAUTHORIZED
+        )
+    
+    try:
+        user_cards = UserCard.objects.filter(user=request.user).order_by('-opened_date', '-created_at')
+        serializer = UserCardSerializer(user_cards, many=True)
+        return Response(serializer.data)
+    except Exception as e:
+        return Response(
+            {'error': str(e)}, 
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+
+@api_view(['POST'])
+def add_user_card(request):
+    """Add or update a card in user's collection"""
+    if not request.user.is_authenticated:
+        return Response(
+            {'error': 'Authentication required'}, 
+            status=status.HTTP_401_UNAUTHORIZED
+        )
+    
+    try:
+        card_id = request.data.get('card_id')
+        if not card_id:
+            return Response(
+                {'error': 'card_id is required'}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Check if card exists
+        try:
+            card = CreditCard.objects.get(id=card_id)
+        except CreditCard.DoesNotExist:
+            return Response(
+                {'error': 'Card not found'}, 
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        # Check if user already owns this card
+        user_card, created = UserCard.objects.get_or_create(
+            user=request.user,
+            card=card,
+            defaults={
+                'nickname': request.data.get('nickname', ''),
+                'opened_date': request.data.get('opened_date'),
+                'closed_date': request.data.get('closed_date'),
+                'notes': request.data.get('notes', '')
+            }
+        )
+        
+        if not created:
+            # Update existing card
+            serializer = UserCardCreateUpdateSerializer(user_card, data=request.data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                user_card.refresh_from_db()
+            else:
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Return the updated/created card
+        response_serializer = UserCardSerializer(user_card)
+        return Response({
+            'user_card': response_serializer.data,
+            'created': created,
+            'message': 'Card added to your collection' if created else 'Card details updated'
+        })
+        
+    except Exception as e:
+        return Response(
+            {'error': str(e)}, 
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+
+@api_view(['PUT', 'PATCH'])
+def update_user_card(request, user_card_id):
+    """Update details of a user's card"""
+    if not request.user.is_authenticated:
+        return Response(
+            {'error': 'Authentication required'}, 
+            status=status.HTTP_401_UNAUTHORIZED
+        )
+    
+    try:
+        user_card = get_object_or_404(UserCard, id=user_card_id, user=request.user)
+        
+        serializer = UserCardCreateUpdateSerializer(
+            user_card, 
+            data=request.data, 
+            partial=(request.method == 'PATCH')
+        )
+        
+        if serializer.is_valid():
+            serializer.save()
+            response_serializer = UserCardSerializer(user_card)
+            return Response({
+                'user_card': response_serializer.data,
+                'message': 'Card details updated successfully'
+            })
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+    except Exception as e:
+        return Response(
+            {'error': str(e)}, 
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+
+@api_view(['DELETE'])
+def remove_user_card(request, user_card_id):
+    """Remove a card from user's collection"""
+    if not request.user.is_authenticated:
+        return Response(
+            {'error': 'Authentication required'}, 
+            status=status.HTTP_401_UNAUTHORIZED
+        )
+    
+    try:
+        user_card = get_object_or_404(UserCard, id=user_card_id, user=request.user)
+        card_name = user_card.display_name
+        user_card.delete()
+        
+        return Response({
+            'message': f'Removed {card_name} from your collection'
+        })
+        
+    except Exception as e:
+        return Response(
+            {'error': str(e)}, 
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+
+@api_view(['GET'])
+def check_card_ownership(request, card_id):
+    """Check if user owns a specific card"""
+    if not request.user.is_authenticated:
+        return Response({'owned': False})
+    
+    try:
+        user_card = UserCard.objects.filter(user=request.user, card_id=card_id).first()
+        if user_card:
+            serializer = UserCardSerializer(user_card)
+            return Response({
+                'owned': True,
+                'user_card': serializer.data
+            })
+        else:
+            return Response({'owned': False})
+            
+    except Exception as e:
+        return Response(
+            {'error': str(e)}, 
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
