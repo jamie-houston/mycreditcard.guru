@@ -42,12 +42,6 @@
     "category": "business"
   },
   {
-    "name": "lyft",
-    "display_name": "Lyft",
-    "description": "Lyft",
-    "category": "transportation"
-  },
-  {
     "name": "precheck",
     "display_name": "PreCheck",
     "description": "PreCheck and TSA PreCheck",
