@@ -16,7 +16,11 @@ class RecommendationEngine:
     
     def __init__(self, profile: UserSpendingProfile):
         self.profile = profile
-        self.user_cards = list(profile.user_cards.filter(is_active=True))
+        # Get user cards from the user, not the profile
+        if profile.user:
+            self.user_cards = list(profile.user.owned_cards.filter(closed_date__isnull=True))
+        else:
+            self.user_cards = []
         self.spending_amounts = {
             sa.category.slug: sa.monthly_amount 
             for sa in profile.spending_amounts.all()

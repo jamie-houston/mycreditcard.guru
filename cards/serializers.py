@@ -175,17 +175,8 @@ class CreateSpendingProfileSerializer(serializers.Serializer):
                         monthly_amount=amount
                     )
         
-        # Update user cards
-        if 'user_cards' in validated_data:
-            profile.user_cards.all().delete()
-            for card_data in validated_data['user_cards']:
-                UserCard.objects.create(
-                    profile=profile,
-                    card_id=card_data['card_id'],
-                    nickname=card_data.get('nickname', ''),
-                    opened_date=card_data['opened_date'],
-                    is_active=card_data.get('is_active', True)
-                )
+        # Note: User cards are now managed separately via UserCard API endpoints
+        # They are no longer part of the UserSpendingProfile serializer
         
         return profile
 
