@@ -326,6 +326,15 @@ class Command(BaseCommand):
                 reward_type = card.primary_reward_type
                 
                 # Create new reward category (existing ones were already deleted)
+                # Handle different field names for spending caps
+                max_annual_spend = None
+                if category_data.get('max_annual_spend'):
+                    max_annual_spend = category_data['max_annual_spend']
+                elif category_data.get('max_bonus_amount'):
+                    max_annual_spend = category_data['max_bonus_amount']
+                elif category_data.get('max_spend'):
+                    max_annual_spend = category_data['max_spend']
+                
                 RewardCategory.objects.create(
                     card=card,
                     category=category,
@@ -333,7 +342,7 @@ class Command(BaseCommand):
                     reward_type=reward_type,
                     start_date=category_data.get('start_date'),
                     end_date=category_data.get('end_date'),
-                    max_annual_spend=category_data.get('max_annual_spend'),
+                    max_annual_spend=max_annual_spend,
                 )
                 
             except (SpendingCategory.DoesNotExist, RewardType.DoesNotExist) as e:

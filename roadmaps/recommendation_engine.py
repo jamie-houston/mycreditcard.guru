@@ -973,17 +973,21 @@ class RecommendationEngine:
         if issuer.name.lower() == 'chase':
             # Simplified 5/24 rule check
             # Only count cards with known opening dates
-            recent_cards = UserCard.objects.filter(
-                profile=self.profile,
-                opened_date__isnull=False,
-                opened_date__gte=datetime.now().date() - timedelta(days=24*30)
-            ).count()
+            # Only check if profile has a user (not anonymous)
+            if self.profile.user:
+                recent_cards = UserCard.objects.filter(
+                    user=self.profile.user,
+                    opened_date__isnull=False,
+                    opened_date__gte=datetime.now().date() - timedelta(days=24*30)
+                ).count()
+            else:
+                recent_cards = 0
             
             if recent_cards >= 5:
                 return False
         
         # Check if user already has this exact card
-        if UserCard.objects.filter(profile=self.profile, card=card, is_active=True).exists():
+        if self.profile.user and UserCard.objects.filter(user=self.profile.user, card=card, closed_date__isnull=True).exists():
             return False
         
         return True

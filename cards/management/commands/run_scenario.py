@@ -478,10 +478,11 @@ class Command(BaseCommand):
         for owned_card_slug in scenario_data.get('owned_cards', []):
             if owned_card_slug in created_cards:
                 UserCard.objects.create(
-                    profile=profile,
+                    user=profile.user,
                     card=created_cards[owned_card_slug],
                     opened_date=date.today() - timedelta(days=180),
-                    is_active=True
+                    # Note: is_active is now a property based on closed_date
+                    # Card is active by default since closed_date is None
                 )
         
         return profile, created_cards
@@ -574,7 +575,7 @@ class Command(BaseCommand):
                 category=self.categories[category_data['category']],
                 reward_rate=Decimal(str(category_data.get('reward_rate', category_data.get('rate', 1.0)))),
                 reward_type=self.reward_types[category_data.get('type', 'Points')],
-                max_annual_spend=Decimal(str(category_data.get('max_annual_spend', category_data.get('max_spend')))) if category_data.get('max_annual_spend') or category_data.get('max_spend') else None,
+                max_annual_spend=Decimal(str(category_data.get('max_annual_spend') or category_data.get('max_bonus_amount') or category_data.get('max_spend'))) if category_data.get('max_annual_spend') or category_data.get('max_bonus_amount') or category_data.get('max_spend') else None,
                 is_active=True
             )
         
