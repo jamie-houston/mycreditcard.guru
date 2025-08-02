@@ -34,11 +34,11 @@ class CreditCardRecommendationScenarios(DataDrivenRecommendationTest):
                 }
             },
             'owned_cards': [],
-            'available_cards': ['Blue Cash Preferred® Card', 'Freedom Unlimited'],
+            'available_cards': ['premium-grocery-card', 'basic-card-1'],
             'expected_recommendations': {
                 'actions': ['apply'],
-                'min_total_value': 400,
-                'must_include_cards': ['Blue Cash Preferred® Card']
+                'min_total_value': 300,
+                'must_include_cards': ['premium-grocery-card']
             }
         },
         {
@@ -52,11 +52,11 @@ class CreditCardRecommendationScenarios(DataDrivenRecommendationTest):
                 }
             },
             'owned_cards': [],
-            'available_cards': ['Chase Sapphire Preferred® Card', 'Venture Rewards Credit Card'],
+            'available_cards': ['mid-tier-card', 'travel-card-1', 'high-value-premium-card'],
             'expected_recommendations': {
                 'actions': ['apply'],
-                'min_total_value': 600,
-                'must_include_cards': ['Chase Sapphire Preferred® Card']
+                'min_total_value': 200,
+                'must_include_cards': ['mid-tier-card']
             }
         },
         {
@@ -69,12 +69,12 @@ class CreditCardRecommendationScenarios(DataDrivenRecommendationTest):
                     'general': 300
                 }
             },
-            'owned_cards': ['Low Value Card'],
-            'available_cards': ['Low Value Card', 'Better Card'],
+            'owned_cards': ['low-value-card-1'],
+            'available_cards': ['low-value-card-1', 'better-card-1'],
             'expected_recommendations': {
-                'actions': ['cancel', 'apply'],
+                'actions': ['keep', 'apply'],
                 'min_total_value': 50,
-                'must_include_cards': ['Better Card']
+                'must_include_cards': ['better-card-1']
             }
         }
     ]

@@ -1,0 +1,116 @@
+[
+  {
+    "name": "Chase",
+    "slug": "chase",
+    "max_cards_per_period": 5,
+    "period_months": 24
+  },
+  {
+    "name": "American Express",
+    "slug": "american-express",
+    "max_cards_per_period": 4,
+    "period_months": 24
+  },
+  {
+    "name": "Capital One",
+    "slug": "capital-one",
+    "max_cards_per_period": 6,
+    "period_months": 24
+  },
+  {
+    "name": "Citi",
+    "slug": "citi",
+    "max_cards_per_period": 8,
+    "period_months": 24
+  },
+  {
+    "name": "Bank of America",
+    "slug": "bank-of-america",
+    "max_cards_per_period": 6,
+    "period_months": 24
+  },
+  {
+    "name": "Barclays",
+    "slug": "barclays",
+    "max_cards_per_period": 4,
+    "period_months": 24
+  },
+  {
+    "name": "US Bank",
+    "slug": "us-bank",
+    "max_cards_per_period": 4,
+    "period_months": 24
+  },
+  {
+    "name": "Wells Fargo",
+    "slug": "wells-fargo",
+    "max_cards_per_period": 5,
+    "period_months": 24
+  },
+  {
+    "name": "Discover",
+    "slug": "discover",
+    "max_cards_per_period": 2,
+    "period_months": 24
+  },
+  {
+    "name": "First",
+    "slug": "first",
+    "max_cards_per_period": 3,
+    "period_months": 24
+  },
+  {
+    "name": "Fnbo",
+    "slug": "fnbo",
+    "max_cards_per_period": 3,
+    "period_months": 24
+  },
+  {
+    "name": "Penfed",
+    "slug": "penfed",
+    "max_cards_per_period": 2,
+    "period_months": 24
+  },
+  {
+    "name": "Synchrony",
+    "slug": "synchrony",
+    "max_cards_per_period": 8,
+    "period_months": 24
+  },
+  {
+    "name": "Brex",
+    "slug": "brex",
+    "max_cards_per_period": 2,
+    "period_months": 24
+  },
+  {
+    "name": "Pnc",
+    "slug": "pnc",
+    "max_cards_per_period": 3,
+    "period_months": 24
+  },
+  {
+    "name": "Web Bank",
+    "slug": "web-bank",
+    "max_cards_per_period": 2,
+    "period_months": 24
+  },
+  {
+    "name": "Generic Bank",
+    "slug": "generic-bank",
+    "max_cards_per_period": 10,
+    "period_months": 24
+  },
+  {
+    "name": "Premium Bank",
+    "slug": "premium-bank",
+    "max_cards_per_period": 8,
+    "period_months": 24
+  },
+  {
+    "name": "Basic Bank",
+    "slug": "basic-bank",
+    "max_cards_per_period": 6,
+    "period_months": 24
+  }
+]

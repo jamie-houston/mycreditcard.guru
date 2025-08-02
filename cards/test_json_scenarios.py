@@ -50,7 +50,7 @@ class JSONScenarioTest(JSONScenarioTestBase):
         """Test the Existing High-Fee Card Review scenario."""
         if not self.scenarios:
             self.skipTest("No scenarios found in JSON file")
-        scenario = self.scenarios[3]  # Existing High-Fee Card Review
+        scenario = self.scenarios[20]  # Existing High-Fee Card Review
         recommendations = self.run_scenario_test(scenario)
         self.print_scenario_results(scenario, recommendations)
         
@@ -68,47 +68,43 @@ class ScenarioValidationTest(TestCase):
     """Test the JSON scenario validation and loading."""
     
     def test_json_file_exists(self):
-        """Test that the JSON scenarios file exists."""
-        scenarios_file = os.path.join(
+        """Test that the JSON scenarios directory exists."""
+        scenarios_dir = os.path.join(
             os.path.dirname(os.path.dirname(__file__)), 
-            'data', 'tests', 'scenarios.json'
+            'data', 'tests', 'scenarios'
         )
         self.assertTrue(
-            os.path.exists(scenarios_file),
-            f"Scenarios file not found at {scenarios_file}"
+            os.path.exists(scenarios_dir),
+            f"Scenarios directory not found at {scenarios_dir}"
+        )
+        
+        # Also check for the index file
+        index_file = os.path.join(scenarios_dir, 'index.json')
+        self.assertTrue(
+            os.path.exists(index_file),
+            f"Scenarios index file not found at {index_file}"
         )
     
     def test_json_file_valid(self):
-        """Test that the JSON file is valid JSON."""
-        scenarios_file = os.path.join(
-            os.path.dirname(os.path.dirname(__file__)), 
-            'data', 'tests', 'scenarios.json'
-        )
+        """Test that the scenario files are valid JSON and can be loaded."""
+        from .scenario_loader import ScenarioLoader
         
-        if not os.path.exists(scenarios_file):
-            self.skipTest("Scenarios file not found")
-        
-        with open(scenarios_file, 'r') as f:
-            try:
-                data = json.load(f)
-                self.assertIsInstance(data, dict)
-                self.assertIn('scenarios', data)
-                self.assertIsInstance(data['scenarios'], list)
-            except json.JSONDecodeError as e:
-                self.fail(f"Invalid JSON in scenarios file: {e}")
+        try:
+            data = ScenarioLoader.load_scenarios()
+            self.assertIsInstance(data, dict)
+            self.assertIn('scenarios', data)
+            self.assertIsInstance(data['scenarios'], list)
+        except (FileNotFoundError, json.JSONDecodeError) as e:
+            self.fail(f"Failed to load or parse scenario files: {e}")
     
     def test_scenario_structure(self):
         """Test that each scenario has the required structure."""
-        scenarios_file = os.path.join(
-            os.path.dirname(os.path.dirname(__file__)), 
-            'data', 'tests', 'scenarios.json'
-        )
+        from .scenario_loader import ScenarioLoader
         
-        if not os.path.exists(scenarios_file):
-            self.skipTest("Scenarios file not found")
-        
-        with open(scenarios_file, 'r') as f:
-            data = json.load(f)
+        try:
+            data = ScenarioLoader.load_scenarios()
+        except FileNotFoundError:
+            self.skipTest("Scenario files not found")
             
         required_fields = ['name', 'user_profile', 'available_cards']
         
@@ -181,4 +177,5 @@ def print_scenario_results(scenario_name, recommendations):
             for breakdown in rec['rewards_breakdown']:
                 print(f"     • {breakdown['category_name']}: {breakdown['calculation']}")
     
+    print(f"\n{'='*50}")
     print(f"\n{'='*50}")

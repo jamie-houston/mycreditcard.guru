@@ -1,0 +1,18 @@
+[
+  {
+    "name": "Points",
+    "slug": "points"
+  },
+  {
+    "name": "Miles",
+    "slug": "miles"
+  },
+  {
+    "name": "Cashback",
+    "slug": "cashback"
+  },
+  {
+    "name": "Hotel Nights",
+    "slug": "hotel-nights"
+  }
+]

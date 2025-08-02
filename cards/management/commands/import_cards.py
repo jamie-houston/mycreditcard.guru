@@ -247,6 +247,16 @@ class Command(BaseCommand):
                         'discontinued': card_data.get('discontinued', False),
                         **card_data.get('metadata', {})
                     }
+                    # Ensure card has a slug
+                    if not card.slug:
+                        from django.utils.text import slugify
+                        base_slug = slugify(card.name)
+                        slug = base_slug
+                        counter = 1
+                        while CreditCard.objects.filter(slug=slug).exclude(id=card.id).exists():
+                            slug = f"{base_slug}-{counter}"
+                            counter += 1
+                        card.slug = slug
                     card.save()
                     
                     # Clear existing reward categories and credits to replace with imported data
@@ -256,9 +266,19 @@ class Command(BaseCommand):
                     self.stdout.write(f'Updated card: {card}')
                     created = False
                 except CreditCard.DoesNotExist:
+                    # Generate slug for the card
+                    from django.utils.text import slugify
+                    base_slug = slugify(card_data['name'])
+                    slug = base_slug
+                    counter = 1
+                    while CreditCard.objects.filter(slug=slug).exists():
+                        slug = f"{base_slug}-{counter}"
+                        counter += 1
+                    
                     # Create new card
                     card = CreditCard.objects.create(
                         name=card_data['name'],
+                        slug=slug,
                         issuer=issuer,
                         annual_fee=card_data.get('annual_fee', 0),
                         signup_bonus_amount=signup_bonus_amount,

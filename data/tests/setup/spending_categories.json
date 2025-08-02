@@ -1,0 +1,50 @@
+[
+  {
+    "name": "dining",
+    "slug": "dining",
+    "display_name": "Dining & Restaurants",
+    "description": "Restaurants, bars, cafes, and food delivery services",
+    "icon": "fas fa-utensils",
+    "sort_order": 10
+  },
+  {
+    "name": "travel",
+    "slug": "travel",
+    "display_name": "Travel",
+    "description": "Airlines, hotels, rental cars, and travel booking services",
+    "icon": "fas fa-plane",
+    "sort_order": 20
+  },
+  {
+    "name": "groceries",
+    "slug": "groceries",
+    "display_name": "Groceries",
+    "description": "Supermarkets and grocery stores",
+    "icon": "fas fa-shopping-cart",
+    "sort_order": 30
+  },
+  {
+    "name": "gas",
+    "slug": "gas",
+    "display_name": "Gas Stations",
+    "description": "Gasoline and gas stations",
+    "icon": "fas fa-gas-pump",
+    "sort_order": 40
+  },
+  {
+    "name": "shopping",
+    "slug": "shopping",
+    "display_name": "General Shopping",
+    "description": "Retail stores and general purchases",
+    "icon": "fas fa-store",
+    "sort_order": 50
+  },
+  {
+    "name": "other",
+    "slug": "other",
+    "display_name": "Other",
+    "description": "All other purchases",
+    "icon": "fas fa-ellipsis-h",
+    "sort_order": 100
+  }
+]

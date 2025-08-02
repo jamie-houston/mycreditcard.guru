@@ -401,6 +401,9 @@ class Command(BaseCommand):
     
     def setup_test_data(self):
         """Set up references to existing data."""
+        # Ensure test setup data exists
+        self.create_test_setup_data()
+        
         # Get existing reward types
         self.reward_types = {}
         for rt in RewardType.objects.all():
@@ -576,3 +579,66 @@ class Command(BaseCommand):
             )
         
         return card
+    
+    def create_test_setup_data(self):
+        """Create test setup data (issuers, reward types, spending categories) if they don't exist."""
+        import json
+        import os
+        
+        # Get project root directory
+        project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
+        setup_dir = os.path.join(project_root, 'data', 'tests', 'setup')
+        
+        # Create issuers
+        issuers_file = os.path.join(setup_dir, 'issuers.json')
+        if os.path.exists(issuers_file):
+            with open(issuers_file, 'r') as f:
+                issuers_data = json.load(f)
+            
+            for issuer_data in issuers_data:
+                issuer, created = Issuer.objects.get_or_create(
+                    name=issuer_data['name'],
+                    defaults={
+                        'slug': issuer_data.get('slug', issuer_data['name'].lower().replace(' ', '-')),
+                        'max_cards_per_period': issuer_data.get('max_cards_per_period', 5),
+                        'period_months': issuer_data.get('period_months', 24)
+                    }
+                )
+                if created:
+                    self.stdout.write(f'✅ Created issuer: {issuer.name}')
+        
+        # Create reward types
+        reward_types_file = os.path.join(setup_dir, 'reward_types.json')
+        if os.path.exists(reward_types_file):
+            with open(reward_types_file, 'r') as f:
+                reward_types_data = json.load(f)
+            
+            for rt_data in reward_types_data:
+                rt, created = RewardType.objects.get_or_create(
+                    name=rt_data['name'],
+                    defaults={
+                        'slug': rt_data.get('slug', rt_data['name'].lower().replace(' ', '-'))
+                    }
+                )
+                if created:
+                    self.stdout.write(f'✅ Created reward type: {rt.name}')
+        
+        # Create spending categories
+        categories_file = os.path.join(setup_dir, 'spending_categories.json')
+        if os.path.exists(categories_file):
+            with open(categories_file, 'r') as f:
+                categories_data = json.load(f)
+            
+            for cat_data in categories_data:
+                cat, created = SpendingCategory.objects.get_or_create(
+                    name=cat_data['name'],
+                    defaults={
+                        'slug': cat_data.get('slug', cat_data['name'].lower().replace(' ', '-')),
+                        'display_name': cat_data.get('display_name', cat_data['name']),
+                        'description': cat_data.get('description', ''),
+                        'icon': cat_data.get('icon', 'fas fa-circle'),
+                        'sort_order': cat_data.get('sort_order', 100)
+                    }
+                )
+                if created:
+                    self.stdout.write(f'✅ Created spending category: {cat.display_name}')
