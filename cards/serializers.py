@@ -81,12 +81,17 @@ class CreditCardSerializer(serializers.ModelSerializer):
     reward_categories = RewardCategorySerializer(many=True, read_only=True)
     credits = CardCreditSerializer(many=True, read_only=True)
     
+    # Add referral URL fields
+    referral_url = serializers.ReadOnlyField()
+    apply_url = serializers.ReadOnlyField()
+    
     class Meta:
         model = CreditCard
         fields = [
-            'id', 'name', 'issuer', 'card_type', 'annual_fee', 'signup_bonus_amount',
+            'id', 'name', 'slug', 'issuer', 'card_type', 'annual_fee', 'signup_bonus_amount',
             'signup_bonus_type', 'signup_bonus_requirement', 'primary_reward_type',
-            'reward_categories', 'credits', 'is_active', 'created_at', 'metadata'
+            'reward_categories', 'credits', 'is_active', 'created_at', 'metadata',
+            'url', 'referral_url', 'apply_url'
         ]
 
 
@@ -96,11 +101,15 @@ class CreditCardListSerializer(serializers.ModelSerializer):
     primary_reward_type = serializers.StringRelatedField()
     signup_bonus_type = serializers.StringRelatedField()
     
+    # Add referral URL for Apply buttons
+    referral_url = serializers.ReadOnlyField()
+    apply_url = serializers.ReadOnlyField()
+    
     class Meta:
         model = CreditCard
         fields = [
-            'id', 'name', 'issuer', 'card_type', 'annual_fee', 'signup_bonus_amount',
-            'signup_bonus_type', 'primary_reward_type'
+            'id', 'name', 'slug', 'issuer', 'card_type', 'annual_fee', 'signup_bonus_amount',
+            'signup_bonus_type', 'primary_reward_type', 'url', 'referral_url', 'apply_url'
         ]
 
 

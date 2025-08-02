@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
 from django.db.models import Q
 from django.shortcuts import render, get_object_or_404
+from django.http import Http404
 
 from .models import (
     Issuer, RewardType, SpendingCategory, CreditCard,
@@ -373,3 +374,113 @@ def toggle_card_ownership(request):
             {'error': str(e)}, 
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
+
+
+@api_view(['POST'])
+def update_profile_privacy(request):
+    """Update the privacy setting for a user's profile"""
+    try:
+        # Get or create user profile
+        if request.user.is_authenticated:
+            profile, created = UserSpendingProfile.objects.get_or_create(
+                user=request.user,
+                defaults={'privacy_setting': 'private'}
+            )
+        else:
+            return Response(
+                {'error': 'Authentication required'}, 
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+        
+        privacy_setting = request.data.get('privacy_setting')
+        if privacy_setting not in ['private', 'public']:
+            return Response(
+                {'error': 'privacy_setting must be "private" or "public"'}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        profile.privacy_setting = privacy_setting
+        
+        # Generate share UUID if making public
+        if privacy_setting == 'public':
+            profile.generate_share_uuid()
+        
+        profile.save()
+        
+        # Build response data
+        response_data = {
+            'privacy_setting': profile.privacy_setting,
+            'is_public': profile.is_public,
+        }
+        
+        # Include shareable URL if public
+        if profile.is_public and profile.share_uuid:
+            response_data['share_uuid'] = str(profile.share_uuid)
+            response_data['shareable_url'] = f'/profile/shared/{profile.share_uuid}/'
+        
+        return Response(response_data)
+        
+    except Exception as e:
+        return Response(
+            {'error': str(e)}, 
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+
+@api_view(['GET'])
+def get_profile_privacy(request):
+    """Get the current privacy setting for a user's profile"""
+    try:
+        if request.user.is_authenticated:
+            profile = UserSpendingProfile.objects.filter(user=request.user).first()
+            if profile:
+                response_data = {
+                    'privacy_setting': profile.privacy_setting,
+                    'is_public': profile.is_public,
+                }
+                
+                # Include shareable URL if public
+                if profile.is_public and profile.share_uuid:
+                    response_data['share_uuid'] = str(profile.share_uuid)
+                    response_data['shareable_url'] = f'/profile/shared/{profile.share_uuid}/'
+                
+                return Response(response_data)
+            else:
+                return Response({
+                    'privacy_setting': 'private',
+                    'is_public': False,
+                })
+        else:
+            return Response(
+                {'error': 'Authentication required'}, 
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+        
+    except Exception as e:
+        return Response(
+            {'error': str(e)}, 
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+
+def shared_profile_view(request, share_uuid):
+    """Display a read-only public profile"""
+    try:
+        import uuid
+        profile = get_object_or_404(
+            UserSpendingProfile, 
+            share_uuid=uuid.UUID(share_uuid),
+            privacy_setting='public'
+        )
+        
+        # Pass the profile to the template with a flag indicating it's a shared view
+        context = {
+            'profile': profile,
+            'is_shared_view': True,
+            'profile_owner': profile.user.username if profile.user else 'Anonymous User'
+        }
+        
+        return render(request, 'shared_profile.html', context)
+        
+    except (ValueError, UserSpendingProfile.DoesNotExist):
+        raise Http404("Profile not found or not public")

@@ -6,7 +6,8 @@
     "signup_bonus": {
       "bonus_amount": 20000,
       "spending_requirement": 500,
-      "time_limit_months": 3
+      "time_limit_months": 3,
+      "referral_url": "https://www.referyourchasecard.com/18A/AP73583B88"
     },
     "reward_type": "Cashback",
     "reward_value_multiplier": 0.01,
@@ -68,7 +69,8 @@
     "signup_bonus": {
       "bonus_amount": 75000,
       "spending_requirement": 5000,
-      "time_limit_months": 3
+      "time_limit_months": 3,
+      "referral_url": "https://www.referyourchasecard.com/19t/ZWQTY1YFCH"
     },
     "reward_type": "Points",
     "reward_value_multiplier": 0.0125,
@@ -317,7 +319,8 @@
     "signup_bonus": {
       "bonus_amount": 90000,
       "spending_requirement": 8000,
-      "time_limit_months": 3
+      "time_limit_months": 3,
+      "referral_url": "https://www.referyourchasecard.com/21u/V4LTM1SIJH"
     },
     "reward_type": "Points",
     "reward_value_multiplier": 0.01,

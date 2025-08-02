@@ -242,9 +242,11 @@ class Command(BaseCommand):
                     card.signup_bonus_requirement = signup_bonus_requirement
                     card.primary_reward_type = primary_reward_type
                     card.card_type = card_data.get('card_type', 'personal')
+                    card.url = card_data.get('url', '')  # Update URL field
                     card.metadata = {
                         'reward_value_multiplier': card_data.get('reward_value_multiplier', 0.01),
                         'discontinued': card_data.get('discontinued', False),
+                        'signup_bonus': card_data.get('signup_bonus', {}),  # Include signup_bonus in metadata
                         **card_data.get('metadata', {})
                     }
                     # Ensure card has a slug
@@ -286,9 +288,11 @@ class Command(BaseCommand):
                         signup_bonus_requirement=signup_bonus_requirement,
                         primary_reward_type=primary_reward_type,
                         card_type=card_data.get('card_type', 'personal'),
+                        url=card_data.get('url', ''),  # Add URL field support
                         metadata={
                             'reward_value_multiplier': card_data.get('reward_value_multiplier', 0.01),
                             'discontinued': card_data.get('discontinued', False),
+                            'signup_bonus': card_data.get('signup_bonus', {}),  # Include signup_bonus in metadata
                             **card_data.get('metadata', {})
                         }
                     )

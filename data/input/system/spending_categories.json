@@ -103,7 +103,7 @@
       },
       {
         "name": "other_shopping",
-        "display_name": "Other",
+        "display_name": "Other Shopping",
         "description": "Other shopping",
         "icon": "fas fa-shopping-bag",
         "sort_order": 20
@@ -149,7 +149,7 @@
   },
   {
     "name": "other",
-    "display_name": "Other",
+    "display_name": "Other Spending",
     "description": "Any expenses that don't fit into the above categories",
     "icon": "fas fa-ellipsis-h",
     "sort_order": 140

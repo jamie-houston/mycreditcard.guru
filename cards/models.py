@@ -69,7 +69,10 @@ class CreditCard(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
-    # JSON field for additional metadata
+    # URL fields for referral links
+    url = models.URLField(max_length=500, blank=True, help_text="Primary card application URL")
+    
+    # JSON field for additional metadata (including signup_bonus.referral_url)
     metadata = models.JSONField(default=dict, blank=True)
     
     class Meta:
@@ -77,6 +80,26 @@ class CreditCard(models.Model):
     
     def __str__(self):
         return f"{self.issuer.name} {self.name}"
+    
+    @property
+    def referral_url(self):
+        """
+        Get the referral URL with priority:
+        1. signup_bonus.referral_url from metadata
+        2. url field
+        """
+        # First try to get referral_url from signup_bonus in metadata
+        signup_bonus = self.metadata.get('signup_bonus', {})
+        if isinstance(signup_bonus, dict) and signup_bonus.get('referral_url'):
+            return signup_bonus['referral_url']
+        
+        # Fallback to the main url field
+        return self.url if self.url else None
+    
+    @property 
+    def apply_url(self):
+        """Alias for referral_url for template clarity"""
+        return self.referral_url
 
 
 class RewardCategory(models.Model):
@@ -152,10 +175,19 @@ class CardCredit(models.Model):
 
 
 class UserSpendingProfile(models.Model):
+    PRIVACY_CHOICES = [
+        ('private', 'Private'),
+        ('public', 'Public'),
+    ]
+    
     user = models.OneToOneField(User, on_delete=models.CASCADE, null=True, blank=True)
     session_key = models.CharField(max_length=40, null=True, blank=True)  # For anonymous users
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    
+    # Profile sharing settings
+    privacy_setting = models.CharField(max_length=10, choices=PRIVACY_CHOICES, default='private')
+    share_uuid = models.UUIDField(default=None, null=True, blank=True, unique=True, help_text="Unique ID for sharing public profiles")
     
     class Meta:
         unique_together = [['user'], ['session_key']]
@@ -164,6 +196,27 @@ class UserSpendingProfile(models.Model):
         if self.user:
             return f"Profile for {self.user.username}"
         return f"Anonymous profile {self.session_key}"
+    
+    def generate_share_uuid(self):
+        """Generate a unique UUID for sharing this profile"""
+        import uuid
+        if not self.share_uuid:
+            self.share_uuid = uuid.uuid4()
+            self.save(update_fields=['share_uuid'])
+        return self.share_uuid
+    
+    @property
+    def shareable_url(self):
+        """Get the full shareable URL for this profile"""
+        if self.privacy_setting == 'public' and self.share_uuid:
+            from django.urls import reverse
+            return reverse('shared_profile', kwargs={'share_uuid': self.share_uuid})
+        return None
+    
+    @property
+    def is_public(self):
+        """Check if this profile is publicly shareable"""
+        return self.privacy_setting == 'public'
 
 
 class SpendingAmount(models.Model):

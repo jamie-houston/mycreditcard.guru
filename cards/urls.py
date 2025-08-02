@@ -19,6 +19,8 @@ urlpatterns = [
     
     # User profile endpoints
     path('profile/', views.spending_profile_view, name='spending-profile'),
+    path('profile/privacy/', views.get_profile_privacy, name='profile-privacy'),
+    path('profile/privacy/update/', views.update_profile_privacy, name='update-profile-privacy'),
     
     # Quick recommendations
     path('recommendations/preview/', views.card_recommendations_preview, name='recommendations-preview'),

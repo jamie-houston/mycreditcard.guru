@@ -2,8 +2,100 @@
 
 {% block title %}My Profile - Credit Card Guru{% endblock %}
 
+{% block extra_css %}
+<style>
+.toggle-switch {
+    display: flex;
+    background: #f3f4f6;
+    border-radius: 8px;
+    padding: 4px;
+    position: relative;
+}
+
+.toggle-switch input[type="radio"] {
+    display: none;
+}
+
+.toggle-option {
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 14px;
+    font-weight: 500;
+    color: #6b7280;
+    user-select: none;
+}
+
+.toggle-switch input[type="radio"]:checked + .toggle-option {
+    background: white;
+    color: #1f2937;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.toggle-option:hover {
+    color: #374151;
+}
+
+.privacy-toggle-section {
+    flex-wrap: wrap;
+}
+
+@media (max-width: 768px) {
+    .privacy-toggle-section {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    
+    #shareable-url-section {
+        margin-left: 0 !important;
+    }
+    
+    #shareable-url {
+        width: 200px !important;
+    }
+}
+</style>
+{% endblock %}
+
 {% block content %}
-<h1>My Credit Card Profile</h1>
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+    <h1>My Credit Card Profile</h1>
+    
+    <!-- Privacy Toggle Section -->
+    <div class="privacy-toggle-section" style="display: flex; align-items: center; gap: 15px;">
+        <label style="color: #6b7280; font-weight: 500;">Profile Visibility:</label>
+        
+        <div class="toggle-switch">
+            <input type="radio" id="privacy-private" name="privacy" value="private" checked>
+            <label for="privacy-private" class="toggle-option">
+                🔒 Private
+            </label>
+            
+            <input type="radio" id="privacy-public" name="privacy" value="public">
+            <label for="privacy-public" class="toggle-option">
+                🌐 Public
+            </label>
+        </div>
+        
+        <!-- Shareable URL Section (hidden by default) -->
+        <div id="shareable-url-section" style="display: none; margin-left: 15px;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <label style="color: #6b7280; font-size: 14px;">Share URL:</label>
+                <div style="display: flex; align-items: center; gap: 5px;">
+                    <input type="text" id="shareable-url" readonly 
+                           style="background: #f9fafb; border: 1px solid #d1d5db; padding: 5px 8px; border-radius: 6px; font-size: 12px; width: 300px;"
+                           placeholder="Generating shareable URL...">
+                    <button id="copy-url-btn" onclick="copyShareableUrl()" 
+                            style="background: #3b82f6; color: white; border: none; padding: 5px 10px; border-radius: 6px; font-size: 12px; cursor: pointer;">
+                        📋 Copy
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
 <!-- Category Optimization Section -->
 <div class="section">
@@ -853,6 +945,158 @@ function showError(message) {
         }
     });
 }
+
+// Profile Privacy and Sharing Functionality
+async function initializePrivacySettings() {
+    try {
+        const response = await fetch('/api/cards/profile/privacy/');
+        if (response.ok) {
+            const data = await response.json();
+            
+            // Set the current privacy setting
+            const privacyRadio = document.querySelector(`input[name="privacy"][value="${data.privacy_setting}"]`);
+            if (privacyRadio) {
+                privacyRadio.checked = true;
+            }
+            
+            // Show shareable URL if public
+            if (data.is_public && data.shareable_url) {
+                showShareableUrl(data.shareable_url);
+            }
+        }
+    } catch (error) {
+        console.log('Could not load privacy settings (user may not be logged in)');
+    }
+}
+
+async function updatePrivacySetting(privacySetting) {
+    try {
+        const response = await fetch('/api/cards/profile/privacy/update/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify({
+                privacy_setting: privacySetting
+            })
+        });
+        
+        if (response.ok) {
+            const data = await response.json();
+            
+            if (data.is_public && data.shareable_url) {
+                showShareableUrl(window.location.origin + data.shareable_url);
+            } else {
+                hideShareableUrl();
+            }
+            
+            // Show success message
+            showNotification(privacySetting === 'public' ? 
+                'Profile is now public and shareable!' : 
+                'Profile is now private', 'success');
+        } else {
+            const errorData = await response.json();
+            showNotification(errorData.error || 'Failed to update privacy setting', 'error');
+        }
+    } catch (error) {
+        showNotification('Error updating privacy setting. Please try again.', 'error');
+    }
+}
+
+function showShareableUrl(url) {
+    const shareableUrlSection = document.getElementById('shareable-url-section');
+    const shareableUrlInput = document.getElementById('shareable-url');
+    
+    shareableUrlInput.value = url;
+    shareableUrlSection.style.display = 'block';
+}
+
+function hideShareableUrl() {
+    const shareableUrlSection = document.getElementById('shareable-url-section');
+    shareableUrlSection.style.display = 'none';
+}
+
+function copyShareableUrl() {
+    const shareableUrlInput = document.getElementById('shareable-url');
+    shareableUrlInput.select();
+    shareableUrlInput.setSelectionRange(0, 99999); // For mobile devices
+    
+    try {
+        document.execCommand('copy');
+        showNotification('URL copied to clipboard!', 'success');
+        
+        // Change button text briefly
+        const copyBtn = document.getElementById('copy-url-btn');
+        const originalText = copyBtn.innerHTML;
+        copyBtn.innerHTML = '✅ Copied!';
+        setTimeout(() => {
+            copyBtn.innerHTML = originalText;
+        }, 2000);
+    } catch (err) {
+        showNotification('Failed to copy URL', 'error');
+    }
+}
+
+function showNotification(message, type = 'info') {
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 12px 20px;
+        border-radius: 8px;
+        color: white;
+        font-weight: 500;
+        z-index: 1000;
+        transition: all 0.3s ease;
+        ${type === 'success' ? 'background: #10b981;' : 
+          type === 'error' ? 'background: #ef4444;' : 'background: #3b82f6;'}
+    `;
+    notification.textContent = message;
+    
+    document.body.appendChild(notification);
+    
+    // Remove after 3 seconds
+    setTimeout(() => {
+        notification.style.opacity = '0';
+        setTimeout(() => {
+            document.body.removeChild(notification);
+        }, 300);
+    }, 3000);
+}
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+// Event listeners
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize privacy settings on page load
+    initializePrivacySettings();
+    
+    // Add event listeners for privacy toggle
+    const privacyRadios = document.querySelectorAll('input[name="privacy"]');
+    privacyRadios.forEach(radio => {
+        radio.addEventListener('change', function() {
+            if (this.checked) {
+                updatePrivacySetting(this.value);
+            }
+        });
+    });
+});
 </script>
 
 {% endblock %}
