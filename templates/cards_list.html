@@ -608,7 +608,7 @@ function displayCards(cards) {
                             ✏️ Edit card details
                         </button>
                         <button 
-                            onclick="event.stopPropagation(); removeUserCard(${card.user_card ? card.user_card.id : 'null'})" 
+                            onclick="event.stopPropagation(); removeUserCard(${card.user_card ? card.user_card.id : 'null'}, ${card.id})" 
                             class="danger"
                         >
                             ❌ Remove from my cards
@@ -689,11 +689,12 @@ function openCardOwnershipModal(cardId, existingUserCard = null) {
         localNotice.style.display = isAuthenticated ? 'none' : 'block';
     }
     
-    modal.style.display = 'flex';
+    modal.classList.add('show');
 }
 
 function closeCardOwnershipModal() {
-    document.getElementById('cardOwnershipModal').style.display = 'none';
+    const modal = document.getElementById('cardOwnershipModal');
+    modal.classList.remove('show');
 }
 
 async function saveCardOwnership(event) {
@@ -849,7 +850,7 @@ function getCookie(name) {
     return cookieValue;
 }
 
-async function removeUserCard(userCardId) {
+async function removeUserCard(userCardId, cardId = null) {
     if (!userCardId || userCardId === 'null') {
         showNotification('Invalid card ID', 'error');
         return;
@@ -860,22 +861,63 @@ async function removeUserCard(userCardId) {
     }
     
     try {
-        const response = await fetch(`${API_BASE}/cards/user-cards/${userCardId}/delete/`, {
-            method: 'DELETE',
-            headers: {
-                'X-CSRFToken': getCookie('csrftoken')
-            }
-        });
-        
-        if (response.ok) {
-            const data = await response.json();
-            showNotification(data.message || 'Card removed successfully', 'success');
+        // Handle local storage cards (userCardId like 'local_6')
+        if (userCardId.toString().startsWith('local_') || !isAuthenticated) {
+            // Remove from local storage
+            const localCards = LocalStorage.getCards();
+            const localCardDetails = LocalStorage.getCardDetails();
             
-            // Reload cards to reflect changes
-            loadCardsWithOwnership();
+            // Extract the real card ID from the userCardId or use provided cardId
+            let realCardId = cardId;
+            if (!realCardId && userCardId.toString().startsWith('local_')) {
+                // Try to find the card ID by matching with the local storage
+                const cardElements = document.querySelectorAll('[data-card-id]');
+                for (const element of cardElements) {
+                    const elementCardId = element.getAttribute('data-card-id');
+                    const elementUserCardId = element.getAttribute('data-user-card-id');
+                    if (elementUserCardId === userCardId.toString()) {
+                        realCardId = parseInt(elementCardId);
+                        break;
+                    }
+                }
+            }
+            
+            if (realCardId) {
+                // Remove from local storage arrays
+                const updatedCards = localCards.filter(id => id !== parseInt(realCardId));
+                LocalStorage.setCards(updatedCards);
+                
+                // Remove from local details
+                delete localCardDetails[realCardId];
+                LocalStorage.setCardDetails(localCardDetails);
+                
+                showNotification('Card removed from your local collection!', 'success');
+                loadCardsWithOwnership();
+                return;
+            }
+        }
+        
+        // Handle server-side cards for authenticated users
+        if (isAuthenticated) {
+            const response = await fetch(`${API_BASE}/cards/user-cards/${userCardId}/delete/`, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken')
+                }
+            });
+            
+            if (response.ok) {
+                const data = await response.json();
+                showNotification(data.message || 'Card removed successfully', 'success');
+                
+                // Reload cards to reflect changes
+                loadCardsWithOwnership();
+            } else {
+                const errorData = await response.json();
+                showNotification(errorData.error || 'Failed to remove card', 'error');
+            }
         } else {
-            const errorData = await response.json();
-            showNotification(errorData.error || 'Failed to remove card', 'error');
+            showNotification('Please log in to remove cards from your account', 'error');
         }
         
     } catch (error) {
@@ -1037,11 +1079,15 @@ loadCards();
     height: 100%;
     background-color: rgba(0, 0, 0, 0.5);
     backdrop-filter: blur(4px);
-    display: flex;
+    display: none; /* Hidden by default */
     align-items: center;
     justify-content: center;
     padding: 20px;
     box-sizing: border-box;
+}
+
+.modal.show {
+    display: flex !important; /* Show with flexbox when active */
 }
 
 .modal-content {
