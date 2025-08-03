@@ -689,12 +689,24 @@ function openCardOwnershipModal(cardId, existingUserCard = null) {
         localNotice.style.display = isAuthenticated ? 'none' : 'block';
     }
     
+    // Position modal at current scroll position
+    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+    const viewportHeight = window.innerHeight;
+    
+    // Set modal to cover the current viewport
+    modal.style.top = scrollTop + 'px';
+    modal.style.height = viewportHeight + 'px';
+    
     modal.classList.add('show');
+    
+    // Prevent background scrolling
+    document.body.style.overflow = 'hidden';
 }
 
 function closeCardOwnershipModal() {
     const modal = document.getElementById('cardOwnershipModal');
     modal.classList.remove('show');
+    document.body.style.overflow = ''; // Restore background scrolling
 }
 
 async function saveCardOwnership(event) {
@@ -1071,12 +1083,12 @@ loadCards();
 
 <style>
 #cardOwnershipModal {
-    position: fixed;
+    position: absolute;
     z-index: 1000;
     left: 0;
     top: 0;
     width: 100%;
-    height: 100%;
+    height: 100vh; /* Will be overridden by JavaScript */
     background-color: rgba(0, 0, 0, 0.5);
     backdrop-filter: blur(4px);
     display: none; /* Hidden by default */
