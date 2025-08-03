@@ -164,21 +164,25 @@ class GenerateRoadmapSerializer(serializers.Serializer):
         # Update user cards if provided
         if 'user_cards' in validated_data:
             from cards.models import CreditCard
-            profile.user_cards.all().delete()
-            # Get valid card IDs to prevent foreign key errors
-            valid_card_ids = set(CreditCard.objects.values_list('id', flat=True))
-            
-            for card_data in validated_data['user_cards']:
-                card_id = card_data['card_id']
-                # Only create user card if card exists
-                if card_id in valid_card_ids:
-                    UserCard.objects.create(
-                        profile=profile,
-                        card_id=card_id,
-                        nickname=card_data.get('nickname', ''),
-                        opened_date=card_data['opened_date'],
-                        is_active=card_data.get('is_active', True)
-                    )
+            # Clear existing user cards for this user
+            if profile.user:
+                UserCard.objects.filter(user=profile.user).delete()
+                # Get valid card IDs to prevent foreign key errors
+                valid_card_ids = set(CreditCard.objects.values_list('id', flat=True))
+                
+                for card_data in validated_data['user_cards']:
+                    card_id = card_data['card_id']
+                    # Only create user card if card exists
+                    if card_id in valid_card_ids:
+                        UserCard.objects.create(
+                            user=profile.user,
+                            card_id=card_id,
+                            nickname=card_data.get('nickname', ''),
+                            opened_date=card_data['opened_date'],
+                            # Note: is_active is now a property based on closed_date
+                            # If the old data says is_active=False, set a closed_date
+                            closed_date=None if card_data.get('is_active', True) else card_data['opened_date']
+                        )
         
         # Update spending credit preferences if provided
         if 'spending_credit_preferences' in validated_data:

@@ -230,6 +230,7 @@ class RecommendationEngine:
                 'estimated_rewards': Decimal(str(max(0, estimated_value))),  # Don't show negative individual values
                 'reasoning': reasoning,
                 'rewards_breakdown': rewards_breakdown['breakdown'],
+                'signup_bonus_value': signup_bonus_value if action == 'apply' else 0,
                 'priority': card_action.get('priority', 1)
             })
         
@@ -960,6 +961,7 @@ class RecommendationEngine:
                 'estimated_rewards': Decimal(str(total_estimated_value)),
                 'reasoning': card_data['reasoning'],
                 'rewards_breakdown': card_data['rewards_breakdown'],
+                'signup_bonus_value': card_data['signup_bonus'],
                 'priority': i + 1
             })
         

@@ -540,17 +540,14 @@ function displayCards(cards) {
     }
     
     const html = cards.map(card => {
-        const hasCard = userCards.has(card.id);
+        const hasCard = card.hasCard || false;
         const signupBonus = card.signup_bonus_amount || 0;
         const rewardMultiplier = card.metadata?.reward_value_multiplier || 0.01;
         
         // Get user's nickname for this card if they own it
         let displayName = card.name;
-        if (hasCard && window.userCardsDetails) {
-            const userCard = window.userCardsDetails.find(uc => uc.card.id === card.id);
-            if (userCard && userCard.nickname) {
-                displayName = `${card.name} (${userCard.nickname})`;
-            }
+        if (hasCard && card.user_card && card.user_card.nickname) {
+            displayName = `${card.name} (${card.user_card.nickname})`;
         }
         
         // Get top reward categories for display
@@ -1007,7 +1004,7 @@ async function removeUserCard(userCardId) {
     }
     
     try {
-        const response = await fetch(`${API_BASE}/user-cards/${userCardId}/delete/`, {
+        const response = await fetch(`${API_BASE}/cards/user-cards/${userCardId}/delete/`, {
             method: 'DELETE',
             headers: {
                 'X-CSRFToken': getCookie('csrftoken')
@@ -1043,13 +1040,13 @@ window.onclick = function(event) {
 async function loadCards() {
     try {
         // Fetch all cards
-        const cardsResponse = await fetch(`${API_BASE}/cards/`);
+        const cardsResponse = await fetch(`${API_BASE}/cards/cards/`);
         const cards = await cardsResponse.json();
         
         // Fetch user's owned cards if authenticated
         let userCards = [];
         try {
-            const userCardsResponse = await fetch(`${API_BASE}/user-cards/`);
+            const userCardsResponse = await fetch(`${API_BASE}/cards/user-cards/`);
             if (userCardsResponse.ok) {
                 userCards = await userCardsResponse.json();
             }
@@ -1072,7 +1069,7 @@ async function loadCards() {
         }));
         
         // Render cards
-        renderCards(cardsWithOwnership);
+        displayCards(cardsWithOwnership);
         
     } catch (error) {
         console.error('Error loading cards:', error);

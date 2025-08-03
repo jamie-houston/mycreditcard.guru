@@ -101,6 +101,280 @@
         <div id="results"></div>
     </div>
 
+    <style>
+    /* Roadmap Cards Grid */
+    .roadmap-cards-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 20px;
+        margin-top: 0;
+    }
+
+    /* Roadmap Card Base */
+    .roadmap-card {
+        background: rgba(255, 255, 255, 0.9);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-radius: 16px;
+        padding: 24px;
+        text-align: center;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        backdrop-filter: blur(10px);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        min-height: 320px;
+        cursor: pointer;
+        position: relative;
+    }
+
+    .roadmap-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+        border-color: rgba(102, 126, 234, 0.3);
+    }
+
+    /* Roadmap Card Header */
+    .roadmap-card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+    }
+
+    .roadmap-card-issuer {
+        font-size: 14px;
+        color: #6b7280;
+        font-weight: 500;
+    }
+
+    .roadmap-priority-badge {
+        color: white;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 12px;
+    }
+
+    /* Roadmap Card Name */
+    .roadmap-card-name {
+        font-weight: 700;
+        color: #1f2937;
+        font-size: 1.1rem;
+        margin-bottom: 16px;
+        text-align: center;
+        line-height: 1.2;
+        min-height: 48px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* Roadmap Card Info */
+    .roadmap-card-key-info {
+        margin-bottom: 16px;
+        text-align: left;
+        flex-grow: 1;
+    }
+
+    .roadmap-card-value,
+    .roadmap-card-fee,
+    .roadmap-card-bonus,
+    .roadmap-card-reasoning {
+        font-size: 14px;
+        color: #374151;
+        margin-bottom: 8px;
+    }
+
+    .roadmap-card-bonus {
+        color: #10b981;
+        font-weight: 600;
+    }
+
+    .roadmap-card-reasoning {
+        margin-top: 12px;
+        font-style: italic;
+        background: #f8f9fa;
+        padding: 10px;
+        border-radius: 6px;
+        border-left: 3px solid #3b82f6;
+    }
+
+    /* Roadmap Card Actions */
+    .roadmap-card-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin-top: auto;
+    }
+
+    .roadmap-btn {
+        padding: 12px 16px;
+        border-radius: 8px;
+        font-weight: 500;
+        font-size: 14px;
+        cursor: pointer;
+        transition: all 0.2s;
+        border: none;
+        text-align: center;
+    }
+
+    .roadmap-btn.primary {
+        background: #3b82f6;
+        color: white;
+    }
+
+    .roadmap-btn.primary:hover {
+        background: #2563eb;
+    }
+
+    .roadmap-btn.success {
+        background: #10b981;
+        color: white;
+    }
+
+    .roadmap-btn.success:hover {
+        background: #059669;
+    }
+
+    .roadmap-btn.apply-btn {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        color: white;
+        box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);
+    }
+
+    .roadmap-btn.apply-btn:hover {
+        background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+        box-shadow: 0 6px 20px rgba(245, 158, 11, 0.6);
+    }
+
+    /* Value Breakdown Styling */
+    .value-breakdown {
+        margin-top: 15px;
+        background: #f8f9fa;
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .breakdown-header {
+        background: #495057;
+        color: white;
+        padding: 12px 16px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-weight: 600;
+        font-size: 14px;
+    }
+
+    .breakdown-total {
+        background: rgba(255, 255, 255, 0.2);
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-family: monospace;
+    }
+
+    .breakdown-items {
+        padding: 0;
+    }
+
+    .breakdown-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 16px;
+        border-bottom: 1px solid #e9ecef;
+        font-size: 13px;
+    }
+
+    .breakdown-item:last-child {
+        border-bottom: none;
+    }
+
+    .breakdown-item.positive {
+        background: #f0f9ff;
+        border-left: 3px solid #10b981;
+    }
+
+    .breakdown-item.negative {
+        background: #fef2f2;
+        border-left: 3px solid #ef4444;
+    }
+
+    .breakdown-subitem {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 4px 16px 4px 32px;
+        background: #f8f9fa;
+        border-bottom: 1px solid #e9ecef;
+        font-size: 12px;
+        color: #6b7280;
+        font-style: italic;
+    }
+
+    .item-name, .subitem-name {
+        font-weight: 500;
+    }
+
+    .item-value {
+        font-family: monospace;
+        font-weight: 600;
+    }
+
+    .item-value.positive {
+        color: #059669;
+    }
+
+    .item-value.negative {
+        color: #dc2626;
+    }
+
+    .subitem-value {
+        font-family: monospace;
+        font-size: 11px;
+        color: #6b7280;
+    }
+
+    /* Mobile Responsive */
+    @media (max-width: 768px) {
+        .roadmap-cards-grid {
+            grid-template-columns: 1fr;
+            gap: 16px;
+        }
+        
+        .roadmap-card {
+            padding: 20px;
+            min-height: 280px;
+        }
+        
+        .roadmap-card-actions {
+            gap: 6px;
+        }
+        
+        .roadmap-btn {
+            padding: 10px 12px;
+            font-size: 13px;
+        }
+        
+        .breakdown-header {
+            padding: 10px 12px;
+            font-size: 13px;
+        }
+        
+        .breakdown-item {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+        
+        .breakdown-subitem {
+            padding: 3px 12px 3px 24px;
+            font-size: 11px;
+        }
+    }
+    </style>
+
     <script>
         // Dynamic issuer loading: 2025-07-04-v1
         let spendingCategories = {}; // For slug -> ID mapping
@@ -859,62 +1133,168 @@
                                         </div>
                                         <div id="toggle-${section.key}" style="font-size: 20px; transition: transform 0.3s ease;">▼</div>
                                     </div>
-                                    <div id="content-${section.key}" style="border: 1px solid ${section.borderColor}; border-top: none; border-radius: 0 0 10px 10px; padding: 0;">
+                                    <div id="content-${section.key}" class="roadmap-cards-grid" style="border: 1px solid ${section.borderColor}; border-top: none; border-radius: 0 0 10px 10px; padding: 20px;">
                             `;
 
                             sectionRecs.forEach((rec, index) => {
                         const actionClass = rec.action.toLowerCase();
 
-                        // Generate rewards breakdown HTML
+                        // Generate detailed value breakdown HTML
                         let breakdownHtml = '';
                         
                         if (rec.rewards_breakdown && Array.isArray(rec.rewards_breakdown) && rec.rewards_breakdown.length > 0) {
-                            breakdownHtml = '<div style="margin-top: 15px; background: #f8f9fa; padding: 10px; border-radius: 6px;"><strong>💰 Rewards Breakdown:</strong><ul style="margin: 8px 0; padding-left: 20px;">';
+                            // Calculate total from breakdown to verify it matches estimated_rewards
+                            let breakdownTotal = 0;
+                            let breakdownItems = [];
+                            
                             rec.rewards_breakdown.forEach(breakdown => {
                                 const categoryName = breakdown.category_name || 'Unknown Category';
-                                const calculation = breakdown.calculation || 'No calculation available';
-                                breakdownHtml += `<li style="margin: 4px 0; font-family: monospace; font-size: 14px; color: #2563eb;"><strong>${categoryName}:</strong> ${calculation}</li>`;
+                                const categoryValue = parseFloat(breakdown.category_rewards || 0);
+                                breakdownTotal += categoryValue;
                                 
-                                // Add credits breakdown if this is the Card Benefits category
-                                if (breakdown.credits_breakdown && Array.isArray(breakdown.credits_breakdown) && breakdown.credits_breakdown.length > 0) {
-                                    breakdown.credits_breakdown.forEach(credit => {
-                                        const frequencyDisplay = credit.frequency_display || '';
-                                        const creditIcon = credit.type === 'benefit' ? '🎁' : '💳';
-                                        breakdownHtml += `<li style="margin: 2px 0 2px 20px; font-family: monospace; font-size: 13px; color: #059669; font-style: italic;">
-                                            ${creditIcon} ${credit.name}: $${credit.annual_value.toFixed(0)}${frequencyDisplay}
-                                        </li>`;
-                                    });
+                                breakdownItems.push({
+                                    name: categoryName,
+                                    value: categoryValue,
+                                    calculation: breakdown.calculation || '',
+                                    credits_breakdown: breakdown.credits_breakdown || []
+                                });
+                            });
+                            
+                            // Add signup bonus if this is an 'apply' action
+                            let signupBonusValue = 0;
+                            if (rec.action === 'apply' && rec.signup_bonus_value) {
+                                signupBonusValue = parseFloat(rec.signup_bonus_value);
+                                breakdownTotal += signupBonusValue;
+                            }
+                            
+                            // Add annual fee (negative value)
+                            const annualFee = parseFloat(rec.card.effective_annual_fee || 0);
+                            if (annualFee > 0) {
+                                breakdownTotal -= annualFee;
+                            }
+                            
+                            // Build the HTML
+                            breakdownHtml = `
+                                <div class="value-breakdown">
+                                    <div class="breakdown-header">
+                                        <strong>💰 Value Breakdown</strong>
+                                        <span class="breakdown-total">Total: $${rec.estimated_rewards.toFixed(0)}</span>
+                                    </div>
+                                    <div class="breakdown-items">`;
+                            
+                            // Add reward categories
+                            breakdownItems.forEach(item => {
+                                if (item.value > 0) {
+                                    breakdownHtml += `
+                                        <div class="breakdown-item positive">
+                                            <span class="item-name">${item.name}</span>
+                                            <span class="item-value">+$${item.value.toFixed(0)}</span>
+                                        </div>`;
+                                    
+                                    // Add credits breakdown if available
+                                    if (item.credits_breakdown && item.credits_breakdown.length > 0) {
+                                        item.credits_breakdown.forEach(credit => {
+                                            const creditIcon = credit.type === 'benefit' ? '🎁' : '💳';
+                                            const frequencyDisplay = credit.frequency_display || '';
+                                            breakdownHtml += `
+                                                <div class="breakdown-subitem">
+                                                    <span class="subitem-name">${creditIcon} ${credit.name}${frequencyDisplay}</span>
+                                                    <span class="subitem-value">$${credit.annual_value.toFixed(0)}</span>
+                                                </div>`;
+                                        });
+                                    }
                                 }
                             });
-                            breakdownHtml += '</ul></div>';
+                            
+                            // Add signup bonus if applicable
+                            if (signupBonusValue > 0) {
+                                breakdownHtml += `
+                                    <div class="breakdown-item positive">
+                                        <span class="item-name">Signup Bonus</span>
+                                        <span class="item-value">+$${signupBonusValue.toFixed(0)}</span>
+                                    </div>`;
+                            }
+                            
+                            // Add annual fee if applicable
+                            if (annualFee > 0) {
+                                const feeLabel = rec.card.annual_fee_waived_first_year && rec.action === 'apply' 
+                                    ? 'Annual Fee (waived Year 1)' 
+                                    : 'Annual Fee';
+                                const feeValue = rec.card.annual_fee_waived_first_year && rec.action === 'apply' ? 0 : annualFee;
+                                
+                                if (feeValue > 0) {
+                                    breakdownHtml += `
+                                        <div class="breakdown-item negative">
+                                            <span class="item-name">${feeLabel}</span>
+                                            <span class="item-value">-$${feeValue.toFixed(0)}</span>
+                                        </div>`;
+                                }
+                            }
+                            
+                            breakdownHtml += `
+                                    </div>
+                                </div>`;
                         }
 
                                 const isLast = index === sectionRecs.length - 1;
                                 const borderBottom = isLast ? 'border-bottom: none;' : 'border-bottom: 1px solid #e5e7eb;';
 
                         html += `
-                                    <div class="recommendation ${actionClass} modal-card-clickable" onclick="openCardModal(${rec.card.id})" style="margin: 0; border-radius: 0; border: none; ${borderBottom} border-left: 4px solid ${section.borderColor};">
-                                        <div style="display: flex; justify-content: space-between; align-items: start;">
-                                            <div style="flex: 1;">
-                                                <h4 style="margin: 0 0 10px 0; font-size: 18px; color: #1f2937;">${rec.card.name}</h4>
-                                                <p style="margin: 5px 0;"><strong>Estimated Value:</strong> $${rec.estimated_rewards.toFixed(0)}</p>
-                                                <p style="margin: 5px 0;"><strong>Annual Fee:</strong> $${rec.card.effective_annual_fee}${rec.card.annual_fee_waived_first_year && rec.action === 'apply' ? ' (first year waived)' : ''}</p>
-                                        ${rec.card.signup_bonus_amount && rec.action === 'apply' ? 
-                                                    `<p style="margin: 5px 0;"><strong>Signup Bonus:</strong> ${rec.card.signup_bonus_amount} points/miles</p>` : ''
-                                        }
-                                        ${breakdownHtml}
-                                                <p style="margin: 10px 0 0 0;"><strong>Why:</strong> ${rec.reasoning}</p>
+                            <div class="roadmap-card ${actionClass}" onclick="openCardModal(${rec.card.id})">
+                                <div class="roadmap-card-header">
+                                    <div class="roadmap-card-issuer">${rec.card.issuer.name}</div>
+                                    <div class="roadmap-priority-badge" style="background: ${section.borderColor};">
+                                        #${rec.priority}
                                     </div>
-                                            <div style="display: flex; flex-direction: column; gap: 8px; align-items: center;">
-                                                <div style="background: ${section.borderColor}; color: white; padding: 8px 12px; border-radius: 20px; font-weight: 600; text-align: center; font-size: 14px;">
-                                            #${rec.priority}
-                                        </div>
-                                        ${rec.action === 'apply' ? 
-                                                    `<button onclick="event.stopPropagation(); toggleCardOwnership(${rec.card.id}, this)" style="padding: 6px 12px; font-size: 12px; background: #10b981; color: white; border: none; border-radius: 6px; cursor: pointer;">
-                                                        ✅ I have this
-                                            </button>` : ''
-                                        }
+                                </div>
+                                
+                                <div class="roadmap-card-name">${rec.card.name}</div>
+                                
+                                <div class="roadmap-card-key-info">
+                                    <div class="roadmap-card-value">
+                                        <strong>Estimated Value:</strong> $${rec.estimated_rewards.toFixed(0)}
                                     </div>
+                                    
+                                    <div class="roadmap-card-fee">
+                                        <strong>Annual Fee:</strong> $${rec.card.effective_annual_fee}${rec.card.annual_fee_waived_first_year && rec.action === 'apply' ? ' (first year waived)' : ''}
+                                    </div>
+                                    
+                                    ${rec.card.signup_bonus_amount && rec.action === 'apply' ? 
+                                        `<div class="roadmap-card-bonus">
+                                            <strong>Signup Bonus:</strong> ${rec.card.signup_bonus_amount.toLocaleString()} ${rec.card.signup_bonus_type ? rec.card.signup_bonus_type.name : 'points'}
+                                        </div>` : ''
+                                    }
+                                    
+                                    ${breakdownHtml}
+                                    
+                                    <div class="roadmap-card-reasoning">
+                                        <strong>Why:</strong> ${rec.reasoning}
+                                    </div>
+                                </div>
+                                
+                                <div class="roadmap-card-actions">
+                                    ${rec.action === 'apply' ? `
+                                        <button 
+                                            onclick="event.stopPropagation(); toggleCardOwnership(${rec.card.id}, this)" 
+                                            class="roadmap-btn success"
+                                        >
+                                            ✅ I have this card
+                                        </button>
+                                        ${rec.card.apply_url ? `
+                                            <button 
+                                                onclick="event.stopPropagation(); window.open('${rec.card.apply_url}', '_blank')" 
+                                                class="roadmap-btn apply-btn"
+                                            >
+                                                🚀 Apply Now
+                                            </button>
+                                        ` : ''}
+                                    ` : ''}
+                                    <button 
+                                        onclick="event.stopPropagation(); openCardModal(${rec.card.id})" 
+                                        class="roadmap-btn primary"
+                                    >
+                                        📋 View Details
+                                    </button>
                                 </div>
                             </div>
                         `;

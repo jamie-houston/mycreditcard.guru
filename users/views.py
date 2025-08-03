@@ -202,7 +202,7 @@ def get_user_cards_details(request):
     """Get detailed user cards with nickname and opening date"""
     try:
         profile, _ = UserSpendingProfile.objects.get_or_create(user=request.user)
-        user_cards = UserCard.objects.filter(profile=profile, is_active=True).select_related('card', 'card__issuer', 'card__primary_reward_type')
+        user_cards = UserCard.objects.filter(user=request.user, closed_date__isnull=True).select_related('card', 'card__issuer', 'card__primary_reward_type')
         
         serializer = UserCardSerializer(user_cards, many=True)
         return Response({
