@@ -544,6 +544,9 @@ function displayCards(cards) {
         const signupBonus = card.signup_bonus_amount || 0;
         const rewardMultiplier = card.metadata?.reward_value_multiplier || 0.01;
         
+        // Store card data globally for modal access (avoid JSON.stringify in HTML)
+        window[`cardData_${card.id}`] = card.user_card || null;
+        
         // Get user's nickname for this card if they own it
         let displayName = card.name;
         if (hasCard && card.user_card && card.user_card.nickname) {
@@ -599,7 +602,7 @@ function displayCards(cards) {
                 <div class="card-actions">
                     ${hasCard ? `
                         <button 
-                            onclick="event.stopPropagation(); openCardOwnershipModal(${card.id}, ${JSON.stringify(card.user_card || null)})" 
+                            onclick="event.stopPropagation(); openCardOwnershipModal(${card.id}, window.cardData_${card.id})" 
                             class="secondary"
                         >
                             ✏️ Edit card details
