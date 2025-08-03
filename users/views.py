@@ -3,6 +3,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from django.contrib.auth.models import User
+from django.utils import timezone
 from .models import UserProfile, UserPreferences
 from cards.models import UserCard, UserSpendingProfile, SpendingAmount
 from .serializers import (
@@ -27,12 +28,10 @@ class UserCardListView(generics.ListCreateAPIView):
     permission_classes = [IsAuthenticated]
     
     def get_queryset(self):
-        profile, _ = UserSpendingProfile.objects.get_or_create(user=self.request.user)
-        return UserCard.objects.filter(profile=profile, is_active=True).select_related('card')
+        return UserCard.objects.filter(user=self.request.user, closed_date__isnull=True).select_related('card')
     
     def perform_create(self, serializer):
-        profile, _ = UserSpendingProfile.objects.get_or_create(user=self.request.user)
-        serializer.save(profile=profile)
+        serializer.save(user=self.request.user)
 
 
 class UserCardDetailView(generics.RetrieveUpdateDestroyAPIView):
@@ -41,8 +40,7 @@ class UserCardDetailView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [IsAuthenticated]
     
     def get_queryset(self):
-        profile, _ = UserSpendingProfile.objects.get_or_create(user=self.request.user)
-        return UserCard.objects.filter(profile=profile)
+        return UserCard.objects.filter(user=self.request.user)
 
 
 class UserSpendingListView(generics.ListCreateAPIView):
@@ -116,15 +114,16 @@ def toggle_user_card(request):
             opened_date = request.data.get('opened_date')
             
             user_card = UserCard.objects.create(
-                profile=profile,
+                user=request.user,
                 card=card,
                 nickname=nickname,
                 opened_date=opened_date,
-                is_active=True
+                # is_active is now a property, don't set it explicitly
             )
             message = 'Card added to your collection'
         else:  # remove
-            UserCard.objects.filter(profile=profile, card=card).update(is_active=False)
+            # Instead of updating is_active, set closed_date to mark as inactive
+            UserCard.objects.filter(user=request.user, card=card, closed_date__isnull=True).update(closed_date=timezone.now().date())
             message = 'Card removed from your collection'
         
         return Response({
@@ -165,10 +164,8 @@ def update_user_card_details(request):
                 status=status.HTTP_404_NOT_FOUND
             )
         
-        profile, _ = UserSpendingProfile.objects.get_or_create(user=request.user)
-        
         try:
-            user_card = UserCard.objects.get(profile=profile, card=card, is_active=True)
+            user_card = UserCard.objects.get(user=request.user, card=card, closed_date__isnull=True)
         except UserCard.DoesNotExist:
             return Response(
                 {'error': 'Card not in your collection'}, 

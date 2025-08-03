@@ -82,14 +82,14 @@ class UserDataSerializer(serializers.Serializer):
         # Update cards
         from cards.models import CreditCard
         # Remove existing cards not in the new list
-        UserCard.objects.filter(profile=profile).exclude(card_id__in=cards_data).delete()
+        UserCard.objects.filter(user=user).exclude(card_id__in=cards_data).delete()
         
         # Add new cards
         for card_id in cards_data:
             try:
                 card = CreditCard.objects.get(id=card_id)
                 UserCard.objects.get_or_create(
-                    profile=profile, 
+                    user=user, 
                     card=card,
                     defaults={'opened_date': '2023-01-01'}  # Default date
                 )
@@ -116,7 +116,7 @@ class UserDataSerializer(serializers.Serializer):
             spending[spending_obj.category.slug] = spending_obj.monthly_amount
         
         # Get cards data
-        cards = list(UserCard.objects.filter(profile=profile, is_active=True).values_list('card_id', flat=True))
+        cards = list(UserCard.objects.filter(user=user, closed_date__isnull=True).values_list('card_id', flat=True))
         
         # Get preferences
         preferences = {}
