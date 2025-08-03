@@ -608,7 +608,7 @@ function displayCards(cards) {
                             ✏️ Edit card details
                         </button>
                         <button 
-                            onclick="event.stopPropagation(); removeUserCard(${card.user_card ? card.user_card.id : 'null'}, ${card.id})" 
+                            onclick="event.stopPropagation(); removeUserCard('${card.user_card ? card.user_card.id : 'null'}', ${card.id})" 
                             class="danger"
                         >
                             ❌ Remove from my cards
@@ -1070,7 +1070,7 @@ loadCards();
 </div>
 
 <style>
-.modal {
+#cardOwnershipModal {
     position: fixed;
     z-index: 1000;
     left: 0;
@@ -1086,11 +1086,11 @@ loadCards();
     box-sizing: border-box;
 }
 
-.modal.show {
+#cardOwnershipModal.show {
     display: flex !important; /* Show with flexbox when active */
 }
 
-.modal-content {
+#cardOwnershipModal .modal-content {
     background-color: white;
     padding: 0;
     border-radius: 16px;
@@ -1102,7 +1102,7 @@ loadCards();
     position: relative;
 }
 
-.modal-header {
+#cardOwnershipModal .modal-header {
     padding: 24px 32px 16px;
     border-bottom: 1px solid #e5e7eb;
     display: flex;
