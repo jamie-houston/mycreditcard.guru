@@ -1275,7 +1275,7 @@
                                 <div class="roadmap-card-actions">
                                     ${rec.action === 'apply' ? `
                                         <button 
-                                            onclick="event.stopPropagation(); toggleCardOwnership(${rec.card.id}, this)" 
+                                            onclick="event.stopPropagation(); openCardOwnershipModal(${rec.card.id})" 
                                             class="roadmap-btn success"
                                         >
                                             ✅ I have this card
@@ -1755,8 +1755,378 @@
                 window.cardDetailsResolveRoadmap(cardDetails);
             }
         }
+
+        // Card Ownership Modal Functions (copied from cards_list.html)
+        function openCardOwnershipModal(cardId, existingUserCard = null) {
+            const modal = document.getElementById('cardOwnershipModal');
+            const form = document.getElementById('cardOwnershipForm');
+            const modalTitle = document.getElementById('modalTitle');
+            
+            // Set modal title and add auth status indicator
+            if (isAuthenticated) {
+                modalTitle.textContent = existingUserCard ? 'Edit Card Details' : 'Add Card to Collection';
+            } else {
+                modalTitle.innerHTML = existingUserCard ? 
+                    'Edit Card Details <span style="background: #f59e0b; color: white; padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: 500; margin-left: 8px;">📱 Local Mode</span>' :
+                    'Add Card to Collection <span style="background: #f59e0b; color: white; padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: 500; margin-left: 8px;">📱 Local Mode</span>';
+            }
+            
+            // Store card ID in form
+            form.dataset.cardId = cardId;
+            form.dataset.userCardId = existingUserCard ? existingUserCard.id : '';
+            
+            // Pre-fill form if editing existing card
+            if (existingUserCard) {
+                form.nickname.value = existingUserCard.nickname || '';
+                form.opened_date.value = existingUserCard.opened_date || '';
+                form.closed_date.value = existingUserCard.closed_date || '';
+                form.notes.value = existingUserCard.notes || '';
+            } else {
+                form.reset();
+            }
+            
+            // Show/hide local storage notice
+            const localNotice = document.getElementById('localStorageNotice');
+            if (localNotice) {
+                localNotice.style.display = isAuthenticated ? 'none' : 'block';
+            }
+            
+            modal.style.display = 'flex';
+        }
+
+        function closeCardOwnershipModal() {
+            document.getElementById('cardOwnershipModal').style.display = 'none';
+        }
+
+        async function saveCardOwnership(event) {
+            event.preventDefault();
+            
+            const form = event.target;
+            const cardId = form.dataset.cardId;
+            const userCardId = form.dataset.userCardId;
+            const submitBtn = form.querySelector('button[type="submit"]');
+            
+            const formData = {
+                card_id: parseInt(cardId),
+                nickname: form.nickname.value,
+                opened_date: form.opened_date.value || null,
+                closed_date: form.closed_date.value || null,
+                notes: form.notes.value
+            };
+            
+            try {
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Saving...';
+                
+                if (isAuthenticated) {
+                    // For authenticated users, save to server
+                    let response;
+                    if (userCardId) {
+                        // Update existing card
+                        response = await fetch(`${API_BASE}/cards/user-cards/${userCardId}/`, {
+                            method: 'PATCH',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRFToken': getCookie('csrftoken')
+                            },
+                            body: JSON.stringify(formData)
+                        });
+                    } else {
+                        // Add new card
+                        response = await fetch(`${API_BASE}/cards/user-cards/add/`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRFToken': getCookie('csrftoken')
+                            },
+                            body: JSON.stringify(formData)
+                        });
+                    }
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        closeCardOwnershipModal();
+                        showNotification(data.message || 'Card saved successfully!', 'success');
+                    } else {
+                        const errorData = await response.json();
+                        showNotification(errorData.error || 'Failed to save card', 'error');
+                    }
+                } else {
+                    // For unauthenticated users, save to local storage
+                    const localCards = LocalStorage.getCards();
+                    const localCardDetails = LocalStorage.getCardDetails();
+                    
+                    if (userCardId && userCardId.toString().startsWith('local_')) {
+                        // Update existing local card
+                        const realCardId = parseInt(cardId);
+                        localCardDetails[realCardId] = {
+                            nickname: formData.nickname,
+                            opened_date: formData.opened_date,
+                            notes: formData.notes
+                        };
+                        LocalStorage.setCardDetails(localCardDetails);
+                        
+                        showNotification('Card details updated in your local collection!', 'success');
+                    } else {
+                        // Add new card to local storage
+                        const realCardId = parseInt(cardId);
+                        if (!localCards.includes(realCardId)) {
+                            localCards.push(realCardId);
+                            LocalStorage.setCards(localCards);
+                        }
+                        
+                        localCardDetails[realCardId] = {
+                            nickname: formData.nickname,
+                            opened_date: formData.opened_date,
+                            notes: formData.notes
+                        };
+                        LocalStorage.setCardDetails(localCardDetails);
+                        
+                        showNotification('Card added to your local collection! Log in to sync with your account.', 'success');
+                    }
+                    
+                    closeCardOwnershipModal();
+                }
+                
+            } catch (error) {
+                console.error('Error saving card:', error);
+                showNotification('Error saving card. Please try again.', 'error');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = userCardId ? 'Update Card' : 'Add Card';
+            }
+        }
+
+        function showNotification(message, type = 'info') {
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#3b82f6'};
+                color: white;
+                padding: 16px 24px;
+                border-radius: 8px;
+                box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+                z-index: 10000;
+                max-width: 400px;
+                font-weight: 500;
+                animation: slideIn 0.3s ease-out;
+            `;
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            // Remove after 4 seconds
+            setTimeout(() => {
+                notification.style.animation = 'slideOut 0.3s ease-in';
+                setTimeout(() => notification.remove(), 300);
+            }, 4000);
+        }
         
     </script>
+
+<!-- Card Ownership Modal -->
+<div id="cardOwnershipModal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 id="modalTitle">Add Card to Collection</h2>
+            <span class="close" onclick="closeCardOwnershipModal()">&times;</span>
+        </div>
+        
+        <!-- Local Storage Notice -->
+        <div id="localStorageNotice" style="display: none; background: #fef3c7; border: 1px solid #f59e0b; color: #92400e; padding: 12px 24px; margin: 0; border-radius: 0;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <span>📱</span>
+                <span><strong>Local Mode:</strong> This card will be saved to your device. <a href="/accounts/login/" style="color: #92400e; text-decoration: underline;">Log in</a> to sync with your account.</span>
+            </div>
+        </div>
+        
+        <form id="cardOwnershipForm" onsubmit="saveCardOwnership(event)">
+            <div class="form-group">
+                <label for="nickname">Nickname (Optional)</label>
+                <input type="text" id="nickname" name="nickname" 
+                       placeholder="e.g., My Travel Card, Grocery Card">
+                <small>Give this card a memorable name</small>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="opened_date">Opened Date</label>
+                    <input type="date" id="opened_date" name="opened_date">
+                    <small>When did you get approved/open this card?</small>
+                </div>
+                
+                <div class="form-group">
+                    <label for="closed_date">Closed Date (Optional)</label>
+                    <input type="date" id="closed_date" name="closed_date">
+                    <small>Leave blank if card is still active</small>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="notes">Notes (Optional)</label>
+                <textarea id="notes" name="notes" rows="3" 
+                          placeholder="Any notes about this card (signup bonus received, annual fee paid, etc.)"></textarea>
+            </div>
+            
+            <div class="form-actions">
+                <button type="button" onclick="closeCardOwnershipModal()" class="btn-secondary">
+                    Cancel
+                </button>
+                <button type="submit" class="btn-primary">
+                    Add Card
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+.modal {
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.modal-content {
+    background-color: white;
+    padding: 0;
+    border-radius: 16px;
+    width: 100%;
+    max-width: 600px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+    max-height: 90vh;
+    overflow-y: auto;
+    position: relative;
+}
+
+.modal-header {
+    padding: 24px 32px 16px;
+    border-bottom: 1px solid #e5e7eb;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h2 {
+    margin: 0;
+    color: #1f2937;
+    font-size: 1.5rem;
+}
+
+.close {
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    color: #6b7280;
+    line-height: 1;
+}
+
+.close:hover {
+    color: #374151;
+}
+
+.form-group {
+    margin-bottom: 20px;
+    padding: 0 32px;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 500;
+    color: #374151;
+}
+
+.form-group input,
+.form-group textarea {
+    width: 100%;
+    padding: 12px 16px;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 14px;
+    transition: border-color 0.2s;
+    box-sizing: border-box;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: #3b82f6;
+}
+
+.form-group small {
+    display: block;
+    margin-top: 4px;
+    color: #6b7280;
+    font-size: 12px;
+}
+
+.form-actions {
+    padding: 24px 32px;
+    border-top: 1px solid #e5e7eb;
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
+.btn-primary,
+.btn-secondary {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-primary {
+    background: #3b82f6;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #2563eb;
+}
+
+.btn-secondary {
+    background: #f3f4f6;
+    color: #374151;
+}
+
+.btn-secondary:hover {
+    background: #e5e7eb;
+}
+
+@keyframes slideIn {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes slideOut {
+    from { transform: translateX(0); opacity: 1; }
+    to { transform: translateX(100%); opacity: 0; }
+}
+</style>
+
 {% endblock %}
 
 {% block extra_js %}{% endblock %}
