@@ -149,7 +149,7 @@
                 oninput="searchCards(this.value)"
             >
             <!-- Dropdown Results -->
-            <div id="cardSearchResults" style="position: absolute; top: 100%; left: 0; right: 0; background: white; border: 2px solid #e5e7eb; border-top: none; border-radius: 0 0 8px 8px; max-height: 300px; overflow-y: auto; z-index: 9999; display: none; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);">
+            <div id="cardSearchResults" style="position: absolute !important; top: 100% !important; left: 0 !important; right: 0 !important; background: white !important; border: 2px solid #e5e7eb; border-top: none; border-radius: 0 0 8px 8px; max-height: 300px; overflow-y: auto; z-index: 99999 !important; display: none; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;">
             </div>
         </div>
         
@@ -735,7 +735,7 @@ async function loadCategoryOptimization() {
         // Load category names for display
         let categoriesResponse;
         try {
-            categoriesResponse = await fetch(`${API_BASE}/cards/categories/`);
+            categoriesResponse = await fetch(`${API_BASE}/cards/spending-categories/`);
             if (!categoriesResponse.ok) throw new Error('Failed to fetch categories');
         } catch (error) {
             console.error('Error fetching categories:', error);
@@ -850,7 +850,7 @@ async function loadSpendingProfile() {
         // Load category names
         let categoriesResponse;
         try {
-            categoriesResponse = await fetch(`${API_BASE}/cards/categories/`);
+            categoriesResponse = await fetch(`${API_BASE}/cards/spending-categories/`);
             if (!categoriesResponse.ok) throw new Error('Failed to fetch categories');
         } catch (error) {
             console.error('Error fetching categories:', error);
