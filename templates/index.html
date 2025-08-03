@@ -1261,7 +1261,7 @@
                                     
                                     ${rec.card.signup_bonus_amount && rec.action === 'apply' ? 
                                         `<div class="roadmap-card-bonus">
-                                            <strong>Signup Bonus:</strong> ${rec.card.signup_bonus_amount.toLocaleString()} ${rec.card.signup_bonus_type ? rec.card.signup_bonus_type.name : 'points'}
+                                            <strong>Signup Bonus:</strong> ${rec.card.signup_bonus_amount.toLocaleString()} ${rec.card.signup_bonus_type || 'points'}
                                         </div>` : ''
                                     }
                                     

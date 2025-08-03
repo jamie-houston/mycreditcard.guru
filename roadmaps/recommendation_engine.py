@@ -610,18 +610,28 @@ class RecommendationEngine:
         """Generate reasoning text for a card recommendation"""
         card = card_data['card']
         action = card_data['action']
-        net_value = card_data['net_value']
         
         if action == 'apply':
+            # Calculate the actual estimated value that user will see
+            rewards_breakdown = self._calculate_card_rewards_breakdown(card)
+            annual_rewards = rewards_breakdown['total_rewards']
             signup_bonus = self._get_signup_bonus_value(card)
             annual_fee_waived = card.metadata.get('annual_fee_waived_first_year', False)
+            effective_fee = 0 if annual_fee_waived else float(card.annual_fee)
+            total_estimated_value = annual_rewards - effective_fee + signup_bonus
+            
             fee_text = " (first year fee waived)" if annual_fee_waived else f" (${card.annual_fee} annual fee)"
             if signup_bonus > 0:
-                return f"Apply - adds ${net_value:.0f} annual value + ${signup_bonus:.0f} signup bonus{fee_text}"
+                return f"Total estimated value: ${total_estimated_value:.0f} (${annual_rewards:.0f} annual rewards - ${effective_fee} fee + ${signup_bonus:.0f} signup bonus)"
             else:
-                return f"Apply - adds ${net_value:.0f} annual value{fee_text}"
+                return f"Total estimated value: ${total_estimated_value:.0f} (${annual_rewards:.0f} annual rewards - ${effective_fee} fee)"
         elif action == 'keep':
-            return f"Keep - provides ${net_value:.0f} annual value to portfolio"
+            # Calculate actual value for keep actions too
+            rewards_breakdown = self._calculate_card_rewards_breakdown(card)
+            annual_rewards = rewards_breakdown['total_rewards']
+            annual_fee = float(card.annual_fee)
+            net_value = annual_rewards - annual_fee
+            return f"Keep - earning ${annual_rewards:.0f} annually vs ${annual_fee} fee (net: ${net_value:.0f})"
         else:  # cancel
             return f"Cancel - redundant card providing negative portfolio value"
     
@@ -945,7 +955,7 @@ class RecommendationEngine:
                     'annual_rewards': annual_rewards,
                     'signup_bonus': signup_bonus_value,
                     'rewards_breakdown': rewards_breakdown['breakdown'],
-                    'reasoning': f"Annual value: ${annual_value:.0f} (${annual_rewards:.0f} rewards - ${effective_annual_fee} fee{' - first year fee waived' if annual_fee_waived_first_year else ''}) + ${signup_bonus_value:.0f} signup bonus"
+                    'reasoning': f"Total estimated value: ${total_estimated_value:.0f} (${annual_rewards:.0f} annual rewards - ${effective_annual_fee} fee{' - first year fee waived' if annual_fee_waived_first_year else ''} + ${signup_bonus_value:.0f} signup bonus)"
                 })
         
         # Sort by score and take top cards
