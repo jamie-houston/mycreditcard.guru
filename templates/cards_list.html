@@ -1073,10 +1073,10 @@ loadCards();
 #cardOwnershipModal {
     position: fixed;
     z-index: 1000;
-    left: 0;
     top: 0;
-    width: 100vw;
-    height: 100vh;
+    left: 0;
+    right: 0;
+    bottom: 0;
     background-color: rgba(0, 0, 0, 0.5);
     backdrop-filter: blur(4px);
     display: none; /* Hidden by default */
@@ -1084,7 +1084,6 @@ loadCards();
     justify-content: center;
     padding: 20px;
     box-sizing: border-box;
-    overflow: auto;
 }
 
 #cardOwnershipModal.show {
@@ -1097,11 +1096,10 @@ loadCards();
     border-radius: 16px;
     width: 100%;
     max-width: 600px;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
     max-height: 90vh;
     overflow-y: auto;
-    position: relative;
-    margin: auto; /* Center horizontally and vertically */
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+    flex-shrink: 0;
 }
 
 #cardOwnershipModal .modal-header {
