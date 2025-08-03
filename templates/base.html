@@ -1557,7 +1557,7 @@
     </div>
 
     <!-- Edit Card Details Modal -->
-    <div id="editCardDetailsModal" class="modal">
+    <div id="editCardDetailsModal" class="modal" style="display: none;">
         <div class="modal-content" style="max-width: 500px;">
             <div class="modal-header">
                 <button class="modal-close" onclick="closeEditCardDetailsModal()">&times;</button>
@@ -2704,6 +2704,8 @@
         
         // Edit Card Details Modal Functions
         async function openEditCardDetailsModal() {
+            console.log('🐛 DEBUG: openEditCardDetailsModal called');
+            console.trace('🐛 DEBUG: Call stack for openEditCardDetailsModal');
             if (!currentModalCard) return;
             
             try {
