@@ -1650,6 +1650,8 @@
                 // User logged out - clear all local data
                 console.log('🔓 User logged out, clearing local data');
                 clearUserData();
+                // Clear the sync completion flag so future logins can trigger sync
+                sessionStorage.removeItem('dataSyncCompleted');
             } else if (!wasAuthenticated && isNowAuthenticated) {
                 // User logged in - handle data synchronization
                 console.log('🔒 User logged in, handling data synchronization');
@@ -1695,6 +1697,13 @@
         // Handle data synchronization when user logs in
         async function handleLoginDataSync() {
             try {
+                // Check if sync has already been completed for this session
+                const syncCompleted = sessionStorage.getItem('dataSyncCompleted');
+                if (syncCompleted) {
+                    console.log('📋 Data sync already completed for this session, skipping');
+                    return;
+                }
+                
                 // Get local data before syncing
                 const localCards = LocalStorage.getCards();
                 const localSpending = LocalStorage.getSpending();
@@ -1718,16 +1727,22 @@
                     console.log('📤 Saving local data to new user account');
                     await saveLocalDataToServer(localCards, localSpending, localPreferences, localCardDetails);
                     await syncUserDataFromServer();
+                    // Mark sync as completed
+                    sessionStorage.setItem('dataSyncCompleted', 'true');
                 } else {
                     // Only server data or no data at all - just sync from server
                     console.log('📥 Syncing data from server');
                     await syncUserDataFromServer();
+                    // Mark sync as completed
+                    sessionStorage.setItem('dataSyncCompleted', 'true');
                 }
                 
             } catch (error) {
                 console.error('Error handling login data sync:', error);
                 // Fallback to just syncing from server
                 await syncUserDataFromServer();
+                // Mark sync as completed even on error to prevent repeated prompts
+                sessionStorage.setItem('dataSyncCompleted', 'true');
             }
         }
 
@@ -1836,8 +1851,15 @@
                             await saveLocalDataToServer(localCards, localSpending, {}, localCardDetails);
                             await syncUserDataFromServer();
                         }
+                        
+                        // Mark sync as completed to prevent repeated prompts
+                        sessionStorage.setItem('dataSyncCompleted', 'true');
+                        console.log('✅ Data sync completed with choice:', choice);
+                        
                     } catch (error) {
                         console.error('Error applying data sync choice:', error);
+                        // Still mark as completed to prevent infinite prompts
+                        sessionStorage.setItem('dataSyncCompleted', 'true');
                     }
                     
                     resolve();
