@@ -857,8 +857,14 @@ function openCardOwnershipModal(cardId, existingUserCard = null) {
     const form = document.getElementById('cardOwnershipForm');
     const modalTitle = document.getElementById('modalTitle');
     
-    // Set modal title
-    modalTitle.textContent = existingUserCard ? 'Edit Card Details' : 'Add Card to Collection';
+    // Set modal title and add auth status indicator
+    if (isAuthenticated) {
+        modalTitle.textContent = existingUserCard ? 'Edit Card Details' : 'Add Card to Collection';
+    } else {
+        modalTitle.innerHTML = existingUserCard ? 
+            'Edit Card Details <span style="background: #f59e0b; color: white; padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: 500; margin-left: 8px;">📱 Local Mode</span>' :
+            'Add Card to Collection <span style="background: #f59e0b; color: white; padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: 500; margin-left: 8px;">📱 Local Mode</span>';
+    }
     
     // Store card ID in form
     form.dataset.cardId = cardId;
@@ -872,6 +878,12 @@ function openCardOwnershipModal(cardId, existingUserCard = null) {
         form.notes.value = existingUserCard.notes || '';
     } else {
         form.reset();
+    }
+    
+    // Show/hide local storage notice
+    const localNotice = document.getElementById('localStorageNotice');
+    if (localNotice) {
+        localNotice.style.display = isAuthenticated ? 'none' : 'block';
     }
     
     modal.style.display = 'block';
@@ -901,41 +913,82 @@ async function saveCardOwnership(event) {
         submitBtn.disabled = true;
         submitBtn.textContent = 'Saving...';
         
-        let response;
-        if (userCardId) {
-            // Update existing card
-            response = await fetch(`${API_BASE}/cards/user-cards/${userCardId}/`, {
-                method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': getCookie('csrftoken')
-                },
-                body: JSON.stringify(formData)
-            });
-        } else {
-            // Add new card
-            response = await fetch(`${API_BASE}/cards/user-cards/add/`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': getCookie('csrftoken')
-                },
-                body: JSON.stringify(formData)
-            });
-        }
-        
-        if (response.ok) {
-            const data = await response.json();
-            closeCardOwnershipModal();
+        if (isAuthenticated) {
+            // For authenticated users, save to server
+            let response;
+            if (userCardId) {
+                // Update existing card
+                response = await fetch(`${API_BASE}/cards/user-cards/${userCardId}/`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify(formData)
+                });
+            } else {
+                // Add new card
+                response = await fetch(`${API_BASE}/cards/user-cards/add/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify(formData)
+                });
+            }
             
-            // Show success message
-            showNotification(data.message || 'Card saved successfully!', 'success');
+            if (response.ok) {
+                const data = await response.json();
+                closeCardOwnershipModal();
+                
+                // Show success message
+                showNotification(data.message || 'Card saved successfully!', 'success');
+                
+                // Reload cards to reflect changes
+                loadCardsWithOwnership();
+            } else {
+                const errorData = await response.json();
+                showNotification(errorData.error || 'Failed to save card', 'error');
+            }
+        } else {
+            // For unauthenticated users, save to local storage
+            const localCards = LocalStorage.getCards();
+            const localCardDetails = LocalStorage.getCardDetails();
+            
+            if (userCardId && userCardId.toString().startsWith('local_')) {
+                // Update existing local card
+                const realCardId = parseInt(cardId);
+                localCardDetails[realCardId] = {
+                    nickname: formData.nickname,
+                    opened_date: formData.opened_date,
+                    notes: formData.notes
+                };
+                LocalStorage.setCardDetails(localCardDetails);
+                
+                showNotification('Card details updated in your local collection!', 'success');
+            } else {
+                // Add new card to local storage
+                const realCardId = parseInt(cardId);
+                if (!localCards.includes(realCardId)) {
+                    localCards.push(realCardId);
+                    LocalStorage.setCards(localCards);
+                }
+                
+                localCardDetails[realCardId] = {
+                    nickname: formData.nickname,
+                    opened_date: formData.opened_date,
+                    notes: formData.notes
+                };
+                LocalStorage.setCardDetails(localCardDetails);
+                
+                showNotification('Card added to your local collection! Log in to sync with your account.', 'success');
+            }
+            
+            closeCardOwnershipModal();
             
             // Reload cards to reflect changes
             loadCardsWithOwnership();
-        } else {
-            const errorData = await response.json();
-            showNotification(errorData.error || 'Failed to save card', 'error');
         }
         
     } catch (error) {
@@ -1121,6 +1174,14 @@ loadCards();
         <div class="modal-header">
             <h2 id="modalTitle">Add Card to Collection</h2>
             <span class="close" onclick="closeCardOwnershipModal()">&times;</span>
+        </div>
+        
+        <!-- Local Storage Notice -->
+        <div id="localStorageNotice" style="display: none; background: #fef3c7; border: 1px solid #f59e0b; color: #92400e; padding: 12px 24px; margin: 0; border-radius: 0;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <span>📱</span>
+                <span><strong>Local Mode:</strong> This card will be saved to your device. <a href="/accounts/login/" style="color: #92400e; text-decoration: underline;">Log in</a> to sync with your account.</span>
+            </div>
         </div>
         
         <form id="cardOwnershipForm" onsubmit="saveCardOwnership(event)">
