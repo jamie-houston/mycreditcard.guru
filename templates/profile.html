@@ -129,6 +129,42 @@
     </div>
 </div>
 
+<!-- Add New Card Section -->
+<div class="section">
+    <h2>➕ Add Credit Cards</h2>
+    <p style="color: #6b7280; margin-bottom: 20px;">Quickly add cards to your collection by searching and selecting from our database:</p>
+    
+    <div style="display: flex; gap: 12px; align-items: flex-end; margin-bottom: 20px; flex-wrap: wrap;">
+        <!-- Searchable Card Dropdown -->
+        <div style="flex: 1; min-width: 300px; position: relative;">
+            <label for="cardSearch" style="display: block; margin-bottom: 5px; font-weight: 500; color: #374151;">Search for a card:</label>
+            <input 
+                type="text" 
+                id="cardSearch" 
+                placeholder="Type card name (e.g., 'Chase Sapphire', 'Blue Cash')..." 
+                autocomplete="off"
+                style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px; transition: border-color 0.2s; box-sizing: border-box;"
+                onfocus="this.style.borderColor='#3b82f6'" 
+                onblur="if(!this.value) this.style.borderColor='#e5e7eb'"
+                oninput="searchCards(this.value)"
+            >
+            <!-- Dropdown Results -->
+            <div id="cardSearchResults" style="position: absolute; top: 100%; left: 0; right: 0; background: white; border: 2px solid #e5e7eb; border-top: none; border-radius: 0 0 8px 8px; max-height: 300px; overflow-y: auto; z-index: 1000; display: none;">
+            </div>
+        </div>
+        
+        <!-- Add Button -->
+        <button 
+            id="addSelectedCard" 
+            onclick="addSelectedCardToCollection()" 
+            disabled
+            style="padding: 12px 24px; background: #3b82f6; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.2s; opacity: 0.5;"
+        >
+            ✅ Add Card
+        </button>
+    </div>
+</div>
+
 <!-- Card Collection Section -->
 <div class="section">
     <h2>💳 My Card Collection</h2>
@@ -452,6 +488,9 @@ async function loadProfileData() {
         // Initialize user state first
         await initUserState();
         
+        // Update UI based on authentication status
+        updateAddCardSection();
+        
         // Load all profile data
         await Promise.all([
             loadCardCollection(),
@@ -470,15 +509,58 @@ async function loadProfileData() {
 
 async function loadCardCollection() {
     try {
-        const userCardsDetails = await UserDataManager.getUserCardsDetails();
+        let userCardsDetails;
         const cardCollectionContainer = document.getElementById('cardCollection');
+        
+        if (!isAuthenticated) {
+            // For unauthenticated users, get cards from local storage
+            const localCardIds = LocalStorage.getCards();
+            const localCardDetails = LocalStorage.getCardDetails();
+            
+            if (localCardIds.length === 0) {
+                cardCollectionContainer.innerHTML = `
+                    <div class="empty-state">
+                        <h3>No Cards Added Yet</h3>
+                        <p>Start building your credit card portfolio by adding your cards using the search above. Your cards will be saved locally, and you can sync them to your account when you log in.</p>
+                        <a href="/cards/">Browse All Credit Cards</a>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Convert local storage data to match expected format
+            userCardsDetails = [];
+            for (const cardId of localCardIds) {
+                try {
+                    const response = await fetch(`${API_BASE}/cards/cards/${cardId}/`);
+                    if (response.ok) {
+                        const cardData = await response.json();
+                        const details = localCardDetails[cardId] || {};
+                        userCardsDetails.push({
+                            id: `local_${cardId}`,
+                            card: cardData,
+                            nickname: details.nickname || '',
+                            opened_date: details.opened_date || null,
+                            closed_date: null,
+                            notes: details.notes || '',
+                            is_local: true
+                        });
+                    }
+                } catch (error) {
+                    console.error(`Error fetching card ${cardId}:`, error);
+                }
+            }
+        } else {
+            // For authenticated users, get from server
+            userCardsDetails = await UserDataManager.getUserCardsDetails();
+        }
         
         if (!userCardsDetails || userCardsDetails.length === 0) {
             cardCollectionContainer.innerHTML = `
                 <div class="empty-state">
                     <h3>No Cards Added Yet</h3>
-                    <p>Start building your credit card portfolio by adding your cards.</p>
-                    <a href="/cards/">Browse Credit Cards</a>
+                    <p>Start building your credit card portfolio by adding your cards using the search above.</p>
+                    <a href="/cards/">Browse All Credit Cards</a>
                 </div>
             `;
             return;
@@ -1097,6 +1179,222 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 });
+
+// Card Search Functionality
+let allCards = [];
+let selectedCard = null;
+let searchTimeout = null;
+
+// Load all cards for search
+async function loadAllCards() {
+    try {
+        const response = await fetch('/api/cards/cards/');
+        allCards = await response.json();
+    } catch (error) {
+        console.error('Error loading cards:', error);
+    }
+}
+
+// Search cards as user types
+function searchCards(query) {
+    const resultsDiv = document.getElementById('cardSearchResults');
+    const addButton = document.getElementById('addSelectedCard');
+    
+    // Clear previous timeout
+    if (searchTimeout) {
+        clearTimeout(searchTimeout);
+    }
+    
+    // Reset selected card
+    selectedCard = null;
+    addButton.disabled = true;
+    addButton.style.opacity = '0.5';
+    
+    if (!query || query.length < 2) {
+        resultsDiv.style.display = 'none';
+        return;
+    }
+    
+    // Debounce search
+    searchTimeout = setTimeout(() => {
+        const filtered = allCards.filter(card => 
+            card.name.toLowerCase().includes(query.toLowerCase()) ||
+            card.issuer.name.toLowerCase().includes(query.toLowerCase())
+        ).slice(0, 8); // Limit to 8 results
+        
+        displaySearchResults(filtered);
+    }, 300);
+}
+
+// Display search results
+function displaySearchResults(cards) {
+    const resultsDiv = document.getElementById('cardSearchResults');
+    
+    if (cards.length === 0) {
+        resultsDiv.innerHTML = '<div style="padding: 12px; color: #6b7280; text-align: center;">No cards found</div>';
+        resultsDiv.style.display = 'block';
+        return;
+    }
+    
+    const html = cards.map(card => `
+        <div 
+            class="search-result-item" 
+            onclick="selectCard(${card.id}, '${card.name.replace(/'/g, '\\\'')}')"
+            style="padding: 12px; cursor: pointer; border-bottom: 1px solid #f3f4f6; display: flex; justify-content: space-between; align-items: center; transition: background-color 0.2s;"
+            onmouseover="this.style.backgroundColor='#f9fafb'"
+            onmouseout="this.style.backgroundColor='white'"
+        >
+            <div>
+                <div style="font-weight: 600; color: #1f2937;">${card.name}</div>
+                <div style="font-size: 12px; color: #6b7280;">${card.issuer.name} • Annual Fee: $${card.annual_fee}</div>
+            </div>
+            <div style="color: #3b82f6; font-size: 12px; font-weight: 600;">Select →</div>
+        </div>
+    `).join('');
+    
+    resultsDiv.innerHTML = html;
+    resultsDiv.style.display = 'block';
+}
+
+// Select a card from search results
+function selectCard(cardId, cardName) {
+    selectedCard = cardId;
+    
+    // Update input value
+    document.getElementById('cardSearch').value = cardName;
+    
+    // Hide results
+    document.getElementById('cardSearchResults').style.display = 'none';
+    
+    // Enable add button
+    const addButton = document.getElementById('addSelectedCard');
+    addButton.disabled = false;
+    addButton.style.opacity = '1';
+}
+
+// Add selected card to collection
+async function addSelectedCardToCollection() {
+    if (!selectedCard) {
+        showNotification('Please select a card first', 'error');
+        return;
+    }
+    
+    const addButton = document.getElementById('addSelectedCard');
+    const originalText = addButton.innerHTML;
+    addButton.innerHTML = '⏳ Adding...';
+    addButton.disabled = true;
+    
+    try {
+        if (isAuthenticated) {
+            // For authenticated users, save to server
+            const response = await fetch('/api/cards/user-cards/add/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({
+                    card_id: selectedCard
+                })
+            });
+            
+            if (response.ok) {
+                const data = await response.json();
+                showNotification(data.message || 'Card added successfully!', 'success');
+                
+                // Reload the page data to show the new card
+                loadProfileData();
+            } else {
+                const errorData = await response.json();
+                showNotification(errorData.error || 'Failed to add card', 'error');
+                return;
+            }
+        } else {
+            // For unauthenticated users, save to local storage
+            const currentCards = LocalStorage.getCards();
+            if (!currentCards.includes(selectedCard)) {
+                currentCards.push(selectedCard);
+                LocalStorage.setCards(currentCards);
+                
+                showNotification('Card added to your local collection! Log in to sync with your account.', 'success');
+                
+                // Reload the page data to show the new card
+                loadProfileData();
+            } else {
+                showNotification('Card is already in your collection', 'info');
+            }
+        }
+        
+        // Clear search
+        document.getElementById('cardSearch').value = '';
+        selectedCard = null;
+        addButton.disabled = true;
+        addButton.style.opacity = '0.5';
+        
+    } catch (error) {
+        console.error('Error adding card:', error);
+        showNotification('Error adding card. Please try again.', 'error');
+    } finally {
+        addButton.innerHTML = originalText;
+        addButton.disabled = selectedCard === null;
+    }
+}
+
+// Hide search results when clicking outside
+document.addEventListener('click', function(event) {
+    const searchInput = document.getElementById('cardSearch');
+    const resultsDiv = document.getElementById('cardSearchResults');
+    
+    if (!searchInput.contains(event.target) && !resultsDiv.contains(event.target)) {
+        resultsDiv.style.display = 'none';
+    }
+});
+
+// Load cards when page loads
+loadAllCards();
+
+// Update add card section based on authentication status
+function updateAddCardSection() {
+    const searchInput = document.getElementById('cardSearch');
+    const addButton = document.getElementById('addSelectedCard');
+    
+    // Enable for both authenticated and unauthenticated users
+    if (searchInput) {
+        searchInput.disabled = false;
+        searchInput.style.opacity = '1';
+        if (isAuthenticated) {
+            searchInput.placeholder = "Type card name (e.g., 'Chase Sapphire', 'Blue Cash')...";
+        } else {
+            searchInput.placeholder = "Type card name (e.g., 'Chase Sapphire', 'Blue Cash')... (saves locally)";
+        }
+    }
+    
+    if (addButton) {
+        addButton.innerHTML = '✅ Add Card';
+        addButton.style.opacity = selectedCard ? '1' : '0.5';
+        addButton.disabled = selectedCard === null;
+    }
+    
+    // Add visual indicator for local storage mode
+    if (!isAuthenticated) {
+        const addCardSection = document.querySelector('.section h2');
+        if (addCardSection && addCardSection.textContent.includes('➕ Add Credit Cards')) {
+            const existingBadge = addCardSection.querySelector('.local-mode-badge');
+            if (!existingBadge) {
+                const badge = document.createElement('span');
+                badge.className = 'local-mode-badge';
+                badge.innerHTML = ' <span style="background: #f59e0b; color: white; padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: 500;">📱 Local Mode</span>';
+                addCardSection.appendChild(badge);
+            }
+        }
+    } else {
+        // Remove local mode badge for authenticated users
+        const badge = document.querySelector('.local-mode-badge');
+        if (badge) {
+            badge.remove();
+        }
+    }
+}
 </script>
 
 {% endblock %}

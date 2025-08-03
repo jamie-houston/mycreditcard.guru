@@ -368,11 +368,11 @@ async function loadCards() {
         // Load user's current cards (if any)
         await loadUserCards();
         
+        // Load cards with ownership data and display them
+        await loadCardsWithOwnership();
+        
         // Check for URL parameters to pre-select filters
         loadURLFilters();
-        
-        // Display all cards
-        filterCards();
         
     } catch (error) {
         console.error('Error loading cards:', error);
@@ -932,7 +932,7 @@ async function saveCardOwnership(event) {
             showNotification(data.message || 'Card saved successfully!', 'success');
             
             // Reload cards to reflect changes
-            loadCards();
+            loadCardsWithOwnership();
         } else {
             const errorData = await response.json();
             showNotification(errorData.error || 'Failed to save card', 'error');
@@ -1016,7 +1016,7 @@ async function removeUserCard(userCardId) {
             showNotification(data.message || 'Card removed successfully', 'success');
             
             // Reload cards to reflect changes
-            loadCards();
+            loadCardsWithOwnership();
         } else {
             const errorData = await response.json();
             showNotification(errorData.error || 'Failed to remove card', 'error');
@@ -1037,7 +1037,7 @@ window.onclick = function(event) {
 }
 
 // Load cards with ownership data
-async function loadCards() {
+async function loadCardsWithOwnership() {
     try {
         // Fetch all cards
         const cardsResponse = await fetch(`${API_BASE}/cards/cards/`);
@@ -1045,14 +1045,45 @@ async function loadCards() {
         
         // Fetch user's owned cards if authenticated
         let userCards = [];
-        try {
-            const userCardsResponse = await fetch(`${API_BASE}/cards/user-cards/`);
-            if (userCardsResponse.ok) {
-                userCards = await userCardsResponse.json();
+        if (isAuthenticated) {
+            try {
+                const userCardsResponse = await fetch(`${API_BASE}/cards/user-cards/`);
+                if (userCardsResponse.ok) {
+                    userCards = await userCardsResponse.json();
+                }
+            } catch (error) {
+                console.log('Error loading user cards:', error);
             }
-        } catch (error) {
-            // User might not be authenticated, that's OK
-            console.log('User not authenticated or no owned cards');
+        } else {
+            // For unauthenticated users, try to get cards from local storage
+            try {
+                const localCardIds = LocalStorage.getCards();
+                const localCardDetails = LocalStorage.getCardDetails();
+                
+                // Convert local storage data to match expected format
+                for (const cardId of localCardIds) {
+                    try {
+                        const response = await fetch(`${API_BASE}/cards/cards/${cardId}/`);
+                        if (response.ok) {
+                            const cardData = await response.json();
+                            const details = localCardDetails[cardId] || {};
+                            userCards.push({
+                                id: `local_${cardId}`,
+                                card: cardData,
+                                nickname: details.nickname || '',
+                                opened_date: details.opened_date || null,
+                                closed_date: null,
+                                notes: details.notes || '',
+                                is_local: true
+                            });
+                        }
+                    } catch (error) {
+                        console.error(`Error fetching card ${cardId}:`, error);
+                    }
+                }
+            } catch (error) {
+                console.log('Error loading local cards:', error);
+            }
         }
         
         // Create a map of owned cards by card ID
@@ -1067,6 +1098,9 @@ async function loadCards() {
             user_card: ownedCardsMap[card.id] || null,
             hasCard: !!ownedCardsMap[card.id]
         }));
+        
+        // Update allCards for filtering
+        allCards = cardsWithOwnership;
         
         // Render cards
         displayCards(cardsWithOwnership);

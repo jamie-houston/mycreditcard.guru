@@ -1644,9 +1644,9 @@
                 console.log('🔓 User logged out, clearing local data');
                 clearUserData();
             } else if (!wasAuthenticated && isNowAuthenticated) {
-                // User logged in - sync with server data
-                console.log('🔒 User logged in, syncing with server data');
-                await syncUserDataFromServer();
+                // User logged in - handle data synchronization
+                console.log('🔒 User logged in, handling data synchronization');
+                await handleLoginDataSync();
             } else if (wasAuthenticated && isNowAuthenticated && previousUser && newUser && previousUser.id !== newUser.id) {
                 // Different user logged in - clear old data and sync new
                 console.log('🔄 Different user logged in, switching user data');
@@ -1685,6 +1685,45 @@
             console.log('✅ All user data cleared from localStorage');
         }
 
+        // Handle data synchronization when user logs in
+        async function handleLoginDataSync() {
+            try {
+                // Get local data before syncing
+                const localCards = LocalStorage.getCards();
+                const localSpending = LocalStorage.getSpending();
+                const localPreferences = LocalStorage.getPreferences();
+                const localCardDetails = LocalStorage.getCardDetails();
+                
+                const hasLocalData = localCards.length > 0 || Object.keys(localSpending).length > 0;
+                
+                // Get server data
+                const serverResponse = await fetch(`${API_BASE}/users/data/`);
+                const serverData = await serverResponse.json();
+                
+                const hasServerData = (serverData.cards && serverData.cards.length > 0) || 
+                                    (serverData.spending && Object.keys(serverData.spending).length > 0);
+                
+                if (hasLocalData && hasServerData) {
+                    // Both have data - ask user what to do
+                    await showDataSyncModal(localCards, localSpending, localCardDetails, serverData);
+                } else if (hasLocalData && !hasServerData) {
+                    // Only local data - save it to server (new user scenario)
+                    console.log('📤 Saving local data to new user account');
+                    await saveLocalDataToServer(localCards, localSpending, localPreferences, localCardDetails);
+                    await syncUserDataFromServer();
+                } else {
+                    // Only server data or no data at all - just sync from server
+                    console.log('📥 Syncing data from server');
+                    await syncUserDataFromServer();
+                }
+                
+            } catch (error) {
+                console.error('Error handling login data sync:', error);
+                // Fallback to just syncing from server
+                await syncUserDataFromServer();
+            }
+        }
+
         // Sync user data from server when logging in
         async function syncUserDataFromServer() {
             try {
@@ -1706,6 +1745,139 @@
                 console.log('User data synced from server:', data);
             } catch (error) {
                 console.error('Error syncing user data from server:', error);
+            }
+        }
+
+        // Show modal to handle data conflict when both local and server data exist
+        async function showDataSyncModal(localCards, localSpending, localCardDetails, serverData) {
+            return new Promise((resolve) => {
+                // Create modal HTML
+                const modalHtml = `
+                    <div id="dataSyncModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); z-index: 10000; display: flex; align-items: center; justify-content: center;">
+                        <div style="background: white; border-radius: 16px; max-width: 600px; width: 90%; padding: 32px; max-height: 80vh; overflow-y: auto;">
+                            <h2 style="margin: 0 0 20px 0; color: #1f2937;">🔄 Sync Your Data</h2>
+                            <p style="color: #6b7280; margin-bottom: 20px;">
+                                We found credit cards stored locally on this device and cards associated with your account. 
+                                How would you like to handle this?
+                            </p>
+                            
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 20px 0;">
+                                <div style="border: 2px solid #e5e7eb; border-radius: 12px; padding: 16px;">
+                                    <h4 style="margin: 0 0 8px 0; color: #374151;">📱 Local Data</h4>
+                                    <p style="margin: 0 0 8px 0; font-size: 14px; color: #6b7280;">${localCards.length} cards saved locally</p>
+                                    ${localCards.length > 0 ? `<div style="font-size: 12px; color: #9ca3af;">Cards stored on this device</div>` : ''}
+                                </div>
+                                <div style="border: 2px solid #e5e7eb; border-radius: 12px; padding: 16px;">
+                                    <h4 style="margin: 0 0 8px 0; color: #374151;">☁️ Account Data</h4>
+                                    <p style="margin: 0 0 8px 0; font-size: 14px; color: #6b7280;">${(serverData.cards || []).length} cards in your account</p>
+                                    ${(serverData.cards || []).length > 0 ? `<div style="font-size: 12px; color: #9ca3af;">Saved to your account</div>` : ''}
+                                </div>
+                            </div>
+                            
+                            <div style="display: flex; flex-direction: column; gap: 12px; margin: 24px 0;">
+                                <button 
+                                    onclick="handleDataSyncChoice('keep_account')" 
+                                    style="background: #3b82f6; color: white; border: none; padding: 12px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: background 0.2s;"
+                                    onmouseover="this.style.background='#2563eb'" 
+                                    onmouseout="this.style.background='#3b82f6'"
+                                >
+                                    ☁️ Keep Account Data (Replace local data)
+                                </button>
+                                <button 
+                                    onclick="handleDataSyncChoice('merge')" 
+                                    style="background: #10b981; color: white; border: none; padding: 12px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: background 0.2s;"
+                                    onmouseover="this.style.background='#059669'" 
+                                    onmouseout="this.style.background='#10b981'"
+                                >
+                                    🔗 Merge Both (Add local cards to account)
+                                </button>
+                                <button 
+                                    onclick="handleDataSyncChoice('keep_local')" 
+                                    style="background: #f59e0b; color: white; border: none; padding: 12px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: background 0.2s;"
+                                    onmouseover="this.style.background='#d97706'" 
+                                    onmouseout="this.style.background='#f59e0b'"
+                                >
+                                    📱 Keep Local Data (Replace account data)
+                                </button>
+                            </div>
+                            
+                            <p style="font-size: 12px; color: #9ca3af; margin-top: 16px;">
+                                💡 Tip: Merging is usually the best option to keep all your cards.
+                            </p>
+                        </div>
+                    </div>
+                `;
+                
+                // Add modal to page
+                document.body.insertAdjacentHTML('beforeend', modalHtml);
+                
+                // Handle user choice
+                window.handleDataSyncChoice = async (choice) => {
+                    const modal = document.getElementById('dataSyncModal');
+                    modal.remove();
+                    
+                    try {
+                        if (choice === 'keep_account') {
+                            // Just sync from server, overwriting local data
+                            await syncUserDataFromServer();
+                        } else if (choice === 'merge') {
+                            // Add local cards to server, then sync everything
+                            await saveLocalDataToServer(localCards, localSpending, {}, localCardDetails);
+                            await syncUserDataFromServer();
+                        } else if (choice === 'keep_local') {
+                            // Replace server data with local data
+                            await saveLocalDataToServer(localCards, localSpending, {}, localCardDetails);
+                            await syncUserDataFromServer();
+                        }
+                    } catch (error) {
+                        console.error('Error applying data sync choice:', error);
+                    }
+                    
+                    resolve();
+                };
+            });
+        }
+
+        // Save local data to server for new users
+        async function saveLocalDataToServer(cards, spending, preferences, cardDetails) {
+            try {
+                // Save cards first
+                for (const cardId of cards) {
+                    const details = cardDetails[cardId] || {};
+                    await fetch('/api/cards/user-cards/add/', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': getCookie('csrftoken')
+                        },
+                        body: JSON.stringify({
+                            card_id: cardId,
+                            nickname: details.nickname || '',
+                            opened_date: details.opened_date || null,
+                            notes: details.notes || ''
+                        })
+                    });
+                }
+                
+                // Save spending and preferences if they exist
+                if (Object.keys(spending).length > 0 || Object.keys(preferences).length > 0) {
+                    await fetch('/api/users/data/', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': getCookie('csrftoken')
+                        },
+                        body: JSON.stringify({
+                            spending: spending,
+                            cards: cards,
+                            preferences: preferences
+                        })
+                    });
+                }
+                
+                console.log('✅ Local data saved to server');
+            } catch (error) {
+                console.error('Error saving local data to server:', error);
             }
         }
 
