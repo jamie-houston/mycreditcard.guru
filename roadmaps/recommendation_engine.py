@@ -1188,9 +1188,16 @@ class RecommendationEngine:
                 best_card = card
         
         if best_card:
-            annual_rewards = self._calculate_card_annual_rewards(best_card)
+            # Get proper breakdown for all components
+            rewards_breakdown = self._calculate_card_rewards_breakdown(best_card)
+            annual_rewards = rewards_breakdown['total_rewards']
             signup_bonus = self._get_signup_bonus_value(best_card)
-            estimated_rewards = annual_rewards + signup_bonus
+            annual_fee = float(best_card.annual_fee)
+            
+            # Calculate net estimated value same as main logic
+            annual_fee_waived = best_card.metadata.get('annual_fee_waived_first_year', False)
+            effective_fee = 0 if annual_fee_waived else annual_fee
+            estimated_rewards = annual_rewards - effective_fee + signup_bonus
             
             return {
                 'card': best_card,
@@ -1198,11 +1205,8 @@ class RecommendationEngine:
                 'estimated_rewards': estimated_rewards,
                 'reasoning': f"High spending fallback - ${signup_bonus:.0f} signup bonus",
                 'priority': 99,  # Low priority fallback
-                'rewards_breakdown': [{
-                    'category': 'Signup Bonus',
-                    'amount': signup_bonus,
-                    'explanation': f"${signup_bonus:.0f} signup bonus"
-                }]
+                'rewards_breakdown': rewards_breakdown['breakdown'],
+                'signup_bonus_value': signup_bonus
             }
         
         return None
