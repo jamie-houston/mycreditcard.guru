@@ -259,6 +259,10 @@ class Command(BaseCommand):
         if portfolio_opt:
             issues.extend(self.validate_portfolio_optimization(recommendations, portfolio_opt))
         
+        # Check value breakdown accuracy (always validate)
+        breakdown_issues = self.validate_breakdown_accuracy(recommendations)
+        issues.extend(breakdown_issues)
+        
         if issues:
             self.stdout.write(self.style.ERROR('⚠️  Validation Issues:'))
             for issue in issues:
@@ -300,6 +304,51 @@ class Command(BaseCommand):
             zero_fee_count = sum(1 for rec in recommendations if rec['card'].annual_fee == 0)
             if zero_fee_count < 2:
                 issues.append(f'Expected multiple zero fee cards, got {zero_fee_count}')
+        
+        return issues
+    
+    def validate_breakdown_accuracy(self, recommendations):
+        """Validate that value breakdowns are accurate and don't double-count spending."""
+        issues = []
+        
+        # Track spending allocation across all cards to prevent double-counting
+        spending_category_allocation = {}
+        
+        for rec in recommendations:
+            card_name = rec['card'].name
+            estimated_rewards = float(rec['estimated_rewards'])
+            breakdown = rec.get('rewards_breakdown', [])
+            signup_bonus = rec.get('signup_bonus_value', 0)
+            annual_fee = float(rec['card'].annual_fee)
+            
+            # Calculate breakdown total
+            breakdown_total = 0.0
+            for item in breakdown:
+                category_name = item.get('category_name', 'Unknown')
+                category_rewards = item.get('category_rewards', 0)
+                
+                if category_rewards:
+                    breakdown_total += float(category_rewards)
+                    
+                    # Track category allocation for double-counting check
+                    if category_name in spending_category_allocation:
+                        issues.append(f'Double-counting detected: "{category_name}" allocated to both "{spending_category_allocation[category_name]}" and "{card_name}"')
+                    else:
+                        spending_category_allocation[category_name] = card_name
+            
+            # Calculate expected total: breakdown + signup bonus - annual fee (for apply/keep cards)
+            if rec['action'] == 'apply':
+                expected_total = breakdown_total + float(signup_bonus)
+                annual_fee_waived = rec['card'].metadata and rec['card'].metadata.get('annual_fee_waived_first_year', False)
+                if not annual_fee_waived:
+                    expected_total -= annual_fee
+            else:  # keep or cancel
+                expected_total = breakdown_total - annual_fee
+            
+            # Allow small rounding differences (< $1)
+            difference = abs(estimated_rewards - expected_total)
+            if difference >= 1.0:
+                issues.append(f'Breakdown mismatch for {card_name}: estimated ${estimated_rewards:.0f} vs calculated ${expected_total:.0f} (diff: ${difference:.2f})')
         
         return issues
     
