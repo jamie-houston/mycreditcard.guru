@@ -1029,7 +1029,7 @@ class RecommendationEngine:
         return breakdown['total_rewards']
     
     def _calculate_portfolio_allocation(self, portfolio_cards: List[CreditCard]) -> dict:
-        """Calculate optimal spending allocation across portfolio cards"""
+        """Calculate optimal spending allocation across portfolio cards, considering signup bonus requirements"""
         from cards.models import SpendingCategory
         
         # Build parent category spending (same logic as in portfolio optimization)
@@ -1049,6 +1049,24 @@ class RecommendationEngine:
                     parent_category_spending[category_slug] = parent_category_spending.get(category_slug, 0.0) + annual_spend
             except SpendingCategory.DoesNotExist:
                 parent_category_spending[category_slug] = parent_category_spending.get(category_slug, 0.0) + annual_spend
+        
+        # Calculate total available spending
+        total_available_spending = sum(parent_category_spending.values())
+        
+        # First pass: Allocate minimum spending for signup bonuses
+        signup_bonus_allocations = {}
+        total_signup_spending = 0
+        
+        for card in portfolio_cards:
+            signup_bonus = card.metadata.get('signup_bonus', {})
+            if signup_bonus:
+                spending_requirement = float(signup_bonus.get('spending_requirement', 0))
+                if spending_requirement > 0 and spending_requirement <= total_available_spending:
+                    signup_bonus_allocations[card.id] = spending_requirement
+                    total_signup_spending += spending_requirement
+        
+        # Remaining spending after signup requirements
+        remaining_spending = max(0, total_available_spending - total_signup_spending)
         
         # Find best rate per category across portfolio
         category_best_allocation = {}
@@ -1102,7 +1120,56 @@ class RecommendationEngine:
                     'annual_spend': unallocated_spending
                 }
         
-        return category_best_allocation
+        # Combine category allocation with signup bonus requirements
+        final_allocation = {}
+        
+        # Start with category-based allocation
+        for category_slug, allocation_data in category_best_allocation.items():
+            card = allocation_data['card']
+            card_id = card.id
+            
+            # If this card has a signup requirement, ensure it gets at least that amount
+            min_spending = signup_bonus_allocations.get(card_id, 0)
+            category_spending = allocation_data['annual_spend']
+            
+            # Use the higher of category allocation or signup requirement
+            final_spending = max(category_spending, min_spending)
+            
+            final_allocation[category_slug] = {
+                'card': card,
+                'rate': allocation_data['rate'],
+                'max_spend': allocation_data['max_spend'],
+                'annual_spend': final_spending
+            }
+        
+        # Add cards that need signup spending but didn't win any categories
+        for card in portfolio_cards:
+            card_id = card.id
+            min_spending = signup_bonus_allocations.get(card_id, 0)
+            
+            if min_spending > 0:
+                # Check if this card already has allocation
+                card_already_allocated = any(
+                    alloc['card'].id == card_id for alloc in final_allocation.values()
+                )
+                
+                if not card_already_allocated:
+                    # Find best rate this card offers for any category
+                    best_rate = 0.0
+                    for reward_cat in card.reward_categories.filter(is_active=True):
+                        rate = float(reward_cat.reward_rate)
+                        if rate > best_rate:
+                            best_rate = rate
+                    
+                    # Allocate minimum spending to this card
+                    final_allocation[f'signup_bonus_{card_id}'] = {
+                        'card': card,
+                        'rate': best_rate,
+                        'max_spend': None,
+                        'annual_spend': min_spending
+                    }
+        
+        return final_allocation
 
     def _calculate_card_allocated_breakdown(self, card: CreditCard, portfolio_allocation: dict) -> dict:
         """Calculate breakdown for a card using only its allocated spending from portfolio optimization"""
