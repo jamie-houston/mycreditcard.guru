@@ -42,6 +42,17 @@ class RecommendationEngine:
         # Generate portfolio-optimized recommendations
         recommendations = self._generate_portfolio_optimized_recommendations(eligible_cards, roadmap)
         
+        # Fallback: If no apply recommendations and high spending, force at least one
+        apply_recommendations = [rec for rec in recommendations if rec['action'] == 'apply']
+        total_annual_spending = sum(float(amount) * 12 for amount in self.spending_amounts.values())
+        
+        if not apply_recommendations and total_annual_spending > 30000:  # $30k+ annual spending
+            print(f"DEBUG: High spending (${total_annual_spending:.0f}/year) with no apply recommendations - adding fallback")
+            fallback_rec = self._get_best_signup_bonus_card(eligible_cards)
+            if fallback_rec:
+                recommendations.append(fallback_rec)
+                print(f"DEBUG: Added fallback recommendation: APPLY {fallback_rec['card'].name}")
+        
         # DEBUG: Print recommendations before filtering
         print(f"DEBUG: Generated {len(recommendations)} recommendations before filtering:")
         for rec in recommendations:
@@ -1155,6 +1166,46 @@ class RecommendationEngine:
             
         except (ValueError, AttributeError):
             return True  # If parsing fails, assume achievable
+
+    def _get_best_signup_bonus_card(self, eligible_cards: List[CreditCard]) -> dict:
+        """Get the best signup bonus card as a fallback recommendation for high spenders"""
+        # Filter to only new cards (not currently owned)
+        owned_card_ids = set(self.profile.user.owned_cards.filter(closed_date__isnull=True).values_list('card_id', flat=True))
+        new_cards = [card for card in eligible_cards if card.id not in owned_card_ids]
+        
+        best_card = None
+        best_value = 0
+        
+        for card in new_cards:
+            signup_bonus = self._get_signup_bonus_value(card)
+            annual_fee = float(card.annual_fee)
+            
+            # Simple net value: signup bonus minus first year fee
+            net_value = signup_bonus - annual_fee
+            
+            if net_value > best_value:
+                best_value = net_value
+                best_card = card
+        
+        if best_card:
+            annual_rewards = self._calculate_card_annual_rewards(best_card)
+            signup_bonus = self._get_signup_bonus_value(best_card)
+            estimated_rewards = annual_rewards + signup_bonus
+            
+            return {
+                'card': best_card,
+                'action': 'apply',
+                'estimated_rewards': estimated_rewards,
+                'reasoning': f"High spending fallback - ${signup_bonus:.0f} signup bonus",
+                'priority': 99,  # Low priority fallback
+                'rewards_breakdown': [{
+                    'category': 'Signup Bonus',
+                    'amount': signup_bonus,
+                    'explanation': f"${signup_bonus:.0f} signup bonus"
+                }]
+            }
+        
+        return None
 
     def _get_signup_bonus_value(self, card: CreditCard) -> float:
         """Get signup bonus value using card's specific reward value multiplier"""
