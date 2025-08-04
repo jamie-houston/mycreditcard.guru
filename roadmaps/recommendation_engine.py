@@ -421,15 +421,22 @@ class RecommendationEngine:
         # Add cancel actions for current cards not in optimal portfolio
         # BUT: Never recommend canceling cards with $0 annual fee
         optimal_card_ids = {cd['card'].id for cd in optimal_cards}
+        
+        # Calculate portfolio allocation for consistent reasoning
+        all_cards = [cd['card'] for cd in optimal_cards] + [uc.card for uc in self.user_cards if uc.card.id not in optimal_card_ids]
+        portfolio_allocation = self._calculate_portfolio_allocation(all_cards)
+        
         for uc in self.user_cards:
             if uc.card.id not in optimal_card_ids:
                 annual_fee = float(uc.card.annual_fee)
                 
+                # Use allocated breakdown for consistent values
+                rewards_breakdown = self._calculate_card_allocated_breakdown(uc.card, portfolio_allocation)
+                annual_rewards = rewards_breakdown['total_rewards']
+                
                 # Skip cancellation recommendations for $0 annual fee cards
                 if annual_fee == 0:
                     # Instead, add as a "keep" recommendation with low priority
-                    rewards_breakdown = self._calculate_card_rewards_breakdown(uc.card)
-                    annual_rewards = rewards_breakdown['total_rewards']
                     print(f"DEBUG: Keeping $0 fee card instead of canceling: {uc.card.name}")
                     actions.append({
                         'card': uc.card,
@@ -439,13 +446,11 @@ class RecommendationEngine:
                     })
                 else:
                     # Only recommend canceling cards with annual fees
-                    rewards_breakdown = self._calculate_card_rewards_breakdown(uc.card)
-                    annual_rewards = rewards_breakdown['total_rewards']
                     print(f"DEBUG: Recommending cancel for fee card: {uc.card.name} (${annual_fee} fee)")
                     actions.append({
                         'card': uc.card,
                         'action': 'cancel',
-                        'reasoning': f"Cancel - provides no additional portfolio value (${annual_rewards:.0f} rewards vs ${annual_fee} fee)",
+                        'reasoning': f"Cancel - provides no additional portfolio value (${annual_rewards:.0f} rewards vs ${annual_fee:.0f} fee)",
                         'priority': 50  # Medium priority - important to show user
                     })
         
