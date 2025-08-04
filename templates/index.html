@@ -1069,6 +1069,98 @@
                     `;
                 }
 
+                // Add detailed recommendations table
+                if (recommendations.length > 0) {
+                    html += `
+                        <div style="margin-bottom: 25px;">
+                            <h3 style="margin-bottom: 15px; color: #374151;">📋 Detailed Recommendation Breakdown</h3>
+                            <div style="overflow-x: auto; border-radius: 8px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+                                <table style="width: 100%; border-collapse: collapse; background: white; font-size: 14px;">
+                                    <thead>
+                                        <tr style="background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); color: white;">
+                                            <th style="padding: 12px 8px; text-align: left; font-weight: 600;">Action</th>
+                                            <th style="padding: 12px 8px; text-align: left; font-weight: 600;">Card Name</th>
+                                            <th style="padding: 12px 8px; text-align: right; font-weight: 600;">Spend on Card</th>
+                                            <th style="padding: 12px 8px; text-align: right; font-weight: 600;">Reward Value</th>
+                                            <th style="padding: 12px 8px; text-align: right; font-weight: 600;">Signup Bonus</th>
+                                            <th style="padding: 12px 8px; text-align: right; font-weight: 600;">Annual Fee</th>
+                                            <th style="padding: 12px 8px; text-align: right; font-weight: 600;">Estimated Value</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>`;
+                    
+                    recommendations.forEach((rec, index) => {
+                        // Calculate spending on this card
+                        const cardSpending = rec.rewards_breakdown?.reduce((sum, item) => 
+                            sum + (item.annual_spend || 0), 0) || 0;
+                        
+                        // Calculate reward value (excluding signup bonus and fees)
+                        const rewardValue = rec.rewards_breakdown?.reduce((sum, item) => 
+                            sum + (item.category_rewards || 0), 0) || 0;
+                        
+                        // Get values
+                        const signupBonus = rec.signup_bonus_value || 0;
+                        const annualFee = parseFloat(rec.card.annual_fee) || 0;
+                        const estimatedValue = parseFloat(rec.estimated_rewards) || 0;
+                        
+                        // Action styling
+                        let actionStyle = '';
+                        let actionText = rec.action.toUpperCase();
+                        switch(rec.action) {
+                            case 'apply':
+                                actionStyle = 'background: #10b981; color: white; padding: 4px 8px; border-radius: 4px; font-weight: 600;';
+                                break;
+                            case 'keep':
+                                actionStyle = 'background: #3b82f6; color: white; padding: 4px 8px; border-radius: 4px; font-weight: 600;';
+                                break;
+                            case 'cancel':
+                                actionStyle = 'background: #ef4444; color: white; padding: 4px 8px; border-radius: 4px; font-weight: 600;';
+                                break;
+                            default:
+                                actionStyle = 'background: #6b7280; color: white; padding: 4px 8px; border-radius: 4px; font-weight: 600;';
+                        }
+                        
+                        // Row styling
+                        const rowStyle = index % 2 === 0 ? 'background: #f9fafb;' : 'background: white;';
+                        
+                        html += `
+                            <tr style="${rowStyle}">
+                                <td style="padding: 10px 8px; border-bottom: 1px solid #e5e7eb;">
+                                    <span style="${actionStyle}">${actionText}</span>
+                                </td>
+                                <td style="padding: 10px 8px; border-bottom: 1px solid #e5e7eb; font-weight: 500;">
+                                    ${rec.card.name}
+                                </td>
+                                <td style="padding: 10px 8px; border-bottom: 1px solid #e5e7eb; text-align: right;">
+                                    $${cardSpending.toLocaleString()}
+                                </td>
+                                <td style="padding: 10px 8px; border-bottom: 1px solid #e5e7eb; text-align: right; color: #10b981; font-weight: 500;">
+                                    $${rewardValue.toFixed(0)}
+                                </td>
+                                <td style="padding: 10px 8px; border-bottom: 1px solid #e5e7eb; text-align: right; color: #f59e0b; font-weight: 500;">
+                                    ${signupBonus > 0 ? `$${signupBonus.toFixed(0)}` : '-'}
+                                </td>
+                                <td style="padding: 10px 8px; border-bottom: 1px solid #e5e7eb; text-align: right; color: #ef4444; font-weight: 500;">
+                                    ${annualFee > 0 ? `$${annualFee.toFixed(0)}` : '$0'}
+                                </td>
+                                <td style="padding: 10px 8px; border-bottom: 1px solid #e5e7eb; text-align: right; font-weight: 600; color: ${estimatedValue >= 0 ? '#10b981' : '#ef4444'};">
+                                    $${estimatedValue.toFixed(0)}
+                                </td>
+                            </tr>
+                        `;
+                    });
+                    
+                    html += `
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div style="margin-top: 8px; font-size: 12px; color: #6b7280; text-align: center;">
+                                💡 Formula: Estimated Value = Reward Value + Signup Bonus - Annual Fee
+                            </div>
+                        </div>
+                    `;
+                }
+
                 if (recommendations.length === 0) {
                     html += '<p>No recommendations found with your current criteria. Try adjusting your filters.</p>';
                 } else {
