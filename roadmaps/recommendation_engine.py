@@ -241,7 +241,7 @@ class RecommendationEngine:
             recommendations.append({
                 'card': card,
                 'action': action,
-                'estimated_rewards': Decimal(str(max(0, estimated_value))),  # Don't show negative individual values
+                'estimated_rewards': Decimal(str(estimated_value)),  # Show true value, including negative for cancel cards
                 'reasoning': reasoning,
                 'rewards_breakdown': rewards_breakdown['breakdown'],
                 'signup_bonus_value': signup_bonus_value if action == 'apply' else 0,
