@@ -742,7 +742,9 @@ async function loadCategoryOptimization() {
             categoriesResponse = null;
         }
         
-        const categories = categoriesResponse ? await categoriesResponse.json() : [];
+        const categoriesData = categoriesResponse ? await categoriesResponse.json() : [];
+        // Handle both paginated (results array) and direct array responses
+        const categories = Array.isArray(categoriesData) ? categoriesData : (categoriesData.results || []);
         const categoryMap = {};
         categories.forEach(cat => {
             categoryMap[cat.slug] = cat.display_name || cat.name;
@@ -857,7 +859,9 @@ async function loadSpendingProfile() {
             categoriesResponse = null;
         }
         
-        const categories = categoriesResponse ? await categoriesResponse.json() : [];
+        const categoriesData = categoriesResponse ? await categoriesResponse.json() : [];
+        // Handle both paginated (results array) and direct array responses
+        const categories = Array.isArray(categoriesData) ? categoriesData : (categoriesData.results || []);
         const categoryMap = {};
         categories.forEach(cat => {
             categoryMap[cat.slug] = cat.display_name || cat.name;
@@ -1229,6 +1233,17 @@ function searchCards(query) {
 // Display search results
 function displaySearchResults(cards) {
     const resultsDiv = document.getElementById('cardSearchResults');
+    
+    // Position dropdown dynamically to avoid stacking context issues
+    const searchInput = document.getElementById('cardSearch');
+    const inputRect = searchInput.getBoundingClientRect();
+    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+    
+    resultsDiv.style.position = 'fixed';
+    resultsDiv.style.top = (inputRect.bottom + 2) + 'px';
+    resultsDiv.style.left = inputRect.left + 'px';
+    resultsDiv.style.width = inputRect.width + 'px';
+    resultsDiv.style.zIndex = '999999';
     
     if (cards.length === 0) {
         resultsDiv.innerHTML = '<div style="padding: 12px; color: #6b7280; text-align: center;">No cards found</div>';
