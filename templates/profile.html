@@ -145,11 +145,11 @@
                 autocomplete="off"
                 style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px; transition: border-color 0.2s; box-sizing: border-box;"
                 onfocus="this.style.borderColor='#3b82f6'" 
-                onblur="if(!this.value) this.style.borderColor='#e5e7eb'"
+                onblur="if(!this.value) this.style.borderColor='#e5e7eb'; setTimeout(() => hideSearchResults(), 200)"
                 oninput="searchCards(this.value)"
             >
-            <!-- Dropdown Results -->
-            <div id="cardSearchResults" style="position: absolute !important; top: 100% !important; left: 0 !important; right: 0 !important; background: white !important; border: 2px solid #e5e7eb; border-top: none; border-radius: 0 0 8px 8px; max-height: 300px; overflow-y: auto; z-index: 99999 !important; display: none; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;">
+            <!-- Dropdown will be moved to body dynamically -->
+            <div id="cardSearchResults" style="display: none;">
             </div>
         </div>
         
@@ -1232,18 +1232,30 @@ function searchCards(query) {
 
 // Display search results
 function displaySearchResults(cards) {
-    const resultsDiv = document.getElementById('cardSearchResults');
+    let resultsDiv = document.getElementById('cardSearchResults');
     
-    // Position dropdown dynamically to avoid stacking context issues
+    // Move dropdown to body to escape all stacking contexts
+    if (resultsDiv.parentNode !== document.body) {
+        document.body.appendChild(resultsDiv);
+    }
+    
+    // Position dropdown relative to search input
     const searchInput = document.getElementById('cardSearch');
     const inputRect = searchInput.getBoundingClientRect();
-    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
     
+    // Style the dropdown as a portal
     resultsDiv.style.position = 'fixed';
     resultsDiv.style.top = (inputRect.bottom + 2) + 'px';
     resultsDiv.style.left = inputRect.left + 'px';
     resultsDiv.style.width = inputRect.width + 'px';
-    resultsDiv.style.zIndex = '999999';
+    resultsDiv.style.zIndex = '10000';
+    resultsDiv.style.background = 'white';
+    resultsDiv.style.border = '2px solid #e5e7eb';
+    resultsDiv.style.borderTop = 'none';
+    resultsDiv.style.borderRadius = '0 0 8px 8px';
+    resultsDiv.style.maxHeight = '300px';
+    resultsDiv.style.overflowY = 'auto';
+    resultsDiv.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.15)';
     
     if (cards.length === 0) {
         resultsDiv.innerHTML = '<div style="padding: 12px; color: #6b7280; text-align: center;">No cards found</div>';
@@ -1271,6 +1283,14 @@ function displaySearchResults(cards) {
     resultsDiv.style.display = 'block';
 }
 
+// Hide search results dropdown
+function hideSearchResults() {
+    const resultsDiv = document.getElementById('cardSearchResults');
+    if (resultsDiv) {
+        resultsDiv.style.display = 'none';
+    }
+}
+
 // Select a card from search results
 function selectCard(cardId, cardName) {
     selectedCard = cardId;
@@ -1278,8 +1298,9 @@ function selectCard(cardId, cardName) {
     // Update input value
     document.getElementById('cardSearch').value = cardName;
     
-    // Hide results
-    document.getElementById('cardSearchResults').style.display = 'none';
+    // Hide results and clean up positioning
+    const resultsDiv = document.getElementById('cardSearchResults');
+    resultsDiv.style.display = 'none';
     
     // Enable add button
     const addButton = document.getElementById('addSelectedCard');
