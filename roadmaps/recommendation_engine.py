@@ -1083,7 +1083,7 @@ class RecommendationEngine:
 
         if unallocated_spending > 0:
             # Find best general rate among portfolio cards
-            best_general_rate = 1.0
+            best_general_rate = 0.0
             best_general_card = None
 
             for card in portfolio_cards:
