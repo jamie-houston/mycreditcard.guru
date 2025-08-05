@@ -7,10 +7,10 @@
       "description": "User with expensive card that may not be worth keeping",
       "user_profile": {
         "spending": {
-          "groceries": 200,
-          "dining": 150,
-          "travel": 100,
-          "general": 300
+          "groceries": 300,
+          "dining": 400,
+          "travel": 600,
+          "general": 400
         }
       },
       "owned_cards": [
