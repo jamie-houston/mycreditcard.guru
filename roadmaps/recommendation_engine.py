@@ -266,6 +266,7 @@ class RecommendationEngine:
                 'estimated_rewards': Decimal(str(estimated_value)),  # Show true value, including negative for cancel cards
                 'reasoning': reasoning,
                 'rewards_breakdown': rewards_breakdown['breakdown'],
+                'total_spending_on_card': rewards_breakdown.get('total_spending_on_card', 0),
                 'signup_bonus_value': signup_bonus_value if action == 'apply' else 0,
                 'priority': card_action.get('priority', 1)
             })
@@ -702,7 +703,8 @@ class RecommendationEngine:
                     'total_value': total_value,
                     'net_annual_value': net_annual_value,
                     'signup_bonus': signup_bonus_value,
-                    'rewards_breakdown': rewards_breakdown['breakdown']
+                    'rewards_breakdown': rewards_breakdown['breakdown'],
+                    'total_spending_on_card': rewards_breakdown.get('total_spending_on_card', 0)
                 })
         
         # Sort by total value and take top cards
@@ -996,6 +998,7 @@ class RecommendationEngine:
                     'annual_rewards': annual_rewards,
                     'signup_bonus': signup_bonus_value,
                     'rewards_breakdown': rewards_breakdown['breakdown'],
+                    'total_spending_on_card': rewards_breakdown.get('total_spending_on_card', 0),
                     'reasoning': f"Total estimated value: ${total_estimated_value:.0f} (${annual_rewards:.0f} annual rewards - ${effective_annual_fee} fee{' - first year fee waived' if annual_fee_waived_first_year else ''} + ${signup_bonus_value:.0f} signup bonus)"
                 })
         
@@ -1012,6 +1015,7 @@ class RecommendationEngine:
                 'estimated_rewards': Decimal(str(total_estimated_value)),
                 'reasoning': card_data['reasoning'],
                 'rewards_breakdown': card_data['rewards_breakdown'],
+                'total_spending_on_card': card_data.get('total_spending_on_card', 0),
                 'signup_bonus_value': card_data['signup_bonus'],
                 'priority': i + 1
             })
@@ -1096,23 +1100,71 @@ class RecommendationEngine:
             best_rate = 0
             best_card = None
             best_max_spend = None
+            best_subcategory_slug = None
             
             for card in portfolio_cards:
                 for reward_cat in card.reward_categories.filter(is_active=True):
+                    # Check for exact match first
                     if reward_cat.category.slug == category_slug:
                         rate = float(reward_cat.reward_rate)
                         if rate > best_rate:
                             best_rate = rate
                             best_card = card
                             best_max_spend = reward_cat.max_annual_spend
+                            best_subcategory_slug = None
+                    
+                    # Also check if this card has subcategory rewards for spending in this parent category
+                    elif reward_cat.category.parent and reward_cat.category.parent.slug == category_slug:
+                        # This card has a subcategory reward rate for spending that gets collapsed into this parent
+                        # We need to check if the original spending was in this subcategory
+                        subcategory_slug = reward_cat.category.slug
+                        subcategory_spending = 0
+                        
+                        # Check if we have spending in this specific subcategory
+                        for orig_slug, monthly_amount in self.spending_amounts.items():
+                            try:
+                                spending_category = SpendingCategory.objects.get(slug=orig_slug)
+                                if (spending_category.slug == subcategory_slug or 
+                                    (spending_category.parent and spending_category.parent.slug == subcategory_slug)):
+                                    subcategory_spending += float(monthly_amount) * 12
+                            except SpendingCategory.DoesNotExist:
+                                continue
+                        
+                        if subcategory_spending > 0:
+                            rate = float(reward_cat.reward_rate)
+                            if rate > best_rate:
+                                best_rate = rate
+                                best_card = card
+                                best_max_spend = reward_cat.max_annual_spend
+                                best_subcategory_slug = subcategory_slug
             
             if best_card:
-                category_best_allocation[category_slug] = {
-                    'card': best_card,
-                    'rate': best_rate,
-                    'max_spend': best_max_spend,
-                    'annual_spend': parent_category_spending[category_slug]
-                }
+                # If we found a subcategory match, use the specific spending amount for that subcategory
+                if best_subcategory_slug:
+                    # Calculate the actual spending for this subcategory
+                    actual_spending = 0
+                    for orig_slug, monthly_amount in self.spending_amounts.items():
+                        try:
+                            spending_category = SpendingCategory.objects.get(slug=orig_slug)
+                            if (spending_category.slug == best_subcategory_slug or 
+                                (spending_category.parent and spending_category.parent.slug == best_subcategory_slug)):
+                                actual_spending += float(monthly_amount) * 12
+                        except SpendingCategory.DoesNotExist:
+                            continue
+                    
+                    category_best_allocation[best_subcategory_slug] = {
+                        'card': best_card,
+                        'rate': best_rate,
+                        'max_spend': best_max_spend,
+                        'annual_spend': actual_spending
+                    }
+                else:
+                    category_best_allocation[category_slug] = {
+                        'card': best_card,
+                        'rate': best_rate,
+                        'max_spend': best_max_spend,
+                        'annual_spend': parent_category_spending[category_slug]
+                    }
         
                 # Handle unallocated spending (general/other category)
         allocated_spending = sum(
@@ -1270,9 +1322,16 @@ class RecommendationEngine:
                     'credit_detail': credit
                 })
         
+        # Calculate total spending on this card
+        total_spending_on_card = sum(
+            item['annual_spend'] for item in breakdown_details 
+            if item['type'] == 'reward_category'
+        )
+        
         return {
             'total_rewards': total_rewards,
-            'breakdown': breakdown_details
+            'breakdown': breakdown_details,
+            'total_spending_on_card': total_spending_on_card
         }
 
     def _calculate_card_rewards_breakdown(self, card: CreditCard) -> dict:
@@ -1409,9 +1468,16 @@ class RecommendationEngine:
                     'credit_detail': credit
                 })
         
+        # Calculate total spending on this card
+        total_spending_on_card = sum(
+            item['annual_spend'] for item in breakdown_details 
+            if item['type'] == 'reward_category'
+        )
+        
         return {
             'total_rewards': total_rewards,
             'breakdown': breakdown_details,
+            'total_spending_on_card': total_spending_on_card,
             'reward_multiplier': float(reward_value_multiplier)
         }
     
@@ -1479,6 +1545,7 @@ class RecommendationEngine:
                 'reasoning': f"High spending fallback - ${signup_bonus:.0f} signup bonus",
                 'priority': 99,  # Low priority fallback
                 'rewards_breakdown': rewards_breakdown['breakdown'],
+                'total_spending_on_card': rewards_breakdown.get('total_spending_on_card', 0),
                 'signup_bonus_value': signup_bonus
             }
         

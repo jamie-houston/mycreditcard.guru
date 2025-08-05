@@ -152,6 +152,7 @@ def quick_recommendation_view(request):
                         'estimated_rewards': float(rec['estimated_rewards']),
                         'reasoning': rec['reasoning'],
                         'rewards_breakdown': rec.get('rewards_breakdown', []),
+                        'total_spending_on_card': float(rec.get('total_spending_on_card', 0)),
                         'signup_bonus_value': float(rec.get('signup_bonus_value', 0)),
                         'priority': rec['priority']
                     }

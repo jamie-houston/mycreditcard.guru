@@ -297,6 +297,144 @@
     flex-shrink: 0;
 }
 
+/* Card Table Styles */
+.card-table-container {
+    overflow-x: auto;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    background: white;
+    border: 1px solid #e5e7eb;
+}
+
+.cards-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+.cards-table th {
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    color: #374151;
+    font-weight: 600;
+    text-align: left;
+    padding: 16px 12px;
+    border-bottom: 2px solid #e5e7eb;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.cards-table td {
+    padding: 16px 12px;
+    border-bottom: 1px solid #f3f4f6;
+    vertical-align: top;
+}
+
+.card-row {
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.card-row:hover {
+    background-color: #f8fafc;
+    transform: scale(1.01);
+}
+
+.card-row:last-child td {
+    border-bottom: none;
+}
+
+.card-name-cell {
+    max-width: 250px;
+}
+
+.card-name-wrapper strong {
+    color: #1f2937;
+    font-weight: 600;
+    display: block;
+    margin-bottom: 2px;
+}
+
+.card-nicknames {
+    color: #6b7280;
+    font-style: italic;
+    font-size: 12px;
+}
+
+.card-count-cell {
+    text-align: center;
+    white-space: nowrap;
+}
+
+.card-count {
+    background: #e0f2fe;
+    color: #0891b2;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 12px;
+}
+
+.multiple-indicator {
+    margin-left: 4px;
+    opacity: 0.7;
+}
+
+.actions-cell {
+    text-align: center;
+    width: 60px;
+}
+
+.table-action-btn {
+    background: #f3f4f6;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    padding: 6px 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 14px;
+}
+
+.table-action-btn:hover {
+    background: #e5e7eb;
+    transform: scale(1.1);
+}
+
+/* Fee styling in table */
+.cards-table .fee-zero {
+    background: #dcfce7;
+    color: #166534;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 12px;
+}
+
+.cards-table .fee-paid {
+    background: #fef3c7;
+    color: #92400e;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 12px;
+}
+
+/* Responsive table */
+@media (max-width: 768px) {
+    .card-table-container {
+        font-size: 12px;
+    }
+    
+    .cards-table th,
+    .cards-table td {
+        padding: 8px 6px;
+    }
+    
+    .card-name-cell {
+        max-width: 150px;
+    }
+}
+
 /* Legacy styles for backward compatibility */
 .category-optimization-item {
     background: linear-gradient(135deg, rgba(239, 246, 255, 0.9) 0%, rgba(239, 246, 255, 0.7) 100%);
@@ -601,7 +739,25 @@ async function loadCardCollection() {
             }
         }
         
-        let cardsHtml = '';
+        // Create table structure
+        let cardsHtml = `
+            <div class="card-table-container">
+                <table class="cards-table">
+                    <thead>
+                        <tr>
+                            <th>Card Name</th>
+                            <th>Issuer</th>
+                            <th>Annual Fee</th>
+                            <th>Reward Type</th>
+                            <th>Point Value</th>
+                            <th>Signup Bonus</th>
+                            <th>Card Type</th>
+                            <th>Count</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+        `;
         
         for (const [cardId, group] of Object.entries(cardGroups)) {
             const cardInfo = cardDetails[cardId];
@@ -618,87 +774,56 @@ async function loadCardCollection() {
             // Get reward type and value
             const rewardType = cardInfo.primary_reward_type?.name || 'Unknown';
             const rewardMultiplier = cardInfo.metadata?.reward_value_multiplier || 0.01;
-            const pointValue = `${(rewardMultiplier * 100).toFixed(1)}¢ each`;
+            const pointValue = `${(rewardMultiplier * 100).toFixed(1)}¢`;
             
             // Get signup bonus
             const signupBonus = cardInfo.signup_bonus_amount ? 
                 `${cardInfo.signup_bonus_amount.toLocaleString()} ${rewardType}` : 'None';
             
-            // Create instances display
-            let instancesHtml = '';
+            // Create nicknames display for table
+            let nicknamesDisplay = '';
             if (hasMultiple) {
-                instancesHtml = `
-                    <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #e5e7eb;">
-                        <div class="detail-label">Multiple Cards (${instances.length})</div>
-                        ${instances.map((instance, index) => `
-                            <div style="margin-bottom: 8px; padding: 8px; background: #f1f5f9; border-radius: 6px;">
-                                <div style="font-weight: 600; color: #1e293b;">
-                                    ${instance.nickname || `Card ${index + 1}`}
-                                </div>
-                                ${instance.opened_date ? `
-                                    <div style="font-size: 12px; color: #64748b;">
-                                        Opened: ${new Date(instance.opened_date).toLocaleDateString()}
-                                    </div>
-                                ` : ''}
-                            </div>
-                        `).join('')}
-                    </div>
-                `;
+                const nicknames = instances.filter(i => i.nickname).map(i => i.nickname);
+                nicknamesDisplay = nicknames.length > 0 ? 
+                    `<small class="card-nicknames">${nicknames.join(', ')}</small>` : '';
             } else {
                 const instance = instances[0];
-                if (instance.nickname || instance.opened_date) {
-                    instancesHtml = `
-                        <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #e5e7eb;">
-                            ${instance.nickname ? `
-                                <div class="detail-item">
-                                    <div class="detail-label">Nickname</div>
-                                    <div class="detail-value">${instance.nickname}</div>
-                                </div>
-                            ` : ''}
-                            ${instance.opened_date ? `
-                                <div class="detail-item" style="margin-top: 10px;">
-                                    <div class="detail-label">Opened</div>
-                                    <div class="detail-value">${new Date(instance.opened_date).toLocaleDateString()}</div>
-                                </div>
-                            ` : ''}
-                        </div>
-                    `;
-                }
+                nicknamesDisplay = instance.nickname ? 
+                    `<small class="card-nicknames">${instance.nickname}</small>` : '';
             }
             
             cardsHtml += `
-                <div class="profile-card modal-card-clickable" onclick="openCardModal(${cardId})">
-                    <div class="card-header">
-                        <div>
-                            <h3 class="card-name">${cardInfo.name}</h3>
-                            <p class="card-nickname">${cardInfo.issuer?.name || 'Unknown Issuer'}${hasMultiple ? ` • ${instances.length} cards` : ''}</p>
+                <tr class="card-row modal-card-clickable" onclick="openCardModal(${cardId})" title="Click to view details">
+                    <td class="card-name-cell">
+                        <div class="card-name-wrapper">
+                            <strong>${cardInfo.name}</strong>
+                            ${nicknamesDisplay ? `<br>${nicknamesDisplay}` : ''}
                         </div>
-                        <div class="card-fee ${feeClass}">${feeText}</div>
-                    </div>
-                    
-                    <div class="card-details">
-                        <div class="detail-item">
-                            <div class="detail-label">Reward Type</div>
-                            <div class="detail-value">${rewardType}</div>
-                        </div>
-                        <div class="detail-item">
-                            <div class="detail-label">Point Value</div>
-                            <div class="detail-value">${pointValue}</div>
-                        </div>
-                        <div class="detail-item">
-                            <div class="detail-label">Signup Bonus</div>
-                            <div class="detail-value">${signupBonus}</div>
-                        </div>
-                        <div class="detail-item">
-                            <div class="detail-label">Card Type</div>
-                            <div class="detail-value">${cardInfo.card_type ? cardInfo.card_type.charAt(0).toUpperCase() + cardInfo.card_type.slice(1) : 'Personal'}</div>
-                        </div>
-                    </div>
-                    
-                    ${instancesHtml}
-                </div>
+                    </td>
+                    <td>${cardInfo.issuer?.name || 'Unknown'}</td>
+                    <td><span class="${feeClass}">${feeText}</span></td>
+                    <td>${rewardType}</td>
+                    <td>${pointValue}</td>
+                    <td>${signupBonus}</td>
+                    <td>${cardInfo.card_type ? cardInfo.card_type.charAt(0).toUpperCase() + cardInfo.card_type.slice(1) : 'Personal'}</td>
+                    <td class="card-count-cell">
+                        <span class="card-count">${instances.length}</span>
+                        ${hasMultiple ? ' <span class="multiple-indicator" title="Multiple cards">📚</span>' : ''}
+                    </td>
+                    <td class="actions-cell">
+                        <button class="table-action-btn" onclick="event.stopPropagation(); openCardModal(${cardId})" title="View Details">
+                            👁️
+                        </button>
+                    </td>
+                </tr>
             `;
         }
+        
+        cardsHtml += `
+                    </tbody>
+                </table>
+            </div>
+        `;
         
         cardCollectionContainer.innerHTML = cardsHtml;
         

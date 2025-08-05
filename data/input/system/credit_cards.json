@@ -493,5 +493,32 @@
     "discontinued": false,
     "verified": true,
     "slug": "amazon-prime-system"
+  },
+  {
+    "name": "Chase Freedom Legacy",
+    "issuer": "Chase",
+    "annual_fee": 0,
+    "reward_type": "Points",
+    "reward_value_multiplier": 0.01,
+    "card_type": "personal",
+    "network": "Mastercard",
+    "url": "https://creditcards.chase.com/cash-back-credit-cards/freedom",
+    "image_url": "/images/chase/freedom.png",
+    "discontinued": true,
+    "slug": "chase-freedom-legacy",
+    "reward_categories": [
+      {
+        "category": "groceries",
+        "reward_rate": 5,
+        "start_date": "2025-01-01",
+        "end_date": "2025-03-31"
+      },
+      {
+        "category": "gas",
+        "reward_rate": 5,
+        "start_date": "2025-07-01",
+        "end_date": "2025-09-30"
+      }
+    ]
   }
 ]

@@ -144,19 +144,6 @@
     "slug": "disney"
   },
   {
-    "name": "Chase Freedom Legacy",
-    "issuer": "Chase",
-    "annual_fee": 0,
-    "reward_type": "Points",
-    "reward_value_multiplier": 0.01,
-    "card_type": "personal",
-    "network": "Mastercard",
-    "url": "https://creditcards.chase.com/cash-back-credit-cards/freedom",
-    "image_url": "/images/chase/freedom.png",
-    "discontinued": true,
-    "slug": "chase-freedom-legacy"
-  },
-  {
     "name": "Freedom Flex",
     "issuer": "Chase",
     "annual_fee": 0,
