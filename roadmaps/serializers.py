@@ -225,7 +225,9 @@ class GenerateRoadmapSerializer(serializers.Serializer):
                 roadmap.filters.add(filter_obj)
         
         # Generate recommendations using quick method (includes breakdowns)
-        engine = RecommendationEngine(profile)
+        # Pass user_cards data directly for session-based users
+        user_cards_data = validated_data.get('user_cards', []) if not profile.user else None
+        engine = RecommendationEngine(profile, user_cards_data=user_cards_data)
         recommendations = engine.generate_quick_recommendations(roadmap)
         
         # Clean up temporary roadmap

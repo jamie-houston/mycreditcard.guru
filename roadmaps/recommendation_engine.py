@@ -14,13 +14,35 @@ class RecommendationEngine:
     - Annual fee vs. benefits analysis
     """
     
-    def __init__(self, profile: UserSpendingProfile):
+    def __init__(self, profile: UserSpendingProfile, user_cards_data=None):
         self.profile = profile
         # Get user cards from the user, not the profile
         if profile.user:
             self.user_cards = list(profile.user.owned_cards.filter(closed_date__isnull=True))
         else:
             self.user_cards = []
+        
+        # For session-based users, accept user cards data directly
+        if user_cards_data and not profile.user:
+            from django.utils.dateparse import parse_date
+            from cards.models import CreditCard
+            # Convert user cards data to mock UserCard objects for consistency
+            mock_user_cards = []
+            for card_data in user_cards_data:
+                try:
+                    card = CreditCard.objects.get(id=card_data['card_id'])
+                    # Create a mock object with the same interface as UserCard
+                    mock_card = type('MockUserCard', (), {
+                        'card': card,
+                        'opened_date': parse_date(card_data.get('opened_date', '2020-01-01')),
+                        'closed_date': None if card_data.get('is_active', True) else parse_date(card_data.get('opened_date', '2020-01-01')),
+                        'nickname': card_data.get('nickname', ''),
+                    })()
+                    mock_user_cards.append(mock_card)
+                except CreditCard.DoesNotExist:
+                    continue
+            self.user_cards = mock_user_cards
+        
         self.spending_amounts = {
             sa.category.slug: sa.monthly_amount 
             for sa in profile.spending_amounts.all()
@@ -1220,6 +1242,32 @@ class RecommendationEngine:
                     'category_rewards': category_rewards,
                     'calculation': f"${annual_spend:,.0f} × {rate:.1f}x × {float(reward_value_multiplier):.3f} = ${category_rewards:.2f}",
                     'type': 'reward_category'
+                })
+        
+        # Add card credits to the total rewards if user has selected them
+        credits_value, credits_breakdown = self._calculate_card_credits_value(card)
+        total_rewards += credits_value
+        
+        # Add individual credits as separate breakdown items
+        if credits_breakdown:
+            for credit in credits_breakdown:
+                # Format credit name with frequency like "Apple TV ($12×10)" or "Airport Lounge ($469)"
+                if credit['times_per_year'] > 1:
+                    credit_display = f"{credit['name']} (${credit['value']:.0f}×{credit['times_per_year']})"
+                else:
+                    credit_display = f"{credit['name']} (${credit['value']:.0f})"
+                
+                breakdown_details.append({
+                    'category_name': credit_display,
+                    'monthly_spend': 0,
+                    'annual_spend': 0,
+                    'reward_rate': 0,
+                    'reward_multiplier': 1.0,
+                    'points_earned': credit['annual_value'],
+                    'category_rewards': credit['annual_value'],
+                    'calculation': f"Card benefit: ${credit['annual_value']:.0f} annually",
+                    'type': 'credit',
+                    'credit_detail': credit
                 })
         
         return {
