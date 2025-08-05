@@ -2443,9 +2443,19 @@
                     valueDisplay = 'Included';
                 }
                 
-                // Use credit type name if available, otherwise use description
-                const creditName = credit.credit_type?.name || 'Benefit';
-                const creditDescription = credit.description || '';
+                // Get proper display name and description from spending_credit or category
+                let creditName = 'Benefit';
+                let creditDescription = credit.description || '';
+                
+                if (credit.spending_credit) {
+                    // For spending credits (like airport_lounge, precheck, etc.)
+                    creditName = credit.spending_credit.display_name;
+                    creditDescription = credit.spending_credit.description || creditDescription;
+                } else if (credit.category) {
+                    // For category-based credits (like travel, dining, etc.)
+                    creditName = credit.category.display_name;
+                    creditDescription = credit.category.description || creditDescription;
+                }
                 
                 return `
                     <div class="modal-credit-item">

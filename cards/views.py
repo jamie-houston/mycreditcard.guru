@@ -21,21 +21,25 @@ from .serializers import (
 class IssuerListView(generics.ListAPIView):
     queryset = Issuer.objects.all().order_by('name')
     serializer_class = IssuerSerializer
+    pagination_class = None  # Disable pagination for reference data
 
 
 class RewardTypeListView(generics.ListAPIView):
     queryset = RewardType.objects.all().order_by('name')
     serializer_class = RewardTypeSerializer
+    pagination_class = None  # Disable pagination for reference data
 
 
 class SpendingCategoryListView(generics.ListAPIView):
-    queryset = SpendingCategory.objects.all().order_by('name')
+    queryset = SpendingCategory.objects.all().order_by('sort_order', 'name')
     serializer_class = SpendingCategorySerializer
+    pagination_class = None  # Disable pagination for reference data
 
 
 class SpendingCreditListView(generics.ListAPIView):
     queryset = SpendingCredit.objects.all().select_related('category').order_by('category__sort_order', 'sort_order', 'display_name')
     serializer_class = SpendingCreditSerializer
+    pagination_class = None  # Disable pagination for reference data
 
 
 class CreditCardListView(generics.ListAPIView):

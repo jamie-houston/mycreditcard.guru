@@ -905,7 +905,7 @@ async function removeUserCard(userCardId, cardId = null) {
                 
                 showNotification('Card removed from your local collection!', 'success');
                 loadCardsWithOwnership();
-                return;
+            return;
             }
         }
         
@@ -924,7 +924,7 @@ async function removeUserCard(userCardId, cardId = null) {
                 
                 // Reload cards to reflect changes
                 loadCardsWithOwnership();
-            } else {
+        } else {
                 const errorData = await response.json();
                 showNotification(errorData.error || 'Failed to remove card', 'error');
             }

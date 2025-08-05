@@ -111,7 +111,6 @@
     "discontinued": false,
     "credits": [
       {
-        "description": "Hotel Credit",
         "category": "hotels",
         "value": 50
       }
@@ -258,7 +257,7 @@
       "spending_requirement": 5000,
       "time_limit_months": 3
     },
-    "reward_type": "Cashback",
+    "reward_type": "Points",
     "reward_value_multiplier": 0.01,
     "reward_categories": [
       {
