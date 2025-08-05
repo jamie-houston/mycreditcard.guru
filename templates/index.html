@@ -1274,27 +1274,33 @@
                                     </div>
                                     <div class="breakdown-items">`;
                             
-                            // Add reward categories
-                            breakdownItems.forEach(item => {
+                            // Separate reward categories and credits for better display
+                            const rewardCategories = breakdownItems.filter(item => 
+                                !rec.rewards_breakdown.find(bd => bd.category_name === item.name && bd.type === 'credit')
+                            );
+                            const credits = breakdownItems.filter(item => 
+                                rec.rewards_breakdown.find(bd => bd.category_name === item.name && bd.type === 'credit')
+                            );
+                            
+                            // Add reward categories first
+                            rewardCategories.forEach(item => {
                                 if (item.value > 0) {
                                     breakdownHtml += `
                                         <div class="breakdown-item positive">
-                                            <span class="item-name">${item.name}</span>
+                                            <span class="item-name">🏆 ${item.name}</span>
                                             <span class="item-value">+$${item.value.toFixed(0)}</span>
                                         </div>`;
-                                    
-                                    // Add credits breakdown if available
-                                    if (item.credits_breakdown && item.credits_breakdown.length > 0) {
-                                        item.credits_breakdown.forEach(credit => {
-                                            const creditIcon = credit.type === 'benefit' ? '🎁' : '💳';
-                                            const frequencyDisplay = credit.frequency_display || '';
-                                            breakdownHtml += `
-                                                <div class="breakdown-subitem">
-                                                    <span class="subitem-name">${creditIcon} ${credit.name}${frequencyDisplay}</span>
-                                                    <span class="subitem-value">$${credit.annual_value.toFixed(0)}</span>
-                                                </div>`;
-                                        });
-                                    }
+                                }
+                            });
+                            
+                            // Add credits separately with different styling
+                            credits.forEach(item => {
+                                if (item.value > 0) {
+                                    breakdownHtml += `
+                                        <div class="breakdown-item positive">
+                                            <span class="item-name">🎁 ${item.name}</span>
+                                            <span class="item-value">+$${item.value.toFixed(0)}</span>
+                                        </div>`;
                                 }
                             });
                             

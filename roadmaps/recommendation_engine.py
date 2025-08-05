@@ -1207,16 +1207,19 @@ class RecommendationEngine:
                 except SpendingCategory.DoesNotExist:
                     category_display_name = category_slug.replace('_', ' ').title()
                 
-                # Add to breakdown
+                # Add to breakdown with multiplier in name
+                category_with_multiplier = f"{category_display_name} ({rate:.1f}x)"
+                
                 breakdown_details.append({
-                    'category_name': category_display_name,
+                    'category_name': category_with_multiplier,
                     'monthly_spend': annual_spend / 12,
                     'annual_spend': annual_spend,
                     'reward_rate': rate,
                     'reward_multiplier': float(reward_value_multiplier),
                     'points_earned': points_earned,
                     'category_rewards': category_rewards,
-                    'calculation': f"${annual_spend:,.0f} × {rate:.1f}x × {float(reward_value_multiplier):.3f} = ${category_rewards:.2f}"
+                    'calculation': f"${annual_spend:,.0f} × {rate:.1f}x × {float(reward_value_multiplier):.3f} = ${category_rewards:.2f}",
+                    'type': 'reward_category'
                 })
         
         return {
@@ -1283,16 +1286,21 @@ class RecommendationEngine:
                 category_rewards = points_earned * float(reward_value_multiplier)
                 total_rewards += category_rewards
                 
-                # Add to breakdown
+                # Add to breakdown with clearer display
+                category_display_name = reward_category.category.display_name or reward_category.category.name
+                # Format category name with multiplier like "Travel (4x)"
+                category_with_multiplier = f"{category_display_name} ({reward_rate:.1f}x)"
+                
                 breakdown_details.append({
-                    'category_name': reward_category.category.display_name or reward_category.category.name,
+                    'category_name': category_with_multiplier,
                     'monthly_spend': annual_spend / 12,
                     'annual_spend': annual_spend,
                     'reward_rate': reward_rate,
                     'reward_multiplier': float(reward_value_multiplier),
                     'points_earned': points_earned,
                     'category_rewards': category_rewards,
-                    'calculation': f"${annual_spend:,.0f} × {reward_rate:.1f}x × {float(reward_value_multiplier):.3f} = ${category_rewards:.2f}"
+                    'calculation': f"${annual_spend:,.0f} × {reward_rate:.1f}x × {float(reward_value_multiplier):.3f} = ${category_rewards:.2f}",
+                    'type': 'reward_category'
                 })
         
         # Handle unallocated spending - apply to general category if it exists
@@ -1312,33 +1320,46 @@ class RecommendationEngine:
                 category_rewards = points_earned * float(reward_value_multiplier)
                 total_rewards += category_rewards
                 
+                # Format other spending with multiplier
+                other_category_with_multiplier = f"Other Spending ({reward_rate:.1f}x)"
+                
                 breakdown_details.append({
-                    'category_name': 'Other Spending',
+                    'category_name': other_category_with_multiplier,
                     'monthly_spend': unallocated_spending / 12,
                     'annual_spend': unallocated_spending,
                     'reward_rate': reward_rate,
                     'reward_multiplier': float(reward_value_multiplier),
                     'points_earned': points_earned,
                     'category_rewards': category_rewards,
-                    'calculation': f"${unallocated_spending:,.0f} × {reward_rate:.1f}x × {float(reward_value_multiplier):.3f} = ${category_rewards:.2f}"
+                    'calculation': f"${unallocated_spending:,.0f} × {reward_rate:.1f}x × {float(reward_value_multiplier):.3f} = ${category_rewards:.2f}",
+                    'type': 'reward_category'
                 })
         
         # Add card credits to the total rewards if user has selected them
         credits_value, credits_breakdown = self._calculate_card_credits_value(card)
         total_rewards += credits_value
         
-        if credits_value > 0:
-            breakdown_details.append({
-                'category_name': 'Card Benefits & Credits',
-                'monthly_spend': 0,
-                'annual_spend': 0,
-                'reward_rate': 0,
-                'reward_multiplier': 1.0,
-                'points_earned': credits_value,
-                'category_rewards': credits_value,
-                'calculation': f"Selected card benefits worth ${credits_value:.2f} annually",
-                'credits_breakdown': credits_breakdown
-            })
+        # Add individual credits as separate breakdown items
+        if credits_breakdown:
+            for credit in credits_breakdown:
+                # Format credit name with frequency like "Apple TV ($12×10)" or "Airport Lounge ($469)"
+                if credit['times_per_year'] > 1:
+                    credit_display = f"{credit['name']} (${credit['value']:.0f}×{credit['times_per_year']})"
+                else:
+                    credit_display = f"{credit['name']} (${credit['value']:.0f})"
+                
+                breakdown_details.append({
+                    'category_name': credit_display,
+                    'monthly_spend': 0,
+                    'annual_spend': 0,
+                    'reward_rate': 0,
+                    'reward_multiplier': 1.0,
+                    'points_earned': credit['annual_value'],
+                    'category_rewards': credit['annual_value'],
+                    'calculation': f"Card benefit: ${credit['annual_value']:.0f} annually",
+                    'type': 'credit',
+                    'credit_detail': credit
+                })
         
         return {
             'total_rewards': total_rewards,
