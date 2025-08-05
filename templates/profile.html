@@ -104,6 +104,29 @@
     <div id="categoryOptimization">
         <div class="loading">Loading category recommendations...</div>
     </div>
+    
+    <!-- Add Card Input - Always Visible -->
+    <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
+        <h3 style="margin-bottom: 15px; color: #374151; font-size: 16px;">➕ Add Credit Cards</h3>
+        <p style="color: #6b7280; margin-bottom: 15px; font-size: 14px;">Add cards to your collection to see updated recommendations:</p>
+        
+        <div style="margin-bottom: 20px;">
+            <!-- Searchable Card Dropdown -->
+            <div style="position: relative;">
+                <label for="cardSearch" style="display: block; margin-bottom: 5px; font-weight: 500; color: #374151;">Search for a card:</label>
+                <input 
+                    type="text" 
+                    id="cardSearch" 
+                    placeholder="Type card name (e.g., 'Chase Sapphire', 'Blue Cash')..." 
+                    autocomplete="off"
+                    style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px; transition: border-color 0.2s; box-sizing: border-box;"
+                >
+                <!-- Dropdown will be moved to body dynamically -->
+                <div id="cardSearchResults" style="display: none;">
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <!-- Profile Summary Section -->
@@ -129,41 +152,6 @@
     </div>
 </div>
 
-<!-- Add New Card Section -->
-<div class="section">
-    <h2>➕ Add Credit Cards</h2>
-    <p style="color: #6b7280; margin-bottom: 20px;">Quickly add cards to your collection by searching and selecting from our database:</p>
-    
-    <div style="display: flex; gap: 12px; align-items: flex-end; margin-bottom: 20px; flex-wrap: wrap;">
-        <!-- Searchable Card Dropdown -->
-        <div style="flex: 1; min-width: 300px; position: relative;">
-            <label for="cardSearch" style="display: block; margin-bottom: 5px; font-weight: 500; color: #374151;">Search for a card:</label>
-            <input 
-                type="text" 
-                id="cardSearch" 
-                placeholder="Type card name (e.g., 'Chase Sapphire', 'Blue Cash')..." 
-                autocomplete="off"
-                style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px; transition: border-color 0.2s; box-sizing: border-box;"
-                onfocus="this.style.borderColor='#3b82f6'" 
-                onblur="if(!this.value) this.style.borderColor='#e5e7eb'; setTimeout(() => hideSearchResults(), 200)"
-                oninput="searchCards(this.value)"
-            >
-            <!-- Dropdown will be moved to body dynamically -->
-            <div id="cardSearchResults" style="display: none;">
-            </div>
-        </div>
-        
-        <!-- Add Button -->
-        <button 
-            id="addSelectedCard" 
-            onclick="addSelectedCardToCollection()" 
-            disabled
-            style="padding: 12px 24px; background: #3b82f6; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.2s; opacity: 0.5;"
-        >
-            ✅ Add Card
-        </button>
-    </div>
-</div>
 
 <!-- Card Collection Section -->
 <div class="section">
@@ -481,6 +469,25 @@
 <script>
 document.addEventListener('DOMContentLoaded', async function() {
     await loadProfileData();
+    
+    // Set up card search event listeners
+    const cardSearchInput = document.getElementById('cardSearch');
+    if (cardSearchInput) {
+        cardSearchInput.addEventListener('input', function(e) {
+            searchCards(e.target.value);
+        });
+        
+        cardSearchInput.addEventListener('focus', function(e) {
+            e.target.style.borderColor = '#3b82f6';
+        });
+        
+        cardSearchInput.addEventListener('blur', function(e) {
+            if (!e.target.value) {
+                e.target.style.borderColor = '#e5e7eb';
+            }
+            setTimeout(() => hideSearchResults(), 200);
+        });
+    }
 });
 
 async function loadProfileData() {
@@ -712,8 +719,7 @@ async function loadCategoryOptimization() {
             categoryContainer.innerHTML = `
                 <div class="empty-state">
                     <h3>Add Cards to See Categories</h3>
-                    <p>Add your credit cards to see which card to use for each spending category.</p>
-                    <a href="/cards/">Add Credit Cards</a>
+                    <p>Add your credit cards using the search box below to see which card to use for each spending category.</p>
                 </div>
             `;
             return;
@@ -1211,8 +1217,10 @@ function searchCards(query) {
     
     // Reset selected card
     selectedCard = null;
-    addButton.disabled = true;
-    addButton.style.opacity = '0.5';
+    if (addButton) {
+        addButton.disabled = true;
+        addButton.style.opacity = '0.5';
+    }
     
     if (!query || query.length < 2) {
         resultsDiv.style.display = 'none';
@@ -1292,7 +1300,7 @@ function hideSearchResults() {
 }
 
 // Select a card from search results
-function selectCard(cardId, cardName) {
+async function selectCard(cardId, cardName) {
     selectedCard = cardId;
     
     // Update input value
@@ -1302,10 +1310,8 @@ function selectCard(cardId, cardName) {
     const resultsDiv = document.getElementById('cardSearchResults');
     resultsDiv.style.display = 'none';
     
-    // Enable add button
-    const addButton = document.getElementById('addSelectedCard');
-    addButton.disabled = false;
-    addButton.style.opacity = '1';
+    // Since there's no button, automatically add the card
+    await addSelectedCardToCollection();
 }
 
 // Add selected card to collection
@@ -1316,9 +1322,12 @@ async function addSelectedCardToCollection() {
     }
     
     const addButton = document.getElementById('addSelectedCard');
-    const originalText = addButton.innerHTML;
-    addButton.innerHTML = '⏳ Adding...';
-    addButton.disabled = true;
+    let originalText = '';
+    if (addButton) {
+        originalText = addButton.innerHTML;
+        addButton.innerHTML = '⏳ Adding...';
+        addButton.disabled = true;
+    }
     
     try {
         if (isAuthenticated) {
@@ -1364,15 +1373,19 @@ async function addSelectedCardToCollection() {
         // Clear search
         document.getElementById('cardSearch').value = '';
         selectedCard = null;
-        addButton.disabled = true;
-        addButton.style.opacity = '0.5';
+        if (addButton) {
+            addButton.disabled = true;
+            addButton.style.opacity = '0.5';
+        }
         
     } catch (error) {
         console.error('Error adding card:', error);
         showNotification('Error adding card. Please try again.', 'error');
     } finally {
-        addButton.innerHTML = originalText;
-        addButton.disabled = selectedCard === null;
+        if (addButton) {
+            addButton.innerHTML = originalText;
+            addButton.disabled = selectedCard === null;
+        }
     }
 }
 
@@ -1405,11 +1418,7 @@ function updateAddCardSection() {
         }
     }
     
-    if (addButton) {
-        addButton.innerHTML = '✅ Add Card';
-        addButton.style.opacity = selectedCard ? '1' : '0.5';
-        addButton.disabled = selectedCard === null;
-    }
+    // Button functionality removed - cards are now added automatically on selection
     
     // Add visual indicator for local storage mode
     if (!isAuthenticated) {
