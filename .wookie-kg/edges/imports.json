@@ -1,0 +1,942 @@
+[
+  {
+    "source": "mod:admin",
+    "target": "mod:os",
+    "type": "imports"
+  },
+  {
+    "source": "mod:admin",
+    "target": "mod:sys",
+    "type": "imports"
+  },
+  {
+    "source": "mod:admin",
+    "target": "mod:subprocess",
+    "type": "imports"
+  },
+  {
+    "source": "mod:admin",
+    "target": "mod:argparse",
+    "type": "imports"
+  },
+  {
+    "source": "mod:admin",
+    "target": "mod:pathlib",
+    "type": "imports"
+  },
+  {
+    "source": "mod:admin",
+    "target": "mod:django",
+    "type": "imports"
+  },
+  {
+    "source": "mod:admin",
+    "target": "mod:cards.models",
+    "type": "imports"
+  },
+  {
+    "source": "mod:admin",
+    "target": "mod:cards.models",
+    "type": "imports"
+  },
+  {
+    "source": "mod:analyze_scenarios",
+    "target": "mod:json",
+    "type": "imports"
+  },
+  {
+    "source": "mod:analyze_scenarios",
+    "target": "mod:re",
+    "type": "imports"
+  },
+  {
+    "source": "mod:analyze_scenarios",
+    "target": "mod:collections",
+    "type": "imports"
+  },
+  {
+    "source": "mod:cards.admin",
+    "target": "mod:django/contrib",
+    "type": "imports"
+  },
+  {
+    "source": "mod:cards.admin",
+    "target": "mod:cards.models",
+    "type": "imports"
+  },
+  {
+    "source": "mod:cards.apps",
+    "target": "mod:cards.apps",
+    "type": "imports"
+  },
+  {
+    "source": "mod:cards.management.commands.import_cards",
+    "target": "mod:json",
+    "type": "imports"
+  },
+  {
+    "source": "mod:cards.management.commands.import_cards",
+    "target": "mod:os",
+    "type": "imports"
+  },
+  {
+    "source": "mod:cards.management.commands.import_cards",
+    "target": "mod:datetime",
+    "type": "imports"
+  },
+  {
+    "source": "mod:cards.management.commands.import_cards",
+    "target": "mod:django/core/management/base",
+    "type": "imports"
+  },
+  {
+    "source": "mod:cards.management.commands.import_cards",
+    "target": "mod:django/utils/text",
+    "type": "imports"
+  },
+  {
+    "source": "mod:cards.management.commands.import_cards",
+    "target": "mod:cards.models",
+    "type": "imports"
+  },
+  {
+    "source": "mod:cards.management.commands.import_cards",
+    "target": "mod:cards.models",
+    "type": "imports"
+  },
+  {
+    "source": "mod:cards.management.commands.import_cards",
+    "target": "mod:django/utils/text",
+    "type": "imports"
+  },
+  {
+    "source": "mod:cards.management.commands.import_cards",
+    "target": "mod:django/utils/text",
+    "type": "imports"
+  },
+  {
+    "source": "mod:cards.management.commands.import_credit_types",
+    "target": "mod:json",
+    "type": "imports"
+  },
+  {
+    "source": "mod:cards.management.commands.import_credit_types",
+    "target": "mod:os",
+    "type": "imports"
+  },
+  {
+    "source": "mod:cards.management.commands.import_credit_types",
+    "target": "mod:glob",
+    "type": "imports"
+  },
+  {
+    "source": "mod:cards.management.commands.import_credit_types",
+    "target": "mod:django/core/management/base",
+    "type": "imports"
+  },
+  {
+    "source": "mod:cards.management.commands.import_credit_types",
+    "target": "mod:django/utils/text",
+    "type": "imports"
+  },
+  {
+    "source": "mod:cards.management.commands.import_credit_types",
+    "target": "mod:cards.models",
+    "type": "imports"
+  },
+  {
+    "source": "mod:cards.management.commands.import_spending_credits",
+    "target": "mod:json",
+    "type": "imports"
+  },
+  {
+    "source": "mod:cards.management.commands.import_spending_credits",
+    "target": "mod:os",
+    "type": "imports"
+  },
+  {
+    "source": "mod:cards.management.commands.import_spending_credits",
+    "target": "mod:django/core/management/base",
+    "type": "imports"
+  },
+  {
+    "source": "mod:cards.management.commands.import_spending_credits",
+    "target": "mod:django/utils/text",
+    "type": "imports"
+  },
+  {
+    "source": "mod:cards.management.commands.import_spending_credits",
+    "target": "mod:cards.models",
+    "type": "imports"
+  },
+  {
+    "source": "mod:cards.management.commands.run_scenario",
+    "target": "mod:json",
+    "type": "imports"
+  },
+  {
+    "source": "mod:cards.management.commands.run_scenario",
+    "target": "mod:os",
+    "type": "imports"
+  },
+  {
+    "source": "mod:cards.management.commands.run_scenario",
+    "target": "mod:django/core/management/base",
+    "type": "imports"
+  },
+  {
+    "source": "mod:cards.management.commands.run_scenario",
+    "target": "mod:cards.models",
+    "type": "imports"
+  },
+  {
+    "source": "mod:cards.management.commands.run_scenario",
+    "target": "mod:django/db",
+    "type": "imports"
+  },
+  {
+    "source": "mod:cards.management.commands.run_scenario",
+    "target": "mod:decimal",
+    "type": "imports"
+  },
+  {
+    "source": "mod:cards.management.commands.run_scenario",
+    "target": "mod:datetime",
+    "type": "imports"
+  },
+  {
+    "source": "mod:cards.management.commands.run_scenario",
+    "target": "mod:cards.models",
+    "type": "imports"
+  },
+  {
+    "source": "mod:cards.management.commands.run_scenario",
+    "target": "mod:cards.models",
+    "type": "imports"
+  },
+  {
+    "source": "mod:cards.management.commands.run_scenario",
+    "target": "mod:roadmaps.recommendation_engine",
+    "type": "imports"
+  },
+  {
+    "source": "mod:cards.management.commands.run_scenario",
+    "target": "mod:cards.scenario_loader",
+    "type": "imports"
+  },
+  {
+    "source": "mod:cards.management.commands.run_scenario",
+    "target": "mod:json",
+    "type": "imports"
+  },
+  {
+    "source": "mod:cards.management.commands.run_scenario",
+    "target": "mod:os",
+    "type": "imports"
+  },
+  {
+    "source": "mod:cards.migrations.0001_initial",
+    "target": "mod:django/db/models/deletion",
+    "type": "imports"
+  },
+  {
+    "source": "mod:cards.migrations.0001_initial",
+    "target": "mod:django/conf",
+    "type": "imports"
+  },
+  {
+    "source": "mod:cards.migrations.0001_initial",
+    "target": "mod:django/db",
+    "type": "imports"
+  },
+  {
+    "source": "mod:cards.models",
+    "target": "mod:django/db",
+    "type": "imports"
+  },
+  {
+    "source": "mod:cards.models",
+    "target": "mod:cards.models",
+    "type": "imports"
+  },
+  {
+    "source": "mod:cards.models",
+    "target": "mod:django/core/validators",
+    "type": "imports"
+  },
+  {
+    "source": "mod:cards.models",
+    "target": "mod:json",
+    "type": "imports"
+  },
+  {
+    "source": "mod:cards.models",
+    "target": "mod:uuid",
+    "type": "imports"
+  },
+  {
+    "source": "mod:cards.models",
+    "target": "mod:cards.urls",
+    "type": "imports"
+  },
+  {
+    "source": "mod:cards.scenario_loader",
+    "target": "mod:os",
+    "type": "imports"
+  },
+  {
+    "source": "mod:cards.scenario_loader",
+    "target": "mod:json",
+    "type": "imports"
+  },
+  {
+    "source": "mod:cards.scenario_loader",
+    "target": "mod:glob",
+    "type": "imports"
+  },
+  {
+    "source": "mod:cards.scenario_loader",
+    "target": "mod:typing",
+    "type": "imports"
+  },
+  {
+    "source": "mod:cards.serializers",
+    "target": "mod:rest_framework",
+    "type": "imports"
+  },
+  {
+    "source": "mod:cards.serializers",
+    "target": "mod:cards.models",
+    "type": "imports"
+  },
+  {
+    "source": "mod:cards.tests",
+    "target": "mod:django/test",
+    "type": "imports"
+  },
+  {
+    "source": "mod:cards.urls",
+    "target": "mod:cards.urls",
+    "type": "imports"
+  },
+  {
+    "source": "mod:cards.views",
+    "target": "mod:rest_framework",
+    "type": "imports"
+  },
+  {
+    "source": "mod:cards.views",
+    "target": "mod:rest_framework/decorators",
+    "type": "imports"
+  },
+  {
+    "source": "mod:cards.views",
+    "target": "mod:rest_framework/response",
+    "type": "imports"
+  },
+  {
+    "source": "mod:cards.views",
+    "target": "mod:django_filters/rest_framework",
+    "type": "imports"
+  },
+  {
+    "source": "mod:cards.views",
+    "target": "mod:cards.models",
+    "type": "imports"
+  },
+  {
+    "source": "mod:cards.views",
+    "target": "mod:django/shortcuts",
+    "type": "imports"
+  },
+  {
+    "source": "mod:cards.views",
+    "target": "mod:django/http",
+    "type": "imports"
+  },
+  {
+    "source": "mod:cards.views",
+    "target": "mod:cards.models",
+    "type": "imports"
+  },
+  {
+    "source": "mod:cards.views",
+    "target": "mod:cards.serializers",
+    "type": "imports"
+  },
+  {
+    "source": "mod:cards.views",
+    "target": "mod:rest_framework/pagination",
+    "type": "imports"
+  },
+  {
+    "source": "mod:cards.views",
+    "target": "mod:cards.serializers",
+    "type": "imports"
+  },
+  {
+    "source": "mod:cards.views",
+    "target": "mod:cards.models",
+    "type": "imports"
+  },
+  {
+    "source": "mod:cards.views",
+    "target": "mod:cards.models",
+    "type": "imports"
+  },
+  {
+    "source": "mod:cards.views",
+    "target": "mod:cards.models",
+    "type": "imports"
+  },
+  {
+    "source": "mod:cards.views",
+    "target": "mod:cards.models",
+    "type": "imports"
+  },
+  {
+    "source": "mod:cards.views",
+    "target": "mod:uuid",
+    "type": "imports"
+  },
+  {
+    "source": "mod:convert_cards_data",
+    "target": "mod:json",
+    "type": "imports"
+  },
+  {
+    "source": "mod:convert_cards_data",
+    "target": "mod:os",
+    "type": "imports"
+  },
+  {
+    "source": "mod:convert_cards_data",
+    "target": "mod:collections",
+    "type": "imports"
+  },
+  {
+    "source": "mod:creditcard_guru.asgi",
+    "target": "mod:os",
+    "type": "imports"
+  },
+  {
+    "source": "mod:creditcard_guru.asgi",
+    "target": "mod:creditcard_guru.asgi",
+    "type": "imports"
+  },
+  {
+    "source": "mod:creditcard_guru.settings",
+    "target": "mod:pathlib",
+    "type": "imports"
+  },
+  {
+    "source": "mod:creditcard_guru.settings",
+    "target": "mod:os",
+    "type": "imports"
+  },
+  {
+    "source": "mod:creditcard_guru.settings",
+    "target": "mod:decouple",
+    "type": "imports"
+  },
+  {
+    "source": "mod:creditcard_guru.settings",
+    "target": "mod:dj_database_url",
+    "type": "imports"
+  },
+  {
+    "source": "mod:creditcard_guru.urls",
+    "target": "mod:django/contrib",
+    "type": "imports"
+  },
+  {
+    "source": "mod:creditcard_guru.urls",
+    "target": "mod:cards.urls",
+    "type": "imports"
+  },
+  {
+    "source": "mod:creditcard_guru.urls",
+    "target": "mod:django/http",
+    "type": "imports"
+  },
+  {
+    "source": "mod:creditcard_guru.urls",
+    "target": "mod:django/shortcuts",
+    "type": "imports"
+  },
+  {
+    "source": "mod:creditcard_guru.urls",
+    "target": "mod:cards.views",
+    "type": "imports"
+  },
+  {
+    "source": "mod:creditcard_guru.wsgi",
+    "target": "mod:os",
+    "type": "imports"
+  },
+  {
+    "source": "mod:creditcard_guru.wsgi",
+    "target": "mod:creditcard_guru.wsgi",
+    "type": "imports"
+  },
+  {
+    "source": "mod:manage",
+    "target": "mod:os",
+    "type": "imports"
+  },
+  {
+    "source": "mod:manage",
+    "target": "mod:sys",
+    "type": "imports"
+  },
+  {
+    "source": "mod:manage",
+    "target": "mod:django/core/management",
+    "type": "imports"
+  },
+  {
+    "source": "mod:roadmaps.admin",
+    "target": "mod:django/contrib",
+    "type": "imports"
+  },
+  {
+    "source": "mod:roadmaps.admin",
+    "target": "mod:cards.models",
+    "type": "imports"
+  },
+  {
+    "source": "mod:roadmaps.apps",
+    "target": "mod:cards.apps",
+    "type": "imports"
+  },
+  {
+    "source": "mod:roadmaps.migrations.0001_initial",
+    "target": "mod:django/db/models/deletion",
+    "type": "imports"
+  },
+  {
+    "source": "mod:roadmaps.migrations.0001_initial",
+    "target": "mod:django/db",
+    "type": "imports"
+  },
+  {
+    "source": "mod:roadmaps.models",
+    "target": "mod:django/db",
+    "type": "imports"
+  },
+  {
+    "source": "mod:roadmaps.models",
+    "target": "mod:cards.models",
+    "type": "imports"
+  },
+  {
+    "source": "mod:roadmaps.models",
+    "target": "mod:cards.models",
+    "type": "imports"
+  },
+  {
+    "source": "mod:roadmaps.recommendation_engine",
+    "target": "mod:datetime",
+    "type": "imports"
+  },
+  {
+    "source": "mod:roadmaps.recommendation_engine",
+    "target": "mod:decimal",
+    "type": "imports"
+  },
+  {
+    "source": "mod:roadmaps.recommendation_engine",
+    "target": "mod:typing",
+    "type": "imports"
+  },
+  {
+    "source": "mod:roadmaps.recommendation_engine",
+    "target": "mod:cards.models",
+    "type": "imports"
+  },
+  {
+    "source": "mod:roadmaps.recommendation_engine",
+    "target": "mod:cards.models",
+    "type": "imports"
+  },
+  {
+    "source": "mod:roadmaps.recommendation_engine",
+    "target": "mod:cards.models",
+    "type": "imports"
+  },
+  {
+    "source": "mod:roadmaps.recommendation_engine",
+    "target": "mod:collections",
+    "type": "imports"
+  },
+  {
+    "source": "mod:roadmaps.recommendation_engine",
+    "target": "mod:itertools",
+    "type": "imports"
+  },
+  {
+    "source": "mod:roadmaps.recommendation_engine",
+    "target": "mod:cards.models",
+    "type": "imports"
+  },
+  {
+    "source": "mod:roadmaps.recommendation_engine",
+    "target": "mod:cards.models",
+    "type": "imports"
+  },
+  {
+    "source": "mod:roadmaps.recommendation_engine",
+    "target": "mod:cards.models",
+    "type": "imports"
+  },
+  {
+    "source": "mod:roadmaps.recommendation_engine",
+    "target": "mod:cards.models",
+    "type": "imports"
+  },
+  {
+    "source": "mod:roadmaps.recommendation_engine",
+    "target": "mod:django/utils/dateparse",
+    "type": "imports"
+  },
+  {
+    "source": "mod:roadmaps.recommendation_engine",
+    "target": "mod:cards.models",
+    "type": "imports"
+  },
+  {
+    "source": "mod:roadmaps.recommendation_engine",
+    "target": "mod:re",
+    "type": "imports"
+  },
+  {
+    "source": "mod:roadmaps.recommendation_engine",
+    "target": "mod:cards.models",
+    "type": "imports"
+  },
+  {
+    "source": "mod:roadmaps.recommendation_engine",
+    "target": "mod:decimal",
+    "type": "imports"
+  },
+  {
+    "source": "mod:roadmaps.serializers",
+    "target": "mod:rest_framework",
+    "type": "imports"
+  },
+  {
+    "source": "mod:roadmaps.serializers",
+    "target": "mod:cards.serializers",
+    "type": "imports"
+  },
+  {
+    "source": "mod:roadmaps.serializers",
+    "target": "mod:cards.models",
+    "type": "imports"
+  },
+  {
+    "source": "mod:roadmaps.serializers",
+    "target": "mod:roadmaps.recommendation_engine",
+    "type": "imports"
+  },
+  {
+    "source": "mod:roadmaps.serializers",
+    "target": "mod:cards.models",
+    "type": "imports"
+  },
+  {
+    "source": "mod:roadmaps.serializers",
+    "target": "mod:cards.models",
+    "type": "imports"
+  },
+  {
+    "source": "mod:roadmaps.serializers",
+    "target": "mod:cards.models",
+    "type": "imports"
+  },
+  {
+    "source": "mod:roadmaps.serializers",
+    "target": "mod:cards.models",
+    "type": "imports"
+  },
+  {
+    "source": "mod:roadmaps.serializers",
+    "target": "mod:cards.models",
+    "type": "imports"
+  },
+  {
+    "source": "mod:roadmaps.serializers",
+    "target": "mod:cards.models",
+    "type": "imports"
+  },
+  {
+    "source": "mod:roadmaps.tests",
+    "target": "mod:django/test",
+    "type": "imports"
+  },
+  {
+    "source": "mod:roadmaps.urls",
+    "target": "mod:cards.urls",
+    "type": "imports"
+  },
+  {
+    "source": "mod:roadmaps.views",
+    "target": "mod:rest_framework",
+    "type": "imports"
+  },
+  {
+    "source": "mod:roadmaps.views",
+    "target": "mod:rest_framework/decorators",
+    "type": "imports"
+  },
+  {
+    "source": "mod:roadmaps.views",
+    "target": "mod:rest_framework/response",
+    "type": "imports"
+  },
+  {
+    "source": "mod:roadmaps.views",
+    "target": "mod:django/shortcuts",
+    "type": "imports"
+  },
+  {
+    "source": "mod:roadmaps.views",
+    "target": "mod:django/utils",
+    "type": "imports"
+  },
+  {
+    "source": "mod:roadmaps.views",
+    "target": "mod:cards.models",
+    "type": "imports"
+  },
+  {
+    "source": "mod:roadmaps.views",
+    "target": "mod:cards.models",
+    "type": "imports"
+  },
+  {
+    "source": "mod:roadmaps.views",
+    "target": "mod:cards.serializers",
+    "type": "imports"
+  },
+  {
+    "source": "mod:roadmaps.views",
+    "target": "mod:roadmaps.recommendation_engine",
+    "type": "imports"
+  },
+  {
+    "source": "mod:roadmaps.views",
+    "target": "mod:cards.models",
+    "type": "imports"
+  },
+  {
+    "source": "mod:setup_data",
+    "target": "mod:os",
+    "type": "imports"
+  },
+  {
+    "source": "mod:setup_data",
+    "target": "mod:sys",
+    "type": "imports"
+  },
+  {
+    "source": "mod:setup_data",
+    "target": "mod:subprocess",
+    "type": "imports"
+  },
+  {
+    "source": "mod:setup_data",
+    "target": "mod:glob",
+    "type": "imports"
+  },
+  {
+    "source": "mod:setup_data",
+    "target": "mod:pathlib",
+    "type": "imports"
+  },
+  {
+    "source": "mod:split_scenarios",
+    "target": "mod:json",
+    "type": "imports"
+  },
+  {
+    "source": "mod:split_scenarios",
+    "target": "mod:os",
+    "type": "imports"
+  },
+  {
+    "source": "mod:split_scenarios",
+    "target": "mod:re",
+    "type": "imports"
+  },
+  {
+    "source": "mod:split_scenarios",
+    "target": "mod:collections",
+    "type": "imports"
+  },
+  {
+    "source": "mod:users.admin",
+    "target": "mod:django/contrib",
+    "type": "imports"
+  },
+  {
+    "source": "mod:users.apps",
+    "target": "mod:cards.apps",
+    "type": "imports"
+  },
+  {
+    "source": "mod:users.migrations.0001_initial",
+    "target": "mod:django/db/models/deletion",
+    "type": "imports"
+  },
+  {
+    "source": "mod:users.migrations.0001_initial",
+    "target": "mod:django/conf",
+    "type": "imports"
+  },
+  {
+    "source": "mod:users.migrations.0001_initial",
+    "target": "mod:django/db",
+    "type": "imports"
+  },
+  {
+    "source": "mod:users.models",
+    "target": "mod:django/db",
+    "type": "imports"
+  },
+  {
+    "source": "mod:users.models",
+    "target": "mod:cards.models",
+    "type": "imports"
+  },
+  {
+    "source": "mod:users.models",
+    "target": "mod:cards.models",
+    "type": "imports"
+  },
+  {
+    "source": "mod:users.serializers",
+    "target": "mod:rest_framework",
+    "type": "imports"
+  },
+  {
+    "source": "mod:users.serializers",
+    "target": "mod:cards.models",
+    "type": "imports"
+  },
+  {
+    "source": "mod:users.serializers",
+    "target": "mod:cards.models",
+    "type": "imports"
+  },
+  {
+    "source": "mod:users.serializers",
+    "target": "mod:cards.models",
+    "type": "imports"
+  },
+  {
+    "source": "mod:users.serializers",
+    "target": "mod:cards.serializers",
+    "type": "imports"
+  },
+  {
+    "source": "mod:users.serializers",
+    "target": "mod:cards.models",
+    "type": "imports"
+  },
+  {
+    "source": "mod:users.serializers",
+    "target": "mod:cards.models",
+    "type": "imports"
+  },
+  {
+    "source": "mod:users.tests",
+    "target": "mod:django/test",
+    "type": "imports"
+  },
+  {
+    "source": "mod:users.urls",
+    "target": "mod:cards.urls",
+    "type": "imports"
+  },
+  {
+    "source": "mod:users.views",
+    "target": "mod:rest_framework",
+    "type": "imports"
+  },
+  {
+    "source": "mod:users.views",
+    "target": "mod:rest_framework/decorators",
+    "type": "imports"
+  },
+  {
+    "source": "mod:users.views",
+    "target": "mod:rest_framework/permissions",
+    "type": "imports"
+  },
+  {
+    "source": "mod:users.views",
+    "target": "mod:rest_framework/response",
+    "type": "imports"
+  },
+  {
+    "source": "mod:users.views",
+    "target": "mod:cards.models",
+    "type": "imports"
+  },
+  {
+    "source": "mod:users.views",
+    "target": "mod:django/utils",
+    "type": "imports"
+  },
+  {
+    "source": "mod:users.views",
+    "target": "mod:cards.models",
+    "type": "imports"
+  },
+  {
+    "source": "mod:users.views",
+    "target": "mod:cards.models",
+    "type": "imports"
+  },
+  {
+    "source": "mod:users.views",
+    "target": "mod:cards.serializers",
+    "type": "imports"
+  },
+  {
+    "source": "mod:users.views",
+    "target": "mod:cards.models",
+    "type": "imports"
+  },
+  {
+    "source": "mod:users.views",
+    "target": "mod:cards.models",
+    "type": "imports"
+  },
+  {
+    "source": "mod:wsgi",
+    "target": "mod:os",
+    "type": "imports"
+  },
+  {
+    "source": "mod:wsgi",
+    "target": "mod:sys",
+    "type": "imports"
+  },
+  {
+    "source": "mod:wsgi",
+    "target": "mod:pathlib",
+    "type": "imports"
+  },
+  {
+    "source": "mod:wsgi",
+    "target": "mod:django",
+    "type": "imports"
+  },
+  {
+    "source": "mod:wsgi",
+    "target": "mod:creditcard_guru.wsgi",
+    "type": "imports"
+  }
+]

@@ -1,0 +1,906 @@
+{
+  "meth:cards/management/commands/import_cards.py.Command.add_arguments": {
+    "class": "Command",
+    "id": "meth:cards/management/commands/import_cards.py.Command.add_arguments",
+    "line": 17,
+    "name": "add_arguments",
+    "path": "cards/management/commands/import_cards.py",
+    "type": "method"
+  },
+  "meth:cards/management/commands/import_cards.py.Command.handle": {
+    "class": "Command",
+    "id": "meth:cards/management/commands/import_cards.py.Command.handle",
+    "line": 24,
+    "name": "handle",
+    "path": "cards/management/commands/import_cards.py",
+    "type": "method"
+  },
+  "meth:cards/management/commands/import_cards.py.Command.import_card_credits": {
+    "class": "Command",
+    "id": "meth:cards/management/commands/import_cards.py.Command.import_card_credits",
+    "line": 353,
+    "name": "import_card_credits",
+    "path": "cards/management/commands/import_cards.py",
+    "type": "method"
+  },
+  "meth:cards/management/commands/import_cards.py.Command.import_credit_cards": {
+    "class": "Command",
+    "id": "meth:cards/management/commands/import_cards.py.Command.import_credit_cards",
+    "line": 214,
+    "name": "import_credit_cards",
+    "path": "cards/management/commands/import_cards.py",
+    "type": "method"
+  },
+  "meth:cards/management/commands/import_cards.py.Command.import_data": {
+    "class": "Command",
+    "id": "meth:cards/management/commands/import_cards.py.Command.import_data",
+    "line": 66,
+    "name": "import_data",
+    "path": "cards/management/commands/import_cards.py",
+    "type": "method"
+  },
+  "meth:cards/management/commands/import_cards.py.Command.import_issuers": {
+    "class": "Command",
+    "id": "meth:cards/management/commands/import_cards.py.Command.import_issuers",
+    "line": 93,
+    "name": "import_issuers",
+    "path": "cards/management/commands/import_cards.py",
+    "type": "method"
+  },
+  "meth:cards/management/commands/import_cards.py.Command.import_personal_cards": {
+    "class": "Command",
+    "id": "meth:cards/management/commands/import_cards.py.Command.import_personal_cards",
+    "line": 391,
+    "name": "import_personal_cards",
+    "path": "cards/management/commands/import_cards.py",
+    "type": "method"
+  },
+  "meth:cards/management/commands/import_cards.py.Command.import_reward_categories": {
+    "class": "Command",
+    "id": "meth:cards/management/commands/import_cards.py.Command.import_reward_categories",
+    "line": 315,
+    "name": "import_reward_categories",
+    "path": "cards/management/commands/import_cards.py",
+    "type": "method"
+  },
+  "meth:cards/management/commands/import_cards.py.Command.import_reward_types": {
+    "class": "Command",
+    "id": "meth:cards/management/commands/import_cards.py.Command.import_reward_types",
+    "line": 106,
+    "name": "import_reward_types",
+    "path": "cards/management/commands/import_cards.py",
+    "type": "method"
+  },
+  "meth:cards/management/commands/import_cards.py.Command.import_spending_categories": {
+    "class": "Command",
+    "id": "meth:cards/management/commands/import_cards.py.Command.import_spending_categories",
+    "line": 117,
+    "name": "import_spending_categories",
+    "path": "cards/management/commands/import_cards.py",
+    "type": "method"
+  },
+  "meth:cards/management/commands/import_credit_types.py.Command.categorize_credit": {
+    "class": "Command",
+    "id": "meth:cards/management/commands/import_credit_types.py.Command.categorize_credit",
+    "line": 152,
+    "name": "categorize_credit",
+    "path": "cards/management/commands/import_credit_types.py",
+    "type": "method"
+  },
+  "meth:cards/management/commands/import_credit_types.py.Command.get_credit_icon": {
+    "class": "Command",
+    "id": "meth:cards/management/commands/import_credit_types.py.Command.get_credit_icon",
+    "line": 171,
+    "name": "get_credit_icon",
+    "path": "cards/management/commands/import_credit_types.py",
+    "type": "method"
+  },
+  "meth:cards/management/commands/import_credit_types.py.Command.get_sort_order": {
+    "class": "Command",
+    "id": "meth:cards/management/commands/import_credit_types.py.Command.get_sort_order",
+    "line": 214,
+    "name": "get_sort_order",
+    "path": "cards/management/commands/import_credit_types.py",
+    "type": "method"
+  },
+  "meth:cards/management/commands/import_credit_types.py.Command.handle": {
+    "class": "Command",
+    "id": "meth:cards/management/commands/import_credit_types.py.Command.handle",
+    "line": 12,
+    "name": "handle",
+    "path": "cards/management/commands/import_credit_types.py",
+    "type": "method"
+  },
+  "meth:cards/management/commands/import_credit_types.py.Command.normalize_credit_description": {
+    "class": "Command",
+    "id": "meth:cards/management/commands/import_credit_types.py.Command.normalize_credit_description",
+    "line": 101,
+    "name": "normalize_credit_description",
+    "path": "cards/management/commands/import_credit_types.py",
+    "type": "method"
+  },
+  "meth:cards/management/commands/import_spending_credits.py.Command.add_arguments": {
+    "class": "Command",
+    "id": "meth:cards/management/commands/import_spending_credits.py.Command.add_arguments",
+    "line": 11,
+    "name": "add_arguments",
+    "path": "cards/management/commands/import_spending_credits.py",
+    "type": "method"
+  },
+  "meth:cards/management/commands/import_spending_credits.py.Command.handle": {
+    "class": "Command",
+    "id": "meth:cards/management/commands/import_spending_credits.py.Command.handle",
+    "line": 24,
+    "name": "handle",
+    "path": "cards/management/commands/import_spending_credits.py",
+    "type": "method"
+  },
+  "meth:cards/management/commands/run_scenario.py.Command.add_arguments": {
+    "class": "Command",
+    "id": "meth:cards/management/commands/run_scenario.py.Command.add_arguments",
+    "line": 29,
+    "name": "add_arguments",
+    "path": "cards/management/commands/run_scenario.py",
+    "type": "method"
+  },
+  "meth:cards/management/commands/run_scenario.py.Command.create_credit_card": {
+    "class": "Command",
+    "id": "meth:cards/management/commands/run_scenario.py.Command.create_credit_card",
+    "line": 607,
+    "name": "create_credit_card",
+    "path": "cards/management/commands/run_scenario.py",
+    "type": "method"
+  },
+  "meth:cards/management/commands/run_scenario.py.Command.create_credit_card_from_name": {
+    "class": "Command",
+    "id": "meth:cards/management/commands/run_scenario.py.Command.create_credit_card_from_name",
+    "line": 573,
+    "name": "create_credit_card_from_name",
+    "path": "cards/management/commands/run_scenario.py",
+    "type": "method"
+  },
+  "meth:cards/management/commands/run_scenario.py.Command.create_credit_card_from_slug": {
+    "class": "Command",
+    "id": "meth:cards/management/commands/run_scenario.py.Command.create_credit_card_from_slug",
+    "line": 539,
+    "name": "create_credit_card_from_slug",
+    "path": "cards/management/commands/run_scenario.py",
+    "type": "method"
+  },
+  "meth:cards/management/commands/run_scenario.py.Command.create_test_scenario": {
+    "class": "Command",
+    "id": "meth:cards/management/commands/run_scenario.py.Command.create_test_scenario",
+    "line": 483,
+    "name": "create_test_scenario",
+    "path": "cards/management/commands/run_scenario.py",
+    "type": "method"
+  },
+  "meth:cards/management/commands/run_scenario.py.Command.create_test_setup_data": {
+    "class": "Command",
+    "id": "meth:cards/management/commands/run_scenario.py.Command.create_test_setup_data",
+    "line": 633,
+    "name": "create_test_setup_data",
+    "path": "cards/management/commands/run_scenario.py",
+    "type": "method"
+  },
+  "meth:cards/management/commands/run_scenario.py.Command.display_results": {
+    "class": "Command",
+    "id": "meth:cards/management/commands/run_scenario.py.Command.display_results",
+    "line": 166,
+    "name": "display_results",
+    "path": "cards/management/commands/run_scenario.py",
+    "type": "method"
+  },
+  "meth:cards/management/commands/run_scenario.py.Command.handle": {
+    "class": "Command",
+    "id": "meth:cards/management/commands/run_scenario.py.Command.handle",
+    "line": 58,
+    "name": "handle",
+    "path": "cards/management/commands/run_scenario.py",
+    "type": "method"
+  },
+  "meth:cards/management/commands/run_scenario.py.Command.list_scenarios": {
+    "class": "Command",
+    "id": "meth:cards/management/commands/run_scenario.py.Command.list_scenarios",
+    "line": 94,
+    "name": "list_scenarios",
+    "path": "cards/management/commands/run_scenario.py",
+    "type": "method"
+  },
+  "meth:cards/management/commands/run_scenario.py.Command.run_all_scenarios": {
+    "class": "Command",
+    "id": "meth:cards/management/commands/run_scenario.py.Command.run_all_scenarios",
+    "line": 115,
+    "name": "run_all_scenarios",
+    "path": "cards/management/commands/run_scenario.py",
+    "type": "method"
+  },
+  "meth:cards/management/commands/run_scenario.py.Command.run_scenario": {
+    "class": "Command",
+    "id": "meth:cards/management/commands/run_scenario.py.Command.run_scenario",
+    "line": 138,
+    "name": "run_scenario",
+    "path": "cards/management/commands/run_scenario.py",
+    "type": "method"
+  },
+  "meth:cards/management/commands/run_scenario.py.Command.run_single_scenario": {
+    "class": "Command",
+    "id": "meth:cards/management/commands/run_scenario.py.Command.run_single_scenario",
+    "line": 124,
+    "name": "run_single_scenario",
+    "path": "cards/management/commands/run_scenario.py",
+    "type": "method"
+  },
+  "meth:cards/management/commands/run_scenario.py.Command.setup_test_data": {
+    "class": "Command",
+    "id": "meth:cards/management/commands/run_scenario.py.Command.setup_test_data",
+    "line": 451,
+    "name": "setup_test_data",
+    "path": "cards/management/commands/run_scenario.py",
+    "type": "method"
+  },
+  "meth:cards/management/commands/run_scenario.py.Command.validate_breakdown_accuracy": {
+    "class": "Command",
+    "id": "meth:cards/management/commands/run_scenario.py.Command.validate_breakdown_accuracy",
+    "line": 310,
+    "name": "validate_breakdown_accuracy",
+    "path": "cards/management/commands/run_scenario.py",
+    "type": "method"
+  },
+  "meth:cards/management/commands/run_scenario.py.Command.validate_card_count_optimization": {
+    "class": "Command",
+    "id": "meth:cards/management/commands/run_scenario.py.Command.validate_card_count_optimization",
+    "line": 273,
+    "name": "validate_card_count_optimization",
+    "path": "cards/management/commands/run_scenario.py",
+    "type": "method"
+  },
+  "meth:cards/management/commands/run_scenario.py.Command.validate_expectations": {
+    "class": "Command",
+    "id": "meth:cards/management/commands/run_scenario.py.Command.validate_expectations",
+    "line": 211,
+    "name": "validate_expectations",
+    "path": "cards/management/commands/run_scenario.py",
+    "type": "method"
+  },
+  "meth:cards/management/commands/run_scenario.py.Command.validate_portfolio_optimization": {
+    "class": "Command",
+    "id": "meth:cards/management/commands/run_scenario.py.Command.validate_portfolio_optimization",
+    "line": 355,
+    "name": "validate_portfolio_optimization",
+    "path": "cards/management/commands/run_scenario.py",
+    "type": "method"
+  },
+  "meth:cards/management/commands/run_scenario.py.Command.validate_zero_fee_optimization": {
+    "class": "Command",
+    "id": "meth:cards/management/commands/run_scenario.py.Command.validate_zero_fee_optimization",
+    "line": 294,
+    "name": "validate_zero_fee_optimization",
+    "path": "cards/management/commands/run_scenario.py",
+    "type": "method"
+  },
+  "meth:cards/models.py.CardCredit.__str__": {
+    "class": "CardCredit",
+    "id": "meth:cards/models.py.CardCredit.__str__",
+    "line": 168,
+    "name": "__str__",
+    "path": "cards/models.py",
+    "type": "method"
+  },
+  "meth:cards/models.py.CardCredit.annual_value": {
+    "class": "CardCredit",
+    "id": "meth:cards/models.py.CardCredit.annual_value",
+    "line": 172,
+    "name": "annual_value",
+    "path": "cards/models.py",
+    "type": "method"
+  },
+  "meth:cards/models.py.CreditCard.__str__": {
+    "class": "CreditCard",
+    "id": "meth:cards/models.py.CreditCard.__str__",
+    "line": 81,
+    "name": "__str__",
+    "path": "cards/models.py",
+    "type": "method"
+  },
+  "meth:cards/models.py.CreditCard.apply_url": {
+    "class": "CreditCard",
+    "id": "meth:cards/models.py.CreditCard.apply_url",
+    "line": 100,
+    "name": "apply_url",
+    "path": "cards/models.py",
+    "type": "method"
+  },
+  "meth:cards/models.py.CreditCard.referral_url": {
+    "class": "CreditCard",
+    "id": "meth:cards/models.py.CreditCard.referral_url",
+    "line": 85,
+    "name": "referral_url",
+    "path": "cards/models.py",
+    "type": "method"
+  },
+  "meth:cards/models.py.CreditType.__str__": {
+    "class": "CreditType",
+    "id": "meth:cards/models.py.CreditType.__str__",
+    "line": 136,
+    "name": "__str__",
+    "path": "cards/models.py",
+    "type": "method"
+  },
+  "meth:cards/models.py.Issuer.__str__": {
+    "class": "Issuer",
+    "id": "meth:cards/models.py.Issuer.__str__",
+    "line": 14,
+    "name": "__str__",
+    "path": "cards/models.py",
+    "type": "method"
+  },
+  "meth:cards/models.py.RewardCategory.__str__": {
+    "class": "RewardCategory",
+    "id": "meth:cards/models.py.RewardCategory.__str__",
+    "line": 118,
+    "name": "__str__",
+    "path": "cards/models.py",
+    "type": "method"
+  },
+  "meth:cards/models.py.RewardType.__str__": {
+    "class": "RewardType",
+    "id": "meth:cards/models.py.RewardType.__str__",
+    "line": 22,
+    "name": "__str__",
+    "path": "cards/models.py",
+    "type": "method"
+  },
+  "meth:cards/models.py.SpendingAmount.__str__": {
+    "class": "SpendingAmount",
+    "id": "meth:cards/models.py.SpendingAmount.__str__",
+    "line": 230,
+    "name": "__str__",
+    "path": "cards/models.py",
+    "type": "method"
+  },
+  "meth:cards/models.py.SpendingCategory.__str__": {
+    "class": "SpendingCategory",
+    "id": "meth:cards/models.py.SpendingCategory.__str__",
+    "line": 39,
+    "name": "__str__",
+    "path": "cards/models.py",
+    "type": "method"
+  },
+  "meth:cards/models.py.SpendingCategory.is_parent_category": {
+    "class": "SpendingCategory",
+    "id": "meth:cards/models.py.SpendingCategory.is_parent_category",
+    "line": 43,
+    "name": "is_parent_category",
+    "path": "cards/models.py",
+    "type": "method"
+  },
+  "meth:cards/models.py.SpendingCategory.is_subcategory": {
+    "class": "SpendingCategory",
+    "id": "meth:cards/models.py.SpendingCategory.is_subcategory",
+    "line": 48,
+    "name": "is_subcategory",
+    "path": "cards/models.py",
+    "type": "method"
+  },
+  "meth:cards/models.py.SpendingCredit.__str__": {
+    "class": "SpendingCredit",
+    "id": "meth:cards/models.py.SpendingCredit.__str__",
+    "line": 152,
+    "name": "__str__",
+    "path": "cards/models.py",
+    "type": "method"
+  },
+  "meth:cards/models.py.UserCard.__str__": {
+    "class": "UserCard",
+    "id": "meth:cards/models.py.UserCard.__str__",
+    "line": 253,
+    "name": "__str__",
+    "path": "cards/models.py",
+    "type": "method"
+  },
+  "meth:cards/models.py.UserCard.display_name": {
+    "class": "UserCard",
+    "id": "meth:cards/models.py.UserCard.display_name",
+    "line": 264,
+    "name": "display_name",
+    "path": "cards/models.py",
+    "type": "method"
+  },
+  "meth:cards/models.py.UserCard.is_active": {
+    "class": "UserCard",
+    "id": "meth:cards/models.py.UserCard.is_active",
+    "line": 259,
+    "name": "is_active",
+    "path": "cards/models.py",
+    "type": "method"
+  },
+  "meth:cards/models.py.UserCreditPreference.__str__": {
+    "class": "UserCreditPreference",
+    "id": "meth:cards/models.py.UserCreditPreference.__str__",
+    "line": 278,
+    "name": "__str__",
+    "path": "cards/models.py",
+    "type": "method"
+  },
+  "meth:cards/models.py.UserSpendingCreditPreference.__str__": {
+    "class": "UserSpendingCreditPreference",
+    "id": "meth:cards/models.py.UserSpendingCreditPreference.__str__",
+    "line": 291,
+    "name": "__str__",
+    "path": "cards/models.py",
+    "type": "method"
+  },
+  "meth:cards/models.py.UserSpendingProfile.__str__": {
+    "class": "UserSpendingProfile",
+    "id": "meth:cards/models.py.UserSpendingProfile.__str__",
+    "line": 195,
+    "name": "__str__",
+    "path": "cards/models.py",
+    "type": "method"
+  },
+  "meth:cards/models.py.UserSpendingProfile.generate_share_uuid": {
+    "class": "UserSpendingProfile",
+    "id": "meth:cards/models.py.UserSpendingProfile.generate_share_uuid",
+    "line": 200,
+    "name": "generate_share_uuid",
+    "path": "cards/models.py",
+    "type": "method"
+  },
+  "meth:cards/models.py.UserSpendingProfile.is_public": {
+    "class": "UserSpendingProfile",
+    "id": "meth:cards/models.py.UserSpendingProfile.is_public",
+    "line": 217,
+    "name": "is_public",
+    "path": "cards/models.py",
+    "type": "method"
+  },
+  "meth:cards/models.py.UserSpendingProfile.shareable_url": {
+    "class": "UserSpendingProfile",
+    "id": "meth:cards/models.py.UserSpendingProfile.shareable_url",
+    "line": 209,
+    "name": "shareable_url",
+    "path": "cards/models.py",
+    "type": "method"
+  },
+  "meth:cards/scenario_loader.py.ScenarioLoader.get_scenario_by_name": {
+    "class": "ScenarioLoader",
+    "id": "meth:cards/scenario_loader.py.ScenarioLoader.get_scenario_by_name",
+    "line": 115,
+    "name": "get_scenario_by_name",
+    "path": "cards/scenario_loader.py",
+    "type": "method"
+  },
+  "meth:cards/scenario_loader.py.ScenarioLoader.list_scenario_names": {
+    "class": "ScenarioLoader",
+    "id": "meth:cards/scenario_loader.py.ScenarioLoader.list_scenario_names",
+    "line": 123,
+    "name": "list_scenario_names",
+    "path": "cards/scenario_loader.py",
+    "type": "method"
+  },
+  "meth:cards/scenario_loader.py.ScenarioLoader.load_from_directory": {
+    "class": "ScenarioLoader",
+    "id": "meth:cards/scenario_loader.py.ScenarioLoader.load_from_directory",
+    "line": 24,
+    "name": "load_from_directory",
+    "path": "cards/scenario_loader.py",
+    "type": "method"
+  },
+  "meth:cards/scenario_loader.py.ScenarioLoader.load_scenarios": {
+    "class": "ScenarioLoader",
+    "id": "meth:cards/scenario_loader.py.ScenarioLoader.load_scenarios",
+    "line": 68,
+    "name": "load_scenarios",
+    "path": "cards/scenario_loader.py",
+    "type": "method"
+  },
+  "meth:cards/scenario_loader.py.ScenarioLoader.load_single_file": {
+    "class": "ScenarioLoader",
+    "id": "meth:cards/scenario_loader.py.ScenarioLoader.load_single_file",
+    "line": 15,
+    "name": "load_single_file",
+    "path": "cards/scenario_loader.py",
+    "type": "method"
+  },
+  "meth:cards/serializers.py.CreateSpendingProfileSerializer.create": {
+    "class": "CreateSpendingProfileSerializer",
+    "id": "meth:cards/serializers.py.CreateSpendingProfileSerializer.create",
+    "line": 154,
+    "name": "create",
+    "path": "cards/serializers.py",
+    "type": "method"
+  },
+  "meth:cards/serializers.py.SpendingCategorySerializer.get_parent": {
+    "class": "SpendingCategorySerializer",
+    "id": "meth:cards/serializers.py.SpendingCategorySerializer.get_parent",
+    "line": 34,
+    "name": "get_parent",
+    "path": "cards/serializers.py",
+    "type": "method"
+  },
+  "meth:cards/serializers.py.SpendingCategorySerializer.get_subcategories": {
+    "class": "SpendingCategorySerializer",
+    "id": "meth:cards/serializers.py.SpendingCategorySerializer.get_subcategories",
+    "line": 29,
+    "name": "get_subcategories",
+    "path": "cards/serializers.py",
+    "type": "method"
+  },
+  "meth:cards/serializers.py.UserCardSerializer.validate": {
+    "class": "UserCardSerializer",
+    "id": "meth:cards/serializers.py.UserCardSerializer.validate",
+    "line": 199,
+    "name": "validate",
+    "path": "cards/serializers.py",
+    "type": "method"
+  },
+  "meth:roadmaps/models.py.Roadmap.__str__": {
+    "class": "Roadmap",
+    "id": "meth:roadmaps/models.py.Roadmap.__str__",
+    "line": 35,
+    "name": "__str__",
+    "path": "roadmaps/models.py",
+    "type": "method"
+  },
+  "meth:roadmaps/models.py.RoadmapCalculation.__str__": {
+    "class": "RoadmapCalculation",
+    "id": "meth:roadmaps/models.py.RoadmapCalculation.__str__",
+    "line": 71,
+    "name": "__str__",
+    "path": "roadmaps/models.py",
+    "type": "method"
+  },
+  "meth:roadmaps/models.py.RoadmapFilter.__str__": {
+    "class": "RoadmapFilter",
+    "id": "meth:roadmaps/models.py.RoadmapFilter.__str__",
+    "line": 19,
+    "name": "__str__",
+    "path": "roadmaps/models.py",
+    "type": "method"
+  },
+  "meth:roadmaps/models.py.RoadmapRecommendation.__str__": {
+    "class": "RoadmapRecommendation",
+    "id": "meth:roadmaps/models.py.RoadmapRecommendation.__str__",
+    "line": 61,
+    "name": "__str__",
+    "path": "roadmaps/models.py",
+    "type": "method"
+  },
+  "meth:roadmaps/recommendation_engine.py.RecommendationEngine.__init__": {
+    "class": "RecommendationEngine",
+    "id": "meth:roadmaps/recommendation_engine.py.RecommendationEngine.__init__",
+    "line": 17,
+    "name": "__init__",
+    "path": "roadmaps/recommendation_engine.py",
+    "type": "method"
+  },
+  "meth:roadmaps/recommendation_engine.py.RecommendationEngine._build_parent_category_spending": {
+    "class": "RecommendationEngine",
+    "id": "meth:roadmaps/recommendation_engine.py.RecommendationEngine._build_parent_category_spending",
+    "line": 836,
+    "name": "_build_parent_category_spending",
+    "path": "roadmaps/recommendation_engine.py",
+    "type": "method"
+  },
+  "meth:roadmaps/recommendation_engine.py.RecommendationEngine._calculate_card_allocated_breakdown": {
+    "class": "RecommendationEngine",
+    "id": "meth:roadmaps/recommendation_engine.py.RecommendationEngine._calculate_card_allocated_breakdown",
+    "line": 1248,
+    "name": "_calculate_card_allocated_breakdown",
+    "path": "roadmaps/recommendation_engine.py",
+    "type": "method"
+  },
+  "meth:roadmaps/recommendation_engine.py.RecommendationEngine._calculate_card_annual_rewards": {
+    "class": "RecommendationEngine",
+    "id": "meth:roadmaps/recommendation_engine.py.RecommendationEngine._calculate_card_annual_rewards",
+    "line": 1052,
+    "name": "_calculate_card_annual_rewards",
+    "path": "roadmaps/recommendation_engine.py",
+    "type": "method"
+  },
+  "meth:roadmaps/recommendation_engine.py.RecommendationEngine._calculate_card_credits_value": {
+    "class": "RecommendationEngine",
+    "id": "meth:roadmaps/recommendation_engine.py.RecommendationEngine._calculate_card_credits_value",
+    "line": 1587,
+    "name": "_calculate_card_credits_value",
+    "path": "roadmaps/recommendation_engine.py",
+    "type": "method"
+  },
+  "meth:roadmaps/recommendation_engine.py.RecommendationEngine._calculate_card_rewards_breakdown": {
+    "class": "RecommendationEngine",
+    "id": "meth:roadmaps/recommendation_engine.py.RecommendationEngine._calculate_card_rewards_breakdown",
+    "line": 1337,
+    "name": "_calculate_card_rewards_breakdown",
+    "path": "roadmaps/recommendation_engine.py",
+    "type": "method"
+  },
+  "meth:roadmaps/recommendation_engine.py.RecommendationEngine._calculate_portfolio_allocation": {
+    "class": "RecommendationEngine",
+    "id": "meth:roadmaps/recommendation_engine.py.RecommendationEngine._calculate_portfolio_allocation",
+    "line": 1057,
+    "name": "_calculate_portfolio_allocation",
+    "path": "roadmaps/recommendation_engine.py",
+    "type": "method"
+  },
+  "meth:roadmaps/recommendation_engine.py.RecommendationEngine._calculate_portfolio_summary": {
+    "class": "RecommendationEngine",
+    "id": "meth:roadmaps/recommendation_engine.py.RecommendationEngine._calculate_portfolio_summary",
+    "line": 1657,
+    "name": "_calculate_portfolio_summary",
+    "path": "roadmaps/recommendation_engine.py",
+    "type": "method"
+  },
+  "meth:roadmaps/recommendation_engine.py.RecommendationEngine._calculate_scenario_portfolio_value": {
+    "class": "RecommendationEngine",
+    "id": "meth:roadmaps/recommendation_engine.py.RecommendationEngine._calculate_scenario_portfolio_value",
+    "line": 725,
+    "name": "_calculate_scenario_portfolio_value",
+    "path": "roadmaps/recommendation_engine.py",
+    "type": "method"
+  },
+  "meth:roadmaps/recommendation_engine.py.RecommendationEngine._calculate_smart_card_value": {
+    "class": "RecommendationEngine",
+    "id": "meth:roadmaps/recommendation_engine.py.RecommendationEngine._calculate_smart_card_value",
+    "line": 862,
+    "name": "_calculate_smart_card_value",
+    "path": "roadmaps/recommendation_engine.py",
+    "type": "method"
+  },
+  "meth:roadmaps/recommendation_engine.py.RecommendationEngine._calculate_spending_efficiency": {
+    "class": "RecommendationEngine",
+    "id": "meth:roadmaps/recommendation_engine.py.RecommendationEngine._calculate_spending_efficiency",
+    "line": 909,
+    "name": "_calculate_spending_efficiency",
+    "path": "roadmaps/recommendation_engine.py",
+    "type": "method"
+  },
+  "meth:roadmaps/recommendation_engine.py.RecommendationEngine._calculate_total_rewards": {
+    "class": "RecommendationEngine",
+    "id": "meth:roadmaps/recommendation_engine.py.RecommendationEngine._calculate_total_rewards",
+    "line": 1652,
+    "name": "_calculate_total_rewards",
+    "path": "roadmaps/recommendation_engine.py",
+    "type": "method"
+  },
+  "meth:roadmaps/recommendation_engine.py.RecommendationEngine._can_meet_signup_requirement": {
+    "class": "RecommendationEngine",
+    "id": "meth:roadmaps/recommendation_engine.py.RecommendationEngine._can_meet_signup_requirement",
+    "line": 1484,
+    "name": "_can_meet_signup_requirement",
+    "path": "roadmaps/recommendation_engine.py",
+    "type": "method"
+  },
+  "meth:roadmaps/recommendation_engine.py.RecommendationEngine._evaluate_portfolio_scenario": {
+    "class": "RecommendationEngine",
+    "id": "meth:roadmaps/recommendation_engine.py.RecommendationEngine._evaluate_portfolio_scenario",
+    "line": 316,
+    "name": "_evaluate_portfolio_scenario",
+    "path": "roadmaps/recommendation_engine.py",
+    "type": "method"
+  },
+  "meth:roadmaps/recommendation_engine.py.RecommendationEngine._find_new_cards": {
+    "class": "RecommendationEngine",
+    "id": "meth:roadmaps/recommendation_engine.py.RecommendationEngine._find_new_cards",
+    "line": 964,
+    "name": "_find_new_cards",
+    "path": "roadmaps/recommendation_engine.py",
+    "type": "method"
+  },
+  "meth:roadmaps/recommendation_engine.py.RecommendationEngine._find_optimal_portfolio": {
+    "class": "RecommendationEngine",
+    "id": "meth:roadmaps/recommendation_engine.py.RecommendationEngine._find_optimal_portfolio",
+    "line": 276,
+    "name": "_find_optimal_portfolio",
+    "path": "roadmaps/recommendation_engine.py",
+    "type": "method"
+  },
+  "meth:roadmaps/recommendation_engine.py.RecommendationEngine._generate_card_reasoning": {
+    "class": "RecommendationEngine",
+    "id": "meth:roadmaps/recommendation_engine.py.RecommendationEngine._generate_card_reasoning",
+    "line": 651,
+    "name": "_generate_card_reasoning",
+    "path": "roadmaps/recommendation_engine.py",
+    "type": "method"
+  },
+  "meth:roadmaps/recommendation_engine.py.RecommendationEngine._generate_portfolio_optimized_recommendations": {
+    "class": "RecommendationEngine",
+    "id": "meth:roadmaps/recommendation_engine.py.RecommendationEngine._generate_portfolio_optimized_recommendations",
+    "line": 219,
+    "name": "_generate_portfolio_optimized_recommendations",
+    "path": "roadmaps/recommendation_engine.py",
+    "type": "method"
+  },
+  "meth:roadmaps/recommendation_engine.py.RecommendationEngine._get_best_signup_bonus_card": {
+    "class": "RecommendationEngine",
+    "id": "meth:roadmaps/recommendation_engine.py.RecommendationEngine._get_best_signup_bonus_card",
+    "line": 1509,
+    "name": "_get_best_signup_bonus_card",
+    "path": "roadmaps/recommendation_engine.py",
+    "type": "method"
+  },
+  "meth:roadmaps/recommendation_engine.py.RecommendationEngine._get_filtered_cards": {
+    "class": "RecommendationEngine",
+    "id": "meth:roadmaps/recommendation_engine.py.RecommendationEngine._get_filtered_cards",
+    "line": 189,
+    "name": "_get_filtered_cards",
+    "path": "roadmaps/recommendation_engine.py",
+    "type": "method"
+  },
+  "meth:roadmaps/recommendation_engine.py.RecommendationEngine._get_signup_bonus_value": {
+    "class": "RecommendationEngine",
+    "id": "meth:roadmaps/recommendation_engine.py.RecommendationEngine._get_signup_bonus_value",
+    "line": 1554,
+    "name": "_get_signup_bonus_value",
+    "path": "roadmaps/recommendation_engine.py",
+    "type": "method"
+  },
+  "meth:roadmaps/recommendation_engine.py.RecommendationEngine._is_eligible_for_card": {
+    "class": "RecommendationEngine",
+    "id": "meth:roadmaps/recommendation_engine.py.RecommendationEngine._is_eligible_for_card",
+    "line": 1025,
+    "name": "_is_eligible_for_card",
+    "path": "roadmaps/recommendation_engine.py",
+    "type": "method"
+  },
+  "meth:roadmaps/recommendation_engine.py.RecommendationEngine._optimize_card_portfolio": {
+    "class": "RecommendationEngine",
+    "id": "meth:roadmaps/recommendation_engine.py.RecommendationEngine._optimize_card_portfolio",
+    "line": 487,
+    "name": "_optimize_card_portfolio",
+    "path": "roadmaps/recommendation_engine.py",
+    "type": "method"
+  },
+  "meth:roadmaps/recommendation_engine.py.RecommendationEngine._select_best_new_cards": {
+    "class": "RecommendationEngine",
+    "id": "meth:roadmaps/recommendation_engine.py.RecommendationEngine._select_best_new_cards",
+    "line": 680,
+    "name": "_select_best_new_cards",
+    "path": "roadmaps/recommendation_engine.py",
+    "type": "method"
+  },
+  "meth:roadmaps/recommendation_engine.py.RecommendationEngine._select_optimal_card_combination": {
+    "class": "RecommendationEngine",
+    "id": "meth:roadmaps/recommendation_engine.py.RecommendationEngine._select_optimal_card_combination",
+    "line": 385,
+    "name": "_select_optimal_card_combination",
+    "path": "roadmaps/recommendation_engine.py",
+    "type": "method"
+  },
+  "meth:roadmaps/recommendation_engine.py.RecommendationEngine.generate_quick_recommendations": {
+    "class": "RecommendationEngine",
+    "id": "meth:roadmaps/recommendation_engine.py.RecommendationEngine.generate_quick_recommendations",
+    "line": 52,
+    "name": "generate_quick_recommendations",
+    "path": "roadmaps/recommendation_engine.py",
+    "type": "method"
+  },
+  "meth:roadmaps/recommendation_engine.py.RecommendationEngine.generate_roadmap": {
+    "class": "RecommendationEngine",
+    "id": "meth:roadmaps/recommendation_engine.py.RecommendationEngine.generate_roadmap",
+    "line": 141,
+    "name": "generate_roadmap",
+    "path": "roadmaps/recommendation_engine.py",
+    "type": "method"
+  },
+  "meth:roadmaps/serializers.py.CreateRoadmapSerializer.create": {
+    "class": "CreateRoadmapSerializer",
+    "id": "meth:roadmaps/serializers.py.CreateRoadmapSerializer.create",
+    "line": 53,
+    "name": "create",
+    "path": "roadmaps/serializers.py",
+    "type": "method"
+  },
+  "meth:roadmaps/serializers.py.GenerateRoadmapSerializer.generate_recommendations": {
+    "class": "GenerateRoadmapSerializer",
+    "id": "meth:roadmaps/serializers.py.GenerateRoadmapSerializer.generate_recommendations",
+    "line": 116,
+    "name": "generate_recommendations",
+    "path": "roadmaps/serializers.py",
+    "type": "method"
+  },
+  "meth:roadmaps/views.py.RoadmapDetailView.get_queryset": {
+    "class": "RoadmapDetailView",
+    "id": "meth:roadmaps/views.py.RoadmapDetailView.get_queryset",
+    "line": 46,
+    "name": "get_queryset",
+    "path": "roadmaps/views.py",
+    "type": "method"
+  },
+  "meth:roadmaps/views.py.RoadmapListView.get_queryset": {
+    "class": "RoadmapListView",
+    "id": "meth:roadmaps/views.py.RoadmapListView.get_queryset",
+    "line": 24,
+    "name": "get_queryset",
+    "path": "roadmaps/views.py",
+    "type": "method"
+  },
+  "meth:users/models.py.UserPreferences.__str__": {
+    "class": "UserPreferences",
+    "id": "meth:users/models.py.UserPreferences.__str__",
+    "line": 45,
+    "name": "__str__",
+    "path": "users/models.py",
+    "type": "method"
+  },
+  "meth:users/models.py.UserProfile.__str__": {
+    "class": "UserProfile",
+    "id": "meth:users/models.py.UserProfile.__str__",
+    "line": 20,
+    "name": "__str__",
+    "path": "users/models.py",
+    "type": "method"
+  },
+  "meth:users/serializers.py.UserDataSerializer.create": {
+    "class": "UserDataSerializer",
+    "id": "meth:users/serializers.py.UserDataSerializer.create",
+    "line": 60,
+    "name": "create",
+    "path": "users/serializers.py",
+    "type": "method"
+  },
+  "meth:users/serializers.py.UserDataSerializer.to_representation": {
+    "class": "UserDataSerializer",
+    "id": "meth:users/serializers.py.UserDataSerializer.to_representation",
+    "line": 109,
+    "name": "to_representation",
+    "path": "users/serializers.py",
+    "type": "method"
+  },
+  "meth:users/views.py.UserCardDetailView.get_queryset": {
+    "class": "UserCardDetailView",
+    "id": "meth:users/views.py.UserCardDetailView.get_queryset",
+    "line": 42,
+    "name": "get_queryset",
+    "path": "users/views.py",
+    "type": "method"
+  },
+  "meth:users/views.py.UserCardListView.get_queryset": {
+    "class": "UserCardListView",
+    "id": "meth:users/views.py.UserCardListView.get_queryset",
+    "line": 30,
+    "name": "get_queryset",
+    "path": "users/views.py",
+    "type": "method"
+  },
+  "meth:users/views.py.UserCardListView.perform_create": {
+    "class": "UserCardListView",
+    "id": "meth:users/views.py.UserCardListView.perform_create",
+    "line": 33,
+    "name": "perform_create",
+    "path": "users/views.py",
+    "type": "method"
+  },
+  "meth:users/views.py.UserPreferencesView.get_object": {
+    "class": "UserPreferencesView",
+    "id": "meth:users/views.py.UserPreferencesView.get_object",
+    "line": 65,
+    "name": "get_object",
+    "path": "users/views.py",
+    "type": "method"
+  },
+  "meth:users/views.py.UserProfileView.get_object": {
+    "class": "UserProfileView",
+    "id": "meth:users/views.py.UserProfileView.get_object",
+    "line": 20,
+    "name": "get_object",
+    "path": "users/views.py",
+    "type": "method"
+  },
+  "meth:users/views.py.UserSpendingListView.get_queryset": {
+    "class": "UserSpendingListView",
+    "id": "meth:users/views.py.UserSpendingListView.get_queryset",
+    "line": 51,
+    "name": "get_queryset",
+    "path": "users/views.py",
+    "type": "method"
+  },
+  "meth:users/views.py.UserSpendingListView.perform_create": {
+    "class": "UserSpendingListView",
+    "id": "meth:users/views.py.UserSpendingListView.perform_create",
+    "line": 55,
+    "name": "perform_create",
+    "path": "users/views.py",
+    "type": "method"
+  }
+}

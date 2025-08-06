@@ -1,0 +1,2117 @@
+[
+  {
+    "source": "mod:admin",
+    "target": "func:admin.py.run_command",
+    "type": "contains"
+  },
+  {
+    "source": "mod:admin",
+    "target": "func:admin.py.setup_environment",
+    "type": "contains"
+  },
+  {
+    "source": "mod:admin",
+    "target": "func:admin.py.install_dependencies",
+    "type": "contains"
+  },
+  {
+    "source": "mod:admin",
+    "target": "func:admin.py.setup_database",
+    "type": "contains"
+  },
+  {
+    "source": "mod:admin",
+    "target": "func:admin.py.setup_google_oauth",
+    "type": "contains"
+  },
+  {
+    "source": "mod:admin",
+    "target": "func:admin.py.create_superuser",
+    "type": "contains"
+  },
+  {
+    "source": "mod:admin",
+    "target": "func:admin.py.run_tests",
+    "type": "contains"
+  },
+  {
+    "source": "mod:admin",
+    "target": "func:admin.py.run_server",
+    "type": "contains"
+  },
+  {
+    "source": "mod:admin",
+    "target": "func:admin.py.import_sample_data",
+    "type": "contains"
+  },
+  {
+    "source": "mod:admin",
+    "target": "func:admin.py.import_data",
+    "type": "contains"
+  },
+  {
+    "source": "mod:admin",
+    "target": "func:admin.py.collect_static",
+    "type": "contains"
+  },
+  {
+    "source": "mod:admin",
+    "target": "func:admin.py.shell",
+    "type": "contains"
+  },
+  {
+    "source": "mod:admin",
+    "target": "func:admin.py.flush_database",
+    "type": "contains"
+  },
+  {
+    "source": "mod:admin",
+    "target": "func:admin.py.wipe_database",
+    "type": "contains"
+  },
+  {
+    "source": "mod:admin",
+    "target": "func:admin.py.show_urls",
+    "type": "contains"
+  },
+  {
+    "source": "mod:admin",
+    "target": "func:admin.py.check_deployment",
+    "type": "contains"
+  },
+  {
+    "source": "mod:admin",
+    "target": "func:admin.py.full_setup",
+    "type": "contains"
+  },
+  {
+    "source": "mod:admin",
+    "target": "func:admin.py.show_interactive_menu",
+    "type": "contains"
+  },
+  {
+    "source": "mod:admin",
+    "target": "func:admin.py.show_all_commands",
+    "type": "contains"
+  },
+  {
+    "source": "mod:admin",
+    "target": "func:admin.py.execute_task",
+    "type": "contains"
+  },
+  {
+    "source": "mod:admin",
+    "target": "func:admin.py.main",
+    "type": "contains"
+  },
+  {
+    "source": "mod:analyze_scenarios",
+    "target": "func:analyze_scenarios.py.load_scenarios",
+    "type": "contains"
+  },
+  {
+    "source": "mod:analyze_scenarios",
+    "target": "func:analyze_scenarios.py.categorize_scenarios",
+    "type": "contains"
+  },
+  {
+    "source": "mod:analyze_scenarios",
+    "target": "func:analyze_scenarios.py.print_analysis",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.admin",
+    "target": "cls:cards/admin.py.IssuerAdmin",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.admin",
+    "target": "cls:cards/admin.py.RewardTypeAdmin",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.admin",
+    "target": "cls:cards/admin.py.SpendingCategoryAdmin",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.admin",
+    "target": "cls:cards/admin.py.RewardCategoryInline",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.admin",
+    "target": "cls:cards/admin.py.CardCreditInline",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.admin",
+    "target": "cls:cards/admin.py.CreditCardAdmin",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.admin",
+    "target": "cls:cards/admin.py.RewardCategoryAdmin",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.admin",
+    "target": "cls:cards/admin.py.CreditTypeAdmin",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.admin",
+    "target": "cls:cards/admin.py.CardCreditAdmin",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.admin",
+    "target": "cls:cards/admin.py.SpendingAmountInline",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.admin",
+    "target": "cls:cards/admin.py.UserCreditPreferenceInline",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.admin",
+    "target": "cls:cards/admin.py.UserSpendingProfileAdmin",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.admin",
+    "target": "cls:cards/admin.py.UserCardAdmin",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.apps",
+    "target": "cls:cards/apps.py.CardsConfig",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.management.commands.import_cards",
+    "target": "cls:cards/management/commands/import_cards.py.Command",
+    "type": "contains"
+  },
+  {
+    "source": "cls:cards/management/commands/import_cards.py.Command",
+    "target": "meth:cards/management/commands/import_cards.py.Command.add_arguments",
+    "type": "contains"
+  },
+  {
+    "source": "cls:cards/management/commands/import_cards.py.Command",
+    "target": "meth:cards/management/commands/import_cards.py.Command.handle",
+    "type": "contains"
+  },
+  {
+    "source": "cls:cards/management/commands/import_cards.py.Command",
+    "target": "meth:cards/management/commands/import_cards.py.Command.import_data",
+    "type": "contains"
+  },
+  {
+    "source": "cls:cards/management/commands/import_cards.py.Command",
+    "target": "meth:cards/management/commands/import_cards.py.Command.import_issuers",
+    "type": "contains"
+  },
+  {
+    "source": "cls:cards/management/commands/import_cards.py.Command",
+    "target": "meth:cards/management/commands/import_cards.py.Command.import_reward_types",
+    "type": "contains"
+  },
+  {
+    "source": "cls:cards/management/commands/import_cards.py.Command",
+    "target": "meth:cards/management/commands/import_cards.py.Command.import_spending_categories",
+    "type": "contains"
+  },
+  {
+    "source": "cls:cards/management/commands/import_cards.py.Command",
+    "target": "meth:cards/management/commands/import_cards.py.Command.import_credit_cards",
+    "type": "contains"
+  },
+  {
+    "source": "cls:cards/management/commands/import_cards.py.Command",
+    "target": "meth:cards/management/commands/import_cards.py.Command.import_reward_categories",
+    "type": "contains"
+  },
+  {
+    "source": "cls:cards/management/commands/import_cards.py.Command",
+    "target": "meth:cards/management/commands/import_cards.py.Command.import_card_credits",
+    "type": "contains"
+  },
+  {
+    "source": "cls:cards/management/commands/import_cards.py.Command",
+    "target": "meth:cards/management/commands/import_cards.py.Command.import_personal_cards",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.management.commands.import_cards",
+    "target": "func:cards/management/commands/import_cards.py.add_arguments",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.management.commands.import_cards",
+    "target": "func:cards/management/commands/import_cards.py.handle",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.management.commands.import_cards",
+    "target": "func:cards/management/commands/import_cards.py.import_data",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.management.commands.import_cards",
+    "target": "func:cards/management/commands/import_cards.py.import_issuers",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.management.commands.import_cards",
+    "target": "func:cards/management/commands/import_cards.py.import_reward_types",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.management.commands.import_cards",
+    "target": "func:cards/management/commands/import_cards.py.import_spending_categories",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.management.commands.import_cards",
+    "target": "func:cards/management/commands/import_cards.py.import_credit_cards",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.management.commands.import_cards",
+    "target": "func:cards/management/commands/import_cards.py.import_reward_categories",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.management.commands.import_cards",
+    "target": "func:cards/management/commands/import_cards.py.import_card_credits",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.management.commands.import_cards",
+    "target": "func:cards/management/commands/import_cards.py.import_personal_cards",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.management.commands.import_credit_types",
+    "target": "cls:cards/management/commands/import_credit_types.py.Command",
+    "type": "contains"
+  },
+  {
+    "source": "cls:cards/management/commands/import_credit_types.py.Command",
+    "target": "meth:cards/management/commands/import_credit_types.py.Command.handle",
+    "type": "contains"
+  },
+  {
+    "source": "cls:cards/management/commands/import_credit_types.py.Command",
+    "target": "meth:cards/management/commands/import_credit_types.py.Command.normalize_credit_description",
+    "type": "contains"
+  },
+  {
+    "source": "cls:cards/management/commands/import_credit_types.py.Command",
+    "target": "meth:cards/management/commands/import_credit_types.py.Command.categorize_credit",
+    "type": "contains"
+  },
+  {
+    "source": "cls:cards/management/commands/import_credit_types.py.Command",
+    "target": "meth:cards/management/commands/import_credit_types.py.Command.get_credit_icon",
+    "type": "contains"
+  },
+  {
+    "source": "cls:cards/management/commands/import_credit_types.py.Command",
+    "target": "meth:cards/management/commands/import_credit_types.py.Command.get_sort_order",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.management.commands.import_credit_types",
+    "target": "func:cards/management/commands/import_credit_types.py.handle",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.management.commands.import_credit_types",
+    "target": "func:cards/management/commands/import_credit_types.py.normalize_credit_description",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.management.commands.import_credit_types",
+    "target": "func:cards/management/commands/import_credit_types.py.categorize_credit",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.management.commands.import_credit_types",
+    "target": "func:cards/management/commands/import_credit_types.py.get_credit_icon",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.management.commands.import_credit_types",
+    "target": "func:cards/management/commands/import_credit_types.py.get_sort_order",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.management.commands.import_spending_credits",
+    "target": "cls:cards/management/commands/import_spending_credits.py.Command",
+    "type": "contains"
+  },
+  {
+    "source": "cls:cards/management/commands/import_spending_credits.py.Command",
+    "target": "meth:cards/management/commands/import_spending_credits.py.Command.add_arguments",
+    "type": "contains"
+  },
+  {
+    "source": "cls:cards/management/commands/import_spending_credits.py.Command",
+    "target": "meth:cards/management/commands/import_spending_credits.py.Command.handle",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.management.commands.import_spending_credits",
+    "target": "func:cards/management/commands/import_spending_credits.py.add_arguments",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.management.commands.import_spending_credits",
+    "target": "func:cards/management/commands/import_spending_credits.py.handle",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.management.commands.run_scenario",
+    "target": "cls:cards/management/commands/run_scenario.py.Command",
+    "type": "contains"
+  },
+  {
+    "source": "cls:cards/management/commands/run_scenario.py.Command",
+    "target": "meth:cards/management/commands/run_scenario.py.Command.add_arguments",
+    "type": "contains"
+  },
+  {
+    "source": "cls:cards/management/commands/run_scenario.py.Command",
+    "target": "meth:cards/management/commands/run_scenario.py.Command.handle",
+    "type": "contains"
+  },
+  {
+    "source": "cls:cards/management/commands/run_scenario.py.Command",
+    "target": "meth:cards/management/commands/run_scenario.py.Command.list_scenarios",
+    "type": "contains"
+  },
+  {
+    "source": "cls:cards/management/commands/run_scenario.py.Command",
+    "target": "meth:cards/management/commands/run_scenario.py.Command.run_all_scenarios",
+    "type": "contains"
+  },
+  {
+    "source": "cls:cards/management/commands/run_scenario.py.Command",
+    "target": "meth:cards/management/commands/run_scenario.py.Command.run_single_scenario",
+    "type": "contains"
+  },
+  {
+    "source": "cls:cards/management/commands/run_scenario.py.Command",
+    "target": "meth:cards/management/commands/run_scenario.py.Command.run_scenario",
+    "type": "contains"
+  },
+  {
+    "source": "cls:cards/management/commands/run_scenario.py.Command",
+    "target": "meth:cards/management/commands/run_scenario.py.Command.display_results",
+    "type": "contains"
+  },
+  {
+    "source": "cls:cards/management/commands/run_scenario.py.Command",
+    "target": "meth:cards/management/commands/run_scenario.py.Command.validate_expectations",
+    "type": "contains"
+  },
+  {
+    "source": "cls:cards/management/commands/run_scenario.py.Command",
+    "target": "meth:cards/management/commands/run_scenario.py.Command.validate_card_count_optimization",
+    "type": "contains"
+  },
+  {
+    "source": "cls:cards/management/commands/run_scenario.py.Command",
+    "target": "meth:cards/management/commands/run_scenario.py.Command.validate_zero_fee_optimization",
+    "type": "contains"
+  },
+  {
+    "source": "cls:cards/management/commands/run_scenario.py.Command",
+    "target": "meth:cards/management/commands/run_scenario.py.Command.validate_breakdown_accuracy",
+    "type": "contains"
+  },
+  {
+    "source": "cls:cards/management/commands/run_scenario.py.Command",
+    "target": "meth:cards/management/commands/run_scenario.py.Command.validate_portfolio_optimization",
+    "type": "contains"
+  },
+  {
+    "source": "cls:cards/management/commands/run_scenario.py.Command",
+    "target": "meth:cards/management/commands/run_scenario.py.Command.setup_test_data",
+    "type": "contains"
+  },
+  {
+    "source": "cls:cards/management/commands/run_scenario.py.Command",
+    "target": "meth:cards/management/commands/run_scenario.py.Command.create_test_scenario",
+    "type": "contains"
+  },
+  {
+    "source": "cls:cards/management/commands/run_scenario.py.Command",
+    "target": "meth:cards/management/commands/run_scenario.py.Command.create_credit_card_from_slug",
+    "type": "contains"
+  },
+  {
+    "source": "cls:cards/management/commands/run_scenario.py.Command",
+    "target": "meth:cards/management/commands/run_scenario.py.Command.create_credit_card_from_name",
+    "type": "contains"
+  },
+  {
+    "source": "cls:cards/management/commands/run_scenario.py.Command",
+    "target": "meth:cards/management/commands/run_scenario.py.Command.create_credit_card",
+    "type": "contains"
+  },
+  {
+    "source": "cls:cards/management/commands/run_scenario.py.Command",
+    "target": "meth:cards/management/commands/run_scenario.py.Command.create_test_setup_data",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.management.commands.run_scenario",
+    "target": "func:cards/management/commands/run_scenario.py.add_arguments",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.management.commands.run_scenario",
+    "target": "func:cards/management/commands/run_scenario.py.handle",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.management.commands.run_scenario",
+    "target": "func:cards/management/commands/run_scenario.py.list_scenarios",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.management.commands.run_scenario",
+    "target": "func:cards/management/commands/run_scenario.py.run_all_scenarios",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.management.commands.run_scenario",
+    "target": "func:cards/management/commands/run_scenario.py.run_single_scenario",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.management.commands.run_scenario",
+    "target": "func:cards/management/commands/run_scenario.py.run_scenario",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.management.commands.run_scenario",
+    "target": "func:cards/management/commands/run_scenario.py.display_results",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.management.commands.run_scenario",
+    "target": "func:cards/management/commands/run_scenario.py.validate_expectations",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.management.commands.run_scenario",
+    "target": "func:cards/management/commands/run_scenario.py.validate_card_count_optimization",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.management.commands.run_scenario",
+    "target": "func:cards/management/commands/run_scenario.py.validate_zero_fee_optimization",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.management.commands.run_scenario",
+    "target": "func:cards/management/commands/run_scenario.py.validate_breakdown_accuracy",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.management.commands.run_scenario",
+    "target": "func:cards/management/commands/run_scenario.py.validate_portfolio_optimization",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.management.commands.run_scenario",
+    "target": "func:cards/management/commands/run_scenario.py.setup_test_data",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.management.commands.run_scenario",
+    "target": "func:cards/management/commands/run_scenario.py.create_test_scenario",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.management.commands.run_scenario",
+    "target": "func:cards/management/commands/run_scenario.py.create_credit_card_from_slug",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.management.commands.run_scenario",
+    "target": "func:cards/management/commands/run_scenario.py.create_credit_card_from_name",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.management.commands.run_scenario",
+    "target": "func:cards/management/commands/run_scenario.py.create_credit_card",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.management.commands.run_scenario",
+    "target": "func:cards/management/commands/run_scenario.py.create_test_setup_data",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.migrations.0001_initial",
+    "target": "cls:cards/migrations/0001_initial.py.Migration",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.models",
+    "target": "cls:cards/models.py.Issuer",
+    "type": "contains"
+  },
+  {
+    "source": "cls:cards/models.py.Issuer",
+    "target": "meth:cards/models.py.Issuer.__str__",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.models",
+    "target": "cls:cards/models.py.RewardType",
+    "type": "contains"
+  },
+  {
+    "source": "cls:cards/models.py.RewardType",
+    "target": "meth:cards/models.py.RewardType.__str__",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.models",
+    "target": "cls:cards/models.py.SpendingCategory",
+    "type": "contains"
+  },
+  {
+    "source": "cls:cards/models.py.SpendingCategory",
+    "target": "meth:cards/models.py.SpendingCategory.__str__",
+    "type": "contains"
+  },
+  {
+    "source": "cls:cards/models.py.SpendingCategory",
+    "target": "meth:cards/models.py.SpendingCategory.is_parent_category",
+    "type": "contains"
+  },
+  {
+    "source": "cls:cards/models.py.SpendingCategory",
+    "target": "meth:cards/models.py.SpendingCategory.is_subcategory",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.models",
+    "target": "cls:cards/models.py.CreditCard",
+    "type": "contains"
+  },
+  {
+    "source": "cls:cards/models.py.CreditCard",
+    "target": "meth:cards/models.py.CreditCard.__str__",
+    "type": "contains"
+  },
+  {
+    "source": "cls:cards/models.py.CreditCard",
+    "target": "meth:cards/models.py.CreditCard.referral_url",
+    "type": "contains"
+  },
+  {
+    "source": "cls:cards/models.py.CreditCard",
+    "target": "meth:cards/models.py.CreditCard.apply_url",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.models",
+    "target": "cls:cards/models.py.RewardCategory",
+    "type": "contains"
+  },
+  {
+    "source": "cls:cards/models.py.RewardCategory",
+    "target": "meth:cards/models.py.RewardCategory.__str__",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.models",
+    "target": "cls:cards/models.py.CreditType",
+    "type": "contains"
+  },
+  {
+    "source": "cls:cards/models.py.CreditType",
+    "target": "meth:cards/models.py.CreditType.__str__",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.models",
+    "target": "cls:cards/models.py.SpendingCredit",
+    "type": "contains"
+  },
+  {
+    "source": "cls:cards/models.py.SpendingCredit",
+    "target": "meth:cards/models.py.SpendingCredit.__str__",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.models",
+    "target": "cls:cards/models.py.CardCredit",
+    "type": "contains"
+  },
+  {
+    "source": "cls:cards/models.py.CardCredit",
+    "target": "meth:cards/models.py.CardCredit.__str__",
+    "type": "contains"
+  },
+  {
+    "source": "cls:cards/models.py.CardCredit",
+    "target": "meth:cards/models.py.CardCredit.annual_value",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.models",
+    "target": "cls:cards/models.py.UserSpendingProfile",
+    "type": "contains"
+  },
+  {
+    "source": "cls:cards/models.py.UserSpendingProfile",
+    "target": "meth:cards/models.py.UserSpendingProfile.__str__",
+    "type": "contains"
+  },
+  {
+    "source": "cls:cards/models.py.UserSpendingProfile",
+    "target": "meth:cards/models.py.UserSpendingProfile.generate_share_uuid",
+    "type": "contains"
+  },
+  {
+    "source": "cls:cards/models.py.UserSpendingProfile",
+    "target": "meth:cards/models.py.UserSpendingProfile.shareable_url",
+    "type": "contains"
+  },
+  {
+    "source": "cls:cards/models.py.UserSpendingProfile",
+    "target": "meth:cards/models.py.UserSpendingProfile.is_public",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.models",
+    "target": "cls:cards/models.py.SpendingAmount",
+    "type": "contains"
+  },
+  {
+    "source": "cls:cards/models.py.SpendingAmount",
+    "target": "meth:cards/models.py.SpendingAmount.__str__",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.models",
+    "target": "cls:cards/models.py.UserCard",
+    "type": "contains"
+  },
+  {
+    "source": "cls:cards/models.py.UserCard",
+    "target": "meth:cards/models.py.UserCard.__str__",
+    "type": "contains"
+  },
+  {
+    "source": "cls:cards/models.py.UserCard",
+    "target": "meth:cards/models.py.UserCard.is_active",
+    "type": "contains"
+  },
+  {
+    "source": "cls:cards/models.py.UserCard",
+    "target": "meth:cards/models.py.UserCard.display_name",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.models",
+    "target": "cls:cards/models.py.UserCreditPreference",
+    "type": "contains"
+  },
+  {
+    "source": "cls:cards/models.py.UserCreditPreference",
+    "target": "meth:cards/models.py.UserCreditPreference.__str__",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.models",
+    "target": "cls:cards/models.py.UserSpendingCreditPreference",
+    "type": "contains"
+  },
+  {
+    "source": "cls:cards/models.py.UserSpendingCreditPreference",
+    "target": "meth:cards/models.py.UserSpendingCreditPreference.__str__",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.models",
+    "target": "cls:cards/models.py.Meta",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.models",
+    "target": "cls:cards/models.py.Meta",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.models",
+    "target": "cls:cards/models.py.Meta",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.models",
+    "target": "cls:cards/models.py.Meta",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.models",
+    "target": "cls:cards/models.py.Meta",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.models",
+    "target": "cls:cards/models.py.Meta",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.models",
+    "target": "cls:cards/models.py.Meta",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.models",
+    "target": "cls:cards/models.py.Meta",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.models",
+    "target": "cls:cards/models.py.Meta",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.models",
+    "target": "cls:cards/models.py.Meta",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.models",
+    "target": "func:cards/models.py.__str__",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.models",
+    "target": "func:cards/models.py.__str__",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.models",
+    "target": "func:cards/models.py.__str__",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.models",
+    "target": "func:cards/models.py.is_parent_category",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.models",
+    "target": "func:cards/models.py.is_subcategory",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.models",
+    "target": "func:cards/models.py.__str__",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.models",
+    "target": "func:cards/models.py.referral_url",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.models",
+    "target": "func:cards/models.py.apply_url",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.models",
+    "target": "func:cards/models.py.__str__",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.models",
+    "target": "func:cards/models.py.__str__",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.models",
+    "target": "func:cards/models.py.__str__",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.models",
+    "target": "func:cards/models.py.__str__",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.models",
+    "target": "func:cards/models.py.annual_value",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.models",
+    "target": "func:cards/models.py.__str__",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.models",
+    "target": "func:cards/models.py.generate_share_uuid",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.models",
+    "target": "func:cards/models.py.shareable_url",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.models",
+    "target": "func:cards/models.py.is_public",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.models",
+    "target": "func:cards/models.py.__str__",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.models",
+    "target": "func:cards/models.py.__str__",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.models",
+    "target": "func:cards/models.py.is_active",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.models",
+    "target": "func:cards/models.py.display_name",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.models",
+    "target": "func:cards/models.py.__str__",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.models",
+    "target": "func:cards/models.py.__str__",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.scenario_loader",
+    "target": "cls:cards/scenario_loader.py.ScenarioLoader",
+    "type": "contains"
+  },
+  {
+    "source": "cls:cards/scenario_loader.py.ScenarioLoader",
+    "target": "meth:cards/scenario_loader.py.ScenarioLoader.load_single_file",
+    "type": "contains"
+  },
+  {
+    "source": "cls:cards/scenario_loader.py.ScenarioLoader",
+    "target": "meth:cards/scenario_loader.py.ScenarioLoader.load_from_directory",
+    "type": "contains"
+  },
+  {
+    "source": "cls:cards/scenario_loader.py.ScenarioLoader",
+    "target": "meth:cards/scenario_loader.py.ScenarioLoader.load_scenarios",
+    "type": "contains"
+  },
+  {
+    "source": "cls:cards/scenario_loader.py.ScenarioLoader",
+    "target": "meth:cards/scenario_loader.py.ScenarioLoader.get_scenario_by_name",
+    "type": "contains"
+  },
+  {
+    "source": "cls:cards/scenario_loader.py.ScenarioLoader",
+    "target": "meth:cards/scenario_loader.py.ScenarioLoader.list_scenario_names",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.scenario_loader",
+    "target": "func:cards/scenario_loader.py.load_scenarios",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.scenario_loader",
+    "target": "func:cards/scenario_loader.py.get_scenarios_path",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.scenario_loader",
+    "target": "func:cards/scenario_loader.py.load_single_file",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.scenario_loader",
+    "target": "func:cards/scenario_loader.py.load_from_directory",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.scenario_loader",
+    "target": "func:cards/scenario_loader.py.load_scenarios",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.scenario_loader",
+    "target": "func:cards/scenario_loader.py.get_scenario_by_name",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.scenario_loader",
+    "target": "func:cards/scenario_loader.py.list_scenario_names",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.serializers",
+    "target": "cls:cards/serializers.py.IssuerSerializer",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.serializers",
+    "target": "cls:cards/serializers.py.RewardTypeSerializer",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.serializers",
+    "target": "cls:cards/serializers.py.SpendingCategorySerializer",
+    "type": "contains"
+  },
+  {
+    "source": "cls:cards/serializers.py.SpendingCategorySerializer",
+    "target": "meth:cards/serializers.py.SpendingCategorySerializer.get_subcategories",
+    "type": "contains"
+  },
+  {
+    "source": "cls:cards/serializers.py.SpendingCategorySerializer",
+    "target": "meth:cards/serializers.py.SpendingCategorySerializer.get_parent",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.serializers",
+    "target": "cls:cards/serializers.py.SpendingCreditSerializer",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.serializers",
+    "target": "cls:cards/serializers.py.RewardCategorySerializer",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.serializers",
+    "target": "cls:cards/serializers.py.CardCreditSerializer",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.serializers",
+    "target": "cls:cards/serializers.py.CreditCardSerializer",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.serializers",
+    "target": "cls:cards/serializers.py.CreditCardListSerializer",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.serializers",
+    "target": "cls:cards/serializers.py.SpendingAmountSerializer",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.serializers",
+    "target": "cls:cards/serializers.py.UserCardSerializer",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.serializers",
+    "target": "cls:cards/serializers.py.UserSpendingProfileSerializer",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.serializers",
+    "target": "cls:cards/serializers.py.CreateSpendingProfileSerializer",
+    "type": "contains"
+  },
+  {
+    "source": "cls:cards/serializers.py.CreateSpendingProfileSerializer",
+    "target": "meth:cards/serializers.py.CreateSpendingProfileSerializer.create",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.serializers",
+    "target": "cls:cards/serializers.py.UserCardSerializer",
+    "type": "contains"
+  },
+  {
+    "source": "cls:cards/serializers.py.UserCardSerializer",
+    "target": "meth:cards/serializers.py.UserCardSerializer.validate",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.serializers",
+    "target": "cls:cards/serializers.py.UserCardCreateUpdateSerializer",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.serializers",
+    "target": "cls:cards/serializers.py.Meta",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.serializers",
+    "target": "cls:cards/serializers.py.Meta",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.serializers",
+    "target": "cls:cards/serializers.py.Meta",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.serializers",
+    "target": "cls:cards/serializers.py.Meta",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.serializers",
+    "target": "cls:cards/serializers.py.Meta",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.serializers",
+    "target": "cls:cards/serializers.py.Meta",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.serializers",
+    "target": "cls:cards/serializers.py.Meta",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.serializers",
+    "target": "cls:cards/serializers.py.Meta",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.serializers",
+    "target": "cls:cards/serializers.py.Meta",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.serializers",
+    "target": "cls:cards/serializers.py.Meta",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.serializers",
+    "target": "cls:cards/serializers.py.Meta",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.serializers",
+    "target": "cls:cards/serializers.py.Meta",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.serializers",
+    "target": "cls:cards/serializers.py.Meta",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.serializers",
+    "target": "func:cards/serializers.py.get_subcategories",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.serializers",
+    "target": "func:cards/serializers.py.get_parent",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.serializers",
+    "target": "func:cards/serializers.py.create",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.serializers",
+    "target": "func:cards/serializers.py.validate",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.views",
+    "target": "cls:cards/views.py.IssuerListView",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.views",
+    "target": "cls:cards/views.py.RewardTypeListView",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.views",
+    "target": "cls:cards/views.py.SpendingCategoryListView",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.views",
+    "target": "cls:cards/views.py.SpendingCreditListView",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.views",
+    "target": "cls:cards/views.py.CreditCardListView",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.views",
+    "target": "cls:cards/views.py.CreditCardDetailView",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.views",
+    "target": "func:cards/views.py.spending_profile_view",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.views",
+    "target": "func:cards/views.py.card_search_view",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.views",
+    "target": "func:cards/views.py.category_detail_view",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.views",
+    "target": "func:cards/views.py.categories_with_rewards_view",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.views",
+    "target": "func:cards/views.py.card_recommendations_preview",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.views",
+    "target": "func:cards/views.py.landing_view",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.views",
+    "target": "func:cards/views.py.index_view",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.views",
+    "target": "func:cards/views.py.cards_list_view",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.views",
+    "target": "func:cards/views.py.categories_list_view",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.views",
+    "target": "func:cards/views.py.category_detail_page_view",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.views",
+    "target": "func:cards/views.py.issuers_list_view",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.views",
+    "target": "func:cards/views.py.profile_view",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.views",
+    "target": "func:cards/views.py.toggle_card_ownership",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.views",
+    "target": "func:cards/views.py.update_profile_privacy",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.views",
+    "target": "func:cards/views.py.get_profile_privacy",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.views",
+    "target": "func:cards/views.py.shared_profile_view",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.views",
+    "target": "func:cards/views.py.get_user_cards",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.views",
+    "target": "func:cards/views.py.add_user_card",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.views",
+    "target": "func:cards/views.py.update_user_card",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.views",
+    "target": "func:cards/views.py.remove_user_card",
+    "type": "contains"
+  },
+  {
+    "source": "mod:cards.views",
+    "target": "func:cards/views.py.check_card_ownership",
+    "type": "contains"
+  },
+  {
+    "source": "mod:convert_cards_data",
+    "target": "func:convert_cards_data.py.map_issuer_name",
+    "type": "contains"
+  },
+  {
+    "source": "mod:convert_cards_data",
+    "target": "func:convert_cards_data.py.map_reward_type",
+    "type": "contains"
+  },
+  {
+    "source": "mod:convert_cards_data",
+    "target": "func:convert_cards_data.py.extract_reward_categories",
+    "type": "contains"
+  },
+  {
+    "source": "mod:convert_cards_data",
+    "target": "func:convert_cards_data.py.convert_card",
+    "type": "contains"
+  },
+  {
+    "source": "mod:convert_cards_data",
+    "target": "func:convert_cards_data.py.main",
+    "type": "contains"
+  },
+  {
+    "source": "mod:creditcard_guru.urls",
+    "target": "func:creditcard_guru/urls.py.home_view",
+    "type": "contains"
+  },
+  {
+    "source": "mod:manage",
+    "target": "func:manage.py.main",
+    "type": "contains"
+  },
+  {
+    "source": "mod:roadmaps.admin",
+    "target": "cls:roadmaps/admin.py.RoadmapFilterAdmin",
+    "type": "contains"
+  },
+  {
+    "source": "mod:roadmaps.admin",
+    "target": "cls:roadmaps/admin.py.RoadmapRecommendationInline",
+    "type": "contains"
+  },
+  {
+    "source": "mod:roadmaps.admin",
+    "target": "cls:roadmaps/admin.py.RoadmapCalculationInline",
+    "type": "contains"
+  },
+  {
+    "source": "mod:roadmaps.admin",
+    "target": "cls:roadmaps/admin.py.RoadmapAdmin",
+    "type": "contains"
+  },
+  {
+    "source": "mod:roadmaps.admin",
+    "target": "cls:roadmaps/admin.py.RoadmapRecommendationAdmin",
+    "type": "contains"
+  },
+  {
+    "source": "mod:roadmaps.admin",
+    "target": "cls:roadmaps/admin.py.RoadmapCalculationAdmin",
+    "type": "contains"
+  },
+  {
+    "source": "mod:roadmaps.apps",
+    "target": "cls:roadmaps/apps.py.RoadmapsConfig",
+    "type": "contains"
+  },
+  {
+    "source": "mod:roadmaps.migrations.0001_initial",
+    "target": "cls:roadmaps/migrations/0001_initial.py.Migration",
+    "type": "contains"
+  },
+  {
+    "source": "mod:roadmaps.models",
+    "target": "cls:roadmaps/models.py.RoadmapFilter",
+    "type": "contains"
+  },
+  {
+    "source": "cls:roadmaps/models.py.RoadmapFilter",
+    "target": "meth:roadmaps/models.py.RoadmapFilter.__str__",
+    "type": "contains"
+  },
+  {
+    "source": "mod:roadmaps.models",
+    "target": "cls:roadmaps/models.py.Roadmap",
+    "type": "contains"
+  },
+  {
+    "source": "cls:roadmaps/models.py.Roadmap",
+    "target": "meth:roadmaps/models.py.Roadmap.__str__",
+    "type": "contains"
+  },
+  {
+    "source": "mod:roadmaps.models",
+    "target": "cls:roadmaps/models.py.RoadmapRecommendation",
+    "type": "contains"
+  },
+  {
+    "source": "cls:roadmaps/models.py.RoadmapRecommendation",
+    "target": "meth:roadmaps/models.py.RoadmapRecommendation.__str__",
+    "type": "contains"
+  },
+  {
+    "source": "mod:roadmaps.models",
+    "target": "cls:roadmaps/models.py.RoadmapCalculation",
+    "type": "contains"
+  },
+  {
+    "source": "cls:roadmaps/models.py.RoadmapCalculation",
+    "target": "meth:roadmaps/models.py.RoadmapCalculation.__str__",
+    "type": "contains"
+  },
+  {
+    "source": "mod:roadmaps.models",
+    "target": "cls:roadmaps/models.py.Meta",
+    "type": "contains"
+  },
+  {
+    "source": "mod:roadmaps.models",
+    "target": "cls:roadmaps/models.py.Meta",
+    "type": "contains"
+  },
+  {
+    "source": "mod:roadmaps.models",
+    "target": "func:roadmaps/models.py.__str__",
+    "type": "contains"
+  },
+  {
+    "source": "mod:roadmaps.models",
+    "target": "func:roadmaps/models.py.__str__",
+    "type": "contains"
+  },
+  {
+    "source": "mod:roadmaps.models",
+    "target": "func:roadmaps/models.py.__str__",
+    "type": "contains"
+  },
+  {
+    "source": "mod:roadmaps.models",
+    "target": "func:roadmaps/models.py.__str__",
+    "type": "contains"
+  },
+  {
+    "source": "mod:roadmaps.recommendation_engine",
+    "target": "cls:roadmaps/recommendation_engine.py.RecommendationEngine",
+    "type": "contains"
+  },
+  {
+    "source": "cls:roadmaps/recommendation_engine.py.RecommendationEngine",
+    "target": "meth:roadmaps/recommendation_engine.py.RecommendationEngine.__init__",
+    "type": "contains"
+  },
+  {
+    "source": "cls:roadmaps/recommendation_engine.py.RecommendationEngine",
+    "target": "meth:roadmaps/recommendation_engine.py.RecommendationEngine.generate_quick_recommendations",
+    "type": "contains"
+  },
+  {
+    "source": "cls:roadmaps/recommendation_engine.py.RecommendationEngine",
+    "target": "meth:roadmaps/recommendation_engine.py.RecommendationEngine.generate_roadmap",
+    "type": "contains"
+  },
+  {
+    "source": "cls:roadmaps/recommendation_engine.py.RecommendationEngine",
+    "target": "meth:roadmaps/recommendation_engine.py.RecommendationEngine._get_filtered_cards",
+    "type": "contains"
+  },
+  {
+    "source": "cls:roadmaps/recommendation_engine.py.RecommendationEngine",
+    "target": "meth:roadmaps/recommendation_engine.py.RecommendationEngine._generate_portfolio_optimized_recommendations",
+    "type": "contains"
+  },
+  {
+    "source": "cls:roadmaps/recommendation_engine.py.RecommendationEngine",
+    "target": "meth:roadmaps/recommendation_engine.py.RecommendationEngine._find_optimal_portfolio",
+    "type": "contains"
+  },
+  {
+    "source": "cls:roadmaps/recommendation_engine.py.RecommendationEngine",
+    "target": "meth:roadmaps/recommendation_engine.py.RecommendationEngine._evaluate_portfolio_scenario",
+    "type": "contains"
+  },
+  {
+    "source": "cls:roadmaps/recommendation_engine.py.RecommendationEngine",
+    "target": "meth:roadmaps/recommendation_engine.py.RecommendationEngine._select_optimal_card_combination",
+    "type": "contains"
+  },
+  {
+    "source": "cls:roadmaps/recommendation_engine.py.RecommendationEngine",
+    "target": "meth:roadmaps/recommendation_engine.py.RecommendationEngine._optimize_card_portfolio",
+    "type": "contains"
+  },
+  {
+    "source": "cls:roadmaps/recommendation_engine.py.RecommendationEngine",
+    "target": "meth:roadmaps/recommendation_engine.py.RecommendationEngine._generate_card_reasoning",
+    "type": "contains"
+  },
+  {
+    "source": "cls:roadmaps/recommendation_engine.py.RecommendationEngine",
+    "target": "meth:roadmaps/recommendation_engine.py.RecommendationEngine._select_best_new_cards",
+    "type": "contains"
+  },
+  {
+    "source": "cls:roadmaps/recommendation_engine.py.RecommendationEngine",
+    "target": "meth:roadmaps/recommendation_engine.py.RecommendationEngine._calculate_scenario_portfolio_value",
+    "type": "contains"
+  },
+  {
+    "source": "cls:roadmaps/recommendation_engine.py.RecommendationEngine",
+    "target": "meth:roadmaps/recommendation_engine.py.RecommendationEngine._build_parent_category_spending",
+    "type": "contains"
+  },
+  {
+    "source": "cls:roadmaps/recommendation_engine.py.RecommendationEngine",
+    "target": "meth:roadmaps/recommendation_engine.py.RecommendationEngine._calculate_smart_card_value",
+    "type": "contains"
+  },
+  {
+    "source": "cls:roadmaps/recommendation_engine.py.RecommendationEngine",
+    "target": "meth:roadmaps/recommendation_engine.py.RecommendationEngine._calculate_spending_efficiency",
+    "type": "contains"
+  },
+  {
+    "source": "cls:roadmaps/recommendation_engine.py.RecommendationEngine",
+    "target": "meth:roadmaps/recommendation_engine.py.RecommendationEngine._find_new_cards",
+    "type": "contains"
+  },
+  {
+    "source": "cls:roadmaps/recommendation_engine.py.RecommendationEngine",
+    "target": "meth:roadmaps/recommendation_engine.py.RecommendationEngine._is_eligible_for_card",
+    "type": "contains"
+  },
+  {
+    "source": "cls:roadmaps/recommendation_engine.py.RecommendationEngine",
+    "target": "meth:roadmaps/recommendation_engine.py.RecommendationEngine._calculate_card_annual_rewards",
+    "type": "contains"
+  },
+  {
+    "source": "cls:roadmaps/recommendation_engine.py.RecommendationEngine",
+    "target": "meth:roadmaps/recommendation_engine.py.RecommendationEngine._calculate_portfolio_allocation",
+    "type": "contains"
+  },
+  {
+    "source": "cls:roadmaps/recommendation_engine.py.RecommendationEngine",
+    "target": "meth:roadmaps/recommendation_engine.py.RecommendationEngine._calculate_card_allocated_breakdown",
+    "type": "contains"
+  },
+  {
+    "source": "cls:roadmaps/recommendation_engine.py.RecommendationEngine",
+    "target": "meth:roadmaps/recommendation_engine.py.RecommendationEngine._calculate_card_rewards_breakdown",
+    "type": "contains"
+  },
+  {
+    "source": "cls:roadmaps/recommendation_engine.py.RecommendationEngine",
+    "target": "meth:roadmaps/recommendation_engine.py.RecommendationEngine._can_meet_signup_requirement",
+    "type": "contains"
+  },
+  {
+    "source": "cls:roadmaps/recommendation_engine.py.RecommendationEngine",
+    "target": "meth:roadmaps/recommendation_engine.py.RecommendationEngine._get_best_signup_bonus_card",
+    "type": "contains"
+  },
+  {
+    "source": "cls:roadmaps/recommendation_engine.py.RecommendationEngine",
+    "target": "meth:roadmaps/recommendation_engine.py.RecommendationEngine._get_signup_bonus_value",
+    "type": "contains"
+  },
+  {
+    "source": "cls:roadmaps/recommendation_engine.py.RecommendationEngine",
+    "target": "meth:roadmaps/recommendation_engine.py.RecommendationEngine._calculate_card_credits_value",
+    "type": "contains"
+  },
+  {
+    "source": "cls:roadmaps/recommendation_engine.py.RecommendationEngine",
+    "target": "meth:roadmaps/recommendation_engine.py.RecommendationEngine._calculate_total_rewards",
+    "type": "contains"
+  },
+  {
+    "source": "cls:roadmaps/recommendation_engine.py.RecommendationEngine",
+    "target": "meth:roadmaps/recommendation_engine.py.RecommendationEngine._calculate_portfolio_summary",
+    "type": "contains"
+  },
+  {
+    "source": "mod:roadmaps.recommendation_engine",
+    "target": "func:roadmaps/recommendation_engine.py.__init__",
+    "type": "contains"
+  },
+  {
+    "source": "mod:roadmaps.recommendation_engine",
+    "target": "func:roadmaps/recommendation_engine.py.generate_quick_recommendations",
+    "type": "contains"
+  },
+  {
+    "source": "mod:roadmaps.recommendation_engine",
+    "target": "func:roadmaps/recommendation_engine.py.generate_roadmap",
+    "type": "contains"
+  },
+  {
+    "source": "mod:roadmaps.recommendation_engine",
+    "target": "func:roadmaps/recommendation_engine.py._get_filtered_cards",
+    "type": "contains"
+  },
+  {
+    "source": "mod:roadmaps.recommendation_engine",
+    "target": "func:roadmaps/recommendation_engine.py._generate_portfolio_optimized_recommendations",
+    "type": "contains"
+  },
+  {
+    "source": "mod:roadmaps.recommendation_engine",
+    "target": "func:roadmaps/recommendation_engine.py._find_optimal_portfolio",
+    "type": "contains"
+  },
+  {
+    "source": "mod:roadmaps.recommendation_engine",
+    "target": "func:roadmaps/recommendation_engine.py._evaluate_portfolio_scenario",
+    "type": "contains"
+  },
+  {
+    "source": "mod:roadmaps.recommendation_engine",
+    "target": "func:roadmaps/recommendation_engine.py._select_optimal_card_combination",
+    "type": "contains"
+  },
+  {
+    "source": "mod:roadmaps.recommendation_engine",
+    "target": "func:roadmaps/recommendation_engine.py._optimize_card_portfolio",
+    "type": "contains"
+  },
+  {
+    "source": "mod:roadmaps.recommendation_engine",
+    "target": "func:roadmaps/recommendation_engine.py._generate_card_reasoning",
+    "type": "contains"
+  },
+  {
+    "source": "mod:roadmaps.recommendation_engine",
+    "target": "func:roadmaps/recommendation_engine.py._select_best_new_cards",
+    "type": "contains"
+  },
+  {
+    "source": "mod:roadmaps.recommendation_engine",
+    "target": "func:roadmaps/recommendation_engine.py._calculate_scenario_portfolio_value",
+    "type": "contains"
+  },
+  {
+    "source": "mod:roadmaps.recommendation_engine",
+    "target": "func:roadmaps/recommendation_engine.py._build_parent_category_spending",
+    "type": "contains"
+  },
+  {
+    "source": "mod:roadmaps.recommendation_engine",
+    "target": "func:roadmaps/recommendation_engine.py._calculate_smart_card_value",
+    "type": "contains"
+  },
+  {
+    "source": "mod:roadmaps.recommendation_engine",
+    "target": "func:roadmaps/recommendation_engine.py._calculate_spending_efficiency",
+    "type": "contains"
+  },
+  {
+    "source": "mod:roadmaps.recommendation_engine",
+    "target": "func:roadmaps/recommendation_engine.py._find_new_cards",
+    "type": "contains"
+  },
+  {
+    "source": "mod:roadmaps.recommendation_engine",
+    "target": "func:roadmaps/recommendation_engine.py._is_eligible_for_card",
+    "type": "contains"
+  },
+  {
+    "source": "mod:roadmaps.recommendation_engine",
+    "target": "func:roadmaps/recommendation_engine.py._calculate_card_annual_rewards",
+    "type": "contains"
+  },
+  {
+    "source": "mod:roadmaps.recommendation_engine",
+    "target": "func:roadmaps/recommendation_engine.py._calculate_portfolio_allocation",
+    "type": "contains"
+  },
+  {
+    "source": "mod:roadmaps.recommendation_engine",
+    "target": "func:roadmaps/recommendation_engine.py._calculate_card_allocated_breakdown",
+    "type": "contains"
+  },
+  {
+    "source": "mod:roadmaps.recommendation_engine",
+    "target": "func:roadmaps/recommendation_engine.py._calculate_card_rewards_breakdown",
+    "type": "contains"
+  },
+  {
+    "source": "mod:roadmaps.recommendation_engine",
+    "target": "func:roadmaps/recommendation_engine.py._can_meet_signup_requirement",
+    "type": "contains"
+  },
+  {
+    "source": "mod:roadmaps.recommendation_engine",
+    "target": "func:roadmaps/recommendation_engine.py._get_best_signup_bonus_card",
+    "type": "contains"
+  },
+  {
+    "source": "mod:roadmaps.recommendation_engine",
+    "target": "func:roadmaps/recommendation_engine.py._get_signup_bonus_value",
+    "type": "contains"
+  },
+  {
+    "source": "mod:roadmaps.recommendation_engine",
+    "target": "func:roadmaps/recommendation_engine.py._calculate_card_credits_value",
+    "type": "contains"
+  },
+  {
+    "source": "mod:roadmaps.recommendation_engine",
+    "target": "func:roadmaps/recommendation_engine.py._calculate_total_rewards",
+    "type": "contains"
+  },
+  {
+    "source": "mod:roadmaps.recommendation_engine",
+    "target": "func:roadmaps/recommendation_engine.py._calculate_portfolio_summary",
+    "type": "contains"
+  },
+  {
+    "source": "mod:roadmaps.recommendation_engine",
+    "target": "func:roadmaps/recommendation_engine.py.calculate_portfolio_value",
+    "type": "contains"
+  },
+  {
+    "source": "mod:roadmaps.serializers",
+    "target": "cls:roadmaps/serializers.py.RoadmapFilterSerializer",
+    "type": "contains"
+  },
+  {
+    "source": "mod:roadmaps.serializers",
+    "target": "cls:roadmaps/serializers.py.RoadmapRecommendationSerializer",
+    "type": "contains"
+  },
+  {
+    "source": "mod:roadmaps.serializers",
+    "target": "cls:roadmaps/serializers.py.RoadmapCalculationSerializer",
+    "type": "contains"
+  },
+  {
+    "source": "mod:roadmaps.serializers",
+    "target": "cls:roadmaps/serializers.py.RoadmapSerializer",
+    "type": "contains"
+  },
+  {
+    "source": "mod:roadmaps.serializers",
+    "target": "cls:roadmaps/serializers.py.CreateRoadmapSerializer",
+    "type": "contains"
+  },
+  {
+    "source": "cls:roadmaps/serializers.py.CreateRoadmapSerializer",
+    "target": "meth:roadmaps/serializers.py.CreateRoadmapSerializer.create",
+    "type": "contains"
+  },
+  {
+    "source": "mod:roadmaps.serializers",
+    "target": "cls:roadmaps/serializers.py.GenerateRoadmapSerializer",
+    "type": "contains"
+  },
+  {
+    "source": "cls:roadmaps/serializers.py.GenerateRoadmapSerializer",
+    "target": "meth:roadmaps/serializers.py.GenerateRoadmapSerializer.generate_recommendations",
+    "type": "contains"
+  },
+  {
+    "source": "mod:roadmaps.serializers",
+    "target": "cls:roadmaps/serializers.py.Meta",
+    "type": "contains"
+  },
+  {
+    "source": "mod:roadmaps.serializers",
+    "target": "cls:roadmaps/serializers.py.Meta",
+    "type": "contains"
+  },
+  {
+    "source": "mod:roadmaps.serializers",
+    "target": "cls:roadmaps/serializers.py.Meta",
+    "type": "contains"
+  },
+  {
+    "source": "mod:roadmaps.serializers",
+    "target": "cls:roadmaps/serializers.py.Meta",
+    "type": "contains"
+  },
+  {
+    "source": "mod:roadmaps.serializers",
+    "target": "func:roadmaps/serializers.py.create",
+    "type": "contains"
+  },
+  {
+    "source": "mod:roadmaps.serializers",
+    "target": "func:roadmaps/serializers.py.generate_recommendations",
+    "type": "contains"
+  },
+  {
+    "source": "mod:roadmaps.views",
+    "target": "cls:roadmaps/views.py.RoadmapFilterListView",
+    "type": "contains"
+  },
+  {
+    "source": "mod:roadmaps.views",
+    "target": "cls:roadmaps/views.py.RoadmapListView",
+    "type": "contains"
+  },
+  {
+    "source": "cls:roadmaps/views.py.RoadmapListView",
+    "target": "meth:roadmaps/views.py.RoadmapListView.get_queryset",
+    "type": "contains"
+  },
+  {
+    "source": "mod:roadmaps.views",
+    "target": "cls:roadmaps/views.py.RoadmapDetailView",
+    "type": "contains"
+  },
+  {
+    "source": "cls:roadmaps/views.py.RoadmapDetailView",
+    "target": "meth:roadmaps/views.py.RoadmapDetailView.get_queryset",
+    "type": "contains"
+  },
+  {
+    "source": "mod:roadmaps.views",
+    "target": "func:roadmaps/views.py.create_roadmap_view",
+    "type": "contains"
+  },
+  {
+    "source": "mod:roadmaps.views",
+    "target": "func:roadmaps/views.py.generate_roadmap_view",
+    "type": "contains"
+  },
+  {
+    "source": "mod:roadmaps.views",
+    "target": "func:roadmaps/views.py.quick_recommendation_view",
+    "type": "contains"
+  },
+  {
+    "source": "mod:roadmaps.views",
+    "target": "func:roadmaps/views.py.roadmap_stats_view",
+    "type": "contains"
+  },
+  {
+    "source": "mod:roadmaps.views",
+    "target": "func:roadmaps/views.py.export_scenario_view",
+    "type": "contains"
+  },
+  {
+    "source": "mod:roadmaps.views",
+    "target": "func:roadmaps/views.py.get_queryset",
+    "type": "contains"
+  },
+  {
+    "source": "mod:roadmaps.views",
+    "target": "func:roadmaps/views.py.get_queryset",
+    "type": "contains"
+  },
+  {
+    "source": "mod:setup_data",
+    "target": "func:setup_data.py.run_command",
+    "type": "contains"
+  },
+  {
+    "source": "mod:setup_data",
+    "target": "func:setup_data.py.main",
+    "type": "contains"
+  },
+  {
+    "source": "mod:split_scenarios",
+    "target": "func:split_scenarios.py.load_scenarios",
+    "type": "contains"
+  },
+  {
+    "source": "mod:split_scenarios",
+    "target": "func:split_scenarios.py.categorize_scenarios",
+    "type": "contains"
+  },
+  {
+    "source": "mod:split_scenarios",
+    "target": "func:split_scenarios.py.write_scenario_files",
+    "type": "contains"
+  },
+  {
+    "source": "mod:split_scenarios",
+    "target": "func:split_scenarios.py.create_index_file",
+    "type": "contains"
+  },
+  {
+    "source": "mod:users.apps",
+    "target": "cls:users/apps.py.UsersConfig",
+    "type": "contains"
+  },
+  {
+    "source": "mod:users.migrations.0001_initial",
+    "target": "cls:users/migrations/0001_initial.py.Migration",
+    "type": "contains"
+  },
+  {
+    "source": "mod:users.models",
+    "target": "cls:users/models.py.UserProfile",
+    "type": "contains"
+  },
+  {
+    "source": "cls:users/models.py.UserProfile",
+    "target": "meth:users/models.py.UserProfile.__str__",
+    "type": "contains"
+  },
+  {
+    "source": "mod:users.models",
+    "target": "cls:users/models.py.UserPreferences",
+    "type": "contains"
+  },
+  {
+    "source": "cls:users/models.py.UserPreferences",
+    "target": "meth:users/models.py.UserPreferences.__str__",
+    "type": "contains"
+  },
+  {
+    "source": "mod:users.models",
+    "target": "cls:users/models.py.Meta",
+    "type": "contains"
+  },
+  {
+    "source": "mod:users.models",
+    "target": "cls:users/models.py.Meta",
+    "type": "contains"
+  },
+  {
+    "source": "mod:users.models",
+    "target": "func:users/models.py.__str__",
+    "type": "contains"
+  },
+  {
+    "source": "mod:users.models",
+    "target": "func:users/models.py.__str__",
+    "type": "contains"
+  },
+  {
+    "source": "mod:users.serializers",
+    "target": "cls:users/serializers.py.UserSerializer",
+    "type": "contains"
+  },
+  {
+    "source": "mod:users.serializers",
+    "target": "cls:users/serializers.py.UserProfileSerializer",
+    "type": "contains"
+  },
+  {
+    "source": "mod:users.serializers",
+    "target": "cls:users/serializers.py.UserCardSerializer",
+    "type": "contains"
+  },
+  {
+    "source": "mod:users.serializers",
+    "target": "cls:users/serializers.py.UserSpendingSerializer",
+    "type": "contains"
+  },
+  {
+    "source": "mod:users.serializers",
+    "target": "cls:users/serializers.py.UserPreferencesSerializer",
+    "type": "contains"
+  },
+  {
+    "source": "mod:users.serializers",
+    "target": "cls:users/serializers.py.UserDataSerializer",
+    "type": "contains"
+  },
+  {
+    "source": "cls:users/serializers.py.UserDataSerializer",
+    "target": "meth:users/serializers.py.UserDataSerializer.create",
+    "type": "contains"
+  },
+  {
+    "source": "cls:users/serializers.py.UserDataSerializer",
+    "target": "meth:users/serializers.py.UserDataSerializer.to_representation",
+    "type": "contains"
+  },
+  {
+    "source": "mod:users.serializers",
+    "target": "cls:users/serializers.py.Meta",
+    "type": "contains"
+  },
+  {
+    "source": "mod:users.serializers",
+    "target": "cls:users/serializers.py.Meta",
+    "type": "contains"
+  },
+  {
+    "source": "mod:users.serializers",
+    "target": "cls:users/serializers.py.Meta",
+    "type": "contains"
+  },
+  {
+    "source": "mod:users.serializers",
+    "target": "cls:users/serializers.py.Meta",
+    "type": "contains"
+  },
+  {
+    "source": "mod:users.serializers",
+    "target": "cls:users/serializers.py.Meta",
+    "type": "contains"
+  },
+  {
+    "source": "mod:users.serializers",
+    "target": "func:users/serializers.py.create",
+    "type": "contains"
+  },
+  {
+    "source": "mod:users.serializers",
+    "target": "func:users/serializers.py.to_representation",
+    "type": "contains"
+  },
+  {
+    "source": "mod:users.views",
+    "target": "cls:users/views.py.UserProfileView",
+    "type": "contains"
+  },
+  {
+    "source": "cls:users/views.py.UserProfileView",
+    "target": "meth:users/views.py.UserProfileView.get_object",
+    "type": "contains"
+  },
+  {
+    "source": "mod:users.views",
+    "target": "cls:users/views.py.UserCardListView",
+    "type": "contains"
+  },
+  {
+    "source": "cls:users/views.py.UserCardListView",
+    "target": "meth:users/views.py.UserCardListView.get_queryset",
+    "type": "contains"
+  },
+  {
+    "source": "cls:users/views.py.UserCardListView",
+    "target": "meth:users/views.py.UserCardListView.perform_create",
+    "type": "contains"
+  },
+  {
+    "source": "mod:users.views",
+    "target": "cls:users/views.py.UserCardDetailView",
+    "type": "contains"
+  },
+  {
+    "source": "cls:users/views.py.UserCardDetailView",
+    "target": "meth:users/views.py.UserCardDetailView.get_queryset",
+    "type": "contains"
+  },
+  {
+    "source": "mod:users.views",
+    "target": "cls:users/views.py.UserSpendingListView",
+    "type": "contains"
+  },
+  {
+    "source": "cls:users/views.py.UserSpendingListView",
+    "target": "meth:users/views.py.UserSpendingListView.get_queryset",
+    "type": "contains"
+  },
+  {
+    "source": "cls:users/views.py.UserSpendingListView",
+    "target": "meth:users/views.py.UserSpendingListView.perform_create",
+    "type": "contains"
+  },
+  {
+    "source": "mod:users.views",
+    "target": "cls:users/views.py.UserPreferencesView",
+    "type": "contains"
+  },
+  {
+    "source": "cls:users/views.py.UserPreferencesView",
+    "target": "meth:users/views.py.UserPreferencesView.get_object",
+    "type": "contains"
+  },
+  {
+    "source": "mod:users.views",
+    "target": "func:users/views.py.user_data_view",
+    "type": "contains"
+  },
+  {
+    "source": "mod:users.views",
+    "target": "func:users/views.py.toggle_user_card",
+    "type": "contains"
+  },
+  {
+    "source": "mod:users.views",
+    "target": "func:users/views.py.update_user_card_details",
+    "type": "contains"
+  },
+  {
+    "source": "mod:users.views",
+    "target": "func:users/views.py.get_user_cards_details",
+    "type": "contains"
+  },
+  {
+    "source": "mod:users.views",
+    "target": "func:users/views.py.user_status_view",
+    "type": "contains"
+  },
+  {
+    "source": "mod:users.views",
+    "target": "func:users/views.py.get_object",
+    "type": "contains"
+  },
+  {
+    "source": "mod:users.views",
+    "target": "func:users/views.py.get_queryset",
+    "type": "contains"
+  },
+  {
+    "source": "mod:users.views",
+    "target": "func:users/views.py.perform_create",
+    "type": "contains"
+  },
+  {
+    "source": "mod:users.views",
+    "target": "func:users/views.py.get_queryset",
+    "type": "contains"
+  },
+  {
+    "source": "mod:users.views",
+    "target": "func:users/views.py.get_queryset",
+    "type": "contains"
+  },
+  {
+    "source": "mod:users.views",
+    "target": "func:users/views.py.perform_create",
+    "type": "contains"
+  },
+  {
+    "source": "mod:users.views",
+    "target": "func:users/views.py.get_object",
+    "type": "contains"
+  }
+]

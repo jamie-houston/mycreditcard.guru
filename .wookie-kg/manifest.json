@@ -1,0 +1,22 @@
+{
+  "version": "1.0",
+  "created_at": "2025-08-06T09:35:19.150282",
+  "statistics": {
+    "total_nodes": 1037,
+    "total_edges": 1632,
+    "node_types": {
+      "method": 113,
+      "class": 127,
+      "module": 86,
+      "function": 711
+    },
+    "edge_types": {
+      "inherits_from": 87,
+      "contains": 370,
+      "imports": 147,
+      "calls": 1028
+    },
+    "files_processed": 50,
+    "errors": 0
+  }
+}

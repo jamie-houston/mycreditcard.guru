@@ -1,0 +1,2189 @@
+{
+  "cls:cards/admin.py.CardCreditAdmin": {
+    "attributes": {
+      "bases": [
+        "admin.ModelAdmin"
+      ],
+      "line": 60,
+      "methods": [],
+      "name": "CardCreditAdmin"
+    },
+    "id": "cls:cards/admin.py.CardCreditAdmin",
+    "line": 60,
+    "name": "CardCreditAdmin",
+    "path": "cards/admin.py",
+    "type": "class"
+  },
+  "cls:cards/admin.py.CardCreditInline": {
+    "attributes": {
+      "bases": [
+        "admin.TabularInline"
+      ],
+      "line": 32,
+      "methods": [],
+      "name": "CardCreditInline"
+    },
+    "id": "cls:cards/admin.py.CardCreditInline",
+    "line": 32,
+    "name": "CardCreditInline",
+    "path": "cards/admin.py",
+    "type": "class"
+  },
+  "cls:cards/admin.py.CreditCardAdmin": {
+    "attributes": {
+      "bases": [
+        "admin.ModelAdmin"
+      ],
+      "line": 38,
+      "methods": [],
+      "name": "CreditCardAdmin"
+    },
+    "id": "cls:cards/admin.py.CreditCardAdmin",
+    "line": 38,
+    "name": "CreditCardAdmin",
+    "path": "cards/admin.py",
+    "type": "class"
+  },
+  "cls:cards/admin.py.CreditTypeAdmin": {
+    "attributes": {
+      "bases": [
+        "admin.ModelAdmin"
+      ],
+      "line": 52,
+      "methods": [],
+      "name": "CreditTypeAdmin"
+    },
+    "id": "cls:cards/admin.py.CreditTypeAdmin",
+    "line": 52,
+    "name": "CreditTypeAdmin",
+    "path": "cards/admin.py",
+    "type": "class"
+  },
+  "cls:cards/admin.py.IssuerAdmin": {
+    "attributes": {
+      "bases": [
+        "admin.ModelAdmin"
+      ],
+      "line": 10,
+      "methods": [],
+      "name": "IssuerAdmin"
+    },
+    "id": "cls:cards/admin.py.IssuerAdmin",
+    "line": 10,
+    "name": "IssuerAdmin",
+    "path": "cards/admin.py",
+    "type": "class"
+  },
+  "cls:cards/admin.py.RewardCategoryAdmin": {
+    "attributes": {
+      "bases": [
+        "admin.ModelAdmin"
+      ],
+      "line": 46,
+      "methods": [],
+      "name": "RewardCategoryAdmin"
+    },
+    "id": "cls:cards/admin.py.RewardCategoryAdmin",
+    "line": 46,
+    "name": "RewardCategoryAdmin",
+    "path": "cards/admin.py",
+    "type": "class"
+  },
+  "cls:cards/admin.py.RewardCategoryInline": {
+    "attributes": {
+      "bases": [
+        "admin.TabularInline"
+      ],
+      "line": 27,
+      "methods": [],
+      "name": "RewardCategoryInline"
+    },
+    "id": "cls:cards/admin.py.RewardCategoryInline",
+    "line": 27,
+    "name": "RewardCategoryInline",
+    "path": "cards/admin.py",
+    "type": "class"
+  },
+  "cls:cards/admin.py.RewardTypeAdmin": {
+    "attributes": {
+      "bases": [
+        "admin.ModelAdmin"
+      ],
+      "line": 16,
+      "methods": [],
+      "name": "RewardTypeAdmin"
+    },
+    "id": "cls:cards/admin.py.RewardTypeAdmin",
+    "line": 16,
+    "name": "RewardTypeAdmin",
+    "path": "cards/admin.py",
+    "type": "class"
+  },
+  "cls:cards/admin.py.SpendingAmountInline": {
+    "attributes": {
+      "bases": [
+        "admin.TabularInline"
+      ],
+      "line": 65,
+      "methods": [],
+      "name": "SpendingAmountInline"
+    },
+    "id": "cls:cards/admin.py.SpendingAmountInline",
+    "line": 65,
+    "name": "SpendingAmountInline",
+    "path": "cards/admin.py",
+    "type": "class"
+  },
+  "cls:cards/admin.py.SpendingCategoryAdmin": {
+    "attributes": {
+      "bases": [
+        "admin.ModelAdmin"
+      ],
+      "line": 22,
+      "methods": [],
+      "name": "SpendingCategoryAdmin"
+    },
+    "id": "cls:cards/admin.py.SpendingCategoryAdmin",
+    "line": 22,
+    "name": "SpendingCategoryAdmin",
+    "path": "cards/admin.py",
+    "type": "class"
+  },
+  "cls:cards/admin.py.UserCardAdmin": {
+    "attributes": {
+      "bases": [
+        "admin.ModelAdmin"
+      ],
+      "line": 82,
+      "methods": [],
+      "name": "UserCardAdmin"
+    },
+    "id": "cls:cards/admin.py.UserCardAdmin",
+    "line": 82,
+    "name": "UserCardAdmin",
+    "path": "cards/admin.py",
+    "type": "class"
+  },
+  "cls:cards/admin.py.UserCreditPreferenceInline": {
+    "attributes": {
+      "bases": [
+        "admin.TabularInline"
+      ],
+      "line": 70,
+      "methods": [],
+      "name": "UserCreditPreferenceInline"
+    },
+    "id": "cls:cards/admin.py.UserCreditPreferenceInline",
+    "line": 70,
+    "name": "UserCreditPreferenceInline",
+    "path": "cards/admin.py",
+    "type": "class"
+  },
+  "cls:cards/admin.py.UserSpendingProfileAdmin": {
+    "attributes": {
+      "bases": [
+        "admin.ModelAdmin"
+      ],
+      "line": 76,
+      "methods": [],
+      "name": "UserSpendingProfileAdmin"
+    },
+    "id": "cls:cards/admin.py.UserSpendingProfileAdmin",
+    "line": 76,
+    "name": "UserSpendingProfileAdmin",
+    "path": "cards/admin.py",
+    "type": "class"
+  },
+  "cls:cards/admin.py.admin.ModelAdmin": {
+    "attributes": {
+      "pending": true
+    },
+    "id": "cls:cards/admin.py.admin.ModelAdmin",
+    "name": "admin.ModelAdmin",
+    "path": "pending:admin.ModelAdmin",
+    "type": "class"
+  },
+  "cls:cards/admin.py.admin.TabularInline": {
+    "attributes": {
+      "pending": true
+    },
+    "id": "cls:cards/admin.py.admin.TabularInline",
+    "name": "admin.TabularInline",
+    "path": "pending:admin.TabularInline",
+    "type": "class"
+  },
+  "cls:cards/apps.py.AppConfig": {
+    "attributes": {
+      "pending": true
+    },
+    "id": "cls:cards/apps.py.AppConfig",
+    "name": "AppConfig",
+    "path": "pending:AppConfig",
+    "type": "class"
+  },
+  "cls:cards/apps.py.CardsConfig": {
+    "attributes": {
+      "bases": [
+        "AppConfig"
+      ],
+      "line": 4,
+      "methods": [],
+      "name": "CardsConfig"
+    },
+    "id": "cls:cards/apps.py.CardsConfig",
+    "line": 4,
+    "name": "CardsConfig",
+    "path": "cards/apps.py",
+    "type": "class"
+  },
+  "cls:cards/management/commands/import_cards.py.BaseCommand": {
+    "attributes": {
+      "pending": true
+    },
+    "id": "cls:cards/management/commands/import_cards.py.BaseCommand",
+    "name": "BaseCommand",
+    "path": "pending:BaseCommand",
+    "type": "class"
+  },
+  "cls:cards/management/commands/import_cards.py.Command": {
+    "attributes": {
+      "bases": [
+        "BaseCommand"
+      ],
+      "line": 14,
+      "methods": [
+        {
+          "line": 17,
+          "name": "add_arguments"
+        },
+        {
+          "line": 24,
+          "name": "handle"
+        },
+        {
+          "line": 66,
+          "name": "import_data"
+        },
+        {
+          "line": 93,
+          "name": "import_issuers"
+        },
+        {
+          "line": 106,
+          "name": "import_reward_types"
+        },
+        {
+          "line": 117,
+          "name": "import_spending_categories"
+        },
+        {
+          "line": 214,
+          "name": "import_credit_cards"
+        },
+        {
+          "line": 315,
+          "name": "import_reward_categories"
+        },
+        {
+          "line": 353,
+          "name": "import_card_credits"
+        },
+        {
+          "line": 391,
+          "name": "import_personal_cards"
+        }
+      ],
+      "name": "Command"
+    },
+    "id": "cls:cards/management/commands/import_cards.py.Command",
+    "line": 14,
+    "name": "Command",
+    "path": "cards/management/commands/import_cards.py",
+    "type": "class"
+  },
+  "cls:cards/management/commands/import_credit_types.py.BaseCommand": {
+    "attributes": {
+      "pending": true
+    },
+    "id": "cls:cards/management/commands/import_credit_types.py.BaseCommand",
+    "name": "BaseCommand",
+    "path": "pending:BaseCommand",
+    "type": "class"
+  },
+  "cls:cards/management/commands/import_credit_types.py.Command": {
+    "attributes": {
+      "bases": [
+        "BaseCommand"
+      ],
+      "line": 9,
+      "methods": [
+        {
+          "line": 12,
+          "name": "handle"
+        },
+        {
+          "line": 101,
+          "name": "normalize_credit_description"
+        },
+        {
+          "line": 152,
+          "name": "categorize_credit"
+        },
+        {
+          "line": 171,
+          "name": "get_credit_icon"
+        },
+        {
+          "line": 214,
+          "name": "get_sort_order"
+        }
+      ],
+      "name": "Command"
+    },
+    "id": "cls:cards/management/commands/import_credit_types.py.Command",
+    "line": 9,
+    "name": "Command",
+    "path": "cards/management/commands/import_credit_types.py",
+    "type": "class"
+  },
+  "cls:cards/management/commands/import_spending_credits.py.BaseCommand": {
+    "attributes": {
+      "pending": true
+    },
+    "id": "cls:cards/management/commands/import_spending_credits.py.BaseCommand",
+    "name": "BaseCommand",
+    "path": "pending:BaseCommand",
+    "type": "class"
+  },
+  "cls:cards/management/commands/import_spending_credits.py.Command": {
+    "attributes": {
+      "bases": [
+        "BaseCommand"
+      ],
+      "line": 8,
+      "methods": [
+        {
+          "line": 11,
+          "name": "add_arguments"
+        },
+        {
+          "line": 24,
+          "name": "handle"
+        }
+      ],
+      "name": "Command"
+    },
+    "id": "cls:cards/management/commands/import_spending_credits.py.Command",
+    "line": 8,
+    "name": "Command",
+    "path": "cards/management/commands/import_spending_credits.py",
+    "type": "class"
+  },
+  "cls:cards/management/commands/run_scenario.py.BaseCommand": {
+    "attributes": {
+      "pending": true
+    },
+    "id": "cls:cards/management/commands/run_scenario.py.BaseCommand",
+    "name": "BaseCommand",
+    "path": "pending:BaseCommand",
+    "type": "class"
+  },
+  "cls:cards/management/commands/run_scenario.py.Command": {
+    "attributes": {
+      "bases": [
+        "BaseCommand"
+      ],
+      "line": 26,
+      "methods": [
+        {
+          "line": 29,
+          "name": "add_arguments"
+        },
+        {
+          "line": 58,
+          "name": "handle"
+        },
+        {
+          "line": 94,
+          "name": "list_scenarios"
+        },
+        {
+          "line": 115,
+          "name": "run_all_scenarios"
+        },
+        {
+          "line": 124,
+          "name": "run_single_scenario"
+        },
+        {
+          "line": 138,
+          "name": "run_scenario"
+        },
+        {
+          "line": 166,
+          "name": "display_results"
+        },
+        {
+          "line": 211,
+          "name": "validate_expectations"
+        },
+        {
+          "line": 273,
+          "name": "validate_card_count_optimization"
+        },
+        {
+          "line": 294,
+          "name": "validate_zero_fee_optimization"
+        },
+        {
+          "line": 310,
+          "name": "validate_breakdown_accuracy"
+        },
+        {
+          "line": 355,
+          "name": "validate_portfolio_optimization"
+        },
+        {
+          "line": 451,
+          "name": "setup_test_data"
+        },
+        {
+          "line": 483,
+          "name": "create_test_scenario"
+        },
+        {
+          "line": 539,
+          "name": "create_credit_card_from_slug"
+        },
+        {
+          "line": 573,
+          "name": "create_credit_card_from_name"
+        },
+        {
+          "line": 607,
+          "name": "create_credit_card"
+        },
+        {
+          "line": 633,
+          "name": "create_test_setup_data"
+        }
+      ],
+      "name": "Command"
+    },
+    "id": "cls:cards/management/commands/run_scenario.py.Command",
+    "line": 26,
+    "name": "Command",
+    "path": "cards/management/commands/run_scenario.py",
+    "type": "class"
+  },
+  "cls:cards/migrations/0001_initial.py.Migration": {
+    "attributes": {
+      "bases": [
+        "migrations.Migration"
+      ],
+      "line": 8,
+      "methods": [],
+      "name": "Migration"
+    },
+    "id": "cls:cards/migrations/0001_initial.py.Migration",
+    "line": 8,
+    "name": "Migration",
+    "path": "cards/migrations/0001_initial.py",
+    "type": "class"
+  },
+  "cls:cards/migrations/0001_initial.py.migrations.Migration": {
+    "attributes": {
+      "pending": true
+    },
+    "id": "cls:cards/migrations/0001_initial.py.migrations.Migration",
+    "name": "migrations.Migration",
+    "path": "pending:migrations.Migration",
+    "type": "class"
+  },
+  "cls:cards/models.py.CardCredit": {
+    "attributes": {
+      "bases": [
+        "models.Model"
+      ],
+      "line": 156,
+      "methods": [
+        {
+          "line": 168,
+          "name": "__str__"
+        },
+        {
+          "line": 172,
+          "name": "annual_value"
+        }
+      ],
+      "name": "CardCredit"
+    },
+    "id": "cls:cards/models.py.CardCredit",
+    "line": 156,
+    "name": "CardCredit",
+    "path": "cards/models.py",
+    "type": "class"
+  },
+  "cls:cards/models.py.CreditCard": {
+    "attributes": {
+      "bases": [
+        "models.Model"
+      ],
+      "line": 53,
+      "methods": [
+        {
+          "line": 81,
+          "name": "__str__"
+        },
+        {
+          "line": 85,
+          "name": "referral_url"
+        },
+        {
+          "line": 100,
+          "name": "apply_url"
+        }
+      ],
+      "name": "CreditCard"
+    },
+    "id": "cls:cards/models.py.CreditCard",
+    "line": 53,
+    "name": "CreditCard",
+    "path": "cards/models.py",
+    "type": "class"
+  },
+  "cls:cards/models.py.CreditType": {
+    "attributes": {
+      "bases": [
+        "models.Model"
+      ],
+      "line": 125,
+      "methods": [
+        {
+          "line": 136,
+          "name": "__str__"
+        }
+      ],
+      "name": "CreditType"
+    },
+    "id": "cls:cards/models.py.CreditType",
+    "line": 125,
+    "name": "CreditType",
+    "path": "cards/models.py",
+    "type": "class"
+  },
+  "cls:cards/models.py.Issuer": {
+    "attributes": {
+      "bases": [
+        "models.Model"
+      ],
+      "line": 7,
+      "methods": [
+        {
+          "line": 14,
+          "name": "__str__"
+        }
+      ],
+      "name": "Issuer"
+    },
+    "id": "cls:cards/models.py.Issuer",
+    "line": 7,
+    "name": "Issuer",
+    "path": "cards/models.py",
+    "type": "class"
+  },
+  "cls:cards/models.py.Meta": {
+    "attributes": {
+      "bases": [],
+      "line": 288,
+      "methods": [],
+      "name": "Meta"
+    },
+    "id": "cls:cards/models.py.Meta",
+    "line": 288,
+    "name": "Meta",
+    "path": "cards/models.py",
+    "type": "class"
+  },
+  "cls:cards/models.py.RewardCategory": {
+    "attributes": {
+      "bases": [
+        "models.Model"
+      ],
+      "line": 105,
+      "methods": [
+        {
+          "line": 118,
+          "name": "__str__"
+        }
+      ],
+      "name": "RewardCategory"
+    },
+    "id": "cls:cards/models.py.RewardCategory",
+    "line": 105,
+    "name": "RewardCategory",
+    "path": "cards/models.py",
+    "type": "class"
+  },
+  "cls:cards/models.py.RewardType": {
+    "attributes": {
+      "bases": [
+        "models.Model"
+      ],
+      "line": 18,
+      "methods": [
+        {
+          "line": 22,
+          "name": "__str__"
+        }
+      ],
+      "name": "RewardType"
+    },
+    "id": "cls:cards/models.py.RewardType",
+    "line": 18,
+    "name": "RewardType",
+    "path": "cards/models.py",
+    "type": "class"
+  },
+  "cls:cards/models.py.SpendingAmount": {
+    "attributes": {
+      "bases": [
+        "models.Model"
+      ],
+      "line": 222,
+      "methods": [
+        {
+          "line": 230,
+          "name": "__str__"
+        }
+      ],
+      "name": "SpendingAmount"
+    },
+    "id": "cls:cards/models.py.SpendingAmount",
+    "line": 222,
+    "name": "SpendingAmount",
+    "path": "cards/models.py",
+    "type": "class"
+  },
+  "cls:cards/models.py.SpendingCategory": {
+    "attributes": {
+      "bases": [
+        "models.Model"
+      ],
+      "line": 26,
+      "methods": [
+        {
+          "line": 39,
+          "name": "__str__"
+        },
+        {
+          "line": 43,
+          "name": "is_parent_category"
+        },
+        {
+          "line": 48,
+          "name": "is_subcategory"
+        }
+      ],
+      "name": "SpendingCategory"
+    },
+    "id": "cls:cards/models.py.SpendingCategory",
+    "line": 26,
+    "name": "SpendingCategory",
+    "path": "cards/models.py",
+    "type": "class"
+  },
+  "cls:cards/models.py.SpendingCredit": {
+    "attributes": {
+      "bases": [
+        "models.Model"
+      ],
+      "line": 140,
+      "methods": [
+        {
+          "line": 152,
+          "name": "__str__"
+        }
+      ],
+      "name": "SpendingCredit"
+    },
+    "id": "cls:cards/models.py.SpendingCredit",
+    "line": 140,
+    "name": "SpendingCredit",
+    "path": "cards/models.py",
+    "type": "class"
+  },
+  "cls:cards/models.py.UserCard": {
+    "attributes": {
+      "bases": [
+        "models.Model"
+      ],
+      "line": 234,
+      "methods": [
+        {
+          "line": 253,
+          "name": "__str__"
+        },
+        {
+          "line": 259,
+          "name": "is_active"
+        },
+        {
+          "line": 264,
+          "name": "display_name"
+        }
+      ],
+      "name": "UserCard"
+    },
+    "id": "cls:cards/models.py.UserCard",
+    "line": 234,
+    "name": "UserCard",
+    "path": "cards/models.py",
+    "type": "class"
+  },
+  "cls:cards/models.py.UserCreditPreference": {
+    "attributes": {
+      "bases": [
+        "models.Model"
+      ],
+      "line": 270,
+      "methods": [
+        {
+          "line": 278,
+          "name": "__str__"
+        }
+      ],
+      "name": "UserCreditPreference"
+    },
+    "id": "cls:cards/models.py.UserCreditPreference",
+    "line": 270,
+    "name": "UserCreditPreference",
+    "path": "cards/models.py",
+    "type": "class"
+  },
+  "cls:cards/models.py.UserSpendingCreditPreference": {
+    "attributes": {
+      "bases": [
+        "models.Model"
+      ],
+      "line": 282,
+      "methods": [
+        {
+          "line": 291,
+          "name": "__str__"
+        }
+      ],
+      "name": "UserSpendingCreditPreference"
+    },
+    "id": "cls:cards/models.py.UserSpendingCreditPreference",
+    "line": 282,
+    "name": "UserSpendingCreditPreference",
+    "path": "cards/models.py",
+    "type": "class"
+  },
+  "cls:cards/models.py.UserSpendingProfile": {
+    "attributes": {
+      "bases": [
+        "models.Model"
+      ],
+      "line": 177,
+      "methods": [
+        {
+          "line": 195,
+          "name": "__str__"
+        },
+        {
+          "line": 200,
+          "name": "generate_share_uuid"
+        },
+        {
+          "line": 209,
+          "name": "shareable_url"
+        },
+        {
+          "line": 217,
+          "name": "is_public"
+        }
+      ],
+      "name": "UserSpendingProfile"
+    },
+    "id": "cls:cards/models.py.UserSpendingProfile",
+    "line": 177,
+    "name": "UserSpendingProfile",
+    "path": "cards/models.py",
+    "type": "class"
+  },
+  "cls:cards/models.py.models.Model": {
+    "attributes": {
+      "pending": true
+    },
+    "id": "cls:cards/models.py.models.Model",
+    "name": "models.Model",
+    "path": "pending:models.Model",
+    "type": "class"
+  },
+  "cls:cards/scenario_loader.py.ScenarioLoader": {
+    "attributes": {
+      "bases": [],
+      "line": 11,
+      "methods": [
+        {
+          "line": 15,
+          "name": "load_single_file"
+        },
+        {
+          "line": 24,
+          "name": "load_from_directory"
+        },
+        {
+          "line": 68,
+          "name": "load_scenarios"
+        },
+        {
+          "line": 115,
+          "name": "get_scenario_by_name"
+        },
+        {
+          "line": 123,
+          "name": "list_scenario_names"
+        }
+      ],
+      "name": "ScenarioLoader"
+    },
+    "id": "cls:cards/scenario_loader.py.ScenarioLoader",
+    "line": 11,
+    "name": "ScenarioLoader",
+    "path": "cards/scenario_loader.py",
+    "type": "class"
+  },
+  "cls:cards/serializers.py.CardCreditSerializer": {
+    "attributes": {
+      "bases": [
+        "serializers.ModelSerializer"
+      ],
+      "line": 65,
+      "methods": [],
+      "name": "CardCreditSerializer"
+    },
+    "id": "cls:cards/serializers.py.CardCreditSerializer",
+    "line": 65,
+    "name": "CardCreditSerializer",
+    "path": "cards/serializers.py",
+    "type": "class"
+  },
+  "cls:cards/serializers.py.CreateSpendingProfileSerializer": {
+    "attributes": {
+      "bases": [
+        "serializers.Serializer"
+      ],
+      "line": 143,
+      "methods": [
+        {
+          "line": 154,
+          "name": "create"
+        }
+      ],
+      "name": "CreateSpendingProfileSerializer"
+    },
+    "id": "cls:cards/serializers.py.CreateSpendingProfileSerializer",
+    "line": 143,
+    "name": "CreateSpendingProfileSerializer",
+    "path": "cards/serializers.py",
+    "type": "class"
+  },
+  "cls:cards/serializers.py.CreditCardListSerializer": {
+    "attributes": {
+      "bases": [
+        "serializers.ModelSerializer"
+      ],
+      "line": 98,
+      "methods": [],
+      "name": "CreditCardListSerializer"
+    },
+    "id": "cls:cards/serializers.py.CreditCardListSerializer",
+    "line": 98,
+    "name": "CreditCardListSerializer",
+    "path": "cards/serializers.py",
+    "type": "class"
+  },
+  "cls:cards/serializers.py.CreditCardSerializer": {
+    "attributes": {
+      "bases": [
+        "serializers.ModelSerializer"
+      ],
+      "line": 77,
+      "methods": [],
+      "name": "CreditCardSerializer"
+    },
+    "id": "cls:cards/serializers.py.CreditCardSerializer",
+    "line": 77,
+    "name": "CreditCardSerializer",
+    "path": "cards/serializers.py",
+    "type": "class"
+  },
+  "cls:cards/serializers.py.IssuerSerializer": {
+    "attributes": {
+      "bases": [
+        "serializers.ModelSerializer"
+      ],
+      "line": 9,
+      "methods": [],
+      "name": "IssuerSerializer"
+    },
+    "id": "cls:cards/serializers.py.IssuerSerializer",
+    "line": 9,
+    "name": "IssuerSerializer",
+    "path": "cards/serializers.py",
+    "type": "class"
+  },
+  "cls:cards/serializers.py.Meta": {
+    "attributes": {
+      "bases": [],
+      "line": 215,
+      "methods": [],
+      "name": "Meta"
+    },
+    "id": "cls:cards/serializers.py.Meta",
+    "line": 215,
+    "name": "Meta",
+    "path": "cards/serializers.py",
+    "type": "class"
+  },
+  "cls:cards/serializers.py.RewardCategorySerializer": {
+    "attributes": {
+      "bases": [
+        "serializers.ModelSerializer"
+      ],
+      "line": 53,
+      "methods": [],
+      "name": "RewardCategorySerializer"
+    },
+    "id": "cls:cards/serializers.py.RewardCategorySerializer",
+    "line": 53,
+    "name": "RewardCategorySerializer",
+    "path": "cards/serializers.py",
+    "type": "class"
+  },
+  "cls:cards/serializers.py.RewardTypeSerializer": {
+    "attributes": {
+      "bases": [
+        "serializers.ModelSerializer"
+      ],
+      "line": 15,
+      "methods": [],
+      "name": "RewardTypeSerializer"
+    },
+    "id": "cls:cards/serializers.py.RewardTypeSerializer",
+    "line": 15,
+    "name": "RewardTypeSerializer",
+    "path": "cards/serializers.py",
+    "type": "class"
+  },
+  "cls:cards/serializers.py.SpendingAmountSerializer": {
+    "attributes": {
+      "bases": [
+        "serializers.ModelSerializer"
+      ],
+      "line": 116,
+      "methods": [],
+      "name": "SpendingAmountSerializer"
+    },
+    "id": "cls:cards/serializers.py.SpendingAmountSerializer",
+    "line": 116,
+    "name": "SpendingAmountSerializer",
+    "path": "cards/serializers.py",
+    "type": "class"
+  },
+  "cls:cards/serializers.py.SpendingCategorySerializer": {
+    "attributes": {
+      "bases": [
+        "serializers.ModelSerializer"
+      ],
+      "line": 21,
+      "methods": [
+        {
+          "line": 29,
+          "name": "get_subcategories"
+        },
+        {
+          "line": 34,
+          "name": "get_parent"
+        }
+      ],
+      "name": "SpendingCategorySerializer"
+    },
+    "id": "cls:cards/serializers.py.SpendingCategorySerializer",
+    "line": 21,
+    "name": "SpendingCategorySerializer",
+    "path": "cards/serializers.py",
+    "type": "class"
+  },
+  "cls:cards/serializers.py.SpendingCreditSerializer": {
+    "attributes": {
+      "bases": [
+        "serializers.ModelSerializer"
+      ],
+      "line": 45,
+      "methods": [],
+      "name": "SpendingCreditSerializer"
+    },
+    "id": "cls:cards/serializers.py.SpendingCreditSerializer",
+    "line": 45,
+    "name": "SpendingCreditSerializer",
+    "path": "cards/serializers.py",
+    "type": "class"
+  },
+  "cls:cards/serializers.py.UserCardCreateUpdateSerializer": {
+    "attributes": {
+      "bases": [
+        "serializers.ModelSerializer"
+      ],
+      "line": 212,
+      "methods": [],
+      "name": "UserCardCreateUpdateSerializer"
+    },
+    "id": "cls:cards/serializers.py.UserCardCreateUpdateSerializer",
+    "line": 212,
+    "name": "UserCardCreateUpdateSerializer",
+    "path": "cards/serializers.py",
+    "type": "class"
+  },
+  "cls:cards/serializers.py.UserCardSerializer": {
+    "attributes": {
+      "bases": [
+        "serializers.ModelSerializer"
+      ],
+      "line": 184,
+      "methods": [
+        {
+          "line": 199,
+          "name": "validate"
+        }
+      ],
+      "name": "UserCardSerializer"
+    },
+    "id": "cls:cards/serializers.py.UserCardSerializer",
+    "line": 184,
+    "name": "UserCardSerializer",
+    "path": "cards/serializers.py",
+    "type": "class"
+  },
+  "cls:cards/serializers.py.UserSpendingProfileSerializer": {
+    "attributes": {
+      "bases": [
+        "serializers.ModelSerializer"
+      ],
+      "line": 134,
+      "methods": [],
+      "name": "UserSpendingProfileSerializer"
+    },
+    "id": "cls:cards/serializers.py.UserSpendingProfileSerializer",
+    "line": 134,
+    "name": "UserSpendingProfileSerializer",
+    "path": "cards/serializers.py",
+    "type": "class"
+  },
+  "cls:cards/serializers.py.serializers.ModelSerializer": {
+    "attributes": {
+      "pending": true
+    },
+    "id": "cls:cards/serializers.py.serializers.ModelSerializer",
+    "name": "serializers.ModelSerializer",
+    "path": "pending:serializers.ModelSerializer",
+    "type": "class"
+  },
+  "cls:cards/serializers.py.serializers.Serializer": {
+    "attributes": {
+      "pending": true
+    },
+    "id": "cls:cards/serializers.py.serializers.Serializer",
+    "name": "serializers.Serializer",
+    "path": "pending:serializers.Serializer",
+    "type": "class"
+  },
+  "cls:cards/views.py.CreditCardDetailView": {
+    "attributes": {
+      "bases": [
+        "generics.RetrieveAPIView"
+      ],
+      "line": 68,
+      "methods": [],
+      "name": "CreditCardDetailView"
+    },
+    "id": "cls:cards/views.py.CreditCardDetailView",
+    "line": 68,
+    "name": "CreditCardDetailView",
+    "path": "cards/views.py",
+    "type": "class"
+  },
+  "cls:cards/views.py.CreditCardListView": {
+    "attributes": {
+      "bases": [
+        "generics.ListAPIView"
+      ],
+      "line": 45,
+      "methods": [],
+      "name": "CreditCardListView"
+    },
+    "id": "cls:cards/views.py.CreditCardListView",
+    "line": 45,
+    "name": "CreditCardListView",
+    "path": "cards/views.py",
+    "type": "class"
+  },
+  "cls:cards/views.py.IssuerListView": {
+    "attributes": {
+      "bases": [
+        "generics.ListAPIView"
+      ],
+      "line": 21,
+      "methods": [],
+      "name": "IssuerListView"
+    },
+    "id": "cls:cards/views.py.IssuerListView",
+    "line": 21,
+    "name": "IssuerListView",
+    "path": "cards/views.py",
+    "type": "class"
+  },
+  "cls:cards/views.py.RewardTypeListView": {
+    "attributes": {
+      "bases": [
+        "generics.ListAPIView"
+      ],
+      "line": 27,
+      "methods": [],
+      "name": "RewardTypeListView"
+    },
+    "id": "cls:cards/views.py.RewardTypeListView",
+    "line": 27,
+    "name": "RewardTypeListView",
+    "path": "cards/views.py",
+    "type": "class"
+  },
+  "cls:cards/views.py.SpendingCategoryListView": {
+    "attributes": {
+      "bases": [
+        "generics.ListAPIView"
+      ],
+      "line": 33,
+      "methods": [],
+      "name": "SpendingCategoryListView"
+    },
+    "id": "cls:cards/views.py.SpendingCategoryListView",
+    "line": 33,
+    "name": "SpendingCategoryListView",
+    "path": "cards/views.py",
+    "type": "class"
+  },
+  "cls:cards/views.py.SpendingCreditListView": {
+    "attributes": {
+      "bases": [
+        "generics.ListAPIView"
+      ],
+      "line": 39,
+      "methods": [],
+      "name": "SpendingCreditListView"
+    },
+    "id": "cls:cards/views.py.SpendingCreditListView",
+    "line": 39,
+    "name": "SpendingCreditListView",
+    "path": "cards/views.py",
+    "type": "class"
+  },
+  "cls:cards/views.py.generics.ListAPIView": {
+    "attributes": {
+      "pending": true
+    },
+    "id": "cls:cards/views.py.generics.ListAPIView",
+    "name": "generics.ListAPIView",
+    "path": "pending:generics.ListAPIView",
+    "type": "class"
+  },
+  "cls:cards/views.py.generics.RetrieveAPIView": {
+    "attributes": {
+      "pending": true
+    },
+    "id": "cls:cards/views.py.generics.RetrieveAPIView",
+    "name": "generics.RetrieveAPIView",
+    "path": "pending:generics.RetrieveAPIView",
+    "type": "class"
+  },
+  "cls:roadmaps/admin.py.RoadmapAdmin": {
+    "attributes": {
+      "bases": [
+        "admin.ModelAdmin"
+      ],
+      "line": 25,
+      "methods": [],
+      "name": "RoadmapAdmin"
+    },
+    "id": "cls:roadmaps/admin.py.RoadmapAdmin",
+    "line": 25,
+    "name": "RoadmapAdmin",
+    "path": "roadmaps/admin.py",
+    "type": "class"
+  },
+  "cls:roadmaps/admin.py.RoadmapCalculationAdmin": {
+    "attributes": {
+      "bases": [
+        "admin.ModelAdmin"
+      ],
+      "line": 41,
+      "methods": [],
+      "name": "RoadmapCalculationAdmin"
+    },
+    "id": "cls:roadmaps/admin.py.RoadmapCalculationAdmin",
+    "line": 41,
+    "name": "RoadmapCalculationAdmin",
+    "path": "roadmaps/admin.py",
+    "type": "class"
+  },
+  "cls:roadmaps/admin.py.RoadmapCalculationInline": {
+    "attributes": {
+      "bases": [
+        "admin.StackedInline"
+      ],
+      "line": 18,
+      "methods": [],
+      "name": "RoadmapCalculationInline"
+    },
+    "id": "cls:roadmaps/admin.py.RoadmapCalculationInline",
+    "line": 18,
+    "name": "RoadmapCalculationInline",
+    "path": "roadmaps/admin.py",
+    "type": "class"
+  },
+  "cls:roadmaps/admin.py.RoadmapFilterAdmin": {
+    "attributes": {
+      "bases": [
+        "admin.ModelAdmin"
+      ],
+      "line": 6,
+      "methods": [],
+      "name": "RoadmapFilterAdmin"
+    },
+    "id": "cls:roadmaps/admin.py.RoadmapFilterAdmin",
+    "line": 6,
+    "name": "RoadmapFilterAdmin",
+    "path": "roadmaps/admin.py",
+    "type": "class"
+  },
+  "cls:roadmaps/admin.py.RoadmapRecommendationAdmin": {
+    "attributes": {
+      "bases": [
+        "admin.ModelAdmin"
+      ],
+      "line": 34,
+      "methods": [],
+      "name": "RoadmapRecommendationAdmin"
+    },
+    "id": "cls:roadmaps/admin.py.RoadmapRecommendationAdmin",
+    "line": 34,
+    "name": "RoadmapRecommendationAdmin",
+    "path": "roadmaps/admin.py",
+    "type": "class"
+  },
+  "cls:roadmaps/admin.py.RoadmapRecommendationInline": {
+    "attributes": {
+      "bases": [
+        "admin.TabularInline"
+      ],
+      "line": 12,
+      "methods": [],
+      "name": "RoadmapRecommendationInline"
+    },
+    "id": "cls:roadmaps/admin.py.RoadmapRecommendationInline",
+    "line": 12,
+    "name": "RoadmapRecommendationInline",
+    "path": "roadmaps/admin.py",
+    "type": "class"
+  },
+  "cls:roadmaps/admin.py.admin.ModelAdmin": {
+    "attributes": {
+      "pending": true
+    },
+    "id": "cls:roadmaps/admin.py.admin.ModelAdmin",
+    "name": "admin.ModelAdmin",
+    "path": "pending:admin.ModelAdmin",
+    "type": "class"
+  },
+  "cls:roadmaps/admin.py.admin.StackedInline": {
+    "attributes": {
+      "pending": true
+    },
+    "id": "cls:roadmaps/admin.py.admin.StackedInline",
+    "name": "admin.StackedInline",
+    "path": "pending:admin.StackedInline",
+    "type": "class"
+  },
+  "cls:roadmaps/admin.py.admin.TabularInline": {
+    "attributes": {
+      "pending": true
+    },
+    "id": "cls:roadmaps/admin.py.admin.TabularInline",
+    "name": "admin.TabularInline",
+    "path": "pending:admin.TabularInline",
+    "type": "class"
+  },
+  "cls:roadmaps/apps.py.AppConfig": {
+    "attributes": {
+      "pending": true
+    },
+    "id": "cls:roadmaps/apps.py.AppConfig",
+    "name": "AppConfig",
+    "path": "pending:AppConfig",
+    "type": "class"
+  },
+  "cls:roadmaps/apps.py.RoadmapsConfig": {
+    "attributes": {
+      "bases": [
+        "AppConfig"
+      ],
+      "line": 4,
+      "methods": [],
+      "name": "RoadmapsConfig"
+    },
+    "id": "cls:roadmaps/apps.py.RoadmapsConfig",
+    "line": 4,
+    "name": "RoadmapsConfig",
+    "path": "roadmaps/apps.py",
+    "type": "class"
+  },
+  "cls:roadmaps/migrations/0001_initial.py.Migration": {
+    "attributes": {
+      "bases": [
+        "migrations.Migration"
+      ],
+      "line": 7,
+      "methods": [],
+      "name": "Migration"
+    },
+    "id": "cls:roadmaps/migrations/0001_initial.py.Migration",
+    "line": 7,
+    "name": "Migration",
+    "path": "roadmaps/migrations/0001_initial.py",
+    "type": "class"
+  },
+  "cls:roadmaps/migrations/0001_initial.py.migrations.Migration": {
+    "attributes": {
+      "pending": true
+    },
+    "id": "cls:roadmaps/migrations/0001_initial.py.migrations.Migration",
+    "name": "migrations.Migration",
+    "path": "pending:migrations.Migration",
+    "type": "class"
+  },
+  "cls:roadmaps/models.py.Meta": {
+    "attributes": {
+      "bases": [],
+      "line": 57,
+      "methods": [],
+      "name": "Meta"
+    },
+    "id": "cls:roadmaps/models.py.Meta",
+    "line": 57,
+    "name": "Meta",
+    "path": "roadmaps/models.py",
+    "type": "class"
+  },
+  "cls:roadmaps/models.py.Roadmap": {
+    "attributes": {
+      "bases": [
+        "models.Model"
+      ],
+      "line": 23,
+      "methods": [
+        {
+          "line": 35,
+          "name": "__str__"
+        }
+      ],
+      "name": "Roadmap"
+    },
+    "id": "cls:roadmaps/models.py.Roadmap",
+    "line": 23,
+    "name": "Roadmap",
+    "path": "roadmaps/models.py",
+    "type": "class"
+  },
+  "cls:roadmaps/models.py.RoadmapCalculation": {
+    "attributes": {
+      "bases": [
+        "models.Model"
+      ],
+      "line": 65,
+      "methods": [
+        {
+          "line": 71,
+          "name": "__str__"
+        }
+      ],
+      "name": "RoadmapCalculation"
+    },
+    "id": "cls:roadmaps/models.py.RoadmapCalculation",
+    "line": 65,
+    "name": "RoadmapCalculation",
+    "path": "roadmaps/models.py",
+    "type": "class"
+  },
+  "cls:roadmaps/models.py.RoadmapFilter": {
+    "attributes": {
+      "bases": [
+        "models.Model"
+      ],
+      "line": 6,
+      "methods": [
+        {
+          "line": 19,
+          "name": "__str__"
+        }
+      ],
+      "name": "RoadmapFilter"
+    },
+    "id": "cls:roadmaps/models.py.RoadmapFilter",
+    "line": 6,
+    "name": "RoadmapFilter",
+    "path": "roadmaps/models.py",
+    "type": "class"
+  },
+  "cls:roadmaps/models.py.RoadmapRecommendation": {
+    "attributes": {
+      "bases": [
+        "models.Model"
+      ],
+      "line": 39,
+      "methods": [
+        {
+          "line": 61,
+          "name": "__str__"
+        }
+      ],
+      "name": "RoadmapRecommendation"
+    },
+    "id": "cls:roadmaps/models.py.RoadmapRecommendation",
+    "line": 39,
+    "name": "RoadmapRecommendation",
+    "path": "roadmaps/models.py",
+    "type": "class"
+  },
+  "cls:roadmaps/models.py.models.Model": {
+    "attributes": {
+      "pending": true
+    },
+    "id": "cls:roadmaps/models.py.models.Model",
+    "name": "models.Model",
+    "path": "pending:models.Model",
+    "type": "class"
+  },
+  "cls:roadmaps/recommendation_engine.py.RecommendationEngine": {
+    "attributes": {
+      "bases": [],
+      "line": 8,
+      "methods": [
+        {
+          "line": 17,
+          "name": "__init__"
+        },
+        {
+          "line": 52,
+          "name": "generate_quick_recommendations"
+        },
+        {
+          "line": 141,
+          "name": "generate_roadmap"
+        },
+        {
+          "line": 189,
+          "name": "_get_filtered_cards"
+        },
+        {
+          "line": 219,
+          "name": "_generate_portfolio_optimized_recommendations"
+        },
+        {
+          "line": 276,
+          "name": "_find_optimal_portfolio"
+        },
+        {
+          "line": 316,
+          "name": "_evaluate_portfolio_scenario"
+        },
+        {
+          "line": 385,
+          "name": "_select_optimal_card_combination"
+        },
+        {
+          "line": 487,
+          "name": "_optimize_card_portfolio"
+        },
+        {
+          "line": 651,
+          "name": "_generate_card_reasoning"
+        },
+        {
+          "line": 680,
+          "name": "_select_best_new_cards"
+        },
+        {
+          "line": 725,
+          "name": "_calculate_scenario_portfolio_value"
+        },
+        {
+          "line": 836,
+          "name": "_build_parent_category_spending"
+        },
+        {
+          "line": 862,
+          "name": "_calculate_smart_card_value"
+        },
+        {
+          "line": 909,
+          "name": "_calculate_spending_efficiency"
+        },
+        {
+          "line": 964,
+          "name": "_find_new_cards"
+        },
+        {
+          "line": 1025,
+          "name": "_is_eligible_for_card"
+        },
+        {
+          "line": 1052,
+          "name": "_calculate_card_annual_rewards"
+        },
+        {
+          "line": 1057,
+          "name": "_calculate_portfolio_allocation"
+        },
+        {
+          "line": 1248,
+          "name": "_calculate_card_allocated_breakdown"
+        },
+        {
+          "line": 1337,
+          "name": "_calculate_card_rewards_breakdown"
+        },
+        {
+          "line": 1484,
+          "name": "_can_meet_signup_requirement"
+        },
+        {
+          "line": 1509,
+          "name": "_get_best_signup_bonus_card"
+        },
+        {
+          "line": 1554,
+          "name": "_get_signup_bonus_value"
+        },
+        {
+          "line": 1587,
+          "name": "_calculate_card_credits_value"
+        },
+        {
+          "line": 1652,
+          "name": "_calculate_total_rewards"
+        },
+        {
+          "line": 1657,
+          "name": "_calculate_portfolio_summary"
+        }
+      ],
+      "name": "RecommendationEngine"
+    },
+    "id": "cls:roadmaps/recommendation_engine.py.RecommendationEngine",
+    "line": 8,
+    "name": "RecommendationEngine",
+    "path": "roadmaps/recommendation_engine.py",
+    "type": "class"
+  },
+  "cls:roadmaps/serializers.py.CreateRoadmapSerializer": {
+    "attributes": {
+      "bases": [
+        "serializers.Serializer"
+      ],
+      "line": 43,
+      "methods": [
+        {
+          "line": 53,
+          "name": "create"
+        }
+      ],
+      "name": "CreateRoadmapSerializer"
+    },
+    "id": "cls:roadmaps/serializers.py.CreateRoadmapSerializer",
+    "line": 43,
+    "name": "CreateRoadmapSerializer",
+    "path": "roadmaps/serializers.py",
+    "type": "class"
+  },
+  "cls:roadmaps/serializers.py.GenerateRoadmapSerializer": {
+    "attributes": {
+      "bases": [
+        "serializers.Serializer"
+      ],
+      "line": 95,
+      "methods": [
+        {
+          "line": 116,
+          "name": "generate_recommendations"
+        }
+      ],
+      "name": "GenerateRoadmapSerializer"
+    },
+    "id": "cls:roadmaps/serializers.py.GenerateRoadmapSerializer",
+    "line": 95,
+    "name": "GenerateRoadmapSerializer",
+    "path": "roadmaps/serializers.py",
+    "type": "class"
+  },
+  "cls:roadmaps/serializers.py.Meta": {
+    "attributes": {
+      "bases": [],
+      "line": 35,
+      "methods": [],
+      "name": "Meta"
+    },
+    "id": "cls:roadmaps/serializers.py.Meta",
+    "line": 35,
+    "name": "Meta",
+    "path": "roadmaps/serializers.py",
+    "type": "class"
+  },
+  "cls:roadmaps/serializers.py.RoadmapCalculationSerializer": {
+    "attributes": {
+      "bases": [
+        "serializers.ModelSerializer"
+      ],
+      "line": 23,
+      "methods": [],
+      "name": "RoadmapCalculationSerializer"
+    },
+    "id": "cls:roadmaps/serializers.py.RoadmapCalculationSerializer",
+    "line": 23,
+    "name": "RoadmapCalculationSerializer",
+    "path": "roadmaps/serializers.py",
+    "type": "class"
+  },
+  "cls:roadmaps/serializers.py.RoadmapFilterSerializer": {
+    "attributes": {
+      "bases": [
+        "serializers.ModelSerializer"
+      ],
+      "line": 6,
+      "methods": [],
+      "name": "RoadmapFilterSerializer"
+    },
+    "id": "cls:roadmaps/serializers.py.RoadmapFilterSerializer",
+    "line": 6,
+    "name": "RoadmapFilterSerializer",
+    "path": "roadmaps/serializers.py",
+    "type": "class"
+  },
+  "cls:roadmaps/serializers.py.RoadmapRecommendationSerializer": {
+    "attributes": {
+      "bases": [
+        "serializers.ModelSerializer"
+      ],
+      "line": 12,
+      "methods": [],
+      "name": "RoadmapRecommendationSerializer"
+    },
+    "id": "cls:roadmaps/serializers.py.RoadmapRecommendationSerializer",
+    "line": 12,
+    "name": "RoadmapRecommendationSerializer",
+    "path": "roadmaps/serializers.py",
+    "type": "class"
+  },
+  "cls:roadmaps/serializers.py.RoadmapSerializer": {
+    "attributes": {
+      "bases": [
+        "serializers.ModelSerializer"
+      ],
+      "line": 29,
+      "methods": [],
+      "name": "RoadmapSerializer"
+    },
+    "id": "cls:roadmaps/serializers.py.RoadmapSerializer",
+    "line": 29,
+    "name": "RoadmapSerializer",
+    "path": "roadmaps/serializers.py",
+    "type": "class"
+  },
+  "cls:roadmaps/serializers.py.serializers.ModelSerializer": {
+    "attributes": {
+      "pending": true
+    },
+    "id": "cls:roadmaps/serializers.py.serializers.ModelSerializer",
+    "name": "serializers.ModelSerializer",
+    "path": "pending:serializers.ModelSerializer",
+    "type": "class"
+  },
+  "cls:roadmaps/serializers.py.serializers.Serializer": {
+    "attributes": {
+      "pending": true
+    },
+    "id": "cls:roadmaps/serializers.py.serializers.Serializer",
+    "name": "serializers.Serializer",
+    "path": "pending:serializers.Serializer",
+    "type": "class"
+  },
+  "cls:roadmaps/views.py.RoadmapDetailView": {
+    "attributes": {
+      "bases": [
+        "generics.RetrieveUpdateDestroyAPIView"
+      ],
+      "line": 43,
+      "methods": [
+        {
+          "line": 46,
+          "name": "get_queryset"
+        }
+      ],
+      "name": "RoadmapDetailView"
+    },
+    "id": "cls:roadmaps/views.py.RoadmapDetailView",
+    "line": 43,
+    "name": "RoadmapDetailView",
+    "path": "roadmaps/views.py",
+    "type": "class"
+  },
+  "cls:roadmaps/views.py.RoadmapFilterListView": {
+    "attributes": {
+      "bases": [
+        "generics.ListCreateAPIView"
+      ],
+      "line": 16,
+      "methods": [],
+      "name": "RoadmapFilterListView"
+    },
+    "id": "cls:roadmaps/views.py.RoadmapFilterListView",
+    "line": 16,
+    "name": "RoadmapFilterListView",
+    "path": "roadmaps/views.py",
+    "type": "class"
+  },
+  "cls:roadmaps/views.py.RoadmapListView": {
+    "attributes": {
+      "bases": [
+        "generics.ListAPIView"
+      ],
+      "line": 21,
+      "methods": [
+        {
+          "line": 24,
+          "name": "get_queryset"
+        }
+      ],
+      "name": "RoadmapListView"
+    },
+    "id": "cls:roadmaps/views.py.RoadmapListView",
+    "line": 21,
+    "name": "RoadmapListView",
+    "path": "roadmaps/views.py",
+    "type": "class"
+  },
+  "cls:roadmaps/views.py.generics.ListAPIView": {
+    "attributes": {
+      "pending": true
+    },
+    "id": "cls:roadmaps/views.py.generics.ListAPIView",
+    "name": "generics.ListAPIView",
+    "path": "pending:generics.ListAPIView",
+    "type": "class"
+  },
+  "cls:roadmaps/views.py.generics.ListCreateAPIView": {
+    "attributes": {
+      "pending": true
+    },
+    "id": "cls:roadmaps/views.py.generics.ListCreateAPIView",
+    "name": "generics.ListCreateAPIView",
+    "path": "pending:generics.ListCreateAPIView",
+    "type": "class"
+  },
+  "cls:roadmaps/views.py.generics.RetrieveUpdateDestroyAPIView": {
+    "attributes": {
+      "pending": true
+    },
+    "id": "cls:roadmaps/views.py.generics.RetrieveUpdateDestroyAPIView",
+    "name": "generics.RetrieveUpdateDestroyAPIView",
+    "path": "pending:generics.RetrieveUpdateDestroyAPIView",
+    "type": "class"
+  },
+  "cls:users/apps.py.AppConfig": {
+    "attributes": {
+      "pending": true
+    },
+    "id": "cls:users/apps.py.AppConfig",
+    "name": "AppConfig",
+    "path": "pending:AppConfig",
+    "type": "class"
+  },
+  "cls:users/apps.py.UsersConfig": {
+    "attributes": {
+      "bases": [
+        "AppConfig"
+      ],
+      "line": 4,
+      "methods": [],
+      "name": "UsersConfig"
+    },
+    "id": "cls:users/apps.py.UsersConfig",
+    "line": 4,
+    "name": "UsersConfig",
+    "path": "users/apps.py",
+    "type": "class"
+  },
+  "cls:users/migrations/0001_initial.py.Migration": {
+    "attributes": {
+      "bases": [
+        "migrations.Migration"
+      ],
+      "line": 8,
+      "methods": [],
+      "name": "Migration"
+    },
+    "id": "cls:users/migrations/0001_initial.py.Migration",
+    "line": 8,
+    "name": "Migration",
+    "path": "users/migrations/0001_initial.py",
+    "type": "class"
+  },
+  "cls:users/migrations/0001_initial.py.migrations.Migration": {
+    "attributes": {
+      "pending": true
+    },
+    "id": "cls:users/migrations/0001_initial.py.migrations.Migration",
+    "name": "migrations.Migration",
+    "path": "pending:migrations.Migration",
+    "type": "class"
+  },
+  "cls:users/models.py.Meta": {
+    "attributes": {
+      "bases": [],
+      "line": 42,
+      "methods": [],
+      "name": "Meta"
+    },
+    "id": "cls:users/models.py.Meta",
+    "line": 42,
+    "name": "Meta",
+    "path": "users/models.py",
+    "type": "class"
+  },
+  "cls:users/models.py.UserPreferences": {
+    "attributes": {
+      "bases": [
+        "models.Model"
+      ],
+      "line": 25,
+      "methods": [
+        {
+          "line": 45,
+          "name": "__str__"
+        }
+      ],
+      "name": "UserPreferences"
+    },
+    "id": "cls:users/models.py.UserPreferences",
+    "line": 25,
+    "name": "UserPreferences",
+    "path": "users/models.py",
+    "type": "class"
+  },
+  "cls:users/models.py.UserProfile": {
+    "attributes": {
+      "bases": [
+        "models.Model"
+      ],
+      "line": 6,
+      "methods": [
+        {
+          "line": 20,
+          "name": "__str__"
+        }
+      ],
+      "name": "UserProfile"
+    },
+    "id": "cls:users/models.py.UserProfile",
+    "line": 6,
+    "name": "UserProfile",
+    "path": "users/models.py",
+    "type": "class"
+  },
+  "cls:users/models.py.models.Model": {
+    "attributes": {
+      "pending": true
+    },
+    "id": "cls:users/models.py.models.Model",
+    "name": "models.Model",
+    "path": "pending:models.Model",
+    "type": "class"
+  },
+  "cls:users/serializers.py.Meta": {
+    "attributes": {
+      "bases": [],
+      "line": 45,
+      "methods": [],
+      "name": "Meta"
+    },
+    "id": "cls:users/serializers.py.Meta",
+    "line": 45,
+    "name": "Meta",
+    "path": "users/serializers.py",
+    "type": "class"
+  },
+  "cls:users/serializers.py.UserCardSerializer": {
+    "attributes": {
+      "bases": [
+        "serializers.ModelSerializer"
+      ],
+      "line": 24,
+      "methods": [],
+      "name": "UserCardSerializer"
+    },
+    "id": "cls:users/serializers.py.UserCardSerializer",
+    "line": 24,
+    "name": "UserCardSerializer",
+    "path": "users/serializers.py",
+    "type": "class"
+  },
+  "cls:users/serializers.py.UserDataSerializer": {
+    "attributes": {
+      "bases": [
+        "serializers.Serializer"
+      ],
+      "line": 54,
+      "methods": [
+        {
+          "line": 60,
+          "name": "create"
+        },
+        {
+          "line": 109,
+          "name": "to_representation"
+        }
+      ],
+      "name": "UserDataSerializer"
+    },
+    "id": "cls:users/serializers.py.UserDataSerializer",
+    "line": 54,
+    "name": "UserDataSerializer",
+    "path": "users/serializers.py",
+    "type": "class"
+  },
+  "cls:users/serializers.py.UserPreferencesSerializer": {
+    "attributes": {
+      "bases": [
+        "serializers.ModelSerializer"
+      ],
+      "line": 44,
+      "methods": [],
+      "name": "UserPreferencesSerializer"
+    },
+    "id": "cls:users/serializers.py.UserPreferencesSerializer",
+    "line": 44,
+    "name": "UserPreferencesSerializer",
+    "path": "users/serializers.py",
+    "type": "class"
+  },
+  "cls:users/serializers.py.UserProfileSerializer": {
+    "attributes": {
+      "bases": [
+        "serializers.ModelSerializer"
+      ],
+      "line": 15,
+      "methods": [],
+      "name": "UserProfileSerializer"
+    },
+    "id": "cls:users/serializers.py.UserProfileSerializer",
+    "line": 15,
+    "name": "UserProfileSerializer",
+    "path": "users/serializers.py",
+    "type": "class"
+  },
+  "cls:users/serializers.py.UserSerializer": {
+    "attributes": {
+      "bases": [
+        "serializers.ModelSerializer"
+      ],
+      "line": 8,
+      "methods": [],
+      "name": "UserSerializer"
+    },
+    "id": "cls:users/serializers.py.UserSerializer",
+    "line": 8,
+    "name": "UserSerializer",
+    "path": "users/serializers.py",
+    "type": "class"
+  },
+  "cls:users/serializers.py.UserSpendingSerializer": {
+    "attributes": {
+      "bases": [
+        "serializers.ModelSerializer"
+      ],
+      "line": 34,
+      "methods": [],
+      "name": "UserSpendingSerializer"
+    },
+    "id": "cls:users/serializers.py.UserSpendingSerializer",
+    "line": 34,
+    "name": "UserSpendingSerializer",
+    "path": "users/serializers.py",
+    "type": "class"
+  },
+  "cls:users/serializers.py.serializers.ModelSerializer": {
+    "attributes": {
+      "pending": true
+    },
+    "id": "cls:users/serializers.py.serializers.ModelSerializer",
+    "name": "serializers.ModelSerializer",
+    "path": "pending:serializers.ModelSerializer",
+    "type": "class"
+  },
+  "cls:users/serializers.py.serializers.Serializer": {
+    "attributes": {
+      "pending": true
+    },
+    "id": "cls:users/serializers.py.serializers.Serializer",
+    "name": "serializers.Serializer",
+    "path": "pending:serializers.Serializer",
+    "type": "class"
+  },
+  "cls:users/views.py.UserCardDetailView": {
+    "attributes": {
+      "bases": [
+        "generics.RetrieveUpdateDestroyAPIView"
+      ],
+      "line": 37,
+      "methods": [
+        {
+          "line": 42,
+          "name": "get_queryset"
+        }
+      ],
+      "name": "UserCardDetailView"
+    },
+    "id": "cls:users/views.py.UserCardDetailView",
+    "line": 37,
+    "name": "UserCardDetailView",
+    "path": "users/views.py",
+    "type": "class"
+  },
+  "cls:users/views.py.UserCardListView": {
+    "attributes": {
+      "bases": [
+        "generics.ListCreateAPIView"
+      ],
+      "line": 25,
+      "methods": [
+        {
+          "line": 30,
+          "name": "get_queryset"
+        },
+        {
+          "line": 33,
+          "name": "perform_create"
+        }
+      ],
+      "name": "UserCardListView"
+    },
+    "id": "cls:users/views.py.UserCardListView",
+    "line": 25,
+    "name": "UserCardListView",
+    "path": "users/views.py",
+    "type": "class"
+  },
+  "cls:users/views.py.UserPreferencesView": {
+    "attributes": {
+      "bases": [
+        "generics.RetrieveUpdateAPIView"
+      ],
+      "line": 60,
+      "methods": [
+        {
+          "line": 65,
+          "name": "get_object"
+        }
+      ],
+      "name": "UserPreferencesView"
+    },
+    "id": "cls:users/views.py.UserPreferencesView",
+    "line": 60,
+    "name": "UserPreferencesView",
+    "path": "users/views.py",
+    "type": "class"
+  },
+  "cls:users/views.py.UserProfileView": {
+    "attributes": {
+      "bases": [
+        "generics.RetrieveUpdateAPIView"
+      ],
+      "line": 15,
+      "methods": [
+        {
+          "line": 20,
+          "name": "get_object"
+        }
+      ],
+      "name": "UserProfileView"
+    },
+    "id": "cls:users/views.py.UserProfileView",
+    "line": 15,
+    "name": "UserProfileView",
+    "path": "users/views.py",
+    "type": "class"
+  },
+  "cls:users/views.py.UserSpendingListView": {
+    "attributes": {
+      "bases": [
+        "generics.ListCreateAPIView"
+      ],
+      "line": 46,
+      "methods": [
+        {
+          "line": 51,
+          "name": "get_queryset"
+        },
+        {
+          "line": 55,
+          "name": "perform_create"
+        }
+      ],
+      "name": "UserSpendingListView"
+    },
+    "id": "cls:users/views.py.UserSpendingListView",
+    "line": 46,
+    "name": "UserSpendingListView",
+    "path": "users/views.py",
+    "type": "class"
+  },
+  "cls:users/views.py.generics.ListCreateAPIView": {
+    "attributes": {
+      "pending": true
+    },
+    "id": "cls:users/views.py.generics.ListCreateAPIView",
+    "name": "generics.ListCreateAPIView",
+    "path": "pending:generics.ListCreateAPIView",
+    "type": "class"
+  },
+  "cls:users/views.py.generics.RetrieveUpdateAPIView": {
+    "attributes": {
+      "pending": true
+    },
+    "id": "cls:users/views.py.generics.RetrieveUpdateAPIView",
+    "name": "generics.RetrieveUpdateAPIView",
+    "path": "pending:generics.RetrieveUpdateAPIView",
+    "type": "class"
+  },
+  "cls:users/views.py.generics.RetrieveUpdateDestroyAPIView": {
+    "attributes": {
+      "pending": true
+    },
+    "id": "cls:users/views.py.generics.RetrieveUpdateDestroyAPIView",
+    "name": "generics.RetrieveUpdateDestroyAPIView",
+    "path": "pending:generics.RetrieveUpdateDestroyAPIView",
+    "type": "class"
+  }
+}

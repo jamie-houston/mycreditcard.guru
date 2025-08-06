@@ -1,0 +1,2202 @@
+{
+  "admin.py": [
+    {
+      "id": "mod:admin",
+      "name": "admin",
+      "type": "module"
+    },
+    {
+      "id": "func:admin.py.check_deployment",
+      "name": "check_deployment",
+      "type": "function"
+    },
+    {
+      "id": "func:admin.py.collect_static",
+      "name": "collect_static",
+      "type": "function"
+    },
+    {
+      "id": "func:admin.py.create_superuser",
+      "name": "create_superuser",
+      "type": "function"
+    },
+    {
+      "id": "func:admin.py.execute_task",
+      "name": "execute_task",
+      "type": "function"
+    },
+    {
+      "id": "func:admin.py.flush_database",
+      "name": "flush_database",
+      "type": "function"
+    },
+    {
+      "id": "func:admin.py.full_setup",
+      "name": "full_setup",
+      "type": "function"
+    },
+    {
+      "id": "func:admin.py.import_data",
+      "name": "import_data",
+      "type": "function"
+    },
+    {
+      "id": "func:admin.py.import_sample_data",
+      "name": "import_sample_data",
+      "type": "function"
+    },
+    {
+      "id": "func:admin.py.install_dependencies",
+      "name": "install_dependencies",
+      "type": "function"
+    },
+    {
+      "id": "func:admin.py.main",
+      "name": "main",
+      "type": "function"
+    },
+    {
+      "id": "func:admin.py.run_command",
+      "name": "run_command",
+      "type": "function"
+    },
+    {
+      "id": "func:admin.py.run_server",
+      "name": "run_server",
+      "type": "function"
+    },
+    {
+      "id": "func:admin.py.run_tests",
+      "name": "run_tests",
+      "type": "function"
+    },
+    {
+      "id": "func:admin.py.setup_database",
+      "name": "setup_database",
+      "type": "function"
+    },
+    {
+      "id": "func:admin.py.setup_environment",
+      "name": "setup_environment",
+      "type": "function"
+    },
+    {
+      "id": "func:admin.py.setup_google_oauth",
+      "name": "setup_google_oauth",
+      "type": "function"
+    },
+    {
+      "id": "func:admin.py.shell",
+      "name": "shell",
+      "type": "function"
+    },
+    {
+      "id": "func:admin.py.show_all_commands",
+      "name": "show_all_commands",
+      "type": "function"
+    },
+    {
+      "id": "func:admin.py.show_interactive_menu",
+      "name": "show_interactive_menu",
+      "type": "function"
+    },
+    {
+      "id": "func:admin.py.show_urls",
+      "name": "show_urls",
+      "type": "function"
+    },
+    {
+      "id": "func:admin.py.wipe_database",
+      "name": "wipe_database",
+      "type": "function"
+    }
+  ],
+  "analyze_scenarios.py": [
+    {
+      "id": "mod:analyze_scenarios",
+      "name": "analyze_scenarios",
+      "type": "module"
+    },
+    {
+      "id": "func:analyze_scenarios.py.categorize_scenarios",
+      "name": "categorize_scenarios",
+      "type": "function"
+    },
+    {
+      "id": "func:analyze_scenarios.py.load_scenarios",
+      "name": "load_scenarios",
+      "type": "function"
+    },
+    {
+      "id": "func:analyze_scenarios.py.print_analysis",
+      "name": "print_analysis",
+      "type": "function"
+    }
+  ],
+  "cards/__init__.py": [
+    {
+      "id": "mod:cards.__init__",
+      "name": "__init__",
+      "type": "module"
+    }
+  ],
+  "cards/admin.py": [
+    {
+      "id": "cls:cards/admin.py.CardCreditAdmin",
+      "name": "CardCreditAdmin",
+      "type": "class"
+    },
+    {
+      "id": "cls:cards/admin.py.CardCreditInline",
+      "name": "CardCreditInline",
+      "type": "class"
+    },
+    {
+      "id": "cls:cards/admin.py.CreditCardAdmin",
+      "name": "CreditCardAdmin",
+      "type": "class"
+    },
+    {
+      "id": "cls:cards/admin.py.CreditTypeAdmin",
+      "name": "CreditTypeAdmin",
+      "type": "class"
+    },
+    {
+      "id": "cls:cards/admin.py.IssuerAdmin",
+      "name": "IssuerAdmin",
+      "type": "class"
+    },
+    {
+      "id": "cls:cards/admin.py.RewardCategoryAdmin",
+      "name": "RewardCategoryAdmin",
+      "type": "class"
+    },
+    {
+      "id": "cls:cards/admin.py.RewardCategoryInline",
+      "name": "RewardCategoryInline",
+      "type": "class"
+    },
+    {
+      "id": "cls:cards/admin.py.RewardTypeAdmin",
+      "name": "RewardTypeAdmin",
+      "type": "class"
+    },
+    {
+      "id": "cls:cards/admin.py.SpendingAmountInline",
+      "name": "SpendingAmountInline",
+      "type": "class"
+    },
+    {
+      "id": "cls:cards/admin.py.SpendingCategoryAdmin",
+      "name": "SpendingCategoryAdmin",
+      "type": "class"
+    },
+    {
+      "id": "cls:cards/admin.py.UserCardAdmin",
+      "name": "UserCardAdmin",
+      "type": "class"
+    },
+    {
+      "id": "cls:cards/admin.py.UserCreditPreferenceInline",
+      "name": "UserCreditPreferenceInline",
+      "type": "class"
+    },
+    {
+      "id": "cls:cards/admin.py.UserSpendingProfileAdmin",
+      "name": "UserSpendingProfileAdmin",
+      "type": "class"
+    },
+    {
+      "id": "mod:cards.admin",
+      "name": "admin",
+      "type": "module"
+    }
+  ],
+  "cards/apps.py": [
+    {
+      "id": "cls:cards/apps.py.CardsConfig",
+      "name": "CardsConfig",
+      "type": "class"
+    },
+    {
+      "id": "mod:cards.apps",
+      "name": "apps",
+      "type": "module"
+    }
+  ],
+  "cards/management/__init__.py": [
+    {
+      "id": "mod:cards.management.__init__",
+      "name": "__init__",
+      "type": "module"
+    }
+  ],
+  "cards/management/commands/__init__.py": [
+    {
+      "id": "mod:cards.management.commands.__init__",
+      "name": "__init__",
+      "type": "module"
+    }
+  ],
+  "cards/management/commands/import_cards.py": [
+    {
+      "id": "meth:cards/management/commands/import_cards.py.Command.add_arguments",
+      "name": "add_arguments",
+      "type": "method"
+    },
+    {
+      "id": "meth:cards/management/commands/import_cards.py.Command.handle",
+      "name": "handle",
+      "type": "method"
+    },
+    {
+      "id": "meth:cards/management/commands/import_cards.py.Command.import_card_credits",
+      "name": "import_card_credits",
+      "type": "method"
+    },
+    {
+      "id": "meth:cards/management/commands/import_cards.py.Command.import_credit_cards",
+      "name": "import_credit_cards",
+      "type": "method"
+    },
+    {
+      "id": "meth:cards/management/commands/import_cards.py.Command.import_data",
+      "name": "import_data",
+      "type": "method"
+    },
+    {
+      "id": "meth:cards/management/commands/import_cards.py.Command.import_issuers",
+      "name": "import_issuers",
+      "type": "method"
+    },
+    {
+      "id": "meth:cards/management/commands/import_cards.py.Command.import_personal_cards",
+      "name": "import_personal_cards",
+      "type": "method"
+    },
+    {
+      "id": "meth:cards/management/commands/import_cards.py.Command.import_reward_categories",
+      "name": "import_reward_categories",
+      "type": "method"
+    },
+    {
+      "id": "meth:cards/management/commands/import_cards.py.Command.import_reward_types",
+      "name": "import_reward_types",
+      "type": "method"
+    },
+    {
+      "id": "meth:cards/management/commands/import_cards.py.Command.import_spending_categories",
+      "name": "import_spending_categories",
+      "type": "method"
+    },
+    {
+      "id": "cls:cards/management/commands/import_cards.py.Command",
+      "name": "Command",
+      "type": "class"
+    },
+    {
+      "id": "mod:cards.management.commands.import_cards",
+      "name": "import_cards",
+      "type": "module"
+    },
+    {
+      "id": "func:cards/management/commands/import_cards.py.add_arguments",
+      "name": "add_arguments",
+      "type": "function"
+    },
+    {
+      "id": "func:cards/management/commands/import_cards.py.handle",
+      "name": "handle",
+      "type": "function"
+    },
+    {
+      "id": "func:cards/management/commands/import_cards.py.import_card_credits",
+      "name": "import_card_credits",
+      "type": "function"
+    },
+    {
+      "id": "func:cards/management/commands/import_cards.py.import_credit_cards",
+      "name": "import_credit_cards",
+      "type": "function"
+    },
+    {
+      "id": "func:cards/management/commands/import_cards.py.import_data",
+      "name": "import_data",
+      "type": "function"
+    },
+    {
+      "id": "func:cards/management/commands/import_cards.py.import_issuers",
+      "name": "import_issuers",
+      "type": "function"
+    },
+    {
+      "id": "func:cards/management/commands/import_cards.py.import_personal_cards",
+      "name": "import_personal_cards",
+      "type": "function"
+    },
+    {
+      "id": "func:cards/management/commands/import_cards.py.import_reward_categories",
+      "name": "import_reward_categories",
+      "type": "function"
+    },
+    {
+      "id": "func:cards/management/commands/import_cards.py.import_reward_types",
+      "name": "import_reward_types",
+      "type": "function"
+    },
+    {
+      "id": "func:cards/management/commands/import_cards.py.import_spending_categories",
+      "name": "import_spending_categories",
+      "type": "function"
+    }
+  ],
+  "cards/management/commands/import_credit_types.py": [
+    {
+      "id": "meth:cards/management/commands/import_credit_types.py.Command.categorize_credit",
+      "name": "categorize_credit",
+      "type": "method"
+    },
+    {
+      "id": "meth:cards/management/commands/import_credit_types.py.Command.get_credit_icon",
+      "name": "get_credit_icon",
+      "type": "method"
+    },
+    {
+      "id": "meth:cards/management/commands/import_credit_types.py.Command.get_sort_order",
+      "name": "get_sort_order",
+      "type": "method"
+    },
+    {
+      "id": "meth:cards/management/commands/import_credit_types.py.Command.handle",
+      "name": "handle",
+      "type": "method"
+    },
+    {
+      "id": "meth:cards/management/commands/import_credit_types.py.Command.normalize_credit_description",
+      "name": "normalize_credit_description",
+      "type": "method"
+    },
+    {
+      "id": "cls:cards/management/commands/import_credit_types.py.Command",
+      "name": "Command",
+      "type": "class"
+    },
+    {
+      "id": "mod:cards.management.commands.import_credit_types",
+      "name": "import_credit_types",
+      "type": "module"
+    },
+    {
+      "id": "func:cards/management/commands/import_credit_types.py.categorize_credit",
+      "name": "categorize_credit",
+      "type": "function"
+    },
+    {
+      "id": "func:cards/management/commands/import_credit_types.py.get_credit_icon",
+      "name": "get_credit_icon",
+      "type": "function"
+    },
+    {
+      "id": "func:cards/management/commands/import_credit_types.py.get_sort_order",
+      "name": "get_sort_order",
+      "type": "function"
+    },
+    {
+      "id": "func:cards/management/commands/import_credit_types.py.handle",
+      "name": "handle",
+      "type": "function"
+    },
+    {
+      "id": "func:cards/management/commands/import_credit_types.py.normalize_credit_description",
+      "name": "normalize_credit_description",
+      "type": "function"
+    }
+  ],
+  "cards/management/commands/import_spending_credits.py": [
+    {
+      "id": "meth:cards/management/commands/import_spending_credits.py.Command.add_arguments",
+      "name": "add_arguments",
+      "type": "method"
+    },
+    {
+      "id": "meth:cards/management/commands/import_spending_credits.py.Command.handle",
+      "name": "handle",
+      "type": "method"
+    },
+    {
+      "id": "cls:cards/management/commands/import_spending_credits.py.Command",
+      "name": "Command",
+      "type": "class"
+    },
+    {
+      "id": "mod:cards.management.commands.import_spending_credits",
+      "name": "import_spending_credits",
+      "type": "module"
+    },
+    {
+      "id": "func:cards/management/commands/import_spending_credits.py.add_arguments",
+      "name": "add_arguments",
+      "type": "function"
+    },
+    {
+      "id": "func:cards/management/commands/import_spending_credits.py.handle",
+      "name": "handle",
+      "type": "function"
+    }
+  ],
+  "cards/management/commands/run_scenario.py": [
+    {
+      "id": "meth:cards/management/commands/run_scenario.py.Command.add_arguments",
+      "name": "add_arguments",
+      "type": "method"
+    },
+    {
+      "id": "meth:cards/management/commands/run_scenario.py.Command.create_credit_card",
+      "name": "create_credit_card",
+      "type": "method"
+    },
+    {
+      "id": "meth:cards/management/commands/run_scenario.py.Command.create_credit_card_from_name",
+      "name": "create_credit_card_from_name",
+      "type": "method"
+    },
+    {
+      "id": "meth:cards/management/commands/run_scenario.py.Command.create_credit_card_from_slug",
+      "name": "create_credit_card_from_slug",
+      "type": "method"
+    },
+    {
+      "id": "meth:cards/management/commands/run_scenario.py.Command.create_test_scenario",
+      "name": "create_test_scenario",
+      "type": "method"
+    },
+    {
+      "id": "meth:cards/management/commands/run_scenario.py.Command.create_test_setup_data",
+      "name": "create_test_setup_data",
+      "type": "method"
+    },
+    {
+      "id": "meth:cards/management/commands/run_scenario.py.Command.display_results",
+      "name": "display_results",
+      "type": "method"
+    },
+    {
+      "id": "meth:cards/management/commands/run_scenario.py.Command.handle",
+      "name": "handle",
+      "type": "method"
+    },
+    {
+      "id": "meth:cards/management/commands/run_scenario.py.Command.list_scenarios",
+      "name": "list_scenarios",
+      "type": "method"
+    },
+    {
+      "id": "meth:cards/management/commands/run_scenario.py.Command.run_all_scenarios",
+      "name": "run_all_scenarios",
+      "type": "method"
+    },
+    {
+      "id": "meth:cards/management/commands/run_scenario.py.Command.run_scenario",
+      "name": "run_scenario",
+      "type": "method"
+    },
+    {
+      "id": "meth:cards/management/commands/run_scenario.py.Command.run_single_scenario",
+      "name": "run_single_scenario",
+      "type": "method"
+    },
+    {
+      "id": "meth:cards/management/commands/run_scenario.py.Command.setup_test_data",
+      "name": "setup_test_data",
+      "type": "method"
+    },
+    {
+      "id": "meth:cards/management/commands/run_scenario.py.Command.validate_breakdown_accuracy",
+      "name": "validate_breakdown_accuracy",
+      "type": "method"
+    },
+    {
+      "id": "meth:cards/management/commands/run_scenario.py.Command.validate_card_count_optimization",
+      "name": "validate_card_count_optimization",
+      "type": "method"
+    },
+    {
+      "id": "meth:cards/management/commands/run_scenario.py.Command.validate_expectations",
+      "name": "validate_expectations",
+      "type": "method"
+    },
+    {
+      "id": "meth:cards/management/commands/run_scenario.py.Command.validate_portfolio_optimization",
+      "name": "validate_portfolio_optimization",
+      "type": "method"
+    },
+    {
+      "id": "meth:cards/management/commands/run_scenario.py.Command.validate_zero_fee_optimization",
+      "name": "validate_zero_fee_optimization",
+      "type": "method"
+    },
+    {
+      "id": "cls:cards/management/commands/run_scenario.py.Command",
+      "name": "Command",
+      "type": "class"
+    },
+    {
+      "id": "mod:cards.management.commands.run_scenario",
+      "name": "run_scenario",
+      "type": "module"
+    },
+    {
+      "id": "func:cards/management/commands/run_scenario.py.add_arguments",
+      "name": "add_arguments",
+      "type": "function"
+    },
+    {
+      "id": "func:cards/management/commands/run_scenario.py.create_credit_card",
+      "name": "create_credit_card",
+      "type": "function"
+    },
+    {
+      "id": "func:cards/management/commands/run_scenario.py.create_credit_card_from_name",
+      "name": "create_credit_card_from_name",
+      "type": "function"
+    },
+    {
+      "id": "func:cards/management/commands/run_scenario.py.create_credit_card_from_slug",
+      "name": "create_credit_card_from_slug",
+      "type": "function"
+    },
+    {
+      "id": "func:cards/management/commands/run_scenario.py.create_test_scenario",
+      "name": "create_test_scenario",
+      "type": "function"
+    },
+    {
+      "id": "func:cards/management/commands/run_scenario.py.create_test_setup_data",
+      "name": "create_test_setup_data",
+      "type": "function"
+    },
+    {
+      "id": "func:cards/management/commands/run_scenario.py.display_results",
+      "name": "display_results",
+      "type": "function"
+    },
+    {
+      "id": "func:cards/management/commands/run_scenario.py.handle",
+      "name": "handle",
+      "type": "function"
+    },
+    {
+      "id": "func:cards/management/commands/run_scenario.py.list_scenarios",
+      "name": "list_scenarios",
+      "type": "function"
+    },
+    {
+      "id": "func:cards/management/commands/run_scenario.py.run_all_scenarios",
+      "name": "run_all_scenarios",
+      "type": "function"
+    },
+    {
+      "id": "func:cards/management/commands/run_scenario.py.run_scenario",
+      "name": "run_scenario",
+      "type": "function"
+    },
+    {
+      "id": "func:cards/management/commands/run_scenario.py.run_single_scenario",
+      "name": "run_single_scenario",
+      "type": "function"
+    },
+    {
+      "id": "func:cards/management/commands/run_scenario.py.setup_test_data",
+      "name": "setup_test_data",
+      "type": "function"
+    },
+    {
+      "id": "func:cards/management/commands/run_scenario.py.validate_breakdown_accuracy",
+      "name": "validate_breakdown_accuracy",
+      "type": "function"
+    },
+    {
+      "id": "func:cards/management/commands/run_scenario.py.validate_card_count_optimization",
+      "name": "validate_card_count_optimization",
+      "type": "function"
+    },
+    {
+      "id": "func:cards/management/commands/run_scenario.py.validate_expectations",
+      "name": "validate_expectations",
+      "type": "function"
+    },
+    {
+      "id": "func:cards/management/commands/run_scenario.py.validate_portfolio_optimization",
+      "name": "validate_portfolio_optimization",
+      "type": "function"
+    },
+    {
+      "id": "func:cards/management/commands/run_scenario.py.validate_zero_fee_optimization",
+      "name": "validate_zero_fee_optimization",
+      "type": "function"
+    }
+  ],
+  "cards/migrations/0001_initial.py": [
+    {
+      "id": "cls:cards/migrations/0001_initial.py.Migration",
+      "name": "Migration",
+      "type": "class"
+    },
+    {
+      "id": "mod:cards.migrations.0001_initial",
+      "name": "0001_initial",
+      "type": "module"
+    }
+  ],
+  "cards/migrations/__init__.py": [
+    {
+      "id": "mod:cards.migrations.__init__",
+      "name": "__init__",
+      "type": "module"
+    }
+  ],
+  "cards/models.py": [
+    {
+      "id": "meth:cards/models.py.CardCredit.__str__",
+      "name": "__str__",
+      "type": "method"
+    },
+    {
+      "id": "meth:cards/models.py.CardCredit.annual_value",
+      "name": "annual_value",
+      "type": "method"
+    },
+    {
+      "id": "meth:cards/models.py.CreditCard.__str__",
+      "name": "__str__",
+      "type": "method"
+    },
+    {
+      "id": "meth:cards/models.py.CreditCard.apply_url",
+      "name": "apply_url",
+      "type": "method"
+    },
+    {
+      "id": "meth:cards/models.py.CreditCard.referral_url",
+      "name": "referral_url",
+      "type": "method"
+    },
+    {
+      "id": "meth:cards/models.py.CreditType.__str__",
+      "name": "__str__",
+      "type": "method"
+    },
+    {
+      "id": "meth:cards/models.py.Issuer.__str__",
+      "name": "__str__",
+      "type": "method"
+    },
+    {
+      "id": "meth:cards/models.py.RewardCategory.__str__",
+      "name": "__str__",
+      "type": "method"
+    },
+    {
+      "id": "meth:cards/models.py.RewardType.__str__",
+      "name": "__str__",
+      "type": "method"
+    },
+    {
+      "id": "meth:cards/models.py.SpendingAmount.__str__",
+      "name": "__str__",
+      "type": "method"
+    },
+    {
+      "id": "meth:cards/models.py.SpendingCategory.__str__",
+      "name": "__str__",
+      "type": "method"
+    },
+    {
+      "id": "meth:cards/models.py.SpendingCategory.is_parent_category",
+      "name": "is_parent_category",
+      "type": "method"
+    },
+    {
+      "id": "meth:cards/models.py.SpendingCategory.is_subcategory",
+      "name": "is_subcategory",
+      "type": "method"
+    },
+    {
+      "id": "meth:cards/models.py.SpendingCredit.__str__",
+      "name": "__str__",
+      "type": "method"
+    },
+    {
+      "id": "meth:cards/models.py.UserCard.__str__",
+      "name": "__str__",
+      "type": "method"
+    },
+    {
+      "id": "meth:cards/models.py.UserCard.display_name",
+      "name": "display_name",
+      "type": "method"
+    },
+    {
+      "id": "meth:cards/models.py.UserCard.is_active",
+      "name": "is_active",
+      "type": "method"
+    },
+    {
+      "id": "meth:cards/models.py.UserCreditPreference.__str__",
+      "name": "__str__",
+      "type": "method"
+    },
+    {
+      "id": "meth:cards/models.py.UserSpendingCreditPreference.__str__",
+      "name": "__str__",
+      "type": "method"
+    },
+    {
+      "id": "meth:cards/models.py.UserSpendingProfile.__str__",
+      "name": "__str__",
+      "type": "method"
+    },
+    {
+      "id": "meth:cards/models.py.UserSpendingProfile.generate_share_uuid",
+      "name": "generate_share_uuid",
+      "type": "method"
+    },
+    {
+      "id": "meth:cards/models.py.UserSpendingProfile.is_public",
+      "name": "is_public",
+      "type": "method"
+    },
+    {
+      "id": "meth:cards/models.py.UserSpendingProfile.shareable_url",
+      "name": "shareable_url",
+      "type": "method"
+    },
+    {
+      "id": "cls:cards/models.py.CardCredit",
+      "name": "CardCredit",
+      "type": "class"
+    },
+    {
+      "id": "cls:cards/models.py.CreditCard",
+      "name": "CreditCard",
+      "type": "class"
+    },
+    {
+      "id": "cls:cards/models.py.CreditType",
+      "name": "CreditType",
+      "type": "class"
+    },
+    {
+      "id": "cls:cards/models.py.Issuer",
+      "name": "Issuer",
+      "type": "class"
+    },
+    {
+      "id": "cls:cards/models.py.Meta",
+      "name": "Meta",
+      "type": "class"
+    },
+    {
+      "id": "cls:cards/models.py.RewardCategory",
+      "name": "RewardCategory",
+      "type": "class"
+    },
+    {
+      "id": "cls:cards/models.py.RewardType",
+      "name": "RewardType",
+      "type": "class"
+    },
+    {
+      "id": "cls:cards/models.py.SpendingAmount",
+      "name": "SpendingAmount",
+      "type": "class"
+    },
+    {
+      "id": "cls:cards/models.py.SpendingCategory",
+      "name": "SpendingCategory",
+      "type": "class"
+    },
+    {
+      "id": "cls:cards/models.py.SpendingCredit",
+      "name": "SpendingCredit",
+      "type": "class"
+    },
+    {
+      "id": "cls:cards/models.py.UserCard",
+      "name": "UserCard",
+      "type": "class"
+    },
+    {
+      "id": "cls:cards/models.py.UserCreditPreference",
+      "name": "UserCreditPreference",
+      "type": "class"
+    },
+    {
+      "id": "cls:cards/models.py.UserSpendingCreditPreference",
+      "name": "UserSpendingCreditPreference",
+      "type": "class"
+    },
+    {
+      "id": "cls:cards/models.py.UserSpendingProfile",
+      "name": "UserSpendingProfile",
+      "type": "class"
+    },
+    {
+      "id": "mod:cards.models",
+      "name": "models",
+      "type": "module"
+    },
+    {
+      "id": "func:cards/models.py.__str__",
+      "name": "__str__",
+      "type": "function"
+    },
+    {
+      "id": "func:cards/models.py.annual_value",
+      "name": "annual_value",
+      "type": "function"
+    },
+    {
+      "id": "func:cards/models.py.apply_url",
+      "name": "apply_url",
+      "type": "function"
+    },
+    {
+      "id": "func:cards/models.py.display_name",
+      "name": "display_name",
+      "type": "function"
+    },
+    {
+      "id": "func:cards/models.py.generate_share_uuid",
+      "name": "generate_share_uuid",
+      "type": "function"
+    },
+    {
+      "id": "func:cards/models.py.is_active",
+      "name": "is_active",
+      "type": "function"
+    },
+    {
+      "id": "func:cards/models.py.is_parent_category",
+      "name": "is_parent_category",
+      "type": "function"
+    },
+    {
+      "id": "func:cards/models.py.is_public",
+      "name": "is_public",
+      "type": "function"
+    },
+    {
+      "id": "func:cards/models.py.is_subcategory",
+      "name": "is_subcategory",
+      "type": "function"
+    },
+    {
+      "id": "func:cards/models.py.referral_url",
+      "name": "referral_url",
+      "type": "function"
+    },
+    {
+      "id": "func:cards/models.py.shareable_url",
+      "name": "shareable_url",
+      "type": "function"
+    }
+  ],
+  "cards/scenario_loader.py": [
+    {
+      "id": "meth:cards/scenario_loader.py.ScenarioLoader.get_scenario_by_name",
+      "name": "get_scenario_by_name",
+      "type": "method"
+    },
+    {
+      "id": "meth:cards/scenario_loader.py.ScenarioLoader.list_scenario_names",
+      "name": "list_scenario_names",
+      "type": "method"
+    },
+    {
+      "id": "meth:cards/scenario_loader.py.ScenarioLoader.load_from_directory",
+      "name": "load_from_directory",
+      "type": "method"
+    },
+    {
+      "id": "meth:cards/scenario_loader.py.ScenarioLoader.load_scenarios",
+      "name": "load_scenarios",
+      "type": "method"
+    },
+    {
+      "id": "meth:cards/scenario_loader.py.ScenarioLoader.load_single_file",
+      "name": "load_single_file",
+      "type": "method"
+    },
+    {
+      "id": "cls:cards/scenario_loader.py.ScenarioLoader",
+      "name": "ScenarioLoader",
+      "type": "class"
+    },
+    {
+      "id": "mod:cards.scenario_loader",
+      "name": "scenario_loader",
+      "type": "module"
+    },
+    {
+      "id": "func:cards/scenario_loader.py.get_scenario_by_name",
+      "name": "get_scenario_by_name",
+      "type": "function"
+    },
+    {
+      "id": "func:cards/scenario_loader.py.get_scenarios_path",
+      "name": "get_scenarios_path",
+      "type": "function"
+    },
+    {
+      "id": "func:cards/scenario_loader.py.list_scenario_names",
+      "name": "list_scenario_names",
+      "type": "function"
+    },
+    {
+      "id": "func:cards/scenario_loader.py.load_from_directory",
+      "name": "load_from_directory",
+      "type": "function"
+    },
+    {
+      "id": "func:cards/scenario_loader.py.load_scenarios",
+      "name": "load_scenarios",
+      "type": "function"
+    },
+    {
+      "id": "func:cards/scenario_loader.py.load_single_file",
+      "name": "load_single_file",
+      "type": "function"
+    }
+  ],
+  "cards/serializers.py": [
+    {
+      "id": "meth:cards/serializers.py.CreateSpendingProfileSerializer.create",
+      "name": "create",
+      "type": "method"
+    },
+    {
+      "id": "meth:cards/serializers.py.SpendingCategorySerializer.get_parent",
+      "name": "get_parent",
+      "type": "method"
+    },
+    {
+      "id": "meth:cards/serializers.py.SpendingCategorySerializer.get_subcategories",
+      "name": "get_subcategories",
+      "type": "method"
+    },
+    {
+      "id": "meth:cards/serializers.py.UserCardSerializer.validate",
+      "name": "validate",
+      "type": "method"
+    },
+    {
+      "id": "cls:cards/serializers.py.CardCreditSerializer",
+      "name": "CardCreditSerializer",
+      "type": "class"
+    },
+    {
+      "id": "cls:cards/serializers.py.CreateSpendingProfileSerializer",
+      "name": "CreateSpendingProfileSerializer",
+      "type": "class"
+    },
+    {
+      "id": "cls:cards/serializers.py.CreditCardListSerializer",
+      "name": "CreditCardListSerializer",
+      "type": "class"
+    },
+    {
+      "id": "cls:cards/serializers.py.CreditCardSerializer",
+      "name": "CreditCardSerializer",
+      "type": "class"
+    },
+    {
+      "id": "cls:cards/serializers.py.IssuerSerializer",
+      "name": "IssuerSerializer",
+      "type": "class"
+    },
+    {
+      "id": "cls:cards/serializers.py.Meta",
+      "name": "Meta",
+      "type": "class"
+    },
+    {
+      "id": "cls:cards/serializers.py.RewardCategorySerializer",
+      "name": "RewardCategorySerializer",
+      "type": "class"
+    },
+    {
+      "id": "cls:cards/serializers.py.RewardTypeSerializer",
+      "name": "RewardTypeSerializer",
+      "type": "class"
+    },
+    {
+      "id": "cls:cards/serializers.py.SpendingAmountSerializer",
+      "name": "SpendingAmountSerializer",
+      "type": "class"
+    },
+    {
+      "id": "cls:cards/serializers.py.SpendingCategorySerializer",
+      "name": "SpendingCategorySerializer",
+      "type": "class"
+    },
+    {
+      "id": "cls:cards/serializers.py.SpendingCreditSerializer",
+      "name": "SpendingCreditSerializer",
+      "type": "class"
+    },
+    {
+      "id": "cls:cards/serializers.py.UserCardCreateUpdateSerializer",
+      "name": "UserCardCreateUpdateSerializer",
+      "type": "class"
+    },
+    {
+      "id": "cls:cards/serializers.py.UserCardSerializer",
+      "name": "UserCardSerializer",
+      "type": "class"
+    },
+    {
+      "id": "cls:cards/serializers.py.UserSpendingProfileSerializer",
+      "name": "UserSpendingProfileSerializer",
+      "type": "class"
+    },
+    {
+      "id": "mod:cards.serializers",
+      "name": "serializers",
+      "type": "module"
+    },
+    {
+      "id": "func:cards/serializers.py.create",
+      "name": "create",
+      "type": "function"
+    },
+    {
+      "id": "func:cards/serializers.py.get_parent",
+      "name": "get_parent",
+      "type": "function"
+    },
+    {
+      "id": "func:cards/serializers.py.get_subcategories",
+      "name": "get_subcategories",
+      "type": "function"
+    },
+    {
+      "id": "func:cards/serializers.py.validate",
+      "name": "validate",
+      "type": "function"
+    }
+  ],
+  "cards/tests.py": [
+    {
+      "id": "mod:cards.tests",
+      "name": "tests",
+      "type": "module"
+    }
+  ],
+  "cards/urls.py": [
+    {
+      "id": "mod:cards.urls",
+      "name": "urls",
+      "type": "module"
+    }
+  ],
+  "cards/views.py": [
+    {
+      "id": "cls:cards/views.py.CreditCardDetailView",
+      "name": "CreditCardDetailView",
+      "type": "class"
+    },
+    {
+      "id": "cls:cards/views.py.CreditCardListView",
+      "name": "CreditCardListView",
+      "type": "class"
+    },
+    {
+      "id": "cls:cards/views.py.IssuerListView",
+      "name": "IssuerListView",
+      "type": "class"
+    },
+    {
+      "id": "cls:cards/views.py.RewardTypeListView",
+      "name": "RewardTypeListView",
+      "type": "class"
+    },
+    {
+      "id": "cls:cards/views.py.SpendingCategoryListView",
+      "name": "SpendingCategoryListView",
+      "type": "class"
+    },
+    {
+      "id": "cls:cards/views.py.SpendingCreditListView",
+      "name": "SpendingCreditListView",
+      "type": "class"
+    },
+    {
+      "id": "mod:cards.views",
+      "name": "views",
+      "type": "module"
+    },
+    {
+      "id": "func:cards/views.py.add_user_card",
+      "name": "add_user_card",
+      "type": "function"
+    },
+    {
+      "id": "func:cards/views.py.card_recommendations_preview",
+      "name": "card_recommendations_preview",
+      "type": "function"
+    },
+    {
+      "id": "func:cards/views.py.card_search_view",
+      "name": "card_search_view",
+      "type": "function"
+    },
+    {
+      "id": "func:cards/views.py.cards_list_view",
+      "name": "cards_list_view",
+      "type": "function"
+    },
+    {
+      "id": "func:cards/views.py.categories_list_view",
+      "name": "categories_list_view",
+      "type": "function"
+    },
+    {
+      "id": "func:cards/views.py.categories_with_rewards_view",
+      "name": "categories_with_rewards_view",
+      "type": "function"
+    },
+    {
+      "id": "func:cards/views.py.category_detail_page_view",
+      "name": "category_detail_page_view",
+      "type": "function"
+    },
+    {
+      "id": "func:cards/views.py.category_detail_view",
+      "name": "category_detail_view",
+      "type": "function"
+    },
+    {
+      "id": "func:cards/views.py.check_card_ownership",
+      "name": "check_card_ownership",
+      "type": "function"
+    },
+    {
+      "id": "func:cards/views.py.get_profile_privacy",
+      "name": "get_profile_privacy",
+      "type": "function"
+    },
+    {
+      "id": "func:cards/views.py.get_user_cards",
+      "name": "get_user_cards",
+      "type": "function"
+    },
+    {
+      "id": "func:cards/views.py.index_view",
+      "name": "index_view",
+      "type": "function"
+    },
+    {
+      "id": "func:cards/views.py.issuers_list_view",
+      "name": "issuers_list_view",
+      "type": "function"
+    },
+    {
+      "id": "func:cards/views.py.landing_view",
+      "name": "landing_view",
+      "type": "function"
+    },
+    {
+      "id": "func:cards/views.py.profile_view",
+      "name": "profile_view",
+      "type": "function"
+    },
+    {
+      "id": "func:cards/views.py.remove_user_card",
+      "name": "remove_user_card",
+      "type": "function"
+    },
+    {
+      "id": "func:cards/views.py.shared_profile_view",
+      "name": "shared_profile_view",
+      "type": "function"
+    },
+    {
+      "id": "func:cards/views.py.spending_profile_view",
+      "name": "spending_profile_view",
+      "type": "function"
+    },
+    {
+      "id": "func:cards/views.py.toggle_card_ownership",
+      "name": "toggle_card_ownership",
+      "type": "function"
+    },
+    {
+      "id": "func:cards/views.py.update_profile_privacy",
+      "name": "update_profile_privacy",
+      "type": "function"
+    },
+    {
+      "id": "func:cards/views.py.update_user_card",
+      "name": "update_user_card",
+      "type": "function"
+    }
+  ],
+  "convert_cards_data.py": [
+    {
+      "id": "mod:convert_cards_data",
+      "name": "convert_cards_data",
+      "type": "module"
+    },
+    {
+      "id": "func:convert_cards_data.py.convert_card",
+      "name": "convert_card",
+      "type": "function"
+    },
+    {
+      "id": "func:convert_cards_data.py.extract_reward_categories",
+      "name": "extract_reward_categories",
+      "type": "function"
+    },
+    {
+      "id": "func:convert_cards_data.py.main",
+      "name": "main",
+      "type": "function"
+    },
+    {
+      "id": "func:convert_cards_data.py.map_issuer_name",
+      "name": "map_issuer_name",
+      "type": "function"
+    },
+    {
+      "id": "func:convert_cards_data.py.map_reward_type",
+      "name": "map_reward_type",
+      "type": "function"
+    }
+  ],
+  "creditcard_guru/__init__.py": [
+    {
+      "id": "mod:creditcard_guru.__init__",
+      "name": "__init__",
+      "type": "module"
+    }
+  ],
+  "creditcard_guru/asgi.py": [
+    {
+      "id": "mod:creditcard_guru.asgi",
+      "name": "asgi",
+      "type": "module"
+    }
+  ],
+  "creditcard_guru/settings.py": [
+    {
+      "id": "mod:creditcard_guru.settings",
+      "name": "settings",
+      "type": "module"
+    }
+  ],
+  "creditcard_guru/urls.py": [
+    {
+      "id": "mod:creditcard_guru.urls",
+      "name": "urls",
+      "type": "module"
+    },
+    {
+      "id": "func:creditcard_guru/urls.py.home_view",
+      "name": "home_view",
+      "type": "function"
+    }
+  ],
+  "creditcard_guru/wsgi.py": [
+    {
+      "id": "mod:creditcard_guru.wsgi",
+      "name": "wsgi",
+      "type": "module"
+    }
+  ],
+  "manage.py": [
+    {
+      "id": "mod:manage",
+      "name": "manage",
+      "type": "module"
+    },
+    {
+      "id": "func:manage.py.main",
+      "name": "main",
+      "type": "function"
+    }
+  ],
+  "roadmaps/__init__.py": [
+    {
+      "id": "mod:roadmaps.__init__",
+      "name": "__init__",
+      "type": "module"
+    }
+  ],
+  "roadmaps/admin.py": [
+    {
+      "id": "cls:roadmaps/admin.py.RoadmapAdmin",
+      "name": "RoadmapAdmin",
+      "type": "class"
+    },
+    {
+      "id": "cls:roadmaps/admin.py.RoadmapCalculationAdmin",
+      "name": "RoadmapCalculationAdmin",
+      "type": "class"
+    },
+    {
+      "id": "cls:roadmaps/admin.py.RoadmapCalculationInline",
+      "name": "RoadmapCalculationInline",
+      "type": "class"
+    },
+    {
+      "id": "cls:roadmaps/admin.py.RoadmapFilterAdmin",
+      "name": "RoadmapFilterAdmin",
+      "type": "class"
+    },
+    {
+      "id": "cls:roadmaps/admin.py.RoadmapRecommendationAdmin",
+      "name": "RoadmapRecommendationAdmin",
+      "type": "class"
+    },
+    {
+      "id": "cls:roadmaps/admin.py.RoadmapRecommendationInline",
+      "name": "RoadmapRecommendationInline",
+      "type": "class"
+    },
+    {
+      "id": "mod:roadmaps.admin",
+      "name": "admin",
+      "type": "module"
+    }
+  ],
+  "roadmaps/apps.py": [
+    {
+      "id": "cls:roadmaps/apps.py.RoadmapsConfig",
+      "name": "RoadmapsConfig",
+      "type": "class"
+    },
+    {
+      "id": "mod:roadmaps.apps",
+      "name": "apps",
+      "type": "module"
+    }
+  ],
+  "roadmaps/migrations/0001_initial.py": [
+    {
+      "id": "cls:roadmaps/migrations/0001_initial.py.Migration",
+      "name": "Migration",
+      "type": "class"
+    },
+    {
+      "id": "mod:roadmaps.migrations.0001_initial",
+      "name": "0001_initial",
+      "type": "module"
+    }
+  ],
+  "roadmaps/migrations/__init__.py": [
+    {
+      "id": "mod:roadmaps.migrations.__init__",
+      "name": "__init__",
+      "type": "module"
+    }
+  ],
+  "roadmaps/models.py": [
+    {
+      "id": "meth:roadmaps/models.py.Roadmap.__str__",
+      "name": "__str__",
+      "type": "method"
+    },
+    {
+      "id": "meth:roadmaps/models.py.RoadmapCalculation.__str__",
+      "name": "__str__",
+      "type": "method"
+    },
+    {
+      "id": "meth:roadmaps/models.py.RoadmapFilter.__str__",
+      "name": "__str__",
+      "type": "method"
+    },
+    {
+      "id": "meth:roadmaps/models.py.RoadmapRecommendation.__str__",
+      "name": "__str__",
+      "type": "method"
+    },
+    {
+      "id": "cls:roadmaps/models.py.Meta",
+      "name": "Meta",
+      "type": "class"
+    },
+    {
+      "id": "cls:roadmaps/models.py.Roadmap",
+      "name": "Roadmap",
+      "type": "class"
+    },
+    {
+      "id": "cls:roadmaps/models.py.RoadmapCalculation",
+      "name": "RoadmapCalculation",
+      "type": "class"
+    },
+    {
+      "id": "cls:roadmaps/models.py.RoadmapFilter",
+      "name": "RoadmapFilter",
+      "type": "class"
+    },
+    {
+      "id": "cls:roadmaps/models.py.RoadmapRecommendation",
+      "name": "RoadmapRecommendation",
+      "type": "class"
+    },
+    {
+      "id": "mod:roadmaps.models",
+      "name": "models",
+      "type": "module"
+    },
+    {
+      "id": "func:roadmaps/models.py.__str__",
+      "name": "__str__",
+      "type": "function"
+    }
+  ],
+  "roadmaps/recommendation_engine.py": [
+    {
+      "id": "meth:roadmaps/recommendation_engine.py.RecommendationEngine.__init__",
+      "name": "__init__",
+      "type": "method"
+    },
+    {
+      "id": "meth:roadmaps/recommendation_engine.py.RecommendationEngine._build_parent_category_spending",
+      "name": "_build_parent_category_spending",
+      "type": "method"
+    },
+    {
+      "id": "meth:roadmaps/recommendation_engine.py.RecommendationEngine._calculate_card_allocated_breakdown",
+      "name": "_calculate_card_allocated_breakdown",
+      "type": "method"
+    },
+    {
+      "id": "meth:roadmaps/recommendation_engine.py.RecommendationEngine._calculate_card_annual_rewards",
+      "name": "_calculate_card_annual_rewards",
+      "type": "method"
+    },
+    {
+      "id": "meth:roadmaps/recommendation_engine.py.RecommendationEngine._calculate_card_credits_value",
+      "name": "_calculate_card_credits_value",
+      "type": "method"
+    },
+    {
+      "id": "meth:roadmaps/recommendation_engine.py.RecommendationEngine._calculate_card_rewards_breakdown",
+      "name": "_calculate_card_rewards_breakdown",
+      "type": "method"
+    },
+    {
+      "id": "meth:roadmaps/recommendation_engine.py.RecommendationEngine._calculate_portfolio_allocation",
+      "name": "_calculate_portfolio_allocation",
+      "type": "method"
+    },
+    {
+      "id": "meth:roadmaps/recommendation_engine.py.RecommendationEngine._calculate_portfolio_summary",
+      "name": "_calculate_portfolio_summary",
+      "type": "method"
+    },
+    {
+      "id": "meth:roadmaps/recommendation_engine.py.RecommendationEngine._calculate_scenario_portfolio_value",
+      "name": "_calculate_scenario_portfolio_value",
+      "type": "method"
+    },
+    {
+      "id": "meth:roadmaps/recommendation_engine.py.RecommendationEngine._calculate_smart_card_value",
+      "name": "_calculate_smart_card_value",
+      "type": "method"
+    },
+    {
+      "id": "meth:roadmaps/recommendation_engine.py.RecommendationEngine._calculate_spending_efficiency",
+      "name": "_calculate_spending_efficiency",
+      "type": "method"
+    },
+    {
+      "id": "meth:roadmaps/recommendation_engine.py.RecommendationEngine._calculate_total_rewards",
+      "name": "_calculate_total_rewards",
+      "type": "method"
+    },
+    {
+      "id": "meth:roadmaps/recommendation_engine.py.RecommendationEngine._can_meet_signup_requirement",
+      "name": "_can_meet_signup_requirement",
+      "type": "method"
+    },
+    {
+      "id": "meth:roadmaps/recommendation_engine.py.RecommendationEngine._evaluate_portfolio_scenario",
+      "name": "_evaluate_portfolio_scenario",
+      "type": "method"
+    },
+    {
+      "id": "meth:roadmaps/recommendation_engine.py.RecommendationEngine._find_new_cards",
+      "name": "_find_new_cards",
+      "type": "method"
+    },
+    {
+      "id": "meth:roadmaps/recommendation_engine.py.RecommendationEngine._find_optimal_portfolio",
+      "name": "_find_optimal_portfolio",
+      "type": "method"
+    },
+    {
+      "id": "meth:roadmaps/recommendation_engine.py.RecommendationEngine._generate_card_reasoning",
+      "name": "_generate_card_reasoning",
+      "type": "method"
+    },
+    {
+      "id": "meth:roadmaps/recommendation_engine.py.RecommendationEngine._generate_portfolio_optimized_recommendations",
+      "name": "_generate_portfolio_optimized_recommendations",
+      "type": "method"
+    },
+    {
+      "id": "meth:roadmaps/recommendation_engine.py.RecommendationEngine._get_best_signup_bonus_card",
+      "name": "_get_best_signup_bonus_card",
+      "type": "method"
+    },
+    {
+      "id": "meth:roadmaps/recommendation_engine.py.RecommendationEngine._get_filtered_cards",
+      "name": "_get_filtered_cards",
+      "type": "method"
+    },
+    {
+      "id": "meth:roadmaps/recommendation_engine.py.RecommendationEngine._get_signup_bonus_value",
+      "name": "_get_signup_bonus_value",
+      "type": "method"
+    },
+    {
+      "id": "meth:roadmaps/recommendation_engine.py.RecommendationEngine._is_eligible_for_card",
+      "name": "_is_eligible_for_card",
+      "type": "method"
+    },
+    {
+      "id": "meth:roadmaps/recommendation_engine.py.RecommendationEngine._optimize_card_portfolio",
+      "name": "_optimize_card_portfolio",
+      "type": "method"
+    },
+    {
+      "id": "meth:roadmaps/recommendation_engine.py.RecommendationEngine._select_best_new_cards",
+      "name": "_select_best_new_cards",
+      "type": "method"
+    },
+    {
+      "id": "meth:roadmaps/recommendation_engine.py.RecommendationEngine._select_optimal_card_combination",
+      "name": "_select_optimal_card_combination",
+      "type": "method"
+    },
+    {
+      "id": "meth:roadmaps/recommendation_engine.py.RecommendationEngine.generate_quick_recommendations",
+      "name": "generate_quick_recommendations",
+      "type": "method"
+    },
+    {
+      "id": "meth:roadmaps/recommendation_engine.py.RecommendationEngine.generate_roadmap",
+      "name": "generate_roadmap",
+      "type": "method"
+    },
+    {
+      "id": "cls:roadmaps/recommendation_engine.py.RecommendationEngine",
+      "name": "RecommendationEngine",
+      "type": "class"
+    },
+    {
+      "id": "mod:roadmaps.recommendation_engine",
+      "name": "recommendation_engine",
+      "type": "module"
+    },
+    {
+      "id": "func:roadmaps/recommendation_engine.py.__init__",
+      "name": "__init__",
+      "type": "function"
+    },
+    {
+      "id": "func:roadmaps/recommendation_engine.py._build_parent_category_spending",
+      "name": "_build_parent_category_spending",
+      "type": "function"
+    },
+    {
+      "id": "func:roadmaps/recommendation_engine.py._calculate_card_allocated_breakdown",
+      "name": "_calculate_card_allocated_breakdown",
+      "type": "function"
+    },
+    {
+      "id": "func:roadmaps/recommendation_engine.py._calculate_card_annual_rewards",
+      "name": "_calculate_card_annual_rewards",
+      "type": "function"
+    },
+    {
+      "id": "func:roadmaps/recommendation_engine.py._calculate_card_credits_value",
+      "name": "_calculate_card_credits_value",
+      "type": "function"
+    },
+    {
+      "id": "func:roadmaps/recommendation_engine.py._calculate_card_rewards_breakdown",
+      "name": "_calculate_card_rewards_breakdown",
+      "type": "function"
+    },
+    {
+      "id": "func:roadmaps/recommendation_engine.py._calculate_portfolio_allocation",
+      "name": "_calculate_portfolio_allocation",
+      "type": "function"
+    },
+    {
+      "id": "func:roadmaps/recommendation_engine.py._calculate_portfolio_summary",
+      "name": "_calculate_portfolio_summary",
+      "type": "function"
+    },
+    {
+      "id": "func:roadmaps/recommendation_engine.py._calculate_scenario_portfolio_value",
+      "name": "_calculate_scenario_portfolio_value",
+      "type": "function"
+    },
+    {
+      "id": "func:roadmaps/recommendation_engine.py._calculate_smart_card_value",
+      "name": "_calculate_smart_card_value",
+      "type": "function"
+    },
+    {
+      "id": "func:roadmaps/recommendation_engine.py._calculate_spending_efficiency",
+      "name": "_calculate_spending_efficiency",
+      "type": "function"
+    },
+    {
+      "id": "func:roadmaps/recommendation_engine.py._calculate_total_rewards",
+      "name": "_calculate_total_rewards",
+      "type": "function"
+    },
+    {
+      "id": "func:roadmaps/recommendation_engine.py._can_meet_signup_requirement",
+      "name": "_can_meet_signup_requirement",
+      "type": "function"
+    },
+    {
+      "id": "func:roadmaps/recommendation_engine.py._evaluate_portfolio_scenario",
+      "name": "_evaluate_portfolio_scenario",
+      "type": "function"
+    },
+    {
+      "id": "func:roadmaps/recommendation_engine.py._find_new_cards",
+      "name": "_find_new_cards",
+      "type": "function"
+    },
+    {
+      "id": "func:roadmaps/recommendation_engine.py._find_optimal_portfolio",
+      "name": "_find_optimal_portfolio",
+      "type": "function"
+    },
+    {
+      "id": "func:roadmaps/recommendation_engine.py._generate_card_reasoning",
+      "name": "_generate_card_reasoning",
+      "type": "function"
+    },
+    {
+      "id": "func:roadmaps/recommendation_engine.py._generate_portfolio_optimized_recommendations",
+      "name": "_generate_portfolio_optimized_recommendations",
+      "type": "function"
+    },
+    {
+      "id": "func:roadmaps/recommendation_engine.py._get_best_signup_bonus_card",
+      "name": "_get_best_signup_bonus_card",
+      "type": "function"
+    },
+    {
+      "id": "func:roadmaps/recommendation_engine.py._get_filtered_cards",
+      "name": "_get_filtered_cards",
+      "type": "function"
+    },
+    {
+      "id": "func:roadmaps/recommendation_engine.py._get_signup_bonus_value",
+      "name": "_get_signup_bonus_value",
+      "type": "function"
+    },
+    {
+      "id": "func:roadmaps/recommendation_engine.py._is_eligible_for_card",
+      "name": "_is_eligible_for_card",
+      "type": "function"
+    },
+    {
+      "id": "func:roadmaps/recommendation_engine.py._optimize_card_portfolio",
+      "name": "_optimize_card_portfolio",
+      "type": "function"
+    },
+    {
+      "id": "func:roadmaps/recommendation_engine.py._select_best_new_cards",
+      "name": "_select_best_new_cards",
+      "type": "function"
+    },
+    {
+      "id": "func:roadmaps/recommendation_engine.py._select_optimal_card_combination",
+      "name": "_select_optimal_card_combination",
+      "type": "function"
+    },
+    {
+      "id": "func:roadmaps/recommendation_engine.py.calculate_portfolio_value",
+      "name": "calculate_portfolio_value",
+      "type": "function"
+    },
+    {
+      "id": "func:roadmaps/recommendation_engine.py.generate_quick_recommendations",
+      "name": "generate_quick_recommendations",
+      "type": "function"
+    },
+    {
+      "id": "func:roadmaps/recommendation_engine.py.generate_roadmap",
+      "name": "generate_roadmap",
+      "type": "function"
+    }
+  ],
+  "roadmaps/serializers.py": [
+    {
+      "id": "meth:roadmaps/serializers.py.CreateRoadmapSerializer.create",
+      "name": "create",
+      "type": "method"
+    },
+    {
+      "id": "meth:roadmaps/serializers.py.GenerateRoadmapSerializer.generate_recommendations",
+      "name": "generate_recommendations",
+      "type": "method"
+    },
+    {
+      "id": "cls:roadmaps/serializers.py.CreateRoadmapSerializer",
+      "name": "CreateRoadmapSerializer",
+      "type": "class"
+    },
+    {
+      "id": "cls:roadmaps/serializers.py.GenerateRoadmapSerializer",
+      "name": "GenerateRoadmapSerializer",
+      "type": "class"
+    },
+    {
+      "id": "cls:roadmaps/serializers.py.Meta",
+      "name": "Meta",
+      "type": "class"
+    },
+    {
+      "id": "cls:roadmaps/serializers.py.RoadmapCalculationSerializer",
+      "name": "RoadmapCalculationSerializer",
+      "type": "class"
+    },
+    {
+      "id": "cls:roadmaps/serializers.py.RoadmapFilterSerializer",
+      "name": "RoadmapFilterSerializer",
+      "type": "class"
+    },
+    {
+      "id": "cls:roadmaps/serializers.py.RoadmapRecommendationSerializer",
+      "name": "RoadmapRecommendationSerializer",
+      "type": "class"
+    },
+    {
+      "id": "cls:roadmaps/serializers.py.RoadmapSerializer",
+      "name": "RoadmapSerializer",
+      "type": "class"
+    },
+    {
+      "id": "mod:roadmaps.serializers",
+      "name": "serializers",
+      "type": "module"
+    },
+    {
+      "id": "func:roadmaps/serializers.py.create",
+      "name": "create",
+      "type": "function"
+    },
+    {
+      "id": "func:roadmaps/serializers.py.generate_recommendations",
+      "name": "generate_recommendations",
+      "type": "function"
+    }
+  ],
+  "roadmaps/tests.py": [
+    {
+      "id": "mod:roadmaps.tests",
+      "name": "tests",
+      "type": "module"
+    }
+  ],
+  "roadmaps/urls.py": [
+    {
+      "id": "mod:roadmaps.urls",
+      "name": "urls",
+      "type": "module"
+    }
+  ],
+  "roadmaps/views.py": [
+    {
+      "id": "meth:roadmaps/views.py.RoadmapDetailView.get_queryset",
+      "name": "get_queryset",
+      "type": "method"
+    },
+    {
+      "id": "meth:roadmaps/views.py.RoadmapListView.get_queryset",
+      "name": "get_queryset",
+      "type": "method"
+    },
+    {
+      "id": "cls:roadmaps/views.py.RoadmapDetailView",
+      "name": "RoadmapDetailView",
+      "type": "class"
+    },
+    {
+      "id": "cls:roadmaps/views.py.RoadmapFilterListView",
+      "name": "RoadmapFilterListView",
+      "type": "class"
+    },
+    {
+      "id": "cls:roadmaps/views.py.RoadmapListView",
+      "name": "RoadmapListView",
+      "type": "class"
+    },
+    {
+      "id": "mod:roadmaps.views",
+      "name": "views",
+      "type": "module"
+    },
+    {
+      "id": "func:roadmaps/views.py.create_roadmap_view",
+      "name": "create_roadmap_view",
+      "type": "function"
+    },
+    {
+      "id": "func:roadmaps/views.py.export_scenario_view",
+      "name": "export_scenario_view",
+      "type": "function"
+    },
+    {
+      "id": "func:roadmaps/views.py.generate_roadmap_view",
+      "name": "generate_roadmap_view",
+      "type": "function"
+    },
+    {
+      "id": "func:roadmaps/views.py.get_queryset",
+      "name": "get_queryset",
+      "type": "function"
+    },
+    {
+      "id": "func:roadmaps/views.py.quick_recommendation_view",
+      "name": "quick_recommendation_view",
+      "type": "function"
+    },
+    {
+      "id": "func:roadmaps/views.py.roadmap_stats_view",
+      "name": "roadmap_stats_view",
+      "type": "function"
+    }
+  ],
+  "setup_data.py": [
+    {
+      "id": "mod:setup_data",
+      "name": "setup_data",
+      "type": "module"
+    },
+    {
+      "id": "func:setup_data.py.main",
+      "name": "main",
+      "type": "function"
+    },
+    {
+      "id": "func:setup_data.py.run_command",
+      "name": "run_command",
+      "type": "function"
+    }
+  ],
+  "split_scenarios.py": [
+    {
+      "id": "mod:split_scenarios",
+      "name": "split_scenarios",
+      "type": "module"
+    },
+    {
+      "id": "func:split_scenarios.py.categorize_scenarios",
+      "name": "categorize_scenarios",
+      "type": "function"
+    },
+    {
+      "id": "func:split_scenarios.py.create_index_file",
+      "name": "create_index_file",
+      "type": "function"
+    },
+    {
+      "id": "func:split_scenarios.py.load_scenarios",
+      "name": "load_scenarios",
+      "type": "function"
+    },
+    {
+      "id": "func:split_scenarios.py.write_scenario_files",
+      "name": "write_scenario_files",
+      "type": "function"
+    }
+  ],
+  "users/__init__.py": [
+    {
+      "id": "mod:users.__init__",
+      "name": "__init__",
+      "type": "module"
+    }
+  ],
+  "users/admin.py": [
+    {
+      "id": "mod:users.admin",
+      "name": "admin",
+      "type": "module"
+    }
+  ],
+  "users/apps.py": [
+    {
+      "id": "cls:users/apps.py.UsersConfig",
+      "name": "UsersConfig",
+      "type": "class"
+    },
+    {
+      "id": "mod:users.apps",
+      "name": "apps",
+      "type": "module"
+    }
+  ],
+  "users/migrations/0001_initial.py": [
+    {
+      "id": "cls:users/migrations/0001_initial.py.Migration",
+      "name": "Migration",
+      "type": "class"
+    },
+    {
+      "id": "mod:users.migrations.0001_initial",
+      "name": "0001_initial",
+      "type": "module"
+    }
+  ],
+  "users/migrations/__init__.py": [
+    {
+      "id": "mod:users.migrations.__init__",
+      "name": "__init__",
+      "type": "module"
+    }
+  ],
+  "users/models.py": [
+    {
+      "id": "meth:users/models.py.UserPreferences.__str__",
+      "name": "__str__",
+      "type": "method"
+    },
+    {
+      "id": "meth:users/models.py.UserProfile.__str__",
+      "name": "__str__",
+      "type": "method"
+    },
+    {
+      "id": "cls:users/models.py.Meta",
+      "name": "Meta",
+      "type": "class"
+    },
+    {
+      "id": "cls:users/models.py.UserPreferences",
+      "name": "UserPreferences",
+      "type": "class"
+    },
+    {
+      "id": "cls:users/models.py.UserProfile",
+      "name": "UserProfile",
+      "type": "class"
+    },
+    {
+      "id": "mod:users.models",
+      "name": "models",
+      "type": "module"
+    },
+    {
+      "id": "func:users/models.py.__str__",
+      "name": "__str__",
+      "type": "function"
+    }
+  ],
+  "users/serializers.py": [
+    {
+      "id": "meth:users/serializers.py.UserDataSerializer.create",
+      "name": "create",
+      "type": "method"
+    },
+    {
+      "id": "meth:users/serializers.py.UserDataSerializer.to_representation",
+      "name": "to_representation",
+      "type": "method"
+    },
+    {
+      "id": "cls:users/serializers.py.Meta",
+      "name": "Meta",
+      "type": "class"
+    },
+    {
+      "id": "cls:users/serializers.py.UserCardSerializer",
+      "name": "UserCardSerializer",
+      "type": "class"
+    },
+    {
+      "id": "cls:users/serializers.py.UserDataSerializer",
+      "name": "UserDataSerializer",
+      "type": "class"
+    },
+    {
+      "id": "cls:users/serializers.py.UserPreferencesSerializer",
+      "name": "UserPreferencesSerializer",
+      "type": "class"
+    },
+    {
+      "id": "cls:users/serializers.py.UserProfileSerializer",
+      "name": "UserProfileSerializer",
+      "type": "class"
+    },
+    {
+      "id": "cls:users/serializers.py.UserSerializer",
+      "name": "UserSerializer",
+      "type": "class"
+    },
+    {
+      "id": "cls:users/serializers.py.UserSpendingSerializer",
+      "name": "UserSpendingSerializer",
+      "type": "class"
+    },
+    {
+      "id": "mod:users.serializers",
+      "name": "serializers",
+      "type": "module"
+    },
+    {
+      "id": "func:users/serializers.py.create",
+      "name": "create",
+      "type": "function"
+    },
+    {
+      "id": "func:users/serializers.py.to_representation",
+      "name": "to_representation",
+      "type": "function"
+    }
+  ],
+  "users/tests.py": [
+    {
+      "id": "mod:users.tests",
+      "name": "tests",
+      "type": "module"
+    }
+  ],
+  "users/urls.py": [
+    {
+      "id": "mod:users.urls",
+      "name": "urls",
+      "type": "module"
+    }
+  ],
+  "users/views.py": [
+    {
+      "id": "meth:users/views.py.UserCardDetailView.get_queryset",
+      "name": "get_queryset",
+      "type": "method"
+    },
+    {
+      "id": "meth:users/views.py.UserCardListView.get_queryset",
+      "name": "get_queryset",
+      "type": "method"
+    },
+    {
+      "id": "meth:users/views.py.UserCardListView.perform_create",
+      "name": "perform_create",
+      "type": "method"
+    },
+    {
+      "id": "meth:users/views.py.UserPreferencesView.get_object",
+      "name": "get_object",
+      "type": "method"
+    },
+    {
+      "id": "meth:users/views.py.UserProfileView.get_object",
+      "name": "get_object",
+      "type": "method"
+    },
+    {
+      "id": "meth:users/views.py.UserSpendingListView.get_queryset",
+      "name": "get_queryset",
+      "type": "method"
+    },
+    {
+      "id": "meth:users/views.py.UserSpendingListView.perform_create",
+      "name": "perform_create",
+      "type": "method"
+    },
+    {
+      "id": "cls:users/views.py.UserCardDetailView",
+      "name": "UserCardDetailView",
+      "type": "class"
+    },
+    {
+      "id": "cls:users/views.py.UserCardListView",
+      "name": "UserCardListView",
+      "type": "class"
+    },
+    {
+      "id": "cls:users/views.py.UserPreferencesView",
+      "name": "UserPreferencesView",
+      "type": "class"
+    },
+    {
+      "id": "cls:users/views.py.UserProfileView",
+      "name": "UserProfileView",
+      "type": "class"
+    },
+    {
+      "id": "cls:users/views.py.UserSpendingListView",
+      "name": "UserSpendingListView",
+      "type": "class"
+    },
+    {
+      "id": "mod:users.views",
+      "name": "views",
+      "type": "module"
+    },
+    {
+      "id": "func:users/views.py.get_object",
+      "name": "get_object",
+      "type": "function"
+    },
+    {
+      "id": "func:users/views.py.get_queryset",
+      "name": "get_queryset",
+      "type": "function"
+    },
+    {
+      "id": "func:users/views.py.get_user_cards_details",
+      "name": "get_user_cards_details",
+      "type": "function"
+    },
+    {
+      "id": "func:users/views.py.perform_create",
+      "name": "perform_create",
+      "type": "function"
+    },
+    {
+      "id": "func:users/views.py.toggle_user_card",
+      "name": "toggle_user_card",
+      "type": "function"
+    },
+    {
+      "id": "func:users/views.py.update_user_card_details",
+      "name": "update_user_card_details",
+      "type": "function"
+    },
+    {
+      "id": "func:users/views.py.user_data_view",
+      "name": "user_data_view",
+      "type": "function"
+    },
+    {
+      "id": "func:users/views.py.user_status_view",
+      "name": "user_status_view",
+      "type": "function"
+    }
+  ],
+  "wsgi.py": [
+    {
+      "id": "mod:wsgi",
+      "name": "wsgi",
+      "type": "module"
+    }
+  ]
+}

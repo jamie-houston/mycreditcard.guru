@@ -1,0 +1,602 @@
+[
+  {
+    "id": "mod:cards.models",
+    "in_degree": 17,
+    "out_degree": 31,
+    "total_degree": 48
+  },
+  {
+    "id": "mod:roadmaps.recommendation_engine",
+    "in_degree": 3,
+    "out_degree": 37,
+    "total_degree": 40
+  },
+  {
+    "id": "mod:cards.views",
+    "in_degree": 1,
+    "out_degree": 37,
+    "total_degree": 38
+  },
+  {
+    "id": "cls:roadmaps/recommendation_engine.py.RecommendationEngine",
+    "in_degree": 1,
+    "out_degree": 27,
+    "total_degree": 28
+  },
+  {
+    "id": "mod:admin",
+    "in_degree": 0,
+    "out_degree": 28,
+    "total_degree": 28
+  },
+  {
+    "id": "mod:cards.management.commands.run_scenario",
+    "in_degree": 0,
+    "out_degree": 28,
+    "total_degree": 28
+  },
+  {
+    "id": "mod:cards.serializers",
+    "in_degree": 5,
+    "out_degree": 20,
+    "total_degree": 25
+  },
+  {
+    "id": "func:roadmaps/recommendation_engine.py._calculate_portfolio_summary",
+    "in_degree": 1,
+    "out_degree": 23,
+    "total_degree": 24
+  },
+  {
+    "id": "func:cards/management/commands/import_credit_types.py.handle",
+    "in_degree": 1,
+    "out_degree": 22,
+    "total_degree": 23
+  },
+  {
+    "id": "func:roadmaps/recommendation_engine.py.float",
+    "in_degree": 22,
+    "out_degree": 0,
+    "total_degree": 22
+  },
+  {
+    "id": "func:roadmaps/recommendation_engine.py.generate_quick_recommendations",
+    "in_degree": 1,
+    "out_degree": 21,
+    "total_degree": 22
+  },
+  {
+    "id": "func:roadmaps/recommendation_engine.py._optimize_card_portfolio",
+    "in_degree": 1,
+    "out_degree": 20,
+    "total_degree": 21
+  },
+  {
+    "id": "cls:cards/management/commands/run_scenario.py.Command",
+    "in_degree": 1,
+    "out_degree": 19,
+    "total_degree": 20
+  },
+  {
+    "id": "mod:users.views",
+    "in_degree": 0,
+    "out_degree": 20,
+    "total_degree": 20
+  },
+  {
+    "id": "func:roadmaps/serializers.py.generate_recommendations",
+    "in_degree": 1,
+    "out_degree": 19,
+    "total_degree": 20
+  },
+  {
+    "id": "func:admin.py.import_sample_data",
+    "in_degree": 1,
+    "out_degree": 17,
+    "total_degree": 18
+  },
+  {
+    "id": "func:cards/serializers.py.create",
+    "in_degree": 12,
+    "out_degree": 6,
+    "total_degree": 18
+  },
+  {
+    "id": "func:roadmaps/recommendation_engine.py.get",
+    "in_degree": 18,
+    "out_degree": 0,
+    "total_degree": 18
+  },
+  {
+    "id": "mod:cards.management.commands.import_cards",
+    "in_degree": 0,
+    "out_degree": 17,
+    "total_degree": 17
+  },
+  {
+    "id": "mod:roadmaps.views",
+    "in_degree": 0,
+    "out_degree": 17,
+    "total_degree": 17
+  },
+  {
+    "id": "func:admin.py.run_command",
+    "in_degree": 14,
+    "out_degree": 3,
+    "total_degree": 17
+  },
+  {
+    "id": "func:cards/management/commands/import_cards.py.import_credit_cards",
+    "in_degree": 1,
+    "out_degree": 16,
+    "total_degree": 17
+  },
+  {
+    "id": "func:cards/management/commands/run_scenario.py.display_results",
+    "in_degree": 1,
+    "out_degree": 16,
+    "total_degree": 17
+  },
+  {
+    "id": "func:roadmaps/recommendation_engine.py._calculate_portfolio_allocation",
+    "in_degree": 1,
+    "out_degree": 16,
+    "total_degree": 17
+  },
+  {
+    "id": "func:admin.py.main",
+    "in_degree": 1,
+    "out_degree": 15,
+    "total_degree": 16
+  },
+  {
+    "id": "func:roadmaps/recommendation_engine.py._calculate_scenario_portfolio_value",
+    "in_degree": 1,
+    "out_degree": 15,
+    "total_degree": 16
+  },
+  {
+    "id": "func:roadmaps/recommendation_engine.py._select_optimal_card_combination",
+    "in_degree": 1,
+    "out_degree": 15,
+    "total_degree": 16
+  },
+  {
+    "id": "mod:cards.admin",
+    "in_degree": 0,
+    "out_degree": 15,
+    "total_degree": 15
+  },
+  {
+    "id": "func:admin.py.full_setup",
+    "in_degree": 1,
+    "out_degree": 14,
+    "total_degree": 15
+  },
+  {
+    "id": "func:cards/management/commands/import_cards.py.handle",
+    "in_degree": 1,
+    "out_degree": 14,
+    "total_degree": 15
+  },
+  {
+    "id": "func:cards/management/commands/import_cards.py.import_personal_cards",
+    "in_degree": 1,
+    "out_degree": 14,
+    "total_degree": 15
+  },
+  {
+    "id": "func:cards/management/commands/import_spending_credits.py.handle",
+    "in_degree": 1,
+    "out_degree": 14,
+    "total_degree": 15
+  },
+  {
+    "id": "func:cards/management/commands/run_scenario.py.create_test_scenario",
+    "in_degree": 1,
+    "out_degree": 14,
+    "total_degree": 15
+  },
+  {
+    "id": "func:roadmaps/recommendation_engine.py._generate_portfolio_optimized_recommendations",
+    "in_degree": 1,
+    "out_degree": 14,
+    "total_degree": 15
+  },
+  {
+    "id": "mod:os",
+    "in_degree": 14,
+    "out_degree": 0,
+    "total_degree": 14
+  },
+  {
+    "id": "func:cards/management/commands/run_scenario.py.validate_expectations",
+    "in_degree": 1,
+    "out_degree": 13,
+    "total_degree": 14
+  },
+  {
+    "id": "func:cards/scenario_loader.py.load_from_directory",
+    "in_degree": 1,
+    "out_degree": 13,
+    "total_degree": 14
+  },
+  {
+    "id": "func:cards/views.py.card_search_view",
+    "in_degree": 1,
+    "out_degree": 13,
+    "total_degree": 14
+  },
+  {
+    "id": "func:convert_cards_data.py.main",
+    "in_degree": 1,
+    "out_degree": 13,
+    "total_degree": 14
+  },
+  {
+    "id": "func:roadmaps/recommendation_engine.py._find_new_cards",
+    "in_degree": 1,
+    "out_degree": 13,
+    "total_degree": 14
+  },
+  {
+    "id": "cls:cards/models.py.models.Model",
+    "in_degree": 13,
+    "out_degree": 0,
+    "total_degree": 13
+  },
+  {
+    "id": "mod:roadmaps.serializers",
+    "in_degree": 0,
+    "out_degree": 13,
+    "total_degree": 13
+  },
+  {
+    "id": "func:cards/management/commands/run_scenario.py.create_test_setup_data",
+    "in_degree": 1,
+    "out_degree": 12,
+    "total_degree": 13
+  },
+  {
+    "id": "func:cards/views.py.Response",
+    "in_degree": 13,
+    "out_degree": 0,
+    "total_degree": 13
+  },
+  {
+    "id": "func:cards/views.py.api_view",
+    "in_degree": 13,
+    "out_degree": 0,
+    "total_degree": 13
+  },
+  {
+    "id": "func:roadmaps/recommendation_engine.py._calculate_card_rewards_breakdown",
+    "in_degree": 1,
+    "out_degree": 12,
+    "total_degree": 13
+  },
+  {
+    "id": "func:roadmaps/recommendation_engine.py._calculate_spending_efficiency",
+    "in_degree": 1,
+    "out_degree": 12,
+    "total_degree": 13
+  },
+  {
+    "id": "func:roadmaps/recommendation_engine.py.filter",
+    "in_degree": 13,
+    "out_degree": 0,
+    "total_degree": 13
+  },
+  {
+    "id": "func:setup_data.py.main",
+    "in_degree": 1,
+    "out_degree": 12,
+    "total_degree": 13
+  },
+  {
+    "id": "func:users/serializers.py.create",
+    "in_degree": 1,
+    "out_degree": 12,
+    "total_degree": 13
+  },
+  {
+    "id": "cls:cards/management/commands/import_cards.py.Command",
+    "in_degree": 1,
+    "out_degree": 11,
+    "total_degree": 12
+  },
+  {
+    "id": "cls:cards/serializers.py.serializers.ModelSerializer",
+    "in_degree": 12,
+    "out_degree": 0,
+    "total_degree": 12
+  },
+  {
+    "id": "mod:cards.management.commands.import_credit_types",
+    "in_degree": 0,
+    "out_degree": 12,
+    "total_degree": 12
+  },
+  {
+    "id": "mod:cards.scenario_loader",
+    "in_degree": 1,
+    "out_degree": 11,
+    "total_degree": 12
+  },
+  {
+    "id": "mod:users.serializers",
+    "in_degree": 0,
+    "out_degree": 12,
+    "total_degree": 12
+  },
+  {
+    "id": "func:cards/views.py.categories_with_rewards_view",
+    "in_degree": 1,
+    "out_degree": 11,
+    "total_degree": 12
+  },
+  {
+    "id": "func:convert_cards_data.py.convert_card",
+    "in_degree": 2,
+    "out_degree": 10,
+    "total_degree": 12
+  },
+  {
+    "id": "func:roadmaps/recommendation_engine.py._calculate_smart_card_value",
+    "in_degree": 1,
+    "out_degree": 11,
+    "total_degree": 12
+  },
+  {
+    "id": "func:roadmaps/recommendation_engine.py._evaluate_portfolio_scenario",
+    "in_degree": 1,
+    "out_degree": 11,
+    "total_degree": 12
+  },
+  {
+    "id": "func:roadmaps/serializers.py.create",
+    "in_degree": 3,
+    "out_degree": 9,
+    "total_degree": 12
+  },
+  {
+    "id": "func:roadmaps/views.py.quick_recommendation_view",
+    "in_degree": 1,
+    "out_degree": 11,
+    "total_degree": 12
+  },
+  {
+    "id": "func:roadmaps/views.py.roadmap_stats_view",
+    "in_degree": 1,
+    "out_degree": 11,
+    "total_degree": 12
+  },
+  {
+    "id": "func:users/views.py.toggle_user_card",
+    "in_degree": 1,
+    "out_degree": 11,
+    "total_degree": 12
+  },
+  {
+    "id": "func:admin.py.print",
+    "in_degree": 11,
+    "out_degree": 0,
+    "total_degree": 11
+  },
+  {
+    "id": "func:cards/management/commands/run_scenario.py.run_scenario",
+    "in_degree": 1,
+    "out_degree": 10,
+    "total_degree": 11
+  },
+  {
+    "id": "func:cards/views.py.add_user_card",
+    "in_degree": 1,
+    "out_degree": 10,
+    "total_degree": 11
+  },
+  {
+    "id": "func:cards/views.py.category_detail_view",
+    "in_degree": 1,
+    "out_degree": 10,
+    "total_degree": 11
+  },
+  {
+    "id": "func:cards/views.py.str",
+    "in_degree": 11,
+    "out_degree": 0,
+    "total_degree": 11
+  },
+  {
+    "id": "func:roadmaps/recommendation_engine.py._get_filtered_cards",
+    "in_degree": 1,
+    "out_degree": 10,
+    "total_degree": 11
+  },
+  {
+    "id": "func:roadmaps/recommendation_engine.py._select_best_new_cards",
+    "in_degree": 1,
+    "out_degree": 10,
+    "total_degree": 11
+  },
+  {
+    "id": "func:roadmaps/recommendation_engine.py.self._get_signup_bonus_value",
+    "in_degree": 11,
+    "out_degree": 0,
+    "total_degree": 11
+  },
+  {
+    "id": "func:cards/management/commands/run_scenario.py.create_credit_card_from_name",
+    "in_degree": 1,
+    "out_degree": 9,
+    "total_degree": 10
+  },
+  {
+    "id": "func:cards/management/commands/run_scenario.py.create_credit_card_from_slug",
+    "in_degree": 1,
+    "out_degree": 9,
+    "total_degree": 10
+  },
+  {
+    "id": "func:cards/management/commands/run_scenario.py.handle",
+    "in_degree": 1,
+    "out_degree": 9,
+    "total_degree": 10
+  },
+  {
+    "id": "func:cards/management/commands/run_scenario.py.validate_portfolio_optimization",
+    "in_degree": 1,
+    "out_degree": 9,
+    "total_degree": 10
+  },
+  {
+    "id": "func:roadmaps/recommendation_engine.py._calculate_card_allocated_breakdown",
+    "in_degree": 1,
+    "out_degree": 9,
+    "total_degree": 10
+  },
+  {
+    "id": "func:roadmaps/recommendation_engine.py.generate_roadmap",
+    "in_degree": 1,
+    "out_degree": 9,
+    "total_degree": 10
+  },
+  {
+    "id": "func:roadmaps/views.py.generate_roadmap_view",
+    "in_degree": 1,
+    "out_degree": 9,
+    "total_degree": 10
+  },
+  {
+    "id": "cls:cards/admin.py.admin.ModelAdmin",
+    "in_degree": 9,
+    "out_degree": 0,
+    "total_degree": 9
+  },
+  {
+    "id": "mod:json",
+    "in_degree": 9,
+    "out_degree": 0,
+    "total_degree": 9
+  },
+  {
+    "id": "func:admin.py.setup_google_oauth",
+    "in_degree": 2,
+    "out_degree": 7,
+    "total_degree": 9
+  },
+  {
+    "id": "func:admin.py.show_interactive_menu",
+    "in_degree": 2,
+    "out_degree": 7,
+    "total_degree": 9
+  },
+  {
+    "id": "func:cards/management/commands/import_cards.py.import_spending_categories",
+    "in_degree": 1,
+    "out_degree": 8,
+    "total_degree": 9
+  },
+  {
+    "id": "func:cards/management/commands/run_scenario.py.list_scenarios",
+    "in_degree": 1,
+    "out_degree": 8,
+    "total_degree": 9
+  },
+  {
+    "id": "func:cards/scenario_loader.py.load_scenarios",
+    "in_degree": 1,
+    "out_degree": 8,
+    "total_degree": 9
+  },
+  {
+    "id": "func:cards/views.py.card_recommendations_preview",
+    "in_degree": 1,
+    "out_degree": 8,
+    "total_degree": 9
+  },
+  {
+    "id": "func:cards/views.py.update_user_card",
+    "in_degree": 1,
+    "out_degree": 8,
+    "total_degree": 9
+  },
+  {
+    "id": "func:roadmaps/recommendation_engine.py.__init__",
+    "in_degree": 1,
+    "out_degree": 8,
+    "total_degree": 9
+  },
+  {
+    "id": "func:roadmaps/recommendation_engine.py._get_best_signup_bonus_card",
+    "in_degree": 1,
+    "out_degree": 8,
+    "total_degree": 9
+  },
+  {
+    "id": "func:roadmaps/recommendation_engine.py._get_signup_bonus_value",
+    "in_degree": 1,
+    "out_degree": 8,
+    "total_degree": 9
+  },
+  {
+    "id": "func:roadmaps/recommendation_engine.py.calculate_portfolio_value",
+    "in_degree": 2,
+    "out_degree": 7,
+    "total_degree": 9
+  },
+  {
+    "id": "func:roadmaps/recommendation_engine.py.min",
+    "in_degree": 9,
+    "out_degree": 0,
+    "total_degree": 9
+  },
+  {
+    "id": "func:roadmaps/recommendation_engine.py.sum",
+    "in_degree": 9,
+    "out_degree": 0,
+    "total_degree": 9
+  },
+  {
+    "id": "func:split_scenarios.py.write_scenario_files",
+    "in_degree": 1,
+    "out_degree": 8,
+    "total_degree": 9
+  },
+  {
+    "id": "func:users/views.py.get_user_cards_details",
+    "in_degree": 1,
+    "out_degree": 8,
+    "total_degree": 9
+  },
+  {
+    "id": "mod:cards.management.commands.import_spending_credits",
+    "in_degree": 0,
+    "out_degree": 8,
+    "total_degree": 8
+  },
+  {
+    "id": "mod:convert_cards_data",
+    "in_degree": 0,
+    "out_degree": 8,
+    "total_degree": 8
+  },
+  {
+    "id": "mod:roadmaps.admin",
+    "in_degree": 0,
+    "out_degree": 8,
+    "total_degree": 8
+  },
+  {
+    "id": "mod:roadmaps.models",
+    "in_degree": 0,
+    "out_degree": 8,
+    "total_degree": 8
+  },
+  {
+    "id": "mod:split_scenarios",
+    "in_degree": 0,
+    "out_degree": 8,
+    "total_degree": 8
+  }
+]

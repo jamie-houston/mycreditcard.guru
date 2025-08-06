@@ -117,3 +117,4 @@ production_settings.py
 # Task files
 tasks.json
 tasks/ 
+.repo_docs/

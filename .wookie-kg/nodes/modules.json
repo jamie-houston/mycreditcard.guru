@@ -1,0 +1,876 @@
+{
+  "mod:admin": {
+    "attributes": {
+      "patterns": [],
+      "purpose": "",
+      "role": ""
+    },
+    "id": "mod:admin",
+    "name": "admin",
+    "path": "admin.py",
+    "type": "module"
+  },
+  "mod:analyze_scenarios": {
+    "attributes": {
+      "patterns": [],
+      "purpose": "",
+      "role": ""
+    },
+    "id": "mod:analyze_scenarios",
+    "name": "analyze_scenarios",
+    "path": "analyze_scenarios.py",
+    "type": "module"
+  },
+  "mod:argparse": {
+    "attributes": {
+      "pending": true
+    },
+    "id": "mod:argparse",
+    "name": "argparse",
+    "path": "pending:argparse",
+    "type": "module"
+  },
+  "mod:cards.__init__": {
+    "attributes": {
+      "patterns": [],
+      "purpose": "",
+      "role": ""
+    },
+    "id": "mod:cards.__init__",
+    "name": "__init__",
+    "path": "cards/__init__.py",
+    "type": "module"
+  },
+  "mod:cards.admin": {
+    "attributes": {
+      "patterns": [],
+      "purpose": "",
+      "role": ""
+    },
+    "id": "mod:cards.admin",
+    "name": "admin",
+    "path": "cards/admin.py",
+    "type": "module"
+  },
+  "mod:cards.apps": {
+    "attributes": {
+      "patterns": [],
+      "purpose": "",
+      "role": ""
+    },
+    "id": "mod:cards.apps",
+    "name": "apps",
+    "path": "cards/apps.py",
+    "type": "module"
+  },
+  "mod:cards.management.__init__": {
+    "attributes": {
+      "patterns": [],
+      "purpose": "",
+      "role": ""
+    },
+    "id": "mod:cards.management.__init__",
+    "name": "__init__",
+    "path": "cards/management/__init__.py",
+    "type": "module"
+  },
+  "mod:cards.management.commands.__init__": {
+    "attributes": {
+      "patterns": [],
+      "purpose": "",
+      "role": ""
+    },
+    "id": "mod:cards.management.commands.__init__",
+    "name": "__init__",
+    "path": "cards/management/commands/__init__.py",
+    "type": "module"
+  },
+  "mod:cards.management.commands.import_cards": {
+    "attributes": {
+      "patterns": [],
+      "purpose": "",
+      "role": ""
+    },
+    "id": "mod:cards.management.commands.import_cards",
+    "name": "import_cards",
+    "path": "cards/management/commands/import_cards.py",
+    "type": "module"
+  },
+  "mod:cards.management.commands.import_credit_types": {
+    "attributes": {
+      "patterns": [],
+      "purpose": "",
+      "role": ""
+    },
+    "id": "mod:cards.management.commands.import_credit_types",
+    "name": "import_credit_types",
+    "path": "cards/management/commands/import_credit_types.py",
+    "type": "module"
+  },
+  "mod:cards.management.commands.import_spending_credits": {
+    "attributes": {
+      "patterns": [],
+      "purpose": "",
+      "role": ""
+    },
+    "id": "mod:cards.management.commands.import_spending_credits",
+    "name": "import_spending_credits",
+    "path": "cards/management/commands/import_spending_credits.py",
+    "type": "module"
+  },
+  "mod:cards.management.commands.run_scenario": {
+    "attributes": {
+      "patterns": [],
+      "purpose": "",
+      "role": ""
+    },
+    "id": "mod:cards.management.commands.run_scenario",
+    "name": "run_scenario",
+    "path": "cards/management/commands/run_scenario.py",
+    "type": "module"
+  },
+  "mod:cards.migrations.0001_initial": {
+    "attributes": {
+      "patterns": [],
+      "purpose": "",
+      "role": ""
+    },
+    "id": "mod:cards.migrations.0001_initial",
+    "name": "0001_initial",
+    "path": "cards/migrations/0001_initial.py",
+    "type": "module"
+  },
+  "mod:cards.migrations.__init__": {
+    "attributes": {
+      "patterns": [],
+      "purpose": "",
+      "role": ""
+    },
+    "id": "mod:cards.migrations.__init__",
+    "name": "__init__",
+    "path": "cards/migrations/__init__.py",
+    "type": "module"
+  },
+  "mod:cards.models": {
+    "attributes": {
+      "patterns": [],
+      "purpose": "",
+      "role": ""
+    },
+    "id": "mod:cards.models",
+    "name": "models",
+    "path": "cards/models.py",
+    "type": "module"
+  },
+  "mod:cards.scenario_loader": {
+    "attributes": {
+      "patterns": [],
+      "purpose": "",
+      "role": ""
+    },
+    "id": "mod:cards.scenario_loader",
+    "name": "scenario_loader",
+    "path": "cards/scenario_loader.py",
+    "type": "module"
+  },
+  "mod:cards.serializers": {
+    "attributes": {
+      "patterns": [],
+      "purpose": "",
+      "role": ""
+    },
+    "id": "mod:cards.serializers",
+    "name": "serializers",
+    "path": "cards/serializers.py",
+    "type": "module"
+  },
+  "mod:cards.tests": {
+    "attributes": {
+      "patterns": [],
+      "purpose": "",
+      "role": ""
+    },
+    "id": "mod:cards.tests",
+    "name": "tests",
+    "path": "cards/tests.py",
+    "type": "module"
+  },
+  "mod:cards.urls": {
+    "attributes": {
+      "patterns": [],
+      "purpose": "",
+      "role": ""
+    },
+    "id": "mod:cards.urls",
+    "name": "urls",
+    "path": "cards/urls.py",
+    "type": "module"
+  },
+  "mod:cards.views": {
+    "attributes": {
+      "patterns": [],
+      "purpose": "",
+      "role": ""
+    },
+    "id": "mod:cards.views",
+    "name": "views",
+    "path": "cards/views.py",
+    "type": "module"
+  },
+  "mod:collections": {
+    "attributes": {
+      "pending": true
+    },
+    "id": "mod:collections",
+    "name": "collections",
+    "path": "pending:collections",
+    "type": "module"
+  },
+  "mod:convert_cards_data": {
+    "attributes": {
+      "patterns": [],
+      "purpose": "",
+      "role": ""
+    },
+    "id": "mod:convert_cards_data",
+    "name": "convert_cards_data",
+    "path": "convert_cards_data.py",
+    "type": "module"
+  },
+  "mod:creditcard_guru.__init__": {
+    "attributes": {
+      "patterns": [],
+      "purpose": "",
+      "role": ""
+    },
+    "id": "mod:creditcard_guru.__init__",
+    "name": "__init__",
+    "path": "creditcard_guru/__init__.py",
+    "type": "module"
+  },
+  "mod:creditcard_guru.asgi": {
+    "attributes": {
+      "patterns": [],
+      "purpose": "",
+      "role": ""
+    },
+    "id": "mod:creditcard_guru.asgi",
+    "name": "asgi",
+    "path": "creditcard_guru/asgi.py",
+    "type": "module"
+  },
+  "mod:creditcard_guru.settings": {
+    "attributes": {
+      "patterns": [],
+      "purpose": "",
+      "role": ""
+    },
+    "id": "mod:creditcard_guru.settings",
+    "name": "settings",
+    "path": "creditcard_guru/settings.py",
+    "type": "module"
+  },
+  "mod:creditcard_guru.urls": {
+    "attributes": {
+      "patterns": [],
+      "purpose": "",
+      "role": ""
+    },
+    "id": "mod:creditcard_guru.urls",
+    "name": "urls",
+    "path": "creditcard_guru/urls.py",
+    "type": "module"
+  },
+  "mod:creditcard_guru.wsgi": {
+    "attributes": {
+      "patterns": [],
+      "purpose": "",
+      "role": ""
+    },
+    "id": "mod:creditcard_guru.wsgi",
+    "name": "wsgi",
+    "path": "creditcard_guru/wsgi.py",
+    "type": "module"
+  },
+  "mod:datetime": {
+    "attributes": {
+      "pending": true
+    },
+    "id": "mod:datetime",
+    "name": "datetime",
+    "path": "pending:datetime",
+    "type": "module"
+  },
+  "mod:decimal": {
+    "attributes": {
+      "pending": true
+    },
+    "id": "mod:decimal",
+    "name": "decimal",
+    "path": "pending:decimal",
+    "type": "module"
+  },
+  "mod:decouple": {
+    "attributes": {
+      "pending": true
+    },
+    "id": "mod:decouple",
+    "name": "decouple",
+    "path": "pending:decouple",
+    "type": "module"
+  },
+  "mod:dj_database_url": {
+    "attributes": {
+      "pending": true
+    },
+    "id": "mod:dj_database_url",
+    "name": "dj_database_url",
+    "path": "pending:dj_database_url",
+    "type": "module"
+  },
+  "mod:django": {
+    "attributes": {
+      "pending": true
+    },
+    "id": "mod:django",
+    "name": "django",
+    "path": "pending:django",
+    "type": "module"
+  },
+  "mod:django/conf": {
+    "attributes": {
+      "pending": true
+    },
+    "id": "mod:django/conf",
+    "name": "conf",
+    "path": "pending:django.conf",
+    "type": "module"
+  },
+  "mod:django/contrib": {
+    "attributes": {
+      "pending": true
+    },
+    "id": "mod:django/contrib",
+    "name": "contrib",
+    "path": "pending:django.contrib",
+    "type": "module"
+  },
+  "mod:django/core/management": {
+    "attributes": {
+      "pending": true
+    },
+    "id": "mod:django/core/management",
+    "name": "management",
+    "path": "pending:django.core.management",
+    "type": "module"
+  },
+  "mod:django/core/management/base": {
+    "attributes": {
+      "pending": true
+    },
+    "id": "mod:django/core/management/base",
+    "name": "base",
+    "path": "pending:django.core.management.base",
+    "type": "module"
+  },
+  "mod:django/core/validators": {
+    "attributes": {
+      "pending": true
+    },
+    "id": "mod:django/core/validators",
+    "name": "validators",
+    "path": "pending:django.core.validators",
+    "type": "module"
+  },
+  "mod:django/db": {
+    "attributes": {
+      "pending": true
+    },
+    "id": "mod:django/db",
+    "name": "db",
+    "path": "pending:django.db",
+    "type": "module"
+  },
+  "mod:django/db/models/deletion": {
+    "attributes": {
+      "pending": true
+    },
+    "id": "mod:django/db/models/deletion",
+    "name": "deletion",
+    "path": "pending:django.db.models.deletion",
+    "type": "module"
+  },
+  "mod:django/http": {
+    "attributes": {
+      "pending": true
+    },
+    "id": "mod:django/http",
+    "name": "http",
+    "path": "pending:django.http",
+    "type": "module"
+  },
+  "mod:django/shortcuts": {
+    "attributes": {
+      "pending": true
+    },
+    "id": "mod:django/shortcuts",
+    "name": "shortcuts",
+    "path": "pending:django.shortcuts",
+    "type": "module"
+  },
+  "mod:django/test": {
+    "attributes": {
+      "pending": true
+    },
+    "id": "mod:django/test",
+    "name": "test",
+    "path": "pending:django.test",
+    "type": "module"
+  },
+  "mod:django/utils": {
+    "attributes": {
+      "pending": true
+    },
+    "id": "mod:django/utils",
+    "name": "utils",
+    "path": "pending:django.utils",
+    "type": "module"
+  },
+  "mod:django/utils/dateparse": {
+    "attributes": {
+      "pending": true
+    },
+    "id": "mod:django/utils/dateparse",
+    "name": "dateparse",
+    "path": "pending:django.utils.dateparse",
+    "type": "module"
+  },
+  "mod:django/utils/text": {
+    "attributes": {
+      "pending": true
+    },
+    "id": "mod:django/utils/text",
+    "name": "text",
+    "path": "pending:django.utils.text",
+    "type": "module"
+  },
+  "mod:django_filters/rest_framework": {
+    "attributes": {
+      "pending": true
+    },
+    "id": "mod:django_filters/rest_framework",
+    "name": "rest_framework",
+    "path": "pending:django_filters.rest_framework",
+    "type": "module"
+  },
+  "mod:glob": {
+    "attributes": {
+      "pending": true
+    },
+    "id": "mod:glob",
+    "name": "glob",
+    "path": "pending:glob",
+    "type": "module"
+  },
+  "mod:itertools": {
+    "attributes": {
+      "pending": true
+    },
+    "id": "mod:itertools",
+    "name": "itertools",
+    "path": "pending:itertools",
+    "type": "module"
+  },
+  "mod:json": {
+    "attributes": {
+      "pending": true
+    },
+    "id": "mod:json",
+    "name": "json",
+    "path": "pending:json",
+    "type": "module"
+  },
+  "mod:manage": {
+    "attributes": {
+      "patterns": [],
+      "purpose": "",
+      "role": ""
+    },
+    "id": "mod:manage",
+    "name": "manage",
+    "path": "manage.py",
+    "type": "module"
+  },
+  "mod:os": {
+    "attributes": {
+      "pending": true
+    },
+    "id": "mod:os",
+    "name": "os",
+    "path": "pending:os",
+    "type": "module"
+  },
+  "mod:pathlib": {
+    "attributes": {
+      "pending": true
+    },
+    "id": "mod:pathlib",
+    "name": "pathlib",
+    "path": "pending:pathlib",
+    "type": "module"
+  },
+  "mod:re": {
+    "attributes": {
+      "pending": true
+    },
+    "id": "mod:re",
+    "name": "re",
+    "path": "pending:re",
+    "type": "module"
+  },
+  "mod:rest_framework": {
+    "attributes": {
+      "pending": true
+    },
+    "id": "mod:rest_framework",
+    "name": "rest_framework",
+    "path": "pending:rest_framework",
+    "type": "module"
+  },
+  "mod:rest_framework/decorators": {
+    "attributes": {
+      "pending": true
+    },
+    "id": "mod:rest_framework/decorators",
+    "name": "decorators",
+    "path": "pending:rest_framework.decorators",
+    "type": "module"
+  },
+  "mod:rest_framework/pagination": {
+    "attributes": {
+      "pending": true
+    },
+    "id": "mod:rest_framework/pagination",
+    "name": "pagination",
+    "path": "pending:rest_framework.pagination",
+    "type": "module"
+  },
+  "mod:rest_framework/permissions": {
+    "attributes": {
+      "pending": true
+    },
+    "id": "mod:rest_framework/permissions",
+    "name": "permissions",
+    "path": "pending:rest_framework.permissions",
+    "type": "module"
+  },
+  "mod:rest_framework/response": {
+    "attributes": {
+      "pending": true
+    },
+    "id": "mod:rest_framework/response",
+    "name": "response",
+    "path": "pending:rest_framework.response",
+    "type": "module"
+  },
+  "mod:roadmaps.__init__": {
+    "attributes": {
+      "patterns": [],
+      "purpose": "",
+      "role": ""
+    },
+    "id": "mod:roadmaps.__init__",
+    "name": "__init__",
+    "path": "roadmaps/__init__.py",
+    "type": "module"
+  },
+  "mod:roadmaps.admin": {
+    "attributes": {
+      "patterns": [],
+      "purpose": "",
+      "role": ""
+    },
+    "id": "mod:roadmaps.admin",
+    "name": "admin",
+    "path": "roadmaps/admin.py",
+    "type": "module"
+  },
+  "mod:roadmaps.apps": {
+    "attributes": {
+      "patterns": [],
+      "purpose": "",
+      "role": ""
+    },
+    "id": "mod:roadmaps.apps",
+    "name": "apps",
+    "path": "roadmaps/apps.py",
+    "type": "module"
+  },
+  "mod:roadmaps.migrations.0001_initial": {
+    "attributes": {
+      "patterns": [],
+      "purpose": "",
+      "role": ""
+    },
+    "id": "mod:roadmaps.migrations.0001_initial",
+    "name": "0001_initial",
+    "path": "roadmaps/migrations/0001_initial.py",
+    "type": "module"
+  },
+  "mod:roadmaps.migrations.__init__": {
+    "attributes": {
+      "patterns": [],
+      "purpose": "",
+      "role": ""
+    },
+    "id": "mod:roadmaps.migrations.__init__",
+    "name": "__init__",
+    "path": "roadmaps/migrations/__init__.py",
+    "type": "module"
+  },
+  "mod:roadmaps.models": {
+    "attributes": {
+      "patterns": [],
+      "purpose": "",
+      "role": ""
+    },
+    "id": "mod:roadmaps.models",
+    "name": "models",
+    "path": "roadmaps/models.py",
+    "type": "module"
+  },
+  "mod:roadmaps.recommendation_engine": {
+    "attributes": {
+      "patterns": [],
+      "purpose": "",
+      "role": ""
+    },
+    "id": "mod:roadmaps.recommendation_engine",
+    "name": "recommendation_engine",
+    "path": "roadmaps/recommendation_engine.py",
+    "type": "module"
+  },
+  "mod:roadmaps.serializers": {
+    "attributes": {
+      "patterns": [],
+      "purpose": "",
+      "role": ""
+    },
+    "id": "mod:roadmaps.serializers",
+    "name": "serializers",
+    "path": "roadmaps/serializers.py",
+    "type": "module"
+  },
+  "mod:roadmaps.tests": {
+    "attributes": {
+      "patterns": [],
+      "purpose": "",
+      "role": ""
+    },
+    "id": "mod:roadmaps.tests",
+    "name": "tests",
+    "path": "roadmaps/tests.py",
+    "type": "module"
+  },
+  "mod:roadmaps.urls": {
+    "attributes": {
+      "patterns": [],
+      "purpose": "",
+      "role": ""
+    },
+    "id": "mod:roadmaps.urls",
+    "name": "urls",
+    "path": "roadmaps/urls.py",
+    "type": "module"
+  },
+  "mod:roadmaps.views": {
+    "attributes": {
+      "patterns": [],
+      "purpose": "",
+      "role": ""
+    },
+    "id": "mod:roadmaps.views",
+    "name": "views",
+    "path": "roadmaps/views.py",
+    "type": "module"
+  },
+  "mod:setup_data": {
+    "attributes": {
+      "patterns": [],
+      "purpose": "",
+      "role": ""
+    },
+    "id": "mod:setup_data",
+    "name": "setup_data",
+    "path": "setup_data.py",
+    "type": "module"
+  },
+  "mod:split_scenarios": {
+    "attributes": {
+      "patterns": [],
+      "purpose": "",
+      "role": ""
+    },
+    "id": "mod:split_scenarios",
+    "name": "split_scenarios",
+    "path": "split_scenarios.py",
+    "type": "module"
+  },
+  "mod:subprocess": {
+    "attributes": {
+      "pending": true
+    },
+    "id": "mod:subprocess",
+    "name": "subprocess",
+    "path": "pending:subprocess",
+    "type": "module"
+  },
+  "mod:sys": {
+    "attributes": {
+      "pending": true
+    },
+    "id": "mod:sys",
+    "name": "sys",
+    "path": "pending:sys",
+    "type": "module"
+  },
+  "mod:typing": {
+    "attributes": {
+      "pending": true
+    },
+    "id": "mod:typing",
+    "name": "typing",
+    "path": "pending:typing",
+    "type": "module"
+  },
+  "mod:users.__init__": {
+    "attributes": {
+      "patterns": [],
+      "purpose": "",
+      "role": ""
+    },
+    "id": "mod:users.__init__",
+    "name": "__init__",
+    "path": "users/__init__.py",
+    "type": "module"
+  },
+  "mod:users.admin": {
+    "attributes": {
+      "patterns": [],
+      "purpose": "",
+      "role": ""
+    },
+    "id": "mod:users.admin",
+    "name": "admin",
+    "path": "users/admin.py",
+    "type": "module"
+  },
+  "mod:users.apps": {
+    "attributes": {
+      "patterns": [],
+      "purpose": "",
+      "role": ""
+    },
+    "id": "mod:users.apps",
+    "name": "apps",
+    "path": "users/apps.py",
+    "type": "module"
+  },
+  "mod:users.migrations.0001_initial": {
+    "attributes": {
+      "patterns": [],
+      "purpose": "",
+      "role": ""
+    },
+    "id": "mod:users.migrations.0001_initial",
+    "name": "0001_initial",
+    "path": "users/migrations/0001_initial.py",
+    "type": "module"
+  },
+  "mod:users.migrations.__init__": {
+    "attributes": {
+      "patterns": [],
+      "purpose": "",
+      "role": ""
+    },
+    "id": "mod:users.migrations.__init__",
+    "name": "__init__",
+    "path": "users/migrations/__init__.py",
+    "type": "module"
+  },
+  "mod:users.models": {
+    "attributes": {
+      "patterns": [],
+      "purpose": "",
+      "role": ""
+    },
+    "id": "mod:users.models",
+    "name": "models",
+    "path": "users/models.py",
+    "type": "module"
+  },
+  "mod:users.serializers": {
+    "attributes": {
+      "patterns": [],
+      "purpose": "",
+      "role": ""
+    },
+    "id": "mod:users.serializers",
+    "name": "serializers",
+    "path": "users/serializers.py",
+    "type": "module"
+  },
+  "mod:users.tests": {
+    "attributes": {
+      "patterns": [],
+      "purpose": "",
+      "role": ""
+    },
+    "id": "mod:users.tests",
+    "name": "tests",
+    "path": "users/tests.py",
+    "type": "module"
+  },
+  "mod:users.urls": {
+    "attributes": {
+      "patterns": [],
+      "purpose": "",
+      "role": ""
+    },
+    "id": "mod:users.urls",
+    "name": "urls",
+    "path": "users/urls.py",
+    "type": "module"
+  },
+  "mod:users.views": {
+    "attributes": {
+      "patterns": [],
+      "purpose": "",
+      "role": ""
+    },
+    "id": "mod:users.views",
+    "name": "views",
+    "path": "users/views.py",
+    "type": "module"
+  },
+  "mod:uuid": {
+    "attributes": {
+      "pending": true
+    },
+    "id": "mod:uuid",
+    "name": "uuid",
+    "path": "pending:uuid",
+    "type": "module"
+  },
+  "mod:wsgi": {
+    "attributes": {
+      "patterns": [],
+      "purpose": "",
+      "role": ""
+    },
+    "id": "mod:wsgi",
+    "name": "wsgi",
+    "path": "wsgi.py",
+    "type": "module"
+  }
+}

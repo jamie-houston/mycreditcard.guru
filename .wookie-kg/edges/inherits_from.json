@@ -1,0 +1,442 @@
+[
+  {
+    "source": "cls:cards/admin.py.IssuerAdmin",
+    "target": "cls:cards/admin.py.admin.ModelAdmin",
+    "type": "inherits_from"
+  },
+  {
+    "source": "cls:cards/admin.py.RewardTypeAdmin",
+    "target": "cls:cards/admin.py.admin.ModelAdmin",
+    "type": "inherits_from"
+  },
+  {
+    "source": "cls:cards/admin.py.SpendingCategoryAdmin",
+    "target": "cls:cards/admin.py.admin.ModelAdmin",
+    "type": "inherits_from"
+  },
+  {
+    "source": "cls:cards/admin.py.RewardCategoryInline",
+    "target": "cls:cards/admin.py.admin.TabularInline",
+    "type": "inherits_from"
+  },
+  {
+    "source": "cls:cards/admin.py.CardCreditInline",
+    "target": "cls:cards/admin.py.admin.TabularInline",
+    "type": "inherits_from"
+  },
+  {
+    "source": "cls:cards/admin.py.CreditCardAdmin",
+    "target": "cls:cards/admin.py.admin.ModelAdmin",
+    "type": "inherits_from"
+  },
+  {
+    "source": "cls:cards/admin.py.RewardCategoryAdmin",
+    "target": "cls:cards/admin.py.admin.ModelAdmin",
+    "type": "inherits_from"
+  },
+  {
+    "source": "cls:cards/admin.py.CreditTypeAdmin",
+    "target": "cls:cards/admin.py.admin.ModelAdmin",
+    "type": "inherits_from"
+  },
+  {
+    "source": "cls:cards/admin.py.CardCreditAdmin",
+    "target": "cls:cards/admin.py.admin.ModelAdmin",
+    "type": "inherits_from"
+  },
+  {
+    "source": "cls:cards/admin.py.SpendingAmountInline",
+    "target": "cls:cards/admin.py.admin.TabularInline",
+    "type": "inherits_from"
+  },
+  {
+    "source": "cls:cards/admin.py.UserCreditPreferenceInline",
+    "target": "cls:cards/admin.py.admin.TabularInline",
+    "type": "inherits_from"
+  },
+  {
+    "source": "cls:cards/admin.py.UserSpendingProfileAdmin",
+    "target": "cls:cards/admin.py.admin.ModelAdmin",
+    "type": "inherits_from"
+  },
+  {
+    "source": "cls:cards/admin.py.UserCardAdmin",
+    "target": "cls:cards/admin.py.admin.ModelAdmin",
+    "type": "inherits_from"
+  },
+  {
+    "source": "cls:cards/apps.py.CardsConfig",
+    "target": "cls:cards/apps.py.AppConfig",
+    "type": "inherits_from"
+  },
+  {
+    "source": "cls:cards/management/commands/import_cards.py.Command",
+    "target": "cls:cards/management/commands/import_cards.py.BaseCommand",
+    "type": "inherits_from"
+  },
+  {
+    "source": "cls:cards/management/commands/import_credit_types.py.Command",
+    "target": "cls:cards/management/commands/import_credit_types.py.BaseCommand",
+    "type": "inherits_from"
+  },
+  {
+    "source": "cls:cards/management/commands/import_spending_credits.py.Command",
+    "target": "cls:cards/management/commands/import_spending_credits.py.BaseCommand",
+    "type": "inherits_from"
+  },
+  {
+    "source": "cls:cards/management/commands/run_scenario.py.Command",
+    "target": "cls:cards/management/commands/run_scenario.py.BaseCommand",
+    "type": "inherits_from"
+  },
+  {
+    "source": "cls:cards/migrations/0001_initial.py.Migration",
+    "target": "cls:cards/migrations/0001_initial.py.migrations.Migration",
+    "type": "inherits_from"
+  },
+  {
+    "source": "cls:cards/models.py.Issuer",
+    "target": "cls:cards/models.py.models.Model",
+    "type": "inherits_from"
+  },
+  {
+    "source": "cls:cards/models.py.RewardType",
+    "target": "cls:cards/models.py.models.Model",
+    "type": "inherits_from"
+  },
+  {
+    "source": "cls:cards/models.py.SpendingCategory",
+    "target": "cls:cards/models.py.models.Model",
+    "type": "inherits_from"
+  },
+  {
+    "source": "cls:cards/models.py.CreditCard",
+    "target": "cls:cards/models.py.models.Model",
+    "type": "inherits_from"
+  },
+  {
+    "source": "cls:cards/models.py.RewardCategory",
+    "target": "cls:cards/models.py.models.Model",
+    "type": "inherits_from"
+  },
+  {
+    "source": "cls:cards/models.py.CreditType",
+    "target": "cls:cards/models.py.models.Model",
+    "type": "inherits_from"
+  },
+  {
+    "source": "cls:cards/models.py.SpendingCredit",
+    "target": "cls:cards/models.py.models.Model",
+    "type": "inherits_from"
+  },
+  {
+    "source": "cls:cards/models.py.CardCredit",
+    "target": "cls:cards/models.py.models.Model",
+    "type": "inherits_from"
+  },
+  {
+    "source": "cls:cards/models.py.UserSpendingProfile",
+    "target": "cls:cards/models.py.models.Model",
+    "type": "inherits_from"
+  },
+  {
+    "source": "cls:cards/models.py.SpendingAmount",
+    "target": "cls:cards/models.py.models.Model",
+    "type": "inherits_from"
+  },
+  {
+    "source": "cls:cards/models.py.UserCard",
+    "target": "cls:cards/models.py.models.Model",
+    "type": "inherits_from"
+  },
+  {
+    "source": "cls:cards/models.py.UserCreditPreference",
+    "target": "cls:cards/models.py.models.Model",
+    "type": "inherits_from"
+  },
+  {
+    "source": "cls:cards/models.py.UserSpendingCreditPreference",
+    "target": "cls:cards/models.py.models.Model",
+    "type": "inherits_from"
+  },
+  {
+    "source": "cls:cards/serializers.py.IssuerSerializer",
+    "target": "cls:cards/serializers.py.serializers.ModelSerializer",
+    "type": "inherits_from"
+  },
+  {
+    "source": "cls:cards/serializers.py.RewardTypeSerializer",
+    "target": "cls:cards/serializers.py.serializers.ModelSerializer",
+    "type": "inherits_from"
+  },
+  {
+    "source": "cls:cards/serializers.py.SpendingCategorySerializer",
+    "target": "cls:cards/serializers.py.serializers.ModelSerializer",
+    "type": "inherits_from"
+  },
+  {
+    "source": "cls:cards/serializers.py.SpendingCreditSerializer",
+    "target": "cls:cards/serializers.py.serializers.ModelSerializer",
+    "type": "inherits_from"
+  },
+  {
+    "source": "cls:cards/serializers.py.RewardCategorySerializer",
+    "target": "cls:cards/serializers.py.serializers.ModelSerializer",
+    "type": "inherits_from"
+  },
+  {
+    "source": "cls:cards/serializers.py.CardCreditSerializer",
+    "target": "cls:cards/serializers.py.serializers.ModelSerializer",
+    "type": "inherits_from"
+  },
+  {
+    "source": "cls:cards/serializers.py.CreditCardSerializer",
+    "target": "cls:cards/serializers.py.serializers.ModelSerializer",
+    "type": "inherits_from"
+  },
+  {
+    "source": "cls:cards/serializers.py.CreditCardListSerializer",
+    "target": "cls:cards/serializers.py.serializers.ModelSerializer",
+    "type": "inherits_from"
+  },
+  {
+    "source": "cls:cards/serializers.py.SpendingAmountSerializer",
+    "target": "cls:cards/serializers.py.serializers.ModelSerializer",
+    "type": "inherits_from"
+  },
+  {
+    "source": "cls:cards/serializers.py.UserCardSerializer",
+    "target": "cls:cards/serializers.py.serializers.ModelSerializer",
+    "type": "inherits_from"
+  },
+  {
+    "source": "cls:cards/serializers.py.UserSpendingProfileSerializer",
+    "target": "cls:cards/serializers.py.serializers.ModelSerializer",
+    "type": "inherits_from"
+  },
+  {
+    "source": "cls:cards/serializers.py.CreateSpendingProfileSerializer",
+    "target": "cls:cards/serializers.py.serializers.Serializer",
+    "type": "inherits_from"
+  },
+  {
+    "source": "cls:cards/serializers.py.UserCardSerializer",
+    "target": "cls:cards/serializers.py.serializers.ModelSerializer",
+    "type": "inherits_from"
+  },
+  {
+    "source": "cls:cards/serializers.py.UserCardCreateUpdateSerializer",
+    "target": "cls:cards/serializers.py.serializers.ModelSerializer",
+    "type": "inherits_from"
+  },
+  {
+    "source": "cls:cards/views.py.IssuerListView",
+    "target": "cls:cards/views.py.generics.ListAPIView",
+    "type": "inherits_from"
+  },
+  {
+    "source": "cls:cards/views.py.RewardTypeListView",
+    "target": "cls:cards/views.py.generics.ListAPIView",
+    "type": "inherits_from"
+  },
+  {
+    "source": "cls:cards/views.py.SpendingCategoryListView",
+    "target": "cls:cards/views.py.generics.ListAPIView",
+    "type": "inherits_from"
+  },
+  {
+    "source": "cls:cards/views.py.SpendingCreditListView",
+    "target": "cls:cards/views.py.generics.ListAPIView",
+    "type": "inherits_from"
+  },
+  {
+    "source": "cls:cards/views.py.CreditCardListView",
+    "target": "cls:cards/views.py.generics.ListAPIView",
+    "type": "inherits_from"
+  },
+  {
+    "source": "cls:cards/views.py.CreditCardDetailView",
+    "target": "cls:cards/views.py.generics.RetrieveAPIView",
+    "type": "inherits_from"
+  },
+  {
+    "source": "cls:roadmaps/admin.py.RoadmapFilterAdmin",
+    "target": "cls:roadmaps/admin.py.admin.ModelAdmin",
+    "type": "inherits_from"
+  },
+  {
+    "source": "cls:roadmaps/admin.py.RoadmapRecommendationInline",
+    "target": "cls:roadmaps/admin.py.admin.TabularInline",
+    "type": "inherits_from"
+  },
+  {
+    "source": "cls:roadmaps/admin.py.RoadmapCalculationInline",
+    "target": "cls:roadmaps/admin.py.admin.StackedInline",
+    "type": "inherits_from"
+  },
+  {
+    "source": "cls:roadmaps/admin.py.RoadmapAdmin",
+    "target": "cls:roadmaps/admin.py.admin.ModelAdmin",
+    "type": "inherits_from"
+  },
+  {
+    "source": "cls:roadmaps/admin.py.RoadmapRecommendationAdmin",
+    "target": "cls:roadmaps/admin.py.admin.ModelAdmin",
+    "type": "inherits_from"
+  },
+  {
+    "source": "cls:roadmaps/admin.py.RoadmapCalculationAdmin",
+    "target": "cls:roadmaps/admin.py.admin.ModelAdmin",
+    "type": "inherits_from"
+  },
+  {
+    "source": "cls:roadmaps/apps.py.RoadmapsConfig",
+    "target": "cls:roadmaps/apps.py.AppConfig",
+    "type": "inherits_from"
+  },
+  {
+    "source": "cls:roadmaps/migrations/0001_initial.py.Migration",
+    "target": "cls:roadmaps/migrations/0001_initial.py.migrations.Migration",
+    "type": "inherits_from"
+  },
+  {
+    "source": "cls:roadmaps/models.py.RoadmapFilter",
+    "target": "cls:roadmaps/models.py.models.Model",
+    "type": "inherits_from"
+  },
+  {
+    "source": "cls:roadmaps/models.py.Roadmap",
+    "target": "cls:roadmaps/models.py.models.Model",
+    "type": "inherits_from"
+  },
+  {
+    "source": "cls:roadmaps/models.py.RoadmapRecommendation",
+    "target": "cls:roadmaps/models.py.models.Model",
+    "type": "inherits_from"
+  },
+  {
+    "source": "cls:roadmaps/models.py.RoadmapCalculation",
+    "target": "cls:roadmaps/models.py.models.Model",
+    "type": "inherits_from"
+  },
+  {
+    "source": "cls:roadmaps/serializers.py.RoadmapFilterSerializer",
+    "target": "cls:roadmaps/serializers.py.serializers.ModelSerializer",
+    "type": "inherits_from"
+  },
+  {
+    "source": "cls:roadmaps/serializers.py.RoadmapRecommendationSerializer",
+    "target": "cls:roadmaps/serializers.py.serializers.ModelSerializer",
+    "type": "inherits_from"
+  },
+  {
+    "source": "cls:roadmaps/serializers.py.RoadmapCalculationSerializer",
+    "target": "cls:roadmaps/serializers.py.serializers.ModelSerializer",
+    "type": "inherits_from"
+  },
+  {
+    "source": "cls:roadmaps/serializers.py.RoadmapSerializer",
+    "target": "cls:roadmaps/serializers.py.serializers.ModelSerializer",
+    "type": "inherits_from"
+  },
+  {
+    "source": "cls:roadmaps/serializers.py.CreateRoadmapSerializer",
+    "target": "cls:roadmaps/serializers.py.serializers.Serializer",
+    "type": "inherits_from"
+  },
+  {
+    "source": "cls:roadmaps/serializers.py.GenerateRoadmapSerializer",
+    "target": "cls:roadmaps/serializers.py.serializers.Serializer",
+    "type": "inherits_from"
+  },
+  {
+    "source": "cls:roadmaps/views.py.RoadmapFilterListView",
+    "target": "cls:roadmaps/views.py.generics.ListCreateAPIView",
+    "type": "inherits_from"
+  },
+  {
+    "source": "cls:roadmaps/views.py.RoadmapListView",
+    "target": "cls:roadmaps/views.py.generics.ListAPIView",
+    "type": "inherits_from"
+  },
+  {
+    "source": "cls:roadmaps/views.py.RoadmapDetailView",
+    "target": "cls:roadmaps/views.py.generics.RetrieveUpdateDestroyAPIView",
+    "type": "inherits_from"
+  },
+  {
+    "source": "cls:users/apps.py.UsersConfig",
+    "target": "cls:users/apps.py.AppConfig",
+    "type": "inherits_from"
+  },
+  {
+    "source": "cls:users/migrations/0001_initial.py.Migration",
+    "target": "cls:users/migrations/0001_initial.py.migrations.Migration",
+    "type": "inherits_from"
+  },
+  {
+    "source": "cls:users/models.py.UserProfile",
+    "target": "cls:users/models.py.models.Model",
+    "type": "inherits_from"
+  },
+  {
+    "source": "cls:users/models.py.UserPreferences",
+    "target": "cls:users/models.py.models.Model",
+    "type": "inherits_from"
+  },
+  {
+    "source": "cls:users/serializers.py.UserSerializer",
+    "target": "cls:users/serializers.py.serializers.ModelSerializer",
+    "type": "inherits_from"
+  },
+  {
+    "source": "cls:users/serializers.py.UserProfileSerializer",
+    "target": "cls:users/serializers.py.serializers.ModelSerializer",
+    "type": "inherits_from"
+  },
+  {
+    "source": "cls:users/serializers.py.UserCardSerializer",
+    "target": "cls:users/serializers.py.serializers.ModelSerializer",
+    "type": "inherits_from"
+  },
+  {
+    "source": "cls:users/serializers.py.UserSpendingSerializer",
+    "target": "cls:users/serializers.py.serializers.ModelSerializer",
+    "type": "inherits_from"
+  },
+  {
+    "source": "cls:users/serializers.py.UserPreferencesSerializer",
+    "target": "cls:users/serializers.py.serializers.ModelSerializer",
+    "type": "inherits_from"
+  },
+  {
+    "source": "cls:users/serializers.py.UserDataSerializer",
+    "target": "cls:users/serializers.py.serializers.Serializer",
+    "type": "inherits_from"
+  },
+  {
+    "source": "cls:users/views.py.UserProfileView",
+    "target": "cls:users/views.py.generics.RetrieveUpdateAPIView",
+    "type": "inherits_from"
+  },
+  {
+    "source": "cls:users/views.py.UserCardListView",
+    "target": "cls:users/views.py.generics.ListCreateAPIView",
+    "type": "inherits_from"
+  },
+  {
+    "source": "cls:users/views.py.UserCardDetailView",
+    "target": "cls:users/views.py.generics.RetrieveUpdateDestroyAPIView",
+    "type": "inherits_from"
+  },
+  {
+    "source": "cls:users/views.py.UserSpendingListView",
+    "target": "cls:users/views.py.generics.ListCreateAPIView",
+    "type": "inherits_from"
+  },
+  {
+    "source": "cls:users/views.py.UserPreferencesView",
+    "target": "cls:users/views.py.generics.RetrieveUpdateAPIView",
+    "type": "inherits_from"
+  }
+]

@@ -2,6 +2,11 @@
 
 A Django-based credit card optimization platform that creates personalized roadmaps for credit card applications, cancellations, and upgrades based on spending patterns and issuer policies.
 
+
+## Documentation
+
+For detailed usage documentation, see [USAGE.md](./USAGE.md)
+
 ## Features
 
 - **Credit Card Database**: Comprehensive database of credit cards with reward categories, signup bonuses, and offers
