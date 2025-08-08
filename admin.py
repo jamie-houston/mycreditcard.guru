@@ -202,13 +202,12 @@ def import_sample_data():
             if choice == 'a':
                 # Import all files in a logical order: system files first, then cards
                 
-                # System files in dependency order
+                # System files in dependency order (excluding credit_cards.json which is being phased out)
                 system_order = [
                     "issuers.json",
                     "reward_types.json", 
                     "spending_categories.json",
-                    "spending_credits.json",
-                    "credit_cards.json"
+                    "spending_credits.json"
                 ]
                 
                 print("\n🔧 Importing system files first...")
@@ -228,7 +227,11 @@ def import_sample_data():
                 # Import any remaining system files
                 for file_path in system_files:
                     if file_path not in imported_files:
-                        print(f"\n📄 Importing {file_path.name}")
+                        # Handle credit_cards.json specially - it's being phased out but may still exist
+                        if file_path.name == "credit_cards.json":
+                            print(f"\n📄 Importing {file_path.name} (legacy system file - use individual card files going forward)")
+                        else:
+                            print(f"\n📄 Importing {file_path.name}")
                         
                         # Use appropriate import command based on file type
                         if file_path.name == "spending_credits.json":
@@ -394,7 +397,7 @@ def full_setup():
     setup_database()
     setup_google_oauth()
     
-    # Import the 4 essential system files automatically
+    # Import essential system files automatically
     print("\n📥 Importing essential system data...")
     data_dir = PROJECT_ROOT / "data" / "input" / "system"
     
@@ -403,8 +406,7 @@ def full_setup():
             "issuers.json",
             "reward_types.json", 
             "spending_categories.json",
-            "spending_credits.json",
-            "credit_cards.json"
+            "spending_credits.json"
         ]
         
         for filename in essential_files:
@@ -424,6 +426,28 @@ def full_setup():
     else:
         print("⚠️  System data directory not found. Skipping automatic import.")
         print("💡 You can manually import data later with 'python admin.py import-sample'")
+    
+    # Import all card files after system files
+    print("\n📥 Importing all card data...")
+    cards_dir = PROJECT_ROOT / "data" / "input" / "cards"
+    
+    if cards_dir.exists():
+        card_files = list(cards_dir.glob("*.json"))
+        if card_files:
+            for file_path in sorted(card_files, key=lambda x: x.name):
+                # Skip personal.json as it requires user accounts
+                if file_path.name == 'personal.json':
+                    print(f"⏭️  Skipping {file_path.name} (requires user account setup)")
+                    continue
+                    
+                print(f"📄 Importing {file_path.name}")
+                run_command(f"python manage.py import_cards {file_path}", f"Importing {file_path.name}")
+            print("✅ All card data imported!")
+        else:
+            print("⚠️  No card files found in cards directory.")
+    else:
+        print("⚠️  Cards data directory not found.")
+        print("💡 You can manually import card data later with 'python admin.py import-sample'")
     
     print("\n✅ Full setup complete!")
     print("💡 Next steps:")

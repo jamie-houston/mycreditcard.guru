@@ -81,11 +81,27 @@
     "sort_order": 40
   },
   {
-    "name": "streaming",
-    "display_name": "Streaming Services",
-    "description": "Video and music streaming subscriptions",
-    "icon": "fas fa-tv",
-    "sort_order": 50
+    "name": "entertainment",
+    "display_name": "Entertainment",
+    "description": "Entertainment and leisure",
+    "icon": "fas fa-theater-masks",
+    "sort_order": 45,
+    "subcategories": [
+      {
+        "name": "streaming",
+        "display_name": "Streaming Services",
+        "description": "Video and music streaming subscriptions",
+        "icon": "fas fa-tv",
+        "sort_order": 10
+      },
+      {
+        "name": "other_entertainment",
+        "display_name": "Other Entertainment",
+        "description": "Other entertainment",
+        "icon": "fas fa-ticket-alt",
+        "sort_order": 20
+      }
+    ]
   },
   {
     "name": "shopping",
@@ -148,6 +164,13 @@
     "sort_order": 90
   },
   {
+    "name": "telecomunications",
+    "display_name": "Internet, Cable and Phone",
+    "description": "Internet, Cable and Phone",
+    "icon": "fas fa-wifi",
+    "sort_order": 10
+  },
+  {
     "name": "other",
     "display_name": "Other Spending",
     "description": "Any expenses that don't fit into the above categories",
@@ -159,6 +182,29 @@
     "display_name": "Business",
     "description": "Business expenses",
     "icon": "fas fa-briefcase",
-    "sort_order": 100
+    "sort_order": 100,
+    "subcategories": [
+      {
+        "name": "office_supplies",
+        "display_name": "Office Supplies",
+        "description": "Office supplies and equipment",
+        "icon": "fas fa-file-alt",
+        "sort_order": 10
+      },
+      {
+        "name": "social_media",
+        "display_name": "Social Media",
+        "description": "Social media and advertising",
+        "icon": "fas fa-users",
+        "sort_order": 20
+      },
+      {
+        "name": "other_business",
+        "display_name": "Other Business",
+        "description": "Other business expenses",
+        "icon": "fas fa-briefcase",
+        "sort_order": 30
+      }
+    ]
   }
 ]

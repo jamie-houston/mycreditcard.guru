@@ -112,6 +112,7 @@ creditcard_guru/
       "signup_bonus_amount": 60000,
       "signup_bonus_type": "Points",
       "primary_reward_type": "Points",
+      "verified": true,
       "reward_categories": [
         {"category": "Travel", "reward_rate": 2.0, "reward_type": "Points"}
       ]

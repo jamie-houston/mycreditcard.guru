@@ -64,5 +64,23 @@
     "display_name": "ZipRecruiter",
     "description": "ZipRecruiter",
     "category": "business"
+  },
+  {
+    "name": "stubhub",
+    "display_name": "StubHub",
+    "description": "StubHub",
+    "category": "entertainment"
+  },
+  {
+    "name": "walmart_plus",
+    "display_name": "Walmart Plus",
+    "description": "Walmart Plus",
+    "category": "groceries"
+  },
+  {
+    "name": "clear",
+    "display_name": "Clear Plus",
+    "description": "Clear Plus",
+    "category": "airlines"
   }
 ]

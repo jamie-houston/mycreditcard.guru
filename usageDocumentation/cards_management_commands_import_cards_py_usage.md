@@ -9,6 +9,7 @@ This document provides usage documentation for the `cards/management/commands/im
 ### Key Responsibilities:
 - **Bulk Data Import**: Imports credit card data, issuers, reward types, and related models from structured JSON files with batch processing and validation
 - **Data Validation & Error Handling**: Validates imported data for consistency, handles missing relationships, and provides detailed error reporting for import issues
+- **Verification Filtering**: Only imports credit cards with `"verified": true` flag, skipping unverified cards with warning messages
 - **Progress Reporting**: Provides command-line progress indicators, import statistics, and detailed logging for monitoring bulk import operations
 
 ## Initialization
@@ -96,6 +97,7 @@ Expected JSON structure for credit card import files.
             "name": "Chase Sapphire Preferred",
             "annual_fee": 95.00,
             "primary_reward_type": "Ultimate Rewards",
+            "verified": true,
             "reward_categories": [
                 {"category": "Travel", "rate": 2.0, "cap": null},
                 {"category": "Dining", "rate": 2.0, "cap": null},
@@ -113,5 +115,6 @@ Expected JSON structure for credit card import files.
 # - Issuer and reward type relationships
 # - Spending category references
 # - Numeric values and constraints
+# - Verification flag: Only imports cards with "verified": true
 # - Prevents duplicate entries (unless --force used)
 ```

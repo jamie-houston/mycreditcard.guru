@@ -1,5 +1,275 @@
 [
   {
+    "name": "Chase Sapphire Reserve",
+    "issuer": "Chase",
+    "annual_fee": 795,
+    "signup_bonus": {
+      "bonus_amount": 100000,
+      "spending_requirement": 5000,
+      "time_limit_months": 3
+    },
+    "reward_type": "Points",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "dining",
+        "reward_rate": 3
+      },
+      {
+        "category": "travel",
+        "reward_rate": 4
+      },
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "personal",
+    "network": "Visa",
+    "url": "https://creditcards.chase.com/rewards-credit-cards/sapphire/reserve",
+    "image_url": "/images/chase/sapphire-reserve.png",
+    "discontinued": false,
+    "credits": [
+      {
+        "category": "travel",
+        "value": 150,
+        "times_per_year": 2
+      },
+      {
+        "credit_type": "airport_lounge",
+        "value": 469,
+        "times_per_year": 1
+      },
+      {
+        "description": "Global Entry / TSA PreCheck Credit",
+        "credit_type": "precheck",
+        "value": 120
+      },
+      {
+        "category": "dining",
+        "value": 150,
+        "times_per_year": 2
+      },
+      {
+        "credit_type": "apple_tv",
+        "value": 10,
+        "times_per_year": 12
+      },
+      {
+        "credit_type": "apple_music",
+        "value": 10,
+        "times_per_year": 12
+      },
+      {
+        "credit_type": "dashpass",
+        "value": 10,
+        "times_per_year": 12
+      },
+      {
+        "credit_type": "stubhub",
+        "value": 150,
+        "times_per_year": 12
+      }
+    ],
+    "verified": true,
+    "slug": "chase-sapphire-reserve"
+  },
+  {
+    "name": "Chase Freedom Unlimited",
+    "issuer": "Chase",
+    "annual_fee": 0,
+    "signup_bonus": {
+      "bonus_amount": 20000,
+      "spending_requirement": 500,
+      "time_limit_months": 3,
+      "referral_url": "https://www.referyourchasecard.com/18A/AP73583B88"
+    },
+    "reward_type": "Points",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "chase_travel",
+        "reward_rate": 5
+      },
+      {
+        "category": "drugstores",
+        "reward_rate": 3
+      },
+      {
+        "category": "dining",
+        "reward_rate": 3
+      },
+      {
+        "category": "other",
+        "reward_rate": 1.5
+      }
+    ],
+    "card_type": "personal",
+    "network": "Visa",
+    "url": "https://creditcards.chase.com/cash-back-credit-cards/freedom/unlimited",
+    "image_url": "/images/chase/freedom-unlimited.png",
+    "discontinued": false,
+    "verified": true,
+    "slug": "chase-freedom-unlimited"
+  },
+  {
+    "name": "Chase Sapphire Preferred Card",
+    "issuer": "Chase",
+    "annual_fee": 95,
+    "signup_bonus": {
+      "bonus_amount": 75000,
+      "spending_requirement": 5000,
+      "time_limit_months": 3,
+      "referral_url": "https://www.referyourchasecard.com/19t/ZWQTY1YFCH"
+    },
+    "reward_type": "Points",
+    "reward_value_multiplier": 0.0125,
+    "reward_categories": [
+      {
+        "category": "chase_travel",
+        "reward_rate": 5
+      },
+      {
+        "category": "lyft",
+        "reward_rate": 5
+      },
+      {
+        "category": "dining",
+        "reward_rate": 3
+      },
+      {
+        "category": "streaming",
+        "reward_rate": 3
+      },
+      {
+        "category": "online_grocery",
+        "reward_rate": 3
+      },
+      {
+        "category": "travel",
+        "reward_rate": 2
+      },
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "personal",
+    "network": "Visa",
+    "url": "https://creditcards.chase.com/rewards-credit-cards/sapphire/preferred",
+    "image_url": "/images/chase/sapphire-preferred.png",
+    "discontinued": false,
+    "credits": [
+      {
+        "category": "hotels",
+        "value": 50
+      }
+    ],
+    "verified": true,
+    "slug": "chase-sapphire-preferred-card"
+  },
+  {
+    "name": "Chase Sapphire Reserve for Business",
+    "issuer": "Chase",
+    "annual_fee": 795,
+    "signup_bonus": {
+      "bonus_amount": 100000,
+      "spending_requirement": 5000,
+      "time_limit_months": 3
+    },
+    "reward_type": "Points",
+    "reward_value_multiplier": 0.015,
+    "reward_categories": [
+      {
+        "category": "chase_travel",
+        "reward_rate": 8
+      },
+      {
+        "category": "lyft",
+        "reward_rate": 5,
+        "end_date": "2027-09-30"
+      },
+      {
+        "category": "dining",
+        "reward_rate": 3
+      },
+      {
+        "category": "travel",
+        "reward_rate": 4
+      },
+      {
+        "category": "social_media",
+        "reward_rate": 3
+      },
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "business",
+    "network": "Visa",
+    "url": "https://creditcards.chase.com/rewards-credit-cards/sapphire/reserve",
+    "image_url": "/images/chase/sapphire-reserve.png",
+    "discontinued": false,
+    "credits": [
+      {
+        "category": "travel",
+        "value": 150,
+        "times_per_year": 2
+      },
+      {
+        "credit_type": "airport_lounge",
+        "value": 469,
+        "times_per_year": 1
+      },
+      {
+        "credit_type": "precheck",
+        "value": 120
+      },
+      {
+        "credit_type": "apple_tv",
+        "value": 10,
+        "times_per_year": 12
+      },
+      {
+        "credit_type": "apple_music",
+        "value": 10,
+        "times_per_year": 12
+      },
+      {
+        "credit_type": "dashpass",
+        "value": 10,
+        "times_per_year": 12
+      },
+      {
+        "credit_type": "doordash",
+        "value": 25,
+        "times_per_year": 12
+      },
+      {
+        "credit_type": "google_workspace",
+        "value": 20,
+        "times_per_year": 12
+      },
+      {
+        "credit_type": "ziprecruiter",
+        "value": 400
+      },
+      {
+        "category": "lyft",
+        "value": 10,
+        "times_per_year": 12
+      },
+      {
+        "description": "Gift Card Credit",
+        "credit_type": "shopping",
+        "value": 100
+      }
+    ],
+    "verified": true,
+    "slug": "chase-sapphire-reserve-for-business"
+  },
+  {
     "name": "Marriott Bonvoy Bountiful",
     "issuer": "Chase",
     "annual_fee": 250,
@@ -144,7 +414,7 @@
     "slug": "disney"
   },
   {
-    "name": "Freedom Flex",
+    "name": "Chase Freedom Flex",
     "issuer": "Chase",
     "annual_fee": 0,
     "signup_bonus": {
@@ -152,9 +422,28 @@
       "spending_requirement": 500,
       "time_limit_months": 3
     },
-    "reward_type": "Cashback",
+    "reward_type": "Points",
     "reward_value_multiplier": 0.01,
     "reward_categories": [
+      {
+        "category": "gas",
+        "reward_rate": 5,
+        "start_date": "2025-01-01",
+        "end_date": "2025-03-31",
+        "max_spending": 1500
+      },
+      {
+        "category": "chase_travel",
+        "reward_rate": 5
+      },
+      {
+        "category": "dining",
+        "reward_rate": 5
+      },
+      {
+        "category": "drugstores",
+        "reward_rate": 3
+      },
       {
         "category": "other",
         "reward_rate": 1
@@ -165,7 +454,8 @@
     "url": "https://creditcards.chase.com/cash-back-credit-cards/freedom/flex",
     "image_url": "/images/chase/freedom-flex.png",
     "discontinued": false,
-    "slug": "freedom-flex"
+    "verified": true,
+    "slug": "chase-freedom-flex"
   },
   {
     "name": "Iberia Signature",
@@ -260,7 +550,45 @@
     "slug": "ihg-traveler"
   },
   {
-    "name": "Ink Business Cash",
+    "name": "Ink Business Preferred Credit Card",
+    "issuer": "Chase",
+    "annual_fee": 95,
+    "signup_bonus": {
+      "bonus_amount": 90000,
+      "spending_requirement": 8000,
+      "time_limit_months": 3,
+      "referral_url": "https://www.referyourchasecard.com/21u/V4LTM1SIJH"
+    },
+    "reward_type": "Points",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "travel",
+        "reward_rate": 3
+      },
+      {
+        "category": "telecomunications",
+        "reward_rate": 3
+      },
+      {
+        "category": "social_media",
+        "reward_rate": 3
+      },
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "business",
+    "network": "Visa",
+    "url": "https://creditcards.chase.com/business-credit-cards/ink/business-preferred",
+    "image_url": "/images/chase/ink-business-preferred.png",
+    "discontinued": false,
+    "verified": true,
+    "slug": "ink-business-preferred-credit-card"
+  },
+  {
+    "name": "Ink Business Cash Credit Card",
     "issuer": "Chase",
     "annual_fee": 0,
     "signup_bonus": {
@@ -268,9 +596,29 @@
       "spending_requirement": 6000,
       "time_limit_months": 6
     },
-    "reward_type": "Cashback",
+    "reward_type": "Points",
     "reward_value_multiplier": 0.01,
     "reward_categories": [
+      {
+        "category": "office_supplies",
+        "reward_rate": 5,
+        "max_spending": 25000
+      },
+      {
+        "category": "telecomunications",
+        "reward_rate": 5,
+        "max_spending": 25000
+      },
+      {
+        "category": "groceries",
+        "reward_rate": 2,
+        "max_spending": 25000
+      },
+      {
+        "category": "dining",
+        "reward_rate": 2,
+        "max_spending": 25000
+      },
       {
         "category": "other",
         "reward_rate": 1
@@ -281,10 +629,11 @@
     "url": "https://creditcards.chase.com/business-credit-cards/ink/cash",
     "image_url": "/images/chase/ink-business-cash.png",
     "discontinued": false,
-    "slug": "ink-business-cash"
+    "verified": true,
+    "slug": "ink-business-cash-credit-card"
   },
   {
-    "name": "Ink Business Unlimited",
+    "name": "Ink Business Unlimited Credit Card",
     "issuer": "Chase",
     "annual_fee": 0,
     "signup_bonus": {
@@ -292,12 +641,12 @@
       "spending_requirement": 6000,
       "time_limit_months": 3
     },
-    "reward_type": "Cashback",
+    "reward_type": "Points",
     "reward_value_multiplier": 0.01,
     "reward_categories": [
       {
         "category": "other",
-        "reward_rate": 1
+        "reward_rate": 1.5
       }
     ],
     "card_type": "business",
@@ -305,7 +654,8 @@
     "url": "https://creditcards.chase.com/business-credit-cards/ink/unlimited",
     "image_url": "/images/chase/ink-business-unlimited.png",
     "discontinued": false,
-    "slug": "ink-business-unlimited"
+    "verified": true,
+    "slug": "ink-business-unlimited-credit-card"
   },
   {
     "name": "Ink Business Premier",
@@ -416,17 +766,27 @@
     "slug": "southwest-performance-business"
   },
   {
-    "name": "Southwest Plus",
+    "name": "Southwest Rapid Rewards Plus Credit Card",
     "issuer": "Chase",
-    "annual_fee": 69,
+    "annual_fee": 99,
     "signup_bonus": {
-      "bonus_amount": 50000,
-      "spending_requirement": 1000,
-      "time_limit_months": 3
+      "bonus_amount": 100000,
+      "spending_requirement": 4000,
+      "time_limit_months": 5
     },
-    "reward_type": "Cashback",
+    "reward_type": "Miles",
     "reward_value_multiplier": 0.01,
     "reward_categories": [
+      {
+        "category": "gas",
+        "reward_rate": 2,
+        "min_spending": 5000
+      },
+      {
+        "category": "groceries",
+        "reward_rate": 2,
+        "min_spending": 5000
+      },
       {
         "category": "other",
         "reward_rate": 1
@@ -437,7 +797,8 @@
     "url": "https://creditcards.chase.com/travel-credit-cards/southwest/plus",
     "image_url": "/images/chase/southwest-rapid-rewards-plus.png",
     "discontinued": false,
-    "slug": "southwest-plus"
+    "verified": true,
+    "slug": "southwest-rapid-rewards-plus-credit-card"
   },
   {
     "name": "Southwest Premier",
@@ -488,17 +849,27 @@
     "slug": "southwest-premier-business"
   },
   {
-    "name": "Southwest Priority",
+    "name": "Southwest Rapid Rewards Priority Credit Card",
     "issuer": "Chase",
-    "annual_fee": 149,
+    "annual_fee": 229,
     "signup_bonus": {
-      "bonus_amount": 50000,
-      "spending_requirement": 1000,
-      "time_limit_months": 3
+      "bonus_amount": 100000,
+      "spending_requirement": 4000,
+      "time_limit_months": 5
     },
-    "reward_type": "Cashback",
+    "reward_type": "Miles",
     "reward_value_multiplier": 0.01,
     "reward_categories": [
+      {
+        "category": "gas",
+        "reward_rate": 2,
+        "min_spending": 5000
+      },
+      {
+        "category": "dining",
+        "reward_rate": 2,
+        "min_spending": 5000
+      },
       {
         "category": "other",
         "reward_rate": 1
@@ -509,14 +880,8 @@
     "url": "https://creditcards.chase.com/travel-credit-cards/southwest/priority",
     "image_url": "/images/chase/southwest-rapid-rewards-priority.png",
     "discontinued": false,
-    "credits": [
-      {
-        "description": "Southwest Credit",
-        "value": 75,
-        "weight": 0.8
-      }
-    ],
-    "slug": "southwest-priority"
+    "verified": true,
+    "slug": "southwest-rapid-rewards-priority-credit-card"
   },
   {
     "name": "United Business",
@@ -929,7 +1294,7 @@
     "issuer": "Chase",
     "annual_fee": 0,
     "signup_bonus": {
-      "bonus_amount": 200,
+      "bonus_amount": 150,
       "spending_requirement": 0.01,
       "time_limit_months": 12
     },
@@ -941,6 +1306,18 @@
         "reward_rate": 5
       },
       {
+        "category": "gas",
+        "reward_rate": 2
+      },
+      {
+        "category": "dining",
+        "reward_rate": 2
+      },
+      {
+        "category": "transportation",
+        "reward_rate": 2
+      },
+      {
         "category": "other",
         "reward_rate": 1
       }
@@ -950,6 +1327,35 @@
     "url": "https://www.amazon.com/dp/BT00LN946S",
     "image_url": "/images/chase/amazon-prime.png",
     "discontinued": false,
+    "verified": true,
     "slug": "amazon-prime"
+  },
+  {
+    "name": "Chase Freedom Legacy",
+    "issuer": "Chase",
+    "annual_fee": 0,
+    "reward_type": "Points",
+    "reward_value_multiplier": 0.01,
+    "card_type": "personal",
+    "network": "Mastercard",
+    "url": "https://creditcards.chase.com/cash-back-credit-cards/freedom",
+    "image_url": "/images/chase/freedom.png",
+    "discontinued": true,
+    "verified": true,
+    "slug": "chase-freedom-legacy",
+    "reward_categories": [
+      {
+        "category": "groceries",
+        "reward_rate": 5,
+        "start_date": "2025-01-01",
+        "end_date": "2025-03-31"
+      },
+      {
+        "category": "gas",
+        "reward_rate": 5,
+        "start_date": "2025-07-01",
+        "end_date": "2025-09-30"
+      }
+    ]
   }
 ]

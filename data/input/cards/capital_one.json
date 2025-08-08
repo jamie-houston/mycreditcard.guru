@@ -1,5 +1,42 @@
 [
   {
+    "name": "Capital One Venture Rewards Credit Card",
+    "issuer": "Capital One",
+    "annual_fee": 95,
+    "annual_fee_waived_first_year": true,
+    "signup_bonus": {
+      "bonus_amount": 75000,
+      "spending_requirement": 4000,
+      "time_limit_months": 3
+    },
+    "reward_type": "Miles",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "capital_one_travel",
+        "reward_rate": 5
+      },
+      {
+        "category": "other",
+        "reward_rate": 2
+      }
+    ],
+    "card_type": "personal",
+    "network": "Visa",
+    "url": "https://www.capitalone.com/credit-cards/venture/",
+    "image_url": "/images/capitalone/venture-rewards.webp",
+    "discontinued": false,
+    "credits": [
+      {
+        "description": "Global Entry / TSA PreCheck Credit",
+        "credit_type": "precheck",
+        "value": 120
+      }
+    ],
+    "verified": true,
+    "slug": "capital-one-venture-rewards-credit-card"
+  },
+  {
     "name": "Quicksilver",
     "issuer": "Capital One",
     "annual_fee": 0,
@@ -140,7 +177,7 @@
     "slug": "spark-2x-miles-plus"
   },
   {
-    "name": "Venture X",
+    "name": "Capital One Venture X Rewards Credit Card",
     "issuer": "Capital One",
     "annual_fee": 395,
     "signup_bonus": {
@@ -148,9 +185,13 @@
       "spending_requirement": 4000,
       "time_limit_months": 3
     },
-    "reward_type": "Cashback",
+    "reward_type": "Miles",
     "reward_value_multiplier": 0.01,
     "reward_categories": [
+      {
+        "category": "capital_one_travel",
+        "reward_rate": 10
+      },
       {
         "category": "other",
         "reward_rate": 2
@@ -163,34 +204,40 @@
     "discontinued": false,
     "credits": [
       {
-        "description": "Travel Credit",
-        "value": 300,
-        "weight": 0.9
+        "category": "capital_one_travel",
+        "value": 300
       },
       {
-        "description": "Global Entry / TSA PreCheck Credit",
-        "value": 100,
-        "weight": 0.4
+        "credit_type": "precheck",
+        "value": 120
       },
       {
-        "description": "Capital One Lounge Access",
-        "value": 300,
-        "weight": 0.25
+        "credit_type": "airport_lounge",
+        "value": 120
       }
     ],
-    "slug": "venture-x"
+    "verified": true,
+    "slug": "capital-one-venture-x-rewards-credit-card"
   },
   {
-    "name": "Venture X Business",
+    "name": "Capital One Venture X Business",
     "issuer": "Capital One",
     "annual_fee": 395,
-    "signup_bonus": null,
-    "reward_type": "Cashback",
+    "signup_bonus": {
+      "bonus_amount": 150000,
+      "spending_requirement": 30000,
+      "time_limit_months": 3
+    },
+    "reward_type": "Miles",
     "reward_value_multiplier": 0.01,
     "reward_categories": [
       {
         "category": "other",
         "reward_rate": 2
+      },
+      {
+        "category": "capital_one_travel",
+        "reward_rate": 10
       }
     ],
     "card_type": "business",
@@ -200,22 +247,20 @@
     "discontinued": false,
     "credits": [
       {
-        "description": "Travel Credit",
-        "value": 300,
-        "weight": 0.9
+        "category": "capital_one_travel",
+        "value": 300
       },
       {
-        "description": "Global Entry / TSA PreCheck Credit",
-        "value": 100,
-        "weight": 0.4
+        "credit_type": "precheck",
+        "value": 120
       },
       {
-        "description": "Capital One Lounge Access",
-        "value": 300,
-        "weight": 0.25
+        "credit_type": "airport_lounge",
+        "value": 120
       }
     ],
-    "slug": "venture-x-business"
+    "verified": true,
+    "slug": "capital-one-venture-x-business"
   },
   {
     "name": "VentureOne",

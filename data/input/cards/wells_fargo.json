@@ -1,5 +1,30 @@
 [
   {
+    "name": "Wells Fargo Active Cash Card",
+    "issuer": "Wells Fargo",
+    "annual_fee": 0,
+    "signup_bonus": {
+      "bonus_amount": 200,
+      "spending_requirement": 500,
+      "time_limit_months": 3
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 2
+      }
+    ],
+    "card_type": "personal",
+    "network": "Visa",
+    "url": "https://creditcards.wellsfargo.com/active-cash-credit-card/",
+    "image_url": "/images/wellsfargo/active-cash.png",
+    "discontinued": false,
+    "verified": true,
+    "slug": "wells-fargo-active-cash-card"
+  },
+  {
     "name": "Signify Business Cash",
     "issuer": "Wells Fargo",
     "annual_fee": 0,
@@ -56,7 +81,7 @@
     "slug": "autograph"
   },
   {
-    "name": "Autograph Journey",
+    "name": "Wells Fargo Autograph Journey Card",
     "issuer": "Wells Fargo",
     "annual_fee": 95,
     "signup_bonus": {
@@ -68,8 +93,30 @@
     "reward_value_multiplier": 0.01,
     "reward_categories": [
       {
+        "category": "hotel",
+        "reward_rate": 5
+      },
+      {
+        "category": "airline",
+        "reward_rate": 4
+      },
+      {
+        "category": "dining",
+        "reward_rate": 3
+      },
+      {
+        "category": "rental_cars",
+        "reward_rate": 3
+      },
+      {
         "category": "other",
         "reward_rate": 1
+      }
+    ],
+    "credits": [
+      {
+        "category": "airline",
+        "value": 50
       }
     ],
     "card_type": "personal",
@@ -77,7 +124,8 @@
     "url": "https://creditcards.wellsfargo.com/autograph-journey-visa-credit-card",
     "image_url": "/images/wellsfargo/autograph.png",
     "discontinued": false,
-    "slug": "autograph-journey"
+    "verified": true,
+    "slug": "wells-fargo-autograph-journey-card"
   },
   {
     "name": "Choice Privileges",

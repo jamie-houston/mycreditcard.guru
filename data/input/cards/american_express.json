@@ -1,5 +1,159 @@
 [
   {
+    "name": "The Platinum Card from American Express",
+    "issuer": "American Express",
+    "annual_fee": 695,
+    "signup_bonus": {
+      "bonus_amount": 150000,
+      "spending_requirement": 8000,
+      "time_limit_months": 6
+    },
+    "reward_type": "Points",
+    "reward_value_multiplier": 0.02,
+    "reward_categories": [
+      {
+        "category": "travel",
+        "reward_rate": 5
+      },
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "credits": [
+      {
+        "credit_type": "disney_plus",
+        "value": 20,
+        "times_per_year": 12
+      },
+      {
+        "credit_type": "walmart_plus",
+        "value": 13,
+        "times_per_year": 12
+      },
+      {
+        "credit_type": "airport_lounge",
+        "value": 100
+      },
+      {
+        "credit_type": "airlines",
+        "value": 200
+      },
+      {
+        "category": "uber",
+        "value": 15,
+        "times_per_year": 12
+      },
+      {
+        "credit_type": "clear",
+        "value": 100
+      },
+      {
+        "credit_type": "precheck",
+        "value": 120
+      }
+    ],
+    "card_type": "personal",
+    "network": "American Express",
+    "url": "https://www.americanexpress.com/us/credit-cards/card/platinum/",
+    "image_url": "/images/amex/platinum.webp",
+    "discontinued": false,
+    "verified": true,
+    "slug": "the-platinum-card-from-american-express"
+  },
+  {
+    "name": "American Express Gold Card",
+    "issuer": "American Express",
+    "annual_fee": 325,
+    "signup_bonus": {
+      "bonus_amount": 75000,
+      "spending_requirement": 6000,
+      "time_limit_months": 6
+    },
+    "reward_type": "Points",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "dining",
+        "reward_rate": 4,
+        "max_bonus_amount": 50000
+      },
+      {
+        "category": "groceries",
+        "reward_rate": 4,
+        "max_bonus_amount": 25000
+      },
+      {
+        "category": "airlines",
+        "reward_rate": 3
+      },
+      {
+        "category": "hotels",
+        "reward_rate": 2
+      },
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "personal",
+    "network": "American Express",
+    "url": "https://www.americanexpress.com/us/credit-cards/card/gold-card/",
+    "image_url": "/images/amex/gold.webp",
+    "discontinued": false,
+    "verified": true,
+    "slug": "american-express-gold-card"
+  },
+  {
+    "name": "Blue Cash Preferred Card from American Express",
+    "issuer": "American Express",
+    "annual_fee": 95,
+    "signup_bonus": {
+      "bonus_amount": 300,
+      "spending_requirement": 3000,
+      "time_limit_months": 6
+    },
+    "reward_type": "Cashback",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "streaming",
+        "reward_rate": 6
+      },
+      {
+        "category": "groceries",
+        "reward_rate": 6,
+        "max_bonus_amount": 6000
+      },
+      {
+        "category": "gas",
+        "reward_rate": 3
+      },
+      {
+        "category": "transportation",
+        "reward_rate": 3
+      },
+      {
+        "category": "other",
+        "reward_rate": 2
+      }
+    ],
+    "card_type": "personal",
+    "network": "American Express",
+    "url": "https://www.americanexpress.com/us/credit-cards/card/blue-cash-preferred/",
+    "image_url": "/images/amex/blue-cash-preferred.webp",
+    "discontinued": false,
+    "credits": [
+      {
+        "credit_type": "disney_plus",
+        "value": 7,
+        "times_per_year": 12
+      }
+    ],
+    "verified": true,
+    "slug": "blue-cash-preferred-card-from-american-express"
+  },
+  {
     "name": "Blue Business Cash",
     "issuer": "American Express",
     "annual_fee": 0,

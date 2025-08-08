@@ -213,6 +213,13 @@ class Command(BaseCommand):
 
     def import_credit_cards(self, cards):
         for card_data in cards:
+            # Only import cards with verified=true flag
+            if not card_data.get('verified', False):
+                self.stdout.write(
+                    self.style.WARNING(f'Skipping unverified card: {card_data.get("name", "Unknown")}')
+                )
+                continue
+                
             try:
                 issuer = Issuer.objects.get(name=card_data['issuer'])
                 # Handle both old and new data formats
