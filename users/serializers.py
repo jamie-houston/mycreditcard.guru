@@ -2,7 +2,7 @@ from rest_framework import serializers
 from django.contrib.auth.models import User
 from .models import UserProfile, UserPreferences
 from cards.models import UserCard, UserSpendingProfile, SpendingAmount
-from cards.serializers import CreditCardListSerializer, SpendingCategorySerializer
+from cards.serializers import CreditCardListSerializer, SpendingCategorySerializer, UserCardSerializer
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -21,14 +21,8 @@ class UserProfileSerializer(serializers.ModelSerializer):
         read_only_fields = ['created_at', 'updated_at']
 
 
-class UserCardSerializer(serializers.ModelSerializer):
-    card = CreditCardListSerializer(read_only=True)
-    card_id = serializers.IntegerField(write_only=True)
-    
-    class Meta:
-        model = UserCard
-        fields = ['id', 'card', 'card_id', 'opened_date', 'nickname', 'is_active']
-        read_only_fields = ['id']
+# UserCardSerializer moved to cards.serializers to avoid duplication
+# Import from cards.serializers import UserCardSerializer
 
 
 class UserSpendingSerializer(serializers.ModelSerializer):

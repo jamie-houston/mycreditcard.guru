@@ -570,39 +570,8 @@ class Command(BaseCommand):
         
         return self.create_credit_card(card_def)
 
-    def create_credit_card_from_name(self, card_name):
-        """Get or create a credit card from card name. DEPRECATED: Use create_credit_card_from_slug."""
-        # First try to find existing card in database
-        try:
-            existing_card = CreditCard.objects.get(name=card_name)
-            return existing_card
-        except CreditCard.DoesNotExist:
-            pass
-        
-        # If not found, try to create from test definitions
-        # Load card definitions if not already loaded
-        if not hasattr(self, 'card_definitions'):
-            cards_file = os.path.join(
-                os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))), 
-                'data', 'tests', 'cards.json'
-            )
-            if os.path.exists(cards_file):
-                with open(cards_file, 'r') as f:
-                    self.card_definitions = json.load(f)
-            else:
-                self.card_definitions = []
-        
-        # Find card definition by name
-        card_def = None
-        for card in self.card_definitions:
-            if card['name'] == card_name:
-                card_def = card
-                break
-        
-        if not card_def:
-            raise ValueError(f"Card definition not found: {card_name} (not in database or test definitions)")
-        
-        return self.create_credit_card(card_def)
+# REMOVED: Deprecated create_credit_card_from_name method
+    # Use create_credit_card_from_slug instead
     
     def create_credit_card(self, card_data):
         """Create a credit card from JSON data."""

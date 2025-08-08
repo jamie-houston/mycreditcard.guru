@@ -85,7 +85,8 @@ def generate_roadmap_view(request, roadmap_id):
     # Get roadmap for current user/session
     if request.user.is_authenticated:
         roadmap = get_object_or_404(
-            Roadmap.objects.prefetch_related('filters'),
+            Roadmap.objects.select_related('profile__user')
+                           .prefetch_related('filters'),
             id=roadmap_id,
             profile__user=request.user
         )
@@ -97,7 +98,8 @@ def generate_roadmap_view(request, roadmap_id):
                 status=status.HTTP_400_BAD_REQUEST
             )
         roadmap = get_object_or_404(
-            Roadmap.objects.prefetch_related('filters'),
+            Roadmap.objects.select_related('profile')
+                           .prefetch_related('filters'),
             id=roadmap_id,
             profile__session_key=session_key
         )

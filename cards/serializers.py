@@ -122,6 +122,8 @@ class SpendingAmountSerializer(serializers.ModelSerializer):
         fields = ['id', 'category', 'category_id', 'monthly_amount']
 
 
+# NOTE: This simpler UserCardSerializer is kept for basic operations
+# The more detailed one below (lines 184+) should be used for full CRUD operations
 class UserCardSerializer(serializers.ModelSerializer):
     card = CreditCardListSerializer(read_only=True)
     card_id = serializers.IntegerField(write_only=True)
