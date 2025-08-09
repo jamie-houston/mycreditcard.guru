@@ -82,5 +82,11 @@
     "display_name": "Clear Plus",
     "description": "Clear Plus",
     "category": "airlines"
+  },
+  {
+    "name": "dunkin",
+    "display_name": "Dunkin",
+    "description": "Dunkin",
+    "category": "dining"
   }
 ]

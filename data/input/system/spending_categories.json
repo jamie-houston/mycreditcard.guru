@@ -47,6 +47,13 @@
         "description": "travel purchased through Capital One Travel",
         "icon": "fas fa-plane",
         "sort_order": 50
+      },
+      {
+        "name": "citi_travel",
+        "display_name": "Book through Citi Travel",
+        "description": "travel purchased through Citi Travel",
+        "icon": "fas fa-plane",
+        "sort_order": 60
       }
     ]
   },

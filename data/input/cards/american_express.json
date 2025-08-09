@@ -96,6 +96,23 @@
         "reward_rate": 1
       }
     ],
+    "credits": [
+      {
+        "credit_type": "dunkin",
+        "value": 7,
+        "times_per_year": 12
+      },
+      {
+        "credit_type": "grubhub",
+        "value": 10,
+        "times_per_year": 12
+      },
+      {
+        "credit_type": "uber_eats",
+        "value": 10,
+        "times_per_year": 12
+      }
+    ],
     "card_type": "personal",
     "network": "American Express",
     "url": "https://www.americanexpress.com/us/credit-cards/card/gold-card/",

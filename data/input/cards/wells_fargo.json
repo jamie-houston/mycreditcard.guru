@@ -176,13 +176,21 @@
     "slug": "choice-privileges-select"
   },
   {
-    "name": "Bilt",
+    "name": "Bilt Mastercard",
     "issuer": "Wells Fargo",
     "annual_fee": 0,
     "signup_bonus": null,
-    "reward_type": "Cashback",
+    "reward_type": "Points",
     "reward_value_multiplier": 0.01,
     "reward_categories": [
+      {
+        "category": "dining",
+        "reward_rate": 3
+      },
+      {
+        "category": "travel",
+        "reward_rate": 2
+      },
       {
         "category": "other",
         "reward_rate": 1
@@ -193,7 +201,8 @@
     "url": "https://www.biltrewards.com/card",
     "image_url": "/images/wellsfargo/bilt.png",
     "discontinued": false,
-    "slug": "bilt"
+    "verified": true,
+    "slug": "bilt-mastercard"
   },
   {
     "name": "Expedia One Key",

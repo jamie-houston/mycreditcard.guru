@@ -151,6 +151,51 @@
     "slug": "custom-cash"
   },
   {
+    "name": "Citi Strata Card",
+    "issuer": "Citi",
+    "annual_fee": 0,
+    "signup_bonus": {
+      "bonus_amount": 30000,
+      "spending_requirement": 1000,
+      "time_limit_months": 3
+    },
+    "reward_type": "Points",
+    "reward_value_multiplier": 0.01,
+    "reward_categories": [
+      {
+        "category": "citi_travel",
+        "reward_rate": 5
+      },
+      {
+        "category": "groceries",
+        "reward_rate": 3
+      },
+      {
+        "category": "transportation",
+        "reward_rate": 3
+      },
+      {
+        "category": "gas",
+        "reward_rate": 3
+      },
+      {
+        "category": "dining",
+        "reward_rate": 2
+      },
+      {
+        "category": "other",
+        "reward_rate": 1
+      }
+    ],
+    "card_type": "personal",
+    "network": "Mastercard",
+    "url": "https://www.citi.com/credit-cards/citi-strata-card",
+    "image_url": "/images/citi/strata.png",
+    "discontinued": false,
+    "verified": true,
+    "slug": "citi-strata-card"
+  },
+  {
     "name": "Strata Premier",
     "issuer": "Citi",
     "annual_fee": 95,

@@ -845,16 +845,36 @@ class RecommendationEngine:
         # Build parent category spending map
         from cards.models import SpendingCategory
         parent_category_spending = {}
+        parent_categories_with_subcategories = set()
         
+        # First pass: identify parent categories that have subcategories with spending
+        for category_slug, annual_spend in all_spending.items():
+            try:
+                spending_category = SpendingCategory.objects.get(slug=category_slug)
+                if spending_category.is_subcategory and annual_spend > 0:
+                    parent_categories_with_subcategories.add(spending_category.parent.slug)
+            except SpendingCategory.DoesNotExist:
+                pass
+        
+        # Second pass: calculate parent category spending correctly  
         for category_slug, annual_spend in all_spending.items():
             try:
                 spending_category = SpendingCategory.objects.get(slug=category_slug)
                 if spending_category.is_subcategory:
+                    # This is a subcategory, add its spending to the parent
                     parent_slug = spending_category.parent.slug
                     parent_category_spending[parent_slug] = parent_category_spending.get(parent_slug, 0.0) + annual_spend
                 else:
-                    parent_category_spending[category_slug] = parent_category_spending.get(category_slug, 0.0) + annual_spend
+                    # This is a parent category
+                    if category_slug in parent_categories_with_subcategories:
+                        # Parent has subcategories with spending, so don't double count
+                        # The subcategories will be aggregated in the first part of this loop
+                        pass
+                    else:
+                        # Parent category with no subcategory spending, include its direct spending
+                        parent_category_spending[category_slug] = parent_category_spending.get(category_slug, 0.0) + annual_spend
             except SpendingCategory.DoesNotExist:
+                # Category doesn't exist in database, treat as parent category
                 parent_category_spending[category_slug] = parent_category_spending.get(category_slug, 0.0) + annual_spend
         
         return parent_category_spending
@@ -1354,8 +1374,18 @@ class RecommendationEngine:
         # Build a map of parent category spending by aggregating subcategory spending
         from cards.models import SpendingCategory
         parent_category_spending = {}
+        parent_categories_with_subcategories = set()
         
-        # For each spending category, if it's a subcategory, add its spending to the parent
+        # First pass: identify parent categories that have subcategories with spending
+        for category_slug, annual_spend in all_spending.items():
+            try:
+                spending_category = SpendingCategory.objects.get(slug=category_slug)
+                if spending_category.is_subcategory and annual_spend > 0:
+                    parent_categories_with_subcategories.add(spending_category.parent.slug)
+            except SpendingCategory.DoesNotExist:
+                pass
+        
+        # Second pass: calculate parent category spending correctly
         for category_slug, annual_spend in all_spending.items():
             try:
                 spending_category = SpendingCategory.objects.get(slug=category_slug)
@@ -1364,8 +1394,14 @@ class RecommendationEngine:
                     parent_slug = spending_category.parent.slug
                     parent_category_spending[parent_slug] = parent_category_spending.get(parent_slug, 0.0) + annual_spend
                 else:
-                    # This is a parent category, include its direct spending
-                    parent_category_spending[category_slug] = parent_category_spending.get(category_slug, 0.0) + annual_spend
+                    # This is a parent category
+                    if category_slug in parent_categories_with_subcategories:
+                        # Parent has subcategories with spending, so don't double count
+                        # The subcategories will be aggregated in the first part of this loop
+                        pass
+                    else:
+                        # Parent category with no subcategory spending, include its direct spending
+                        parent_category_spending[category_slug] = parent_category_spending.get(category_slug, 0.0) + annual_spend
             except SpendingCategory.DoesNotExist:
                 # Category doesn't exist in database, treat as parent category
                 parent_category_spending[category_slug] = parent_category_spending.get(category_slug, 0.0) + annual_spend
