@@ -88,33 +88,61 @@ class RecommendationEngine:
         zero_fee_keeps = [rec for rec in keeps_and_applies if rec['action'] == 'keep' and float(rec['card'].annual_fee) == 0]
         other_keeps_applies = [rec for rec in keeps_and_applies if not (rec['action'] == 'keep' and float(rec['card'].annual_fee) == 0)]
         
-        # Sort other keeps/applies by priority (lower number = higher priority)
-        other_keeps_applies.sort(key=lambda x: x['priority'])
+        # Separate applies from other keeps for balanced filtering
+        applies = [rec for rec in other_keeps_applies if rec['action'] == 'apply']
+        other_keeps = [rec for rec in other_keeps_applies if rec['action'] != 'apply']
         
-        # Always include $0 fee keeps and cancels, limit other keeps/applies
-        max_other_keeps_applies = roadmap.max_recommendations
+        # Sort by priority (lower number = higher priority)
+        applies.sort(key=lambda x: x['priority'])
+        other_keeps.sort(key=lambda x: x['priority'])
         
-        # Reserve space for zero fee keeps and cancels
-        reserved_slots = len(zero_fee_keeps)
-        if cancels:
-            # Reserve at least 1-2 slots for cancels, but don't go below 2 other keeps/applies
-            cancel_slots = min(len(cancels), max(1, roadmap.max_recommendations // 3))
-            reserved_slots += cancel_slots
+        # Separate current card actions (keeps/cancels) from new card actions (applies)
+        # Note: Some keeps might get converted to cancels in the validation step, so we include both
+        current_card_actions = [rec for rec in other_keeps if rec['action'] in ['keep']] + cancels
+        new_card_actions = applies
         
-        max_other_keeps_applies = max(1, roadmap.max_recommendations - reserved_slots)
+        # ALWAYS include ALL current card recommendations (keeps and cancels)
+        # Users need to see what happens to each of their existing cards
+        filtered_other_keeps_applies = current_card_actions.copy()
         
-        # Take top other keeps/applies, all zero fee keeps, and all cancels
-        filtered_other_keeps_applies = other_keeps_applies[:max_other_keeps_applies]
-        recommendations = filtered_other_keeps_applies + zero_fee_keeps + cancels
+        # Calculate remaining slots for new card applications
+        used_slots = len(filtered_other_keeps_applies) + len(zero_fee_keeps)
+        remaining_slots = max(1, roadmap.max_recommendations - used_slots)
+        
+        # Include best apply recommendations up to remaining slots
+        # But always include at least one apply if available, even if it exceeds max_recommendations
+        if new_card_actions:
+            new_card_actions.sort(key=lambda x: x['priority'])
+            if remaining_slots > 0:
+                # Normal case: we have room for applies
+                filtered_other_keeps_applies.extend(new_card_actions[:remaining_slots])
+            else:
+                # Edge case: too many current cards, but still show best apply
+                filtered_other_keeps_applies.append(new_card_actions[0])
+        
+        recommendations = filtered_other_keeps_applies + zero_fee_keeps
+        
+        # VALIDATION: Convert negative-value keeps to cancels
+        for rec in recommendations:
+            if rec['action'] == 'keep':
+                estimated_value = float(rec['estimated_rewards'])
+                annual_fee = float(rec['card'].annual_fee)
+                
+                # Never recommend "keep" for cards with negative value (unless $0 fee)
+                if estimated_value < 0 and annual_fee > 0:
+                    rec['action'] = 'cancel'
+                    rec['reasoning'] = f"Cancel - losing money: ${estimated_value + annual_fee:.0f} rewards vs ${annual_fee:.0f} fee (net: ${estimated_value:.0f})"
         
         # DEBUG: Print smart filtering details
         print(f"DEBUG: Smart filtering breakdown:")
         print(f"  - Other keeps/applies: {len(filtered_other_keeps_applies)}")
         print(f"  - Zero fee keeps: {len(zero_fee_keeps)}")
-        print(f"  - Cancels: {len(cancels)}")
+        # Recount cancels after validation
+        actual_cancels = [rec for rec in recommendations if rec['action'] == 'cancel']
+        print(f"  - Cancels: {len(actual_cancels)}")
         print(f"DEBUG: Final {len(recommendations)} recommendations after smart filtering:")
         for rec in recommendations:
-            fee_info = f" (${rec['card'].annual_fee} fee)" if rec['action'] == 'keep' else ""
+            fee_info = f" (${rec['card'].annual_fee} fee)" if rec['action'] in ['keep', 'cancel'] else ""
             print(f"  - {rec['action'].upper()}: {rec['card'].name}{fee_info} (priority: {rec['priority']})")
         
         # Calculate portfolio summary for the recommended cards
@@ -234,7 +262,9 @@ class RecommendationEngine:
         print(f"DEBUG: Will scenario 2 use optimization? {True}")
         
         # Generate all possible portfolio combinations and evaluate them
-        best_portfolio = self._find_optimal_portfolio(current_cards, available_new_cards, roadmap.max_recommendations)
+        # max_cards should be current cards + max new recommendations, not just max_recommendations
+        max_total_cards = len(current_cards) + roadmap.max_recommendations
+        best_portfolio = self._find_optimal_portfolio(current_cards, available_new_cards, max_total_cards)
         
         # Calculate optimal spending allocation across the entire portfolio
         portfolio_allocation = self._calculate_portfolio_allocation([card_action['card'] for card_action in best_portfolio])
@@ -281,14 +311,38 @@ class RecommendationEngine:
         # Evaluate portfolio scenarios
         scenarios = []
         
-        # Scenario 1: Keep all current cards, add best new cards
+        # Scenario 1: Evaluate current cards individually, keep profitable ones, add best new cards
+        profitable_current_cards = []
+        unprofitable_current_cards = []
+        for card in current_cards:
+            rewards_breakdown = self._calculate_card_rewards_breakdown(card)
+            annual_rewards = rewards_breakdown['total_rewards']
+            annual_fee = float(card.annual_fee)
+            net_value = annual_rewards - annual_fee
+            
+            # Keep profitable cards or zero-fee cards
+            if net_value >= 0 or annual_fee == 0:
+                profitable_current_cards.append(card)
+            else:
+                unprofitable_current_cards.append((card, annual_rewards, annual_fee))
+        
         scenario1 = self._evaluate_portfolio_scenario(
-            cards_to_keep=current_cards,
+            cards_to_keep=profitable_current_cards,
             cards_to_apply=[],
             available_cards=available_cards,
             max_total_cards=max_cards
         )
-        scenarios.append(("keep_all_add_new", scenario1))
+        
+        # Add cancel actions for unprofitable cards to scenario1
+        for card, annual_rewards, annual_fee in unprofitable_current_cards:
+            scenario1['actions'].append({
+                'card': card,
+                'action': 'cancel',
+                'reasoning': f"Cancel - losing money: ${annual_rewards:.0f} rewards vs ${annual_fee} fee (net: ${annual_rewards - annual_fee:.0f})",
+                'priority': 1
+            })
+        
+        scenarios.append(("keep_profitable_add_new", scenario1))
         
         # Scenario 2: Optimize current cards (may cancel some), add best new cards
         scenario2 = self._evaluate_portfolio_scenario(
@@ -1579,7 +1633,7 @@ class RecommendationEngine:
                 'action': 'apply',
                 'estimated_rewards': estimated_rewards,
                 'reasoning': f"High spending fallback - ${signup_bonus:.0f} signup bonus",
-                'priority': 99,  # Low priority fallback
+                'priority': 15,  # Medium priority - better than low keeps but after optimal applies
                 'rewards_breakdown': rewards_breakdown['breakdown'],
                 'total_spending_on_card': rewards_breakdown.get('total_spending_on_card', 0),
                 'signup_bonus_value': signup_bonus
