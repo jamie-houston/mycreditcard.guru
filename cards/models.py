@@ -210,7 +210,7 @@ class UserSpendingProfile(models.Model):
         """Get the full shareable URL for this profile"""
         if self.privacy_setting == 'public' and self.share_uuid:
             from django.urls import reverse
-            return reverse('shared_profile', kwargs={'share_uuid': self.share_uuid})
+            return reverse('shared_profile', kwargs={'share_uuid': str(self.share_uuid)})
         return None
     
     @property

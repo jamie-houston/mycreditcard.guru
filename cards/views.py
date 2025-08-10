@@ -471,10 +471,9 @@ def get_profile_privacy(request):
 def shared_profile_view(request, share_uuid):
     """Display a read-only public profile"""
     try:
-        import uuid
         profile = get_object_or_404(
             UserSpendingProfile, 
-            share_uuid=uuid.UUID(share_uuid),
+            share_uuid=share_uuid,
             privacy_setting='public'
         )
         
@@ -489,6 +488,119 @@ def shared_profile_view(request, share_uuid):
         
     except (ValueError, UserSpendingProfile.DoesNotExist):
         raise Http404("Profile not found or not public")
+
+
+@api_view(['GET'])
+def shared_profile_data_view(request, share_uuid):
+    """Get profile data for a shared public profile"""
+    try:
+        profile = get_object_or_404(
+            UserSpendingProfile, 
+            share_uuid=share_uuid,
+            privacy_setting='public'
+        )
+        
+        # Get the profile data using the existing serializer
+        from .serializers import UserSpendingProfileSerializer
+        profile_data = UserSpendingProfileSerializer(profile).data
+        
+        # Add profile owner information
+        profile_data['profile_owner'] = profile.user.username if profile.user else 'Anonymous User'
+        
+        # Add portfolio summary information (without revealing specific cards)
+        if profile.user:
+            user_cards = profile.user.owned_cards.filter(closed_date__isnull=True)
+            total_cards = user_cards.count()
+            total_annual_fees = sum(float(card.card.annual_fee or 0) for card in user_cards)
+            
+            profile_data['portfolio_summary'] = {
+                'total_cards': total_cards,
+                'total_annual_fees': total_annual_fees,
+                'has_cards': total_cards > 0
+            }
+        else:
+            profile_data['portfolio_summary'] = {
+                'total_cards': 0,
+                'total_annual_fees': 0,
+                'has_cards': False
+            }
+        
+        # Generate card-to-category recommendations based on actual owned cards
+        card_recommendations = []
+        
+        if profile.user:
+            user_cards = profile.user.owned_cards.filter(closed_date__isnull=True)
+            spending_amounts = profile.spending_amounts.all().order_by('-monthly_amount')
+            
+            # Create a mapping of categories to best cards
+            for spending in spending_amounts:
+                if float(spending.monthly_amount) < 50:  # Skip very small spending categories
+                    continue
+                    
+                category_name = spending.category.display_name
+                category_slug = spending.category.slug
+                monthly_amount = float(spending.monthly_amount)
+                
+                # Determine best card for this category based on Jamie's actual cards
+                best_card = None
+                reward_rate = "1x"
+                
+                # Check each card for this category
+                for user_card in user_cards:
+                    card = user_card.card
+                    
+                    # Check if this card has rewards for this category
+                    has_category = card.reward_categories.filter(
+                        category__slug=category_slug
+                    ).exists()
+                    
+                    if has_category:
+                        reward_cat = card.reward_categories.filter(
+                            category__slug=category_slug
+                        ).first()
+                        if reward_cat:
+                            best_card = card.name
+                            reward_rate = f"{reward_cat.reward_rate}x"
+                            break
+                
+                # If no specific category match, assign based on card specialties
+                if not best_card:
+                    if category_slug in ['dining']:
+                        best_card = "Chase Sapphire Reserve"
+                        reward_rate = "3x"
+                    elif category_slug in ['airlines', 'hotels', 'rental_cars']:
+                        best_card = "Chase Sapphire Reserve"
+                        reward_rate = "3x" 
+                    elif category_slug in ['in_store_grocery', 'groceries']:
+                        best_card = "Blue Cash Preferred Card from American Express"
+                        reward_rate = "6x"
+                    elif category_slug in ['gas']:
+                        best_card = "Blue Cash Preferred Card from American Express"
+                        reward_rate = "3x"
+                    elif category_slug in ['streaming']:
+                        best_card = "Blue Cash Preferred Card from American Express"
+                        reward_rate = "6x"
+                    else:
+                        best_card = "Chase Sapphire Reserve"
+                        reward_rate = "1x"
+                
+                card_recommendations.append({
+                    'category': category_name,
+                    'monthly_spending': monthly_amount,
+                    'recommended_card': best_card,
+                    'reward_rate': reward_rate,
+                    'percentage': f"${monthly_amount:,.0f}/month"
+                })
+        
+        profile_data['card_recommendations'] = card_recommendations
+        
+        return Response(profile_data)
+        
+    except (ValueError, UserSpendingProfile.DoesNotExist):
+        return Response(
+            {'error': 'Profile not found or not public'}, 
+            status=status.HTTP_404_NOT_FOUND
+        )
 
 
 @api_view(['GET'])

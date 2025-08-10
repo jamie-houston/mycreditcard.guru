@@ -21,6 +21,7 @@ urlpatterns = [
     path('profile/', views.spending_profile_view, name='spending-profile'),
     path('profile/privacy/', views.get_profile_privacy, name='profile-privacy'),
     path('profile/privacy/update/', views.update_profile_privacy, name='update-profile-privacy'),
+    path('profile/shared/<uuid:share_uuid>/', views.shared_profile_data_view, name='shared-profile-data'),
     
     # Quick recommendations
     path('recommendations/preview/', views.card_recommendations_preview, name='recommendations-preview'),
