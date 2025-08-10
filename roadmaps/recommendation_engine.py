@@ -105,20 +105,15 @@ class RecommendationEngine:
         # Users need to see what happens to each of their existing cards
         filtered_other_keeps_applies = current_card_actions.copy()
         
-        # Calculate remaining slots for new card applications
-        used_slots = len(filtered_other_keeps_applies) + len(zero_fee_keeps)
-        remaining_slots = max(1, roadmap.max_recommendations - used_slots)
+        # max_recommendations should apply only to NEW card applications
+        # Current cards (keeps/cancels) must always be shown regardless of max_recommendations
+        max_new_card_applications = roadmap.max_recommendations
         
-        # Include best apply recommendations up to remaining slots
-        # But always include at least one apply if available, even if it exceeds max_recommendations
+        # Include best apply recommendations up to max_new_card_applications
         if new_card_actions:
             new_card_actions.sort(key=lambda x: x['priority'])
-            if remaining_slots > 0:
-                # Normal case: we have room for applies
-                filtered_other_keeps_applies.extend(new_card_actions[:remaining_slots])
-            else:
-                # Edge case: too many current cards, but still show best apply
-                filtered_other_keeps_applies.append(new_card_actions[0])
+            # Take up to max_recommendations new cards
+            filtered_other_keeps_applies.extend(new_card_actions[:max_new_card_applications])
         
         recommendations = filtered_other_keeps_applies + zero_fee_keeps
         
@@ -669,30 +664,46 @@ class RecommendationEngine:
         cards_to_test = remaining_cards[:min(20, len(remaining_cards))]  # Top 20 cards to include relevant niche cards
         print(f"DEBUG: Testing top {len(cards_to_test)} cards for performance")
         
-        # Try combinations of different sizes with strict limits
-        for combo_size in range(0, min(max_combinations + 1, 4)):  # Max 3 new cards
-            if len(must_include) + combo_size > max_cards:
+        # Use greedy approach: add cards one by one in order of individual value
+        # This ensures consistent results regardless of max_cards
+        current_combination = must_include.copy()
+        current_value = calculate_portfolio_value(current_combination) if current_combination else 0
+        
+        if current_value > best_value:
+            best_value = current_value
+            best_combination = current_combination.copy()
+            print(f"DEBUG: Base combination - value: ${best_value:.2f}, cards: {[cd['card'].name for cd in best_combination]}")
+        
+        # Add cards one by one, always picking the one that adds most value
+        available_cards = cards_to_test.copy()
+        
+        while len(current_combination) < max_cards and available_cards:
+            best_addition = None
+            best_addition_value = current_value
+            
+            # Test each remaining card to see which adds most value
+            for card_to_add in available_cards:
+                test_combination = current_combination + [card_to_add]
+                test_actions = [{'card': cd['card'], 'action': cd['action']} for cd in test_combination]
+                test_value = self._calculate_scenario_portfolio_value(test_actions)
+                
+                if test_value > best_addition_value:
+                    best_addition_value = test_value
+                    best_addition = card_to_add
+            
+            # If we found a beneficial addition, add it
+            if best_addition and best_addition_value > current_value:
+                current_combination.append(best_addition)
+                available_cards.remove(best_addition)
+                current_value = best_addition_value
+                
+                if current_value > best_value:
+                    best_value = current_value
+                    best_combination = current_combination.copy()
+                    print(f"DEBUG: Added {best_addition['card'].name} - value: ${best_value:.2f}, cards: {[cd['card'].name for cd in best_combination]}")
+            else:
+                # No beneficial additions found, stop
                 break
-            
-            combinations_tested = 0
-            max_combinations_to_test = 30 if combo_size <= 2 else 10  # Fewer tests for larger combos
-            
-            for combination in combinations(cards_to_test, combo_size):
-                combinations_tested += 1
-                if combinations_tested > max_combinations_to_test:
-                    print(f"DEBUG: Hit combination limit for size {combo_size}, moving to next size")
-                    break
-                
-                full_combination = must_include + list(combination)
-                # Convert to actions format for efficiency-enhanced portfolio calculation
-                actions = [{'card': cd['card'], 'action': cd['action']} for cd in full_combination]
-                portfolio_value = self._calculate_scenario_portfolio_value(actions)
-                
-                # Only accept portfolios with positive value
-                if portfolio_value > best_value and portfolio_value > 0:
-                    best_value = portfolio_value
-                    best_combination = full_combination
-                    print(f"DEBUG: New best combination - value: ${best_value:.2f}, cards: {[cd['card'].name for cd in best_combination]}")
         
         # If no positive portfolio found, return empty (no recommendations)
         if best_value <= 0:
