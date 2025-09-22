@@ -1,4 +1,40 @@
 {
+  // Debug configurations for running the Django app in Cursor/VS Code
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Django: Runserver (localhost:8000)",
+      "type": "python",
+      "request": "launch",
+      "program": "${workspaceFolder}/manage.py",
+      "args": [
+        "runserver",
+        "0.0.0.0:8000"
+      ],
+      "django": true,
+      "cwd": "${workspaceFolder}",
+      "envFile": "${workspaceFolder}/.env",
+      "console": "integratedTerminal",
+      "justMyCode": true
+    },
+    {
+      "name": "Django: Manage (shell)",
+      "type": "python",
+      "request": "launch",
+      "program": "${workspaceFolder}/manage.py",
+      "args": [
+        "shell"
+      ],
+      "django": true,
+      "cwd": "${workspaceFolder}",
+      "envFile": "${workspaceFolder}/.env",
+      "console": "integratedTerminal",
+      "justMyCode": true
+    }
+  ]
+}
+
+{
     "version": "0.2.0",
     "configurations": [
         {
