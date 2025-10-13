@@ -169,6 +169,14 @@
     </div>
 </div>
 
+<!-- Credits & Benefits Section -->
+<div class="section">
+    <h2>🎁 Your Card Credits & Benefits</h2>
+    <div id="creditsProfile">
+        <div class="loading">Loading your benefits...</div>
+    </div>
+</div>
+
 <style>
 .profile-card {
     background: rgba(255, 255, 255, 0.9);
@@ -640,9 +648,10 @@ async function loadProfileData() {
         await Promise.all([
             loadCardCollection(),
             loadCategoryOptimization(),
-            loadSpendingProfile()
+            loadSpendingProfile(),
+            loadCreditsProfile()
         ]);
-        
+
         // Calculate and display portfolio summary
         calculatePortfolioSummary();
         
@@ -1045,11 +1054,131 @@ async function loadSpendingProfile() {
         `;
         
         spendingContainer.innerHTML = spendingHtml;
-        
+
     } catch (error) {
         console.error('Error loading spending profile:', error);
         document.getElementById('spendingProfile').innerHTML = `
             <div class="error">Error loading spending profile. Please try refreshing the page.</div>
+        `;
+    }
+}
+
+async function loadCreditsProfile() {
+    try {
+        const userCards = await UserDataManager.getCards();
+        const creditsContainer = document.getElementById('creditsProfile');
+
+        if (!userCards || userCards.length === 0) {
+            creditsContainer.innerHTML = `
+                <div class="info-box">
+                    <h3>📱 No Cards Added Yet</h3>
+                    <p>Add your credit cards above to see all the benefits and credits you're earning!</p>
+                </div>
+            `;
+            return;
+        }
+
+        // Fetch detailed card information to get credits
+        const cardDetails = {};
+        const allCredits = {};
+
+        for (const cardId of userCards) {
+            try {
+                const response = await fetch(`${API_BASE}/cards/cards/${cardId}/`);
+                if (response.ok) {
+                    const card = await response.json();
+                    cardDetails[cardId] = card;
+
+                    // Collect all credits from this card
+                    if (card.credits && card.credits.length > 0) {
+                        card.credits.forEach(credit => {
+                            const creditType = credit.credit_type;
+                            if (creditType) {
+                                const creditKey = creditType.slug;
+                                if (!allCredits[creditKey]) {
+                                    allCredits[creditKey] = {
+                                        name: creditType.display_name || creditType.name,
+                                        slug: creditType.slug,
+                                        totalAmount: 0,
+                                        cards: []
+                                    };
+                                }
+                                allCredits[creditKey].totalAmount += parseFloat(credit.amount || 0);
+                                allCredits[creditKey].cards.push({
+                                    name: card.name,
+                                    amount: credit.amount,
+                                    frequency: credit.frequency,
+                                    description: credit.description
+                                });
+                            }
+                        });
+                    }
+                }
+            } catch (error) {
+                console.error(`Error fetching card ${cardId}:`, error);
+            }
+        }
+
+        // Display credits grouped by type
+        const creditEntries = Object.values(allCredits);
+
+        if (creditEntries.length === 0) {
+            creditsContainer.innerHTML = `
+                <div class="info-box">
+                    <h3>ℹ️ No Card Benefits Found</h3>
+                    <p>Your current cards don't have any tracked benefits or credits. Consider adding cards with travel credits, statement credits, or other perks!</p>
+                </div>
+            `;
+            return;
+        }
+
+        // Sort by total amount (highest first)
+        creditEntries.sort((a, b) => b.totalAmount - a.totalAmount);
+
+        let creditsHtml = '<div class="credits-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">';
+
+        creditEntries.forEach(credit => {
+            const totalAnnualValue = credit.totalAmount;
+
+            creditsHtml += `
+                <div class="profile-card" style="border-left: 4px solid #10b981;">
+                    <h3 style="margin-top: 0; color: #10b981; font-size: 18px; display: flex; align-items: center; gap: 10px;">
+                        ${credit.name}
+                        <span style="background: #d1fae5; color: #065f46; padding: 4px 12px; border-radius: 12px; font-size: 14px; font-weight: 600;">
+                            $${totalAnnualValue.toFixed(0)}/year
+                        </span>
+                    </h3>
+                    <div style="margin-top: 15px;">
+                        ${credit.cards.map(card => `
+                            <div style="background: #f9fafb; padding: 12px; border-radius: 8px; margin-bottom: 10px;">
+                                <div style="font-weight: 600; color: #374151; margin-bottom: 4px;">${card.name}</div>
+                                <div style="color: #10b981; font-size: 14px; font-weight: 600;">$${parseFloat(card.amount).toFixed(0)} ${card.frequency || 'annually'}</div>
+                                ${card.description ? `<div style="color: #6b7280; font-size: 13px; margin-top: 4px;">${card.description}</div>` : ''}
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        });
+
+        creditsHtml += '</div>';
+
+        // Add total summary
+        const totalCreditsValue = creditEntries.reduce((sum, credit) => sum + credit.totalAmount, 0);
+        creditsHtml = `
+            <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 20px; border-radius: 12px; margin-bottom: 20px; text-align: center;">
+                <h3 style="margin: 0 0 8px 0; font-size: 16px; font-weight: 500; opacity: 0.9;">Total Annual Benefits Value</h3>
+                <div style="font-size: 36px; font-weight: 700;">$${totalCreditsValue.toFixed(0)}</div>
+                <div style="font-size: 14px; opacity: 0.9; margin-top: 4px;">${creditEntries.length} benefit${creditEntries.length !== 1 ? 's' : ''} across ${Object.keys(cardDetails).length} card${Object.keys(cardDetails).length !== 1 ? 's' : ''}</div>
+            </div>
+        ` + creditsHtml;
+
+        creditsContainer.innerHTML = creditsHtml;
+
+    } catch (error) {
+        console.error('Error loading credits profile:', error);
+        document.getElementById('creditsProfile').innerHTML = `
+            <div class="error">Error loading benefits. Please try refreshing the page.</div>
         `;
     }
 }
