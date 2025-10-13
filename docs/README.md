@@ -4,7 +4,12 @@ This folder contains detailed documentation for the Credit Card Guru project.
 
 ## 📄 Documentation Index
 
-### 🚀 Deployment
+### 🚀 Getting Started
+- **[../RUNNING.md](../RUNNING.md)** - Complete setup and troubleshooting guide
+- **[../QUICKSTART.md](../QUICKSTART.md)** - Quick reference for common tasks
+- **[CARD_IMPORT_GUIDE.md](CARD_IMPORT_GUIDE.md)** - **How credit card imports work (which cards get imported)**
+
+### 🔧 Deployment
 - **[DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md)** - Comprehensive PythonAnywhere deployment instructions
 - **[DEPLOYMENT_CHECKLIST.md](DEPLOYMENT_CHECKLIST.md)** - Step-by-step deployment checklist
 
@@ -23,23 +28,38 @@ This folder contains detailed documentation for the Credit Card Guru project.
 ## 🎯 Quick Navigation
 
 ### For Developers
-- Start with the main [README.md](../README.md) for setup
-- Use [README_TESTING.md](README_TESTING.md) for testing
-- Reference [COMPREHENSIVE_DOCUMENTATION.md](COMPREHENSIVE_DOCUMENTATION.md) for detailed technical info
+- **New to the project?** Start with [../README.md](../README.md)
+- **Need to import cards?** See [CARD_IMPORT_GUIDE.md](CARD_IMPORT_GUIDE.md) ⭐
+- **Running tests?** Use [README_TESTING.md](README_TESTING.md)
+- **Deep dive?** Reference [COMPREHENSIVE_DOCUMENTATION.md](COMPREHENSIVE_DOCUMENTATION.md)
 
 ### For Deployment
 - Follow [DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md) step-by-step
 - Use [DEPLOYMENT_CHECKLIST.md](DEPLOYMENT_CHECKLIST.md) to ensure nothing is missed
 
-### For Algorithm Understanding
+### For Understanding the Algorithm
 - See [FINAL_TEST_ANALYSIS.md](FINAL_TEST_ANALYSIS.md) for algorithm performance analysis
+
+## 💡 Common Questions
+
+**"Which credit cards will be imported?"**
+→ See [CARD_IMPORT_GUIDE.md](CARD_IMPORT_GUIDE.md) - Only cards with `"verified": true` are imported (currently 24 out of 162 cards)
+
+**"How do I import more cards?"**
+→ Edit the JSON files in `data/input/cards/` and set `"verified": true`, then run import
+
+**"How do I run the project locally?"**
+→ See [../RUNNING.md](../RUNNING.md) for complete setup instructions
+
+**"What's the easiest way to manage the project?"**
+→ Use `python manage_project.py` - interactive menu for all common tasks
 
 ## 📝 Documentation Status
 
-All documentation has been cleaned up and organized as of December 2024:
-- ✅ Removed duplicate deployment docs
-- ✅ Consolidated test analysis documents  
-- ✅ Archived outdated requirements specifications
+All documentation is current as of October 2024:
+- ✅ Removed outdated and duplicate documentation
+- ✅ Added comprehensive card import guide
+- ✅ Updated all guides to reference new `manage_project.py` script
 - ✅ Maintained essential documentation only
 
 ---
