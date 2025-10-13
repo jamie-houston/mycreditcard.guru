@@ -3,152 +3,76 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Django: Runserver (localhost:8000)",
+      "name": "Django: Run Server",
       "type": "python",
       "request": "launch",
       "program": "${workspaceFolder}/manage.py",
-      "args": [
-        "runserver",
-        "0.0.0.0:8000"
-      ],
+      "args": ["runserver", "8000"],
       "django": true,
-      "cwd": "${workspaceFolder}",
-      "envFile": "${workspaceFolder}/.env",
+      "justMyCode": true,
       "console": "integratedTerminal",
-      "justMyCode": true
+      "envFile": "${workspaceFolder}/.env",
+      "python": "${workspaceFolder}/venv/bin/python"
     },
     {
-      "name": "Django: Manage (shell)",
+      "name": "Django: Run Server (Debug)",
       "type": "python",
       "request": "launch",
       "program": "${workspaceFolder}/manage.py",
-      "args": [
-        "shell"
-      ],
+      "args": ["runserver", "8000", "--noreload"],
       "django": true,
-      "cwd": "${workspaceFolder}",
-      "envFile": "${workspaceFolder}/.env",
+      "justMyCode": false,
       "console": "integratedTerminal",
-      "justMyCode": true
+      "envFile": "${workspaceFolder}/.env",
+      "python": "${workspaceFolder}/venv/bin/python"
+    },
+    {
+      "name": "Django: Run Tests",
+      "type": "python",
+      "request": "launch",
+      "program": "${workspaceFolder}/manage.py",
+      "args": ["test"],
+      "django": true,
+      "justMyCode": true,
+      "console": "integratedTerminal",
+      "envFile": "${workspaceFolder}/.env",
+      "python": "${workspaceFolder}/venv/bin/python"
+    },
+    {
+      "name": "Django: Shell",
+      "type": "python",
+      "request": "launch",
+      "program": "${workspaceFolder}/manage.py",
+      "args": ["shell"],
+      "django": true,
+      "justMyCode": true,
+      "console": "integratedTerminal",
+      "envFile": "${workspaceFolder}/.env",
+      "python": "${workspaceFolder}/venv/bin/python"
+    },
+    {
+      "name": "Django: Migrate",
+      "type": "python",
+      "request": "launch",
+      "program": "${workspaceFolder}/manage.py",
+      "args": ["migrate"],
+      "django": true,
+      "justMyCode": true,
+      "console": "integratedTerminal",
+      "envFile": "${workspaceFolder}/.env",
+      "python": "${workspaceFolder}/venv/bin/python"
+    },
+    {
+      "name": "Django: Create Superuser",
+      "type": "python",
+      "request": "launch",
+      "program": "${workspaceFolder}/manage.py",
+      "args": ["createsuperuser"],
+      "django": true,
+      "justMyCode": true,
+      "console": "integratedTerminal",
+      "envFile": "${workspaceFolder}/.env",
+      "python": "${workspaceFolder}/venv/bin/python"
     }
   ]
-}
-
-{
-    "version": "0.2.0",
-    "configurations": [
-        {
-            "name": "Django: Run Server",
-            "type": "python",
-            "request": "launch",
-            "program": "${workspaceFolder}/manage.py",
-            "args": ["runserver", "8000"],
-            "django": true,
-            "justMyCode": true,
-            "console": "integratedTerminal",
-            "env": {
-                "DJANGO_SETTINGS_MODULE": "creditcard_guru.settings"
-            },
-            "python": "${workspaceFolder}/venv/bin/python"
-        },
-        {
-            "name": "Django: Run Server (Debug)",
-            "type": "python",
-            "request": "launch",
-            "program": "${workspaceFolder}/manage.py",
-            "args": ["runserver", "8000", "--noreload"],
-            "django": true,
-            "justMyCode": false,
-            "console": "integratedTerminal",
-            "env": {
-                "DJANGO_SETTINGS_MODULE": "creditcard_guru.settings",
-                "DEBUG": "True"
-            },
-            "python": "${workspaceFolder}/venv/bin/python"
-        },
-        {
-            "name": "Django: Run Tests",
-            "type": "python",
-            "request": "launch",
-            "program": "${workspaceFolder}/manage.py",
-            "args": ["test"],
-            "django": true,
-            "justMyCode": true,
-            "console": "integratedTerminal",
-            "env": {
-                "DJANGO_SETTINGS_MODULE": "creditcard_guru.settings"
-            },
-            "python": "${workspaceFolder}/venv/bin/python"
-        },
-        {
-            "name": "Django: Shell",
-            "type": "python",
-            "request": "launch",
-            "program": "${workspaceFolder}/manage.py",
-            "args": ["shell_plus"],
-            "django": true,
-            "justMyCode": true,
-            "console": "integratedTerminal",
-            "env": {
-                "DJANGO_SETTINGS_MODULE": "creditcard_guru.settings"
-            },
-            "python": "${workspaceFolder}/venv/bin/python"
-        },
-        {
-            "name": "Django: Import Cards",
-            "type": "python",
-            "request": "launch",
-            "program": "${workspaceFolder}/manage.py",
-            "args": ["import_cards", "${workspaceFolder}/sample_cards.json"],
-            "django": true,
-            "justMyCode": true,
-            "console": "integratedTerminal",
-            "env": {
-                "DJANGO_SETTINGS_MODULE": "creditcard_guru.settings"
-            },
-            "python": "${workspaceFolder}/venv/bin/python"
-        },
-        {
-            "name": "Django: Migrate",
-            "type": "python",
-            "request": "launch",
-            "program": "${workspaceFolder}/manage.py",
-            "args": ["migrate"],
-            "django": true,
-            "justMyCode": true,
-            "console": "integratedTerminal",
-            "env": {
-                "DJANGO_SETTINGS_MODULE": "creditcard_guru.settings"
-            },
-            "python": "${workspaceFolder}/venv/bin/python"
-        },
-        {
-            "name": "Django: Make Migrations",
-            "type": "python",
-            "request": "launch",
-            "program": "${workspaceFolder}/manage.py",
-            "args": ["makemigrations"],
-            "django": true,
-            "justMyCode": true,
-            "console": "integratedTerminal",
-            "env": {
-                "DJANGO_SETTINGS_MODULE": "creditcard_guru.settings"
-            },
-            "python": "${workspaceFolder}/venv/bin/python"
-        },
-        {
-            "name": "Django: Create Superuser",
-            "type": "python",
-            "request": "launch",
-            "program": "${workspaceFolder}/manage.py",
-            "args": ["createsuperuser"],
-            "django": true,
-            "justMyCode": true,
-            "console": "integratedTerminal",
-            "env": {
-                "DJANGO_SETTINGS_MODULE": "creditcard_guru.settings"
-            },
-            "python": "${workspaceFolder}/venv/bin/python"
-        }
-    ]
 }
