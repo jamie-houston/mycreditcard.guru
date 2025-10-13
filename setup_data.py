@@ -53,14 +53,14 @@ def main():
     # 1. Load system data
     system_files = [
         'data/input/system/spending_categories.json',
-        'data/input/system/issuers.json', 
+        'data/input/system/issuers.json',
         'data/input/system/reward_types.json'
     ]
-    
+
     for file_path in system_files:
         if os.path.exists(file_path):
             total_commands += 1
-            if run_command(f'python manage.py loaddata {file_path}', f'Loading {Path(file_path).name}'):
+            if run_command(f'python manage.py import_cards {file_path}', f'Loading {Path(file_path).name}'):
                 success_count += 1
         else:
             print(f"⚠️  Warning: {file_path} not found, skipping...")
