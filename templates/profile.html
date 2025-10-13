@@ -100,26 +100,22 @@
 <!-- Category Optimization Section -->
 <div class="section">
     <h2>🎯 Which Card to Use for Each Category</h2>
-    <p style="color: #6b7280; margin-bottom: 20px;">Here's which card to use for each category to maximize rewards based on your card collection:</p>
     <div id="categoryOptimization">
         <div class="loading">Loading category recommendations...</div>
     </div>
-    
+
     <!-- Add Card Input - Always Visible -->
-    <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
-        <h3 style="margin-bottom: 15px; color: #374151; font-size: 16px;">➕ Add Credit Cards</h3>
-        <p style="color: #6b7280; margin-bottom: 15px; font-size: 14px;">Add cards to your collection to see updated recommendations:</p>
-        
-        <div style="margin-bottom: 20px;">
+    <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #e5e7eb;">
+        <h3 style="margin-bottom: 10px; color: #374151; font-size: 16px;">➕ Add Credit Cards</h3>
+        <div style="margin-bottom: 15px;">
             <!-- Searchable Card Dropdown -->
             <div style="position: relative;">
-                <label for="cardSearch" style="display: block; margin-bottom: 5px; font-weight: 500; color: #374151;">Search for a card:</label>
-                <input 
-                    type="text" 
-                    id="cardSearch" 
-                    placeholder="Type card name (e.g., 'Chase Sapphire', 'Blue Cash')..." 
+                <input
+                    type="text"
+                    id="cardSearch"
+                    placeholder="Type card name (e.g., 'Chase Sapphire', 'Blue Cash')..."
                     autocomplete="off"
-                    style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px; transition: border-color 0.2s; box-sizing: border-box;"
+                    style="width: 100%; padding: 10px 14px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px; transition: border-color 0.2s; box-sizing: border-box;"
                 >
                 <!-- Dropdown will be moved to body dynamically -->
                 <div id="cardSearchResults" style="display: none;">
@@ -129,8 +125,16 @@
     </div>
 </div>
 
+<!-- Credits & Benefits Section -->
+<div class="section" style="padding: 20px;">
+    <h2>🎁 Your Card Credits & Benefits</h2>
+    <div id="creditsProfile">
+        <div class="loading">Loading your benefits...</div>
+    </div>
+</div>
+
 <!-- Profile Summary Section -->
-<div class="section">
+<div class="section" style="padding: 20px;">
     <h2>📊 Portfolio Summary</h2>
     <div class="modal-info-grid">
         <div class="modal-info-item">
@@ -152,9 +156,8 @@
     </div>
 </div>
 
-
 <!-- Card Collection Section -->
-<div class="section">
+<div class="section" style="padding: 20px;">
     <h2>💳 My Card Collection</h2>
     <div id="cardCollection">
         <div class="loading">Loading your card collection...</div>
@@ -162,18 +165,10 @@
 </div>
 
 <!-- Spending Profile Section -->
-<div class="section">
+<div class="section" style="padding: 20px;">
     <h2>📈 Your Spending Profile</h2>
     <div id="spendingProfile">
         <div class="loading">Loading spending profile...</div>
-    </div>
-</div>
-
-<!-- Credits & Benefits Section -->
-<div class="section">
-    <h2>🎁 Your Card Credits & Benefits</h2>
-    <div id="creditsProfile">
-        <div class="loading">Loading your benefits...</div>
     </div>
 </div>
 
@@ -1092,7 +1087,8 @@ async function loadCreditsProfile() {
                     // Collect all credits from this card
                     if (card.credits && card.credits.length > 0) {
                         card.credits.forEach(credit => {
-                            const creditType = credit.credit_type;
+                            // Credits can be in either spending_credit or credit_type
+                            const creditType = credit.spending_credit || credit.credit_type;
                             if (creditType) {
                                 const creditKey = creditType.slug;
                                 if (!allCredits[creditKey]) {
@@ -1103,11 +1099,14 @@ async function loadCreditsProfile() {
                                         cards: []
                                     };
                                 }
-                                allCredits[creditKey].totalAmount += parseFloat(credit.amount || 0);
+                                // Use annual_value if available, otherwise calculate
+                                const annualValue = credit.annual_value || (parseFloat(credit.value || 0) * (credit.times_per_year || 1));
+                                allCredits[creditKey].totalAmount += annualValue;
                                 allCredits[creditKey].cards.push({
                                     name: card.name,
-                                    amount: credit.amount,
-                                    frequency: credit.frequency,
+                                    value: credit.value,
+                                    annualValue: annualValue,
+                                    timesPerYear: credit.times_per_year,
                                     description: credit.description
                                 });
                             }
@@ -1135,25 +1134,34 @@ async function loadCreditsProfile() {
         // Sort by total amount (highest first)
         creditEntries.sort((a, b) => b.totalAmount - a.totalAmount);
 
-        let creditsHtml = '<div class="credits-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">';
+        // Add total summary (compact version)
+        const totalCreditsValue = creditEntries.reduce((sum, credit) => sum + credit.totalAmount, 0);
+        let creditsHtml = `
+            <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 15px; border-radius: 10px; margin-bottom: 15px; text-align: center;">
+                <div style="font-size: 13px; font-weight: 500; opacity: 0.9; margin-bottom: 4px;">Total Annual Benefits</div>
+                <div style="font-size: 28px; font-weight: 700;">$${totalCreditsValue.toFixed(0)}</div>
+                <div style="font-size: 12px; opacity: 0.9; margin-top: 2px;">${creditEntries.length} benefit${creditEntries.length !== 1 ? 's' : ''} from ${Object.keys(cardDetails).length} card${Object.keys(cardDetails).length !== 1 ? 's' : ''}</div>
+            </div>
+        `;
+
+        creditsHtml += '<div class="credits-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px;">';
 
         creditEntries.forEach(credit => {
             const totalAnnualValue = credit.totalAmount;
 
             creditsHtml += `
-                <div class="profile-card" style="border-left: 4px solid #10b981;">
-                    <h3 style="margin-top: 0; color: #10b981; font-size: 18px; display: flex; align-items: center; gap: 10px;">
-                        ${credit.name}
-                        <span style="background: #d1fae5; color: #065f46; padding: 4px 12px; border-radius: 12px; font-size: 14px; font-weight: 600;">
-                            $${totalAnnualValue.toFixed(0)}/year
+                <div style="background: rgba(255, 255, 255, 0.9); border: 1px solid #e5e7eb; border-left: 3px solid #10b981; border-radius: 8px; padding: 12px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <h3 style="margin: 0; color: #10b981; font-size: 15px; font-weight: 600;">${credit.name}</h3>
+                        <span style="background: #d1fae5; color: #065f46; padding: 3px 8px; border-radius: 8px; font-size: 12px; font-weight: 600; white-space: nowrap;">
+                            $${totalAnnualValue.toFixed(0)}/yr
                         </span>
-                    </h3>
-                    <div style="margin-top: 15px;">
+                    </div>
+                    <div style="margin-top: 8px;">
                         ${credit.cards.map(card => `
-                            <div style="background: #f9fafb; padding: 12px; border-radius: 8px; margin-bottom: 10px;">
-                                <div style="font-weight: 600; color: #374151; margin-bottom: 4px;">${card.name}</div>
-                                <div style="color: #10b981; font-size: 14px; font-weight: 600;">$${parseFloat(card.amount).toFixed(0)} ${card.frequency || 'annually'}</div>
-                                ${card.description ? `<div style="color: #6b7280; font-size: 13px; margin-top: 4px;">${card.description}</div>` : ''}
+                            <div style="background: #f9fafb; padding: 8px; border-radius: 6px; margin-bottom: 6px; font-size: 13px;">
+                                <div style="font-weight: 600; color: #374151; margin-bottom: 2px;">${card.name}</div>
+                                <div style="color: #10b981; font-weight: 600; font-size: 12px;">$${parseFloat(card.annualValue).toFixed(0)}/year${card.timesPerYear > 1 ? ` ($${parseFloat(card.value).toFixed(0)} × ${card.timesPerYear})` : ''}</div>
                             </div>
                         `).join('')}
                     </div>
@@ -1162,16 +1170,6 @@ async function loadCreditsProfile() {
         });
 
         creditsHtml += '</div>';
-
-        // Add total summary
-        const totalCreditsValue = creditEntries.reduce((sum, credit) => sum + credit.totalAmount, 0);
-        creditsHtml = `
-            <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 20px; border-radius: 12px; margin-bottom: 20px; text-align: center;">
-                <h3 style="margin: 0 0 8px 0; font-size: 16px; font-weight: 500; opacity: 0.9;">Total Annual Benefits Value</h3>
-                <div style="font-size: 36px; font-weight: 700;">$${totalCreditsValue.toFixed(0)}</div>
-                <div style="font-size: 14px; opacity: 0.9; margin-top: 4px;">${creditEntries.length} benefit${creditEntries.length !== 1 ? 's' : ''} across ${Object.keys(cardDetails).length} card${Object.keys(cardDetails).length !== 1 ? 's' : ''}</div>
-            </div>
-        ` + creditsHtml;
 
         creditsContainer.innerHTML = creditsHtml;
 
