@@ -1,163 +1,203 @@
 # Credit Card Guru
 
-A Django-based credit card optimization platform that creates personalized roadmaps for credit card applications, cancellations, and upgrades based on spending patterns and issuer policies.
-
-
-## Documentation
-
-For detailed usage documentation, see [USAGE.md](./USAGE.md)
-
-## Features
-
-- **Credit Card Database**: Comprehensive database of credit cards with reward categories, signup bonuses, and offers
-- **Spending Profile**: Input your monthly spending by category
-- **Smart Recommendations**: Algorithm considers issuer policies (like Chase 5/24 rule)
-- **Roadmap Generation**: Creates personalized action plans for credit card optimization
-- **Anonymous & Logged-in Users**: Works without login, with option to save roadmaps
-- **JSON Data Import**: Easy import of credit card data from JSON files
+A Django-based credit card optimization platform that generates personalized roadmaps for credit card applications, cancellations, and upgrades. The system analyzes user spending patterns against issuer policies (like Chase's 5/24 rule) to recommend optimal credit card strategies for maximizing rewards.
 
 ## Quick Start
 
-### Prerequisites
-- Python 3.8+
-- pip
+### First Time Setup
 
-### Installation
-
-1. **Clone and setup virtual environment**:
 ```bash
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-pip install -r requirements.txt
+# 1. Activate virtual environment
+source venv/bin/activate
+
+# 2. Run the interactive management script
+python manage_project.py
+
+# 3. Select option 3: Reset database (creates DB + imports all data)
+# 4. Select option 1: Run development server
 ```
 
-2. **Setup database**:
+Visit **http://localhost:8000/**
+
+### Running the Server
+
 ```bash
-python manage.py migrate
-```
+# Option A: Interactive script (recommended)
+python manage_project.py
+# Select option 1
 
-3. **Import initial data**:
-
-**Option A: Use the setup script (recommended)**:
-```bash
-python setup_data.py
-```
-
-**Option B: Manual import**:
-```bash
-# Import basic system data
-python manage.py loaddata data/input/system/spending_categories.json
-python manage.py loaddata data/input/system/issuers.json
-python manage.py loaddata data/input/system/reward_types.json
-
-# Import credit cards from all available files
-python manage.py import_cards data/input/cards/chase.json
-python manage.py import_cards data/input/cards/american_express.json
-# ... repeat for other card files
-
-# Import credit types (for offers/benefits in roadmap preferences)
-python manage.py import_credit_types
-```
-
-4. **Create admin user** (optional):
-```bash
-python manage.py createsuperuser
-```
-
-5. **Run the development server**:
-```bash
+# Option B: Direct command
 python manage.py runserver
+
+# Option C: Debug in VS Code/Cursor
+# Press F5
 ```
 
-Visit http://127.0.0.1:8000/ to see the application.
+## Features
 
-## Project Structure
+- **Portfolio Optimization**: Recommends optimal card combinations rather than individual cards
+- **Issuer Policy Engine**: Respects rules like Chase 5/24, application velocity limits
+- **Anonymous Support**: Full functionality without registration using session tracking
+- **Spending Analysis**: Matches card benefits to user spending patterns
+- **Smart Recommendations**: Anti-overlap logic prevents double-counting rewards
+- **Roadmap Generation**: Creates actionable credit card application/cancellation plans
+
+## Interactive Management Script
+
+The `manage_project.py` script provides a menu-driven interface for all development tasks:
 
 ```
-creditcard_guru/
-├── cards/              # Credit card models and data
-├── roadmaps/           # Recommendation engine
-├── users/              # User management
-├── creditcard_guru/    # Django settings
-└── sample_cards.json   # Sample data
+1. Run development server         → Start Django at http://127.0.0.1:8000/
+2. Run tests                       → Run Django test suite (all or specific)
+3. Reset database                  → Delete and recreate database with fresh data
+4. Migrate database               → Run/create database migrations
+5. Import credit card data        → Import cards, issuers, categories
+6. Show database info             → View counts of data in database
+7. Manage superuser               → Create/modify admin users
+8. Open Django shell              → Interactive Django shell
+9. Exit                           → Quit the script
 ```
 
-## Data Models
+## Project Architecture
 
-### Core Models
-- **Issuer**: Credit card companies (Chase, Amex, etc.) with policies
-- **CreditCard**: Individual credit cards with fees, bonuses
-- **RewardCategory**: Earning rates by spending category
-- **UserSpendingProfile**: User spending patterns
-- **Roadmap**: Generated recommendations
+### Django Apps
 
-### JSON Import Format
+- **`cards/`** - Credit card database, user profiles, card ownership tracking
+- **`roadmaps/`** - Recommendation engine and portfolio optimization
+- **`users/`** - User management with anonymous session support
 
-```json
-{
-  "issuers": [
-    {"name": "Chase", "max_cards_per_period": 5, "period_months": 24}
-  ],
-  "reward_types": [
-    {"name": "Points"}
-  ],
-  "spending_categories": [
-    {"name": "Travel"}
-  ],
-  "credit_cards": [
-    {
-      "name": "Sapphire Preferred",
-      "issuer": "Chase",
-      "annual_fee": 95,
-      "signup_bonus_amount": 60000,
-      "signup_bonus_type": "Points",
-      "primary_reward_type": "Points",
-      "verified": true,
-      "reward_categories": [
-        {"category": "Travel", "reward_rate": 2.0, "reward_type": "Points"}
-      ]
-    }
-  ]
-}
-```
+### Key Models
+
+- `CreditCard` - Card details with JSON metadata for flexible attributes
+- `Issuer` - Card issuers with application policies (5/24, velocity limits)
+- `SpendingCategory` - Hierarchical spending categories
+- `UserSpendingProfile` - User spending patterns (authenticated or session-based)
+- `Roadmap` - Generated recommendations with portfolio calculations
+- `UserCard` - Detailed card ownership history with open/close dates
+
+### Recommendation Engine
+
+The core engine (`roadmaps/recommendation_engine.py`, 1,923 lines) implements:
+
+- Portfolio-first optimization (not simple card suggestions)
+- Anti-overlap logic to prevent reward double-counting
+- Issuer policy compliance checking
+- Spending efficiency scoring
+- Greedy algorithm for optimal card selection
+- Scenario analysis (keeping profitable cards vs. full optimization)
+
+## Documentation
+
+- **[RUNNING.md](RUNNING.md)** - Comprehensive setup and troubleshooting guide
+- **[QUICKSTART.md](QUICKSTART.md)** - Quick reference for common tasks
+- **[CLAUDE.md](CLAUDE.md)** - Project overview and architecture for AI assistants
+- **[PRD.md](PRD.md)** - Product requirements and specifications
+- **[docs/](docs/)** - Additional documentation (deployment, testing)
 
 ## Development
 
+### Prerequisites
+
+- Python 3.8+
+- Virtual environment activated
+- `.env` file configured (see `.env.example`)
+
+### Common Commands
+
+```bash
+# Import all data (fresh database)
+python manage_project.py  # Select option 5 → 1
+
+# Import specific issuer
+python manage.py import_cards data/input/cards/chase.json
+
+# Run tests
+python manage.py test
+
+# Create superuser for admin access
+python manage.py createsuperuser
+
+# Access admin panel
+http://localhost:8000/admin/
+```
+
 ### Management Commands
 
-- `python manage.py import_cards <file.json>` - Import credit card data
-- `python manage.py import_credit_types` - Import credit types (offers/benefits) from card files
-- `python manage.py shell_plus` - Enhanced Django shell
+- `import_cards <file.json>` - Import credit card data (handles all file types)
+- `import_credit_types` - Import benefit/offer types for preferences
+- `import_spending_credits` - Import spending credit types (lounge access, etc.)
 
-### Admin Interface
+### API Endpoints
 
-Access the admin at http://127.0.0.1:8000/admin/ to manage:
-- Credit cards and issuers
-- Reward categories and offers
-- User spending profiles
-- Roadmaps and recommendations
+- `/api/cards/` - Card search, user profiles, quick recommendations
+- `/api/roadmaps/` - Roadmap CRUD, generation, portfolio statistics
+- `/api/users/` - Authentication status, profile management
 
-## Next Steps
+All endpoints support anonymous users via session-based tracking.
 
-1. **Recommendation Engine**: Implement the core algorithm considering:
-   - Issuer policies (5/24 rule, etc.)
-   - Reward optimization
-   - Annual fee vs. benefits analysis
+## Data Import
 
-2. **Frontend**: Build user interface for:
-   - Spending input forms
-   - Card filtering and selection
-   - Roadmap visualization
+### JSON Data Structure
 
-3. **API Endpoints**: Create REST API for:
-   - Card search and filtering
-   - Roadmap generation
-   - User profile management
+Credit card data is organized in `/data/input/`:
+
+- `/system/` - Core data (categories, issuers, reward types)
+- `/cards/` - Card data by issuer (chase.json, american_express.json, etc.)
+
+The `import_cards` command automatically detects file type and imports appropriately.
+
+### Import Options
+
+```bash
+# Option 1: Use interactive script (easiest)
+python manage_project.py  # Select 5 → 1
+
+# Option 2: Use setup script
+python setup_data.py
+
+# Option 3: Manual import
+python manage.py import_cards data/input/system/issuers.json
+python manage.py import_cards data/input/system/spending_categories.json
+python manage.py import_cards data/input/system/reward_types.json
+python manage.py import_spending_credits
+python manage.py import_cards data/input/cards/*.json
+python manage.py import_credit_types
+```
+
+## Testing
+
+```bash
+# Run all tests
+python manage.py test
+
+# Run specific app tests
+python manage.py test cards
+python manage.py test roadmaps
+
+# Use interactive script
+python manage_project.py  # Select option 2
+```
 
 ## Technology Stack
 
-- **Backend**: Django 4.2, Django REST Framework
-- **Database**: SQLite (development), PostgreSQL (production)
-- **Task Queue**: Celery + Redis
-- **Admin**: Django Admin
-- **API**: REST API with pagination
+- **Backend**: Django 5.1, Django REST Framework
+- **Database**: SQLite (development), PostgreSQL (production-ready)
+- **Authentication**: django-allauth (email + Google OAuth)
+- **Frontend**: Django templates with modern CSS
+- **API**: RESTful with anonymous user support
+
+## Deployment
+
+The application is production-ready and currently hosted on PythonAnywhere. See [docs/DEPLOYMENT_GUIDE.md](docs/DEPLOYMENT_GUIDE.md) for deployment instructions.
+
+## Key Design Decisions
+
+1. **Portfolio-First Approach** - Optimizes entire card portfolios, not individual suggestions
+2. **Anonymous Functionality** - Full features without registration using session keys
+3. **Hierarchical Categories** - Spending categories support parent/child relationships
+4. **JSON Flexibility** - Card metadata in JSON fields for diverse card features
+5. **Issuer Policy Engine** - Built-in support for complex issuer rules
+
+## License
+
+Proprietary - All rights reserved
