@@ -1,42 +1,51 @@
 ---
-description: Use comprehensive usage documentation for codebase understanding
+description: Documentation and code change guidelines
 globs: **/*
 alwaysApply: true
 ---
 
-# Codebase Documentation Usage
+# Documentation and Code Change Guidelines
 
-When working on this Django fintech credit card platform, **ALWAYS** reference the comprehensive usage documentation in `usageDocumentation/` before making changes.
+When working on this Django fintech credit card platform, **ALWAYS** reference the project documentation before and after making changes.
 
 ## **Primary Documentation Resources:**
 
-### **Core Module Documentation:**
-- **Models**: `usageDocumentation/[app]_models_py_usage.md` - Database schema, relationships, business logic
-- **Views**: `usageDocumentation/[app]_views_py_usage.md` - API endpoints, request handling, authentication
-- **Serializers**: `usageDocumentation/[app]_serializers_py_usage.md` - Data transformation, validation patterns
+### **Project Documentation:**
+- **`CLAUDE.md`** - Project overview, architecture, development patterns (this file)
+- **`README.md`** - Main project documentation with quick start
+- **`RUNNING.md`** - Comprehensive setup and troubleshooting guide
+- **`QUICKSTART.md`** - Quick reference for common tasks
+- **`docs/CARD_IMPORT_GUIDE.md`** - Credit card import system documentation
 
 ### **Key Files:**
-- **Recommendation Engine**: `usageDocumentation/roadmaps_recommendation_engine_py_usage.md` - Core business logic (1,822 lines)
-- **Project Overview**: `source_map.md` - High-level architecture and module relationships
-- **Management Commands**: `usageDocumentation/cards_management_commands_*_usage.md` - Data import and scenario testing
+- **Recommendation Engine**: `roadmaps/recommendation_engine.py` - Core business logic (1,923 lines)
+- **Data Import**: `cards/management/commands/import_cards.py` - Card data import system
+- **Interactive Script**: `manage_project.py` - Menu-driven development tool
 
 ## **Development Guidelines:**
 
 ### **Before Making Changes:**
-1. **Read relevant usage documentation** to understand current patterns
-2. **Follow established code patterns** documented in the usage files
-3. **Understand dependencies** listed in each module's documentation
-4. **Use provided code examples** as templates for new functionality
+1. **Read `CLAUDE.md`** to understand project architecture and patterns
+2. **Check relevant documentation** (RUNNING.md, CARD_IMPORT_GUIDE.md, etc.)
+3. **Review the actual code** you're modifying to understand current implementation
+4. **Follow established Django and project patterns**
+
+### **After Making Changes:**
+1. **Update documentation** if you changed functionality
+2. **Update `CLAUDE.md`** if you changed architecture or core patterns
+3. **Update relevant guides** (RUNNING.md, QUICKSTART.md, etc.) if you changed workflows
+4. **Add/update tests** to cover new functionality
 
 ### **For Bug Fixes:**
-- Check the module's usage documentation for **common patterns** and **expected behavior**
-- Review **dependencies section** for potential interaction issues
-- Use **practical code examples** to understand proper implementation
+- Understand the intended behavior from documentation
+- Review related code for potential interaction issues
+- Test thoroughly before committing
 
 ### **For New Features:**
-- Study similar existing functionality in the **usage documentation**
-- Follow **established patterns** from documented examples
-- Maintain consistency with **documented API patterns** and **data structures**
+- Study similar existing functionality in the codebase
+- Follow established patterns (Django REST Framework, session management, etc.)
+- Maintain consistency with existing API patterns and data structures
+- Document the new feature appropriately
 
 ### **Django App Structure:**
 - **`cards/`**: Credit card models, recommendation logic, data import
@@ -45,14 +54,22 @@ When working on this Django fintech credit card platform, **ALWAYS** reference t
 - **`creditcard_guru/`**: Project configuration, URL routing, deployment settings
 
 ## **Code Quality Standards:**
-- Follow patterns documented in each module's **Practical Code Examples** section
-- Maintain consistency with existing **Public API documentation**
-- Use established **dependency patterns** documented in each file
-- Reference **initialization patterns** for proper Django app integration
+- Follow Django REST Framework patterns for API endpoints
+- Use session-based tracking for anonymous users
+- Maintain consistent error handling and validation
+- Write clear, descriptive commit messages
 
 ## **Testing Approach:**
-- Use **management commands** documented in `cards_management_commands_*_usage.md`
-- Follow **test patterns** in `usageDocumentation/[app]_tests_py_usage.md`
-- Leverage **scenario testing** documented in test scenario files
+- Use `python manage_project.py` for common development tasks
+- Run tests with `python manage.py test`
+- Test both authenticated and anonymous user workflows
+- Verify imports work with the verified flag system
 
-**Remember**: This documentation represents the **definitive source of truth** for how each module works, its patterns, and proper usage. Always consult it before making changes!
+## **Documentation Maintenance:**
+When you make changes, update these files as appropriate:
+- **Architecture changes** → Update `CLAUDE.md`
+- **New features/workflows** → Update `RUNNING.md` and `QUICKSTART.md`
+- **Import system changes** → Update `docs/CARD_IMPORT_GUIDE.md`
+- **Deployment changes** → Update `docs/DEPLOYMENT_GUIDE.md`
+
+**Remember**: Documentation should reflect the current state of the codebase. When you change code, update the relevant documentation!

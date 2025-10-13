@@ -135,3 +135,23 @@ The recommendation engine (`roadmaps/recommendation_engine.py`) implements sophi
 3. **Hierarchical Categories**: Spending categories support parent/child relationships for flexible categorization
 4. **JSON Flexibility**: Credit card metadata stored in JSON fields to accommodate diverse card features
 5. **Issuer Policy Engine**: Built-in support for complex issuer rules and application restrictions
+
+## Documentation Guidelines
+
+**Important**: When making code changes, always follow the documentation guidelines in `.cursor/rules/documentation.mdc`.
+
+### Key Documentation Rules:
+- **Before changes**: Review CLAUDE.md (this file) and relevant documentation
+- **After changes**: Update documentation to reflect new functionality
+- **Architecture changes**: Update CLAUDE.md
+- **New workflows**: Update RUNNING.md and QUICKSTART.md
+- **Import changes**: Update docs/CARD_IMPORT_GUIDE.md
+
+### Documentation Structure:
+- **CLAUDE.md** (this file) - Project overview for AI assistants
+- **README.md** - Main project documentation
+- **RUNNING.md** - Setup and troubleshooting
+- **QUICKSTART.md** - Quick reference guide
+- **docs/** - Detailed guides (imports, deployment, testing)
+
+**See `.cursor/rules/documentation.mdc` for complete guidelines on when and how to update documentation.**
