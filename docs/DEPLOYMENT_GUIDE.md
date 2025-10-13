@@ -2,6 +2,25 @@
 
 This guide provides step-by-step instructions for deploying the Credit Card Guru Django application to PythonAnywhere.
 
+## Quick Reference: Updating After Git Pull
+
+**Looking for update instructions?** Jump to:
+- [Updating Your Application (Full Instructions)](#updating-your-application)
+- [Quick Update (Code Only)](#quick-update-no-data-changes)
+- [Full Update (Code + Data + DB)](#full-update-code--data--database-changes)
+
+**TL;DR - After `git pull`:**
+```bash
+workon creditcard_guru
+pip install -r requirements.txt
+python manage.py migrate
+python manage.py import_cards data/input/cards/*.json
+python manage.py collectstatic --noinput
+# Then reload web app in PythonAnywhere
+```
+
+---
+
 ## Prerequisites
 
 - A PythonAnywhere account (Beginner plan or higher)
@@ -142,26 +161,36 @@ In the Web tab, add these static file mappings:
 
 ## Step 9: Load Initial Data
 
-1. Load initial data for your application:
+**Important**: The `import_cards` command works for all file types (system data and card data). Only cards with `"verified": true` will be imported.
+
+1. Import system data:
    ```bash
-   python manage.py loaddata data/input/system/spending_categories.json
-   python manage.py loaddata data/input/system/issuers.json
-   python manage.py loaddata data/input/system/reward_types.json
+   python manage.py import_cards data/input/system/issuers.json
+   python manage.py import_cards data/input/system/spending_categories.json
+   python manage.py import_cards data/input/system/reward_types.json
    ```
 
-2. Import credit cards:
+2. Import spending credits (for card benefits):
+   ```bash
+   python manage.py import_spending_credits
+   ```
+
+3. Import credit cards:
    ```bash
    python manage.py import_cards data/input/cards/chase.json
    python manage.py import_cards data/input/cards/american_express.json
    python manage.py import_cards data/input/cards/capital_one.json
+   python manage.py import_cards data/input/cards/wells_fargo.json
    python manage.py import_cards data/input/cards/citi.json
    # Add other card files as needed
    ```
 
-3. Import credit types (offers/benefits for roadmap preferences):
+4. Import credit types (offers/benefits for roadmap preferences):
    ```bash
    python manage.py import_credit_types
    ```
+
+**Note**: Currently 24 out of 162 cards are marked as verified and will be imported. See [docs/CARD_IMPORT_GUIDE.md](CARD_IMPORT_GUIDE.md) for details on which cards are verified.
 
 ## Step 10: Configure Domain (Optional)
 
@@ -184,28 +213,120 @@ In the Web tab, add these static file mappings:
 
 ### Updating Your Application
 
-1. Pull latest changes:
-   ```bash
-   cd ~/mycreditcard.guru
-   git pull origin main
-   ```
+When you pull the latest code changes, follow these steps to update your deployment:
 
-2. Install new dependencies (if any):
-   ```bash
-   pip install -r requirements.txt
-   ```
+#### 1. Pull Latest Changes
+```bash
+cd ~/mycreditcard.guru
+git pull origin main
+```
 
-3. Run migrations (if any):
-   ```bash
-   python manage.py migrate
-   ```
+#### 2. Activate Virtual Environment
+```bash
+workon creditcard_guru
+# Or: source ~/.virtualenvs/creditcard_guru/bin/activate
+```
 
-4. Collect static files:
-   ```bash
-   python manage.py collectstatic --noinput
-   ```
+#### 3. Install New Dependencies (if any)
+```bash
+pip install -r requirements.txt
+```
 
-5. Reload the web app from PythonAnywhere dashboard
+#### 4. Run Database Migrations (if any)
+```bash
+python manage.py migrate
+```
+
+#### 5. Update Credit Card Data
+
+**Important**: Only cards marked with `"verified": true` will be imported. See [docs/CARD_IMPORT_GUIDE.md](CARD_IMPORT_GUIDE.md) for details.
+
+**Option A: Update All Card Data (Recommended)**
+```bash
+# Import system data (categories, issuers, reward types)
+python manage.py import_cards data/input/system/issuers.json
+python manage.py import_cards data/input/system/spending_categories.json
+python manage.py import_cards data/input/system/reward_types.json
+
+# Import spending credits (for card benefits)
+python manage.py import_spending_credits
+
+# Import all credit card files
+python manage.py import_cards data/input/cards/american_express.json
+python manage.py import_cards data/input/cards/chase.json
+python manage.py import_cards data/input/cards/capital_one.json
+python manage.py import_cards data/input/cards/wells_fargo.json
+python manage.py import_cards data/input/cards/citi.json
+python manage.py import_cards data/input/cards/bank_of_america.json
+python manage.py import_cards data/input/cards/barclays.json
+python manage.py import_cards data/input/cards/us_bank.json
+# Add other issuers as needed...
+
+# Import credit types (benefits/offers for preferences)
+python manage.py import_credit_types
+```
+
+**Option B: Use Setup Script (Fresh Import)**
+```bash
+python setup_data.py
+```
+⚠️ **Warning**: This will delete and recreate all data!
+
+**Option C: Update Specific Issuers Only**
+```bash
+# Just update Chase cards
+python manage.py import_cards data/input/cards/chase.json
+
+# Or update a few specific issuers
+python manage.py import_cards data/input/cards/american_express.json
+python manage.py import_cards data/input/cards/capital_one.json
+```
+
+**Notes on Card Imports**:
+- The `import_cards` command updates existing cards and creates new ones
+- Only cards with `"verified": true` in the JSON are imported
+- Currently 24 out of 162 cards are verified for import
+- See which cards are verified: [docs/CARD_IMPORT_GUIDE.md](CARD_IMPORT_GUIDE.md)
+
+#### 6. Collect Static Files (if frontend changed)
+```bash
+python manage.py collectstatic --noinput
+```
+
+#### 7. Reload Web App
+Go to the PythonAnywhere Web tab and click **Reload** button
+
+#### 8. Verify Update
+- Visit your site and check that changes are live
+- Test any new features
+- Check error logs if issues occur
+
+### Quick Update (No Data Changes)
+
+If you only changed code (no database or card data changes):
+```bash
+cd ~/mycreditcard.guru
+git pull origin main
+python manage.py collectstatic --noinput
+# Click Reload in Web tab
+```
+
+### Full Update (Code + Data + Database Changes)
+
+For major updates with database and card data changes:
+```bash
+cd ~/mycreditcard.guru
+workon creditcard_guru
+git pull origin main
+pip install -r requirements.txt
+python manage.py migrate
+python manage.py import_cards data/input/system/*.json
+python manage.py import_spending_credits
+python manage.py import_cards data/input/cards/*.json
+python manage.py import_credit_types
+python manage.py collectstatic --noinput
+# Click Reload in Web tab
+```
 
 ### Environment Variables Security
 

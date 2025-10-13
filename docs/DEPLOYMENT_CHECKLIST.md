@@ -102,4 +102,54 @@ Optional:
 
 ---
 
+## Update After Git Pull Checklist
+
+Use this when updating an existing deployment:
+
+### Code Updates
+- [ ] SSH into PythonAnywhere console
+- [ ] Navigate to project: `cd ~/mycreditcard.guru`
+- [ ] Activate virtual environment: `workon creditcard_guru`
+- [ ] Pull latest changes: `git pull origin main`
+- [ ] Check what changed: review commit messages
+
+### Dependencies & Database
+- [ ] Update dependencies: `pip install -r requirements.txt`
+- [ ] Run migrations: `python manage.py migrate`
+- [ ] Check for migration errors in output
+
+### Card Data Updates
+- [ ] Import system data (if changed):
+  - [ ] `python manage.py import_cards data/input/system/issuers.json`
+  - [ ] `python manage.py import_cards data/input/system/spending_categories.json`
+  - [ ] `python manage.py import_cards data/input/system/reward_types.json`
+- [ ] Import spending credits: `python manage.py import_spending_credits`
+- [ ] Import card data:
+  - [ ] `python manage.py import_cards data/input/cards/*.json`
+  - [ ] Or specific issuers that changed
+- [ ] Import credit types: `python manage.py import_credit_types`
+
+### Static Files & Reload
+- [ ] Collect static files: `python manage.py collectstatic --noinput`
+- [ ] Go to PythonAnywhere Web tab
+- [ ] Click **Reload** button
+- [ ] Wait for reload to complete
+
+### Verification
+- [ ] Visit your site URL
+- [ ] Check homepage loads
+- [ ] Test new features/changes
+- [ ] Check browser console for errors
+- [ ] Check PythonAnywhere error log (Web tab)
+- [ ] Verify card data updated correctly
+
+### Quick Update (No Data/DB Changes)
+If only code changed:
+- [ ] `git pull origin main`
+- [ ] `python manage.py collectstatic --noinput`
+- [ ] Reload web app
+- [ ] Test changes
+
+---
+
 **Remember**: Never commit your `.env` file to version control!
