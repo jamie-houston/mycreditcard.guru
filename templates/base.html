@@ -1913,7 +1913,7 @@
                 const localPreferences = LocalStorage.getPreferences();
                 const localCardDetails = LocalStorage.getCardDetails();
                 
-                const hasLocalData = localCards.length > 0 || Object.keys(localSpending).length > 0;
+                const hasLocalData = localCards.length > 0;
                 
                 // Get server data
                 const serverResponse = await fetch(`${API_BASE}/users/data/`);

@@ -751,6 +751,7 @@ async function loadCardCollection() {
                         <tr>
                             <th>Card Name</th>
                             <th>Issuer</th>
+                            <th>Signup Date</th>
                             <th>Annual Fee</th>
                             <th>Reward Type</th>
                             <th>Point Value</th>
@@ -788,14 +789,55 @@ async function loadCardCollection() {
             let nicknamesDisplay = '';
             if (hasMultiple) {
                 const nicknames = instances.filter(i => i.nickname).map(i => i.nickname);
-                nicknamesDisplay = nicknames.length > 0 ? 
+                nicknamesDisplay = nicknames.length > 0 ?
                     `<small class="card-nicknames">${nicknames.join(', ')}</small>` : '';
             } else {
                 const instance = instances[0];
-                nicknamesDisplay = instance.nickname ? 
+                nicknamesDisplay = instance.nickname ?
                     `<small class="card-nicknames">${instance.nickname}</small>` : '';
             }
-            
+
+            // Calculate signup date display with yellow highlighting logic
+            let signupDateDisplay = '';
+            if (hasMultiple) {
+                // For multiple cards, show all signup dates
+                const dates = instances
+                    .filter(i => i.opened_date)
+                    .map(i => {
+                        const date = new Date(i.opened_date);
+                        const formattedDate = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+
+                        // Check if date is within 2 months and has annual fee
+                        const today = new Date();
+                        const twoMonthsFromNow = new Date(today);
+                        twoMonthsFromNow.setMonth(twoMonthsFromNow.getMonth() + 2);
+
+                        const shouldHighlight = annualFee > 0 && date >= today && date <= twoMonthsFromNow;
+                        const style = shouldHighlight ? 'color: #d97706; font-weight: 600;' : '';
+
+                        return `<div style="${style}">${formattedDate}</div>`;
+                    });
+                signupDateDisplay = dates.length > 0 ? dates.join('') : '<span style="color: #9ca3af;">-</span>';
+            } else {
+                const instance = instances[0];
+                if (instance.opened_date) {
+                    const date = new Date(instance.opened_date);
+                    const formattedDate = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+
+                    // Check if date is within 2 months and has annual fee
+                    const today = new Date();
+                    const twoMonthsFromNow = new Date(today);
+                    twoMonthsFromNow.setMonth(twoMonthsFromNow.getMonth() + 2);
+
+                    const shouldHighlight = annualFee > 0 && date >= today && date <= twoMonthsFromNow;
+                    const style = shouldHighlight ? 'color: #d97706; font-weight: 600;' : '';
+
+                    signupDateDisplay = `<span style="${style}">${formattedDate}</span>`;
+                } else {
+                    signupDateDisplay = '<span style="color: #9ca3af;">-</span>';
+                }
+            }
+
             cardsHtml += `
                 <tr class="card-row modal-card-clickable" onclick="openCardModal(${cardId})" title="Click to view details">
                     <td class="card-name-cell">
@@ -805,6 +847,7 @@ async function loadCardCollection() {
                         </div>
                     </td>
                     <td>${cardInfo.issuer?.name || 'Unknown'}</td>
+                    <td>${signupDateDisplay}</td>
                     <td><span class="${feeClass}">${feeText}</span></td>
                     <td>${rewardType}</td>
                     <td>${pointValue}</td>

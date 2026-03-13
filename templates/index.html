@@ -1276,12 +1276,14 @@
                                     <div class="breakdown-items">`;
                             
                             // Separate reward categories and credits for better display
-                            const rewardCategories = breakdownItems.filter(item => 
-                                !rec.rewards_breakdown.find(bd => bd.category_name === item.name && bd.type === 'credit')
-                            );
-                            const credits = breakdownItems.filter(item => 
-                                rec.rewards_breakdown.find(bd => bd.category_name === item.name && bd.type === 'credit')
-                            );
+                            const rewardCategories = breakdownItems.filter((item, index) => {
+                                const originalItem = rec.rewards_breakdown[index];
+                                return originalItem && originalItem.type !== 'credit';
+                            });
+                            const credits = breakdownItems.filter((item, index) => {
+                                const originalItem = rec.rewards_breakdown[index];
+                                return originalItem && originalItem.type === 'credit';
+                            });
                             
                             // Add reward categories first
                             rewardCategories.forEach(item => {
@@ -1305,11 +1307,11 @@
                                 }
                             });
                             
-                            // Add signup bonus if applicable
-                            if (signupBonusValue > 0) {
+                            // Add signup bonus if applicable (only for 'apply' actions)
+                            if (rec.action === 'apply' && signupBonusValue > 0) {
                                 breakdownHtml += `
                                     <div class="breakdown-item positive">
-                                        <span class="item-name">Signup Bonus</span>
+                                        <span class="item-name">🎁 Signup Bonus</span>
                                         <span class="item-value">+$${signupBonusValue.toFixed(0)}</span>
                                     </div>`;
                             }

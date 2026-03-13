@@ -732,13 +732,13 @@
   {
     "name": "Southwest Performance Business",
     "issuer": "Chase",
-    "annual_fee": 199,
+    "annual_fee": 299,
     "signup_bonus": {
-      "bonus_amount": 80000,
+      "bonus_amount": 100000,
       "spending_requirement": 5000,
       "time_limit_months": 3
     },
-    "reward_type": "Cashback",
+    "reward_type": "Miles",
     "reward_value_multiplier": 0.01,
     "reward_categories": [
       {
@@ -763,6 +763,7 @@
         "weight": 0.4
       }
     ],
+    "verified": true,
     "slug": "southwest-performance-business"
   },
   {
@@ -827,7 +828,7 @@
   {
     "name": "Southwest Premier Business",
     "issuer": "Chase",
-    "annual_fee": 99,
+    "annual_fee": 199,
     "signup_bonus": {
       "bonus_amount": 60000,
       "spending_requirement": 3000,
@@ -846,6 +847,7 @@
     "url": "https://creditcards.chase.com/business-credit-cards/southwest/premier-business",
     "image_url": "/images/chase/southwest-rapid-rewards-premier-business.png",
     "discontinued": false,
+    "verified": true,
     "slug": "southwest-premier-business"
   },
   {
