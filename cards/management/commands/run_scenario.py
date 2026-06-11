@@ -558,7 +558,26 @@ class Command(BaseCommand):
                 category=category,
                 monthly_amount=Decimal(str(amount))
             )
-        
+
+        # Credit preferences: which card credits (by slug) the user actually
+        # redeems. Without these, high-credit cards look cancel-worthy when
+        # they aren't (and vice versa). Unknown slugs are a loud error.
+        credit_slugs = scenario_data['user_profile'].get('spending_credit_preferences', [])
+        if credit_slugs:
+            from cards.models import SpendingCredit, UserSpendingCreditPreference
+            for slug in credit_slugs:
+                try:
+                    credit = SpendingCredit.objects.get(slug=slug)
+                except SpendingCredit.DoesNotExist:
+                    raise ValueError(
+                        f"Scenario credit preference '{slug}' doesn't match any "
+                        f"SpendingCredit slug")
+                UserSpendingCreditPreference.objects.create(
+                    profile=profile,
+                    spending_credit=credit,
+                    values_credit=True
+                )
+
         # Create available cards
         created_cards = {}
         for card_slug in scenario_data['available_cards']:

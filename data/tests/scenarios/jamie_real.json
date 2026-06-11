@@ -18,11 +18,17 @@
           "amazon": 1000,
           "other_shopping": 1800,
           "lyft": 50,
-          "telecomunications": 120,
+          "telecommunications": 120,
           "office_supplies": 50,
           "social_media": 100,
           "other_business": 100
-        }
+        },
+        "spending_credit_preferences": [
+          "dashpass",
+          "doordash",
+          "uber_eats",
+          "google_workspace"
+        ]
       },
       "owned_cards": [
         "amazon-prime",
