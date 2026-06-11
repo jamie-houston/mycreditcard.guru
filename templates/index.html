@@ -1004,21 +1004,25 @@
                                     </div>
                                     <div class="breakdown-items">`;
                             
-                            // Separate reward categories and credits for better display
+                            // Separate reward categories, credits and info notes for display
                             const rewardCategories = breakdownItems.filter((item, index) => {
                                 const originalItem = rec.rewards_breakdown[index];
-                                return originalItem && originalItem.type !== 'credit';
+                                return originalItem && originalItem.type !== 'credit' && originalItem.type !== 'info';
                             });
                             const credits = breakdownItems.filter((item, index) => {
                                 const originalItem = rec.rewards_breakdown[index];
                                 return originalItem && originalItem.type === 'credit';
                             });
-                            
-                            // Add reward categories first
+                            const infoNotes = breakdownItems.filter((item, index) => {
+                                const originalItem = rec.rewards_breakdown[index];
+                                return originalItem && originalItem.type === 'info';
+                            });
+
+                            // Add reward categories first (hover shows the exact math)
                             rewardCategories.forEach(item => {
                                 if (item.value > 0) {
                                     breakdownHtml += `
-                                        <div class="breakdown-item positive">
+                                        <div class="breakdown-item positive" title="${item.calculation}">
                                             <span class="item-name">🏆 ${item.name}</span>
                                             <span class="item-value">+$${item.value.toFixed(0)}</span>
                                         </div>`;
@@ -1060,7 +1064,31 @@
                                         </div>`;
                                 }
                             }
-                            
+
+                            // Informational notes (e.g. signup bonus spending gap) — $0 items
+                            infoNotes.forEach(item => {
+                                breakdownHtml += `
+                                    <div class="breakdown-item" style="opacity: 0.85; font-size: 0.85em;">
+                                        <span class="item-name">⚠️ ${item.name}: ${item.calculation}</span>
+                                    </div>`;
+                            });
+
+                            // Valuation transparency: how points were valued, and
+                            // first-year vs ongoing when a signup bonus skews year one
+                            if (rec.valuation_note) {
+                                breakdownHtml += `
+                                    <div class="breakdown-item" style="opacity: 0.7; font-size: 0.8em;">
+                                        <span class="item-name">${rec.valuation_note}</span>
+                                    </div>`;
+                            }
+                            if (rec.first_year_value !== undefined && rec.ongoing_value !== undefined
+                                && Math.abs(rec.first_year_value - rec.ongoing_value) >= 1) {
+                                breakdownHtml += `
+                                    <div class="breakdown-item" style="font-size: 0.85em;">
+                                        <span class="item-name">First year: $${rec.first_year_value.toFixed(0)} · Ongoing: $${rec.ongoing_value.toFixed(0)}/yr</span>
+                                    </div>`;
+                            }
+
                             breakdownHtml += `
                                     </div>
                                 </div>`;
