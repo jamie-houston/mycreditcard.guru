@@ -54,6 +54,12 @@ class Command(BaseCommand):
             action='store_true',
             help='Show detailed breakdown information'
         )
+        parser.add_argument(
+            '--explain',
+            action='store_true',
+            help='Show the full line-item math for every recommendation, '
+                 'with a reconciliation line you can check by hand'
+        )
     
     def handle(self, *args, **options):
         # Get project root directory (go up from cards/management/commands/ to project root)
@@ -84,10 +90,13 @@ class Command(BaseCommand):
         # Set up test data
         self.setup_test_data()
         
+        verbose = options['verbose'] or options['explain']
+        self.explain = options['explain']
+
         if options['all']:
-            self.run_all_scenarios(scenarios, options['verbose'])
+            self.run_all_scenarios(scenarios, verbose)
         elif options['scenario_name']:
-            self.run_single_scenario(scenarios, options['scenario_name'], options['verbose'])
+            self.run_single_scenario(scenarios, options['scenario_name'], verbose)
         else:
             raise CommandError('Please specify a scenario name or use --all or --list')
     
@@ -196,11 +205,14 @@ class Command(BaseCommand):
             self.stdout.write(f'   Annual Fee: ${rec["card"].annual_fee}')
             self.stdout.write(f'   Estimated Annual Value: ${rec["estimated_rewards"]}')
             self.stdout.write(f'   Reasoning: {rec["reasoning"]}')
-            
+
             if verbose and rec.get('rewards_breakdown'):
                 self.stdout.write('   Detailed Breakdown:')
                 for breakdown in rec['rewards_breakdown']:
                     self.stdout.write(f'     • {breakdown["category_name"]}: {breakdown["calculation"]}')
+
+            if getattr(self, 'explain', False):
+                self.print_reconciliation(rec)
             self.stdout.write('')
         
         # Validate against expectations if provided
@@ -208,6 +220,33 @@ class Command(BaseCommand):
         if expected:
             self.validate_expectations(recommendations, expected, scenario_data['name'])
     
+    def print_reconciliation(self, rec):
+        """Print the check-it-by-hand math for one recommendation."""
+        card = rec['card']
+        breakdown = rec.get('rewards_breakdown', [])
+        line_total = sum(float(item.get('category_rewards', 0)) for item in breakdown)
+        signup = float(rec.get('signup_bonus_value', 0) or 0)
+        annual_fee = float(card.annual_fee)
+        fee_waived = bool(card.metadata and card.metadata.get('annual_fee_waived_first_year'))
+        fee = 0 if (rec['action'] == 'apply' and fee_waived) else annual_fee
+        expected_total = line_total + signup - fee
+        estimated = float(rec['estimated_rewards'])
+
+        multiplier = rec.get('reward_value_multiplier')
+        if multiplier:
+            self.stdout.write(f'   Point valuation: {multiplier * 100:.2f}¢ per point/mile')
+        parts = [f'line items ${line_total:,.2f}']
+        if signup:
+            parts.append(f'signup ${signup:,.2f}')
+        parts.append(f'fee -${fee:,.2f}' + (' (waived)' if fee == 0 and annual_fee else ''))
+        check = '✓' if abs(estimated - expected_total) < 1 else f'✗ MISMATCH (headline ${estimated:,.2f})'
+        self.stdout.write(f'   Check: {" + ".join(parts)} = ${expected_total:,.2f} {check}')
+        if rec.get('first_year_value') is not None and rec.get('ongoing_value') is not None:
+            if abs(float(rec['first_year_value']) - float(rec['ongoing_value'])) >= 1:
+                self.stdout.write(
+                    f'   First year: ${float(rec["first_year_value"]):,.2f} | '
+                    f'Ongoing: ${float(rec["ongoing_value"]):,.2f}/yr')
+
     def validate_expectations(self, recommendations, expected, scenario_name):
         """Validate recommendations against expected results."""
         issues = []

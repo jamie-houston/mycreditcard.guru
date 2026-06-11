@@ -27,7 +27,7 @@ class JSONScenarioTest(JSONScenarioTestBase):
         """Test the Young Professional - Dining Focus scenario."""
         if not self.scenarios:
             self.skipTest("No scenarios found in JSON file")
-        scenario = self.scenarios[0]  # Young Professional - Dining Focus
+        scenario = self.get_scenario('Young Professional - Dining Focus')
         recommendations = self.run_scenario_test(scenario)
         self.print_scenario_results(scenario, recommendations)
         
@@ -35,7 +35,7 @@ class JSONScenarioTest(JSONScenarioTestBase):
         """Test the Business Traveler scenario."""
         if not self.scenarios:
             self.skipTest("No scenarios found in JSON file")
-        scenario = self.scenarios[1]  # Business Traveler
+        scenario = self.get_scenario('Business Traveler')
         recommendations = self.run_scenario_test(scenario)
         self.print_scenario_results(scenario, recommendations)
         
@@ -43,7 +43,7 @@ class JSONScenarioTest(JSONScenarioTestBase):
         """Test the Family with High Grocery Spend scenario."""
         if not self.scenarios:
             self.skipTest("No scenarios found in JSON file")
-        scenario = self.scenarios[2]  # Family with High Grocery Spend
+        scenario = self.get_scenario('Family with High Grocery Spend')
         recommendations = self.run_scenario_test(scenario)
         self.print_scenario_results(scenario, recommendations)
         
@@ -51,7 +51,7 @@ class JSONScenarioTest(JSONScenarioTestBase):
         """Test the Existing High-Fee Card Review scenario."""
         if not self.scenarios:
             self.skipTest("No scenarios found in JSON file")
-        scenario = self.scenarios[20]  # Existing High-Fee Card Review
+        scenario = self.get_scenario('Existing High-Fee Card Review')
         recommendations = self.run_scenario_test(scenario)
         self.print_scenario_results(scenario, recommendations)
         
@@ -59,7 +59,7 @@ class JSONScenarioTest(JSONScenarioTestBase):
         """Test the Multiple Cards Optimization scenario."""
         if not self.scenarios:
             self.skipTest("No scenarios found in JSON file")
-        scenario = self.scenarios[4]  # Multiple Cards Optimization
+        scenario = self.get_scenario('Multiple Cards Optimization')
         recommendations = self.run_scenario_test(scenario)
         self.print_scenario_results(scenario, recommendations)
 

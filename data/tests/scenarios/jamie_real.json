@@ -1,0 +1,46 @@
+{
+  "description": "Jamie's real cards and spending — the hand-verification scenario. Every number in its output should be reproducible with a calculator. Run: python manage.py run_scenario \"Jamie Real\" --explain",
+  "category": "real_world",
+  "scenarios": [
+    {
+      "name": "Jamie Real",
+      "description": "Actual owned cards + actual monthly spending (June 2026)",
+      "user_profile": {
+        "spending": {
+          "dining": 1000,
+          "hotels": 350,
+          "airlines": 300,
+          "rental_cars": 130,
+          "in_store_grocery": 1960,
+          "gas": 150,
+          "streaming": 100,
+          "other_entertainment": 250,
+          "amazon": 1000,
+          "other_shopping": 1800,
+          "lyft": 50,
+          "telecomunications": 120,
+          "office_supplies": 50,
+          "social_media": 100,
+          "other_business": 100
+        }
+      },
+      "owned_cards": [
+        "amazon-prime",
+        "chase-sapphire-reserve-for-business",
+        "chase-freedom-legacy",
+        "ink-business-cash-credit-card",
+        "blue-cash-preferred-card-from-american-express"
+      ],
+      "available_cards": [
+        "amazon-prime",
+        "chase-sapphire-reserve-for-business",
+        "chase-freedom-legacy",
+        "ink-business-cash-credit-card",
+        "blue-cash-preferred-card-from-american-express"
+      ],
+      "expected_recommendations": {
+        "actions": ["keep"]
+      }
+    }
+  ]
+}

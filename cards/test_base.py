@@ -147,3 +147,10 @@ class JSONScenarioTestBase(CreditCardTestBase):
             self.scenarios = []
         else:
             self.scenarios = data.get('scenarios', [])
+
+    def get_scenario(self, name):
+        """Find a scenario by name (file order is not a stable address)."""
+        for scenario in self.scenarios:
+            if scenario.get('name') == name:
+                return scenario
+        self.fail(f"Scenario '{name}' not found in data/tests/scenarios/")
