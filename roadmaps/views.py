@@ -148,6 +148,8 @@ def quick_recommendation_view(request):
                             'annual_fee_waived_first_year': rec['card'].metadata.get('annual_fee_waived_first_year', False),
                             'signup_bonus_amount': rec['card'].signup_bonus_amount,
                             'signup_bonus_type': rec['card'].signup_bonus_type.name if rec['card'].signup_bonus_type else 'points',
+                            'signup_spending_requirement': float((rec['card'].metadata.get('signup_bonus') or {}).get('spending_requirement') or 0),
+                            'signup_time_limit_months': (rec['card'].metadata.get('signup_bonus') or {}).get('time_limit_months'),
                             'apply_url': rec['card'].apply_url,
                         },
                         'action': rec['action'],

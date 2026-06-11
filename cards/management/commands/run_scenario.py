@@ -349,31 +349,56 @@ class Command(BaseCommand):
     def validate_breakdown_accuracy(self, recommendations):
         """Validate that value breakdowns are accurate and don't double-count spending."""
         issues = []
-        
-        # Track spending allocation across all cards to prevent double-counting
-        spending_category_allocation = {}
-        
+
+        # Double-counting is about dollars, not names: a capped category
+        # legitimately splits across two cards (e.g. 5x Amazon up to the cap,
+        # overflow elsewhere), so we sum each category's allocated spend
+        # across held cards and flag only totals exceeding the user's actual
+        # spending. Credits, info notes and bonus-window shifts (per-apply
+        # counterfactuals) don't allocate steady-state spending.
+        from collections import defaultdict
+        category_spend = defaultdict(float)
+        category_cards = defaultdict(list)
+
         for rec in recommendations:
             card_name = rec['card'].name
             estimated_rewards = float(rec['estimated_rewards'])
             breakdown = rec.get('rewards_breakdown', [])
             signup_bonus = rec.get('signup_bonus_value', 0)
             annual_fee = float(rec['card'].annual_fee)
-            
+
             # Calculate breakdown total
             breakdown_total = 0.0
             for item in breakdown:
                 category_name = item.get('category_name', 'Unknown')
                 category_rewards = item.get('category_rewards', 0)
-                
+
                 if category_rewards:
                     breakdown_total += float(category_rewards)
-                    
-                    # Track category allocation for double-counting check
-                    if category_name in spending_category_allocation:
-                        issues.append(f'Double-counting detected: "{category_name}" allocated to both "{spending_category_allocation[category_name]}" and "{card_name}"')
-                    else:
-                        spending_category_allocation[category_name] = card_name
+
+                if (item.get('type', 'reward_category') == 'reward_category'
+                        and rec['action'] in ('apply', 'keep')
+                        and item.get('annual_spend')):
+                    # Strip the "(5.0x)" rate suffix so cap splits at
+                    # different rates aggregate into one category.
+                    base_name = category_name.rsplit(' (', 1)[0]
+                    category_spend[base_name] += float(item['annual_spend'])
+                    category_cards[base_name].append(
+                        (card_name, float(item['annual_spend'])))
+
+        # A category may legitimately split across cards (rate caps), but
+        # the dollars allocated across all held cards can never exceed what
+        # the user actually spends in that category.
+        expected_annual = getattr(self, 'scenario_category_annual', None)
+        if expected_annual is not None:
+            for base_name, spend in category_spend.items():
+                limit = expected_annual.get(base_name)
+                if limit is not None and spend > limit + 1:
+                    names = ', '.join(name for name, _ in category_cards[base_name])
+                    issues.append(
+                        f'Double-counting detected: "{base_name}" allocates '
+                        f'${spend:,.0f} across {names} but actual spending '
+                        f'is ${limit:,.0f}')
             
             # Calculate expected total: breakdown + signup bonus - annual fee (for apply/keep cards)
             if rec['action'] == 'apply':
@@ -546,6 +571,10 @@ class Command(BaseCommand):
             'general': 'other',
         }
 
+        # Remember per-category annual totals (by display name, matching
+        # breakdown line items) so validate_breakdown_accuracy can verify
+        # allocated spending never exceeds actual spending.
+        self.scenario_category_annual = {}
         for category_slug, amount in scenario_data['user_profile']['spending'].items():
             category = (self.categories.get(category_slug)
                         or self.categories.get(category_aliases.get(category_slug)))
@@ -558,6 +587,9 @@ class Command(BaseCommand):
                 category=category,
                 monthly_amount=Decimal(str(amount))
             )
+            display = category.display_name or category.name
+            self.scenario_category_annual[display] = (
+                self.scenario_category_annual.get(display, 0) + float(amount) * 12)
 
         # Credit preferences: which card credits (by slug) the user actually
         # redeems. Without these, high-credit cards look cancel-worthy when

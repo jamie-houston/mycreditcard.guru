@@ -977,6 +977,7 @@
                                 breakdownItems.push({
                                     name: categoryName,
                                     value: categoryValue,
+                                    type: breakdown.type || 'reward_category',
                                     calculation: breakdown.calculation || '',
                                     credits_breakdown: breakdown.credits_breakdown || []
                                 });
@@ -1004,19 +1005,12 @@
                                     </div>
                                     <div class="breakdown-items">`;
                             
-                            // Separate reward categories, credits and info notes for display
-                            const rewardCategories = breakdownItems.filter((item, index) => {
-                                const originalItem = rec.rewards_breakdown[index];
-                                return originalItem && originalItem.type !== 'credit' && originalItem.type !== 'info';
-                            });
-                            const credits = breakdownItems.filter((item, index) => {
-                                const originalItem = rec.rewards_breakdown[index];
-                                return originalItem && originalItem.type === 'credit';
-                            });
-                            const infoNotes = breakdownItems.filter((item, index) => {
-                                const originalItem = rec.rewards_breakdown[index];
-                                return originalItem && originalItem.type === 'info';
-                            });
+                            // Separate reward categories, credits, bonus shifts and info notes
+                            const rewardCategories = breakdownItems.filter(item =>
+                                item.type !== 'credit' && item.type !== 'info' && item.type !== 'bonus_shift');
+                            const credits = breakdownItems.filter(item => item.type === 'credit');
+                            const bonusShifts = breakdownItems.filter(item => item.type === 'bonus_shift');
+                            const infoNotes = breakdownItems.filter(item => item.type === 'info');
 
                             // Add reward categories first (hover shows the exact math)
                             rewardCategories.forEach(item => {
@@ -1027,6 +1021,18 @@
                                             <span class="item-value">+$${item.value.toFixed(0)}</span>
                                         </div>`;
                                 }
+                            });
+
+                            // Bonus-window spending shifts: net cost/gain of moving
+                            // spending here to meet the signup requirement
+                            bonusShifts.forEach(item => {
+                                const cls = item.value >= 0 ? 'positive' : 'negative';
+                                const sign = item.value >= 0 ? '+' : '-';
+                                breakdownHtml += `
+                                    <div class="breakdown-item ${cls}" title="${item.calculation}" style="font-size: 0.85em;">
+                                        <span class="item-name">🔁 ${item.name}</span>
+                                        <span class="item-value">${sign}$${Math.abs(item.value).toFixed(0)}</span>
+                                    </div>`;
                             });
                             
                             // Add credits separately with different styling
@@ -1117,9 +1123,9 @@
                                         <strong>Annual Fee:</strong> $${rec.card.effective_annual_fee}${rec.card.annual_fee_waived_first_year && rec.action === 'apply' ? ' (first year waived)' : ''}
                                     </div>
                                     
-                                    ${rec.card.signup_bonus_amount && rec.action === 'apply' ? 
+                                    ${rec.card.signup_bonus_amount && rec.action === 'apply' ?
                                         `<div class="roadmap-card-bonus">
-                                            <strong>Signup Bonus:</strong> ${rec.card.signup_bonus_amount.toLocaleString()} ${rec.card.signup_bonus_type || 'points'}
+                                            <strong>Signup Bonus:</strong> ${rec.card.signup_bonus_amount.toLocaleString()} ${rec.card.signup_bonus_type || 'points'}${rec.card.signup_spending_requirement ? ` — spend $${rec.card.signup_spending_requirement.toLocaleString()} in ${rec.card.signup_time_limit_months || 3} months` : ''}
                                         </div>` : ''
                                     }
                                     

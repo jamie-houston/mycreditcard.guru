@@ -298,23 +298,38 @@ class RecommendationEngine:
                 signup_bonus_value = self._get_signup_bonus_value(card)
                 annual_fee_waived = card.metadata.get('annual_fee_waived_first_year', False)
                 effective_fee = 0 if annual_fee_waived else annual_fee
+                # Ongoing value reflects steady state — no bonus, no
+                # bonus-window spending shifts.
+                ongoing_value = annual_rewards - annual_fee
+
+                plan = self._signup_bonus_plan(
+                    card, portfolio_allocation,
+                    rewards_breakdown['total_spending_on_card'])
+                if not plan['bonus_earnable']:
+                    signup_bonus_value = 0
+                annual_rewards += plan['value_delta']
+                rewards_breakdown['breakdown'].extend(plan['items'])
+
                 estimated_value = annual_rewards - effective_fee + signup_bonus_value
                 first_year_value = estimated_value
-                ongoing_value = annual_rewards - annual_fee
 
                 fee_text = "first-year fee waived" if annual_fee_waived else f"${effective_fee:.0f} fee"
                 if signup_bonus_value > 0:
+                    shift_text = ""
+                    if plan['value_delta']:
+                        shift_text = (f", {'+' if plan['value_delta'] > 0 else '-'}"
+                                      f"${abs(plan['value_delta']):.0f} from shifting spending "
+                                      f"to meet the bonus requirement")
                     reasoning = (f"Total estimated value: ${estimated_value:.0f} "
-                                 f"(${annual_rewards:.0f} annual rewards - {fee_text} "
-                                 f"+ ${signup_bonus_value:.0f} signup bonus)")
+                                 f"(${rewards_breakdown['total_rewards']:.0f} annual rewards - {fee_text} "
+                                 f"+ ${signup_bonus_value:.0f} signup bonus{shift_text})")
+                elif not plan['bonus_earnable']:
+                    reasoning = (f"Total estimated value: ${estimated_value:.0f} "
+                                 f"(${annual_rewards:.0f} annual rewards - {fee_text}; "
+                                 f"signup bonus not counted — spending requirement unreachable)")
                 else:
                     reasoning = (f"Total estimated value: ${estimated_value:.0f} "
                                  f"(${annual_rewards:.0f} annual rewards - {fee_text})")
-
-                shortfall_item = self._signup_shortfall_item(
-                    card, rewards_breakdown['total_spending_on_card'])
-                if shortfall_item:
-                    rewards_breakdown['breakdown'].append(shortfall_item)
             else:  # keep or cancel
                 signup_bonus_value = 0
                 estimated_value = annual_rewards - annual_fee
@@ -352,33 +367,130 @@ class RecommendationEngine:
 
         return recommendations
 
-    def _signup_shortfall_item(self, card: CreditCard, allocated_annual_spend: float) -> dict:
-        """Informational line item when the user's allocated spending won't
-        meet a signup bonus requirement within its window. Worth $0 in the
-        math — it flags spending the user would need beyond their normal
-        pattern (which the engine deliberately does not invent)."""
+    def _signup_bonus_plan(self, card: CreditCard, portfolio_allocation: list,
+                           allocated_annual_spend: float) -> dict:
+        """Model how this card's signup spending requirement actually gets met.
+
+        Three outcomes:
+        - Organic: the card's own allocated spending covers the requirement
+          within the window — informational item only, no cost.
+        - Shift: spending allocated to other cards must temporarily move to
+          this card during the bonus window. It earns this card's base rate
+          but foregoes the incumbent card's (usually better) rate; each
+          shift is a line item whose net value is the honest cost of
+          chasing the bonus. Cheapest spending shifts first.
+        - Unreachable: even shifting every dollar the user spends can't
+          meet the requirement — the bonus is worth $0 and says so.
+
+        Returns {'items': [line items], 'value_delta': float,
+                 'bonus_earnable': bool}.
+        """
         signup_bonus = card.metadata.get('signup_bonus') or {}
         requirement = float(signup_bonus.get('spending_requirement') or 0)
         months = float(signup_bonus.get('time_limit_months') or 3)
         if requirement <= 0:
-            return None
-        spend_in_window = allocated_annual_spend * (months / 12)
-        shortfall = requirement - spend_in_window
-        if shortfall <= 0:
-            return None
-        return {
-            'category_name': 'Signup bonus spending gap',
-            'monthly_spend': 0,
-            'annual_spend': 0,
-            'reward_rate': 0,
-            'reward_multiplier': 0,
-            'points_earned': 0,
-            'category_rewards': 0,
-            'calculation': (f"Needs ${requirement:,.0f} in {months:.0f} months; your "
-                            f"allocated spending covers ${spend_in_window:,.0f} — "
-                            f"${shortfall:,.0f} extra required (not counted in rewards)"),
-            'type': 'info',
-        }
+            return {'items': [], 'value_delta': 0.0, 'bonus_earnable': True}
+
+        window = months / 12
+        organic = allocated_annual_spend * window
+
+        def info_item(name, text):
+            return {
+                'category_name': name, 'monthly_spend': 0, 'annual_spend': 0,
+                'reward_rate': 0, 'reward_multiplier': 0, 'points_earned': 0,
+                'category_rewards': 0, 'calculation': text, 'type': 'info',
+            }
+
+        if organic >= requirement:
+            return {
+                'items': [info_item(
+                    'Signup bonus requirement',
+                    f"${requirement:,.0f} in {months:.0f} months — covered by "
+                    f"~${organic:,.0f} you'd already spend on this card")],
+                'value_delta': 0.0,
+                'bonus_earnable': True,
+            }
+
+        # Spending must shift from other cards. This card earns its base
+        # rate on shifted spend (anything it rated higher already won that
+        # category in the allocation).
+        this_mult = float(card.metadata.get('reward_value_multiplier', 0.01))
+        this_rate = 1.0
+        for rc in card.reward_categories.active_on(self.today).select_related('category'):
+            if rc.category.slug in self.BASE_CATEGORY_SLUGS:
+                this_rate = max(this_rate, float(rc.reward_rate))
+        this_value = this_rate * this_mult
+
+        sources = []
+        for entry in portfolio_allocation:
+            if entry['annual_spend'] <= 0:
+                continue
+            if entry['card'] is not None and entry['card'].id == card.id:
+                continue
+            if entry['card'] is None:
+                other_value = 0.0
+            else:
+                other_mult = float(entry['card'].metadata.get('reward_value_multiplier', 0.01))
+                other_value = entry['rate'] * other_mult
+            sources.append((other_value - this_value, other_value, entry))
+        sources.sort(key=lambda s: s[0])  # cheapest opportunity cost first
+
+        shortfall = requirement - organic
+        items = []
+        value_delta = 0.0
+        for cost_per_dollar, other_value, entry in sources:
+            if shortfall <= 0:
+                break
+            available = entry['annual_spend'] * window
+            take = min(shortfall, available)
+            if take <= 0:
+                continue
+            earn = take * this_value
+            forgo = take * other_value
+            net = earn - forgo
+            value_delta += net
+            if entry['card'] is None:
+                detail = (f"${take:,.0f} of unrewarded spending moved here for "
+                          f"{months:.0f} mo: earns {this_rate:.1f}x (${earn:.2f})")
+                name = f"Bonus window: {entry['category_name']} (uncovered)"
+            else:
+                detail = (f"${take:,.0f} moved here for {months:.0f} mo: earns "
+                          f"{this_rate:.1f}x (${earn:.2f}) instead of "
+                          f"{entry['rate']:.1f}x on {entry['card'].name} "
+                          f"(${forgo:.2f}) = ${net:+.2f}")
+                name = f"Bonus window: {entry['category_name']} from {entry['card'].name}"
+            items.append({
+                'category_name': name,
+                'monthly_spend': take / months,
+                'annual_spend': take,
+                'reward_rate': this_rate,
+                'reward_multiplier': this_mult,
+                'points_earned': take * this_rate,
+                'category_rewards': net,
+                'calculation': detail,
+                'type': 'bonus_shift',
+            })
+            shortfall -= take
+
+        if shortfall > 0:
+            # Even every dollar of the user's spending can't reach the
+            # requirement — the bonus is not real money for this user.
+            return {
+                'items': [info_item(
+                    'Signup bonus unreachable',
+                    f"Needs ${requirement:,.0f} in {months:.0f} months but your "
+                    f"total spending in that window is "
+                    f"~${requirement - shortfall:,.0f} — bonus valued at $0")],
+                'value_delta': 0.0,
+                'bonus_earnable': False,
+            }
+
+        items.insert(0, info_item(
+            'Signup bonus requirement',
+            f"${requirement:,.0f} in {months:.0f} months — "
+            f"~${organic:,.0f} from spending allocated to this card, "
+            f"${requirement - organic:,.0f} shifted from other cards (below)"))
+        return {'items': items, 'value_delta': value_delta, 'bonus_earnable': True}
     
     def _find_optimal_portfolio(self, current_cards: List[CreditCard], available_cards: List[CreditCard], max_cards: int) -> List[dict]:
         """Find the optimal combination of cards for maximum portfolio value"""
