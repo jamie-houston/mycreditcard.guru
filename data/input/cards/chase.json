@@ -302,8 +302,8 @@
       "spending_requirement": 5000,
       "time_limit_months": 3
     },
-    "reward_type": "Cashback",
-    "reward_value_multiplier": 0.01,
+    "reward_type": "Miles",
+    "reward_value_multiplier": 0.012,
     "reward_categories": [
       {
         "category": "other",
@@ -326,8 +326,8 @@
       "spending_requirement": 3000,
       "time_limit_months": 3
     },
-    "reward_type": "Cashback",
-    "reward_value_multiplier": 0.01,
+    "reward_type": "Miles",
+    "reward_value_multiplier": 0.012,
     "reward_categories": [
       {
         "category": "other",
@@ -350,8 +350,8 @@
       "spending_requirement": 5000,
       "time_limit_months": 3
     },
-    "reward_type": "Cashback",
-    "reward_value_multiplier": 0.01,
+    "reward_type": "Miles",
+    "reward_value_multiplier": 0.012,
     "reward_categories": [
       {
         "category": "other",
@@ -466,8 +466,8 @@
       "spending_requirement": 5000,
       "time_limit_months": 3
     },
-    "reward_type": "Cashback",
-    "reward_value_multiplier": 0.01,
+    "reward_type": "Miles",
+    "reward_value_multiplier": 0.012,
     "reward_categories": [
       {
         "category": "other",
@@ -510,8 +510,8 @@
       "spending_requirement": 4000,
       "time_limit_months": 3
     },
-    "reward_type": "Cashback",
-    "reward_value_multiplier": 0.01,
+    "reward_type": "Points",
+    "reward_value_multiplier": 0.005,
     "reward_categories": [
       {
         "category": "other",
@@ -534,8 +534,8 @@
       "spending_requirement": 2000,
       "time_limit_months": 3
     },
-    "reward_type": "Cashback",
-    "reward_value_multiplier": 0.01,
+    "reward_type": "Points",
+    "reward_value_multiplier": 0.005,
     "reward_categories": [
       {
         "category": "other",
@@ -690,8 +690,8 @@
       "spending_requirement": 1000,
       "time_limit_months": 3
     },
-    "reward_type": "Cashback",
-    "reward_value_multiplier": 0.01,
+    "reward_type": "Points",
+    "reward_value_multiplier": 0.007,
     "reward_categories": [
       {
         "category": "other",
@@ -714,8 +714,8 @@
       "spending_requirement": 3000,
       "time_limit_months": 3
     },
-    "reward_type": "Cashback",
-    "reward_value_multiplier": 0.01,
+    "reward_type": "Points",
+    "reward_value_multiplier": 0.007,
     "reward_categories": [
       {
         "category": "other",
@@ -810,8 +810,8 @@
       "spending_requirement": 1000,
       "time_limit_months": 3
     },
-    "reward_type": "Cashback",
-    "reward_value_multiplier": 0.01,
+    "reward_type": "Miles",
+    "reward_value_multiplier": 0.012,
     "reward_categories": [
       {
         "category": "other",
@@ -834,8 +834,8 @@
       "spending_requirement": 3000,
       "time_limit_months": 3
     },
-    "reward_type": "Cashback",
-    "reward_value_multiplier": 0.01,
+    "reward_type": "Miles",
+    "reward_value_multiplier": 0.012,
     "reward_categories": [
       {
         "category": "other",
@@ -894,8 +894,8 @@
       "spending_requirement": 5000,
       "time_limit_months": 3
     },
-    "reward_type": "Cashback",
-    "reward_value_multiplier": 0.01,
+    "reward_type": "Miles",
+    "reward_value_multiplier": 0.012,
     "reward_categories": [
       {
         "category": "other",
@@ -955,8 +955,8 @@
       "spending_requirement": 5000,
       "time_limit_months": 3
     },
-    "reward_type": "Cashback",
-    "reward_value_multiplier": 0.01,
+    "reward_type": "Miles",
+    "reward_value_multiplier": 0.012,
     "reward_categories": [
       {
         "category": "other",
@@ -1016,8 +1016,8 @@
       "spending_requirement": 5000,
       "time_limit_months": 3
     },
-    "reward_type": "Cashback",
-    "reward_value_multiplier": 0.01,
+    "reward_type": "Miles",
+    "reward_value_multiplier": 0.012,
     "reward_categories": [
       {
         "category": "other",
@@ -1077,8 +1077,8 @@
       "spending_requirement": 3000,
       "time_limit_months": 3
     },
-    "reward_type": "Cashback",
-    "reward_value_multiplier": 0.01,
+    "reward_type": "Miles",
+    "reward_value_multiplier": 0.012,
     "reward_categories": [
       {
         "category": "other",
@@ -1158,8 +1158,8 @@
       "spending_requirement": 1000,
       "time_limit_months": 3
     },
-    "reward_type": "Cashback",
-    "reward_value_multiplier": 0.01,
+    "reward_type": "Miles",
+    "reward_value_multiplier": 0.012,
     "reward_categories": [
       {
         "category": "other",
@@ -1182,8 +1182,8 @@
       "spending_requirement": 4000,
       "time_limit_months": 3
     },
-    "reward_type": "Cashback",
-    "reward_value_multiplier": 0.01,
+    "reward_type": "Miles",
+    "reward_value_multiplier": 0.012,
     "reward_categories": [
       {
         "category": "other",
@@ -1244,8 +1244,8 @@
       "spending_requirement": 3000,
       "time_limit_months": 3
     },
-    "reward_type": "Cashback",
-    "reward_value_multiplier": 0.01,
+    "reward_type": "Points",
+    "reward_value_multiplier": 0.017,
     "reward_categories": [
       {
         "category": "other",
@@ -1276,8 +1276,8 @@
       "spending_requirement": 5000,
       "time_limit_months": 3
     },
-    "reward_type": "Cashback",
-    "reward_value_multiplier": 0.01,
+    "reward_type": "Points",
+    "reward_value_multiplier": 0.017,
     "reward_categories": [
       {
         "category": "other",

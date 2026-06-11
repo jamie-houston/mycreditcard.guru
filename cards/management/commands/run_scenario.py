@@ -499,23 +499,26 @@ class Command(BaseCommand):
         
         profile = UserSpendingProfile.objects.create(user=user)
         
-        # Create spending amounts
-        category_mapping = {
-            'groceries': 'Groceries',
-            'dining': 'Dining',
-            'gas': 'Gas',
-            'travel': 'Travel',
-            'general': 'General',
+        # Create spending amounts. Scenario slugs that don't exist as
+        # categories map onto their closest real category; anything still
+        # unmatched is a loud error — silently dropping spending makes
+        # every downstream number wrong.
+        category_aliases = {
+            'general': 'other',
         }
-        
+
         for category_slug, amount in scenario_data['user_profile']['spending'].items():
-            category_name = category_mapping.get(category_slug, category_slug)
-            if category_name in self.categories:
-                SpendingAmount.objects.create(
-                    profile=profile,
-                    category=self.categories[category_name],
-                    monthly_amount=Decimal(str(amount))
-                )
+            category = (self.categories.get(category_slug)
+                        or self.categories.get(category_aliases.get(category_slug)))
+            if category is None:
+                raise ValueError(
+                    f"Scenario spending category '{category_slug}' doesn't match "
+                    f"any SpendingCategory (known: {sorted(set(self.categories))})")
+            SpendingAmount.objects.create(
+                profile=profile,
+                category=category,
+                monthly_amount=Decimal(str(amount))
+            )
         
         # Create available cards
         created_cards = {}
@@ -661,3 +664,16 @@ class Command(BaseCommand):
                 )
                 if created:
                     self.stdout.write(f'✅ Created spending category: {cat.display_name}')
+
+            # Second pass: wire up parent links (parents may appear later
+            # in the file than their children)
+            for cat_data in categories_data:
+                parent_name = cat_data.get('parent')
+                if parent_name:
+                    try:
+                        parent = SpendingCategory.objects.get(name=parent_name)
+                        SpendingCategory.objects.filter(
+                            name=cat_data['name'], parent__isnull=True
+                        ).update(parent=parent)
+                    except SpendingCategory.DoesNotExist:
+                        pass

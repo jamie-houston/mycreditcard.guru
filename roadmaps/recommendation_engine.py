@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 from decimal import Decimal
 from typing import List, Dict
 from cards.models import CreditCard, UserSpendingProfile, UserCard
@@ -19,6 +19,9 @@ class RecommendationEngine:
     
     def __init__(self, profile: UserSpendingProfile, user_cards_data=None):
         self.profile = profile
+        # All reward-category lookups are filtered to what's active today so
+        # expired rotating quarters never count.
+        self.today = date.today()
         # Get user cards from the user, not the profile
         if profile.user:
             self.user_cards = list(profile.user.owned_cards.filter(closed_date__isnull=True))
@@ -146,22 +149,13 @@ class RecommendationEngine:
         # Calculate portfolio summary for the recommended cards
         portfolio_summary = self._calculate_portfolio_summary(recommendations)
         
-        # Filter rewards breakdown to only show for top-performing cards per category
-        optimal_cards = portfolio_summary.get('category_optimization_cards', set())
+        # NOTE: breakdowns are intentionally never stripped — every card's
+        # headline value must stay reproducible from its visible line items.
+        # (Allocation already keeps non-optimal cards' breakdowns small.)
         for rec in recommendations:
-            # Only keep rewards breakdown for cards that are optimal for at least one category
-            if rec['card'].name not in optimal_cards:
-                # Keep only the credits breakdown, remove spending-based rewards
-                filtered_breakdown = []
-                for breakdown_item in rec.get('rewards_breakdown', []):
-                    # Keep Card Benefits & Credits breakdown, filter out spending categories
-                    if 'Card Benefits' in breakdown_item.get('category_name', ''):
-                        filtered_breakdown.append(breakdown_item)
-                rec['rewards_breakdown'] = filtered_breakdown
-            
             # Add portfolio summary to each recommendation for frontend access
             rec['portfolio_summary'] = portfolio_summary
-        
+
         return recommendations
     
     def generate_roadmap(self, roadmap: 'Roadmap') -> List[dict]:
@@ -263,43 +257,128 @@ class RecommendationEngine:
         # max_cards should be current cards + max new recommendations, not just max_recommendations
         max_total_cards = len(current_cards) + roadmap.max_recommendations
         best_portfolio = self._find_optimal_portfolio(current_cards, available_new_cards, max_total_cards)
-        
-        # Calculate optimal spending allocation across the entire portfolio
-        portfolio_allocation = self._calculate_portfolio_allocation([card_action['card'] for card_action in best_portfolio])
-        
+
+        # De-dup: scenario assembly can emit the same card twice (e.g. a
+        # keep from optimization plus a cancel appended separately).
+        # Keep/apply wins over cancel; otherwise first occurrence wins.
+        actions_by_card = {}
+        for card_action in best_portfolio:
+            card_id = card_action['card'].id
+            existing = actions_by_card.get(card_id)
+            if existing is None or (existing['action'] == 'cancel'
+                                    and card_action['action'] in ('keep', 'apply')):
+                actions_by_card[card_id] = card_action
+        best_portfolio = list(actions_by_card.values())
+
+        # Spending allocation spans only cards the user will actually hold;
+        # a card recommended for cancellation can't earn category rewards.
+        held_cards = [ca['card'] for ca in best_portfolio if ca['action'] in ('keep', 'apply')]
+        portfolio_allocation = self._calculate_portfolio_allocation(held_cards)
+
         # Convert optimal portfolio to recommendations
         for card_action in best_portfolio:
             card = card_action['card']
             action = card_action['action']
-            
-            # Calculate individual card breakdown using actual allocated spending
-            rewards_breakdown = self._calculate_card_allocated_breakdown(card, portfolio_allocation)
+
+            # Individual card values come from its allocated spending, so
+            # every headline number reconciles with its line items.
+            if action == 'cancel':
+                # Counterfactual: what keeping this card would net, with
+                # spending optimally re-allocated across held cards + it.
+                # Shows the honest cost of keeping rather than the bare fee.
+                cancel_allocation = self._calculate_portfolio_allocation(held_cards + [card])
+                rewards_breakdown = self._calculate_card_allocated_breakdown(card, cancel_allocation)
+            else:
+                rewards_breakdown = self._calculate_card_allocated_breakdown(card, portfolio_allocation)
             annual_rewards = rewards_breakdown['total_rewards']
             annual_fee = float(card.annual_fee)
-            
-            # For individual card display, calculate net value
+            multiplier = rewards_breakdown['reward_multiplier']
+
             if action == 'apply':
                 signup_bonus_value = self._get_signup_bonus_value(card)
                 annual_fee_waived = card.metadata.get('annual_fee_waived_first_year', False)
                 effective_fee = 0 if annual_fee_waived else annual_fee
                 estimated_value = annual_rewards - effective_fee + signup_bonus_value
-                reasoning = card_action.get('reasoning', f"Apply - adds ${estimated_value:.0f} value to portfolio")
+                first_year_value = estimated_value
+                ongoing_value = annual_rewards - annual_fee
+
+                fee_text = "first-year fee waived" if annual_fee_waived else f"${effective_fee:.0f} fee"
+                if signup_bonus_value > 0:
+                    reasoning = (f"Total estimated value: ${estimated_value:.0f} "
+                                 f"(${annual_rewards:.0f} annual rewards - {fee_text} "
+                                 f"+ ${signup_bonus_value:.0f} signup bonus)")
+                else:
+                    reasoning = (f"Total estimated value: ${estimated_value:.0f} "
+                                 f"(${annual_rewards:.0f} annual rewards - {fee_text})")
+
+                shortfall_item = self._signup_shortfall_item(
+                    card, rewards_breakdown['total_spending_on_card'])
+                if shortfall_item:
+                    rewards_breakdown['breakdown'].append(shortfall_item)
             else:  # keep or cancel
+                signup_bonus_value = 0
                 estimated_value = annual_rewards - annual_fee
-                reasoning = card_action.get('reasoning', f"{action.title()} - portfolio optimization decision")
-            
+                first_year_value = estimated_value
+                ongoing_value = estimated_value
+                verb = 'Keep' if action == 'keep' else 'Cancel'
+                reasoning = (f"{verb} - ${annual_rewards:.0f} annual rewards vs "
+                             f"${annual_fee:.0f} fee (net ${estimated_value:.0f})")
+
+            # Reconciliation guard: the headline must equal the sum of the
+            # line items plus signup bonus minus the fee. By construction it
+            # does; if this ever fires, the math above regressed.
+            line_total = sum(item['category_rewards'] for item in rewards_breakdown['breakdown'])
+            fee_in_headline = effective_fee if action == 'apply' else annual_fee
+            expected = line_total + signup_bonus_value - fee_in_headline
+            if abs(estimated_value - expected) >= 1.0:
+                logger.error(
+                    f"Breakdown mismatch for {card.name} ({action}): headline "
+                    f"${estimated_value:.2f} vs line items ${expected:.2f}")
+
             recommendations.append({
                 'card': card,
                 'action': action,
                 'estimated_rewards': Decimal(str(estimated_value)),  # Show true value, including negative for cancel cards
+                'first_year_value': first_year_value,
+                'ongoing_value': ongoing_value,
+                'reward_value_multiplier': multiplier,
+                'valuation_note': f"Points/miles valued at {multiplier * 100:.2f}¢ each" if multiplier != 1 else "",
                 'reasoning': reasoning,
                 'rewards_breakdown': rewards_breakdown['breakdown'],
                 'total_spending_on_card': rewards_breakdown.get('total_spending_on_card', 0),
-                'signup_bonus_value': signup_bonus_value if action == 'apply' else 0,
+                'signup_bonus_value': signup_bonus_value,
                 'priority': card_action.get('priority', 1)
             })
-        
+
         return recommendations
+
+    def _signup_shortfall_item(self, card: CreditCard, allocated_annual_spend: float) -> dict:
+        """Informational line item when the user's allocated spending won't
+        meet a signup bonus requirement within its window. Worth $0 in the
+        math — it flags spending the user would need beyond their normal
+        pattern (which the engine deliberately does not invent)."""
+        signup_bonus = card.metadata.get('signup_bonus') or {}
+        requirement = float(signup_bonus.get('spending_requirement') or 0)
+        months = float(signup_bonus.get('time_limit_months') or 3)
+        if requirement <= 0:
+            return None
+        spend_in_window = allocated_annual_spend * (months / 12)
+        shortfall = requirement - spend_in_window
+        if shortfall <= 0:
+            return None
+        return {
+            'category_name': 'Signup bonus spending gap',
+            'monthly_spend': 0,
+            'annual_spend': 0,
+            'reward_rate': 0,
+            'reward_multiplier': 0,
+            'points_earned': 0,
+            'category_rewards': 0,
+            'calculation': (f"Needs ${requirement:,.0f} in {months:.0f} months; your "
+                            f"allocated spending covers ${spend_in_window:,.0f} — "
+                            f"${shortfall:,.0f} extra required (not counted in rewards)"),
+            'type': 'info',
+        }
     
     def _find_optimal_portfolio(self, current_cards: List[CreditCard], available_cards: List[CreditCard], max_cards: int) -> List[dict]:
         """Find the optimal combination of cards for maximum portfolio value"""
@@ -497,9 +576,10 @@ class RecommendationEngine:
         # BUT: Never recommend canceling cards with $0 annual fee
         optimal_card_ids = {cd['card'].id for cd in optimal_cards}
         
-        # Calculate portfolio allocation for consistent reasoning
-        all_cards = [cd['card'] for cd in optimal_cards] + [uc.card for uc in self.user_cards if uc.card.id not in optimal_card_ids]
-        portfolio_allocation = self._calculate_portfolio_allocation(all_cards)
+        # Allocation spans only the cards the user would hold (the optimal
+        # set) — cards being cancelled can't claim category spending.
+        portfolio_allocation = self._calculate_portfolio_allocation(
+            [cd['card'] for cd in optimal_cards])
         
         for uc in self.user_cards:
             if uc.card.id not in optimal_card_ids:
@@ -546,7 +626,7 @@ class RecommendationEngine:
         
         for card_data in card_scores:
             card = card_data['card']
-            for reward_cat in card.reward_categories.filter(is_active=True):
+            for reward_cat in card.reward_categories.active_on(self.today):
                 category_slug = reward_cat.category.slug
                 category_coverage[category_slug].append({
                     'card_data': card_data,
@@ -588,7 +668,7 @@ class RecommendationEngine:
                 total_value += credits_value
                 
                 # Track best reward rate per category across all cards
-                for reward_cat in card.reward_categories.filter(is_active=True):
+                for reward_cat in card.reward_categories.active_on(self.today):
                     category_slug = reward_cat.category.slug
                     rate = float(reward_cat.reward_rate)
                     max_spend = reward_cat.max_annual_spend
@@ -825,7 +905,7 @@ class RecommendationEngine:
             card = action['card']
             # Pre-fetch all reward categories to avoid N+1 queries
             if not hasattr(card, '_cached_reward_categories'):
-                card._cached_reward_categories = list(card.reward_categories.filter(is_active=True).select_related('category'))
+                card._cached_reward_categories = list(card.reward_categories.active_on(self.today).select_related('category'))
             
             for reward_category in card._cached_reward_categories:
                 category_slug = reward_category.category.slug
@@ -957,7 +1037,7 @@ class RecommendationEngine:
         
         # Pre-fetch reward categories to avoid N+1 queries
         if not hasattr(card, '_cached_reward_categories'):
-            card._cached_reward_categories = list(card.reward_categories.filter(is_active=True).select_related('category'))
+            card._cached_reward_categories = list(card.reward_categories.active_on(self.today).select_related('category'))
         
         # Calculate rewards for categories where user actually spends money
         for reward_category in card._cached_reward_categories:
@@ -1013,7 +1093,7 @@ class RecommendationEngine:
         
         # Pre-fetch reward categories
         if not hasattr(card, '_cached_reward_categories'):
-            card._cached_reward_categories = list(card.reward_categories.filter(is_active=True).select_related('category'))
+            card._cached_reward_categories = list(card.reward_categories.active_on(self.today).select_related('category'))
         
         relevant_spending = 0.0
         weighted_efficiency = 0.0
@@ -1142,284 +1222,179 @@ class RecommendationEngine:
         breakdown = self._calculate_card_rewards_breakdown(card)
         return breakdown['total_rewards']
     
-    def _calculate_portfolio_allocation(self, portfolio_cards: List[CreditCard]) -> dict:
-        """Calculate optimal spending allocation across portfolio cards, considering signup bonus requirements"""
+    BASE_CATEGORY_SLUGS = ('general', 'other', 'everything-else')
+
+    def _calculate_portfolio_allocation(self, portfolio_cards: List[CreditCard]) -> list:
+        """Allocate the user's annual spending across the portfolio.
+
+        Each spending category the user entered is walked from the
+        best-rate eligible card downward; spending beyond a reward
+        category's annual cap rolls over to the next-best card, ending
+        at the best flat/base-rate card. The sum of allocated spending
+        always equals the user's total annual spending — entries with
+        card=None mark spending no portfolio card covers, so totals
+        still reconcile.
+
+        Returns a list of allocation entries:
+            {category_slug, category_name, card, rate, annual_spend,
+             max_spend, reward_category_id, is_base_rate}
+        """
         from cards.models import SpendingCategory
-        
-        # Build parent category spending (same logic as in portfolio optimization)
-        all_spending = {}
-        for category_slug, monthly_amount in self.spending_amounts.items():
-            annual_spend = float(monthly_amount) * 12
-            all_spending[category_slug] = annual_spend
-        
-        parent_category_spending = {}
-        for category_slug, annual_spend in all_spending.items():
-            try:
-                spending_category = SpendingCategory.objects.get(slug=category_slug)
-                if spending_category.is_subcategory:
-                    parent_slug = spending_category.parent.slug
-                    parent_category_spending[parent_slug] = parent_category_spending.get(parent_slug, 0.0) + annual_spend
-                else:
-                    parent_category_spending[category_slug] = parent_category_spending.get(category_slug, 0.0) + annual_spend
-            except SpendingCategory.DoesNotExist:
-                parent_category_spending[category_slug] = parent_category_spending.get(category_slug, 0.0) + annual_spend
-        
-        # Calculate total available spending
-        total_available_spending = sum(parent_category_spending.values())
-        
-        # First pass: Allocate minimum spending for signup bonuses
-        signup_bonus_allocations = {}
-        total_signup_spending = 0
-        
+
+        # De-dup cards: scoring paths can hand us the same card twice.
+        seen_ids = set()
+        cards = []
         for card in portfolio_cards:
-            signup_bonus = card.metadata.get('signup_bonus', {})
-            if signup_bonus:
-                spending_requirement = float(signup_bonus.get('spending_requirement', 0))
-                if spending_requirement > 0 and spending_requirement <= total_available_spending:
-                    signup_bonus_allocations[card.id] = spending_requirement
-                    total_signup_spending += spending_requirement
-        
-        # Remaining spending after signup requirements
-        remaining_spending = max(0, total_available_spending - total_signup_spending)
-        
-        # Find best rate per category across portfolio
-        category_best_allocation = {}
-        for category_slug in parent_category_spending.keys():
-            best_rate = 0
-            best_card = None
-            best_max_spend = None
-            best_subcategory_slug = None
-            
-            for card in portfolio_cards:
-                for reward_cat in card.reward_categories.filter(is_active=True):
-                    # Check for exact match first
-                    if reward_cat.category.slug == category_slug:
-                        rate = float(reward_cat.reward_rate)
-                        if rate > best_rate:
-                            best_rate = rate
-                            best_card = card
-                            best_max_spend = reward_cat.max_annual_spend
-                            best_subcategory_slug = None
-                    
-                    # Also check if this card has subcategory rewards for spending in this parent category
-                    elif reward_cat.category.parent and reward_cat.category.parent.slug == category_slug:
-                        # This card has a subcategory reward rate for spending that gets collapsed into this parent
-                        # We need to check if the original spending was in this subcategory
-                        subcategory_slug = reward_cat.category.slug
-                        subcategory_spending = 0
-                        
-                        # Check if we have spending in this specific subcategory
-                        for orig_slug, monthly_amount in self.spending_amounts.items():
-                            try:
-                                spending_category = SpendingCategory.objects.get(slug=orig_slug)
-                                if (spending_category.slug == subcategory_slug or 
-                                    (spending_category.parent and spending_category.parent.slug == subcategory_slug)):
-                                    subcategory_spending += float(monthly_amount) * 12
-                            except SpendingCategory.DoesNotExist:
-                                continue
-                        
-                        if subcategory_spending > 0:
-                            rate = float(reward_cat.reward_rate)
-                            if rate > best_rate:
-                                best_rate = rate
-                                best_card = card
-                                best_max_spend = reward_cat.max_annual_spend
-                                best_subcategory_slug = subcategory_slug
-            
-            if best_card:
-                # If we found a subcategory match, use the specific spending amount for that subcategory
-                if best_subcategory_slug:
-                    # Calculate the actual spending for this subcategory
-                    actual_spending = 0
-                    for orig_slug, monthly_amount in self.spending_amounts.items():
-                        try:
-                            spending_category = SpendingCategory.objects.get(slug=orig_slug)
-                            if (spending_category.slug == best_subcategory_slug or 
-                                (spending_category.parent and spending_category.parent.slug == best_subcategory_slug)):
-                                actual_spending += float(monthly_amount) * 12
-                        except SpendingCategory.DoesNotExist:
-                            continue
-                    
-                    category_best_allocation[best_subcategory_slug] = {
-                        'card': best_card,
-                        'rate': best_rate,
-                        'max_spend': best_max_spend,
-                        'annual_spend': actual_spending
-                    }
+            if card.id not in seen_ids:
+                seen_ids.add(card.id)
+                cards.append(card)
+
+        # Collect each card's active reward categories once.
+        category_rewards = []  # (card, reward_cat) for specific categories
+        base_rewards = []      # (card, reward_cat) for base/catch-all rates
+        for card in cards:
+            active = card.reward_categories.active_on(self.today).select_related(
+                'category', 'category__parent')
+            for reward_cat in active:
+                if reward_cat.category.slug in self.BASE_CATEGORY_SLUGS:
+                    base_rewards.append((card, reward_cat))
                 else:
-                    category_best_allocation[category_slug] = {
-                        'card': best_card,
-                        'rate': best_rate,
-                        'max_spend': best_max_spend,
-                        'annual_spend': parent_category_spending[category_slug]
-                    }
-        
-                # Handle unallocated spending (general/other category)
-        allocated_spending = sum(
-            data['annual_spend'] for data in category_best_allocation.values()
-        )
-        total_spending = sum(parent_category_spending.values())
-        unallocated_spending = total_spending - allocated_spending
+                    category_rewards.append((card, reward_cat))
 
-        if unallocated_spending > 0:
-            # Find best general rate among portfolio cards
-            best_general_rate = 0.0
-            best_general_card = None
+        # Cap room is shared per reward-category row: two spending slugs
+        # that hit the same capped 5x bucket draw from one allowance.
+        cap_room = {}
+        for _, reward_cat in category_rewards + base_rewards:
+            if reward_cat.max_annual_spend:
+                cap_room[reward_cat.id] = float(reward_cat.max_annual_spend)
 
-            for card in portfolio_cards:
-                for reward_cat in card.reward_categories.filter(is_active=True):
-                    if reward_cat.category.slug in ['general', 'other', 'everything-else']:
-                        rate = float(reward_cat.reward_rate)
-                        if rate > best_general_rate:
-                            best_general_rate = rate
-                            best_general_card = card
+        base_rewards.sort(key=lambda cr: float(cr[1].reward_rate), reverse=True)
 
-            if best_general_card:
-                category_best_allocation['other'] = {
-                    'card': best_general_card,
-                    'rate': best_general_rate,
+        allocation = []
+
+        def allocate(spending_slug, category_name, amount, candidates):
+            remaining = amount
+            for card, reward_cat in candidates:
+                if remaining <= 0:
+                    return
+                take = remaining
+                if reward_cat.id in cap_room:
+                    take = min(take, cap_room[reward_cat.id])
+                    if take <= 0:
+                        continue
+                    cap_room[reward_cat.id] -= take
+                allocation.append({
+                    'category_slug': spending_slug,
+                    'category_name': category_name,
+                    'card': card,
+                    'rate': float(reward_cat.reward_rate),
+                    'annual_spend': take,
+                    'max_spend': reward_cat.max_annual_spend,
+                    'reward_category_id': reward_cat.id,
+                    'is_base_rate': reward_cat.category.slug in self.BASE_CATEGORY_SLUGS,
+                })
+                remaining -= take
+            if remaining > 0:
+                allocation.append({
+                    'category_slug': spending_slug,
+                    'category_name': category_name,
+                    'card': None,
+                    'rate': 0.0,
+                    'annual_spend': remaining,
                     'max_spend': None,
-                    'annual_spend': unallocated_spending
-                }
-        
-        # Combine category allocation with signup bonus requirements
-        final_allocation = {}
-        
-        # Start with category-based allocation
-        for category_slug, allocation_data in category_best_allocation.items():
-            card = allocation_data['card']
-            card_id = card.id
-            
-            # If this card has a signup requirement, ensure it gets at least that amount
-            min_spending = signup_bonus_allocations.get(card_id, 0)
-            category_spending = allocation_data['annual_spend']
-            
-            # Use the higher of category allocation or signup requirement
-            final_spending = max(category_spending, min_spending)
-            
-            final_allocation[category_slug] = {
-                'card': card,
-                'rate': allocation_data['rate'],
-                'max_spend': allocation_data['max_spend'],
-                'annual_spend': final_spending
-            }
-        
-        # Add cards that need signup spending but didn't win any categories
-        for card in portfolio_cards:
-            card_id = card.id
-            min_spending = signup_bonus_allocations.get(card_id, 0)
-            
-            if min_spending > 0:
-                # Check if this card already has allocation
-                card_already_allocated = any(
-                    alloc['card'].id == card_id for alloc in final_allocation.values()
-                )
-                
-                if not card_already_allocated:
-                    # Find best rate this card offers for any category
-                    best_rate = 0.0
-                    for reward_cat in card.reward_categories.filter(is_active=True):
-                        rate = float(reward_cat.reward_rate)
-                        if rate > best_rate:
-                            best_rate = rate
-                    
-                    # Allocate minimum spending to this card
-                    final_allocation[f'signup_bonus_{card_id}'] = {
-                        'card': card,
-                        'rate': best_rate,
-                        'max_spend': None,
-                        'annual_spend': min_spending
-                    }
-        
-        return final_allocation
+                    'reward_category_id': None,
+                    'is_base_rate': False,
+                })
 
-    def _calculate_card_allocated_breakdown(self, card: CreditCard, portfolio_allocation: dict) -> dict:
-        """Calculate breakdown for a card using only its allocated spending from portfolio optimization"""
-        from cards.models import SpendingCategory
-        
+        for spending_slug, monthly_amount in self.spending_amounts.items():
+            annual_spend = float(monthly_amount) * 12
+            if annual_spend <= 0:
+                continue
+
+            parent_slug = None
+            try:
+                spend_category = SpendingCategory.objects.select_related('parent').get(
+                    slug=spending_slug)
+                category_name = spend_category.display_name or spend_category.name
+                if spend_category.parent:
+                    parent_slug = spend_category.parent.slug
+            except SpendingCategory.DoesNotExist:
+                category_name = spending_slug.replace('_', ' ').title()
+
+            # A card matches this spending if it rates the category itself
+            # or the category's parent (a parent-level rate covers leaf
+            # spending). Base rates compete too — a 2% everything card
+            # should beat a 1.5% category rate.
+            matches = [
+                (card, reward_cat) for card, reward_cat in category_rewards
+                if reward_cat.category.slug == spending_slug
+                or (parent_slug and reward_cat.category.slug == parent_slug)
+            ]
+            candidates = sorted(matches + base_rewards,
+                                key=lambda cr: float(cr[1].reward_rate), reverse=True)
+            allocate(spending_slug, category_name, annual_spend, candidates)
+
+        return allocation
+
+    def _calculate_card_allocated_breakdown(self, card: CreditCard, portfolio_allocation: list) -> dict:
+        """Breakdown for one card using only the spending allocated to it
+        by _calculate_portfolio_allocation."""
         total_rewards = 0.0
         breakdown_details = []
-        
-        # Get the card's reward value multiplier
-        reward_value_multiplier = card.metadata.get('reward_value_multiplier', 0.01)
-        
-        # Only include categories where this card is the optimal choice
-        for category_slug, allocation_data in portfolio_allocation.items():
-            if allocation_data['card'].id == card.id:
-                annual_spend = allocation_data['annual_spend']
-                rate = allocation_data['rate']
-                max_spend = allocation_data['max_spend']
-                
-                # Apply spending caps
-                if max_spend:
-                    annual_spend = min(annual_spend, float(max_spend))
-                
-                # Calculate rewards for this category
-                points_earned = annual_spend * rate
-                category_rewards = points_earned * float(reward_value_multiplier)
-                total_rewards += category_rewards
-                
-                # Get category display name
-                try:
-                    if category_slug == 'other':
-                        category_display_name = 'Other Spending'
-                    else:
-                        category_obj = SpendingCategory.objects.get(slug=category_slug)
-                        category_display_name = category_obj.display_name or category_obj.name
-                except SpendingCategory.DoesNotExist:
-                    category_display_name = category_slug.replace('_', ' ').title()
-                
-                # Add to breakdown with multiplier in name
-                category_with_multiplier = f"{category_display_name} ({rate:.1f}x)"
-                
-                breakdown_details.append({
-                    'category_name': category_with_multiplier,
-                    'monthly_spend': annual_spend / 12,
-                    'annual_spend': annual_spend,
-                    'reward_rate': rate,
-                    'reward_multiplier': float(reward_value_multiplier),
-                    'points_earned': points_earned,
-                    'category_rewards': category_rewards,
-                    'calculation': f"${annual_spend:,.0f} × {rate:.1f}x × {float(reward_value_multiplier):.3f} = ${category_rewards:.2f}",
-                    'type': 'reward_category'
-                })
-        
-        # Add card credits to the total rewards if user has selected them
+        reward_value_multiplier = float(card.metadata.get('reward_value_multiplier', 0.01))
+
+        for entry in portfolio_allocation:
+            if entry['card'] is None or entry['card'].id != card.id:
+                continue
+            annual_spend = entry['annual_spend']
+            rate = entry['rate']
+            points_earned = annual_spend * rate
+            category_rewards = points_earned * reward_value_multiplier
+            total_rewards += category_rewards
+
+            breakdown_details.append({
+                'category_name': f"{entry['category_name']} ({rate:.1f}x)",
+                'monthly_spend': annual_spend / 12,
+                'annual_spend': annual_spend,
+                'reward_rate': rate,
+                'reward_multiplier': reward_value_multiplier,
+                'points_earned': points_earned,
+                'category_rewards': category_rewards,
+                'calculation': f"${annual_spend:,.0f} × {rate:.1f}x × {reward_value_multiplier:.3f} = ${category_rewards:.2f}",
+                'type': 'reward_category',
+            })
+
+        # Add card credits the user values as separate line items.
         credits_value, credits_breakdown = self._calculate_card_credits_value(card)
         total_rewards += credits_value
-        
-        # Add individual credits as separate breakdown items
-        if credits_breakdown:
-            for credit in credits_breakdown:
-                # Format credit name with frequency like "Apple TV ($12×10)" or "Airport Lounge ($469)"
-                if credit['times_per_year'] > 1:
-                    credit_display = f"{credit['name']} (${credit['value']:.0f}×{credit['times_per_year']})"
-                else:
-                    credit_display = f"{credit['name']} (${credit['value']:.0f})"
-                
-                breakdown_details.append({
-                    'category_name': credit_display,
-                    'monthly_spend': 0,
-                    'annual_spend': 0,
-                    'reward_rate': 0,
-                    'reward_multiplier': 1.0,
-                    'points_earned': credit['annual_value'],
-                    'category_rewards': credit['annual_value'],
-                    'calculation': f"Card benefit: ${credit['annual_value']:.0f} annually",
-                    'type': 'credit',
-                    'credit_detail': credit
-                })
-        
-        # Calculate total spending on this card
+        for credit in credits_breakdown:
+            if credit['times_per_year'] > 1:
+                credit_display = f"{credit['name']} (${credit['value']:.0f}×{credit['times_per_year']})"
+            else:
+                credit_display = f"{credit['name']} (${credit['value']:.0f})"
+            breakdown_details.append({
+                'category_name': credit_display,
+                'monthly_spend': 0,
+                'annual_spend': 0,
+                'reward_rate': 0,
+                'reward_multiplier': 1.0,
+                'points_earned': credit['annual_value'],
+                'category_rewards': credit['annual_value'],
+                'calculation': f"Card benefit: ${credit['annual_value']:.0f} annually",
+                'type': 'credit',
+                'credit_detail': credit,
+            })
+
         total_spending_on_card = sum(
-            item['annual_spend'] for item in breakdown_details 
+            item['annual_spend'] for item in breakdown_details
             if item['type'] == 'reward_category'
         )
-        
+
         return {
             'total_rewards': total_rewards,
             'breakdown': breakdown_details,
-            'total_spending_on_card': total_spending_on_card
+            'total_spending_on_card': total_spending_on_card,
+            'reward_multiplier': reward_value_multiplier,
         }
 
     def _calculate_card_rewards_breakdown(self, card: CreditCard) -> dict:
@@ -1478,7 +1453,7 @@ class RecommendationEngine:
         allocated_spending = 0.0
         
         # Calculate rewards for specific reward categories
-        for reward_category in card.reward_categories.filter(is_active=True):
+        for reward_category in card.reward_categories.active_on(self.today):
             category_slug = reward_category.category.slug
             
             # Check if this reward category applies to a parent category that has aggregated spending
@@ -1586,29 +1561,34 @@ class RecommendationEngine:
         }
     
     def _can_meet_signup_requirement(self, card: CreditCard) -> bool:
-        """Check if user's total spending can meet the card's signup bonus requirement"""
-        if not card.signup_bonus_requirement or card.signup_bonus_requirement in ['', '$0.01 in 6 months']:
-            return True
-            
-        try:
-            # Parse requirement format like "$5000 in 3 months"
+        """Check if user's total spending can meet the card's signup bonus
+        requirement. Prefers the structured metadata over parsing the
+        human-readable requirement string."""
+        signup_bonus = card.metadata.get('signup_bonus') or {}
+        required_amount = float(signup_bonus.get('spending_requirement') or 0)
+        time_months = float(signup_bonus.get('time_limit_months') or 0)
+
+        if not required_amount:
+            # Fall back to parsing a requirement string like "$5000 in 3 months"
+            if not card.signup_bonus_requirement:
+                return True
             import re
-            match = re.search(r'\$(\d+).*?(\d+)\s*months?', card.signup_bonus_requirement)
+            match = re.search(r'\$([\d,]+).*?(\d+)\s*months?', card.signup_bonus_requirement)
             if not match:
                 return True  # If we can't parse, assume achievable
-                
-            required_amount = int(match.group(1))
-            time_months = int(match.group(2))
-            
-            # Calculate user's total monthly spending
-            total_monthly_spending = sum(float(amount) for amount in self.spending_amounts.values())
-            user_spending_in_period = total_monthly_spending * time_months
-            
-            # Add 20% buffer for achievability (user might increase spending slightly)
-            return user_spending_in_period * 1.2 >= required_amount
-            
-        except (ValueError, AttributeError):
-            return True  # If parsing fails, assume achievable
+            required_amount = float(match.group(1).replace(',', ''))
+            time_months = float(match.group(2))
+
+        if required_amount <= 0:
+            return True
+        if time_months <= 0:
+            time_months = 3  # most common bonus window
+
+        total_monthly_spending = sum(float(amount) for amount in self.spending_amounts.values())
+        user_spending_in_period = total_monthly_spending * time_months
+
+        # Add 20% buffer for achievability (user might increase spending slightly)
+        return user_spending_in_period * 1.2 >= required_amount
 
     def _get_best_signup_bonus_card(self, eligible_cards: List[CreditCard]) -> dict:
         """Get the best signup bonus card as a fallback recommendation for high spenders"""
@@ -1631,8 +1611,12 @@ class RecommendationEngine:
                 best_card = card
         
         if best_card:
-            # Get proper breakdown for all components
-            rewards_breakdown = self._calculate_card_rewards_breakdown(best_card)
+            # Breakdown uses allocated spending across current cards plus
+            # this candidate, so its value doesn't double-count categories
+            # the user's existing cards already win.
+            current_cards = [uc.card for uc in self.user_cards]
+            allocation = self._calculate_portfolio_allocation(current_cards + [best_card])
+            rewards_breakdown = self._calculate_card_allocated_breakdown(best_card, allocation)
             annual_rewards = rewards_breakdown['total_rewards']
             signup_bonus = self._get_signup_bonus_value(best_card)
             annual_fee = float(best_card.annual_fee)
@@ -1669,18 +1653,10 @@ class RecommendationEngine:
                 bonus_type_name = 'unknown'
             
             if bonus_type_name in ['cashback', 'cash', 'cash back']:
-                # Cashback signup bonuses are already in dollars
-                bonus_value = float(card.signup_bonus_amount)
-                
-                # Sanity check: If cashback bonus > $5000, it's probably misclassified points
-                if bonus_value > 5000:
-                    # Treat as points with conversion
-                    reward_value_multiplier = card.metadata.get('reward_value_multiplier', 0.01)
-                    bonus_value = bonus_value * float(reward_value_multiplier)
-                    if bonus_value > 10000:  # Still too high, cap it
-                        bonus_value = min(bonus_value, 10000)
-                
-                return bonus_value
+                # Cashback signup bonuses are already in dollars. No
+                # sanity-check heuristics here: a wrong number means the
+                # card's source data is wrong — fix the data, not the math.
+                return float(card.signup_bonus_amount)
             else:
                 # Points/miles need to be converted using reward value multiplier
                 reward_value_multiplier = card.metadata.get('reward_value_multiplier', 0.01)
@@ -1811,40 +1787,33 @@ class RecommendationEngine:
             logger.debug(f"{category_slug}: ${monthly_amount}/month -> ${annual_spend}/year")
         
         # Build category optimization from portfolio allocation
-        for category_slug, allocation_data in portfolio_allocation.items():
-            card = allocation_data['card']
-            rate = allocation_data['rate']
-            annual_spend = allocation_data['annual_spend']
-            
-            # Calculate rewards for this allocation
-            reward_value_multiplier = card.metadata.get('reward_value_multiplier', 0.01)
-            points_earned = annual_spend * rate
-            category_rewards = points_earned * float(reward_value_multiplier)
+        for entry in portfolio_allocation:
+            card = entry['card']
+            if card is None:
+                continue  # spending no portfolio card covers earns nothing
+            rate = entry['rate']
+            annual_spend = entry['annual_spend']
+
+            reward_value_multiplier = float(card.metadata.get('reward_value_multiplier', 0.01))
+            category_rewards = annual_spend * rate * reward_value_multiplier
             total_portfolio_rewards += category_rewards
-            
-            # Add to category optimization display (only if rate > 1x)
+
+            # Category optimization display: primary (highest-rate) entry
+            # per category, only when it beats the 1x floor
             if rate > 1.0:
-                from cards.models import SpendingCategory
-                try:
-                    if category_slug == 'other':
-                        category_display_name = 'Other Spending'
-                    else:
-                        category_obj = SpendingCategory.objects.get(slug=category_slug)
-                        category_display_name = category_obj.display_name or category_obj.name
-                except SpendingCategory.DoesNotExist:
-                    category_display_name = category_slug.replace('_', ' ').title()
-                
-                category_optimization[category_slug] = {
-                    'category_name': category_display_name,
-                    'best_rate': rate,
-                    'best_card': card.name,
-                    'annual_spend': annual_spend,
-                    'annual_rewards': category_rewards,
-                    'max_annual_spend': allocation_data.get('max_spend')
-                }
-        
+                existing = category_optimization.get(entry['category_slug'])
+                if existing is None or rate > existing['best_rate']:
+                    category_optimization[entry['category_slug']] = {
+                        'category_name': entry['category_name'],
+                        'best_rate': rate,
+                        'best_card': card.name,
+                        'annual_spend': annual_spend,
+                        'annual_rewards': category_rewards,
+                        'max_annual_spend': entry['max_spend']
+                    }
+
         # Calculate total annual spending for summary
-        total_parent_spending = sum(allocation_data['annual_spend'] for allocation_data in portfolio_allocation.values())
+        total_parent_spending = sum(entry['annual_spend'] for entry in portfolio_allocation)
         
         # Add card benefits/credits (avoid double counting by using set of unique credits)
         unique_credits = set()

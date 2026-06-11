@@ -29,7 +29,7 @@
     "issuer": "Citi",
     "annual_fee": 0,
     "signup_bonus_amount": 20000,
-    "signup_bonus_type": "Cashback",
+    "signup_bonus_type": "Points",
     "primary_reward_type": "Cashback",
     "metadata": {
       "reward_value_multiplier": 0.01,
@@ -71,7 +71,7 @@
     "issuer": "Generic Bank",
     "annual_fee": 0,
     "signup_bonus_amount": 15000,
-    "signup_bonus_type": "Cashback",
+    "signup_bonus_type": "Points",
     "primary_reward_type": "Cashback",
     "metadata": {
       "reward_value_multiplier": 0.01,
@@ -90,7 +90,7 @@
     "issuer": "Generic Bank",
     "annual_fee": 0,
     "signup_bonus_amount": 20000,
-    "signup_bonus_type": "Cashback",
+    "signup_bonus_type": "Points",
     "primary_reward_type": "Cashback",
     "metadata": {
       "reward_value_multiplier": 0.01,
@@ -136,7 +136,7 @@
     "issuer": "Generic Bank",
     "annual_fee": 0,
     "signup_bonus_amount": 15000,
-    "signup_bonus_type": "Cashback",
+    "signup_bonus_type": "Points",
     "primary_reward_type": "Cashback",
     "metadata": {
       "reward_value_multiplier": 0.01,
@@ -155,7 +155,7 @@
     "issuer": "Discover",
     "annual_fee": 0,
     "signup_bonus_amount": 20000,
-    "signup_bonus_type": "Cashback",
+    "signup_bonus_type": "Points",
     "primary_reward_type": "Cashback",
     "metadata": {
       "reward_value_multiplier": 0.01,
@@ -234,7 +234,7 @@
     "issuer": "Basic Bank",
     "annual_fee": 0,
     "signup_bonus_amount": 10000,
-    "signup_bonus_type": "Cashback",
+    "signup_bonus_type": "Points",
     "primary_reward_type": "Cashback",
     "metadata": {
       "reward_value_multiplier": 0.01,
@@ -253,7 +253,7 @@
     "issuer": "Generic Bank",
     "annual_fee": 0,
     "signup_bonus_amount": 25000,
-    "signup_bonus_type": "Cashback",
+    "signup_bonus_type": "Points",
     "primary_reward_type": "Cashback",
     "metadata": {
       "reward_value_multiplier": 0.01,
@@ -322,7 +322,7 @@
     "issuer": "Premium Bank",
     "annual_fee": 95,
     "signup_bonus_amount": 25000,
-    "signup_bonus_type": "Cashback",
+    "signup_bonus_type": "Points",
     "primary_reward_type": "Cashback",
     "metadata": {
       "reward_value_multiplier": 0.01,
@@ -351,7 +351,7 @@
     "issuer": "Generic Bank",
     "annual_fee": 0,
     "signup_bonus_amount": 20000,
-    "signup_bonus_type": "Cashback",
+    "signup_bonus_type": "Points",
     "primary_reward_type": "Cashback",
     "metadata": {
       "reward_value_multiplier": 0.01,
