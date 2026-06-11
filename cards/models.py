@@ -102,6 +102,21 @@ class CreditCard(models.Model):
         return self.referral_url
 
 
+class RewardCategoryQuerySet(models.QuerySet):
+    def active_on(self, on_date):
+        """Categories in effect on the given date.
+
+        Rotating/seasonal entries carry start_date/end_date; permanent
+        entries leave them null. An expired quarterly 5x must never be
+        treated as currently active.
+        """
+        return self.filter(
+            models.Q(is_active=True),
+            models.Q(start_date__isnull=True) | models.Q(start_date__lte=on_date),
+            models.Q(end_date__isnull=True) | models.Q(end_date__gte=on_date),
+        )
+
+
 class RewardCategory(models.Model):
     card = models.ForeignKey(CreditCard, on_delete=models.CASCADE, related_name='reward_categories')
     category = models.ForeignKey(SpendingCategory, on_delete=models.CASCADE)
@@ -111,7 +126,9 @@ class RewardCategory(models.Model):
     end_date = models.DateField(null=True, blank=True)
     max_annual_spend = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     is_active = models.BooleanField(default=True)
-    
+
+    objects = RewardCategoryQuerySet.as_manager()
+
     class Meta:
         unique_together = ['card', 'category', 'start_date']
     

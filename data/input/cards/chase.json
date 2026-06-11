@@ -426,11 +426,11 @@
     "reward_value_multiplier": 0.01,
     "reward_categories": [
       {
-        "category": "gas",
+        "category": "amazon",
         "reward_rate": 5,
-        "start_date": "2025-01-01",
-        "end_date": "2025-03-31",
-        "max_spending": 1500
+        "start_date": "2026-04-01",
+        "end_date": "2026-06-30",
+        "max_spend": 1500
       },
       {
         "category": "chase_travel",
@@ -438,7 +438,7 @@
       },
       {
         "category": "dining",
-        "reward_rate": 5
+        "reward_rate": 3
       },
       {
         "category": "drugstores",
@@ -1347,16 +1347,22 @@
     "slug": "chase-freedom-legacy",
     "reward_categories": [
       {
-        "category": "groceries",
+        "category": "amazon",
         "reward_rate": 5,
-        "start_date": "2025-01-01",
-        "end_date": "2025-03-31"
+        "start_date": "2026-04-01",
+        "end_date": "2026-06-30",
+        "max_spend": 1500
       },
       {
-        "category": "gas",
+        "category": "chase_travel",
         "reward_rate": 5,
-        "start_date": "2025-07-01",
-        "end_date": "2025-09-30"
+        "start_date": "2026-04-01",
+        "end_date": "2026-06-30",
+        "max_spend": 1500
+      },
+      {
+        "category": "other",
+        "reward_rate": 1
       }
     ]
   }

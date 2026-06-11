@@ -1,0 +1,185 @@
+{% load static %}
+<!DOCTYPE html>
+{# Standalone page (doesn't extend base.html) so the daily phone view #}
+{# loads without the roadmap builder's JS payload. #}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Wallet - Credit Card Guru</title>
+    <link rel="manifest" href="{% static 'manifest.json' %}">
+    <meta name="theme-color" content="#667eea">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Wallet">
+    <link rel="apple-touch-icon" href="{% static 'icons/wallet-180.png' %}">
+    <link rel="icon" href="{% static 'icons/wallet.svg' %}" type="image/svg+xml">
+    <style>
+        :root {
+            --primary: #667eea;
+            --primary-dark: #764ba2;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --neutral-500: #6b7280;
+            --neutral-700: #374151;
+            --neutral-800: #1f2937;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: env(safe-area-inset-top) 12px calc(env(safe-area-inset-bottom) + 24px);
+            color: var(--neutral-800);
+        }
+        .header {
+            color: white;
+            text-align: center;
+            padding: 18px 0 10px;
+        }
+        .header h1 { font-size: 1.4rem; font-weight: 700; }
+        .quarter-banner {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 0.85rem;
+            margin-top: 4px;
+        }
+        .rows { max-width: 560px; margin: 0 auto; }
+        .row {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 14px;
+            padding: 14px 16px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+        }
+        .row .icon {
+            width: 42px; height: 42px;
+            border-radius: 10px;
+            background: #eef0fe;
+            color: var(--primary);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+        }
+        .row .info { flex: 1; min-width: 0; }
+        .row .category { font-weight: 700; font-size: 1.05rem; }
+        .row .card-name {
+            color: var(--neutral-500);
+            font-size: 0.9rem;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .row .rate {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: var(--success);
+            flex-shrink: 0;
+        }
+        .row.base .icon { background: #f3f4f6; color: var(--neutral-500); }
+        .rotating-note {
+            display: inline-block;
+            background: #fef3c7;
+            color: #92400e;
+            font-size: 0.72rem;
+            font-weight: 600;
+            border-radius: 6px;
+            padding: 1px 6px;
+            margin-top: 3px;
+        }
+        .section-label {
+            color: rgba(255, 255, 255, 0.85);
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin: 16px 4px 8px;
+        }
+        .empty {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 14px;
+            padding: 28px 20px;
+            text-align: center;
+        }
+        .empty a {
+            display: inline-block;
+            margin-top: 12px;
+            background: var(--primary);
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+            border-radius: 10px;
+            padding: 10px 18px;
+        }
+        .footer-links {
+            text-align: center;
+            margin-top: 18px;
+        }
+        .footer-links a {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 0.85rem;
+            text-decoration: none;
+            margin: 0 10px;
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="header">
+        <h1><i class="fas fa-wallet"></i> Which card?</h1>
+        <div class="quarter-banner">
+            Q{{ quarter }} {{ today|date:"Y" }} &middot; rotating categories end {{ quarter_end|date:"M j" }}
+        </div>
+    </div>
+
+    <div class="rows">
+        {% if open_card_count == 0 %}
+            <div class="empty">
+                <strong>No cards in your wallet yet.</strong>
+                <p>Add the cards you own to see which one to use where.</p>
+                <a href="{% url 'profile' %}">Add my cards</a>
+            </div>
+        {% else %}
+            {% for row in rows %}
+                <div class="row">
+                    <div class="icon"><i class="{{ row.category.icon|default:'fas fa-circle' }}"></i></div>
+                    <div class="info">
+                        <div class="category">{{ row.category }}</div>
+                        <div class="card-name">{{ row.card_label }}</div>
+                        {% if row.is_rotating %}
+                            <span class="rotating-note">
+                                until {{ row.end_date|date:"M j" }}{% if row.max_annual_spend %} &middot; ${{ row.max_annual_spend|floatformat:0 }} cap{% endif %}
+                            </span>
+                        {% elif row.max_annual_spend %}
+                            <span class="rotating-note">${{ row.max_annual_spend|floatformat:0 }}/yr cap</span>
+                        {% endif %}
+                    </div>
+                    <div class="rate">{{ row.rate|floatformat:"-1" }}{% if row.reward_type == 'Cashback' %}%{% else %}x{% endif %}</div>
+                </div>
+            {% empty %}
+                <div class="empty">
+                    <strong>No bonus categories found for your cards.</strong>
+                    <p>Your cards may be missing reward category data.</p>
+                </div>
+            {% endfor %}
+
+            {% if base_entry %}
+                <div class="section-label">Everything else</div>
+                <div class="row base">
+                    <div class="icon"><i class="fas fa-asterisk"></i></div>
+                    <div class="info">
+                        <div class="category">All other purchases</div>
+                        <div class="card-name">{{ base_entry.card_label }}</div>
+                    </div>
+                    <div class="rate">{{ base_entry.rate|floatformat:"-1" }}{% if base_entry.reward_type == 'Cashback' %}%{% else %}x{% endif %}</div>
+                </div>
+            {% endif %}
+        {% endif %}
+
+        <div class="footer-links">
+            <a href="{% url 'profile' %}">My cards</a>
+            <a href="{% url 'roadmap' %}">Roadmap</a>
+        </div>
+    </div>
+</body>
+</html>

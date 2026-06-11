@@ -12,6 +12,55 @@
     "reward_value_multiplier": 0.01,
     "reward_categories": [
       {
+        "category": "groceries",
+        "reward_rate": 5,
+        "start_date": "2026-01-01",
+        "end_date": "2026-03-31",
+        "max_spend": 1500
+      },
+      {
+        "category": "streaming",
+        "reward_rate": 5,
+        "start_date": "2026-01-01",
+        "end_date": "2026-03-31",
+        "max_spend": 1500
+      },
+      {
+        "category": "dining",
+        "reward_rate": 5,
+        "start_date": "2026-04-01",
+        "end_date": "2026-06-30",
+        "max_spend": 1500
+      },
+      {
+        "category": "gas",
+        "reward_rate": 5,
+        "start_date": "2026-07-01",
+        "end_date": "2026-09-30",
+        "max_spend": 1500
+      },
+      {
+        "category": "public_transportation",
+        "reward_rate": 5,
+        "start_date": "2026-07-01",
+        "end_date": "2026-09-30",
+        "max_spend": 1500
+      },
+      {
+        "category": "airlines",
+        "reward_rate": 5,
+        "start_date": "2026-07-01",
+        "end_date": "2026-09-30",
+        "max_spend": 1500
+      },
+      {
+        "category": "drugstores",
+        "reward_rate": 5,
+        "start_date": "2026-07-01",
+        "end_date": "2026-09-30",
+        "max_spend": 1500
+      },
+      {
         "category": "other",
         "reward_rate": 1
       }
@@ -21,6 +70,7 @@
     "url": "https://www.discover.com/credit-cards/",
     "image_url": "/images/discover/it.webp",
     "discontinued": false,
+    "verified": true,
     "slug": "discover-it"
   }
 ]

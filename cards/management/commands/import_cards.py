@@ -341,6 +341,8 @@ class Command(BaseCommand):
                     max_annual_spend = category_data['max_bonus_amount']
                 elif category_data.get('max_spend'):
                     max_annual_spend = category_data['max_spend']
+                elif category_data.get('max_spending'):
+                    max_annual_spend = category_data['max_spending']
                 
                 RewardCategory.objects.create(
                     card=card,
