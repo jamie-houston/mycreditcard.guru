@@ -1,8 +1,11 @@
+import logging
 from datetime import datetime, timedelta
 from decimal import Decimal
 from typing import List, Dict
 from cards.models import CreditCard, UserSpendingProfile, UserCard
 from .models import Roadmap
+
+logger = logging.getLogger(__name__)
 
 
 class RecommendationEngine:
@@ -56,7 +59,7 @@ class RecommendationEngine:
             sa.category.slug: sa.monthly_amount 
             for sa in self.profile.spending_amounts.all()
         }
-        print(f"DEBUG: Reloaded spending_amounts: {dict(self.spending_amounts)}")
+        logger.debug(f"Reloaded spending_amounts: {dict(self.spending_amounts)}")
         
         # Get all eligible cards based on filters
         eligible_cards = self._get_filtered_cards(roadmap)
@@ -69,16 +72,16 @@ class RecommendationEngine:
         total_annual_spending = sum(float(amount) * 12 for amount in self.spending_amounts.values())
         
         if not apply_recommendations and total_annual_spending > 30000:  # $30k+ annual spending
-            print(f"DEBUG: High spending (${total_annual_spending:.0f}/year) with no apply recommendations - adding fallback")
+            logger.debug(f"High spending (${total_annual_spending:.0f}/year) with no apply recommendations - adding fallback")
             fallback_rec = self._get_best_signup_bonus_card(eligible_cards)
             if fallback_rec:
                 recommendations.append(fallback_rec)
-                print(f"DEBUG: Added fallback recommendation: APPLY {fallback_rec['card'].name}")
+                logger.debug(f"Added fallback recommendation: APPLY {fallback_rec['card'].name}")
         
         # DEBUG: Print recommendations before filtering
-        print(f"DEBUG: Generated {len(recommendations)} recommendations before filtering:")
+        logger.debug(f"Generated {len(recommendations)} recommendations before filtering:")
         for rec in recommendations:
-            print(f"  - {rec['action'].upper()}: {rec['card'].name} (priority: {rec['priority']})")
+            logger.debug(f"  - {rec['action'].upper()}: {rec['card'].name} (priority: {rec['priority']})")
         
         # Separate recommendations by action type for smart filtering
         keeps_and_applies = [rec for rec in recommendations if rec['action'] in ['keep', 'apply', 'upgrade', 'downgrade']]
@@ -129,16 +132,16 @@ class RecommendationEngine:
                     rec['reasoning'] = f"Cancel - losing money: ${estimated_value + annual_fee:.0f} rewards vs ${annual_fee:.0f} fee (net: ${estimated_value:.0f})"
         
         # DEBUG: Print smart filtering details
-        print(f"DEBUG: Smart filtering breakdown:")
-        print(f"  - Other keeps/applies: {len(filtered_other_keeps_applies)}")
-        print(f"  - Zero fee keeps: {len(zero_fee_keeps)}")
+        logger.debug(f"Smart filtering breakdown:")
+        logger.debug(f"  - Other keeps/applies: {len(filtered_other_keeps_applies)}")
+        logger.debug(f"  - Zero fee keeps: {len(zero_fee_keeps)}")
         # Recount cancels after validation
         actual_cancels = [rec for rec in recommendations if rec['action'] == 'cancel']
-        print(f"  - Cancels: {len(actual_cancels)}")
-        print(f"DEBUG: Final {len(recommendations)} recommendations after smart filtering:")
+        logger.debug(f"  - Cancels: {len(actual_cancels)}")
+        logger.debug(f"Final {len(recommendations)} recommendations after smart filtering:")
         for rec in recommendations:
             fee_info = f" (${rec['card'].annual_fee} fee)" if rec['action'] in ['keep', 'cancel'] else ""
-            print(f"  - {rec['action'].upper()}: {rec['card'].name}{fee_info} (priority: {rec['priority']})")
+            logger.debug(f"  - {rec['action'].upper()}: {rec['card'].name}{fee_info} (priority: {rec['priority']})")
         
         # Calculate portfolio summary for the recommended cards
         portfolio_summary = self._calculate_portfolio_summary(recommendations)
@@ -248,13 +251,13 @@ class RecommendationEngine:
         available_new_cards = [c for c in eligible_cards if c.id not in {card.id for card in current_cards}]
         
         # DEBUG: Print current cards
-        print(f"DEBUG: User has {len(current_cards)} current cards:")
+        logger.debug(f"User has {len(current_cards)} current cards:")
         for card in current_cards:
-            print(f"  - {card.name}")
-        print(f"DEBUG: Found {len(available_new_cards)} available new cards")
-        print(f"DEBUG: Max recommendations allowed: {roadmap.max_recommendations}")
-        print(f"DEBUG: Will scenario 1 use optimization? {len(current_cards) == 0}")
-        print(f"DEBUG: Will scenario 2 use optimization? {True}")
+            logger.debug(f"  - {card.name}")
+        logger.debug(f"Found {len(available_new_cards)} available new cards")
+        logger.debug(f"Max recommendations allowed: {roadmap.max_recommendations}")
+        logger.debug(f"Will scenario 1 use optimization? {len(current_cards) == 0}")
+        logger.debug(f"Will scenario 2 use optimization? {True}")
         
         # Generate all possible portfolio combinations and evaluate them
         # max_cards should be current cards + max new recommendations, not just max_recommendations
@@ -349,17 +352,17 @@ class RecommendationEngine:
         scenarios.append(("full_optimization", scenario2))
         
         # DEBUG: Print scenario comparison
-        print(f"DEBUG: Scenario comparison:")
+        logger.debug(f"Scenario comparison:")
         for name, scenario in scenarios:
             actions_summary = {}
             for action in scenario['actions']:
                 action_type = action['action']
                 actions_summary[action_type] = actions_summary.get(action_type, 0) + 1
-            print(f"  {name}: value=${scenario['net_portfolio_value']:.2f}, actions={actions_summary}")
+            logger.debug(f"  {name}: value=${scenario['net_portfolio_value']:.2f}, actions={actions_summary}")
         
         # Choose best scenario
         best_scenario = max(scenarios, key=lambda x: x[1]['net_portfolio_value'])
-        print(f"DEBUG: Selected scenario: {best_scenario[0]} with value ${best_scenario[1]['net_portfolio_value']:.2f}")
+        logger.debug(f"Selected scenario: {best_scenario[0]} with value ${best_scenario[1]['net_portfolio_value']:.2f}")
         return best_scenario[1]['actions']
     
     def _evaluate_portfolio_scenario(self, cards_to_keep: List[CreditCard], cards_to_apply: List[CreditCard], 
@@ -402,11 +405,11 @@ class RecommendationEngine:
             if remaining_slots > 0 and available_cards:
                 # If no cards to keep, use full portfolio optimization
                 if len(cards_to_keep) == 0:
-                    print(f"DEBUG: Scenario 1 using portfolio optimization for {len(available_cards)} available cards")
+                    logger.debug(f"Scenario 1 using portfolio optimization for {len(available_cards)} available cards")
                     return self._select_optimal_card_combination(available_cards, max_total_cards)
                 else:
                     # ALWAYS use full optimization to consider dropping current cards for better new ones
-                    print(f"DEBUG: Scenario 2 using FULL portfolio optimization with {len(cards_to_keep)} current + {len(available_cards)} new cards")
+                    logger.debug(f"Scenario 2 using FULL portfolio optimization with {len(cards_to_keep)} current + {len(available_cards)} new cards")
                     all_cards = list(cards_to_keep) + available_cards
                     full_optimization = self._select_optimal_card_combination(all_cards, max_total_cards)
                     
@@ -417,10 +420,10 @@ class RecommendationEngine:
                     
                     # Use full optimization if it's better
                     if full_optimization and full_optimization['net_portfolio_value'] > keep_all_value:
-                        print(f"DEBUG: Full optimization better: ${full_optimization['net_portfolio_value']:.2f} vs ${keep_all_value:.2f}")
+                        logger.debug(f"Full optimization better: ${full_optimization['net_portfolio_value']:.2f} vs ${keep_all_value:.2f}")
                         return full_optimization
                     else:
-                        print(f"DEBUG: Keep-all scenario better: ${keep_all_value:.2f} vs ${full_optimization.get('net_portfolio_value', 0):.2f}")
+                        logger.debug(f"Keep-all scenario better: ${keep_all_value:.2f} vs ${full_optimization.get('net_portfolio_value', 0):.2f}")
                         # Keep the current logic (actions already extended above)
             
             # Calculate portfolio value
@@ -509,7 +512,7 @@ class RecommendationEngine:
                 # Skip cancellation recommendations for $0 annual fee cards
                 if annual_fee == 0:
                     # Instead, add as a "keep" recommendation with low priority
-                    print(f"DEBUG: Keeping $0 fee card instead of canceling: {uc.card.name}")
+                    logger.debug(f"Keeping $0 fee card instead of canceling: {uc.card.name}")
                     actions.append({
                         'card': uc.card,
                         'action': 'keep',
@@ -518,7 +521,7 @@ class RecommendationEngine:
                     })
                 else:
                     # Only recommend canceling cards with annual fees
-                    print(f"DEBUG: Recommending cancel for fee card: {uc.card.name} (${annual_fee} fee)")
+                    logger.debug(f"Recommending cancel for fee card: {uc.card.name} (${annual_fee} fee)")
                     actions.append({
                         'card': uc.card,
                         'action': 'cancel',
@@ -625,14 +628,14 @@ class RecommendationEngine:
         must_include = [cd for cd in card_scores if cd['action'] == 'keep']
         remaining_cards = [cd for cd in card_scores if cd not in must_include]
         
-        print(f"DEBUG: Portfolio optimization - must_include: {len(must_include)}, remaining: {len(remaining_cards)}, max_cards: {max_cards}")
+        logger.debug(f"Portfolio optimization - must_include: {len(must_include)}, remaining: {len(remaining_cards)}, max_cards: {max_cards}")
         
         # Start with empty portfolio (value = $0) as baseline
         empty_portfolio_value = calculate_portfolio_value([])
         if empty_portfolio_value > best_value:
             best_value = empty_portfolio_value
             best_combination = []
-            print(f"DEBUG: Empty portfolio baseline - value: ${best_value:.2f}")
+            logger.debug(f"Empty portfolio baseline - value: ${best_value:.2f}")
         
         # Aggressive performance optimization - limit search space dramatically
         max_combinations = min(len(remaining_cards), max_cards - len(must_include))
@@ -641,28 +644,28 @@ class RecommendationEngine:
         remaining_cards.sort(key=lambda x: x['net_value'], reverse=True)
         
         # DEBUG: Show top cards being considered with efficiency scores
-        print(f"DEBUG: Top 15 cards by net value (with efficiency scoring):")
+        logger.debug(f"Top 15 cards by net value (with efficiency scoring):")
         for i, card_data in enumerate(remaining_cards[:15]):
             base_val = card_data.get('base_net_value', card_data['net_value'])
             efficiency = card_data.get('efficiency_score', 0)
             boost = card_data.get('efficiency_boost', 0)
-            print(f"  {i+1}. {card_data['card'].name}: ${card_data['net_value']:.0f} (base: ${base_val:.0f}, efficiency: {efficiency:.2f}, boost: +${boost:.0f})")
+            logger.debug(f"  {i+1}. {card_data['card'].name}: ${card_data['net_value']:.0f} (base: ${base_val:.0f}, efficiency: {efficiency:.2f}, boost: +${boost:.0f})")
         
         # DEBUG: Specifically look for Amazon Prime card
         amazon_cards = [cd for cd in remaining_cards if 'Amazon' in cd['card'].name]
         if amazon_cards:
-            print(f"DEBUG: Amazon cards with efficiency:")
+            logger.debug(f"Amazon cards with efficiency:")
             for i, card_data in enumerate(amazon_cards):
                 base_val = card_data.get('base_net_value', card_data['net_value'])
                 efficiency = card_data.get('efficiency_score', 0)
                 boost = card_data.get('efficiency_boost', 0)
-                print(f"  Amazon {i+1}. {card_data['card'].name}: ${card_data['net_value']:.0f} (base: ${base_val:.0f}, efficiency: {efficiency:.2f}, boost: +${boost:.0f})")
+                logger.debug(f"  Amazon {i+1}. {card_data['card'].name}: ${card_data['net_value']:.0f} (base: ${base_val:.0f}, efficiency: {efficiency:.2f}, boost: +${boost:.0f})")
         else:
-            print(f"DEBUG: No Amazon cards found in remaining_cards")
+            logger.debug(f"No Amazon cards found in remaining_cards")
         
         # Only test top cards to limit exponential explosion
         cards_to_test = remaining_cards[:min(20, len(remaining_cards))]  # Top 20 cards to include relevant niche cards
-        print(f"DEBUG: Testing top {len(cards_to_test)} cards for performance")
+        logger.debug(f"Testing top {len(cards_to_test)} cards for performance")
         
         # Use greedy approach: add cards one by one in order of individual value
         # This ensures consistent results regardless of max_cards
@@ -672,7 +675,7 @@ class RecommendationEngine:
         if current_value > best_value:
             best_value = current_value
             best_combination = current_combination.copy()
-            print(f"DEBUG: Base combination - value: ${best_value:.2f}, cards: {[cd['card'].name for cd in best_combination]}")
+            logger.debug(f"Base combination - value: ${best_value:.2f}, cards: {[cd['card'].name for cd in best_combination]}")
         
         # Add cards one by one, always picking the one that adds most value
         available_cards = cards_to_test.copy()
@@ -700,14 +703,14 @@ class RecommendationEngine:
                 if current_value > best_value:
                     best_value = current_value
                     best_combination = current_combination.copy()
-                    print(f"DEBUG: Added {best_addition['card'].name} - value: ${best_value:.2f}, cards: {[cd['card'].name for cd in best_combination]}")
+                    logger.debug(f"Added {best_addition['card'].name} - value: ${best_value:.2f}, cards: {[cd['card'].name for cd in best_combination]}")
             else:
                 # No beneficial additions found, stop
                 break
         
         # If no positive portfolio found, return empty (no recommendations)
         if best_value <= 0:
-            print(f"DEBUG: No profitable portfolio found - returning no recommendations")
+            logger.debug(f"No profitable portfolio found - returning no recommendations")
             return []
         
         # Ensure we don't return more than max_cards
@@ -1802,10 +1805,10 @@ class RecommendationEngine:
         total_portfolio_rewards = 0
         category_optimization = {}
         
-        print(f"DEBUG: self.spending_amounts in portfolio summary: {dict(self.spending_amounts)}")
+        logger.debug(f"self.spending_amounts in portfolio summary: {dict(self.spending_amounts)}")
         for category_slug, monthly_amount in self.spending_amounts.items():
             annual_spend = float(monthly_amount) * 12
-            print(f"DEBUG: {category_slug}: ${monthly_amount}/month -> ${annual_spend}/year")
+            logger.debug(f"{category_slug}: ${monthly_amount}/month -> ${annual_spend}/year")
         
         # Build category optimization from portfolio allocation
         for category_slug, allocation_data in portfolio_allocation.items():
@@ -1893,7 +1896,7 @@ class RecommendationEngine:
                 total_signup_bonuses += signup_bonus
         
         total_portfolio_rewards += total_signup_bonuses
-        print(f"DEBUG: Portfolio Summary - signup bonuses: ${total_signup_bonuses:.2f}")
+        logger.debug(f"Portfolio Summary - signup bonuses: ${total_signup_bonuses:.2f}")
         
         # Calculate net portfolio value (rewards - fees)
         net_portfolio_value = total_portfolio_rewards - total_annual_fees
@@ -1902,9 +1905,9 @@ class RecommendationEngine:
         # If negative, it means the optimization failed - this should not happen
         # with proper portfolio optimization, but let's log it for debugging
         if net_portfolio_value < 0:
-            print(f"WARNING: Portfolio optimization resulted in negative value: ${net_portfolio_value:.2f}")
-            print(f"Total rewards: ${total_portfolio_rewards:.2f}, Total fees: ${total_annual_fees:.2f}")
-            print(f"Portfolio cards: {len(all_portfolio_cards)}")
+            logger.warning(f"Portfolio optimization resulted in negative value: ${net_portfolio_value:.2f}")
+            logger.debug(f"Total rewards: ${total_portfolio_rewards:.2f}, Total fees: ${total_annual_fees:.2f}")
+            logger.debug(f"Portfolio cards: {len(all_portfolio_cards)}")
             # In production, we might want to return an error or try a different optimization strategy
         
         # Create a summary that includes filtered recommendations

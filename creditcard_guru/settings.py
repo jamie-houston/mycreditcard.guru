@@ -225,3 +225,22 @@ if not DEBUG:
 
 # Custom settings
 DATA_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10MB
+
+# Logging: engine debug detail is opt-in via ENGINE_LOG_LEVEL; everything
+# else stays at INFO so server output is readable.
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'simple': {'format': '{levelname} {name}: {message}', 'style': '{'},
+    },
+    'handlers': {
+        'console': {'class': 'logging.StreamHandler', 'formatter': 'simple'},
+    },
+    'root': {'handlers': ['console'], 'level': 'INFO'},
+    'loggers': {
+        'roadmaps.recommendation_engine': {
+            'level': config('ENGINE_LOG_LEVEL', default='INFO'),
+        },
+    },
+}
