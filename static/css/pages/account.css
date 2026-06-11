@@ -1,0 +1,23 @@
+/* Account page styles - extracted from account templates */
+
+/* Hover effects for buttons */
+button[type="submit"]:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(239, 68, 68, 0.6) !important;
+}
+
+a[href*="landing"]:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.6) !important;
+}
+
+/* Hover effects for links */
+a[href*="account_reset_password"]:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.6) !important;
+}
+
+a[href*="account_login"]:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(107, 114, 128, 0.6) !important;
+}

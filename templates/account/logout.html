@@ -1,3 +1,4 @@
+{% load static %}
 {% extends 'base.html' %}
 {% load allauth account %}
 
@@ -54,16 +55,5 @@
     </div>
 </div>
 
-<style>
-/* Hover effects for buttons */
-button[type="submit"]:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(239, 68, 68, 0.6) !important;
-}
-
-a[href*="landing"]:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.6) !important;
-}
-</style>
+<link rel="stylesheet" href="{% static 'css/pages/account.css' %}">
 {% endblock %}

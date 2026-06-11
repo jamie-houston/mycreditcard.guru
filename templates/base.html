@@ -1,4 +1,5 @@
 {% load allauth account socialaccount %}
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -11,7 +12,7 @@
 
       gtag('config', 'G-3YBDVN11MC');
     </script>
-    
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Credit Card Guru{% endblock %}</title>
@@ -19,1549 +20,9 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            line-height: 1.6;
-            display: flex;
-            flex-direction: column;
-        }
-        
-        /* Navigation */
-        .navbar {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-            padding: 0 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-            position: relative;
-            z-index: 1000;
-        }
-        .nav-container {
-            display: grid;
-            grid-template-columns: 1fr 2fr 1fr;
-            align-items: center;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 15px 0;
-            gap: 20px;
-        }
-        .nav-brand {
-            font-size: 20px;
-            font-weight: 800;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            text-decoration: none;
-            letter-spacing: -0.5px;
-            justify-self: start;
-        }
-        .nav-center {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-        .nav-menu {
-            display: flex;
-            list-style: none;
-            margin: 0;
-            padding: 0;
-            gap: 4px;
-            background: rgba(255, 255, 255, 0.6);
-            border-radius: 16px;
-            padding: 6px;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-        .nav-auth {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            justify-self: end;
-        }
-        
-        @media (min-width: 769px) {
-            .nav-menu {
-                display: flex !important;
-                position: static !important;
-                flex-direction: row !important;
-                background: transparent !important;
-                box-shadow: none !important;
-                border: none !important;
-                padding: 0 !important;
-            }
-            
-            .nav-auth {
-                display: flex !important;
-                position: static !important;
-                background: transparent !important;
-                box-shadow: none !important;
-                border: none !important;
-                padding: 0 !important;
-            }
-        }
-        .nav-item a {
-            text-decoration: none;
-            color: #374151;
-            font-weight: 600;
-            padding: 8px 16px;
-            border-radius: 10px;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative;
-            white-space: nowrap;
-            font-size: 14px;
-        }
-        .nav-item a:hover {
-            background: rgba(102, 126, 234, 0.15);
-            color: #667eea;
-        }
-        .nav-item a.active {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
-        }
-        .nav-user {
-            color: #374151;
-            font-weight: 500;
-            font-size: 14px;
-            max-width: 150px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-        .nav-login, .nav-logout {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 8px 16px;
-            border-radius: 10px;
-            text-decoration: none;
-            font-weight: 600;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
-            font-size: 14px;
-            white-space: nowrap;
-        }
-        .nav-login:hover, .nav-logout:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-        }
-        .nav-logout {
-            background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
-        }
-        
-        /* Main container */
-        .container {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
-            margin: 0 20px;
-            padding: 40px;
-            border-radius: 24px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-        
-        /* Common styles */
-        h1 {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            text-align: center;
-            margin-bottom: 30px;
-            font-weight: 800;
-            font-size: 2.5rem;
-            letter-spacing: -1px;
-        }
-        .section {
-            margin-bottom: 30px;
-            padding: 28px;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            border-radius: 20px;
-            background: rgba(255, 255, 255, 0.7);
-            backdrop-filter: blur(10px);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .section:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
-        }
-        .form-group {
-            margin-bottom: 15px;
-        }
-        
-        /* Inline preferences form group */
-        .preferences-inline {
-            display: flex;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-        
-        .preferences-inline .input-group {
-            display: flex;
-            align-items: stretch;
-            width: 100%;
-        }
-        
-        .preferences-inline .input-group-text {
-            display: flex;
-            align-items: center;
-            padding: 8px 12px;
-            font-size: 14px;
-            font-weight: 600;
-            background-color: #f3f4f6;
-            border: 1px solid #d1d5db;
-            border-right: none;
-            border-top-left-radius: 8px;
-            border-bottom-left-radius: 8px;
-            min-width: 140px;
-            white-space: nowrap;
-        }
-        
-        .preferences-inline select,
-        .preferences-inline input {
-            flex: 1;
-            padding: 8px 12px;
-            border: 1px solid #d1d5db;
-            border-left: none;
-            border-top-right-radius: 8px;
-            border-bottom-right-radius: 8px;
-            font-size: 14px;
-            outline: none;
-            transition: border-color 0.2s;
-            background: rgba(255, 255, 255, 0.9);
-            margin: 0;
-            width: auto;
-        }
-        
-        .preferences-inline select:focus,
-        .preferences-inline input:focus {
-            border-color: #667eea;
-            box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);
-            transform: none;
-        }
-        
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: #374151;
-            font-size: 14px;
-            letter-spacing: 0.5px;
-        }
-        input, select {
-            width: 100%;
-            padding: 14px 16px;
-            border: 2px solid rgba(255, 255, 255, 0.6);
-            border-radius: 12px;
-            font-size: 16px;
-            box-sizing: border-box;
-            -webkit-appearance: none;
-            -moz-appearance: none;
-            appearance: none;
-            background: rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(10px);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        input:focus, select:focus {
-            outline: none;
-            border-color: #667eea;
-            background: rgba(255, 255, 255, 0.95);
-            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
-            transform: translateY(-1px);
-        }
-        button {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 14px 28px;
-            border: none;
-            border-radius: 12px;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: 600;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
-            letter-spacing: 0.5px;
-        }
-        button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.6);
-        }
-        button:active {
-            transform: translateY(0);
-        }
-        button.secondary {
-            background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
-            box-shadow: 0 4px 15px rgba(107, 114, 128, 0.4);
-        }
-        button.secondary:hover {
-            box-shadow: 0 8px 25px rgba(107, 114, 128, 0.6);
-        }
-        button.success {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
-        }
-        button.success:hover {
-            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.6);
-        }
-        button.danger {
-            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);
-        }
-        button.danger:hover {
-            box-shadow: 0 8px 25px rgba(239, 68, 68, 0.6);
-        }
-        .card-item {
-            padding: 24px;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            border-radius: 16px;
-            margin-bottom: 16px;
-            background: rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(10px);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .card-item:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
-            border-color: rgba(102, 126, 234, 0.3);
-        }
-        .card-title {
-            font-weight: 700;
-            color: #1f2937;
-            margin-bottom: 12px;
-            font-size: 1.25rem;
-            letter-spacing: -0.5px;
-        }
-        .card-details {
-            color: #6b7280;
-            font-size: 14px;
-        }
-        .recommendation {
-            padding: 24px;
-            border-left: 4px solid #10b981;
-            background: linear-gradient(135deg, rgba(240, 253, 244, 0.9) 0%, rgba(240, 253, 244, 0.7) 100%);
-            backdrop-filter: blur(10px);
-            margin-bottom: 20px;
-            border-radius: 0 16px 16px 0;
-            box-shadow: 0 8px 32px rgba(16, 185, 129, 0.15);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .recommendation:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 12px 40px rgba(16, 185, 129, 0.25);
-        }
-        .recommendation.apply {
-            border-left-color: #667eea;
-            background: linear-gradient(135deg, rgba(239, 246, 255, 0.9) 0%, rgba(239, 246, 255, 0.7) 100%);
-            box-shadow: 0 8px 32px rgba(102, 126, 234, 0.15);
-        }
-        .recommendation.apply:hover {
-            box-shadow: 0 12px 40px rgba(102, 126, 234, 0.25);
-        }
-        .recommendation.cancel {
-            border-left-color: #ef4444;
-            background: linear-gradient(135deg, rgba(254, 242, 242, 0.9) 0%, rgba(254, 242, 242, 0.7) 100%);
-            box-shadow: 0 8px 32px rgba(239, 68, 68, 0.15);
-        }
-        .recommendation.cancel:hover {
-            box-shadow: 0 12px 40px rgba(239, 68, 68, 0.25);
-        }
-        .grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 24px;
-        }
-        
-        /* Spending profile single column layout */
-        .spending-grid {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-        
-        .spending-item {
-            margin-bottom: 10px;
-        }
-        
-        .main-category-item {
-            margin-bottom: 15px;
-            border-left: 4px solid #3b82f6;
-            padding-left: 10px;
-            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-            border-radius: 8px;
-        }
-        
-        .main-category-item .input-group-text.category-label {
-            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-            color: white;
-            font-weight: 700;
-            font-size: 15px;
-            border: none;
-        }
-
-        /* Styling for read-only parent categories */
-        .main-category-item input[readonly] {
-            background-color: #f8f9fa !important;
-            color: #6c757d !important;
-            cursor: not-allowed !important;
-            font-weight: 600 !important;
-            border: 1px solid #e9ecef !important;
-        }
-
-        /* Styling for editable subcategories */
-        .subcategory-item input:not([readonly]) {
-            background-color: white !important;
-            border: 1px solid #ced4da !important;
-        }
-
-        .subcategory-item input:not([readonly]):focus {
-            border-color: #86b7fe !important;
-            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25) !important;
-        }
-        
-        .subcategory-item {
-            margin-left: 35px;
-            margin-bottom: 8px;
-            margin-top: 8px;
-            position: relative;
-        }
-        
-        .subcategory-item::before {
-            content: '';
-            position: absolute;
-            left: -25px;
-            top: 50%;
-            width: 20px;
-            height: 1px;
-            background: #9ca3af;
-            transform: translateY(-50%);
-        }
-        
-        .subcategory-item::after {
-            content: '';
-            position: absolute;
-            left: -35px;
-            top: 0;
-            width: 1px;
-            height: 50%;
-            background: #9ca3af;
-        }
-        
-        .subcategory-item .input-group-text.subcategory-label {
-            background: #f9fafb;
-            color: #6b7280;
-            font-weight: 500;
-            font-size: 13px;
-            border: 1px solid #e5e7eb;
-            font-style: italic;
-        }
-        
-        .input-group {
-            display: flex;
-            align-items: stretch;
-        }
-        
-        .input-group-text {
-            display: flex;
-            align-items: center;
-            padding: 8px 12px;
-            font-size: 14px;
-            font-weight: 500;
-            background-color: #f3f4f6;
-            border: 1px solid #d1d5db;
-            border-right: none;
-        }
-        
-        .input-group-text:first-child {
-            border-top-left-radius: 8px;
-            border-bottom-left-radius: 8px;
-        }
-        
-        .form-control {
-            flex: 1;
-            padding: 8px 12px;
-            border: 1px solid #d1d5db;
-            border-left: none;
-            font-size: 14px;
-            outline: none;
-            transition: border-color 0.2s;
-        }
-        
-        .form-control:last-child {
-            border-top-right-radius: 8px;
-            border-bottom-right-radius: 8px;
-        }
-        
-        .form-control:focus {
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-        
-        /* Credits grid */
-        .credits-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 12px;
-            margin-bottom: 20px;
-        }
-        
-        .credit-checkbox {
-            display: flex;
-            align-items: center;
-            padding: 12px;
-            background: #f9fafb;
-            border: 1px solid #e5e7eb;
-            border-radius: 8px;
-            transition: all 0.2s;
-            cursor: pointer;
-        }
-        
-        .credit-checkbox:hover {
-            background: #f3f4f6;
-            border-color: #d1d5db;
-        }
-        
-        .credit-checkbox.selected {
-            background: #eff6ff;
-            border-color: #667eea;
-        }
-        
-        .credit-checkbox input[type="checkbox"] {
-            margin-right: 10px;
-            transform: scale(1.1);
-        }
-        
-        .credit-checkbox label {
-            margin: 0;
-            cursor: pointer;
-            flex: 1;
-            font-size: 14px;
-        }
-        
-        .credit-checkbox-simple {
-            display: flex;
-            align-items: center;
-            padding: 8px 12px;
-            background: #ffffff;
-            border: 1px solid #e5e7eb;
-            border-radius: 6px;
-            transition: all 0.2s;
-            cursor: pointer;
-        }
-        
-        .credit-checkbox-simple:hover {
-            background: #f9fafb;
-            border-color: #d1d5db;
-        }
-        
-        .credit-checkbox-simple input[type="checkbox"] {
-            margin-right: 8px;
-            transform: scale(1.1);
-        }
-        
-        .credit-checkbox-simple label {
-            margin: 0;
-            cursor: pointer;
-            flex: 1;
-            font-size: 14px;
-            font-weight: 500;
-        }
-        
-        .credits-simple-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 8px;
-            margin-top: 15px;
-        }
-        
-        .credit-item-simple {
-            display: flex;
-            align-items: center;
-            padding: 6px 8px;
-            background: #ffffff;
-            border: 1px solid #e5e7eb;
-            border-radius: 4px;
-            transition: all 0.2s;
-            cursor: pointer;
-        }
-        
-        .credit-item-simple:hover {
-            background: #f9fafb;
-            border-color: #d1d5db;
-        }
-        
-        .credit-item-simple input[type="checkbox"] {
-            margin-right: 8px;
-            margin-left: 0;
-        }
-        
-        .credit-item-simple label {
-            margin: 0;
-            cursor: pointer;
-            flex: 1;
-            font-size: 13px;
-            font-weight: 500;
-            color: #374151;
-        }
-        
-        /* Simple checkbox list for credit preferences */
-        .credits-checkbox-list {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 12px;
-            margin-top: 15px;
-        }
-        
-        .credit-checkbox-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .credit-checkbox-item input[type="checkbox"] {
-            margin: 0 !important;
-            width: 16px !important;
-            height: 16px !important;
-            padding: 0 !important;
-            transform: none !important;
-            background: white !important;
-            border: 2px solid #d1d5db !important;
-            border-radius: 3px !important;
-            appearance: none !important;
-            -webkit-appearance: none !important;
-            -moz-appearance: none !important;
-            cursor: pointer;
-            flex-shrink: 0;
-            box-shadow: none !important;
-            backdrop-filter: none !important;
-            transition: none !important;
-        }
-        
-        .credit-checkbox-item input[type="checkbox"]:checked {
-            background: #3b82f6 !important;
-            border-color: #3b82f6 !important;
-            position: relative;
-        }
-        
-        .credit-checkbox-item input[type="checkbox"]:checked::after {
-            content: '✓';
-            position: absolute;
-            top: -1px;
-            left: 2px;
-            color: white;
-            font-size: 12px;
-            font-weight: bold;
-        }
-        
-        .credit-checkbox-item input[type="checkbox"]:focus {
-            outline: 2px solid #3b82f6 !important;
-            outline-offset: 2px !important;
-            box-shadow: none !important;
-            transform: none !important;
-            border-color: #3b82f6 !important;
-        }
-
-        /* Spending credit checkboxes styling */
-        .spending-credit-item input[type="checkbox"] {
-            margin: 0 !important;
-            width: 16px !important;
-            height: 16px !important;
-            padding: 0 !important;
-            transform: none !important;
-            background: white !important;
-            border: 2px solid #d1d5db !important;
-            border-radius: 3px !important;
-            appearance: none !important;
-            -webkit-appearance: none !important;
-            -moz-appearance: none !important;
-            cursor: pointer;
-            flex-shrink: 0;
-            box-shadow: none !important;
-            backdrop-filter: none !important;
-            transition: none !important;
-        }
-        
-        .spending-credit-item input[type="checkbox"]:checked {
-            background: #3b82f6 !important;
-            border-color: #3b82f6 !important;
-            position: relative;
-        }
-        
-        .spending-credit-item input[type="checkbox"]:checked::after {
-            content: '✓';
-            position: absolute;
-            top: -1px;
-            left: 2px;
-            color: white;
-            font-size: 12px;
-            font-weight: bold;
-        }
-        
-        .spending-credit-item input[type="checkbox"]:focus {
-            outline: 2px solid #3b82f6 !important;
-            outline-offset: 2px !important;
-            box-shadow: none !important;
-            transform: none !important;
-            border-color: #3b82f6 !important;
-        }
-
-        /* Force single column layout for spending credits */
-        .spending-credits-list {
-            display: block !important;
-            width: 100% !important;
-            grid-template-columns: none !important;
-            columns: 1 !important;
-            column-count: 1 !important;
-        }
-
-        .spending-credit-item {
-            display: flex !important;
-            align-items: center !important;
-            width: 100% !important;
-            break-inside: avoid !important;
-            page-break-inside: avoid !important;
-        }
-        
-        .credit-checkbox-item label {
-            margin: 0;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: normal;
-            color: #374151;
-            padding: 0;
-            background: none;
-            border: none;
-            user-select: none;
-        }
-        
-        /* Mobile responsive */
-        @media (max-width: 768px) {
-            .credits-checkbox-list {
-                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-                gap: 10px;
-            }
-            
-            .credit-checkbox-item label {
-                font-size: 13px;
-            }
-        }
-        
-        .tooltip-icon {
-            margin-left: 5px;
-            font-size: 12px;
-            color: #6b7280;
-            cursor: help;
-            opacity: 0.7;
-        }
-        
-        .tooltip-icon:hover {
-            opacity: 1;
-        }
-        
-        /* Modern badge styles */
-        .badge {
-            display: inline-block;
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            backdrop-filter: blur(10px);
-        }
-        .badge.points {
-            background: linear-gradient(135deg, rgba(102, 126, 234, 0.2) 0%, rgba(118, 75, 162, 0.2) 100%);
-            color: #667eea;
-            border: 1px solid rgba(102, 126, 234, 0.3);
-        }
-        .badge.miles {
-            background: linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(5, 150, 105, 0.2) 100%);
-            color: #10b981;
-            border: 1px solid rgba(16, 185, 129, 0.3);
-        }
-        .badge.cashback {
-            background: linear-gradient(135deg, rgba(245, 158, 11, 0.2) 0%, rgba(217, 119, 6, 0.2) 100%);
-            color: #f59e0b;
-            border: 1px solid rgba(245, 158, 11, 0.3);
-        }
-        
-        /* Loading and error states */
-        .loading {
-            text-align: center;
-            padding: 40px;
-            color: #6b7280;
-            font-style: italic;
-        }
-        .error {
-            background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(220, 38, 38, 0.1) 100%);
-            border: 1px solid rgba(239, 68, 68, 0.3);
-            color: #dc2626;
-            padding: 16px;
-            border-radius: 12px;
-            text-align: center;
-            backdrop-filter: blur(10px);
-        }
-        
-        /* Section headers */
-        .section h2 {
-            font-weight: 700;
-            color: #374151;
-            font-size: 1.5rem;
-            margin-bottom: 20px;
-            letter-spacing: -0.5px;
-        }
-        /* Mobile Navigation */
-        .nav-toggle {
-            display: none;
-            flex-direction: column;
-            cursor: pointer;
-            padding: 5px;
-        }
-        .nav-toggle span {
-            width: 25px;
-            height: 3px;
-            background: #374151;
-            margin: 3px 0;
-            transition: 0.3s;
-        }
-        
-        @media (max-width: 768px) {
-            .container {
-                margin: 0 10px;
-                padding: 20px;
-            }
-            
-            .nav-container {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                position: relative;
-                padding: 10px 0;
-                gap: 10px;
-            }
-            
-            .nav-center {
-                position: absolute;
-                top: 100%;
-                left: 0;
-                right: 0;
-                z-index: 9999;
-            }
-            
-            .nav-toggle {
-                display: flex;
-                order: 2;
-            }
-            
-            .nav-menu {
-                display: none;
-                flex-direction: column;
-                gap: 5px;
-                background: rgba(255, 255, 255, 0.95);
-                backdrop-filter: blur(20px);
-                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
-                border: 1px solid rgba(255, 255, 255, 0.2);
-                border-radius: 16px;
-                padding: 15px;
-                margin-top: 10px;
-            }
-            
-            .nav-menu.active {
-                display: flex;
-            }
-            
-            .nav-auth {
-                order: 3;
-                position: static;
-                justify-self: auto;
-            }
-            
-            .nav-user {
-                display: none; /* Hide email on mobile */
-            }
-            
-            .nav-brand {
-                order: 1;
-                font-size: 18px;
-            }
-            
-            .grid {
-                grid-template-columns: 1fr;
-                gap: 15px;
-            }
-            
-            .spending-grid {
-                gap: 10px;
-            }
-            
-            .credits-grid {
-                grid-template-columns: 1fr;
-                gap: 8px;
-            }
-            
-            .input-group-text {
-                min-width: 120px !important;
-                font-size: 13px;
-                padding: 6px 8px;
-            }
-            
-            .preferences-inline .input-group-text {
-                min-width: 100px !important;
-                font-size: 12px;
-            }
-            
-            .preferences-inline select,
-            .preferences-inline input {
-                font-size: 13px;
-                padding: 6px 8px;
-            }
-            
-            /* Mobile form improvements */
-            .form-group {
-                margin-bottom: 20px;
-            }
-            
-            input, select, button {
-                font-size: 16px;
-                padding: 12px;
-            }
-            
-            .section {
-                margin-bottom: 20px;
-                padding: 15px;
-            }
-            
-            h1 {
-                font-size: 28px;
-                margin-bottom: 20px;
-            }
-            
-            h2 {
-                font-size: 22px;
-                margin-bottom: 15px;
-            }
-            
-            .card-item {
-                padding: 15px;
-                margin-bottom: 15px;
-            }
-            
-            .card-layout {
-                flex-direction: column;
-                gap: 15px;
-            }
-            
-            .card-actions {
-                flex-direction: column;
-                gap: 8px;
-                margin-top: 15px;
-            }
-            
-            .card-actions button {
-                width: 100%;
-                padding: 12px;
-                font-size: 14px;
-            }
-            
-            .recommendation {
-                padding: 15px;
-                margin-bottom: 15px;
-            }
-            
-            .recommendation > div {
-                flex-direction: column !important;
-                gap: 15px !important;
-            }
-        }
-        
-        @media (max-width: 480px) {
-            .container {
-                margin: 0 5px;
-                padding: 15px;
-            }
-            
-            .navbar {
-                padding: 0 10px;
-            }
-            
-            .nav-brand {
-                font-size: 20px;
-            }
-            
-            h1 {
-                font-size: 24px;
-            }
-            
-            h2 {
-                font-size: 20px;
-            }
-            
-            .modal-content {
-                width: 100%;
-                margin: 0;
-                border-radius: 0;
-                max-height: 100vh;
-            }
-            
-            .modal-header {
-                padding: 15px;
-            }
-            
-            .modal-body {
-                padding: 15px;
-            }
-            
-            .modal-title {
-                font-size: 20px;
-            }
-            
-            .modal-subtitle {
-                font-size: 14px;
-            }
-            
-            .section {
-                padding: 10px;
-                margin-bottom: 15px;
-            }
-            
-            /* Compact preferences section for mobile */
-            .preferences-mobile {
-                padding: 8px !important;
-                margin-bottom: 15px !important;
-            }
-            
-            .preferences-mobile .grid {
-                gap: 10px !important;
-            }
-            
-            .preferences-mobile .form-group {
-                margin-bottom: 10px !important;
-            }
-            
-            .preferences-mobile label {
-                font-size: 14px !important;
-                margin-bottom: 3px !important;
-            }
-            
-            .preferences-mobile input,
-            .preferences-mobile select {
-                padding: 8px !important;
-                font-size: 14px !important;
-            }
-            
-            /* Compact spending profile for mobile */
-            .spending-mobile {
-                padding: 8px !important;
-            }
-            
-            .spending-mobile .grid {
-                gap: 8px !important;
-            }
-            
-            .spending-mobile .form-group {
-                margin-bottom: 8px !important;
-            }
-            
-            .spending-mobile label {
-                font-size: 13px !important;
-                margin-bottom: 2px !important;
-            }
-            
-            .spending-mobile input {
-                padding: 6px !important;
-                font-size: 14px !important;
-            }
-            
-            /* Compact action button */
-            .action-button-mobile {
-                padding: 12px 20px !important;
-                font-size: 16px !important;
-                margin: 15px 0 !important;
-            }
-            
-            /* Compact section headers */
-            .section h2 {
-                font-size: 18px !important;
-                margin-bottom: 10px !important;
-            }
-            
-            /* Reduce vertical spacing in form groups */
-            .form-group label > div {
-                margin-top: 2px !important;
-            }
-            
-            /* Compact toggle indicators */
-            .section h2 span {
-                font-size: 12px !important;
-            }
-            
-            /* Mobile-optimized results section */
-            .results-mobile .recommendation {
-                padding: 10px !important;
-                margin-bottom: 10px !important;
-            }
-            
-            .results-mobile .recommendation h3 {
-                font-size: 16px !important;
-                margin-bottom: 8px !important;
-            }
-            
-            .results-mobile .recommendation p {
-                font-size: 14px !important;
-                margin-bottom: 6px !important;
-            }
-            
-            .results-mobile .recommendation ul {
-                padding-left: 15px !important;
-            }
-            
-            .results-mobile .recommendation li {
-                font-size: 12px !important;
-                margin: 2px 0 !important;
-            }
-            
-            /* Compact priority badges */
-            .results-mobile .recommendation > div > div:last-child {
-                gap: 4px !important;
-            }
-            
-            .results-mobile .recommendation > div > div:last-child > div {
-                padding: 4px 8px !important;
-                font-size: 12px !important;
-            }
-            
-            .results-mobile .recommendation > div > div:last-child button {
-                padding: 4px 8px !important;
-                font-size: 11px !important;
-            }
-            
-            .card-item {
-                padding: 10px;
-            }
-        }
-        .results {
-            background: white;
-            border-radius: 8px;
-            padding: 20px;
-            margin-top: 20px;
-        }
-        .error {
-            color: #ef4444;
-            background: #fef2f2;
-            padding: 10px;
-            border-radius: 6px;
-            margin: 10px 0;
-        }
-        .loading {
-            text-align: center;
-            color: #6b7280;
-            padding: 20px;
-        }
-        .badge {
-            display: inline-block;
-            padding: 4px 8px;
-            border-radius: 12px;
-            font-size: 12px;
-            font-weight: 600;
-            text-transform: uppercase;
-        }
-        .badge.points { background: #dbeafe; color: #1d4ed8; }
-        .badge.miles { background: #fef3c7; color: #d97706; }
-        .badge.cashback { background: #dcfce7; color: #16a34a; }
-        .card-actions {
-            margin-top: 10px;
-            display: flex;
-            gap: 10px;
-        }
-        .card-actions button {
-            padding: 6px 12px;
-            font-size: 14px;
-        }
-        
-        .card-layout {
-            display: flex;
-            justify-content: space-between;
-            align-items: start;
-            gap: 15px;
-        }
-        
-        .card-content {
-            flex: 1;
-        }
-        
-        /* Card Detail Modal */
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.5);
-            /* Center modal in viewport when shown */
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-            box-sizing: border-box;
-        }
-        
-        .modal[style*="block"] {
-            display: flex !important;
-        }
-        .modal-content {
-            background-color: white;
-            padding: 0;
-            border-radius: 12px;
-            width: 90%;
-            max-width: 800px;
-            max-height: 90vh;
-            overflow-y: auto;
-            position: relative;
-            box-shadow: 0 10px 50px rgba(0,0,0,0.3);
-        }
-        .modal-header {
-            padding: 25px 30px 20px;
-            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-            color: white;
-            border-radius: 12px 12px 0 0;
-            position: relative;
-        }
-        .modal-close {
-            position: absolute;
-            right: 20px;
-            top: 20px;
-            color: white;
-            font-size: 28px;
-            font-weight: bold;
-            cursor: pointer;
-            background: none;
-            border: none;
-            padding: 5px;
-            border-radius: 4px;
-            transition: background 0.2s;
-        }
-        .modal-close:hover {
-            background: rgba(255,255,255,0.2);
-        }
-        .modal-title {
-            margin: 0;
-            font-size: 24px;
-            font-weight: 600;
-        }
-        .modal-subtitle {
-            margin: 5px 0 0 0;
-            font-size: 16px;
-            opacity: 0.9;
-        }
-        .modal-body {
-            padding: 30px;
-        }
-        .modal-section {
-            margin-bottom: 25px;
-        }
-        .modal-section h3 {
-            margin: 0 0 15px 0;
-            color: #1f2937;
-            font-size: 18px;
-            font-weight: 600;
-            border-bottom: 2px solid #e5e7eb;
-            padding-bottom: 8px;
-        }
-        .modal-info-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            margin-bottom: 20px;
-        }
-        .modal-info-item {
-            background: #f9fafb;
-            padding: 15px;
-            border-radius: 8px;
-            border: 1px solid #e5e7eb;
-        }
-        .modal-info-label {
-            font-weight: 600;
-            color: #6b7280;
-            font-size: 14px;
-            margin-bottom: 5px;
-        }
-        .modal-info-value {
-            color: #1f2937;
-            font-size: 16px;
-            font-weight: 500;
-        }
-        .modal-rewards-list {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-        .modal-rewards-item {
-            background: #f0fdf4;
-            border: 1px solid #dcfce7;
-            border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 10px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .modal-rewards-category {
-            font-weight: 600;
-            color: #166534;
-        }
-        .modal-rewards-rate {
-            background: #10b981;
-            color: white;
-            padding: 4px 12px;
-            border-radius: 12px;
-            font-weight: 600;
-            font-size: 14px;
-        }
-        .modal-rewards-limit {
-            font-size: 14px;
-            color: #6b7280;
-            margin-top: 5px;
-        }
-        .modal-credits-list {
-            display: grid;
-            gap: 12px;
-        }
-        .modal-credit-item {
-            background: #f0f9ff;
-            border: 1px solid #e0f2fe;
-            border-radius: 8px;
-            padding: 15px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .modal-credit-content {
-            flex: 1;
-        }
-        .modal-credit-name {
-            font-weight: 600;
-            color: #0c4a6e;
-            margin-bottom: 4px;
-        }
-        .modal-credit-description {
-            font-size: 14px;
-            color: #475569;
-            line-height: 1.4;
-        }
-        .modal-credit-value {
-            background: #0284c7;
-            color: white;
-            padding: 6px 12px;
-            border-radius: 16px;
-            font-weight: 600;
-            font-size: 14px;
-            white-space: nowrap;
-            margin-left: 12px;
-        }
-        .modal-card-clickable {
-            cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-        .modal-card-clickable:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        }
-        
-        /* Dollar sign spacing improvements */
-        .input-group .input-group-text:not(.category-label):not(.subcategory-label) {
-            padding: 8px 8px !important; /* Reduce padding for dollar signs */
-            min-width: auto !important;
-            justify-content: center !important;
-            border-left: none !important;
-        }
-        
-        .spending-input {
-            border-left: none !important; /* Remove gap between $ and input */
-        }
-        
-        @media (max-width: 768px) {
-            .modal-content {
-                width: 95%;
-                margin: 5% auto;
-                max-height: 85vh;
-            }
-            .modal-info-grid {
-                grid-template-columns: 1fr;
-                gap: 15px;
-            }
-            .modal-header {
-                padding: 20px;
-            }
-            .modal-body {
-                padding: 20px;
-            }
-            
-            /* Mobile input spacing fixes */
-            .input-group .input-group-text {
-                padding: 8px 6px !important; /* Reduce padding on mobile */
-            }
-            
-            .spending-input {
-                flex: 1 !important;
-                min-width: 80px !important; /* Ensure minimum width for numbers */
-            }
-        }
-
-        /* Footer Styles */
-        .container {
-            flex: 1; /* Allow container to grow and push footer down */
-        }
-
-        .site-footer {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
-            border-top: 1px solid rgba(255, 255, 255, 0.2);
-            margin: 40px 20px 20px;
-            border-radius: 24px;
-            box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-        }
-
-        .footer-content {
-            display: grid;
-            grid-template-columns: 2fr 1fr 1fr;
-            gap: 40px;
-            padding: 40px;
-        }
-
-        .footer-section h4 {
-            color: #1f2937;
-            font-weight: 600;
-            margin-bottom: 16px;
-            font-size: 16px;
-        }
-
-        .footer-brand {
-            font-size: 24px;
-            font-weight: 800;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin-bottom: 16px;
-            display: block;
-        }
-
-        .footer-description {
-            color: #6b7280;
-            line-height: 1.6;
-            margin-bottom: 0;
-            font-size: 14px;
-        }
-
-        .footer-links {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-
-        .footer-links li {
-            margin-bottom: 8px;
-        }
-
-        .footer-links a {
-            color: #6b7280;
-            text-decoration: none;
-            font-size: 14px;
-            transition: color 0.2s ease;
-        }
-
-        .footer-links a:hover {
-            color: #667eea;
-        }
-
-        .footer-bottom {
-            background: rgba(0, 0, 0, 0.02);
-            border-top: 1px solid rgba(0, 0, 0, 0.05);
-            padding: 20px 40px;
-        }
-
-        .footer-bottom-content {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 20px;
-        }
-
-        .copyright p {
-            margin: 0;
-            color: #6b7280;
-            font-size: 13px;
-        }
-
-        .data-timestamp {
-            margin: 0;
-            color: #6b7280;
-            font-size: 13px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .data-timestamp i {
-            color: #667eea;
-            font-size: 12px;
-        }
-
-        /* Footer responsive design */
-        @media (max-width: 768px) {
-            .site-footer {
-                margin: 20px 10px 10px;
-                border-radius: 16px;
-            }
-
-            .footer-content {
-                grid-template-columns: 1fr;
-                gap: 30px;
-                padding: 30px 20px;
-            }
-
-            .footer-bottom {
-                padding: 20px;
-            }
-
-            .footer-bottom-content {
-                flex-direction: column;
-                gap: 10px;
-                text-align: center;
-            }
-
-            .data-timestamp {
-                justify-content: center;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .footer-content {
-                padding: 20px 15px;
-            }
-
-            .footer-bottom {
-                padding: 15px;
-            }
-
-            .footer-brand {
-                font-size: 20px;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
     {% block extra_css %}{% endblock %}
-    
+
     <!-- Global JavaScript variables -->
     <script>
         const API_BASE = '/api';
@@ -1571,7 +32,7 @@
     <nav class="navbar">
         <div class="nav-container">
             <a href="/" class="nav-brand">🏦 Credit Card Guru</a>
-            
+
             <div class="nav-center">
                 <div class="nav-toggle" onclick="toggleMobileMenu()">
                     <span></span>
@@ -1587,7 +48,7 @@
                     <li class="nav-item"><a href="/issuers/" {% if request.resolver_match.url_name == 'issuers_list' %}class="active"{% endif %}>Issuers</a></li>
                 </ul>
             </div>
-            
+
             <div class="nav-auth" id="navAuth">
                 {% if user.is_authenticated %}
                     <span class="nav-user">{{ user.email }}</span>
@@ -1614,7 +75,7 @@
                     Maximize your rewards with data-driven credit card recommendations tailored to your spending patterns.
                 </p>
             </div>
-            
+
             <div class="footer-section">
                 <h4>Quick Links</h4>
                 <ul class="footer-links">
@@ -1624,7 +85,7 @@
                     <li><a href="/categories/">Categories</a></li>
                 </ul>
             </div>
-            
+
             <div class="footer-section">
                 <h4>Resources</h4>
                 <ul class="footer-links">
@@ -1638,7 +99,7 @@
                 </ul>
             </div>
         </div>
-        
+
         <div class="footer-bottom">
             <div class="footer-bottom-content">
                 <div class="copyright">
@@ -1695,7 +156,7 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="modal-section" id="modalUserDetailsSection" style="display: none;">
                     <h3>👤 Your Card Details</h3>
                     <div class="modal-info-grid">
@@ -1714,7 +175,7 @@
                         </button>
                     </div>
                 </div>
-                
+
                 <div class="modal-section" id="modalSignupBonusSection">
                     <h3>🎁 Signup Bonus</h3>
                     <div class="modal-info-item">
@@ -1726,21 +187,21 @@
                         <div class="modal-info-value" id="modalSignupSpending">$0 in 3 months</div>
                     </div>
                 </div>
-                
+
                 <div class="modal-section" id="modalRewardsSection">
                     <h3>🏆 Reward Categories</h3>
                     <ul class="modal-rewards-list" id="modalRewardsList">
                         <!-- Rewards will be populated here -->
                     </ul>
                 </div>
-                
+
                 <div class="modal-section" id="modalCreditsSection">
                     <h3>💎 Card Benefits & Credits</h3>
                     <div id="modalCreditsList">
                         <!-- Credits will be populated here -->
                     </div>
                 </div>
-                
+
                 <div class="modal-section">
                     <h3>⚙️ Actions</h3>
                     <div id="modalActionButtons" style="display: flex; gap: 15px; justify-content: center;">
@@ -1771,17 +232,17 @@
                 <form onsubmit="saveCardDetails(event)">
                     <div class="form-group" style="margin-bottom: 20px;">
                         <label for="cardNickname" style="display: block; margin-bottom: 8px; font-weight: 600;">Nickname (Optional)</label>
-                        <input 
-                            type="text" 
-                            id="cardNickname" 
+                        <input
+                            type="text"
+                            id="cardNickname"
                             placeholder="e.g., My Travel Card, Daily Driver..."
                             style="width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 16px;"
                         >
                     </div>
                     <div class="form-group" style="margin-bottom: 30px;">
                         <label for="cardOpeningDate" style="display: block; margin-bottom: 8px; font-weight: 600;">Opening Date (Optional)</label>
-                        <input 
-                            type="date" 
+                        <input
+                            type="date"
                             id="cardOpeningDate"
                             style="width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 16px;"
                         >
@@ -1826,16 +287,16 @@
                 const data = await response.json();
                 const wasAuthenticated = isAuthenticated;
                 const previousUser = currentUser;
-                
+
                 isAuthenticated = data.authenticated;
                 currentUser = data.user;
-                
+
                 // Handle user state changes
-                if (wasAuthenticated !== isAuthenticated || 
+                if (wasAuthenticated !== isAuthenticated ||
                     (previousUser && currentUser && previousUser.id !== currentUser.id)) {
                     await handleUserStateChange(wasAuthenticated, isAuthenticated, previousUser, currentUser);
                 }
-                
+
                 return data;
             } catch (error) {
                 console.error('Error checking user status:', error);
@@ -1848,7 +309,7 @@
         // Handle user authentication state changes
         async function handleUserStateChange(wasAuthenticated, isNowAuthenticated, previousUser, newUser) {
             console.log('User state changed:', { wasAuthenticated, isNowAuthenticated, previousUser, newUser });
-            
+
             if (wasAuthenticated && !isNowAuthenticated) {
                 // User logged out - clear all local data
                 console.log('🔓 User logged out, clearing local data');
@@ -1865,7 +326,7 @@
                 clearUserData();
                 await syncUserDataFromServer();
             }
-            
+
             // Refresh current page data
             console.log('🔄 Refreshing page data after state change');
             if (typeof loadUserCards === 'function') {
@@ -1886,12 +347,12 @@
             console.log('Before clear - userSpending:', localStorage.getItem('userSpending'));
             console.log('Before clear - userPreferences:', localStorage.getItem('userPreferences'));
             console.log('Before clear - userCardDetails:', localStorage.getItem('userCardDetails'));
-            
+
             localStorage.removeItem('userSpending');
             localStorage.removeItem('userCards');
             localStorage.removeItem('userPreferences');
             localStorage.removeItem('userCardDetails');
-            
+
             console.log('After clear - userCards:', localStorage.getItem('userCards'));
             console.log('After clear - userSpending:', localStorage.getItem('userSpending'));
             console.log('✅ All user data cleared from localStorage');
@@ -1906,22 +367,22 @@
                     console.log('📋 Data sync already completed for this session, skipping');
                     return;
                 }
-                
+
                 // Get local data before syncing
                 const localCards = LocalStorage.getCards();
                 const localSpending = LocalStorage.getSpending();
                 const localPreferences = LocalStorage.getPreferences();
                 const localCardDetails = LocalStorage.getCardDetails();
-                
+
                 const hasLocalData = localCards.length > 0;
-                
+
                 // Get server data
                 const serverResponse = await fetch(`${API_BASE}/users/data/`);
                 const serverData = await serverResponse.json();
-                
-                const hasServerData = (serverData.cards && serverData.cards.length > 0) || 
+
+                const hasServerData = (serverData.cards && serverData.cards.length > 0) ||
                                     (serverData.spending && Object.keys(serverData.spending).length > 0);
-                
+
                 if (hasLocalData && hasServerData) {
                     // Both have data - ask user what to do
                     await showDataSyncModal(localCards, localSpending, localCardDetails, serverData);
@@ -1939,7 +400,7 @@
                     // Mark sync as completed
                     sessionStorage.setItem('dataSyncCompleted', 'true');
                 }
-                
+
             } catch (error) {
                 console.error('Error handling login data sync:', error);
                 // Fallback to just syncing from server
@@ -1955,7 +416,7 @@
                 // Force refresh of user data from server
                 const serverData = await fetch(`${API_BASE}/users/data/`);
                 const data = await serverData.json();
-                
+
                 // Update localStorage with server data
                 if (data.spending) {
                     localStorage.setItem('userSpending', JSON.stringify(data.spending));
@@ -1966,7 +427,7 @@
                 if (data.preferences) {
                     localStorage.setItem('userPreferences', JSON.stringify(data.preferences));
                 }
-                
+
                 console.log('User data synced from server:', data);
             } catch (error) {
                 console.error('Error syncing user data from server:', error);
@@ -1982,10 +443,10 @@
                         <div style="background: white; border-radius: 16px; max-width: 600px; width: 90%; padding: 32px; max-height: 80vh; overflow-y: auto;">
                             <h2 style="margin: 0 0 20px 0; color: #1f2937;">🔄 Sync Your Data</h2>
                             <p style="color: #6b7280; margin-bottom: 20px;">
-                                We found credit cards stored locally on this device and cards associated with your account. 
+                                We found credit cards stored locally on this device and cards associated with your account.
                                 How would you like to handle this?
                             </p>
-                            
+
                             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 20px 0;">
                                 <div style="border: 2px solid #e5e7eb; border-radius: 12px; padding: 16px;">
                                     <h4 style="margin: 0 0 8px 0; color: #374151;">📱 Local Data</h4>
@@ -1998,49 +459,49 @@
                                     ${(serverData.cards || []).length > 0 ? `<div style="font-size: 12px; color: #9ca3af;">Saved to your account</div>` : ''}
                                 </div>
                             </div>
-                            
+
                             <div style="display: flex; flex-direction: column; gap: 12px; margin: 24px 0;">
-                                <button 
-                                    onclick="handleDataSyncChoice('keep_account')" 
+                                <button
+                                    onclick="handleDataSyncChoice('keep_account')"
                                     style="background: #3b82f6; color: white; border: none; padding: 12px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: background 0.2s;"
-                                    onmouseover="this.style.background='#2563eb'" 
+                                    onmouseover="this.style.background='#2563eb'"
                                     onmouseout="this.style.background='#3b82f6'"
                                 >
                                     ☁️ Keep Account Data (Replace local data)
                                 </button>
-                                <button 
-                                    onclick="handleDataSyncChoice('merge')" 
+                                <button
+                                    onclick="handleDataSyncChoice('merge')"
                                     style="background: #10b981; color: white; border: none; padding: 12px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: background 0.2s;"
-                                    onmouseover="this.style.background='#059669'" 
+                                    onmouseover="this.style.background='#059669'"
                                     onmouseout="this.style.background='#10b981'"
                                 >
                                     🔗 Merge Both (Add local cards to account)
                                 </button>
-                                <button 
-                                    onclick="handleDataSyncChoice('keep_local')" 
+                                <button
+                                    onclick="handleDataSyncChoice('keep_local')"
                                     style="background: #f59e0b; color: white; border: none; padding: 12px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: background 0.2s;"
-                                    onmouseover="this.style.background='#d97706'" 
+                                    onmouseover="this.style.background='#d97706'"
                                     onmouseout="this.style.background='#f59e0b'"
                                 >
                                     📱 Keep Local Data (Replace account data)
                                 </button>
                             </div>
-                            
+
                             <p style="font-size: 12px; color: #9ca3af; margin-top: 16px;">
                                 💡 Tip: Merging is usually the best option to keep all your cards.
                             </p>
                         </div>
                     </div>
                 `;
-                
+
                 // Add modal to page
                 document.body.insertAdjacentHTML('beforeend', modalHtml);
-                
+
                 // Handle user choice
                 window.handleDataSyncChoice = async (choice) => {
                     const modal = document.getElementById('dataSyncModal');
                     modal.remove();
-                    
+
                     try {
                         if (choice === 'keep_account') {
                             // Just sync from server, overwriting local data
@@ -2054,17 +515,17 @@
                             await saveLocalDataToServer(localCards, localSpending, {}, localCardDetails);
                             await syncUserDataFromServer();
                         }
-                        
+
                         // Mark sync as completed to prevent repeated prompts
                         sessionStorage.setItem('dataSyncCompleted', 'true');
                         console.log('✅ Data sync completed with choice:', choice);
-                        
+
                     } catch (error) {
                         console.error('Error applying data sync choice:', error);
                         // Still mark as completed to prevent infinite prompts
                         sessionStorage.setItem('dataSyncCompleted', 'true');
                     }
-                    
+
                     resolve();
                 };
             });
@@ -2090,7 +551,7 @@
                         })
                     });
                 }
-                
+
                 // Save spending and preferences if they exist
                 if (Object.keys(spending).length > 0 || Object.keys(preferences).length > 0) {
                     await fetch('/api/users/data/', {
@@ -2106,7 +567,7 @@
                         })
                     });
                 }
-                
+
                 console.log('✅ Local data saved to server');
             } catch (error) {
                 console.error('Error saving local data to server:', error);
@@ -2264,7 +725,7 @@
                     return LocalStorage.getPreferences();
                 }
             }
-            
+
             // New methods for handling detailed user cards
             static async getUserCardsDetails() {
                 if (isAuthenticated) {
@@ -2287,7 +748,7 @@
                     }));
                 }
             }
-            
+
             static async addCardWithDetails(cardId, nickname, openedDate) {
                 if (isAuthenticated) {
                     try {
@@ -2347,7 +808,7 @@
                     return true;
                 }
             }
-            
+
             static async getCardDetails(cardId) {
                 if (isAuthenticated) {
                     const userCards = await this.getUserCardsDetails();
@@ -2363,10 +824,10 @@
             try {
                 const hasCard = button.textContent.includes('I have this');
                 const action = hasCard ? 'add' : 'remove';
-                
+
                 button.disabled = true;
                 button.textContent = '...';
-                
+
                 // Update local data first
                 const userCards = await UserDataManager.getCards();
                 if (hasCard) {
@@ -2378,7 +839,7 @@
                     if (index > -1) userCards.splice(index, 1);
                 }
                 await UserDataManager.saveCards(userCards);
-                
+
                 if (isAuthenticated) {
                     // Sync with authenticated API
                     try {
@@ -2393,9 +854,9 @@
                                 action: action
                             })
                         });
-                        
+
                         const data = await response.json();
-                        
+
                         if (!data.success) {
                             // Revert local changes if API call failed
                             const revertCards = await UserDataManager.getCards();
@@ -2416,9 +877,9 @@
                         // Keep local changes even if API fails
                     }
                 }
-                
+
                 updateButtonState(button, hasCard);
-                
+
             } catch (error) {
                 console.error('Error:', error);
                 alert('Error updating card ownership');
@@ -2439,18 +900,18 @@
 
         // Card Detail Modal functionality
         let currentModalCard = null;
-        
+
         async function openCardModal(cardId) {
             try {
                 console.log('🐛 DEBUG: openCardModal called with cardId:', cardId);
                 console.trace('🐛 DEBUG: Call stack for openCardModal');
-                
+
                 // Show loading modal first
                 const modal = document.getElementById('cardModal');
                 document.getElementById('modalCardName').textContent = 'Loading...';
                 document.getElementById('modalCardIssuer').textContent = '';
                 modal.style.display = 'block';
-                
+
                 // Fetch card details
                 const response = await fetch(`${API_BASE}/cards/cards/${cardId}/`);
                 if (!response.ok) {
@@ -2458,60 +919,60 @@
                 }
                 const card = await response.json();
                 currentModalCard = card;
-                
+
                 // Populate modal with card data
                 populateCardModal(card);
-                
+
             } catch (error) {
                 console.error('Error loading card details:', error);
                 closeCardModal();
                 alert('Error loading card details. Please try again.');
             }
         }
-        
+
         async function populateCardModal(card) {
             // Check if user owns this card and has a nickname
             const userCards = await UserDataManager.getCards();
             const hasCard = userCards.includes(card.id);
             let displayName = card.name;
-            
+
             if (hasCard) {
                 const cardDetails = await UserDataManager.getCardDetails(card.id);
                 if (cardDetails?.nickname) {
                     displayName = `${card.name} (${cardDetails.nickname})`;
                 }
             }
-            
+
             // Basic card info
             document.getElementById('modalCardName').textContent = displayName;
             document.getElementById('modalCardIssuer').textContent = card.issuer?.name || 'Unknown Issuer';
             document.getElementById('modalCardType').textContent = card.card_type ? card.card_type.charAt(0).toUpperCase() + card.card_type.slice(1) : 'Personal';
             document.getElementById('modalAnnualFee').textContent = `$${card.annual_fee || 0}`;
             document.getElementById('modalRewardType').textContent = card.primary_reward_type?.name || 'Unknown';
-            
+
             // Point value
             const rewardMultiplier = card.metadata?.reward_value_multiplier || 0.01;
             document.getElementById('modalPointValue').textContent = `${(rewardMultiplier * 100).toFixed(1)}¢ each`;
-            
+
             // Network (if available in metadata)
             const network = card.metadata?.network || 'Not specified';
             document.getElementById('modalNetwork').textContent = network;
-            
+
             // Signup bonus
             const signupBonus = card.signup_bonus_amount;
             const signupBonusSection = document.getElementById('modalSignupBonusSection');
             const signupRequirement = document.getElementById('modalSignupRequirement');
-            
+
             if (signupBonus && signupBonus > 0) {
                 const bonusType = card.signup_bonus_type?.name || 'points';
-                document.getElementById('modalSignupBonus').textContent = 
+                document.getElementById('modalSignupBonus').textContent =
                     `${signupBonus.toLocaleString()} ${bonusType}`;
-                    
+
                 // Show spending requirement if available
                 const spendingReq = card.metadata?.signup_spending_requirement;
                 const timeLimit = card.metadata?.signup_time_limit_months || 3;
                 if (spendingReq) {
-                    document.getElementById('modalSignupSpending').textContent = 
+                    document.getElementById('modalSignupSpending').textContent =
                         `$${spendingReq.toLocaleString()} in ${timeLimit} months`;
                     signupRequirement.style.display = 'block';
                 } else {
@@ -2523,33 +984,33 @@
                 signupRequirement.style.display = 'none';
                 signupBonusSection.style.display = 'block';
             }
-            
+
             // User-specific card details
             await populateUserCardDetails(card.id);
-            
+
             // Reward categories
             populateRewardCategories(card.reward_categories || []);
-            
+
             // Credits/Benefits
             populateCardCredits(card.credits || []);
-            
+
             // Update ownership button
             updateModalOwnershipButton(card.id);
         }
-        
+
         async function populateUserCardDetails(cardId) {
             try {
                 const userCards = await UserDataManager.getCards();
                 const hasCard = userCards.includes(cardId);
                 const userDetailsSection = document.getElementById('modalUserDetailsSection');
-                
+
                 if (hasCard) {
                     const cardDetails = await UserDataManager.getCardDetails(cardId);
-                    
+
                     // Show nickname
                     const nicknameEl = document.getElementById('modalUserNickname');
                     nicknameEl.textContent = cardDetails?.nickname || 'None';
-                    
+
                     // Show opening date
                     const openingDateEl = document.getElementById('modalUserOpeningDate');
                     if (cardDetails?.opened_date) {
@@ -2558,7 +1019,7 @@
                     } else {
                         openingDateEl.textContent = 'Not set';
                     }
-                    
+
                     userDetailsSection.style.display = 'block';
                 } else {
                     userDetailsSection.style.display = 'none';
@@ -2568,35 +1029,35 @@
                 document.getElementById('modalUserDetailsSection').style.display = 'none';
             }
         }
-        
+
         function populateRewardCategories(rewardCategories) {
             const rewardsList = document.getElementById('modalRewardsList');
             const rewardsSection = document.getElementById('modalRewardsSection');
-            
+
             if (!rewardCategories || rewardCategories.length === 0) {
                 rewardsList.innerHTML = '<li style="text-align: center; color: #6b7280; padding: 20px;">No specific reward categories</li>';
                 rewardsSection.style.display = 'block';
                 return;
             }
-            
+
             const activeRewards = rewardCategories.filter(cat => cat.is_active);
-            
+
             if (activeRewards.length === 0) {
                 rewardsList.innerHTML = '<li style="text-align: center; color: #6b7280; padding: 20px;">No active reward categories</li>';
                 rewardsSection.style.display = 'block';
                 return;
             }
-            
+
             const rewardsHtml = activeRewards.map(reward => {
                 const categoryName = reward.category?.display_name || reward.category?.name || 'Unknown Category';
                 const rate = parseFloat(reward.reward_rate || 0);
                 const maxSpend = reward.max_annual_spend;
-                
+
                 let limitHtml = '';
                 if (maxSpend) {
                     limitHtml = `<div class="modal-rewards-limit">Up to $${parseInt(maxSpend).toLocaleString()}/year</div>`;
                 }
-                
+
                 return `
                     <li class="modal-rewards-item">
                         <div>
@@ -2607,33 +1068,33 @@
                     </li>
                 `;
             }).join('');
-            
+
             rewardsList.innerHTML = rewardsHtml;
             rewardsSection.style.display = 'block';
         }
-        
+
         function populateCardCredits(credits) {
             const creditsList = document.getElementById('modalCreditsList');
             const creditsSection = document.getElementById('modalCreditsSection');
-            
+
             if (!credits || credits.length === 0) {
                 creditsList.innerHTML = '<div style="text-align: center; color: #6b7280; padding: 20px;">No special benefits or credits listed for this card</div>';
                 creditsSection.style.display = 'block';
                 return;
             }
-            
+
             const activeCredits = credits.filter(credit => credit.is_active);
-            
+
             if (activeCredits.length === 0) {
                 creditsList.innerHTML = '<div style="text-align: center; color: #6b7280; padding: 20px;">No active benefits or credits</div>';
                 creditsSection.style.display = 'block';
                 return;
             }
-            
+
             const creditsHtml = activeCredits.map(credit => {
                 const value = parseFloat(credit.value || 0);
                 const currency = credit.currency || 'USD';
-                
+
                 // Format value display
                 let valueDisplay = '';
                 if (value > 0) {
@@ -2645,11 +1106,11 @@
                 } else {
                     valueDisplay = 'Included';
                 }
-                
+
                 // Get proper display name and description from spending_credit or category
                 let creditName = 'Benefit';
                 let creditDescription = credit.description || '';
-                
+
                 if (credit.spending_credit) {
                     // For spending credits (like airport_lounge, precheck, etc.)
                     creditName = credit.spending_credit.display_name;
@@ -2659,7 +1120,7 @@
                     creditName = credit.category.display_name;
                     creditDescription = credit.category.description || creditDescription;
                 }
-                
+
                 return `
                     <div class="modal-credit-item">
                         <div class="modal-credit-content">
@@ -2670,18 +1131,18 @@
                     </div>
                 `;
             }).join('');
-            
+
             creditsList.innerHTML = `<div class="modal-credits-list">${creditsHtml}</div>`;
             creditsSection.style.display = 'block';
         }
-        
+
         async function updateModalOwnershipButton(cardId) {
             try {
                 const userCards = await UserDataManager.getCards();
                 const hasCard = userCards.includes(cardId);
                 const ownershipButton = document.getElementById('modalOwnershipButton');
                 const addAnotherButton = document.getElementById('modalAddAnotherButton');
-                
+
                 if (hasCard) {
                     ownershipButton.textContent = '❌ Remove from my cards';
                     ownershipButton.className = 'danger';
@@ -2697,17 +1158,17 @@
                 console.error('Error checking card ownership:', error);
             }
         }
-        
+
         async function addAnotherCardModal() {
             if (!currentModalCard) return;
-            
+
             const button = document.getElementById('modalAddAnotherButton');
             const cardId = currentModalCard.id;
-            
+
             try {
                 button.disabled = true;
                 button.textContent = '...';
-                
+
                 // Show nickname/opening date popup
                 const cardDetails = await showCardDetailsPopupModal(cardId);
                 if (cardDetails === null) {
@@ -2716,12 +1177,12 @@
                     button.textContent = '➕ Add another card';
                     return;
                 }
-                
+
                 // Add another instance of the card with details
                 const success = await UserDataManager.addCardWithDetails(cardId, cardDetails.nickname, cardDetails.openingDate);
                 if (success) {
                     alert(`Added another ${cardDetails.nickname} to your collection!`);
-                    
+
                     // Refresh displays
                     if (typeof filterCards === 'function') {
                         filterCards();
@@ -2731,7 +1192,7 @@
                 } else {
                     throw new Error('Failed to add another card');
                 }
-                
+
             } catch (error) {
                 console.error('Error adding another card:', error);
                 alert('Error adding another card');
@@ -2740,31 +1201,31 @@
                 button.textContent = '➕ Add another card';
             }
         }
-        
+
         async function removeLastCardModal() {
             if (!currentModalCard) return;
-            
+
             const button = document.getElementById('modalOwnershipButton');
             const cardId = currentModalCard.id;
-            
+
             try {
                 const userCards = await UserDataManager.getCards();
                 const index = userCards.indexOf(cardId);
                 if (index > -1) userCards.splice(index, 1);
-                
+
                 button.disabled = true;
                 button.textContent = '...';
-                
+
                 await UserDataManager.saveCards(userCards);
                 await updateModalOwnershipButton(cardId);
-                
+
                 // Refresh displays
                 if (typeof filterCards === 'function') {
                     filterCards();
                 } else if (typeof displayCards === 'function' && typeof allCards !== 'undefined') {
                     displayCards(allCards);
                 }
-                
+
             } catch (error) {
                 console.error('Error removing card:', error);
                 alert('Error removing card');
@@ -2772,25 +1233,25 @@
                 button.disabled = false;
             }
         }
-        
+
         async function toggleCardOwnershipModal() {
             if (!currentModalCard) return;
-            
+
             const button = document.getElementById('modalOwnershipButton');
             const cardId = currentModalCard.id;
-            
+
             try {
                 const userCards = await UserDataManager.getCards();
                 const hasCard = userCards.includes(cardId);
-                
+
                 button.disabled = true;
                 button.textContent = '...';
-                
+
                 if (hasCard) {
                     // Remove card
                     const index = userCards.indexOf(cardId);
                     if (index > -1) userCards.splice(index, 1);
-                    
+
                     await UserDataManager.saveCards(userCards);
                 } else {
                     // Show nickname/opening date popup before adding card
@@ -2800,26 +1261,26 @@
                         button.disabled = false;
                         return;
                     }
-                    
+
                     // Add card with details
                     const success = await UserDataManager.addCardWithDetails(cardId, cardDetails.nickname, cardDetails.openingDate);
                     if (!success) {
                         throw new Error('Failed to add card');
                     }
-                    
+
                     // Update local userCards array for immediate UI feedback
                     userCards.push(cardId);
                 }
-                
+
                 await updateModalOwnershipButton(cardId);
-                
+
                 // If there's a global filterCards or similar function, refresh the display
                 if (typeof filterCards === 'function') {
                     filterCards();
                 } else if (typeof displayCards === 'function' && typeof allCards !== 'undefined') {
                     displayCards(allCards);
                 }
-                
+
             } catch (error) {
                 console.error('Error updating card ownership:', error);
                 alert('Error updating card ownership');
@@ -2827,28 +1288,28 @@
                 button.disabled = false;
             }
         }
-        
 
-        
+
+
         function closeCardModal() {
             document.getElementById('cardModal').style.display = 'none';
             currentModalCard = null;
         }
-        
+
         // Edit Card Details Modal Functions
         async function openEditCardDetailsModal() {
             console.log('🐛 DEBUG: openEditCardDetailsModal called');
             console.trace('🐛 DEBUG: Call stack for openEditCardDetailsModal');
             if (!currentModalCard) return;
-            
+
             try {
                 const cardDetails = await UserDataManager.getCardDetails(currentModalCard.id);
-                
+
                 // Populate form with current values
                 document.getElementById('editModalCardName').textContent = currentModalCard.name;
                 document.getElementById('cardNickname').value = cardDetails?.nickname || '';
                 document.getElementById('cardOpeningDate').value = cardDetails?.opened_date || '';
-                
+
                 // Show edit modal
                 document.getElementById('editCardDetailsModal').style.display = 'block';
             } catch (error) {
@@ -2856,36 +1317,36 @@
                 alert('Error loading card details for editing');
             }
         }
-        
+
         function closeEditCardDetailsModal() {
             document.getElementById('editCardDetailsModal').style.display = 'none';
             // Clear form
             document.getElementById('cardNickname').value = '';
             document.getElementById('cardOpeningDate').value = '';
         }
-        
+
         async function saveCardDetails(event) {
             event.preventDefault();
-            
+
             if (!currentModalCard) return;
-            
+
             try {
                 const nickname = document.getElementById('cardNickname').value.trim();
                 const openingDate = document.getElementById('cardOpeningDate').value;
-                
+
                 const success = await UserDataManager.updateCardDetails(
-                    currentModalCard.id, 
-                    nickname, 
+                    currentModalCard.id,
+                    nickname,
                     openingDate
                 );
-                
+
                 if (success) {
                     // Close edit modal
                     closeEditCardDetailsModal();
-                    
+
                     // Refresh the main modal display
                     await populateUserCardDetails(currentModalCard.id);
-                    
+
                     // Also refresh the card list display if needed
                     if (typeof filterCards === 'function') {
                         filterCards();
@@ -2898,25 +1359,25 @@
                 alert('Error saving card details. Please try again.');
             }
         }
-        
+
         // Close modal when clicking outside of it
         window.onclick = function(event) {
             const cardModal = document.getElementById('cardModal');
             const editModal = document.getElementById('editCardDetailsModal');
-            
+
             if (event.target === cardModal) {
                 closeCardModal();
             } else if (event.target === editModal) {
                 closeEditCardDetailsModal();
             }
         }
-        
+
         // Close modal with Escape key
         document.addEventListener('keydown', function(event) {
             if (event.key === 'Escape') {
                 const editModal = document.getElementById('editCardDetailsModal');
                 const cardModal = document.getElementById('cardModal');
-                
+
                 if (editModal.style.display === 'block') {
                     closeEditCardDetailsModal();
                 } else if (cardModal.style.display === 'block') {
@@ -2932,19 +1393,19 @@
             navMenu.classList.toggle('active');
             navAuth.classList.toggle('active');
         }
-        
+
         // Close mobile menu when clicking outside
         document.addEventListener('click', function(event) {
             const navMenu = document.getElementById('navMenu');
             const navAuth = document.getElementById('navAuth');
             const navToggle = document.querySelector('.nav-toggle');
-            
+
             if (!navToggle.contains(event.target) && !navMenu.contains(event.target) && !navAuth.contains(event.target)) {
                 navMenu.classList.remove('active');
                 navAuth.classList.remove('active');
             }
         });
-        
+
         // Close mobile menu when window is resized to desktop
         window.addEventListener('resize', function() {
             if (window.innerWidth > 768) {
@@ -2961,7 +1422,7 @@
             clearUserData();
             isAuthenticated = false;
             currentUser = null;
-            
+
             // Refresh current page data immediately
             if (typeof loadUserCards === 'function') {
                 loadUserCards();
@@ -2972,7 +1433,7 @@
             if (typeof filterCards === 'function') {
                 filterCards();
             }
-            
+
             // Also check again after a short delay to catch any async logout
             setTimeout(async () => {
                 console.log('Checking logout state after delay');
@@ -3005,14 +1466,14 @@
         // Initialize user state when page loads
         document.addEventListener('DOMContentLoaded', function() {
             initUserState();
-            
+
             // Check for user state changes periodically
             setInterval(async () => {
                 await initUserState();
             }, 30000); // Check every 30 seconds
         });
     </script>
-    
+
     {% block extra_js %}{% endblock %}
 </body>
 </html>

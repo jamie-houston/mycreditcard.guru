@@ -1,0 +1,454 @@
+/* Profile page styles - extracted from profile.html */
+
+.privacy-toggle-section {
+    flex-wrap: wrap;
+}
+
+@media (max-width: 768px) {
+    .privacy-toggle-section {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    #shareable-url-section {
+        margin-left: 0 !important;
+    }
+
+    #shareable-url {
+        width: 200px !important;
+    }
+}
+
+.profile-card {
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 16px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.profile-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 15px;
+}
+
+.card-name {
+    font-size: 18px;
+    font-weight: 700;
+    color: #1f2937;
+    margin: 0;
+}
+
+.card-nickname {
+    font-size: 14px;
+    color: #6b7280;
+    margin: 2px 0 0 0;
+}
+
+.card-fee {
+    font-size: 16px;
+    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: 8px;
+    margin-left: 10px;
+}
+
+.fee-zero {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.fee-paid {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.card-details {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.detail-item {
+    background: #f8fafc;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+}
+
+.detail-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+}
+
+.detail-value {
+    font-size: 16px;
+    font-weight: 600;
+    color: #1e293b;
+}
+
+.category-optimization-simple {
+    background: linear-gradient(135deg, rgba(239, 246, 255, 0.9) 0%, rgba(239, 246, 255, 0.7) 100%);
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.category-simple-name {
+    font-size: 16px;
+    font-weight: 600;
+    color: #1e40af;
+    min-width: 120px;
+    flex-shrink: 0;
+}
+
+.rate-simple {
+    background: #10b981;
+    color: white;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 700;
+    min-width: 50px;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.card-simple-name {
+    font-size: 15px;
+    font-weight: 600;
+    color: #1f2937;
+    flex: 1;
+}
+
+.spending-cap-simple {
+    font-size: 12px;
+    color: #64748b;
+    font-style: italic;
+    margin-left: auto;
+    flex-shrink: 0;
+}
+
+/* Card Table Styles */
+.card-table-container {
+    overflow-x: auto;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    background: white;
+    border: 1px solid #e5e7eb;
+}
+
+.cards-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+.cards-table th {
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    color: #374151;
+    font-weight: 600;
+    text-align: left;
+    padding: 16px 12px;
+    border-bottom: 2px solid #e5e7eb;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.cards-table td {
+    padding: 16px 12px;
+    border-bottom: 1px solid #f3f4f6;
+    vertical-align: top;
+}
+
+.card-row {
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.card-row:hover {
+    background-color: #f8fafc;
+    transform: scale(1.01);
+}
+
+.card-row:last-child td {
+    border-bottom: none;
+}
+
+.card-name-cell {
+    max-width: 250px;
+}
+
+.card-name-wrapper strong {
+    color: #1f2937;
+    font-weight: 600;
+    display: block;
+    margin-bottom: 2px;
+}
+
+.card-nicknames {
+    color: #6b7280;
+    font-style: italic;
+    font-size: 12px;
+}
+
+.card-count-cell {
+    text-align: center;
+    white-space: nowrap;
+}
+
+.card-count {
+    background: #e0f2fe;
+    color: #0891b2;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 12px;
+}
+
+.multiple-indicator {
+    margin-left: 4px;
+    opacity: 0.7;
+}
+
+.actions-cell {
+    text-align: center;
+    width: 60px;
+}
+
+.table-action-btn {
+    background: #f3f4f6;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    padding: 6px 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 14px;
+}
+
+.table-action-btn:hover {
+    background: #e5e7eb;
+    transform: scale(1.1);
+}
+
+/* Fee styling in table */
+.cards-table .fee-zero {
+    background: #dcfce7;
+    color: #166534;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 12px;
+}
+
+.cards-table .fee-paid {
+    background: #fef3c7;
+    color: #92400e;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 12px;
+}
+
+/* Responsive table */
+@media (max-width: 768px) {
+    .card-table-container {
+        font-size: 12px;
+    }
+
+    .cards-table th,
+    .cards-table td {
+        padding: 8px 6px;
+    }
+
+    .card-name-cell {
+        max-width: 150px;
+    }
+}
+
+/* Legacy styles for backward compatibility */
+.category-optimization-item {
+    background: linear-gradient(135deg, rgba(239, 246, 255, 0.9) 0%, rgba(239, 246, 255, 0.7) 100%);
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.category-info {
+    flex: 1;
+}
+
+.category-name {
+    font-size: 16px;
+    font-weight: 600;
+    color: #1e40af;
+    margin-bottom: 4px;
+}
+
+.category-details {
+    font-size: 14px;
+    color: #64748b;
+}
+
+.category-recommendation {
+    text-align: right;
+    padding-left: 20px;
+}
+
+.recommended-card {
+    font-size: 14px;
+    font-weight: 600;
+    color: #1f2937;
+    margin-bottom: 4px;
+}
+
+.reward-rate {
+    background: #10b981;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    display: inline-block;
+}
+
+.spending-item {
+    background: rgba(255, 255, 255, 0.8);
+    border: 1px solid rgba(229, 231, 235, 0.6);
+    border-radius: 10px;
+    padding: 15px;
+    margin-bottom: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.spending-category {
+    font-size: 16px;
+    font-weight: 600;
+    color: #374151;
+}
+
+.spending-amounts {
+    text-align: right;
+}
+
+.monthly-amount {
+    font-size: 18px;
+    font-weight: 700;
+    color: #059669;
+    margin-bottom: 2px;
+}
+
+.annual-amount {
+    font-size: 14px;
+    color: #6b7280;
+}
+
+.no-data {
+    text-align: center;
+    color: #6b7280;
+    padding: 40px 20px;
+    font-style: italic;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: #6b7280;
+}
+
+.empty-state h3 {
+    color: #374151;
+    margin-bottom: 8px;
+}
+
+.empty-state p {
+    margin-bottom: 20px;
+}
+
+.empty-state a {
+    display: inline-block;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 12px 24px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: transform 0.2s;
+}
+
+.empty-state a:hover {
+    transform: translateY(-2px);
+}
+
+@media (max-width: 768px) {
+    .card-details {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+
+    .category-optimization-simple {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .category-simple-name {
+        min-width: auto;
+    }
+
+    .rate-simple {
+        min-width: auto;
+        align-self: flex-start;
+    }
+
+    .spending-cap-simple {
+        margin-left: 0;
+        align-self: flex-start;
+    }
+
+    .category-optimization-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .category-recommendation {
+        text-align: left;
+        padding-left: 0;
+    }
+
+    .card-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .card-fee {
+        margin-left: 0;
+    }
+}
