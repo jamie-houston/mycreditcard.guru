@@ -14,7 +14,7 @@ Last updated: 2026-06-12
 | 0 | Triage & stabilize (.gitignore traps, restore `cards/test_base.py`, commit CSS refactor) | ✅ Done |
 | 1 | Phone wallet view (`/wallet/`) + quarter-aware rotating categories (`active_on(date)`) + PWA manifest | ✅ Done |
 | 2 | Trust: single allocation source of truth, cap-overflow reallocation, structured signup-bonus reqs, point-valuation transparency, reconciliation guard, `run_scenario --explain`, `jamie_real.json` acceptance scenario | ✅ Done |
-| 3 | Deploy: refresh PythonAnywhere per `docs/DEPLOYMENT_GUIDE.md` | ⏸ Blocked on PythonAnywhere login (Jamie) |
+| 3 | Deploy: refresh PythonAnywhere per `docs/DEPLOYMENT_GUIDE.md` | ✅ Done — live at https://foresterh.pythonanywhere.com on MySQL (see deploy guide for the SQLite/NFS incident); monthly bonus-refresh task scheduled |
 | 4 | Sustainable data pipeline: `import_external_cards` refreshes bonuses/fees from the andenacitelli community API | ✅ Done (monthly cron wiring happens at deploy, Phase 3) |
 | 5 | Cleanup: dead deps/scripts removed, `manage_project.py` menu entries | ✅ Mostly done (see backlog) |
 

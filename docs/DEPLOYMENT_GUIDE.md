@@ -2,6 +2,33 @@
 
 This guide provides step-by-step instructions for deploying the Credit Card Guru Django application to PythonAnywhere.
 
+## ⚠️ Production database is MySQL, not SQLite (June 2026)
+
+The June 2026 deploy hit broken NFS file-locking on PythonAnywhere's storage: any
+SQLite write commit hung forever (even on freshly created databases in fresh
+directories), wedging every web worker. Diagnosis trail: stale `db.sqlite3-journal`,
+hot-journal rollback hanging, fresh-DB commits hanging, while raw I/O/fsync/fcntl all
+worked. Production therefore runs on PythonAnywhere's bundled MySQL:
+
+- `DATABASE_URL=mysql://foresterh:<password>@foresterh.mysql.pythonanywhere-services.com/foresterh$default`
+  in the server `.env`. The current MySQL password lives in `~/.my.cnf` on the server —
+  the one in old `.env` copies is stale.
+- `mysqlclient` is installed in the server virtualenv only (NOT in requirements.txt, so
+  local dev installs don't need MySQL headers; local dev stays on SQLite).
+- If you ever revert to SQLite: use an **absolute** path
+  (`sqlite:////home/foresterh/...`); a relative `sqlite:///db.sqlite3` resolves against
+  the WSGI process's cwd and silently creates a second, empty database. And get
+  PythonAnywhere support to confirm file locking works first.
+
+A pre-deploy SQLite backup with the old deployment's users/data is at
+`~/db.sqlite3.backup-predeploy` on the server.
+
+## Monthly card-data refresh (scheduled task)
+
+A PythonAnywhere scheduled task (daily 09:15 UTC, acts only on the 1st of the month)
+resets `data/input/cards/`, pulls main, and runs `import_external_cards` to refresh
+signup bonuses/fees; output appends to `~/import_external.log`.
+
 ## Quick Reference: Updating After Git Pull
 
 **Looking for update instructions?** Jump to:
