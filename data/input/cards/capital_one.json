@@ -141,8 +141,8 @@
     "issuer": "Capital One",
     "annual_fee": 0,
     "signup_bonus": {
-      "bonus_amount": 500,
-      "spending_requirement": 4500,
+      "bonus_amount": 750,
+      "spending_requirement": 6000,
       "time_limit_months": 3
     },
     "reward_type": "Cashback",
@@ -207,11 +207,11 @@
   {
     "name": "Capital One Spark Miles for Business",
     "issuer": "Capital One",
-    "annual_fee": 99,
+    "annual_fee": 95,
     "signup_bonus": {
-      "bonus_amount": 50000,
-      "spending_requirement": 4500,
-      "time_limit_months": 3
+      "bonus_amount": 150000,
+      "spending_requirement": 30000,
+      "time_limit_months": 6
     },
     "reward_type": "Miles",
     "reward_value_multiplier": 0.01,

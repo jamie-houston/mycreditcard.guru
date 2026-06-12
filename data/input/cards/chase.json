@@ -4,8 +4,8 @@
     "issuer": "Chase",
     "annual_fee": 795,
     "signup_bonus": {
-      "bonus_amount": 100000,
-      "spending_requirement": 5000,
+      "bonus_amount": 150000,
+      "spending_requirement": 6000,
       "time_limit_months": 3
     },
     "reward_type": "Points",
@@ -79,7 +79,7 @@
     "issuer": "Chase",
     "annual_fee": 0,
     "signup_bonus": {
-      "bonus_amount": 20000,
+      "bonus_amount": 25000,
       "spending_requirement": 500,
       "time_limit_months": 3,
       "referral_url": "https://www.referyourchasecard.com/18A/AP73583B88"
@@ -173,8 +173,8 @@
     "issuer": "Chase",
     "annual_fee": 795,
     "signup_bonus": {
-      "bonus_amount": 100000,
-      "spending_requirement": 5000,
+      "bonus_amount": 150000,
+      "spending_requirement": 20000,
       "time_limit_months": 3
     },
     "reward_type": "Points",
@@ -322,8 +322,8 @@
     "issuer": "Chase",
     "annual_fee": 95,
     "signup_bonus": {
-      "bonus_amount": 75000,
-      "spending_requirement": 3000,
+      "bonus_amount": 85000,
+      "spending_requirement": 4000,
       "time_limit_months": 3
     },
     "reward_type": "Miles",
@@ -346,7 +346,7 @@
     "issuer": "Chase",
     "annual_fee": 95,
     "signup_bonus": {
-      "bonus_amount": 75000,
+      "bonus_amount": 90000,
       "spending_requirement": 5000,
       "time_limit_months": 3
     },
@@ -370,7 +370,7 @@
     "issuer": "Chase",
     "annual_fee": 49,
     "signup_bonus": {
-      "bonus_amount": 400,
+      "bonus_amount": 300,
       "spending_requirement": 1000,
       "time_limit_months": 3
     },
@@ -485,7 +485,11 @@
     "name": "IHG Premier",
     "issuer": "Chase",
     "annual_fee": 99,
-    "signup_bonus": null,
+    "signup_bonus": {
+      "bonus_amount": 140000,
+      "spending_requirement": 3000,
+      "time_limit_months": 3
+    },
     "reward_type": "Cashback",
     "reward_value_multiplier": 0.01,
     "reward_categories": [
@@ -506,8 +510,8 @@
     "issuer": "Chase",
     "annual_fee": 99,
     "signup_bonus": {
-      "bonus_amount": 140000,
-      "spending_requirement": 4000,
+      "bonus_amount": 200000,
+      "spending_requirement": 9000,
       "time_limit_months": 3
     },
     "reward_type": "Points",
@@ -554,7 +558,7 @@
     "issuer": "Chase",
     "annual_fee": 95,
     "signup_bonus": {
-      "bonus_amount": 90000,
+      "bonus_amount": 100000,
       "spending_requirement": 8000,
       "time_limit_months": 3,
       "referral_url": "https://www.referyourchasecard.com/21u/V4LTM1SIJH"
@@ -639,7 +643,7 @@
     "signup_bonus": {
       "bonus_amount": 75000,
       "spending_requirement": 6000,
-      "time_limit_months": 3
+      "time_limit_months": 6
     },
     "reward_type": "Points",
     "reward_value_multiplier": 0.01,
@@ -710,9 +714,9 @@
     "issuer": "Chase",
     "annual_fee": 95,
     "signup_bonus": {
-      "bonus_amount": 250000,
-      "spending_requirement": 3000,
-      "time_limit_months": 3
+      "bonus_amount": 200000,
+      "spending_requirement": 4000,
+      "time_limit_months": 4
     },
     "reward_type": "Points",
     "reward_value_multiplier": 0.007,
@@ -734,7 +738,7 @@
     "issuer": "Chase",
     "annual_fee": 299,
     "signup_bonus": {
-      "bonus_amount": 100000,
+      "bonus_amount": 80000,
       "spending_requirement": 5000,
       "time_limit_months": 3
     },
@@ -771,9 +775,9 @@
     "issuer": "Chase",
     "annual_fee": 99,
     "signup_bonus": {
-      "bonus_amount": 100000,
+      "bonus_amount": 20000,
       "spending_requirement": 4000,
-      "time_limit_months": 5
+      "time_limit_months": 3
     },
     "reward_type": "Miles",
     "reward_value_multiplier": 0.01,
@@ -804,10 +808,10 @@
   {
     "name": "Southwest Premier",
     "issuer": "Chase",
-    "annual_fee": 99,
+    "annual_fee": 149,
     "signup_bonus": {
-      "bonus_amount": 50000,
-      "spending_requirement": 1000,
+      "bonus_amount": 30000,
+      "spending_requirement": 4000,
       "time_limit_months": 3
     },
     "reward_type": "Miles",
@@ -828,7 +832,7 @@
   {
     "name": "Southwest Premier Business",
     "issuer": "Chase",
-    "annual_fee": 199,
+    "annual_fee": 149,
     "signup_bonus": {
       "bonus_amount": 60000,
       "spending_requirement": 3000,
@@ -855,9 +859,9 @@
     "issuer": "Chase",
     "annual_fee": 229,
     "signup_bonus": {
-      "bonus_amount": 100000,
-      "spending_requirement": 4000,
-      "time_limit_months": 5
+      "bonus_amount": 40000,
+      "spending_requirement": 3000,
+      "time_limit_months": 3
     },
     "reward_type": "Miles",
     "reward_value_multiplier": 0.01,
@@ -890,7 +894,7 @@
     "issuer": "Chase",
     "annual_fee": 150,
     "signup_bonus": {
-      "bonus_amount": 75000,
+      "bonus_amount": 100000,
       "spending_requirement": 5000,
       "time_limit_months": 3
     },
@@ -951,7 +955,7 @@
     "issuer": "Chase",
     "annual_fee": 695,
     "signup_bonus": {
-      "bonus_amount": 90000,
+      "bonus_amount": 110000,
       "spending_requirement": 5000,
       "time_limit_months": 3
     },
@@ -1012,7 +1016,7 @@
     "issuer": "Chase",
     "annual_fee": 695,
     "signup_bonus": {
-      "bonus_amount": 80000,
+      "bonus_amount": 100000,
       "spending_requirement": 5000,
       "time_limit_months": 3
     },
@@ -1073,7 +1077,7 @@
     "issuer": "Chase",
     "annual_fee": 150,
     "signup_bonus": {
-      "bonus_amount": 60000,
+      "bonus_amount": 85000,
       "spending_requirement": 3000,
       "time_limit_months": 3
     },
@@ -1147,7 +1151,10 @@
         "weight": 0.4
       }
     ],
-    "slug": "united-explorer"
+    "slug": "united-explorer",
+    "metadata": {
+      "annual_fee_waived_first_year": true
+    }
   },
   {
     "name": "United Gateway",

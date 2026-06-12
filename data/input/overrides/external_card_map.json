@@ -1,0 +1,11 @@
+{
+  "_comment": "Manual andenacitelli cardId -> catalog card mappings, for cards whose names differ too much for import_external_cards' auto-matcher. Most cards auto-match by normalized name+issuer; add an entry here only when the import reports a card as 'new' that actually exists in data/input/cards/ under a different name.",
+  "mappings": {
+    "5d8c589d1e7c1294d04fa6e4a2685624": {"issuer": "Chase", "name": "Chase Sapphire Reserve for Business"},
+    "d2517ce6b72999e14f50c399347100ed": {"issuer": "Chase", "name": "United Club Infinite"},
+    "2d16431e0caee645b420cc3d3255b2ee": {"issuer": "Capital One", "name": "Capital One Savor Cash Rewards Credit Card"},
+    "e48261ce7908f2ed8403245217f44de7": {"issuer": "Capital One", "name": "Capital One Spark Miles for Business"},
+    "9aa036266b8cc7e7512a630efdecae0b": {"issuer": "Capital One", "name": "Capital One Venture X Rewards Credit Card"},
+    "c077a47639c7b47d1895200c72588ee3": {"issuer": "Wells Fargo", "name": "Bilt Mastercard"}
+  }
+}

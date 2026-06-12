@@ -45,14 +45,17 @@
     "url": "https://www.usbank.com/business-banking/business-credit-cards/business-altitude-connect-world-elite-mastercard.html",
     "image_url": "/images/usbank/business-altitude-connect.webp",
     "discontinued": false,
-    "slug": "business-altitude-connect"
+    "slug": "business-altitude-connect",
+    "metadata": {
+      "annual_fee_waived_first_year": true
+    }
   },
   {
     "name": "Altitude Connect",
     "issuer": "US Bank",
     "annual_fee": 0,
     "signup_bonus": {
-      "bonus_amount": 20000,
+      "bonus_amount": 30000,
       "spending_requirement": 1000,
       "time_limit_months": 3
     },
@@ -69,7 +72,10 @@
     "url": "https://www.usbank.com/credit-cards/altitude-connect-visa-signature-credit-card.html",
     "image_url": "/images/usbank/altitude-connect.png",
     "discontinued": false,
-    "slug": "altitude-connect"
+    "slug": "altitude-connect",
+    "metadata": {
+      "annual_fee_waived_first_year": true
+    }
   },
   {
     "name": "Altitude Go",
@@ -141,16 +147,19 @@
     "url": "https://www.usbank.com/business-banking/business-credit-cards/business-leverage-rewards-credit-card.html",
     "image_url": "/images/usbank/business-leverage.webp",
     "discontinued": false,
-    "slug": "business-leverage"
+    "slug": "business-leverage",
+    "metadata": {
+      "annual_fee_waived_first_year": true
+    }
   },
   {
     "name": "Business Triple Cash Rewards",
     "issuer": "US Bank",
     "annual_fee": 0,
     "signup_bonus": {
-      "bonus_amount": 500,
+      "bonus_amount": 750,
       "spending_requirement": 4500,
-      "time_limit_months": 6
+      "time_limit_months": 5
     },
     "reward_type": "Cashback",
     "reward_value_multiplier": 0.01,
@@ -321,6 +330,9 @@
     "url": "https://www.usbank.com/credit-cards/shopper-cash-rewards-visa-signature-credit-card.html",
     "image_url": "/images/usbank/shopper-cash-rewards.webp",
     "discontinued": false,
-    "slug": "shopper-cash-rewards"
+    "slug": "shopper-cash-rewards",
+    "metadata": {
+      "annual_fee_waived_first_year": true
+    }
   }
 ]

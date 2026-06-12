@@ -209,7 +209,7 @@
     "issuer": "Wells Fargo",
     "annual_fee": 0,
     "signup_bonus": {
-      "bonus_amount": 400,
+      "bonus_amount": 250,
       "spending_requirement": 1000,
       "time_limit_months": 3
     },
@@ -245,7 +245,7 @@
     "issuer": "Wells Fargo",
     "annual_fee": 99,
     "signup_bonus": {
-      "bonus_amount": 600,
+      "bonus_amount": 350,
       "spending_requirement": 3000,
       "time_limit_months": 3
     },

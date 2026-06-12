@@ -28,8 +28,8 @@
     "issuer": "Synchrony",
     "annual_fee": 99,
     "signup_bonus": {
-      "bonus_amount": 40000,
-      "spending_requirement": 3000,
+      "bonus_amount": 60000,
+      "spending_requirement": 4000,
       "time_limit_months": 3
     },
     "reward_type": "Points",

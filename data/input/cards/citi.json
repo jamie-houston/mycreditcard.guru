@@ -155,7 +155,7 @@
     "issuer": "Citi",
     "annual_fee": 0,
     "signup_bonus": {
-      "bonus_amount": 30000,
+      "bonus_amount": 20000,
       "spending_requirement": 1000,
       "time_limit_months": 3
     },
@@ -251,8 +251,8 @@
     "issuer": "Citi",
     "annual_fee": 0,
     "signup_bonus": {
-      "bonus_amount": 200,
-      "spending_requirement": 1000,
+      "bonus_amount": 250,
+      "spending_requirement": 500,
       "time_limit_months": 3
     },
     "reward_type": "Cashback",

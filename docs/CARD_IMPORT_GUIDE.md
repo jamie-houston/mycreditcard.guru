@@ -4,6 +4,33 @@
 
 The credit card import system uses the `import_cards` management command to load credit card data from JSON files. **Only cards marked with `"verified": true`** are imported into the database.
 
+## Keeping Bonuses & Fees Current (import_external_cards)
+
+Signup bonus offers and annual fees churn constantly; reward categories and credits don't.
+The `import_external_cards` command refreshes only the churning fields from the
+[andenacitelli community API](https://github.com/andenacitelli/credit-card-bonuses-api):
+
+```bash
+python manage.py import_external_cards            # fetch, update JSON, re-import to DB
+python manage.py import_external_cards --dry-run  # preview changes only
+python manage.py import_external_cards --file data/external/andenacitelli.json  # offline
+```
+
+How it works:
+- Fetches the API export (cached to `data/external/andenacitelli.json` as a fallback).
+- Matches API cards to entries in `data/input/cards/*.json` by normalized name + issuer;
+  renamed cards are pinned in `data/input/overrides/external_card_map.json`.
+- Updates `signup_bonus` (amount, spending requirement, time limit), `annual_fee`,
+  `discontinued`, and first-year fee waivers **in the JSON files** — they remain the
+  source of truth, and `git diff data/input/cards/` shows exactly what offers changed.
+- Re-imports changed files via `import_cards` (so only `verified: true` cards hit the DB).
+- Reports API cards missing from the catalog (new product launches) and never clobbers a
+  curated bonus when the API shows no current offer — it warns instead.
+
+It's idempotent and safe to run monthly (PythonAnywhere scheduled task after deploy).
+Curated detail — reward categories, credits, `reward_value_multiplier`, referral URLs —
+is never touched.
+
 ## Key Import Rule
 
 **🔑 CRITICAL**: The import command **only imports cards with `"verified": true`** in the JSON. Cards without this flag or with `"verified": false` are skipped.

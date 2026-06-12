@@ -2,9 +2,9 @@
   {
     "name": "The Platinum Card from American Express",
     "issuer": "American Express",
-    "annual_fee": 695,
+    "annual_fee": 895,
     "signup_bonus": {
-      "bonus_amount": 150000,
+      "bonus_amount": 100000,
       "spending_requirement": 8000,
       "time_limit_months": 6
     },
@@ -64,9 +64,9 @@
   {
     "name": "American Express Gold Card",
     "issuer": "American Express",
-    "annual_fee": 325,
+    "annual_fee": 350,
     "signup_bonus": {
-      "bonus_amount": 75000,
+      "bonus_amount": 60000,
       "spending_requirement": 6000,
       "time_limit_months": 6
     },
@@ -126,7 +126,7 @@
     "issuer": "American Express",
     "annual_fee": 95,
     "signup_bonus": {
-      "bonus_amount": 300,
+      "bonus_amount": 250,
       "spending_requirement": 3000,
       "time_limit_months": 6
     },
@@ -168,14 +168,17 @@
       }
     ],
     "verified": true,
-    "slug": "blue-cash-preferred-card-from-american-express"
+    "slug": "blue-cash-preferred-card-from-american-express",
+    "metadata": {
+      "annual_fee_waived_first_year": true
+    }
   },
   {
     "name": "Blue Business Cash",
     "issuer": "American Express",
     "annual_fee": 0,
     "signup_bonus": {
-      "bonus_amount": 200,
+      "bonus_amount": 250,
       "spending_requirement": 3000,
       "time_limit_months": 3
     },
@@ -223,7 +226,7 @@
     "issuer": "American Express",
     "annual_fee": 0,
     "signup_bonus": {
-      "bonus_amount": 250,
+      "bonus_amount": 200,
       "spending_requirement": 2000,
       "time_limit_months": 6
     },
@@ -264,7 +267,10 @@
     "url": "https://apply.americanexpress.com/amex-morgan-stanley-credit-cards/",
     "image_url": "/images/amex/blue-cash-preferred-morgan-stanley.png",
     "discontinued": false,
-    "slug": "blue-cash-preferred-morgan-stanley"
+    "slug": "blue-cash-preferred-morgan-stanley",
+    "metadata": {
+      "annual_fee_waived_first_year": true
+    }
   },
   {
     "name": "Business Gold",
@@ -272,7 +278,7 @@
     "annual_fee": 375,
     "signup_bonus": {
       "bonus_amount": 100000,
-      "spending_requirement": 10000,
+      "spending_requirement": 15000,
       "time_limit_months": 3
     },
     "reward_type": "Points",
@@ -295,7 +301,7 @@
     "issuer": "American Express",
     "annual_fee": 95,
     "signup_bonus": {
-      "bonus_amount": 25000,
+      "bonus_amount": 15000,
       "spending_requirement": 3000,
       "time_limit_months": 3
     },
@@ -319,7 +325,7 @@
     "issuer": "American Express",
     "annual_fee": 695,
     "signup_bonus": {
-      "bonus_amount": 150000,
+      "bonus_amount": 200000,
       "spending_requirement": 20000,
       "time_limit_months": 3
     },
@@ -423,8 +429,8 @@
     "issuer": "American Express",
     "annual_fee": 150,
     "signup_bonus": {
-      "bonus_amount": 80000,
-      "spending_requirement": 3000,
+      "bonus_amount": 50000,
+      "spending_requirement": 2000,
       "time_limit_months": 6
     },
     "reward_type": "Miles",
@@ -462,14 +468,17 @@
         "weight": 0.8
       }
     ],
-    "slug": "delta-skymiles-gold"
+    "slug": "delta-skymiles-gold",
+    "metadata": {
+      "annual_fee_waived_first_year": true
+    }
   },
   {
     "name": "Delta SkyMiles Gold Business",
     "issuer": "American Express",
     "annual_fee": 150,
     "signup_bonus": {
-      "bonus_amount": 90000,
+      "bonus_amount": 60000,
       "spending_requirement": 4000,
       "time_limit_months": 6
     },
@@ -486,15 +495,18 @@
     "url": "https://www.americanexpress.com/en-us/business/credit-cards/delta-skymiles-gold/",
     "image_url": "/images/amex/delta-skymiles-gold-business.webp",
     "discontinued": false,
-    "slug": "delta-skymiles-gold-business"
+    "slug": "delta-skymiles-gold-business",
+    "metadata": {
+      "annual_fee_waived_first_year": true
+    }
   },
   {
     "name": "Delta SkyMiles Platinum",
     "issuer": "American Express",
     "annual_fee": 350,
     "signup_bonus": {
-      "bonus_amount": 90000,
-      "spending_requirement": 4000,
+      "bonus_amount": 60000,
+      "spending_requirement": 3000,
       "time_limit_months": 6
     },
     "reward_type": "Miles",
@@ -554,8 +566,8 @@
     "issuer": "American Express",
     "annual_fee": 350,
     "signup_bonus": {
-      "bonus_amount": 100000,
-      "spending_requirement": 8000,
+      "bonus_amount": 70000,
+      "spending_requirement": 6000,
       "time_limit_months": 6
     },
     "reward_type": "Miles",
@@ -595,7 +607,7 @@
     "issuer": "American Express",
     "annual_fee": 650,
     "signup_bonus": {
-      "bonus_amount": 100000,
+      "bonus_amount": 70000,
       "spending_requirement": 5000,
       "time_limit_months": 6
     },
@@ -626,7 +638,7 @@
     "issuer": "American Express",
     "annual_fee": 550,
     "signup_bonus": {
-      "bonus_amount": 110000,
+      "bonus_amount": 80000,
       "spending_requirement": 10000,
       "time_limit_months": 6
     },
@@ -686,7 +698,7 @@
     "issuer": "American Express",
     "annual_fee": 0,
     "signup_bonus": {
-      "bonus_amount": 100000,
+      "bonus_amount": 80000,
       "spending_requirement": 2000,
       "time_limit_months": 6
     },
@@ -717,7 +729,7 @@
     "issuer": "American Express",
     "annual_fee": 550,
     "signup_bonus": {
-      "bonus_amount": 175000,
+      "bonus_amount": 150000,
       "spending_requirement": 6000,
       "time_limit_months": 6
     },
@@ -741,7 +753,7 @@
     "issuer": "American Express",
     "annual_fee": 175,
     "signup_bonus": {
-      "bonus_amount": 175000,
+      "bonus_amount": 130000,
       "spending_requirement": 6000,
       "time_limit_months": 6
     },
@@ -797,7 +809,7 @@
     "issuer": "American Express",
     "annual_fee": 650,
     "signup_bonus": {
-      "bonus_amount": 150000,
+      "bonus_amount": 200000,
       "spending_requirement": 6000,
       "time_limit_months": 6
     },
@@ -846,7 +858,7 @@
   {
     "name": "Platinum (Schwab)",
     "issuer": "American Express",
-    "annual_fee": 695,
+    "annual_fee": 895,
     "signup_bonus": {
       "bonus_amount": 80000,
       "spending_requirement": 8000,
@@ -902,8 +914,12 @@
   {
     "name": "Platinum (Morgan Stanley)",
     "issuer": "American Express",
-    "annual_fee": 695,
-    "signup_bonus": null,
+    "annual_fee": 895,
+    "signup_bonus": {
+      "bonus_amount": 80000,
+      "spending_requirement": 8000,
+      "time_limit_months": 6
+    },
     "reward_type": "Cashback",
     "reward_value_multiplier": 0.01,
     "reward_categories": [
@@ -956,8 +972,8 @@
     "issuer": "American Express",
     "annual_fee": 250,
     "signup_bonus": {
-      "bonus_amount": 135000,
-      "spending_requirement": 7000,
+      "bonus_amount": 175000,
+      "spending_requirement": 5000,
       "time_limit_months": 6
     },
     "reward_type": "Points",
@@ -1028,8 +1044,8 @@
     "issuer": "American Express",
     "annual_fee": 0,
     "signup_bonus": {
-      "bonus_amount": 400,
-      "spending_requirement": 4000,
+      "bonus_amount": 100,
+      "spending_requirement": 0.01,
       "time_limit_months": 3
     },
     "reward_type": "Cashback",

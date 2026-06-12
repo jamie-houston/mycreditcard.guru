@@ -77,7 +77,7 @@
     "annual_fee": 499,
     "signup_bonus": {
       "bonus_amount": 50000,
-      "spending_requirement": 6000,
+      "spending_requirement": 5000,
       "time_limit_months": 3
     },
     "reward_type": "Miles",
@@ -100,8 +100,8 @@
     "issuer": "First",
     "annual_fee": 99,
     "signup_bonus": {
-      "bonus_amount": 50000,
-      "spending_requirement": 3000,
+      "bonus_amount": 40000,
+      "spending_requirement": 4500,
       "time_limit_months": 3
     },
     "reward_type": "Miles",
@@ -124,7 +124,7 @@
     "issuer": "First",
     "annual_fee": 250,
     "signup_bonus": {
-      "bonus_amount": 80000,
+      "bonus_amount": 60000,
       "spending_requirement": 4500,
       "time_limit_months": 3
     },
@@ -149,7 +149,7 @@
     "annual_fee": 85,
     "signup_bonus": {
       "bonus_amount": 5000,
-      "spending_requirement": 7000,
+      "spending_requirement": 0.01,
       "time_limit_months": 3
     },
     "reward_type": "Miles",
@@ -165,6 +165,9 @@
     "url": "https://www.anacardusa.com/en/",
     "image_url": "/images/first/ana-card-usa.png",
     "discontinued": false,
-    "slug": "ana-card-usa-plus"
+    "slug": "ana-card-usa-plus",
+    "metadata": {
+      "annual_fee_waived_first_year": true
+    }
   }
 ]

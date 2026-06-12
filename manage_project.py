@@ -127,9 +127,11 @@ def run_tests():
     print("1. Run all tests")
     print("2. Run tests for specific app (cards, roadmaps, users)")
     print("3. Run specific test file")
-    print("4. Back to main menu")
+    print("4. Run Jamie Real acceptance scenario (--explain)")
+    print("5. Run ALL JSON scenarios (slow)")
+    print("6. Back to main menu")
 
-    choice = input("\nSelect option (1-4): ").strip()
+    choice = input("\nSelect option (1-6): ").strip()
 
     if choice == '1':
         run_command("python manage.py test", "Running all tests")
@@ -143,6 +145,12 @@ def run_tests():
         test_path = input("Enter test path (e.g., cards.tests.test_models): ").strip()
         run_command(f"python manage.py test {test_path}", f"Running {test_path}")
     elif choice == '4':
+        run_command('python manage.py run_scenario "Jamie Real" --explain',
+                    "Running Jamie Real acceptance scenario")
+    elif choice == '5':
+        run_command("RUN_ALL_SCENARIOS=1 python manage.py test cards.test_json_scenarios",
+                    "Running all JSON scenarios")
+    elif choice == '6':
         return
     else:
         print_error("Invalid option")
@@ -253,10 +261,11 @@ def load_data():
     print("2. Import system data only (categories, issuers, reward types)")
     print("3. Import credit cards only")
     print("4. Import specific issuer cards")
-    print("5. Run setup_data.py script")
-    print("6. Back to main menu")
+    print("5. Refresh bonuses/fees from external API (import_external_cards)")
+    print("6. Run setup_data.py script")
+    print("7. Back to main menu")
 
-    choice = input("\nSelect option (1-6): ").strip()
+    choice = input("\nSelect option (1-7): ").strip()
 
     if choice == '1':
         import_all_data()
@@ -267,8 +276,11 @@ def load_data():
     elif choice == '4':
         import_specific_issuer()
     elif choice == '5':
-        run_command("python setup_data.py", "Running setup_data.py")
+        run_command("python manage.py import_external_cards",
+                    "Refreshing signup bonuses and fees from the community API")
     elif choice == '6':
+        run_command("python setup_data.py", "Running setup_data.py")
+    elif choice == '7':
         return
     else:
         print_error("Invalid option")

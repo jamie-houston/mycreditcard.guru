@@ -232,8 +232,8 @@
     "issuer": "Bank of America",
     "annual_fee": 0,
     "signup_bonus": {
-      "bonus_amount": 300,
-      "spending_requirement": 3000,
+      "bonus_amount": 500,
+      "spending_requirement": 5000,
       "time_limit_months": 3
     },
     "reward_type": "Cashback",
@@ -256,8 +256,8 @@
     "issuer": "Bank of America",
     "annual_fee": 0,
     "signup_bonus": {
-      "bonus_amount": 300,
-      "spending_requirement": 3000,
+      "bonus_amount": 500,
+      "spending_requirement": 5000,
       "time_limit_months": 3
     },
     "reward_type": "Cashback",
@@ -280,8 +280,8 @@
     "issuer": "Bank of America",
     "annual_fee": 0,
     "signup_bonus": {
-      "bonus_amount": 30000,
-      "spending_requirement": 3000,
+      "bonus_amount": 50000,
+      "spending_requirement": 5000,
       "time_limit_months": 3
     },
     "reward_type": "Points",
@@ -328,7 +328,7 @@
     "issuer": "Bank of America",
     "annual_fee": 79,
     "signup_bonus": {
-      "bonus_amount": 50000,
+      "bonus_amount": 65000,
       "spending_requirement": 1000,
       "time_limit_months": 3
     },
@@ -352,6 +352,9 @@
         "weight": 0.6
       }
     ],
-    "slug": "free-spirit"
+    "slug": "free-spirit",
+    "metadata": {
+      "annual_fee_waived_first_year": true
+    }
   }
 ]
