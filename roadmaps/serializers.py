@@ -112,7 +112,16 @@ class GenerateRoadmapSerializer(serializers.Serializer):
         required=False,
         default=list
     )
-    
+    strategy = serializers.CharField(required=False, allow_blank=True, default='')
+
+    def validate_strategy(self, value):
+        from .strategies import get_strategy, STRATEGIES
+        if value and get_strategy(value) is None:
+            raise serializers.ValidationError(
+                f"Unknown strategy '{value}'. Choices: {', '.join(sorted(STRATEGIES))}"
+            )
+        return value
+
     def generate_recommendations(self):
         """Generate recommendations without saving to database"""
         from .recommendation_engine import RecommendationEngine
@@ -201,18 +210,31 @@ class GenerateRoadmapSerializer(serializers.Serializer):
                         values_credit=True
                     )
         
+        # Resolve strategy preset (validated above, so lookup can't fail)
+        from .strategies import get_strategy, apply_strategy_to_roadmap
+        strategy = get_strategy(validated_data.get('strategy'))
+
+        # An explicit max_recommendations in the request beats the preset's
+        # default; the serializer default (5) only applies with no strategy.
+        if 'max_recommendations' in self.initial_data:
+            max_recommendations = validated_data.get('max_recommendations', 5)
+        elif strategy:
+            max_recommendations = strategy['max_recommendations']
+        else:
+            max_recommendations = validated_data.get('max_recommendations', 5)
+
         # Create or get temporary roadmap for filtering
         roadmap, created = Roadmap.objects.get_or_create(
             profile=profile,
             name="Temporary Quick Recommendation",
-            defaults={'max_recommendations': validated_data.get('max_recommendations', 5)}
+            defaults={'max_recommendations': max_recommendations}
         )
-        
+
         # Update max_recommendations if roadmap already exists
         if not created:
-            roadmap.max_recommendations = validated_data.get('max_recommendations', 5)
+            roadmap.max_recommendations = max_recommendations
             roadmap.save()
-        
+
         # Clear existing filters and add new ones if provided
         roadmap.filters.clear()
         if 'filters' in validated_data:
@@ -223,11 +245,13 @@ class GenerateRoadmapSerializer(serializers.Serializer):
                     value=filter_data['value']
                 )
                 roadmap.filters.add(filter_obj)
-        
+        # Strategy filters add on top of explicit ones (narrowing the pool)
+        apply_strategy_to_roadmap(roadmap, strategy)
+
         # Generate recommendations using quick method (includes breakdowns)
         # Pass user_cards data directly for session-based users
         user_cards_data = validated_data.get('user_cards', []) if not profile.user else None
-        engine = RecommendationEngine(profile, user_cards_data=user_cards_data)
+        engine = RecommendationEngine(profile, user_cards_data=user_cards_data, strategy=strategy)
         recommendations = engine.generate_quick_recommendations(roadmap)
         
         # Clean up temporary roadmap

@@ -63,6 +63,40 @@ class JSONScenarioTest(JSONScenarioTestBase):
         recommendations = self.run_scenario_test(scenario)
         self.print_scenario_results(scenario, recommendations)
 
+    def test_strategy_simple_cash_back(self):
+        """Simple Cash Back preset: cashback-only pool, max 2 applies."""
+        if not self.scenarios:
+            self.skipTest("No scenarios found in JSON file")
+        scenario = self.get_scenario('Strategy - Simple Cash Back')
+        recommendations = self.run_scenario_test(scenario)
+        applies = [rec for rec in recommendations if rec['action'] == 'apply']
+        self.assertLessEqual(len(applies), 2, "Simple Cash Back must cap at 2 new cards")
+        self.print_scenario_results(scenario, recommendations)
+
+    def test_strategy_travel_points(self):
+        """Travel Points preset: points/miles-only pool, max 4 applies."""
+        if not self.scenarios:
+            self.skipTest("No scenarios found in JSON file")
+        scenario = self.get_scenario('Strategy - Travel Points')
+        recommendations = self.run_scenario_test(scenario)
+        applies = [rec for rec in recommendations if rec['action'] == 'apply']
+        self.assertLessEqual(len(applies), 4, "Travel Points must cap at 4 new cards")
+        self.print_scenario_results(scenario, recommendations)
+
+    def test_strategy_maximizer(self):
+        """Maximizer preset: unfiltered pool, should out-earn the cautious presets."""
+        if not self.scenarios:
+            self.skipTest("No scenarios found in JSON file")
+        scenario = self.get_scenario('Strategy - Maximizer')
+        recommendations = self.run_scenario_test(scenario)
+        self.print_scenario_results(scenario, recommendations)
+
+    def test_unknown_strategy_is_loud(self):
+        """A typo'd strategy key must error, not silently run the default."""
+        from roadmaps.strategies import resolve_scenario_strategy
+        with self.assertRaises(ValueError):
+            resolve_scenario_strategy({'strategy': 'simple_cashback'})  # missing underscore
+
     # The broad scenario suite has ~22 stale expectations (card counts and
     # keep/cancel policies written for an older engine; baseline was 27
     # failures before the allocation rework). Math-integrity checks

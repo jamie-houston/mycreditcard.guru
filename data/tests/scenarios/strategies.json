@@ -1,0 +1,102 @@
+{
+  "description": "Strategy presets (S1): the same spender and the same mixed card pool run through each preset — the strategy is the only variable, so differences in output are the strategy working. Expectations hand-confirmed via run_scenario --explain.",
+  "category": "strategies",
+  "scenarios": [
+    {
+      "name": "Strategy - Simple Cash Back",
+      "description": "Cashback-only pool, max 2 new cards, bonus de-emphasized, $100/card effort penalty. Travel/points cards must never appear.",
+      "strategy": "simple_cash_back",
+      "user_profile": {
+        "spending": {
+          "dining": 600,
+          "groceries": 800,
+          "gas": 200,
+          "travel": 400,
+          "other": 1000
+        }
+      },
+      "owned_cards": [],
+      "available_cards": [
+        "discover-it-cash-back",
+        "citi-double-cash-card",
+        "dining-card",
+        "premium-grocery-card",
+        "travel-card-1",
+        "mid-tier-card",
+        "basic-travel-card",
+        "high-value-premium-card"
+      ],
+      "expected_recommendations": {
+        "actions": ["apply"],
+        "must_not_include_cards": [
+          "travel-card-1",
+          "mid-tier-card",
+          "basic-travel-card",
+          "high-value-premium-card"
+        ]
+      }
+    },
+    {
+      "name": "Strategy - Travel Points",
+      "description": "Points/miles-only pool, up to 4 new cards, normal bonus weighting, mild $25/card penalty. Cashback cards must never appear.",
+      "strategy": "travel_points",
+      "user_profile": {
+        "spending": {
+          "dining": 600,
+          "groceries": 800,
+          "gas": 200,
+          "travel": 400,
+          "other": 1000
+        }
+      },
+      "owned_cards": [],
+      "available_cards": [
+        "discover-it-cash-back",
+        "citi-double-cash-card",
+        "dining-card",
+        "premium-grocery-card",
+        "travel-card-1",
+        "mid-tier-card",
+        "basic-travel-card",
+        "high-value-premium-card"
+      ],
+      "expected_recommendations": {
+        "actions": ["apply"],
+        "must_not_include_cards": [
+          "discover-it-cash-back",
+          "citi-double-cash-card",
+          "dining-card",
+          "premium-grocery-card"
+        ]
+      }
+    },
+    {
+      "name": "Strategy - Maximizer",
+      "description": "Unfiltered pool, up to 6 new cards, signup bonuses weighted 1.5x, no per-card penalty. Should mix reward types and out-recommend the other presets.",
+      "strategy": "maximizer",
+      "user_profile": {
+        "spending": {
+          "dining": 600,
+          "groceries": 800,
+          "gas": 200,
+          "travel": 400,
+          "other": 1000
+        }
+      },
+      "owned_cards": [],
+      "available_cards": [
+        "discover-it-cash-back",
+        "citi-double-cash-card",
+        "dining-card",
+        "premium-grocery-card",
+        "travel-card-1",
+        "mid-tier-card",
+        "basic-travel-card",
+        "high-value-premium-card"
+      ],
+      "expected_recommendations": {
+        "actions": ["apply"]
+      }
+    }
+  ]
+}

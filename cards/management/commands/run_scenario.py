@@ -154,23 +154,38 @@ class Command(BaseCommand):
         
         # Create the scenario
         profile, created_cards = self.create_test_scenario(scenario_data)
-        
+
+        # Optional strategy preset: its filters narrow the card pool and its
+        # max_recommendations caps new applications (expected count stays a
+        # pure assertion for strategy scenarios).
+        from roadmaps.strategies import resolve_scenario_strategy, apply_strategy_to_roadmap
+        strategy = resolve_scenario_strategy(scenario_data)
+        if strategy:
+            max_recommendations = strategy['max_recommendations']
+            self.stdout.write(f'Strategy: {strategy["name"]}')
+        else:
+            max_recommendations = scenario_data.get('expected_recommendations', {}).get('count', 5)
+
         # Create roadmap
         roadmap = Roadmap.objects.create(
             profile=profile,
             name=f"Scenario: {scenario_data['name']}",
-            max_recommendations=scenario_data.get('expected_recommendations', {}).get('count', 5)
+            max_recommendations=max_recommendations
         )
-        
+        apply_strategy_to_roadmap(roadmap, strategy)
+
         # Generate recommendations
-        engine = RecommendationEngine(profile)
+        engine = RecommendationEngine(profile, strategy=strategy)
         recommendations = engine.generate_quick_recommendations(roadmap)
         
         # Display results
         self.display_results(scenario_data, recommendations, verbose)
         
-        # Cleanup
-        profile.user.delete()  # This will cascade delete everything
+        # Cleanup: the scenario user (cascades its profile/cards/spending)
+        # AND any fixture cards this run created in the database.
+        profile.user.delete()
+        for card in getattr(self, 'created_fixture_cards', []):
+            card.delete()
     
     def display_results(self, scenario_data, recommendations, verbose=False):
         """Display scenario results."""
@@ -610,11 +625,18 @@ class Command(BaseCommand):
                     values_credit=True
                 )
 
-        # Create available cards
+        # Create available cards. Track which ones we actually CREATE (vs
+        # fetched pre-existing) so CLI cleanup can remove them — otherwise
+        # every run_scenario invocation leaks fixture cards into the dev DB,
+        # and they start showing up in real recommendations.
         created_cards = {}
+        self.created_fixture_cards = []
         for card_slug in scenario_data['available_cards']:
+            existed = CreditCard.objects.filter(slug=card_slug).exists()
             card = self.create_credit_card_from_slug(card_slug)
             created_cards[card_slug] = card
+            if not existed:
+                self.created_fixture_cards.append(card)
         
         # Create owned cards
         for owned_card_slug in scenario_data.get('owned_cards', []):

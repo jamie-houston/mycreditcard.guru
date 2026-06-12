@@ -17,8 +17,14 @@ class RecommendationEngine:
     - Annual fee vs. benefits analysis
     """
     
-    def __init__(self, profile: UserSpendingProfile, user_cards_data=None):
+    def __init__(self, profile: UserSpendingProfile, user_cards_data=None, strategy=None):
+        from .strategies import strategy_weights
         self.profile = profile
+        # Strategy weights shape SELECTION only (which cards make the
+        # portfolio); displayed dollar values stay honest so every headline
+        # still reconciles to its line items.
+        self.strategy = strategy
+        self.weights = strategy_weights(strategy)
         # All reward-category lookups are filtered to what's active today so
         # expired rotating quarters never count.
         self.today = date.today()
@@ -207,28 +213,40 @@ class RecommendationEngine:
         return recommendations
     
     def _get_filtered_cards(self, roadmap: Roadmap) -> List[CreditCard]:
-        """Apply roadmap filters to get eligible cards"""
+        """Apply roadmap filters to get eligible cards.
+
+        Multiple filters of the SAME type OR together (e.g. reward_type
+        Points + Miles = either); different types AND. Chaining .filter()
+        per filter would AND everything and same-type pairs would match
+        nothing."""
+        from collections import defaultdict
+        from django.db.models import Q
+
         queryset = CreditCard.objects.filter(is_active=True)
-        
+
+        filters_by_type = defaultdict(list)
         for filter_obj in roadmap.filters.all():
-            if filter_obj.filter_type == 'issuer':
-                queryset = queryset.filter(issuer__name__icontains=filter_obj.value)
-            elif filter_obj.filter_type == 'reward_type':
-                queryset = queryset.filter(primary_reward_type__name__icontains=filter_obj.value)
-            elif filter_obj.filter_type == 'card_type':
-                queryset = queryset.filter(card_type=filter_obj.value)
-            elif filter_obj.filter_type == 'annual_fee':
-                # Expect format like "0" or "0-95" or "95+"
-                from decimal import Decimal
-                if '+' in filter_obj.value:
-                    min_fee = Decimal(filter_obj.value.replace('+', ''))
-                    queryset = queryset.filter(annual_fee__gte=min_fee)
-                elif '-' in filter_obj.value:
-                    min_fee, max_fee = map(Decimal, filter_obj.value.split('-'))
-                    queryset = queryset.filter(annual_fee__gte=min_fee, annual_fee__lte=max_fee)
-                else:
-                    fee = Decimal(filter_obj.value)
-                    queryset = queryset.filter(annual_fee=fee)
+            filters_by_type[filter_obj.filter_type].append(filter_obj.value)
+
+        for filter_type, values in filters_by_type.items():
+            type_q = Q()
+            for value in values:
+                if filter_type == 'issuer':
+                    type_q |= Q(issuer__name__icontains=value)
+                elif filter_type == 'reward_type':
+                    type_q |= Q(primary_reward_type__name__icontains=value)
+                elif filter_type == 'card_type':
+                    type_q |= Q(card_type=value)
+                elif filter_type == 'annual_fee':
+                    # Expect format like "0" or "0-95" or "95+"
+                    if '+' in value:
+                        type_q |= Q(annual_fee__gte=Decimal(value.replace('+', '')))
+                    elif '-' in value:
+                        min_fee, max_fee = map(Decimal, value.split('-'))
+                        type_q |= Q(annual_fee__gte=min_fee, annual_fee__lte=max_fee)
+                    else:
+                        type_q |= Q(annual_fee=Decimal(value))
+            queryset = queryset.filter(type_q)
         
         # Filter out discontinued cards
         all_cards = list(queryset.prefetch_related('reward_categories', 'credits'))
@@ -650,13 +668,18 @@ class RecommendationEngine:
                 base_net_value = annual_rewards - effective_fee + signup_bonus_value
                 action = 'apply'
             
+            # Strategy weights: selection-time value, never displayed.
+            scored_value = (base_net_value
+                            + signup_bonus_value * (self.weights['signup_bonus_weight'] - 1)
+                            - self.weights['per_card_penalty'])
+
             # Apply efficiency scoring: boost cards that are highly relevant to user's spending
             efficiency_score = self._calculate_spending_efficiency(card)
             if efficiency_score > 0.8:  # Super boost for highly relevant cards
-                efficiency_boost = base_net_value * efficiency_score * 2.0  # Up to 200% boost for perfect efficiency
+                efficiency_boost = scored_value * efficiency_score * 2.0  # Up to 200% boost for perfect efficiency
             else:
-                efficiency_boost = base_net_value * efficiency_score * 1.0  # Up to 100% boost for normal cards
-            net_value = base_net_value + efficiency_boost
+                efficiency_boost = scored_value * efficiency_score * 1.0  # Up to 100% boost for normal cards
+            net_value = scored_value + efficiency_boost
             
             card_scores.append({
                 'card': card,
@@ -770,10 +793,11 @@ class RecommendationEngine:
                 else:
                     total_fees += float(card.annual_fee)
                 
-                # Add signup bonus for new cards
+                # Add signup bonus for new cards (strategy-weighted: this
+                # function only ranks combinations, it never reaches the UI)
                 if card_data['action'] == 'apply':
                     signup_bonus = self._get_signup_bonus_value(card)
-                    total_value += signup_bonus
+                    total_value += signup_bonus * self.weights['signup_bonus_weight']
                 
                 # Add credits/benefits value
                 credits_value, _ = self._calculate_card_credits_value(card)
@@ -809,8 +833,10 @@ class RecommendationEngine:
                     # Calculate rewards: spend * rate * value_multiplier
                     category_rewards = effective_spend * rate * float(multiplier)
                     total_value += category_rewards
-            
-            return total_value - total_fees
+
+            # Strategy effort cost: every held card must earn its keep
+            card_count_cost = self.weights['per_card_penalty'] * len(card_combination)
+            return total_value - total_fees - card_count_cost
         
                  # Try different combinations to find optimal portfolio
         best_combination = []
@@ -1000,9 +1026,11 @@ class RecommendationEngine:
             else:
                 total_annual_fees += float(card.annual_fee)
             
-            # Add signup bonus for new cards
+            # Add signup bonus for new cards (strategy-weighted: scenario
+            # values only rank portfolios, they're never displayed)
             if action['action'] == 'apply':
-                total_signup_bonuses += self._get_signup_bonus_value(card)
+                total_signup_bonuses += (self._get_signup_bonus_value(card)
+                                         * self.weights['signup_bonus_weight'])
         
         # Use cached spending data for performance
         if not hasattr(self, '_cached_parent_spending'):
@@ -1084,13 +1112,17 @@ class RecommendationEngine:
             
             if efficiency_score > 0.1:  # Boost any somewhat relevant cards (lowered threshold)
                 card_annual_value = self._calculate_smart_card_value(card, signup_bonus=False) - float(card.annual_fee)
-                card_signup_value = self._get_signup_bonus_value(card) if action['action'] == 'apply' else 0
+                card_signup_value = ((self._get_signup_bonus_value(card)
+                                      * self.weights['signup_bonus_weight'])
+                                     if action['action'] == 'apply' else 0)
                 card_base_value = card_annual_value + card_signup_value
                 efficiency_boost = card_base_value * efficiency_score * 0.5  # 50% max boost for perfect efficiency
                 total_efficiency_boost += efficiency_boost
-        
-        final_value = base_portfolio_value + total_efficiency_boost
-        
+
+        # Strategy effort cost: every held card must earn its keep
+        card_count_cost = self.weights['per_card_penalty'] * len(portfolio_cards)
+        final_value = base_portfolio_value + total_efficiency_boost - card_count_cost
+
         return final_value
     
     def _build_parent_category_spending(self) -> dict:

@@ -43,14 +43,24 @@ class CreditCardTestBase(TestCase):
         the scenario's expectations, and return the recommendations."""
         profile, _created_cards = self.command.create_test_scenario(scenario)
 
+        # Mirrors run_scenario.run_scenario: a strategy preset supplies the
+        # card-pool filters and the new-application cap.
+        from roadmaps.strategies import resolve_scenario_strategy, apply_strategy_to_roadmap
+        strategy = resolve_scenario_strategy(scenario)
+
         expected = scenario.get('expected_recommendations', {})
+        if strategy:
+            max_recommendations = strategy['max_recommendations']
+        else:
+            max_recommendations = expected.get('count', 5)
         roadmap = Roadmap.objects.create(
             profile=profile,
             name=f"Scenario: {scenario['name']}",
-            max_recommendations=expected.get('count', 5),
+            max_recommendations=max_recommendations,
         )
+        apply_strategy_to_roadmap(roadmap, strategy)
 
-        engine = RecommendationEngine(profile)
+        engine = RecommendationEngine(profile, strategy=strategy)
         recommendations = engine.generate_quick_recommendations(roadmap)
 
         self.assert_expectations(scenario, recommendations)
