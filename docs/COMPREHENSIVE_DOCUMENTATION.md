@@ -417,11 +417,11 @@ data/tests/scenarios/
 # Run all tests
 python manage.py test
 
-# Run specific test scenarios
-python manage.py run_scenario data/tests/scenarios/basic_profiles.json
+# Run a specific scenario with full line-item math
+python manage.py run_scenario "Jamie Real" --explain
 
-# Performance testing
-python analyze_scenarios.py
+# Audit every JSON scenario against its expectations
+RUN_ALL_SCENARIOS=1 python manage.py test cards.test_json_scenarios
 ```
 
 ## 🚀 Key Features Summary
