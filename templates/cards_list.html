@@ -324,7 +324,7 @@ function filterCards() {
         }
 
         // Search filter
-        if (searchFilter && !card.name.toLowerCase().includes(searchFilter)) {
+        if (searchFilter && !cardMatchesQuery(card, searchFilter)) {
             return false;
         }
 

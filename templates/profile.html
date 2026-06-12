@@ -1039,9 +1039,8 @@ function searchCards(query) {
     
     // Debounce search
     searchTimeout = setTimeout(() => {
-        const filtered = allCards.filter(card => 
-            card.name.toLowerCase().includes(query.toLowerCase()) ||
-            card.issuer.name.toLowerCase().includes(query.toLowerCase())
+        const filtered = allCards.filter(card =>
+            cardMatchesQuery(card, query)
         ).slice(0, 8); // Limit to 8 results
         
         displaySearchResults(filtered);
