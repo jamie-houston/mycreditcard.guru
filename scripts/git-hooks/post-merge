@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+#
+# Runs automatically after a successful `git pull` / `git merge`.
+#
+# It only auto-deploys on the PythonAnywhere web host (detected by a
+# *_wsgi.py under /var/www). On your dev machine it just prints a note —
+# you don't want migrate/collectstatic/reload firing after every local pull.
+#
+# This hook is version-controlled. Activate it once per checkout with:
+#     git config core.hooksPath scripts/git-hooks
+#
+set -euo pipefail
+
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+
+if ls /var/www/*_wsgi.py >/dev/null 2>&1; then
+    echo "[post-merge] PythonAnywhere host detected — running deploy.sh"
+    "$REPO_ROOT/scripts/deploy.sh"
+else
+    echo "[post-merge] pull complete (local machine — skipping auto-deploy)."
+fi
