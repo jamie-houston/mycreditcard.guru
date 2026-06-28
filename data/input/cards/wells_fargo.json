@@ -93,11 +93,11 @@
     "reward_value_multiplier": 0.01,
     "reward_categories": [
       {
-        "category": "hotel",
+        "category": "hotels",
         "reward_rate": 5
       },
       {
-        "category": "airline",
+        "category": "airlines",
         "reward_rate": 4
       },
       {
@@ -115,7 +115,7 @@
     ],
     "credits": [
       {
-        "category": "airline",
+        "category": "airlines",
         "value": 50
       }
     ],

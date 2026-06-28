@@ -41,6 +41,8 @@ signup bonuses/fees; output appends to `~/import_external.log`.
 workon creditcard_guru
 pip install -r requirements.txt
 python manage.py migrate
+python manage.py import_cards data/input/system/spending_categories.json  # the single category seed
+python manage.py import_spending_credits   # must precede card import: card credits resolve these by name
 python manage.py import_cards data/input/cards/*.json
 python manage.py collectstatic --noinput
 # Then reload web app in PythonAnywhere

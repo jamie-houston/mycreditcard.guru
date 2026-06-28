@@ -6,6 +6,12 @@
     "category": "airlines"
   },
   {
+    "name": "airlines",
+    "display_name": "Airline Fee Credit",
+    "description": "Annual statement credit for incidental airline fees",
+    "category": "airlines"
+  },
+  {
     "name": "apple_music",
     "display_name": "Apple Music",
     "description": "Apple Music",
@@ -87,6 +93,12 @@
     "name": "dunkin",
     "display_name": "Dunkin",
     "description": "Dunkin",
+    "category": "dining"
+  },
+  {
+    "name": "grubhub",
+    "display_name": "Grubhub",
+    "description": "Grubhub monthly dining credit",
     "category": "dining"
   }
 ]
