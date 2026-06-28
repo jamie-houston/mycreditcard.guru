@@ -28,6 +28,7 @@ STRATEGIES = {
     'simple_cash_back': {
         'key': 'simple_cash_back',
         'name': 'Simple Cash Back',
+        'effort_label': 'As little as possible',
         'description': (
             'A couple of cash-back cards you can use on autopilot. '
             'No points math, no rotating calendars, no fee juggling.'
@@ -44,6 +45,7 @@ STRATEGIES = {
     'travel_points': {
         'key': 'travel_points',
         'name': 'Travel Points',
+        'effort_label': 'Some, if it pays for travel',
         'description': (
             'Build a points/miles portfolio for travel redemptions. '
             'A few more cards and an annual fee where it pays for itself.'
@@ -62,6 +64,7 @@ STRATEGIES = {
     'maximizer': {
         'key': 'maximizer',
         'name': 'Maximizer',
+        'effort_label': 'I have a spreadsheet',
         'description': (
             'Every reward type in play, signup bonuses weighted heavily, '
             'no card-count squeamishness. For people with spreadsheets.'
@@ -74,6 +77,31 @@ STRATEGIES = {
         },
     },
 }
+
+
+def ui_presets():
+    """STRATEGIES as a list for UI rendering, ordered low→high effort.
+
+    `effort_label` is the answer text for the effort-tolerance question
+    (which is just a friendly skin over the presets). `pool_label` is a
+    human summary of the card-pool filters so the UI never re-derives
+    filter semantics.
+    """
+    presets = []
+    for strategy in STRATEGIES.values():
+        reward_types = [
+            f['value'] for f in strategy['filters']
+            if f['filter_type'] == 'reward_type'
+        ]
+        presets.append({
+            'key': strategy['key'],
+            'name': strategy['name'],
+            'effort_label': strategy['effort_label'],
+            'description': strategy['description'],
+            'max_recommendations': strategy['max_recommendations'],
+            'pool_label': ' / '.join(reward_types) if reward_types else 'All reward types',
+        })
+    return presets
 
 
 def get_strategy(key):

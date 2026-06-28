@@ -325,9 +325,11 @@ def landing_view(request):
 
 def index_view(request):
     """Roadmap creation page"""
+    from roadmaps.strategies import ui_presets
     context = {
         'user_email': request.user.email if request.user.is_authenticated else None,
-        'is_dev_user': request.user.is_authenticated and request.user.email == 'foresterh@gmail.com'
+        'is_dev_user': request.user.is_authenticated and request.user.email == 'foresterh@gmail.com',
+        'strategies': ui_presets()
     }
     return render(request, 'index.html', context)
 

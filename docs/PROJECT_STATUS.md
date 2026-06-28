@@ -75,7 +75,7 @@ preferences, not a strategy.
 | Phase | Scope | Status |
 |---|---|---|
 | S1 | Three data-driven presets — **Simple Cash Back**, **Travel Points**, **Maximizer** (the churner tier) — as filter bundles + engine weights; `strategy` param on the quick-rec API; one JSON scenario file per preset (non-negotiable: every preset gets scenario coverage or we're back to untrusted math) | ✅ Done 2026-06-12 (see S1 notes below) |
-| S2 | UI: effort-tolerance question picks the default preset; explicit strategy picker is an advanced option, not a gate before the roadmap | Planned |
+| S2 | UI: effort-tolerance question picks the default preset; explicit strategy picker is an advanced option, not a gate before the roadmap | ✅ Done 2026-06-12 (see S2 notes below) |
 | S3 | Issuer eligibility rules engine (see below) — behind-the-scenes "can you even get this card/bonus" checks feeding next-card selection, plus an eligibility note on recommendation cards in the UI | Planned |
 | — | **Goals with sequencing** (e.g., Southwest Companion Pass: time two bonuses to land after Jan 1) — explicitly **deferred**; it's a goal, not a weighting, and depends on the bonus-sequencing backlog item | Deferred |
 
@@ -110,6 +110,29 @@ serializer footgun (below) gets worse with more state on that endpoint — defus
   every run (it deleted the scenario user but not the cards it created) — they then
   appeared in real recommendations. Now tracks created-vs-fetched cards and deletes the
   created ones on cleanup. Dev DB was scrubbed back to the 27 real cards.
+
+### S2 notes: strategies UI (done 2026-06-12)
+
+- **Strategy stays data**: presets grew an `effort_label` and a `ui_presets()` helper in
+  `roadmaps/strategies.py`; the roadmap page (`index_view`) passes that list to the
+  template, which renders the question AND feeds the JS via `json_script` — no preset
+  names/captions duplicated in the frontend.
+- **The question is optional**: three tappable effort cards above Preferences on
+  `/roadmap/`; clicking selects a preset, clicking again clears it. Nothing blocks
+  "Get My Roadmap" — unanswered = no `strategy` in the payload = pre-S2 behavior.
+- **Advanced picker**: a collapsed "pick a strategy directly" select (preset name +
+  pool + card cap, plus "No strategy"), kept in sync with the effort cards both ways.
+- **Preset side effects on selection** (user action only, not on page-load restore):
+  Max Recommendations is set to the preset's cap (visible, still user-overridable —
+  matches the serializer's explicit-beats-preset rule) and the Reward Type filter is
+  cleared, because same-type filters OR together so a leftover pick would *widen* the
+  preset's pool.
+- Selection persists in localStorage (`userStrategy`), the results header names the
+  active strategy, and the dev "Export to Test Scenario" includes the top-level
+  `"strategy"` key scenarios already understand.
+- Tests (standard suite now 36): `ui_presets()` shape, `/roadmap/` renders the
+  question/presets/picker (needed a test `SocialApp` for base.html's Google button),
+  and the API 400s on a typo'd strategy key.
 
 ### S3 detail: issuer eligibility rules (verified via web research 2026-06-12)
 
@@ -181,6 +204,6 @@ on the models, neither is used here. Rules themselves should be data
 
 - Acceptance scenario: `python manage.py run_scenario "Jamie Real" --explain`
 - Full scenario sweep: `RUN_ALL_SCENARIOS=1 python manage.py test cards.test_json_scenarios`
-- Standard tests: `python manage.py test` (33 tests)
+- Standard tests: `python manage.py test` (36 tests)
 - Full-sweep baseline (2026-06-12): `FAILED (failures=21, errors=7)` — all pre-existing
   stale expectations/test-DB data gaps; any change to these numbers means a regression

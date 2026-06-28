@@ -9,6 +9,45 @@
             Get personalized credit card recommendations based on your spending patterns
         </p>
 
+        <!-- Strategy Section: effort-tolerance question picks a preset.
+             Optional — never a gate; skipping it = no strategy, filters-only. -->
+        {% if strategies %}
+        <div class="section strategy-section">
+            <h2>⚡ How much effort do you want to put in?</h2>
+            <p class="strategy-subtitle">
+                Optional — answer and we'll shape the roadmap around a strategy.
+                Skip it and your preferences below run the show. Click again to clear.
+            </p>
+            <div class="effort-options">
+                {% for s in strategies %}
+                <button type="button" class="effort-option" id="effort-{{ s.key }}"
+                        onclick="toggleEffortOption('{{ s.key }}')">
+                    <div class="effort-label">{{ s.effort_label }}</div>
+                    <div class="effort-desc">{{ s.description }}</div>
+                </button>
+                {% endfor %}
+            </div>
+            <div id="strategyHint" class="strategy-hint" style="display: none;"></div>
+            <div class="strategy-advanced">
+                <span onclick="toggleStrategyPicker()" id="strategyPickerToggle" class="strategy-advanced-toggle">
+                    ▸ Advanced: pick a strategy directly
+                </span>
+                <div id="strategyPicker" style="display: none; margin-top: 10px;">
+                    <div class="input-group">
+                        <span class="input-group-text">Strategy</span>
+                        <select id="strategySelect" onchange="setStrategy(this.value, true)">
+                            <option value="">No strategy — just my preferences</option>
+                            {% for s in strategies %}
+                            <option value="{{ s.key }}">{{ s.name }} — {{ s.pool_label }}, up to {{ s.max_recommendations }} new cards</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {{ strategies|json_script:"strategiesData" }}
+        {% endif %}
+
         <!-- Preferences Section (moved to top) -->
         <div class="section preferences-section">
             <h2 onclick="togglePreferences()" style="cursor: pointer; display: flex; justify-content: space-between; align-items: center;">
@@ -110,6 +149,82 @@
         let spendingCategories = {}; // For slug -> ID mapping
         let spendingCategoriesArray = []; // For the actual category objects
         let spendingCredits = [];
+
+        // Strategy presets (from roadmaps/strategies.py via the view context)
+        const STRATEGY_PRESETS = (() => {
+            const el = document.getElementById('strategiesData');
+            if (!el) return [];
+            try {
+                const parsed = JSON.parse(el.textContent);
+                return Array.isArray(parsed) ? parsed : [];
+            } catch (e) {
+                return [];
+            }
+        })();
+        let selectedStrategy = ''; // '' = no strategy (filters-only, the old behavior)
+
+        function strategyByKey(key) {
+            return STRATEGY_PRESETS.find(s => s.key === key) || null;
+        }
+
+        function toggleEffortOption(key) {
+            // Clicking the selected answer clears it — the question is not a gate
+            setStrategy(selectedStrategy === key ? '' : key, true);
+        }
+
+        function toggleStrategyPicker() {
+            const picker = document.getElementById('strategyPicker');
+            const toggle = document.getElementById('strategyPickerToggle');
+            if (picker.style.display === 'none') {
+                picker.style.display = 'block';
+                toggle.textContent = '▾ Advanced: pick a strategy directly';
+            } else {
+                picker.style.display = 'none';
+                toggle.textContent = '▸ Advanced: pick a strategy directly';
+            }
+        }
+
+        // applyDefaults: true on user action (preset sets Max Recommendations and
+        // releases the Reward Type filter, since the preset owns the card pool);
+        // false when restoring saved state on page load (saved prefs already
+        // reflect whatever the preset set).
+        function setStrategy(key, applyDefaults) {
+            selectedStrategy = key || '';
+            const preset = strategyByKey(selectedStrategy);
+
+            STRATEGY_PRESETS.forEach(s => {
+                const el = document.getElementById(`effort-${s.key}`);
+                if (el) el.classList.toggle('selected', s.key === selectedStrategy);
+            });
+            const select = document.getElementById('strategySelect');
+            if (select) select.value = selectedStrategy;
+
+            const hint = document.getElementById('strategyHint');
+            if (hint) {
+                if (preset) {
+                    hint.style.display = 'block';
+                    hint.innerHTML = `<strong>${preset.name}</strong> strategy — card pool: ${preset.pool_label}, up to ${preset.max_recommendations} new cards. You can still adjust preferences below.`;
+                } else {
+                    hint.style.display = 'none';
+                }
+            }
+
+            if (applyDefaults) {
+                const maxRecs = document.getElementById('maxRecs');
+                const rewardType = document.getElementById('rewardType');
+                if (preset) {
+                    if (maxRecs) maxRecs.value = preset.max_recommendations;
+                    // Preset filters OR with same-type explicit filters, so a
+                    // leftover reward-type pick would WIDEN the pool — clear it.
+                    if (rewardType) rewardType.value = '';
+                } else if (maxRecs) {
+                    const saved = JSON.parse(localStorage.getItem('userPreferences') || '{}');
+                    maxRecs.value = saved.default_max_recommendations || 5;
+                }
+            }
+
+            localStorage.setItem('userStrategy', selectedStrategy);
+        }
 
         function toggleSpendingProfile() {
             const content = document.getElementById('spendingProfileContent');
@@ -522,7 +637,14 @@
                     const maxRecsSelect = document.getElementById('maxRecs');
                     if (maxRecsSelect) maxRecsSelect.value = savedPreferences.default_max_recommendations;
                 }
-                
+
+                // Restore strategy selection (highlight/picker only — saved
+                // preferences already reflect any defaults the preset applied)
+                const savedStrategy = localStorage.getItem('userStrategy') || '';
+                if (savedStrategy && strategyByKey(savedStrategy)) {
+                    setStrategy(savedStrategy, false);
+                }
+
                 // Load spending credit preferences after a short delay to ensure they are rendered
                 setTimeout(() => {
                     loadSpendingCreditPreferences();
@@ -721,7 +843,8 @@
                     user_cards: userCards,
                     filters: filters,
                     max_recommendations: parseInt(document.getElementById('maxRecs').value),
-                    spending_credit_preferences: selectedSpendingCredits
+                    spending_credit_preferences: selectedSpendingCredits,
+                    strategy: selectedStrategy
                 };
 
                 const response = await fetch(`${API_BASE}/roadmaps/quick-recommendation/`, {
@@ -744,9 +867,11 @@
                 const recommendations = data.recommendations || [];
                 const portfolioSummary = data.portfolio_summary || {};
 
+                const activePreset = strategyByKey(selectedStrategy);
                 let html = `
                     <div class="results">
                         <h2 id="roadmapResults">🎯 Your Personalized Credit Card Roadmap</h2>
+                        ${activePreset ? `<p style="text-align: center; color: #6b7280; margin: -10px 0 20px 0;">Strategy: <strong>${activePreset.name}</strong> — ${activePreset.pool_label}</p>` : ''}
                 `;
 
                 // Add portfolio summary if we have recommendations
@@ -1282,6 +1407,7 @@
             const scenario = {
                 name: `Custom Scenario - ${new Date().toLocaleDateString()}`,
                 description: `Test scenario exported from user input on ${new Date().toLocaleDateString()}`,
+                ...(selectedStrategy ? { strategy: selectedStrategy } : {}),
                 user_profile: {
                     spending: spendingData,
                     monthly_spending_total: totalMonthlySpending
