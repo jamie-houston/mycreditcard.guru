@@ -34,13 +34,17 @@ elif [ -f "venv/bin/activate" ]; then
 elif [ -d "$HOME/.virtualenvs" ] && [ "$(find "$HOME/.virtualenvs" -maxdepth 1 -mindepth 1 -type d | wc -l)" -eq 1 ]; then
     # shellcheck disable=SC1091
     source "$HOME/.virtualenvs/$(ls -1 "$HOME/.virtualenvs")/bin/activate"
+elif python -c "import django" >/dev/null 2>&1; then
+    # No virtualenv, but the ambient python already has Django (e.g. this
+    # PythonAnywhere account installs packages to ~/.local, not a venv).
+    echo "==> no virtualenv found; using ambient python"
 else
-    echo "!! Could not find a virtualenv automatically."
+    echo "!! No virtualenv found, and the ambient python can't import Django."
     echo "   Set DEPLOY_VENV to the path shown on the PythonAnywhere Web tab, e.g.:"
     echo "     DEPLOY_VENV=\$HOME/.virtualenvs/<name> ./scripts/deploy.sh"
     exit 1
 fi
-echo "==> venv: ${VIRTUAL_ENV:-unknown}"
+echo "==> python: $(command -v python)"
 
 # --- dependencies (no-op if requirements unchanged) ---
 echo "==> pip install -r requirements.txt"
