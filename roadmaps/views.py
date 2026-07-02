@@ -3,11 +3,12 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
+from django.contrib.sessions.exceptions import SessionInterrupted
 
 from cards.models import UserSpendingProfile
 from .models import Roadmap, RoadmapFilter
 from .serializers import (
-    RoadmapFilterSerializer, RoadmapSerializer, 
+    RoadmapFilterSerializer, RoadmapSerializer,
     CreateRoadmapSerializer, GenerateRoadmapSerializer
 )
 from .recommendation_engine import RecommendationEngine
@@ -128,15 +129,15 @@ def quick_recommendation_view(request):
         data=request.data,
         context={'request': request}
     )
-    
+
     if serializer.is_valid():
         try:
             recommendations = serializer.generate_recommendations()
-            
+
             # Get portfolio summary from the first recommendation (they all have the same summary)
             portfolio_summary = recommendations[0].get('portfolio_summary', {}) if recommendations else {}
-            
-            return Response({
+
+            response = Response({
                 'recommendations': [
                     {
                         'card': {
@@ -181,13 +182,20 @@ def quick_recommendation_view(request):
                     'bonus_capacity': portfolio_summary.get('bonus_capacity', {})
                 }
             })
-            
+
+            # After the rolled-back transaction, session may be out of sync.
+            # Mark it as unmodified so middleware doesn't try to save it.
+            if not request.user.is_authenticated:
+                request.session.modified = False
+
+            return response
+
         except Exception as e:
             return Response(
-                {'error': f'Failed to generate recommendations: {str(e)}'}, 
+                {'error': f'Failed to generate recommendations: {str(e)}'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
-    
+
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
