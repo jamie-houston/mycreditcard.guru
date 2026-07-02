@@ -87,13 +87,13 @@
                 <div class="preferences-inline">
                     <div class="input-group">
                         <span class="input-group-text">Max Annual Fee</span>
-                        <input type="number" id="maxFee" placeholder="95" min="0" step="25">
+                        <input type="number" id="maxFee" placeholder="No max" min="0" step="25">
                     </div>
                 </div>
                 <div class="preferences-inline">
                     <div class="input-group">
                         <span class="input-group-text">Max Recommendations</span>
-                        <input type="number" id="maxRecs" class="form-control" value="5" min="1" max="20" step="1" placeholder="5">
+                        <input type="number" id="maxRecs" class="form-control" min="1" max="20" step="1" placeholder="1">
                     </div>
                 </div>
             </div>
@@ -219,7 +219,7 @@
                     if (rewardType) rewardType.value = '';
                 } else if (maxRecs) {
                     const saved = JSON.parse(localStorage.getItem('userPreferences') || '{}');
-                    maxRecs.value = saved.default_max_recommendations || 5;
+                    maxRecs.value = saved.default_max_recommendations || 1;
                 }
             }
 
@@ -709,9 +709,9 @@
                     default_issuer_filter: document.getElementById('issuer')?.value || '',
                     default_reward_type_filter: document.getElementById('rewardType')?.value || '',
                     default_max_fee_filter: parseFloat(document.getElementById('maxFee')?.value) || null,
-                    default_max_recommendations: parseInt(document.getElementById('maxRecs')?.value) || 5
+                    default_max_recommendations: parseInt(document.getElementById('maxRecs')?.value) || 1
                 };
-                
+
                 // Use the unified data manager to save
                 await UserDataManager.saveSpending(spendingData);
                 
@@ -842,7 +842,7 @@
                     spending_amounts: spendingAmounts,
                     user_cards: userCards,
                     filters: filters,
-                    max_recommendations: parseInt(document.getElementById('maxRecs').value),
+                    max_recommendations: parseInt(document.getElementById('maxRecs').value) || 1,
                     spending_credit_preferences: selectedSpendingCredits,
                     strategy: selectedStrategy
                 };
@@ -904,6 +904,13 @@
                                     <div style="opacity: 0.9; font-size: 14px;">Recommended Cards</div>
                                 </div>
                             </div>
+                            ${(portfolioSummary.bonus_capacity && portfolioSummary.bonus_capacity.deferred_applies && portfolioSummary.bonus_capacity.deferred_applies.length > 0) ? `
+                                <div style="background: rgba(255,255,255,0.15); padding: 12px 15px; border-radius: 8px; margin-bottom: 15px; font-size: 14px;">
+                                    ⏳ At ~$${(portfolioSummary.bonus_capacity.total_monthly_spending || 0).toLocaleString()}/mo of spending, the recommended signup bonuses take
+                                    ~${portfolioSummary.bonus_capacity.months_committed} of the year's ${portfolioSummary.bonus_capacity.capacity_months} months to earn.
+                                    Deferred until next year: ${portfolioSummary.bonus_capacity.deferred_applies.join(', ')}.
+                                </div>
+                            ` : ''}
                             ${categoryOptimizationEntries.length > 0 ? `
                                 <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 8px;">
                                     <h4 style="margin: 0 0 10px 0; color: white; font-size: 16px;">🎯 Optimized Reward Rates by Category</h4>
@@ -1253,7 +1260,12 @@
                                             <strong>Signup Bonus:</strong> ${rec.card.signup_bonus_amount.toLocaleString()} ${rec.card.signup_bonus_type || 'points'}${rec.card.signup_spending_requirement ? ` — spend $${rec.card.signup_spending_requirement.toLocaleString()} in ${rec.card.signup_time_limit_months || 3} months` : ''}
                                         </div>` : ''
                                     }
-                                    
+                                    ${rec.eligibility_note ? `
+                                        <div style="background: #fef3c7; color: #92400e; padding: 6px 10px; border-radius: 6px; font-size: 13px; margin-top: 6px;">
+                                            ⚠️ ${rec.eligibility_note}
+                                        </div>` : ''
+                                    }
+
                                     ${breakdownHtml}
                                     
                                     <div class="roadmap-card-reasoning">
@@ -1374,7 +1386,7 @@
                 issuer: document.getElementById('issuer')?.value || null,
                 rewardType: document.getElementById('rewardType')?.value || 'Points',
                 maxFee: parseFloat(document.getElementById('maxFee')?.value) || null,
-                maxRecommendations: parseInt(document.getElementById('maxRecommendations')?.value) || 5
+                maxRecommendations: parseInt(document.getElementById('maxRecommendations')?.value) || 1
             };
         }
 
@@ -1420,14 +1432,14 @@
                         card_type: filters.cardType || 'personal',
                         preferred_reward_type: filters.rewardType || 'Points',
                         issuer: filters.issuer || null,
-                        max_recommendations: filters.maxRecommendations || 5
+                        max_recommendations: filters.maxRecommendations || 1
                     },
                     spending_credit_preferences: selectedSpendingCredits
                 },
                 expected_recommendations: {
                     actions: ["apply", "keep"],
                     min_cards: 1,
-                    max_cards: filters.maxRecommendations || 5,
+                    max_cards: filters.maxRecommendations || 1,
                     reasoning_must_contain: ["spending", "rewards", "portfolio"],
                     test_conditions: [
                         "Validates user input scenario",
@@ -1561,9 +1573,9 @@
                     default_issuer_filter: document.getElementById('issuer')?.value || '',
                     default_reward_type_filter: document.getElementById('rewardType')?.value || '',
                     default_max_fee_filter: parseFloat(document.getElementById('maxFee')?.value) || null,
-                    default_max_recommendations: parseInt(document.getElementById('maxRecs')?.value) || 5
+                    default_max_recommendations: parseInt(document.getElementById('maxRecs')?.value) || 1
                 };
-                
+
                 // Use localStorage for immediate saving (works in beforeunload)
                 localStorage.setItem('userSpending', JSON.stringify(spendingData));
                 localStorage.setItem('userPreferences', JSON.stringify(preferencesData));

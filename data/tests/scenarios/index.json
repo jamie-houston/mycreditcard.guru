@@ -1,6 +1,6 @@
 {
-  "description": "Index of all scenario test files",
-  "total_scenarios": 53,
+  "description": "Index of all scenario test files (informational — the loader globs *.json, so a missing entry here doesn't skip a file)",
+  "total_scenarios": 61,
   "files": [
     {
       "filename": "basic_profiles.json",
@@ -43,6 +43,24 @@
       "category": "signup_bonus",
       "scenario_count": 3,
       "description": "Test scenarios for signup bonus"
+    },
+    {
+      "filename": "jamie_real.json",
+      "category": "acceptance",
+      "scenario_count": 1,
+      "description": "Jamie's real cards and spending — the hand-verification scenario"
+    },
+    {
+      "filename": "strategies.json",
+      "category": "strategies",
+      "scenario_count": 3,
+      "description": "Strategy presets (S1): same spender through each preset"
+    },
+    {
+      "filename": "eligibility.json",
+      "category": "eligibility",
+      "scenario_count": 4,
+      "description": "Issuer eligibility rules (S3): application blocks, bonus ineligibility, bonus capacity"
     }
   ]
 }

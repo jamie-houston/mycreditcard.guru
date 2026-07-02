@@ -2,6 +2,12 @@
   {
     "name": "Chase Sapphire Reserve",
     "issuer": "Chase",
+    "metadata": {
+      "bonus_eligibility": {
+        "once_per_lifetime": true,
+        "label": "Sapphire bonus: once per lifetime per card"
+      }
+    },
     "annual_fee": 795,
     "signup_bonus": {
       "bonus_amount": 150000,
@@ -115,6 +121,12 @@
   {
     "name": "Chase Sapphire Preferred Card",
     "issuer": "Chase",
+    "metadata": {
+      "bonus_eligibility": {
+        "once_per_lifetime": true,
+        "label": "Sapphire bonus: once per lifetime per card"
+      }
+    },
     "annual_fee": 95,
     "signup_bonus": {
       "bonus_amount": 75000,
@@ -171,6 +183,12 @@
   {
     "name": "Chase Sapphire Reserve for Business",
     "issuer": "Chase",
+    "metadata": {
+      "bonus_eligibility": {
+        "once_per_lifetime": true,
+        "label": "Sapphire bonus: once per lifetime per card"
+      }
+    },
     "annual_fee": 795,
     "signup_bonus": {
       "bonus_amount": 150000,
@@ -736,6 +754,12 @@
   {
     "name": "Southwest Performance Business",
     "issuer": "Chase",
+    "metadata": {
+      "bonus_eligibility": {
+        "months_since_bonus": 24,
+        "label": "Southwest 24-month rule (per business card)"
+      }
+    },
     "annual_fee": 299,
     "signup_bonus": {
       "bonus_amount": 80000,
@@ -773,6 +797,14 @@
   {
     "name": "Southwest Rapid Rewards Plus Credit Card",
     "issuer": "Chase",
+    "metadata": {
+      "application_family": "southwest-personal",
+      "bonus_eligibility": {
+        "months_since_bonus": 24,
+        "family": "southwest-personal",
+        "label": "Southwest 24-month rule"
+      }
+    },
     "annual_fee": 99,
     "signup_bonus": {
       "bonus_amount": 20000,
@@ -808,6 +840,14 @@
   {
     "name": "Southwest Premier",
     "issuer": "Chase",
+    "metadata": {
+      "application_family": "southwest-personal",
+      "bonus_eligibility": {
+        "months_since_bonus": 24,
+        "family": "southwest-personal",
+        "label": "Southwest 24-month rule"
+      }
+    },
     "annual_fee": 149,
     "signup_bonus": {
       "bonus_amount": 30000,
@@ -832,6 +872,12 @@
   {
     "name": "Southwest Premier Business",
     "issuer": "Chase",
+    "metadata": {
+      "bonus_eligibility": {
+        "months_since_bonus": 24,
+        "label": "Southwest 24-month rule (per business card)"
+      }
+    },
     "annual_fee": 149,
     "signup_bonus": {
       "bonus_amount": 60000,
@@ -857,6 +903,14 @@
   {
     "name": "Southwest Rapid Rewards Priority Credit Card",
     "issuer": "Chase",
+    "metadata": {
+      "application_family": "southwest-personal",
+      "bonus_eligibility": {
+        "months_since_bonus": 24,
+        "family": "southwest-personal",
+        "label": "Southwest 24-month rule"
+      }
+    },
     "annual_fee": 229,
     "signup_bonus": {
       "bonus_amount": 40000,

@@ -97,6 +97,48 @@ class JSONScenarioTest(JSONScenarioTestBase):
         with self.assertRaises(ValueError):
             resolve_scenario_strategy({'strategy': 'simple_cashback'})  # missing underscore
 
+    def test_eligibility_chase_524_blocks(self):
+        """S3: five personal cards in 24 months block the Chase candidate."""
+        if not self.scenarios:
+            self.skipTest("No scenarios found in JSON file")
+        scenario = self.get_scenario('Eligibility - Chase 5/24 blocks new Chase card')
+        recommendations = self.run_scenario_test(scenario)
+        self.print_scenario_results(scenario, recommendations)
+
+    def test_eligibility_under_524_allows(self):
+        """S3: at 3/24 the same Chase candidate is recommendable."""
+        if not self.scenarios:
+            self.skipTest("No scenarios found in JSON file")
+        scenario = self.get_scenario('Eligibility - Under 5/24 allows the Chase card')
+        recommendations = self.run_scenario_test(scenario)
+        self.print_scenario_results(scenario, recommendations)
+
+    def test_eligibility_amex_lifetime_zeroes_bonus(self):
+        """S3: prior (closed) ownership zeroes the Amex bonus but the card
+        is still recommended on ongoing value, with a user-facing note."""
+        if not self.scenarios:
+            self.skipTest("No scenarios found in JSON file")
+        scenario = self.get_scenario('Eligibility - Amex lifetime rule zeroes the bonus')
+        recommendations = self.run_scenario_test(scenario)
+        amex = next(rec for rec in recommendations
+                    if rec['card'].slug == 'amex-test-gold')
+        self.assertEqual(float(amex['signup_bonus_value']), 0.0,
+                         "Amex lifetime rule must value the bonus at $0")
+        self.assertIn('bonus unlikely', amex['eligibility_note'],
+                      "Recommendation must carry the eligibility note")
+        self.print_scenario_results(scenario, recommendations)
+
+    def test_bonus_capacity_defers_third_card(self):
+        """S3: two $10K bonuses fit a $2K/mo year; the third is deferred."""
+        if not self.scenarios:
+            self.skipTest("No scenarios found in JSON file")
+        scenario = self.get_scenario('Bonus capacity - only two 10K bonuses fit a year')
+        recommendations = self.run_scenario_test(scenario)
+        capacity = recommendations[0]['portfolio_summary']['bonus_capacity']
+        self.assertEqual(capacity['deferred_applies'], ['Bonus Card Gamma'])
+        self.assertAlmostEqual(capacity['months_committed'], 10.0, places=1)
+        self.print_scenario_results(scenario, recommendations)
+
     # The broad scenario suite has ~22 stale expectations (card counts and
     # keep/cancel policies written for an older engine; baseline was 27
     # failures before the allocation rework). Math-integrity checks

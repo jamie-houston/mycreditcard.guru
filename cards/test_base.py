@@ -49,7 +49,12 @@ class CreditCardTestBase(TestCase):
         strategy = resolve_scenario_strategy(scenario)
 
         expected = scenario.get('expected_recommendations', {})
-        if strategy:
+        # Top-level max_recommendations beats the strategy preset and the
+        # count-derived default (mirrors run_scenario) — bonus-capacity
+        # scenarios must allow more applies than they expect to survive.
+        if 'max_recommendations' in scenario:
+            max_recommendations = scenario['max_recommendations']
+        elif strategy:
             max_recommendations = strategy['max_recommendations']
         else:
             max_recommendations = expected.get('count', 5)

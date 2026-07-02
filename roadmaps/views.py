@@ -162,6 +162,7 @@ def quick_recommendation_view(request):
                         'rewards_breakdown': rec.get('rewards_breakdown', []),
                         'total_spending_on_card': float(rec.get('total_spending_on_card', 0)),
                         'signup_bonus_value': float(rec.get('signup_bonus_value', 0)),
+                        'eligibility_note': rec.get('eligibility_note', ''),
                         'priority': rec['priority']
                     }
                     for rec in recommendations
@@ -176,7 +177,8 @@ def quick_recommendation_view(request):
                     'category_optimization': portfolio_summary.get('category_optimization', {}),
                     'card_count': portfolio_summary.get('card_count', 0),
                     'total_credits_value': portfolio_summary.get('total_credits_value', 0),
-                    'total_annual_spending': portfolio_summary.get('total_annual_spending', 0)
+                    'total_annual_spending': portfolio_summary.get('total_annual_spending', 0),
+                    'bonus_capacity': portfolio_summary.get('bonus_capacity', {})
                 }
             })
             

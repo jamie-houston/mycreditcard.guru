@@ -1,0 +1,128 @@
+{
+  "description": "Issuer eligibility rules (S3): application blocks, bonus ineligibility, and yearly bonus capacity from spend velocity",
+  "category": "eligibility",
+  "scenarios": [
+    {
+      "name": "Eligibility - Chase 5/24 blocks new Chase card",
+      "description": "Five personal cards opened within 24 months: the Chase candidate must not be recommended even though its bonus is attractive. Uses opened_days_ago so the window never goes stale.",
+      "user_profile": {
+        "spending": {
+          "dining": 500,
+          "groceries": 700,
+          "gas": 300,
+          "general": 1500
+        }
+      },
+      "owned_cards": [
+        {"card": "basic-card-1", "opened_days_ago": 60},
+        {"card": "low-reward-card", "opened_days_ago": 150},
+        {"card": "dining-card", "opened_days_ago": 300},
+        {"card": "warehouse-card", "opened_days_ago": 450},
+        {"card": "better-card-1", "opened_days_ago": 600}
+      ],
+      "available_cards": [
+        "basic-card-1",
+        "low-reward-card",
+        "dining-card",
+        "warehouse-card",
+        "better-card-1",
+        "chase-test-rewards"
+      ],
+      "expected_recommendations": {
+        "actions": ["keep"],
+        "must_not_include_cards": ["chase-test-rewards"],
+        "test_conditions": [
+          "5 personal cards opened in the last 24 months trip Chase 5/24",
+          "chase-test-rewards is silently excluded from apply recommendations"
+        ]
+      }
+    },
+    {
+      "name": "Eligibility - Under 5/24 allows the Chase card",
+      "description": "Same profile but two of the five cards were opened >24 months ago, so the user is at 3/24 and the Chase card is recommendable.",
+      "user_profile": {
+        "spending": {
+          "dining": 500,
+          "groceries": 700,
+          "gas": 300,
+          "general": 1500
+        }
+      },
+      "owned_cards": [
+        {"card": "basic-card-1", "opened_days_ago": 60},
+        {"card": "low-reward-card", "opened_days_ago": 150},
+        {"card": "dining-card", "opened_days_ago": 300},
+        {"card": "warehouse-card", "opened_days_ago": 800},
+        {"card": "better-card-1", "opened_days_ago": 900}
+      ],
+      "available_cards": [
+        "basic-card-1",
+        "low-reward-card",
+        "dining-card",
+        "warehouse-card",
+        "better-card-1",
+        "chase-test-rewards"
+      ],
+      "expected_recommendations": {
+        "actions": ["apply"],
+        "must_include_cards": ["chase-test-rewards"],
+        "test_conditions": [
+          "Only 3 cards opened within 24 months — 5/24 does not trip",
+          "The 2% Chase card beats the owned 1x cards for general spending"
+        ]
+      }
+    },
+    {
+      "name": "Eligibility - Amex lifetime rule zeroes the bonus",
+      "description": "User held (and closed) the Amex card years ago. It's still worth applying for the 3x dining, but the once-per-lifetime rule values the signup bonus at $0.",
+      "user_profile": {
+        "spending": {
+          "dining": 1500,
+          "general": 1500
+        }
+      },
+      "owned_cards": [
+        {"card": "amex-test-gold", "opened_days_ago": 1200, "closed_days_ago": 800}
+      ],
+      "available_cards": [
+        "amex-test-gold"
+      ],
+      "expected_recommendations": {
+        "actions": ["apply"],
+        "must_include_cards": ["amex-test-gold"],
+        "test_conditions": [
+          "Closed card still counts as prior ownership for Amex lifetime rule",
+          "Bonus valued at $0; card recommended on ongoing 3x dining value alone",
+          "Unit tests assert signup_bonus_value == 0 (roadmaps/tests.py)"
+        ]
+      }
+    },
+    {
+      "name": "Bonus capacity - only two 10K bonuses fit a year",
+      "description": "A $2,000/month spender is offered three cards that each need $10,000 of spending (~5 months each). Only two bonuses fit in 12 months of spending; the third card is deferred even though max_recommendations allows it.",
+      "max_recommendations": 3,
+      "user_profile": {
+        "spending": {
+          "general": 2000
+        }
+      },
+      "owned_cards": [],
+      "available_cards": [
+        "bonus-card-alpha",
+        "bonus-card-beta",
+        "bonus-card-gamma"
+      ],
+      "expected_recommendations": {
+        "count": 2,
+        "actions": ["apply"],
+        "must_include_cards": ["bonus-card-alpha", "bonus-card-beta"],
+        "must_not_include_cards": ["bonus-card-gamma"],
+        "test_conditions": [
+          "Each $10K requirement consumes ~5 months of the $2K/mo spending",
+          "5 + 5 = 10 months fits; the third bonus (15 months) is deferred",
+          "max_recommendations=3 proves the cap comes from spend velocity, not the count"
+        ]
+      }
+    }
+  ]
+}

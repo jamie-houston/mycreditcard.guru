@@ -17,6 +17,10 @@ class RecommendationEngine:
     - Annual fee vs. benefits analysis
     """
     
+    # A year of bonus-earning capacity: counted signup bonuses consume
+    # months of the user's total spending (see _bonus_months_needed).
+    BONUS_CAPACITY_MONTHS = 12.0
+
     def __init__(self, profile: UserSpendingProfile, user_cards_data=None, strategy=None):
         from .strategies import strategy_weights
         self.profile = profile
@@ -28,12 +32,19 @@ class RecommendationEngine:
         # All reward-category lookups are filtered to what's active today so
         # expired rotating quarters never count.
         self.today = date.today()
-        # Get user cards from the user, not the profile
+        # Get user cards from the user, not the profile. `user_cards` is the
+        # OPEN cards (they earn rewards); `card_history` includes closed
+        # cards too — eligibility rules like Chase 5/24 and Amex's lifetime
+        # bonus rule look at everything the user has ever held.
         if profile.user:
-            self.user_cards = list(profile.user.owned_cards.filter(closed_date__isnull=True))
+            self.card_history = list(
+                profile.user.owned_cards.select_related('card__issuer').all())
+            self.user_cards = [uc for uc in self.card_history
+                               if uc.closed_date is None]
         else:
+            self.card_history = []
             self.user_cards = []
-        
+
         # For session-based users, accept user cards data directly
         if user_cards_data and not profile.user:
             from django.utils.dateparse import parse_date
@@ -49,11 +60,14 @@ class RecommendationEngine:
                         'opened_date': parse_date(card_data.get('opened_date', '2020-01-01')),
                         'closed_date': None if card_data.get('is_active', True) else parse_date(card_data.get('opened_date', '2020-01-01')),
                         'nickname': card_data.get('nickname', ''),
+                        'bonus_earned_date': parse_date(card_data['bonus_earned_date']) if card_data.get('bonus_earned_date') else None,
                     })()
                     mock_user_cards.append(mock_card)
                 except CreditCard.DoesNotExist:
                     continue
-            self.user_cards = mock_user_cards
+            self.card_history = mock_user_cards
+            self.user_cards = [uc for uc in mock_user_cards
+                               if uc.closed_date is None]
         
         self.spending_amounts = {
             sa.category.slug: sa.monthly_amount 
@@ -120,12 +134,35 @@ class RecommendationEngine:
         # max_recommendations should apply only to NEW card applications
         # Current cards (keeps/cancels) must always be shown regardless of max_recommendations
         max_new_card_applications = roadmap.max_recommendations
-        
-        # Include best apply recommendations up to max_new_card_applications
+
+        # Include best apply recommendations up to max_new_card_applications,
+        # AND within the year's bonus-earning capacity: each counted signup
+        # bonus consumes months of the user's total spending
+        # (_bonus_months_needed), and there are only 12 in a year. A $2K/mo
+        # spender can't work three $10K requirements this year — the third
+        # card is deferred, not shown. Keeping windows sequential also keeps
+        # each card's bonus_shift line items honest (they'd double-count the
+        # same dollars if windows overlapped).
+        months_committed = 0.0
+        deferred_applies = []
         if new_card_actions:
             new_card_actions.sort(key=lambda x: x['priority'])
-            # Take up to max_recommendations new cards
-            filtered_other_keeps_applies.extend(new_card_actions[:max_new_card_applications])
+            selected_applies = []
+            for rec in new_card_actions:
+                if len(selected_applies) >= max_new_card_applications:
+                    break
+                months = (self._bonus_months_needed(rec['card'])
+                          if float(rec.get('signup_bonus_value', 0)) > 0 else 0.0)
+                if months_committed + months <= self.BONUS_CAPACITY_MONTHS:
+                    months_committed += months
+                    selected_applies.append(rec)
+                else:
+                    logger.debug(
+                        f"Deferring {rec['card'].name}: bonus needs "
+                        f"{months:.1f} months of spending, only "
+                        f"{self.BONUS_CAPACITY_MONTHS - months_committed:.1f} left this year")
+                    deferred_applies.append(rec)
+            filtered_other_keeps_applies.extend(selected_applies)
         
         recommendations = filtered_other_keeps_applies + zero_fee_keeps
         
@@ -154,6 +191,15 @@ class RecommendationEngine:
         
         # Calculate portfolio summary for the recommended cards
         portfolio_summary = self._calculate_portfolio_summary(recommendations)
+
+        # Bonus-capacity summary: how much of the year's spending the
+        # recommended bonuses consume, and which applies didn't fit.
+        portfolio_summary['bonus_capacity'] = {
+            'total_monthly_spending': self._total_monthly_spending(),
+            'months_committed': round(months_committed, 1),
+            'capacity_months': self.BONUS_CAPACITY_MONTHS,
+            'deferred_applies': [rec['card'].name for rec in deferred_applies],
+        }
         
         # NOTE: breakdowns are intentionally never stripped — every card's
         # headline value must stay reproducible from its visible line items.
@@ -312,6 +358,7 @@ class RecommendationEngine:
             annual_fee = float(card.annual_fee)
             multiplier = rewards_breakdown['reward_multiplier']
 
+            eligibility_note = ''
             if action == 'apply':
                 signup_bonus_value = self._get_signup_bonus_value(card)
                 annual_fee_waived = card.metadata.get('annual_fee_waived_first_year', False)
@@ -320,11 +367,36 @@ class RecommendationEngine:
                 # bonus-window spending shifts.
                 ongoing_value = annual_rewards - annual_fee
 
-                plan = self._signup_bonus_plan(
-                    card, portfolio_allocation,
-                    rewards_breakdown['total_spending_on_card'])
-                if not plan['bonus_earnable']:
+                bonus_block = self._bonus_ineligibility_note(card)
+                if bonus_block:
+                    # Issuer bonus rules zero the bonus for THIS user; no
+                    # point modeling shift spending for a bonus that won't
+                    # pay. The card competes on ongoing value alone.
+                    eligibility_note = bonus_block
                     signup_bonus_value = 0
+                    plan = {'items': [self._info_item(
+                        'Signup bonus not counted', bonus_block)],
+                        'value_delta': 0.0, 'bonus_earnable': False}
+                else:
+                    plan = self._signup_bonus_plan(
+                        card, portfolio_allocation,
+                        rewards_breakdown['total_spending_on_card'])
+                    if not plan['bonus_earnable']:
+                        signup_bonus_value = 0
+                    elif signup_bonus_value > 0:
+                        # Bonus timeline: how many months of the user's
+                        # total spending this requirement consumes (feeds
+                        # the yearly bonus-capacity cap in assembly).
+                        months_needed = self._bonus_months_needed(card)
+                        if months_needed > 0:
+                            requirement = float((card.metadata.get('signup_bonus')
+                                                 or {}).get('spending_requirement') or 0)
+                            plan['items'].append(self._info_item(
+                                'Bonus timeline',
+                                f"${requirement:,.0f} requirement ÷ "
+                                f"${self._total_monthly_spending():,.0f}/mo total "
+                                f"spending ≈ {months_needed:.1f} months of your "
+                                f"spending devoted to this bonus"))
                 annual_rewards += plan['value_delta']
                 rewards_breakdown['breakdown'].extend(plan['items'])
 
@@ -342,9 +414,10 @@ class RecommendationEngine:
                                  f"(${rewards_breakdown['total_rewards']:.0f} annual rewards - {fee_text} "
                                  f"+ ${signup_bonus_value:.0f} signup bonus{shift_text})")
                 elif not plan['bonus_earnable']:
+                    why = eligibility_note or 'spending requirement unreachable'
                     reasoning = (f"Total estimated value: ${estimated_value:.0f} "
                                  f"(${annual_rewards:.0f} annual rewards - {fee_text}; "
-                                 f"signup bonus not counted — spending requirement unreachable)")
+                                 f"signup bonus not counted — {why})")
                 else:
                     reasoning = (f"Total estimated value: ${estimated_value:.0f} "
                                  f"(${annual_rewards:.0f} annual rewards - {fee_text})")
@@ -380,10 +453,38 @@ class RecommendationEngine:
                 'rewards_breakdown': rewards_breakdown['breakdown'],
                 'total_spending_on_card': rewards_breakdown.get('total_spending_on_card', 0),
                 'signup_bonus_value': signup_bonus_value,
+                'eligibility_note': eligibility_note,
                 'priority': card_action.get('priority', 1)
             })
 
         return recommendations
+
+    @staticmethod
+    def _info_item(name, text):
+        """A $0 informational breakdown line — never affects reconciliation."""
+        return {
+            'category_name': name, 'monthly_spend': 0, 'annual_spend': 0,
+            'reward_rate': 0, 'reward_multiplier': 0, 'points_earned': 0,
+            'category_rewards': 0, 'calculation': text, 'type': 'info',
+        }
+
+    def _total_monthly_spending(self) -> float:
+        return sum(float(amount) for amount in self.spending_amounts.values())
+
+    def _bonus_months_needed(self, card: CreditCard) -> float:
+        """Months of the user's TOTAL spending it takes to meet this card's
+        signup requirement — the scarce resource behind bonus sequencing.
+        $2K/mo spend against a $10K requirement = 5 months in which every
+        dollar runs through this card. 0 when there's no requirement;
+        inf when the user spends nothing."""
+        signup_bonus = card.metadata.get('signup_bonus') or {}
+        requirement = float(signup_bonus.get('spending_requirement') or 0)
+        if requirement <= 0:
+            return 0.0
+        monthly = self._total_monthly_spending()
+        if monthly <= 0:
+            return float('inf')
+        return requirement / monthly
 
     def _signup_bonus_plan(self, card: CreditCard, portfolio_allocation: list,
                            allocated_annual_spend: float) -> dict:
@@ -412,12 +513,7 @@ class RecommendationEngine:
         window = months / 12
         organic = allocated_annual_spend * window
 
-        def info_item(name, text):
-            return {
-                'category_name': name, 'monthly_spend': 0, 'annual_spend': 0,
-                'reward_rate': 0, 'reward_multiplier': 0, 'points_earned': 0,
-                'category_rewards': 0, 'calculation': text, 'type': 'info',
-            }
+        info_item = self._info_item
 
         if organic >= requirement:
             return {
@@ -1335,31 +1431,34 @@ class RecommendationEngine:
         return recommendations
     
     def _is_eligible_for_card(self, card: CreditCard) -> bool:
-        """Check if user is eligible for card based on issuer policies"""
-        issuer = card.issuer
-        
-        # Check issuer-specific rules
-        if issuer.name.lower() == 'chase':
-            # Simplified 5/24 rule check
-            # Only count cards with known opening dates
-            # Only check if profile has a user (not anonymous)
-            if self.profile.user:
-                recent_cards = UserCard.objects.filter(
-                    user=self.profile.user,
-                    opened_date__isnull=False,
-                    opened_date__gte=datetime.now().date() - timedelta(days=24*30)
-                ).count()
-            else:
-                recent_cards = 0
-            
-            if recent_cards >= 5:
-                return False
-        
-        # Check if user already has this exact card
-        if self.profile.user and UserCard.objects.filter(user=self.profile.user, card=card, closed_date__isnull=True).exists():
+        """Application eligibility: can the user get approved at all?
+
+        Data-driven issuer rules (Chase 5/24, BofA 2/3/4, Capital One
+        1-per-6-months, family blocks) live in roadmaps/eligibility.py and
+        are evaluated against the full card history, closed cards included.
+        Blocked cards are silently skipped — the roadmap picks the
+        next-best card instead.
+        """
+        from .eligibility import application_block
+
+        # Already holds this exact card (open) — can't apply again.
+        if any(uc.card.id == card.id for uc in self.user_cards):
             return False
-        
-        return True
+
+        return application_block(card, self.card_history, self.today) is None
+
+    def _bonus_ineligibility_note(self, card: CreditCard):
+        """User-facing reason this card's signup bonus is valued at $0
+        (Amex lifetime, Citi 48-month, Sapphire/Southwest rules...), or
+        None when the bonus looks earnable. Cached per card — it's called
+        from every scoring site via _get_signup_bonus_value."""
+        if not hasattr(self, '_bonus_notes'):
+            self._bonus_notes = {}
+        if card.id not in self._bonus_notes:
+            from .eligibility import bonus_ineligibility
+            self._bonus_notes[card.id] = bonus_ineligibility(
+                card, self.card_history, self.today)
+        return self._bonus_notes[card.id]
     
     def _calculate_card_annual_rewards(self, card: CreditCard) -> float:
         """Calculate annual rewards for a card based on user spending"""
@@ -1736,9 +1835,14 @@ class RecommendationEngine:
 
     def _get_best_signup_bonus_card(self, eligible_cards: List[CreditCard]) -> dict:
         """Get the best signup bonus card as a fallback recommendation for high spenders"""
-        # Filter to only new cards (not currently owned)
-        owned_card_ids = set(self.profile.user.owned_cards.filter(closed_date__isnull=True).values_list('card_id', flat=True))
-        new_cards = [card for card in eligible_cards if card.id not in owned_card_ids]
+        # Filter to only new cards (not currently owned). Works for session
+        # users too — self.user_cards covers both real and mock cards.
+        # Issuer application rules apply here too: a 5/24-blocked card must
+        # not sneak back in through the high-spender fallback.
+        owned_card_ids = {uc.card.id for uc in self.user_cards}
+        new_cards = [card for card in eligible_cards
+                     if card.id not in owned_card_ids
+                     and self._is_eligible_for_card(card)]
         
         best_card = None
         best_value = 0
@@ -1784,7 +1888,13 @@ class RecommendationEngine:
         return None
 
     def _get_signup_bonus_value(self, card: CreditCard) -> float:
-        """Get signup bonus value using card's specific reward value multiplier"""
+        """Get signup bonus value using card's specific reward value multiplier.
+
+        Returns $0 when issuer bonus rules make the bonus unearnable for
+        THIS user (see _bonus_ineligibility_note) — the card still competes
+        on ongoing value, matching the unreachable-requirement pathway."""
+        if self._bonus_ineligibility_note(card):
+            return 0.0
         if card.signup_bonus_amount and self._can_meet_signup_requirement(card):
             # Check signup bonus type to determine if conversion is needed
             signup_bonus_type = getattr(card, 'signup_bonus_type', None)

@@ -157,12 +157,18 @@ class Command(BaseCommand):
 
         # Optional strategy preset: its filters narrow the card pool and its
         # max_recommendations caps new applications (expected count stays a
-        # pure assertion for strategy scenarios).
+        # pure assertion for strategy scenarios). A top-level
+        # "max_recommendations" beats both — needed when a scenario must
+        # allow MORE applies than it expects (e.g. bonus-capacity tests
+        # prove cards get deferred, which a count-derived cap would mask).
         from roadmaps.strategies import resolve_scenario_strategy, apply_strategy_to_roadmap
         strategy = resolve_scenario_strategy(scenario_data)
         if strategy:
-            max_recommendations = strategy['max_recommendations']
             self.stdout.write(f'Strategy: {strategy["name"]}')
+        if 'max_recommendations' in scenario_data:
+            max_recommendations = scenario_data['max_recommendations']
+        elif strategy:
+            max_recommendations = strategy['max_recommendations']
         else:
             max_recommendations = scenario_data.get('expected_recommendations', {}).get('count', 5)
 
@@ -199,10 +205,20 @@ class Command(BaseCommand):
             self.stdout.write(f'  • {category.title()}: ${amount:,.0f} ({percentage:.1f}%)')
         self.stdout.write('')
         
-        # Show owned cards
+        # Show owned cards (entries are slugs or history dicts)
         owned_cards = scenario_data.get('owned_cards', [])
         if owned_cards:
-            self.stdout.write(f'Currently Owned Cards: {", ".join(owned_cards)}')
+            def describe(entry):
+                if isinstance(entry, dict):
+                    parts = [entry['card']]
+                    if entry.get('opened_date'):
+                        parts.append(f"opened {entry['opened_date']}")
+                    if entry.get('closed_date'):
+                        parts.append(f"closed {entry['closed_date']}")
+                    return ' '.join(parts)
+                return entry
+            self.stdout.write(
+                f'Currently Owned Cards: {", ".join(describe(e) for e in owned_cards)}')
             self.stdout.write('')
         
         # Show recommendations
@@ -638,17 +654,50 @@ class Command(BaseCommand):
             if not existed:
                 self.created_fixture_cards.append(card)
         
-        # Create owned cards
-        for owned_card_slug in scenario_data.get('owned_cards', []):
-            if owned_card_slug in created_cards:
+        # Create owned cards. Two forms:
+        #   "card-slug"                       -> open card, opened ~6 months ago
+        #   {"card": "card-slug",             -> full history entry, for
+        #    "opened_days_ago": 90,              eligibility-rule scenarios
+        #    "closed_days_ago": 30,              (5/24 windows, Amex lifetime,
+        #    "bonus_earned_days_ago": 60}        Citi 48-month...)
+        # Days-ago values keep scenarios evergreen (an absolute date would
+        # silently drift out of every eligibility window); absolute
+        # "opened_date"/"closed_date"/"bonus_earned_date" ISO strings are
+        # also accepted. Dict-form cards must exist in available_cards — a
+        # typo silently creating no history would make the test vacuous.
+        for owned_entry in scenario_data.get('owned_cards', []):
+            if isinstance(owned_entry, dict):
+                owned_card_slug = owned_entry['card']
+                if owned_card_slug not in created_cards:
+                    raise ValueError(
+                        f"Scenario owned card '{owned_card_slug}' is not in "
+                        f"available_cards — history entries must reference "
+                        f"cards the scenario defines")
+
+                def parse(key):
+                    if owned_entry.get(f'{key}_days_ago') is not None:
+                        return date.today() - timedelta(
+                            days=int(owned_entry[f'{key}_days_ago']))
+                    if owned_entry.get(f'{key}_date'):
+                        return date.fromisoformat(owned_entry[f'{key}_date'])
+                    return None
+
                 UserCard.objects.create(
                     user=profile.user,
                     card=created_cards[owned_card_slug],
+                    opened_date=parse('opened') or (date.today() - timedelta(days=180)),
+                    closed_date=parse('closed'),
+                    bonus_earned_date=parse('bonus_earned'),
+                )
+            elif owned_entry in created_cards:
+                UserCard.objects.create(
+                    user=profile.user,
+                    card=created_cards[owned_entry],
                     opened_date=date.today() - timedelta(days=180),
                     # Note: is_active is now a property based on closed_date
                     # Card is active by default since closed_date is None
                 )
-        
+
         return profile, created_cards
     
     def create_credit_card_from_slug(self, card_slug):

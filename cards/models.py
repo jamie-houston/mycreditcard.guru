@@ -257,6 +257,10 @@ class UserCard(models.Model):
     nickname = models.CharField(max_length=100, blank=True, help_text="Optional nickname for this card")
     opened_date = models.DateField(null=True, blank=True, help_text="Date when the card was opened/approved")
     closed_date = models.DateField(null=True, blank=True, help_text="Date when the card was closed (if applicable)")
+    bonus_earned_date = models.DateField(
+        null=True, blank=True,
+        help_text="Date the signup bonus was earned (feeds issuer bonus-eligibility rules; "
+                  "approximated as opened_date + ~3 months when blank)")
     
     # Metadata
     created_at = models.DateTimeField(auto_now_add=True)
