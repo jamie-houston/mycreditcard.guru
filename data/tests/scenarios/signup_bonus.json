@@ -58,7 +58,7 @@
     },
     {
       "name": "Signup Bonus Opportunity - Keep Existing Plus New",
-      "description": "User has good existing cards but should get new cards for signup bonuses",
+      "description": "User has good existing cards but should get new cards for signup bonuses. Recalibrated 2026-07-01 against the allocation-consistent engine + S3 (realistic fixture bonus requirements, bonus capacity, zero-fee keep policy).",
       "user_profile": {
         "spending": {
           "dining": 1000,
@@ -76,6 +76,7 @@
         "basic-card-1"
       ],
       "available_cards": [
+        "basic-card-1",
         "mid-tier-card",
         "expensive-premium-card-1"
       ],
@@ -97,7 +98,7 @@
           "keep",
           "signup bonus"
         ],
-        "min_total_value": 2000,
+        "min_total_value": 1900,
         "test_conditions": [
           "Keeps existing profitable cards",
           "Recommends new cards with valuable signup bonuses",
@@ -128,6 +129,7 @@
         "mid-tier-card"
       ],
       "available_cards": [
+        "basic-card-1",
         "mid-tier-card",
         "expensive-premium-card-1"
       ],

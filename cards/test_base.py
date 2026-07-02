@@ -68,6 +68,14 @@ class CreditCardTestBase(TestCase):
         engine = RecommendationEngine(profile, strategy=strategy)
         recommendations = engine.generate_quick_recommendations(roadmap)
 
+        # DUMP_SCENARIOS=1 prints every scenario's full results BEFORE the
+        # assertions — the recalibration workflow needs the actual numbers
+        # from the clean test DB (the CLI runs against the dev DB, whose
+        # real cards pollute scenario pools).
+        import os
+        if os.environ.get('DUMP_SCENARIOS'):
+            self.print_scenario_results(scenario, recommendations)
+
         self.assert_expectations(scenario, recommendations)
         return recommendations
 

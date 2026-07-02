@@ -100,5 +100,11 @@
     "display_name": "Grubhub",
     "description": "Grubhub monthly dining credit",
     "category": "dining"
+  },
+  {
+    "name": "lyft",
+    "display_name": "Lyft Credit",
+    "description": "Monthly Lyft ride credit",
+    "category": "lyft"
   }
 ]

@@ -697,6 +697,12 @@ class Command(BaseCommand):
                     # Note: is_active is now a property based on closed_date
                     # Card is active by default since closed_date is None
                 )
+            else:
+                # Used to skip silently — four scenarios spent months
+                # "testing" keeps of cards that were never created.
+                raise ValueError(
+                    f"Scenario owned card '{owned_entry}' is not in "
+                    f"available_cards — add it there or the user owns nothing")
 
         return profile, created_cards
     
@@ -728,26 +734,83 @@ class Command(BaseCommand):
             if card['slug'] == card_slug:
                 card_def = card
                 break
-        
-        if not card_def:
-            raise ValueError(f"Card definition not found: {card_slug} (not in database or test definitions)")
-        
-        return self.create_credit_card(card_def)
+
+        if card_def:
+            return self.create_credit_card(card_def)
+
+        # Last resort: the REAL per-issuer card files. This is what lets
+        # jamie_real (real cards, real spending) run in the test database
+        # via the exact import path production uses.
+        real_card = self._create_real_card_from_slug(card_slug)
+        if real_card is not None:
+            return real_card
+
+        raise ValueError(
+            f"Card definition not found: {card_slug} (not in database, "
+            f"test definitions, or data/input/cards/)")
+
+    def _create_real_card_from_slug(self, card_slug):
+        """Import a single real card from data/input/cards/*.json using the
+        import_cards machinery, or None if no file defines the slug."""
+        import glob
+        from io import StringIO
+        from django.core.management.base import OutputWrapper
+        from cards.management.commands.import_cards import (
+            Command as ImportCardsCommand)
+
+        if not hasattr(self, '_real_card_definitions'):
+            self._real_card_definitions = {}
+            cards_dir = os.path.join(
+                os.path.dirname(os.path.dirname(os.path.dirname(
+                    os.path.dirname(__file__)))),
+                'data', 'input', 'cards')
+            for path in sorted(glob.glob(os.path.join(cards_dir, '*.json'))):
+                try:
+                    with open(path) as f:
+                        data = json.load(f)
+                except (json.JSONDecodeError, OSError):
+                    continue
+                for card_data in (data if isinstance(data, list) else data.get('cards', [])):
+                    slug = card_data.get('slug')
+                    if slug:
+                        self._real_card_definitions.setdefault(slug, card_data)
+
+        card_def = self._real_card_definitions.get(card_slug)
+        if card_def is None:
+            return None
+
+        importer = ImportCardsCommand()
+        importer.stdout = OutputWrapper(StringIO())
+        importer.style = self.style
+        importer.import_credit_cards([card_def])
+        return CreditCard.objects.filter(slug=card_slug).first()
 
 # REMOVED: Deprecated create_credit_card_from_name method
     # Use create_credit_card_from_slug instead
     
     def create_credit_card(self, card_data):
         """Create a credit card from JSON data."""
+        # Accept the real card-file format too: a top-level structured
+        # "signup_bonus" dict supplies the amount and lands in metadata,
+        # where the engine reads spending requirements. Silently dropping
+        # it (the old behavior) made fixture bonuses free money.
+        metadata = dict(card_data.get('metadata') or {'reward_value_multiplier': 0.01})
+        signup_bonus_amount = card_data.get('signup_bonus_amount')
+        top_level_bonus = card_data.get('signup_bonus')
+        if top_level_bonus and 'signup_bonus' not in metadata:
+            metadata['signup_bonus'] = top_level_bonus
+        if signup_bonus_amount is None and isinstance(metadata.get('signup_bonus'), dict):
+            signup_bonus_amount = metadata['signup_bonus'].get('bonus_amount')
+
         card = CreditCard.objects.create(
             name=card_data['name'],
             slug=card_data['slug'],
             issuer=self.issuers[card_data['issuer']],
             annual_fee=Decimal(str(card_data.get('annual_fee', 0))),
-            signup_bonus_amount=card_data.get('signup_bonus_amount'),
+            signup_bonus_amount=signup_bonus_amount,
             signup_bonus_type=self.reward_types[card_data.get('signup_bonus_type', 'Points')],
             primary_reward_type=self.reward_types[card_data.get('primary_reward_type', 'Points')],
-            metadata=card_data.get('metadata', {'reward_value_multiplier': 0.01})
+            metadata=metadata
         )
         
         # Create reward categories
@@ -760,7 +823,38 @@ class Command(BaseCommand):
                 max_annual_spend=Decimal(str(category_data.get('max_annual_spend') or category_data.get('max_bonus_amount') or category_data.get('max_spend'))) if category_data.get('max_annual_spend') or category_data.get('max_bonus_amount') or category_data.get('max_spend') else None,
                 is_active=True
             )
-        
+
+        # Create card credits (same JSON shape as the real card files:
+        # credit_type -> SpendingCredit by name, category -> SpendingCategory
+        # by slug). Unknown references are loud — a credit that silently
+        # doesn't exist makes credit-integration scenarios test nothing.
+        from cards.models import CardCredit, SpendingCredit
+        for credit_data in card_data.get('credits', []):
+            category = None
+            spending_credit = None
+            if 'credit_type' in credit_data:
+                try:
+                    spending_credit = SpendingCredit.objects.get(
+                        name=credit_data['credit_type'])
+                except SpendingCredit.DoesNotExist:
+                    raise ValueError(
+                        f"Fixture card {card.slug}: unknown credit_type "
+                        f"'{credit_data['credit_type']}'")
+            elif 'category' in credit_data:
+                category = self.categories.get(credit_data['category'])
+                if category is None:
+                    raise ValueError(
+                        f"Fixture card {card.slug}: unknown credit category "
+                        f"'{credit_data['category']}'")
+            CardCredit.objects.create(
+                card=card,
+                category=category,
+                spending_credit=spending_credit,
+                description=credit_data.get('description', ''),
+                value=credit_data.get('value', 0),
+                times_per_year=credit_data.get('times_per_year', 1),
+            )
+
         return card
     
     def create_test_setup_data(self):
@@ -838,3 +932,19 @@ class Command(BaseCommand):
                         ).update(parent=parent)
                     except SpendingCategory.DoesNotExist:
                         pass
+
+        # Scenarios also reference the REAL taxonomy (jamie_real spends in
+        # airlines/rental_cars/...; spending-credit scenarios value
+        # dashpass/uber_eats/...). Import the same system files production
+        # uses so the test DB speaks the same slugs — get_or_create keeps
+        # this idempotent against the flat test-setup categories above.
+        from io import StringIO
+        from django.core.management import call_command
+        system_dir = os.path.join(project_root, 'data', 'input', 'system')
+        system_categories = os.path.join(system_dir, 'spending_categories.json')
+        if os.path.exists(system_categories):
+            call_command('import_cards', system_categories, stdout=StringIO())
+        system_credits = os.path.join(system_dir, 'spending_credits.json')
+        if os.path.exists(system_credits):
+            call_command('import_spending_credits', file=system_credits,
+                         stdout=StringIO())

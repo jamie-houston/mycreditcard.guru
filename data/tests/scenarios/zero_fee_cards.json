@@ -102,7 +102,7 @@
     },
     {
       "name": "Zero Fee Cards Always Visible",
-      "description": "Tests that $0 fee cards always appear in recommendations regardless of max_recommendations limit",
+      "description": "Tests that $0 fee cards always appear in recommendations regardless of max_recommendations limit. Recalibrated 2026-07-01 against the allocation-consistent engine + S3 (realistic fixture bonus requirements, bonus capacity, zero-fee keep policy).",
       "user_profile": {
         "spending": {
           "groceries": 200,
@@ -131,8 +131,7 @@
       ],
       "expected_recommendations": {
         "actions": [
-          "keep",
-          "apply"
+          "keep"
         ],
         "smart_filtering": {
           "max_recommendations": 3,
@@ -398,7 +397,7 @@
     },
     {
       "name": "Zero Fee Card Smart Filtering Priority",
-      "description": "Tests that smart filtering logic properly prioritizes $0 fee cards over other recommendations",
+      "description": "Tests that smart filtering logic properly prioritizes $0 fee cards over other recommendations. Recalibrated 2026-07-01 against the allocation-consistent engine + S3 (realistic fixture bonus requirements, bonus capacity, zero-fee keep policy).",
       "user_profile": {
         "spending": {
           "groceries": 200,
@@ -426,8 +425,7 @@
       "expected_recommendations": {
         "actions": [
           "keep",
-          "cancel",
-          "apply"
+          "cancel"
         ],
         "smart_filtering": {
           "zero_fee_priority": true,

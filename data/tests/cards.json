@@ -3,11 +3,6 @@
     "name": "Amazon Prime",
     "issuer": "Chase",
     "annual_fee": 0,
-    "signup_bonus": {
-      "bonus_amount": 200,
-      "spending_requirement": 0.01,
-      "time_limit_months": 12
-    },
     "reward_type": "Cashback",
     "signup_bonus_type": "Cashback",
     "primary_reward_type": "Cashback",
@@ -22,7 +17,16 @@
         "reward_rate": 1.0
       }
     ],
-    "slug": "amazon-prime-test"
+    "slug": "amazon-prime-test",
+    "signup_bonus_amount": 200,
+    "metadata": {
+      "reward_value_multiplier": 0.01,
+      "signup_bonus": {
+        "bonus_amount": 200,
+        "spending_requirement": 0.01,
+        "time_limit_months": 12
+      }
+    }
   },
   {
     "name": "Citi Double Cash Card",
@@ -33,7 +37,12 @@
     "primary_reward_type": "Cashback",
     "metadata": {
       "reward_value_multiplier": 0.01,
-      "discontinued": false
+      "discontinued": false,
+      "signup_bonus": {
+        "bonus_amount": 20000,
+        "spending_requirement": 1500,
+        "time_limit_months": 6
+      }
     },
     "reward_categories": [
       {
@@ -52,7 +61,12 @@
     "primary_reward_type": "Points",
     "metadata": {
       "reward_value_multiplier": 0.01,
-      "discontinued": false
+      "discontinued": false,
+      "signup_bonus": {
+        "bonus_amount": 40000,
+        "spending_requirement": 3000,
+        "time_limit_months": 3
+      }
     },
     "reward_categories": [
       {
@@ -75,7 +89,12 @@
     "primary_reward_type": "Cashback",
     "metadata": {
       "reward_value_multiplier": 0.01,
-      "discontinued": false
+      "discontinued": false,
+      "signup_bonus": {
+        "bonus_amount": 15000,
+        "spending_requirement": 1000,
+        "time_limit_months": 3
+      }
     },
     "reward_categories": [
       {
@@ -94,7 +113,12 @@
     "primary_reward_type": "Cashback",
     "metadata": {
       "reward_value_multiplier": 0.01,
-      "discontinued": false
+      "discontinued": false,
+      "signup_bonus": {
+        "bonus_amount": 20000,
+        "spending_requirement": 1000,
+        "time_limit_months": 3
+      }
     },
     "reward_categories": [
       {
@@ -113,7 +137,12 @@
     "primary_reward_type": "Points",
     "metadata": {
       "reward_value_multiplier": 0.012,
-      "discontinued": false
+      "discontinued": false,
+      "signup_bonus": {
+        "bonus_amount": 50000,
+        "spending_requirement": 4000,
+        "time_limit_months": 3
+      }
     },
     "reward_categories": [
       {
@@ -140,7 +169,12 @@
     "primary_reward_type": "Cashback",
     "metadata": {
       "reward_value_multiplier": 0.01,
-      "discontinued": false
+      "discontinued": false,
+      "signup_bonus": {
+        "bonus_amount": 15000,
+        "spending_requirement": 1000,
+        "time_limit_months": 3
+      }
     },
     "reward_categories": [
       {
@@ -159,7 +193,12 @@
     "primary_reward_type": "Cashback",
     "metadata": {
       "reward_value_multiplier": 0.01,
-      "discontinued": false
+      "discontinued": false,
+      "signup_bonus": {
+        "bonus_amount": 20000,
+        "spending_requirement": 1000,
+        "time_limit_months": 3
+      }
     },
     "reward_categories": [
       {
@@ -188,7 +227,12 @@
     "primary_reward_type": "Points",
     "metadata": {
       "reward_value_multiplier": 0.015,
-      "discontinued": false
+      "discontinued": false,
+      "signup_bonus": {
+        "bonus_amount": 80000,
+        "spending_requirement": 6000,
+        "time_limit_months": 3
+      }
     },
     "reward_categories": [
       {
@@ -204,7 +248,34 @@
         "reward_rate": 1.0
       }
     ],
-    "slug": "high-value-premium-card"
+    "slug": "high-value-premium-card",
+    "credits": [
+      {
+        "credit_type": "google_workspace",
+        "value": 20,
+        "times_per_year": 12
+      },
+      {
+        "credit_type": "ziprecruiter",
+        "value": 15,
+        "times_per_year": 12
+      },
+      {
+        "credit_type": "lyft",
+        "value": 10,
+        "times_per_year": 12
+      },
+      {
+        "credit_type": "dashpass",
+        "value": 10,
+        "times_per_year": 12
+      },
+      {
+        "credit_type": "uber_eats",
+        "value": 15,
+        "times_per_year": 12
+      }
+    ]
   },
   {
     "name": "Mid Tier Card",
@@ -215,7 +286,12 @@
     "primary_reward_type": "Points",
     "metadata": {
       "reward_value_multiplier": 0.012,
-      "discontinued": false
+      "discontinued": false,
+      "signup_bonus": {
+        "bonus_amount": 50000,
+        "spending_requirement": 4000,
+        "time_limit_months": 3
+      }
     },
     "reward_categories": [
       {
@@ -238,7 +314,12 @@
     "primary_reward_type": "Cashback",
     "metadata": {
       "reward_value_multiplier": 0.01,
-      "discontinued": false
+      "discontinued": false,
+      "signup_bonus": {
+        "bonus_amount": 10000,
+        "spending_requirement": 500,
+        "time_limit_months": 3
+      }
     },
     "reward_categories": [
       {
@@ -257,7 +338,12 @@
     "primary_reward_type": "Cashback",
     "metadata": {
       "reward_value_multiplier": 0.01,
-      "discontinued": false
+      "discontinued": false,
+      "signup_bonus": {
+        "bonus_amount": 25000,
+        "spending_requirement": 1500,
+        "time_limit_months": 3
+      }
     },
     "reward_categories": [
       {
@@ -276,7 +362,12 @@
     "primary_reward_type": "Points",
     "metadata": {
       "reward_value_multiplier": 0.015,
-      "discontinued": false
+      "discontinued": false,
+      "signup_bonus": {
+        "bonus_amount": 60000,
+        "spending_requirement": 6000,
+        "time_limit_months": 6
+      }
     },
     "reward_categories": [
       {
@@ -303,7 +394,12 @@
     "primary_reward_type": "Points",
     "metadata": {
       "reward_value_multiplier": 0.01,
-      "discontinued": false
+      "discontinued": false,
+      "signup_bonus": {
+        "bonus_amount": 40000,
+        "spending_requirement": 3000,
+        "time_limit_months": 3
+      }
     },
     "reward_categories": [
       {
@@ -326,7 +422,12 @@
     "primary_reward_type": "Cashback",
     "metadata": {
       "reward_value_multiplier": 0.01,
-      "discontinued": false
+      "discontinued": false,
+      "signup_bonus": {
+        "bonus_amount": 25000,
+        "spending_requirement": 3000,
+        "time_limit_months": 6
+      }
     },
     "reward_categories": [
       {
@@ -355,7 +456,12 @@
     "primary_reward_type": "Cashback",
     "metadata": {
       "reward_value_multiplier": 0.01,
-      "discontinued": false
+      "discontinued": false,
+      "signup_bonus": {
+        "bonus_amount": 20000,
+        "spending_requirement": 1000,
+        "time_limit_months": 3
+      }
     },
     "reward_categories": [
       {

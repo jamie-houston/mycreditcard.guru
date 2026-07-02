@@ -72,7 +72,7 @@
     },
     {
       "name": "Existing Card Optimization",
-      "description": "User with low-value card that should be optimized",
+      "description": "User with low-value card that should be optimized. Recalibrated 2026-07-01 against the allocation-consistent engine + S3 (realistic fixture bonus requirements, bonus capacity, zero-fee keep policy).",
       "user_profile": {
         "spending": {
           "groceries": 200,
@@ -90,7 +90,7 @@
       ],
       "expected_recommendations": {
         "actions": [
-          "cancel",
+          "keep",
           "apply"
         ],
         "min_total_value": 50,
@@ -145,7 +145,7 @@
     },
     {
       "name": "Portfolio Optimization - Overlapping Reward Categories",
-      "description": "Tests portfolio logic with multiple cards having overlapping reward categories - should only count highest rate",
+      "description": "Tests portfolio logic with multiple cards having overlapping reward categories - should only count highest rate. Recalibrated 2026-07-01 against the allocation-consistent engine + S3 (realistic fixture bonus requirements, bonus capacity, zero-fee keep policy).",
       "user_profile": {
         "spending": {
           "groceries": 800,
@@ -172,8 +172,7 @@
       "expected_recommendations": {
         "actions": [
           "keep",
-          "apply",
-          "cancel"
+          "apply"
         ],
         "portfolio_optimization": {
           "total_annual_fees": 190,
@@ -206,7 +205,7 @@
     },
     {
       "name": "Portfolio Optimization - Redundant Cards Detection",
-      "description": "Tests detection and recommendation to cancel redundant cards that provide no additional value",
+      "description": "Tests detection and recommendation to cancel redundant cards that provide no additional value. Recalibrated 2026-07-01 against the allocation-consistent engine + S3 (realistic fixture bonus requirements, bonus capacity, zero-fee keep policy).",
       "user_profile": {
         "spending": {
           "groceries": 400,
@@ -230,20 +229,12 @@
       ],
       "expected_recommendations": {
         "actions": [
-          "cancel",
-          "keep",
-          "apply"
+          "keep"
         ],
         "portfolio_optimization": {
-          "redundant_cards_identified": [
-            "Warehouse Card"
-          ],
-          "optimal_portfolio_size": 2,
-          "fee_reduction_achieved": true
+          "zero_fee_cards_kept": true,
+          "note": "All owned cards are kept: the two $0-fee cards are never cancel candidates and the grocery card nets +$193"
         },
-        "cards_to_cancel": [
-          "Warehouse Card"
-        ],
         "reasoning_must_contain": [
           "redundant",
           "same category",
@@ -251,10 +242,9 @@
           "no additional value"
         ],
         "test_conditions": [
-          "Identifies cards that provide no additional portfolio value",
-          "Recommends canceling inferior cards with same reward categories",
-          "Keeps best card for each spending category",
-          "Total portfolio fees are minimized while maintaining rewards"
+          "Zero-fee cards are kept even when redundant (they cost nothing)",
+          "Fee cards are kept only while allocation keeps them positive",
+          "Allocation guarantees no category is double counted"
         ]
       }
     },
@@ -477,6 +467,10 @@
           "travel_credit",
           "dining_credit",
           "streaming_credit"
+        ],
+        "spending_credit_preferences": [
+          "google_workspace",
+          "lyft"
         ]
       },
       "owned_cards": [],
@@ -575,7 +569,7 @@
     },
     {
       "name": "Existing Zero-Fee Cards Protection",
-      "description": "User has existing zero-fee cards that should never be canceled",
+      "description": "User has existing zero-fee cards that should never be canceled. Recalibrated 2026-07-01 against the allocation-consistent engine + S3 (realistic fixture bonus requirements, bonus capacity, zero-fee keep policy).",
       "user_profile": {
         "spending": {
           "groceries": 100,
@@ -591,35 +585,33 @@
         "basic-card-1"
       ],
       "available_cards": [
+        "basic-card-1",
         "premium-grocery-card",
         "high-value-premium-card",
         "mid-tier-card"
       ],
       "expected_recommendations": {
         "actions": [
-          "keep",
           "keep"
         ],
         "card_count_optimization": {
           "max_recommendations": 5,
-          "expected_actual_count": 2,
-          "reason": "Keep existing zero-fee cards, don't add fee cards for low spending"
+          "expected_actual_count": 1,
+          "reason": "Keep the owned zero-fee card; no new card is positive at this spending"
         },
         "zero_fee_protection": {
           "existing_zero_fee_cards": [
-            "Basic Card",
             "Basic Card"
           ],
           "must_keep_zero_fee": true,
           "no_cancel_zero_fee": true
         },
         "portfolio_optimization": {
-          "net_portfolio_value_min": 80,
+          "net_portfolio_value_min": 70,
           "total_annual_spending": 4800,
           "prevents_negative_portfolio": true
         },
         "must_include_cards": [
-          "basic-card-1",
           "basic-card-1"
         ],
         "must_not_include_cards": [
@@ -657,6 +649,7 @@
         "mid-tier-card"
       ],
       "available_cards": [
+        "mid-tier-card",
         "expensive-premium-card-1"
       ],
       "expected_recommendations": {

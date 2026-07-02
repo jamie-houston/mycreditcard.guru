@@ -146,6 +146,12 @@ class RecommendationEngine:
         months_committed = 0.0
         deferred_applies = []
         if new_card_actions:
+            # An apply worth $0 or less is noise — never tell someone to
+            # open a card that earns them nothing. (Selection-time
+            # efficiency boosts can drag these in; the displayed value is
+            # the honest one, so filter on it.)
+            new_card_actions = [rec for rec in new_card_actions
+                                if float(rec['estimated_rewards']) > 0]
             new_card_actions.sort(key=lambda x: x['priority'])
             selected_applies = []
             for rec in new_card_actions:
@@ -1127,6 +1133,12 @@ class RecommendationEngine:
             if action['action'] == 'apply':
                 total_signup_bonuses += (self._get_signup_bonus_value(card)
                                          * self.weights['signup_bonus_weight'])
+
+            # Credits the user actually redeems count toward selection —
+            # without this, a credit-heavy card loses the greedy race even
+            # though its displayed value (which includes credits) wins.
+            credits_value, _ = self._calculate_card_credits_value(card)
+            total_signup_bonuses += credits_value
         
         # Use cached spending data for performance
         if not hasattr(self, '_cached_parent_spending'):
