@@ -11,12 +11,28 @@ from django.conf import settings
 from cards.models import CreditCard
 
 
+def _parse_iso_timestamp(timestamp_str):
+    """
+    Parse ISO 8601 timestamp string to datetime object.
+
+    Args:
+        timestamp_str: ISO 8601 timestamp string (e.g., "2026-07-02T16:18:40-05:00")
+
+    Returns:
+        datetime: Parsed datetime object, or None if parsing fails
+    """
+    try:
+        return datetime.fromisoformat(timestamp_str)
+    except (ValueError, TypeError):
+        return None
+
+
 def _get_version_info():
     """
     Get version info from VERSION file (generated during deploy) or from git.
 
     Returns:
-        dict: Version info with 'timestamp' and 'commit' keys, or empty dict if unavailable
+        dict: Version info with 'timestamp' (datetime object) and 'commit' keys, or empty dict if unavailable
     """
     version_file = os.path.join(settings.BASE_DIR, 'VERSION')
 
@@ -24,14 +40,18 @@ def _get_version_info():
     if os.path.exists(version_file):
         try:
             with open(version_file, 'r') as f:
-                return json.load(f)
+                data = json.load(f)
+                # Parse the timestamp string to datetime object
+                if 'timestamp' in data and data['timestamp']:
+                    data['timestamp'] = _parse_iso_timestamp(data['timestamp'])
+                return data
         except Exception:
             pass
 
     # Fallback: generate from git (for local dev)
     try:
         # Get the timestamp of the last commit to main
-        timestamp = subprocess.check_output(
+        timestamp_str = subprocess.check_output(
             ['git', 'log', '-1', '--format=%cI', 'main'],
             cwd=settings.BASE_DIR,
             stderr=subprocess.DEVNULL
@@ -44,7 +64,8 @@ def _get_version_info():
             stderr=subprocess.DEVNULL
         ).decode('utf-8').strip()
 
-        if timestamp:
+        if timestamp_str:
+            timestamp = _parse_iso_timestamp(timestamp_str)
             return {'timestamp': timestamp, 'commit': commit}
     except Exception:
         pass
