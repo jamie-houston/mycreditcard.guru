@@ -5,7 +5,7 @@ backlog of new/changed requirements discovered along the way. Update this when a
 completes or a new requirement appears. (The original product spec is `PRD.md` at the repo
 root — that's the *what*; this file is the *where are we*.)
 
-Last updated: 2026-06-12
+Last updated: 2026-07-01
 
 ## Phase plan
 
@@ -76,8 +76,9 @@ preferences, not a strategy.
 |---|---|---|
 | S1 | Three data-driven presets — **Simple Cash Back**, **Travel Points**, **Maximizer** (the churner tier) — as filter bundles + engine weights; `strategy` param on the quick-rec API; one JSON scenario file per preset (non-negotiable: every preset gets scenario coverage or we're back to untrusted math) | ✅ Done 2026-06-12 (see S1 notes below) |
 | S2 | UI: effort-tolerance question picks the default preset; explicit strategy picker is an advanced option, not a gate before the roadmap | ✅ Done 2026-06-12 (see S2 notes below) |
-| S3 | Issuer eligibility rules engine (see below) — behind-the-scenes "can you even get this card/bonus" checks feeding next-card selection, plus an eligibility note on recommendation cards in the UI | Planned |
-| — | **Goals with sequencing** (e.g., Southwest Companion Pass: time two bonuses to land after Jan 1) — explicitly **deferred**; it's a goal, not a weighting, and depends on the bonus-sequencing backlog item | Deferred |
+| S3 | Issuer eligibility rules engine (see below) — behind-the-scenes "can you even get this card/bonus" checks feeding next-card selection, plus an eligibility note on recommendation cards in the UI | ✅ Done 2026-07-01 (see S3 notes below) |
+| S4 | **Bonus capacity from spend velocity** (added 2026-07 by request): a counted signup bonus consumes `requirement ÷ total monthly spend` months of the year; recommended applies must fit in 12 months. A $2K/mo spender offered three $10K-requirement cards gets two — the third is deferred with a note in the portfolio summary. Sequential windows also keep per-card `bonus_shift` line items honest (no overlapping dollars) | ✅ Done 2026-07-01 |
+| — | **Goals with sequencing** (e.g., Southwest Companion Pass: time two bonuses to land after Jan 1) — explicitly **deferred**; it's a goal, not a weighting. S4's capacity cap is the first step; ordering bonuses across the year is the rest | Deferred |
 
 Risks called out at design time: every preset multiplies the scenario-validation surface
 (22 scenarios are already stale — recalibrate first or alongside); the quick-rec
@@ -134,7 +135,37 @@ serializer footgun (below) gets worse with more state on that endpoint — defus
   question/presets/picker (needed a test `SocialApp` for base.html's Google button),
   and the API 400s on a typo'd strategy key.
 
-### S3 detail: issuer eligibility rules (verified via web research 2026-06-12)
+### S3 notes: how eligibility is implemented (done 2026-07-01)
+
+- **`roadmaps/eligibility.py`** is the whole feature surface (same "rules
+  are data" idiom as strategies.py): `ISSUER_RULES` keyed by issuer slug
+  holds application rules (Chase 5/24, BofA 2/3/4, Capital One 1/6mo) and
+  issuer-default bonus rules (Amex once-per-lifetime, Citi 48-month).
+  Card-level rules live in card JSON `metadata.bonus_eligibility`
+  (Sapphire lifetime, Southwest 24-month + family) and
+  `metadata.application_family` (holding an open family card blocks
+  applying for another) — curated in `data/input/cards/chase.json`.
+- Rules evaluate against the user's FULL card history including closed
+  cards (`engine.card_history`); new `UserCard.bonus_earned_date` field,
+  approximated as opened_date + ~3 months when blank. Unknown dates are
+  treated conservatively (bonus assumed earned recently).
+- Application-blocked cards are silently excluded from applies (all
+  paths, including the high-spender fallback). Bonus-ineligible cards
+  still compete on ongoing value with `signup_bonus = $0`, a $0 info
+  line item, and a user-facing `eligibility_note` ("bonus unlikely — ...")
+  rendered on the recommendation card.
+- Windows are calendar-accurate (`months_before`), replacing the old
+  `24*30 days` drift. `Issuer.max_cards_per_period`/`period_months`
+  model fields remain unused (their seeded values are junk).
+- Scenario plumbing: owned_cards entries can be history dicts
+  (`{"card": ..., "opened_days_ago": 90, "closed_days_ago": ...,
+  "bonus_earned_days_ago": ...}`); a top-level scenario
+  `max_recommendations` beats the count-derived default. Coverage:
+  `data/tests/scenarios/eligibility.json` (4 scenarios) + unit tests in
+  `roadmaps/tests.py` (rule-by-rule, incl. business-card reporting
+  exceptions and family rules).
+
+### S3 research: issuer eligibility rules (verified via web research 2026-06-12)
 
 Two distinct rule types, both behind-the-scenes (they change *which* card is recommended
 next; the UI only gets a small note like "bonus unlikely — you've earned this card's
@@ -168,34 +199,43 @@ Sources: [TPG — Sapphire eligibility changes](https://thepointsguy.com/news/ch
 [AwardWallet — BofA 2/3/4](https://awardwallet.com/credit-cards/bank-america-234-policy/),
 [Upgraded Points — per-bank rules](https://upgradedpoints.com/credit-cards/applying-for-credit-cards-bank-rules/).
 
-**Gaps in the current implementation** (`roadmaps/recommendation_engine.py`,
-`_is_eligible_for_card`): the existing 5/24 check is hardcoded to issuer name "chase",
-counts ALL the user's cards including business cards (wrong per the table above), and
-uses `24*30 days` as the window. No bonus-eligibility rules exist at all. **Data gap**:
-modeling bonus rules needs a per-UserCard "bonus earned" date (approximate from
-`opened_date` + ~3 mo when unknown) and `card_type` awareness in the count — both exist
-on the models, neither is used here. Rules themselves should be data
-(Issuer fields + card `metadata.bonus_eligibility`), not more name-matching branches.
+~~Gaps in the current implementation~~ — all addressed 2026-07-01 (see S3
+notes above): the hardcoded name-matching 5/24 is gone, business cards
+count only when their issuer reports to personal credit, windows are
+calendar-accurate, bonus rules exist as data, and `UserCard.bonus_earned_date`
+was added (approximated from `opened_date` + ~3 mo when blank).
+
+## Done since (2026-07-01)
+
+- ~~Recalibrate stale scenario expectations~~ — the full sweep now passes
+  **61/61** (was 21 failures + 7 errors). Root causes were mostly data bugs,
+  not just stale numbers: fixture bonuses had no spending requirements
+  (free money), four scenarios "owned" cards that were never created
+  (silent skip, now a loud error), the test DB lacked the real
+  category/credit taxonomy, and credit-integration scenarios never set
+  credit preferences. Two engine fixes fell out: selection now counts
+  card credits (display already did), and $0-value applies are filtered.
+  `DUMP_SCENARIOS=1` prints per-scenario results for future recalibration.
+- ~~Quick-recommendation serializer footgun~~ — quick-rec runs in an
+  always-rolled-back transaction; stored profiles survive untouched.
+- **Preference defaults** (2026-07, by request): empty max annual fee =
+  no max (the "95" placeholder lied — it was already no-filter); empty
+  max recommendations = 1 (was 5) across UI, serializers, and models.
 
 ## Backlog (known, not yet done)
 
-- **Recalibrate 22 stale scenario expectations** — engine rework changed verdicts/values;
-  math integrity passes on all 53 scenarios but 22 expectation files predate the rework.
-  Workflow: `RUN_ALL_SCENARIOS=1 python manage.py test cards.test_json_scenarios`, then
-  per failure `python manage.py run_scenario "<name>" --explain` and update the JSON only
-  after hand-confirming the new number.
-- **Quick-recommendation serializer footgun** (`roadmaps/serializers.py`,
-  `generate_recommendations`): deletes and recreates the user's stored UserCards/spending/
-  credit prefs from the form payload on every quick run. Fine for a single dev user; will
-  destroy real users' saved profiles. Defuse before opening to anyone else.
 - **Ownership endpoint consolidation** (Phase 5 leftover): `users/` duplicates some
   `cards/` ownership endpoints; consolidate on `cards/`.
 - **UX: negative `bonus_shift` line items** confused at least one user (the user). Options:
   group under a "Cost to earn the bonus" subheading, or collapse to a single net line.
-- **Future feature: bonus sequencing** — each apply's shift plan is an independent
-  counterfactual today; sequencing multiple signup bonuses over time is the actual
-  "roadmap" the product is named for. (Also the prerequisite for the deferred
-  goals/Companion Pass work in the Strategies section above.)
+- **Future feature: bonus sequencing** — S4's capacity cap decides HOW MANY bonuses fit
+  a year; sequencing decides the ORDER and timing (e.g. Companion Pass timing). Each
+  apply's shift plan is still an independent counterfactual; the capacity cap keeps them
+  from overlapping, but nothing yet plans month-by-month.
+- **Selection-time bonus capacity**: the 12-month cap is enforced at final assembly;
+  the greedy optimizer can still pick a portfolio whose later applies get deferred.
+  Rarely matters (deferred cards are the lowest-priority applies) but selection-aware
+  capacity would be strictly better.
 - **Deploy loose ends** (2026-06): after Jamie's first Google login on production,
   promote his user to staff/superuser via the PythonAnywhere console; consider revoking
   the PythonAnywhere API token that was used during deployment.
@@ -203,7 +243,11 @@ on the models, neither is used here. Rules themselves should be data
 ## Verification quick reference
 
 - Acceptance scenario: `python manage.py run_scenario "Jamie Real" --explain`
+  (every line item must reconcile to the headline; runs against the dev DB)
 - Full scenario sweep: `RUN_ALL_SCENARIOS=1 python manage.py test cards.test_json_scenarios`
-- Standard tests: `python manage.py test` (36 tests)
-- Full-sweep baseline (2026-06-12): `FAILED (failures=21, errors=7)` — all pre-existing
-  stale expectations/test-DB data gaps; any change to these numbers means a regression
+- Standard tests: `python manage.py test` (54 tests)
+- Full-sweep baseline (2026-07-01): **OK — 61/61 scenarios pass.** Any failure is a
+  regression. To hand-confirm a change's new numbers, re-run the sweep with
+  `DUMP_SCENARIOS=1` and diff the printed per-scenario results (the CLI
+  `run_scenario` runs against the dev DB, whose real cards pollute fixture pools —
+  trust the test-DB dump for scenario work).

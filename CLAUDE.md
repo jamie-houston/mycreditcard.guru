@@ -1,157 +1,124 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+Guidance for Claude Code (claude.ai/code) working in this repository.
 
-## Project Overview
+## What this is
 
-Credit Card Guru is a Django-based credit card optimization platform that generates personalized roadmaps for credit card applications, cancellations, and upgrades. The system analyzes user spending patterns against issuer policies (like Chase's 5/24 rule) to recommend optimal credit card strategies for maximizing rewards.
+Credit Card Guru (mycreditcard.guru) — a Django app that recommends credit
+card portfolios (apply/keep/cancel) from a user's real spending. The core
+product promise is **trustworthy math**: every recommendation's headline
+value must be reproducible from its visible line items. Protect that above
+all else.
 
-## Development Commands
+Production: https://foresterh.pythonanywhere.com (PythonAnywhere, **MySQL** —
+see `docs/DEPLOYMENT_GUIDE.md`, including why SQLite is dev-only there).
+Local dev uses SQLite. Current status and backlog live in
+`docs/PROJECT_STATUS.md` — read it before starting work, update it when
+phases complete or requirements change.
 
-### Environment Setup
+## Working rules
+
+- Run Python via the project venv: `venv/bin/python manage.py ...`
+  Never pip install outside the venv.
+- Don't start `runserver` for Jamie — he runs the dev server himself.
+- Git branch is `main`. Deploys happen by pushing (server has a post-merge
+  hook + `deploy.sh`).
+- When you change code or requirements: update `docs/PROJECT_STATUS.md`
+  (status/backlog) and this file (architecture) in the same commit.
+
+## Verification gates (run before calling anything done)
+
 ```bash
-# Create and activate virtual environment with Python 3.8+
-python3 -m venv venv
-source venv/bin/activate
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Setup database and import all data
-python setup_data.py
-
-# Run development server
-python manage.py runserver
+venv/bin/python manage.py test                                   # standard suite (54 tests)
+RUN_ALL_SCENARIOS=1 venv/bin/python manage.py test cards.test_json_scenarios   # full sweep: 61/61 must pass
+venv/bin/python manage.py run_scenario "Jamie Real" --explain    # acceptance: every line item reconciles
 ```
 
-### Data Management
-```bash
-# Import credit card data from JSON files
-python manage.py import_cards
+- The full sweep passes 61/61 as of 2026-07-01. Any failure is a regression.
+- `run_scenario` (CLI) runs against the **dev DB**, so real cards pollute
+  fixture pools. For scenario debugging use the test DB instead:
+  `DUMP_SCENARIOS=1 RUN_ALL_SCENARIOS=1 venv/bin/python manage.py test cards.test_json_scenarios`
+  prints every scenario's full results.
+- The engine logs a reconciliation error if a headline value stops matching
+  its line items (line items + signup bonus − fee = headline, within $1).
+  If that fires, the math regressed — fix the math, never the guard.
 
-# Import benefit/credit types
-python manage.py import_credit_types
+## Architecture map
 
-# Run database migrations
-python manage.py migrate
-```
+Three Django apps: `cards/` (card database, spending profiles, ownership),
+`roadmaps/` (recommendation engine + API), `users/` (auth via allauth,
+preferences). Anonymous users work via session keys.
 
-### Testing
-```bash
-# Run all tests
-python manage.py test
+Key modules:
 
-# Run specific app tests
-python manage.py test cards
-python manage.py test roadmaps
-```
+- `roadmaps/recommendation_engine.py` — the engine. Portfolio selection
+  (greedy, strategy-weighted) is separate from displayed math (allocation-
+  consistent): **selection weights/boosts may shape which cards win, but
+  displayed dollars always come from `_calculate_portfolio_allocation`**
+  (best-rate-per-category with cap rollover; totals always equal the user's
+  actual spending). Signup bonuses model where the money comes from
+  (`_signup_bonus_plan`: organic / shifted-with-opportunity-cost /
+  unreachable→$0). Bonus capacity: counted bonuses consume
+  `requirement ÷ monthly spend` months; applies must fit 12 months
+  (`BONUS_CAPACITY_MONTHS`); excess applies are deferred.
+- `roadmaps/strategies.py` — strategy presets are data, not code
+  (filters + max_recommendations + selection weights). UI effort question
+  maps onto these.
+- `roadmaps/eligibility.py` — issuer rules are data, not code. Application
+  rules (Chase 5/24, BofA 2/3/4, CapOne 1/6mo, family blocks) exclude cards
+  from applies; bonus rules (Amex lifetime, Citi 48-month, Sapphire/
+  Southwest via card `metadata.bonus_eligibility`) zero the bonus but keep
+  the card competing on ongoing value, with a user-facing note. Evaluated
+  against full card history INCLUDING closed cards
+  (`UserCard.bonus_earned_date`, approximated when blank).
+- `roadmaps/serializers.py` — quick-recommendation writes the request
+  payload into profile tables to feed the engine, inside an
+  **always-rolled-back transaction**. Never let it persist; saving profiles
+  is `/api/users/data/`'s job.
+- `templates/index.html` — the roadmap page (all inline JS). Preferences:
+  empty max annual fee = no max; empty max recommendations = 1.
 
-## Core Architecture
+## Data
 
-### Django App Structure
+- `data/input/cards/*.json` (per issuer) is the source of truth for curated
+  card detail. `verified: true` is the import watchlist (~27 of ~160 cards).
+  `git diff data/input/cards/` is the offer-change audit trail.
+- `import_external_cards` refreshes churn fields (bonuses/fees/discontinued)
+  from the andenacitelli community API by editing those JSONs in place.
+  Production runs it monthly (scheduled task, 1st @ 09:15 UTC); run it
+  locally ~monthly too and commit, or the repo drifts behind the server.
+- `import_cards <file>` imports a card file (or
+  `data/input/system/spending_categories.json`). `import_spending_credits`
+  seeds SpendingCredits. `setup_data.py` does a full fresh setup.
+- Hand-curated metadata (e.g. `bonus_eligibility`, `application_family`,
+  `reward_value_multiplier`) lives in the card JSONs and survives the
+  external refresh.
 
-**`cards/`** - Credit card database and user profiles
-- Manages credit cards, issuers, reward categories, spending profiles
-- Handles user card ownership tracking with detailed history
-- Provides search/filtering APIs with anonymous user support
+## Scenario test system
 
-**`roadmaps/`** - Recommendation engine and roadmap generation
-- Contains the core `RecommendationEngine` class (1,923 lines)
-- Generates portfolio-optimized recommendations rather than simple suggestions
-- Implements sophisticated algorithms for spending allocation optimization
+JSON scenarios in `data/tests/scenarios/*.json` run through the REAL engine
+(`cards/test_base.py` reuses `run_scenario`'s plumbing).
 
-**`users/`** - User management with anonymous support
-- Extended user profiles and preferences
-- Session-based functionality for unregistered users
-- Integration with django-allauth for email/Google OAuth authentication
+- Fixture cards: `data/tests/cards.json`. Every bonus must have a realistic
+  structured `signup_bonus` requirement — a bonus without one is free money
+  that corrupts every scenario it touches.
+- Owned cards: `"slug"` (opened ~6 months ago) or a history dict
+  `{"card": slug, "opened_days_ago": 90, "closed_days_ago": 30,
+  "bonus_earned_days_ago": 60}` for eligibility scenarios (days-ago keeps
+  them evergreen). Owned cards MUST appear in `available_cards` (loud error).
+- A top-level `"strategy"` key applies a preset; a top-level
+  `"max_recommendations"` beats the count-derived default (needed when a
+  scenario must allow more applies than it expects, e.g. capacity tests).
+- Real cards referenced by a scenario (e.g. jamie_real) are imported into
+  the test DB on demand from `data/input/cards/` via the import machinery.
+- Recalibration workflow: run the sweep with `DUMP_SCENARIOS=1`, hand-confirm
+  the new numbers from the dump, then update the expectation JSON. Never
+  update an expectation to a number you haven't verified line-by-line.
 
-### Key Data Models
+## Docs
 
-**Core Relationships:**
-- `SpendingCategory` supports hierarchical parent/child relationships
-- `UserCard` tracks detailed ownership history with open/close dates
-- `CreditCard` uses JSON metadata fields for flexible attributes
-- `UserSpendingProfile` supports both authenticated users and anonymous sessions
-
-**Portfolio Optimization Models:**
-- `Roadmap` contains recommendation filters and parameters
-- `RoadmapRecommendation` tracks individual card actions (apply/keep/cancel/upgrade)
-- `RoadmapCalculation` stores calculated portfolio values with JSON breakdowns
-
-### Recommendation Engine Architecture
-
-The recommendation engine (`roadmaps/recommendation_engine.py`) implements sophisticated portfolio optimization:
-
-- **Anti-overlap Logic**: Prevents double-counting rewards across multiple cards
-- **Issuer Policy Compliance**: Respects rules like Chase 5/24 and application velocity limits
-- **Spending Efficiency Scoring**: Matches card benefits to user spending patterns
-- **Greedy Optimization**: Selects optimal card combinations from eligible candidates
-- **Scenario Analysis**: Balances keeping profitable cards vs. full portfolio optimization
-
-### API Structure
-
-**REST Framework Design:**
-- `/api/cards/` - Card search, user profiles, recommendations preview
-- `/api/roadmaps/` - Roadmap CRUD, generation, and portfolio statistics
-- `/api/users/` - Authentication status, profile management, card ownership
-
-**Anonymous User Support:**
-- All endpoints use `AllowAny` permissions to support unregistered users
-- Session-based tracking for anonymous spending profiles and roadmaps
-- UUID-based public sharing for spending profiles
-
-### Data Import System
-
-**JSON Data Structure:**
-- Card data organized by issuer in `/data/input/cards/`
-- System data (categories, issuers) in `/data/input/system/`
-- Flexible JSON schema with signup bonuses, reward categories, and credits
-
-**Import Commands:**
-- `setup_data.py` - Automated full setup for fresh installations
-- Management commands for incremental updates and specific data types
-
-## Development Patterns
-
-### Frontend Integration
-- Django templates with server-side rendering
-- Modern CSS with Inter typography and gradient backgrounds
-- REST API endpoints designed for potential SPA migration
-
-### Database Strategy
-- SQLite for development, PostgreSQL production-ready
-- Extensive use of select_related/prefetch_related for performance
-- JSON fields for flexible card attributes without schema changes
-
-### Error Handling
-- Graceful degradation between anonymous and authenticated user workflows
-- Comprehensive validation in serializers and recommendation engine
-- Session fallback patterns for unauthenticated operations
-
-## Key Technical Decisions
-
-1. **Portfolio-First Approach**: Recommendations optimize entire card portfolios rather than suggesting individual cards
-2. **Anonymous Functionality**: Full platform features available without registration using session keys
-3. **Hierarchical Categories**: Spending categories support parent/child relationships for flexible categorization
-4. **JSON Flexibility**: Credit card metadata stored in JSON fields to accommodate diverse card features
-5. **Issuer Policy Engine**: Built-in support for complex issuer rules and application restrictions
-
-## Documentation Guidelines
-
-**Important**: When making code changes, always follow the documentation guidelines in `.cursor/rules/documentation.mdc`.
-
-### Key Documentation Rules:
-- **Before changes**: Review CLAUDE.md (this file) and relevant documentation
-- **After changes**: Update documentation to reflect new functionality
-- **Architecture changes**: Update CLAUDE.md
-- **New workflows**: Update RUNNING.md and QUICKSTART.md
-- **Import changes**: Update docs/CARD_IMPORT_GUIDE.md
-
-### Documentation Structure:
-- **CLAUDE.md** (this file) - Project overview for AI assistants
-- **README.md** - Main project documentation
-- **RUNNING.md** - Setup and troubleshooting
-- **QUICKSTART.md** - Quick reference guide
-- **docs/** - Detailed guides (imports, deployment, testing)
-
-**See `.cursor/rules/documentation.mdc` for complete guidelines on when and how to update documentation.**
+- `docs/PROJECT_STATUS.md` — where we are, backlog, S1–S4 design notes,
+  eligibility rules research (with sources). **Keep it current.**
+- `docs/DEPLOYMENT_GUIDE.md` — PythonAnywhere deploy, MySQL migration
+  incident, scheduled tasks.
+- `PRD.md` — original product spec (the *what*).
