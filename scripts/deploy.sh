@@ -54,6 +54,17 @@ pip install -q -r requirements.txt
 echo "==> manage.py migrate"
 python manage.py migrate --noinput
 
+# --- version file ---
+echo "==> Generating VERSION file"
+cd "$PROJECT_ROOT"
+{
+    echo "{"
+    echo "  \"timestamp\": \"$(git log -1 --format=%cI main 2>/dev/null || echo '')\","
+    echo "  \"commit\": \"$(git rev-parse --short HEAD 2>/dev/null || echo 'unknown')\""
+    echo "}"
+} > VERSION
+chmod 644 VERSION
+
 # --- static files ---
 echo "==> manage.py collectstatic"
 python manage.py collectstatic --noinput

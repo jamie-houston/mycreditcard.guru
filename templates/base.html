@@ -117,6 +117,12 @@
                             Card data: Not yet imported
                         </p>
                     {% endif %}
+                    {% if version_info.timestamp %}
+                        <p class="version-info" style="font-size: 12px; color: #9ca3af; margin-top: 8px;">
+                            <i class="fas fa-code-branch"></i>
+                            Version: {{ version_info.commit }} ({% load tz %}{{ version_info.timestamp|date:"M d, Y \a\t H:i" }})
+                        </p>
+                    {% endif %}
                 </div>
             </div>
         </div>
