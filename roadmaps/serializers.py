@@ -44,7 +44,7 @@ class CreateRoadmapSerializer(serializers.Serializer):
     """Serializer for creating roadmaps with filters"""
     name = serializers.CharField(max_length=200)
     description = serializers.CharField(required=False, allow_blank=True)
-    max_recommendations = serializers.IntegerField(default=5, min_value=1, max_value=20)
+    max_recommendations = serializers.IntegerField(default=1, min_value=1, max_value=20)
     filters = serializers.ListField(
         child=serializers.DictField(),
         required=False
@@ -106,7 +106,7 @@ class GenerateRoadmapSerializer(serializers.Serializer):
         child=serializers.DictField(),
         required=False
     )
-    max_recommendations = serializers.IntegerField(default=5, min_value=1, max_value=20)
+    max_recommendations = serializers.IntegerField(default=1, min_value=1, max_value=20)
     spending_credit_preferences = serializers.ListField(
         child=serializers.CharField(),
         required=False,
@@ -123,10 +123,33 @@ class GenerateRoadmapSerializer(serializers.Serializer):
         return value
 
     def generate_recommendations(self):
-        """Generate recommendations without saving to database"""
+        """Generate recommendations without persisting anything.
+
+        The engine reads spending/cards/preferences from the database, so
+        the request payload is written there for the computation — but the
+        whole thing runs in a transaction that is ALWAYS rolled back.
+        Before this, every quick run deleted and recreated the user's
+        stored UserCards/spending/credit preferences from the form payload,
+        which would destroy real users' saved profiles (see
+        docs/PROJECT_STATUS.md backlog: "quick-recommendation serializer
+        footgun"). Saving the profile is the /users/data/ endpoint's job.
+        """
+        from django.db import transaction
+
+        with transaction.atomic():
+            recommendations = self._generate_with_scratch_data()
+            # Computation only — undo every write (spending amounts, user
+            # cards, credit prefs, the temporary roadmap).
+            transaction.set_rollback(True)
+        return recommendations
+
+    def _generate_with_scratch_data(self):
+        """Write the payload into the profile tables and generate
+        recommendations. Only ever called inside the rolled-back
+        transaction above."""
         from .recommendation_engine import RecommendationEngine
         from cards.models import UserSpendingProfile, SpendingAmount, UserCard
-        
+
         request = self.context['request']
         validated_data = self.validated_data
         
@@ -215,13 +238,13 @@ class GenerateRoadmapSerializer(serializers.Serializer):
         strategy = get_strategy(validated_data.get('strategy'))
 
         # An explicit max_recommendations in the request beats the preset's
-        # default; the serializer default (5) only applies with no strategy.
+        # default; the serializer default (1) only applies with no strategy.
         if 'max_recommendations' in self.initial_data:
-            max_recommendations = validated_data.get('max_recommendations', 5)
+            max_recommendations = validated_data.get('max_recommendations', 1)
         elif strategy:
             max_recommendations = strategy['max_recommendations']
         else:
-            max_recommendations = validated_data.get('max_recommendations', 5)
+            max_recommendations = validated_data.get('max_recommendations', 1)
 
         # Create or get temporary roadmap for filtering
         roadmap, created = Roadmap.objects.get_or_create(

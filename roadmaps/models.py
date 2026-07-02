@@ -25,7 +25,7 @@ class Roadmap(models.Model):
     name = models.CharField(max_length=200)
     description = models.TextField(blank=True)
     filters = models.ManyToManyField(RoadmapFilter, blank=True)
-    max_recommendations = models.IntegerField(default=5)
+    max_recommendations = models.IntegerField(default=1)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     

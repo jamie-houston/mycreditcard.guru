@@ -30,7 +30,7 @@ class UserPreferences(models.Model):
     default_issuer_filter = models.CharField(max_length=100, blank=True)
     default_reward_type_filter = models.CharField(max_length=50, blank=True)
     default_max_fee_filter = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
-    default_max_recommendations = models.IntegerField(default=5)
+    default_max_recommendations = models.IntegerField(default=1)
     
     # UI preferences
     theme = models.CharField(max_length=20, default='light', choices=[('light', 'Light'), ('dark', 'Dark')])
