@@ -309,7 +309,7 @@ function filterCards() {
         // Credit/Benefit filter
         if (creditFilter && card.credits) {
             const hasCredit = card.credits.some(credit =>
-                credit.credit_type && credit.credit_type.slug === creditFilter
+                credit.spending_credit && credit.spending_credit.slug === creditFilter
             );
             if (!hasCredit) return false;
         }
