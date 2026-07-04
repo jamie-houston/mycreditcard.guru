@@ -322,7 +322,7 @@
                 console.log('🔓 User logged out, clearing local data');
                 clearUserData();
                 // Clear the sync completion flag so future logins can trigger sync
-                sessionStorage.removeItem('dataSyncCompleted');
+                localStorage.removeItem('dataSyncCompletedFor');
             } else if (!wasAuthenticated && isNowAuthenticated) {
                 // User logged in - handle data synchronization
                 console.log('🔒 User logged in, handling data synchronization');
@@ -332,6 +332,7 @@
                 console.log('🔄 Different user logged in, switching user data');
                 clearUserData();
                 await syncUserDataFromServer();
+                localStorage.setItem('dataSyncCompletedFor', String(newUser.id));
             }
 
             // Refresh current page data
@@ -368,10 +369,13 @@
         // Handle data synchronization when user logs in
         async function handleLoginDataSync() {
             try {
-                // Check if sync has already been completed for this session
-                const syncCompleted = sessionStorage.getItem('dataSyncCompleted');
-                if (syncCompleted) {
-                    console.log('📋 Data sync already completed for this session, skipping');
+                // Check if sync has already been completed for this account.
+                // Stored in localStorage (not sessionStorage) so it survives
+                // closing the tab/browser - otherwise every new browser
+                // session looks like a fresh login and re-prompts.
+                const syncCompletedFor = localStorage.getItem('dataSyncCompletedFor');
+                if (syncCompletedFor && currentUser && syncCompletedFor === String(currentUser.id)) {
+                    console.log('📋 Data sync already completed for this account, skipping');
                     return;
                 }
 
@@ -390,8 +394,15 @@
                 const hasServerData = (serverData.cards && serverData.cards.length > 0) ||
                                     (serverData.spending && Object.keys(serverData.spending).length > 0);
 
-                if (hasLocalData && hasServerData) {
-                    // Both have data - ask user what to do
+                // Only a real conflict if the local and server card sets
+                // actually differ - if they already match (e.g. a previous
+                // merge already synced them), there's nothing to ask about.
+                const serverCards = serverData.cards || [];
+                const cardsMatch = localCards.length === serverCards.length &&
+                    localCards.every(c => serverCards.includes(c));
+
+                if (hasLocalData && hasServerData && !cardsMatch) {
+                    // Both have data and they differ - ask user what to do
                     await showDataSyncModal(localCards, localSpending, localCardDetails, serverData);
                 } else if (hasLocalData && !hasServerData) {
                     // Only local data - save it to server (new user scenario)
@@ -399,13 +410,13 @@
                     await saveLocalDataToServer(localCards, localSpending, localPreferences, localCardDetails);
                     await syncUserDataFromServer();
                     // Mark sync as completed
-                    sessionStorage.setItem('dataSyncCompleted', 'true');
+                    localStorage.setItem('dataSyncCompletedFor', String(currentUser.id));
                 } else {
-                    // Only server data or no data at all - just sync from server
+                    // Only server data, no data at all, or local already matches server
                     console.log('📥 Syncing data from server');
                     await syncUserDataFromServer();
                     // Mark sync as completed
-                    sessionStorage.setItem('dataSyncCompleted', 'true');
+                    localStorage.setItem('dataSyncCompletedFor', String(currentUser.id));
                 }
 
             } catch (error) {
@@ -413,7 +424,9 @@
                 // Fallback to just syncing from server
                 await syncUserDataFromServer();
                 // Mark sync as completed even on error to prevent repeated prompts
-                sessionStorage.setItem('dataSyncCompleted', 'true');
+                if (currentUser) {
+                    localStorage.setItem('dataSyncCompletedFor', String(currentUser.id));
+                }
             }
         }
 
@@ -524,13 +537,17 @@
                         }
 
                         // Mark sync as completed to prevent repeated prompts
-                        sessionStorage.setItem('dataSyncCompleted', 'true');
+                        if (currentUser) {
+                            localStorage.setItem('dataSyncCompletedFor', String(currentUser.id));
+                        }
                         console.log('✅ Data sync completed with choice:', choice);
 
                     } catch (error) {
                         console.error('Error applying data sync choice:', error);
                         // Still mark as completed to prevent infinite prompts
-                        sessionStorage.setItem('dataSyncCompleted', 'true');
+                        if (currentUser) {
+                            localStorage.setItem('dataSyncCompletedFor', String(currentUser.id));
+                        }
                     }
 
                     resolve();
