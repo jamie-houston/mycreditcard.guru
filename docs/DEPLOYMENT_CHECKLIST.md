@@ -127,7 +127,6 @@ Use this when updating an existing deployment:
 - [ ] Import card data:
   - [ ] `python manage.py import_cards data/input/cards/*.json`
   - [ ] Or specific issuers that changed
-- [ ] Import credit types: `python manage.py import_credit_types`
 
 ### Static Files & Reload
 - [ ] Collect static files: `python manage.py collectstatic --noinput`

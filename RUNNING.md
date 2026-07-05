@@ -137,9 +137,6 @@ python manage.py import_cards data/input/cards/chase.json
 python manage.py import_cards data/input/cards/american_express.json
 # ... etc for other issuers
 
-# Import credit types (benefits/offers for preferences)
-python manage.py import_credit_types
-
 # Or use the setup script to import everything
 python setup_data.py
 

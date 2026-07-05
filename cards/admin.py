@@ -1,8 +1,8 @@
 from django.contrib import admin
 from .models import (
     Issuer, RewardType, SpendingCategory, CreditCard,
-    RewardCategory, CardCredit, CreditType, UserSpendingProfile,
-    SpendingAmount, UserCard, UserCreditPreference
+    RewardCategory, CardCredit, UserSpendingProfile,
+    SpendingAmount, UserCard
 )
 
 
@@ -48,18 +48,10 @@ class RewardCategoryAdmin(admin.ModelAdmin):
     list_filter = ['reward_type', 'category', 'is_active']
     
 
-@admin.register(CreditType)
-class CreditTypeAdmin(admin.ModelAdmin):
-    list_display = ['name', 'category', 'sort_order']
-    list_filter = ['category']
-    search_fields = ['name', 'description']
-    prepopulated_fields = {'slug': ('name',)}
-
-
 @admin.register(CardCredit)
 class CardCreditAdmin(admin.ModelAdmin):
-    list_display = ['card', 'description', 'value', 'weight', 'currency', 'credit_type', 'is_active']
-    list_filter = ['is_active', 'currency', 'credit_type']
+    list_display = ['card', 'description', 'value', 'weight', 'currency', 'spending_credit', 'is_active']
+    list_filter = ['is_active', 'currency', 'spending_credit']
 
 
 class SpendingAmountInline(admin.TabularInline):
@@ -67,15 +59,10 @@ class SpendingAmountInline(admin.TabularInline):
     extra = 1
 
 
-class UserCreditPreferenceInline(admin.TabularInline):
-    model = UserCreditPreference
-    extra = 1
-
-
 @admin.register(UserSpendingProfile)
 class UserSpendingProfileAdmin(admin.ModelAdmin):
     list_display = ['__str__', 'user', 'session_key', 'privacy_setting', 'created_at']
-    inlines = [SpendingAmountInline, UserCreditPreferenceInline]
+    inlines = [SpendingAmountInline]
 
 
 @admin.register(UserCard)

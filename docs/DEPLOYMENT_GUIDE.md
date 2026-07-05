@@ -214,11 +214,6 @@ In the Web tab, add these static file mappings:
    # Add other card files as needed
    ```
 
-4. Import credit types (offers/benefits for roadmap preferences):
-   ```bash
-   python manage.py import_credit_types
-   ```
-
 **Note**: Currently 24 out of 162 cards are marked as verified and will be imported. See [docs/CARD_IMPORT_GUIDE.md](CARD_IMPORT_GUIDE.md) for details on which cards are verified.
 
 ## Step 10: Configure Domain (Optional)
@@ -290,9 +285,6 @@ python manage.py import_cards data/input/cards/bank_of_america.json
 python manage.py import_cards data/input/cards/barclays.json
 python manage.py import_cards data/input/cards/us_bank.json
 # Add other issuers as needed...
-
-# Import credit types (benefits/offers for preferences)
-python manage.py import_credit_types
 ```
 
 **Option B: Use Setup Script (Fresh Import)**
@@ -352,7 +344,6 @@ python manage.py migrate
 python manage.py import_cards data/input/system/*.json
 python manage.py import_spending_credits
 python manage.py import_cards data/input/cards/*.json
-python manage.py import_credit_types
 python manage.py collectstatic --noinput
 # Click Reload in Web tab
 ```

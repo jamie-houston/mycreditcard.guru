@@ -139,21 +139,6 @@ class RewardCategory(models.Model):
         return f"{self.card} - {self.reward_rate}x {self.category}{period}"
 
 
-class CreditType(models.Model):
-    name = models.CharField(max_length=200, unique=True)
-    slug = models.SlugField(unique=True)
-    description = models.TextField(blank=True)
-    icon = models.CharField(max_length=50, blank=True)
-    category = models.CharField(max_length=100, blank=True)  # e.g., 'travel', 'dining', 'misc'
-    sort_order = models.IntegerField(default=100)
-    
-    class Meta:
-        ordering = ['sort_order', 'name']
-    
-    def __str__(self):
-        return self.name
-
-
 class SpendingCredit(models.Model):
     name = models.CharField(max_length=100, unique=True)
     slug = models.SlugField(unique=True)
@@ -172,7 +157,6 @@ class SpendingCredit(models.Model):
 
 class CardCredit(models.Model):
     card = models.ForeignKey(CreditCard, on_delete=models.CASCADE, related_name='credits')
-    credit_type = models.ForeignKey(CreditType, on_delete=models.CASCADE, related_name='card_credits', null=True, blank=True)
     spending_credit = models.ForeignKey(SpendingCredit, on_delete=models.CASCADE, related_name='card_credits', null=True, blank=True)
     category = models.ForeignKey(SpendingCategory, on_delete=models.CASCADE, null=True, blank=True)  # For category-based credits
     description = models.CharField(max_length=500)
@@ -286,18 +270,6 @@ class UserCard(models.Model):
         """Get the display name (nickname if available, otherwise card name)"""
         return self.nickname if self.nickname else str(self.card)
 
-
-
-class UserCreditPreference(models.Model):
-    profile = models.ForeignKey(UserSpendingProfile, on_delete=models.CASCADE, related_name='credit_preferences')
-    credit_type = models.ForeignKey(CreditType, on_delete=models.CASCADE)
-    values_credit = models.BooleanField(default=False)
-    
-    class Meta:
-        unique_together = ['profile', 'credit_type']
-    
-    def __str__(self):
-        return f"{self.profile} - {self.credit_type.name}: {self.values_credit}"
 
 
 class UserSpendingCreditPreference(models.Model):

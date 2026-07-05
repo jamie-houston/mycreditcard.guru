@@ -826,9 +826,9 @@ async function loadCardsWithOwnership() {
         
         // Update allCards for filtering
         allCards = cardsWithOwnership;
-        
-        // Render cards
-        displayCards(cardsWithOwnership);
+
+        // Render cards, respecting any active filters
+        filterCards();
         
     } catch (error) {
         console.error('Error loading cards:', error);

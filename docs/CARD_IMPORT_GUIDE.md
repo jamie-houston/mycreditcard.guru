@@ -202,9 +202,6 @@ python manage.py import_cards data/input/cards/chase.json
 for file in data/input/cards/*.json; do
   python manage.py import_cards "$file"
 done
-
-# Import credit types (for preference filtering)
-python manage.py import_credit_types
 ```
 
 ## Verifying Cards to Import More Cards
@@ -277,9 +274,6 @@ python manage.py import_cards data/input/cards/capital_one.json
 python manage.py import_cards data/input/cards/wells_fargo.json
 python manage.py import_cards data/input/cards/citi.json
 # ... (continue for other issuers)
-
-# 4. Credit types (for filtering preferences)
-python manage.py import_credit_types
 ```
 
 ## Checking Import Results
@@ -298,7 +292,6 @@ python manage.py shell
 In the shell:
 ```python
 from cards.models import CreditCard, Issuer
-from roadmaps.models import CreditType
 
 # Count total cards
 print(f"Total cards: {CreditCard.objects.count()}")

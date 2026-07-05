@@ -124,7 +124,6 @@ http://localhost:8000/admin/
 ### Management Commands
 
 - `import_cards <file.json>` - Import credit card data (handles all file types)
-- `import_credit_types` - Import benefit/offer types for preferences
 - `import_spending_credits` - Import spending credit types (lounge access, etc.)
 
 ### API Endpoints
@@ -161,7 +160,6 @@ python manage.py import_cards data/input/system/spending_categories.json
 python manage.py import_cards data/input/system/reward_types.json
 python manage.py import_spending_credits
 python manage.py import_cards data/input/cards/*.json
-python manage.py import_credit_types
 ```
 
 ## Testing

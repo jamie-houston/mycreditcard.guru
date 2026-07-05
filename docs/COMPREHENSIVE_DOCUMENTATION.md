@@ -354,7 +354,6 @@ function generateRecommendations() {
 # Import all system data
 python manage.py import_cards data/input/system/credit_cards.json
 python manage.py import_spending_credits
-python manage.py import_credit_types
 
 # Import issuer-specific cards
 python manage.py import_cards data/input/cards/chase.json

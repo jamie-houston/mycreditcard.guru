@@ -221,6 +221,13 @@ was added (approximated from `opened_date` + ~3 mo when blank).
 - **Preference defaults** (2026-07, by request): empty max annual fee =
   no max (the "95" placeholder lied — it was already no-filter); empty
   max recommendations = 1 (was 5) across UI, serializers, and models.
+- **Removed dead `CreditType`/`UserCreditPreference` system** (2026-07-04): the card
+  credit/benefit filter on `cards_list.html` was checking `credit.credit_type`, a field
+  the serializer never even sends — `SpendingCredit` (added 2025-07-28) superseded
+  `CreditType` (added 2025-07-18) as the real, structured system, but the old model,
+  its FK on `CardCredit`, the `import_credit_types` command, and admin wiring were never
+  deleted. Fixed the filter to use `spending_credit` and removed the dead model/FK/command
+  (migration `cards/0004`) plus stale doc references to `import_credit_types`.
 
 ## Backlog (known, not yet done)
 

@@ -80,11 +80,6 @@ def main():
     else:
         print("⚠️  Warning: No card files found in data/input/cards/")
     
-    # 3. Import credit types (offers/benefits)
-    total_commands += 1
-    if run_command('python manage.py import_credit_types', 'Importing credit types (offers/benefits)'):
-        success_count += 1
-    
     # Summary
     print(f"\n🎯 Setup Summary:")
     print(f"   ✅ {success_count}/{total_commands} commands completed successfully")

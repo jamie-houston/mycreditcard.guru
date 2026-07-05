@@ -328,9 +328,6 @@ def import_all_cards():
     # Import spending credits (used by card benefits)
     run_command("python manage.py import_spending_credits", "Importing spending credits", show_output=False)
 
-    # Import credit types (benefits/offers)
-    run_command("python manage.py import_credit_types", "Importing credit types", show_output=False)
-
     print_success("All card imports complete!")
 
 
