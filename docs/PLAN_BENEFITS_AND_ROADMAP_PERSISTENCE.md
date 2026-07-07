@@ -285,19 +285,28 @@ link works logged-out; private link 404s.
 Update this section as work proceeds. Uncommitted work-in-progress lives on
 `main` (check `git status`).
 
-- [x] **A1 — DONE** (2026-07-05, not yet committed):
+- [x] **A1 — DONE**, committed `0bac083`:
   - `SpendingCredit.stackable` added (cards/models.py) + migration
-    `cards/migrations/0005_spendingcredit_stackable.py` (applied to dev DB)
+    `cards/migrations/0005_spendingcredit_stackable.py`
   - `data/input/system/spending_credits.json`: stackable on all 18 entries
-  - `import_spending_credits.py` handles stackable in create + update paths;
-    re-import run against dev DB (18 updated)
+  - `import_spending_credits.py` handles stackable in create + update paths
   - `SpendingCreditSerializer` exposes `stackable`
-- [ ] **A2 — IN PROGRESS**: engine refactor not started; no engine edits yet.
-      Next step: implement `_counted_card_credits` + `_allocate_portfolio_credits`
-      per A2 above.
-- [ ] A3 — not started
-- [ ] A4 — not started
-- [ ] A5 — not started
+- [x] **A2 — DONE**, committed `0bac083` (same commit as A1, engine work just
+      wasn't reflected here at the time): `_counted_card_credits` and
+      `_allocate_portfolio_credits` implemented in
+      `roadmaps/recommendation_engine.py`; all selection, display, and
+      summary call sites route through the allocation (verified by grep —
+      `_calculate_portfolio_summary`, `_calculate_card_allocated_breakdown`,
+      and both scoring sites call `_allocate_portfolio_credits`). Standard
+      suite (63 tests) and scenario sweep pass as of 2026-07-07.
+- [ ] **A3 — NOT STARTED**: no `credit-preferences` endpoint exists yet in
+      `cards/urls.py`/`cards/views.py`. Next step: build the GET/PUT
+      endpoint per A3 above.
+- [ ] A4 — not started (no `stackable`-aware UI in index.html/profile.html yet)
+- [ ] A5 — not started (no `credit_stackability.json` scenario, no
+      allocation unit tests, no endpoint tests)
 - [ ] B1–B5 — not started
 - [ ] C1–C4 — not started
-- [ ] Docs updates — not started
+- [ ] Docs updates — PROJECT_STATUS.md phase table + this file kept in sync
+      as of 2026-07-07; CLAUDE.md architecture-map update (per the Docs
+      section above) still not started — do it alongside A3/A4.

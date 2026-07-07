@@ -9,7 +9,9 @@ Last updated: 2026-07-07
 
 **Active work (2026-07-05):** benefit preferences & stackability, roadmap
 persistence, and roadmap sharing — full approved plan + progress tracker in
-`docs/PLAN_BENEFITS_AND_ROADMAP_PERSISTENCE.md`. Phases A/B/C below.
+`docs/PLAN_BENEFITS_AND_ROADMAP_PERSISTENCE.md` (**source of truth for
+phase A/B/C detail — update its Progress section, not just this file**).
+Phases A/B/C below.
 
 **UI redesign (2026-07-07):** "Ledger" visual/IA redesign implemented per
 `docs/design_handoff_ccguru_redesign/` — dark theme (tokens in
@@ -23,6 +25,24 @@ added (card rows still open the existing detail modal; no deep-linking, no
 cancel-suggested/match-value badges, no Add-category button). Auth pages and
 the public shared-profile page got the same token sweep for consistency.
 
+## Docs map
+
+This file is the entry point for "where are we." Every other doc below
+covers one feature/phase in depth — if you're planning or resuming work on
+something, check here first for which file owns it.
+
+| File | Owns | Status |
+|---|---|---|
+| `PRD.md` (root) | Original product spec — the *what* | Reference, not living |
+| `docs/PLAN_BENEFITS_AND_ROADMAP_PERSISTENCE.md` | Phase A/B/C detailed design + Progress checklist (benefit prefs/stackability, roadmap persistence, roadmap sharing) | **Living — update its Progress section as A/B/C move**, not just the phase table here |
+| `docs/DEPLOYMENT_GUIDE.md` | PythonAnywhere deploy, MySQL migration incident, scheduled tasks | Living reference |
+| `docs/DEPLOYMENT_CHECKLIST.md` | Step-by-step deploy checklist (companion to the guide above) | Living reference |
+| `docs/CARD_IMPORT_GUIDE.md` | How `import_cards`/`verified: true` gating works | Living reference, but card counts (24/162) are stale — CLAUDE.md's "~27 of ~160" is current |
+| `docs/design_handoff_ccguru_redesign/` | Ledger UI redesign spec (implemented 2026-07-07, see phase table below) | Reference (handoff artifact, not living) |
+| `docs/COMPREHENSIVE_DOCUMENTATION.md` | General architecture/API walkthrough | Living reference, not verified as part of this update — spot-check before trusting specifics |
+| `docs/README_TESTING.md` | How the JSON scenario test suite works (`data/tests/scenarios/*.json`), how to add scenarios, recalibration workflow | Rewritten 2026-07-07 to match the current system (was describing a pre-refactor single-file setup) |
+| `docs/README.md` | Doc folder index | Refreshed 2026-07-07 — now points to this file and the PLAN doc |
+
 ## Phase plan
 
 | Phase | Scope | Status |
@@ -33,7 +53,7 @@ the public shared-profile page got the same token sweep for consistency.
 | 3 | Deploy: refresh PythonAnywhere per `docs/DEPLOYMENT_GUIDE.md` | ✅ Done — live at https://foresterh.pythonanywhere.com on MySQL (see deploy guide for the SQLite/NFS incident); monthly bonus-refresh task scheduled |
 | 4 | Sustainable data pipeline: `import_external_cards` refreshes bonuses/fees from the andenacitelli community API | ✅ Done (monthly cron wiring happens at deploy, Phase 3) |
 | 5 | Cleanup: dead deps/scripts removed, `manage_project.py` menu entries | ✅ Mostly done (see backlog) |
-| A | Benefit preferences (opt-out toggles on profile+roadmap, server-persisted) + stackability dedup (curated `stackable` flag; non-stackable credits count once per portfolio) — see `PLAN_BENEFITS_AND_ROADMAP_PERSISTENCE.md` | 🔨 In progress (A1 done) |
+| A | Benefit preferences (opt-out toggles on profile+roadmap, server-persisted) + stackability dedup (curated `stackable` flag; non-stackable credits count once per portfolio) — see `PLAN_BENEFITS_AND_ROADMAP_PERSISTENCE.md` | 🔨 In progress (A1+A2 done — model, migration, and engine dedup are live and committed; A3 credit-preferences API, A4 frontend, A5 tests still to do) |
 | B | Roadmap persistence (survives reload until regenerate; anon via session) + "I have this card"/"remove from my cards" on results | 📋 Planned |
 | C | Roadmap sharing (share toggle + public UUID link, mirrors profile sharing) | 📋 Planned |
 
