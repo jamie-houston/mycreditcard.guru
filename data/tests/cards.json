@@ -653,5 +653,129 @@
       }
     ],
     "slug": "citi-test-rewards"
+  },
+  {
+    "name": "Lounge Card Low",
+    "issuer": "Generic Bank",
+    "annual_fee": 0,
+    "signup_bonus_amount": 200,
+    "signup_bonus_type": "Cashback",
+    "primary_reward_type": "Cashback",
+    "metadata": {
+      "reward_value_multiplier": 0.01,
+      "discontinued": false,
+      "signup_bonus": {
+        "bonus_amount": 200,
+        "spending_requirement": 1000,
+        "time_limit_months": 3
+      }
+    },
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1.0
+      }
+    ],
+    "slug": "lounge-card-low-test",
+    "credits": [
+      {
+        "credit_type": "airport_lounge",
+        "value": 300,
+        "times_per_year": 1
+      }
+    ]
+  },
+  {
+    "name": "Lounge Card High",
+    "issuer": "Generic Bank",
+    "annual_fee": 0,
+    "signup_bonus_amount": 200,
+    "signup_bonus_type": "Cashback",
+    "primary_reward_type": "Cashback",
+    "metadata": {
+      "reward_value_multiplier": 0.01,
+      "discontinued": false,
+      "signup_bonus": {
+        "bonus_amount": 200,
+        "spending_requirement": 1000,
+        "time_limit_months": 3
+      }
+    },
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1.0
+      }
+    ],
+    "slug": "lounge-card-high-test",
+    "credits": [
+      {
+        "credit_type": "airport_lounge",
+        "value": 550,
+        "times_per_year": 1
+      }
+    ]
+  },
+  {
+    "name": "Uber Eats Card A",
+    "issuer": "Generic Bank",
+    "annual_fee": 0,
+    "signup_bonus_amount": 200,
+    "signup_bonus_type": "Cashback",
+    "primary_reward_type": "Cashback",
+    "metadata": {
+      "reward_value_multiplier": 0.01,
+      "discontinued": false,
+      "signup_bonus": {
+        "bonus_amount": 200,
+        "spending_requirement": 1000,
+        "time_limit_months": 3
+      }
+    },
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1.0
+      }
+    ],
+    "slug": "uber-eats-card-a-test",
+    "credits": [
+      {
+        "credit_type": "uber_eats",
+        "value": 15,
+        "times_per_year": 12
+      }
+    ]
+  },
+  {
+    "name": "Uber Eats Card B",
+    "issuer": "Generic Bank",
+    "annual_fee": 0,
+    "signup_bonus_amount": 200,
+    "signup_bonus_type": "Cashback",
+    "primary_reward_type": "Cashback",
+    "metadata": {
+      "reward_value_multiplier": 0.01,
+      "discontinued": false,
+      "signup_bonus": {
+        "bonus_amount": 200,
+        "spending_requirement": 1000,
+        "time_limit_months": 3
+      }
+    },
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1.0
+      }
+    ],
+    "slug": "uber-eats-card-b-test",
+    "credits": [
+      {
+        "credit_type": "uber_eats",
+        "value": 20,
+        "times_per_year": 12
+      }
+    ]
   }
 ]

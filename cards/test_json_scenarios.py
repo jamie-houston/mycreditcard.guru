@@ -139,6 +139,63 @@ class JSONScenarioTest(JSONScenarioTestBase):
         self.assertAlmostEqual(capacity['months_committed'], 10.0, places=1)
         self.print_scenario_results(scenario, recommendations)
 
+    def test_credit_stackability_non_stackable_counted_once(self):
+        """A5: a non-stackable credit (Airport Lounge) counts once per
+        portfolio — the higher-value card wins, the other gets a $0 info
+        line naming it."""
+        if not self.scenarios:
+            self.skipTest("No scenarios found in JSON file")
+        scenario = self.get_scenario('Credit Stackability - Non-Stackable Credit Counted Once')
+        recommendations = self.run_scenario_test(scenario)
+        low = next(rec for rec in recommendations if rec['card'].slug == 'lounge-card-low-test')
+        high = next(rec for rec in recommendations if rec['card'].slug == 'lounge-card-high-test')
+
+        high_credits = [b for b in high['rewards_breakdown'] if b.get('type') == 'credit']
+        self.assertTrue(
+            any(abs(b['category_rewards'] - 550) < 0.01 for b in high_credits),
+            "Lounge Card High must count its full $550 lounge value")
+
+        low_credits = [b for b in low['rewards_breakdown'] if b.get('type') == 'credit']
+        self.assertEqual(low_credits, [], "Lounge Card Low must not double-count the lounge credit")
+        low_info = [b for b in low['rewards_breakdown'] if b.get('type') == 'info']
+        self.assertEqual(len(low_info), 1)
+        self.assertIn('counted once', low_info[0]['calculation'])
+        self.assertIn('Lounge Card High', low_info[0]['calculation'])
+        self.print_scenario_results(scenario, recommendations)
+
+    def test_credit_stackability_stackable_counts_on_every_card(self):
+        """A5: a stackable credit (Uber Eats) counts in full on every
+        carrying card — no dedup, no info lines."""
+        if not self.scenarios:
+            self.skipTest("No scenarios found in JSON file")
+        scenario = self.get_scenario('Credit Stackability - Stackable Credit Counted On Every Card')
+        recommendations = self.run_scenario_test(scenario)
+        card_a = next(rec for rec in recommendations if rec['card'].slug == 'uber-eats-card-a-test')
+        card_b = next(rec for rec in recommendations if rec['card'].slug == 'uber-eats-card-b-test')
+
+        a_credits = [b for b in card_a['rewards_breakdown'] if b.get('type') == 'credit']
+        b_credits = [b for b in card_b['rewards_breakdown'] if b.get('type') == 'credit']
+        self.assertTrue(any(abs(b['category_rewards'] - 180) < 0.01 for b in a_credits),
+                        "Uber Eats Card A must count its full $180/year")
+        self.assertTrue(any(abs(b['category_rewards'] - 240) < 0.01 for b in b_credits),
+                        "Uber Eats Card B must count its full $240/year")
+        self.assertFalse(any(b.get('type') == 'info' for b in card_a['rewards_breakdown']))
+        self.assertFalse(any(b.get('type') == 'info' for b in card_b['rewards_breakdown']))
+        self.print_scenario_results(scenario, recommendations)
+
+    def test_credit_stackability_no_preference_zeroes_credit(self):
+        """A5: an absent spending_credit_preferences row (never opted in)
+        contributes nothing — same as an explicit opt-out."""
+        if not self.scenarios:
+            self.skipTest("No scenarios found in JSON file")
+        scenario = self.get_scenario('Credit Stackability - No Preference Zeroes The Credit')
+        recommendations = self.run_scenario_test(scenario)
+        card = next(rec for rec in recommendations if rec['card'].slug == 'lounge-card-low-test')
+        self.assertFalse(
+            any('Airport Lounge' in b.get('category_name', '') for b in card['rewards_breakdown']),
+            "Un-opted-in credit must not appear in the breakdown at all")
+        self.print_scenario_results(scenario, recommendations)
+
     # The broad scenario suite has ~22 stale expectations (card counts and
     # keep/cancel policies written for an older engine; baseline was 27
     # failures before the allocation rework). Math-integrity checks

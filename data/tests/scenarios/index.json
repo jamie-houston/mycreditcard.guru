@@ -1,6 +1,6 @@
 {
   "description": "Index of all scenario test files (informational — the loader globs *.json, so a missing entry here doesn't skip a file)",
-  "total_scenarios": 61,
+  "total_scenarios": 64,
   "files": [
     {
       "filename": "basic_profiles.json",
@@ -61,6 +61,12 @@
       "category": "eligibility",
       "scenario_count": 4,
       "description": "Issuer eligibility rules (S3): application blocks, bonus ineligibility, bonus capacity"
+    },
+    {
+      "filename": "credit_stackability.json",
+      "category": "credit_stackability",
+      "scenario_count": 3,
+      "description": "Stackability (A5): non-stackable credits count once per portfolio, stackable credits count per card, no-preference zeroes a credit"
     }
   ]
 }

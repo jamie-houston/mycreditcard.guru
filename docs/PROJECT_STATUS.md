@@ -11,7 +11,7 @@ Last updated: 2026-07-07
 persistence, and roadmap sharing — full approved plan + progress tracker in
 `docs/PLAN_BENEFITS_AND_ROADMAP_PERSISTENCE.md` (**source of truth for
 phase A/B/C detail — update its Progress section, not just this file**).
-Phases A/B/C below.
+Phase A completed 2026-07-07; B and C are next. Phases A/B/C below.
 
 **UI redesign (2026-07-07):** "Ledger" visual/IA redesign implemented per
 `docs/design_handoff_ccguru_redesign/` — dark theme (tokens in
@@ -53,7 +53,7 @@ something, check here first for which file owns it.
 | 3 | Deploy: refresh PythonAnywhere per `docs/DEPLOYMENT_GUIDE.md` | ✅ Done — live at https://foresterh.pythonanywhere.com on MySQL (see deploy guide for the SQLite/NFS incident); monthly bonus-refresh task scheduled |
 | 4 | Sustainable data pipeline: `import_external_cards` refreshes bonuses/fees from the andenacitelli community API | ✅ Done (monthly cron wiring happens at deploy, Phase 3) |
 | 5 | Cleanup: dead deps/scripts removed, `manage_project.py` menu entries | ✅ Mostly done (see backlog) |
-| A | Benefit preferences (opt-out toggles on profile+roadmap, server-persisted) + stackability dedup (curated `stackable` flag; non-stackable credits count once per portfolio) — see `PLAN_BENEFITS_AND_ROADMAP_PERSISTENCE.md` | 🔨 In progress (A1–A4 done — model/migration, engine dedup, the credit-preferences API, and the index.html/profile.html UI are live; needs a manual browser pass, unverified. Remainder of A5 (allocation unit tests + `credit_stackability.json` scenario) still to do) |
+| A | Benefit preferences (opt-out toggles on profile+roadmap, server-persisted) + stackability dedup (curated `stackable` flag; non-stackable credits count once per portfolio) — see `PLAN_BENEFITS_AND_ROADMAP_PERSISTENCE.md` | ✅ Done (A1–A5 all landed 2026-07-07 — model/migration, engine dedup, credit-preferences API, index.html/profile.html UI, and full test coverage incl. `credit_stackability.json`; the UI still needs a manual browser pass, unverified) |
 | B | Roadmap persistence (survives reload until regenerate; anon via session) + "I have this card"/"remove from my cards" on results | 📋 Planned |
 | C | Roadmap sharing (share toggle + public UUID link, mirrors profile sharing) | 📋 Planned |
 
@@ -291,8 +291,9 @@ was added (approximated from `opened_date` + ~3 mo when blank).
 - Acceptance scenario: `python manage.py run_scenario "Jamie Real" --explain`
   (every line item must reconcile to the headline; runs against the dev DB)
 - Full scenario sweep: `RUN_ALL_SCENARIOS=1 python manage.py test cards.test_json_scenarios`
-- Standard tests: `python manage.py test` (54 tests)
-- Full-sweep baseline (2026-07-01): **OK — 61/61 scenarios pass.** Any failure is a
+- Standard tests: `python manage.py test` (76 tests)
+- Full-sweep baseline (2026-07-07): **OK — 64/64 scenarios pass** (61 + 3 new
+  `credit_stackability.json` scenarios from A5). Any failure is a
   regression. To hand-confirm a change's new numbers, re-run the sweep with
   `DUMP_SCENARIOS=1` and diff the printed per-scenario results (the CLI
   `run_scenario` runs against the dev DB, whose real cards pollute fixture pools —

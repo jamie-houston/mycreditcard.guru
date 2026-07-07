@@ -1,0 +1,88 @@
+{
+  "description": "Stackability (A5): non-stackable membership/subscription credits count once per portfolio; stackable statement credits count per card; an un-opted-in credit contributes nothing.",
+  "category": "credit_stackability",
+  "scenarios": [
+    {
+      "name": "Credit Stackability - Non-Stackable Credit Counted Once",
+      "description": "Two cards both carry Airport Lounge (stackable: false, different values). The higher-value card should get the full credit; the other gets a $0 info line naming it, and both headlines still reconcile.",
+      "user_profile": {
+        "spending": {
+          "general": 500
+        },
+        "spending_credit_preferences": [
+          "airport_lounge"
+        ]
+      },
+      "owned_cards": [
+        "lounge-card-low-test",
+        "lounge-card-high-test"
+      ],
+      "available_cards": [
+        "lounge-card-low-test",
+        "lounge-card-high-test"
+      ],
+      "expected_recommendations": {
+        "actions": ["keep"],
+        "must_include_cards": ["lounge-card-low-test", "lounge-card-high-test"],
+        "test_conditions": [
+          "Lounge Card High ($550 lounge value) wins the dedup",
+          "Lounge Card Low gets a $0 info line naming Lounge Card High",
+          "Both cards' line items still reconcile to their headline"
+        ]
+      }
+    },
+    {
+      "name": "Credit Stackability - Stackable Credit Counted On Every Card",
+      "description": "Two cards both carry Uber Eats (stackable: true, different values). Both should count in full — no dedup, no info lines.",
+      "user_profile": {
+        "spending": {
+          "general": 500
+        },
+        "spending_credit_preferences": [
+          "uber_eats"
+        ]
+      },
+      "owned_cards": [
+        "uber-eats-card-a-test",
+        "uber-eats-card-b-test"
+      ],
+      "available_cards": [
+        "uber-eats-card-a-test",
+        "uber-eats-card-b-test"
+      ],
+      "expected_recommendations": {
+        "actions": ["keep"],
+        "must_include_cards": ["uber-eats-card-a-test", "uber-eats-card-b-test"],
+        "test_conditions": [
+          "Uber Eats Card A counts its full $180/year ($15 x 12)",
+          "Uber Eats Card B counts its full $240/year ($20 x 12)",
+          "Neither card gets an info line — stackable credits never dedup"
+        ]
+      }
+    },
+    {
+      "name": "Credit Stackability - No Preference Zeroes The Credit",
+      "description": "User never opted into Airport Lounge, so it contributes nothing to the card's value (an absent preference row, same as an explicit opt-out).",
+      "user_profile": {
+        "spending": {
+          "general": 500
+        },
+        "spending_credit_preferences": []
+      },
+      "owned_cards": [
+        "lounge-card-low-test"
+      ],
+      "available_cards": [
+        "lounge-card-low-test"
+      ],
+      "expected_recommendations": {
+        "actions": ["keep"],
+        "must_include_cards": ["lounge-card-low-test"],
+        "test_conditions": [
+          "No spending_credit_preferences entry for airport_lounge",
+          "Lounge Card Low's breakdown has no Airport Lounge credit or info line"
+        ]
+      }
+    }
+  ]
+}

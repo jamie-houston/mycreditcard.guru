@@ -310,13 +310,39 @@ Update this section as work proceeds. Uncommitted work-in-progress lives on
       `GenerateRoadmapSerializer`'s slug-list contract
       (roadmaps/serializers.py) — that scratch write stays True-only,
       inside the rollback, as designed.
-- [x] A5 (partial) — endpoint tests added: `cards/tests.py`
-      `CreditPreferencesAPITests` (5 tests: empty GET, auth round-trip incl.
-      explicit-False persistence, anon session creation, unknown-slug
-      ignored, 400 on non-dict `preferences`). Standard suite now 68 tests,
-      all green; full scenario sweep (`cards.test_json_scenarios`) still
-      green. Allocation unit tests and the `credit_stackability.json`
-      scenario (the rest of A5) still not started.
+- [x] **A5 — DONE** (2026-07-07):
+      - Endpoint tests: `cards/tests.py` `CreditPreferencesAPITests` (5
+        tests: empty GET, auth round-trip incl. explicit-False persistence,
+        anon session creation, unknown-slug ignored, 400 on non-dict
+        `preferences`).
+      - Allocation unit tests: `roadmaps/tests.py` `CreditAllocationTests`
+        (5 tests, direct against `_allocate_portfolio_credits`) — non-
+        stackable duplicate counts once with a $0 info line naming the
+        winner; stackable duplicate counts on every card; an explicit
+        opt-out row (`values_credit=False`) behaves identically to no row
+        at all; the tie-break is deterministic on card id regardless of
+        input order; a cancel counterfactual correctly attributes $0 to a
+        lower-value card when a held card already carries the same
+        non-stackable credit.
+      - Scenario coverage: `data/tests/scenarios/credit_stackability.json`
+        (3 scenarios) + new fixture cards in `data/tests/cards.json`
+        (`lounge-card-low-test`/`lounge-card-high-test` — same non-stackable
+        Airport Lounge credit, different values; `uber-eats-card-a-test`/
+        `uber-eats-card-b-test` — same stackable Uber Eats credit, different
+        values). Three dedicated test methods in
+        `cards/test_json_scenarios.py` (following the eligibility/bonus-
+        capacity pattern — inspecting actual breakdown line items, not just
+        generic count/action expectations) verify: the higher-value lounge
+        card gets the real credit line and the other gets the $0 info line;
+        both Uber Eats cards count their full (different) values with no
+        info lines; an un-opted-in credit produces no breakdown line at all.
+      - Standard suite: 76 tests, all green. Full sweep
+        (`RUN_ALL_SCENARIOS=1 cards.test_json_scenarios`): **64/64** (was 61
+        — +3 new). `run_scenario "Jamie Real" --explain`: all line items
+        reconcile.
+      - `data/tests/scenarios/index.json` updated (61 → 64 total,
+        `credit_stackability.json` entry added — informational only, the
+        loader globs `*.json`).
 - [x] **A4 — DONE** (2026-07-07): `UserDataManager.getCreditPreferences()`/
       `saveCreditPreferences()` added in `base.html` (server-persisted for
       auth *and* anon via the A3 endpoint — no LocalStorage branch needed,
@@ -347,13 +373,8 @@ Update this section as work proceeds. Uncommitted work-in-progress lives on
         standard suite (68 tests, unaffected) still passes. **Needs a
         manual pass in the browser** — checkbox wiring and the grey-out/
         counted-once visuals haven't been eyeballed.
-- [ ] A5 remainder — allocation unit tests (roadmaps/tests.py: non-stackable
-      duplicate → one winner + $0 info lines; stackable duplicate → both
-      count; opt-out row ≡ absent row; deterministic tie-break; cancel
-      counterfactual) and `data/tests/scenarios/credit_stackability.json`
-      still not started.
 - [ ] B1–B5 — not started
 - [ ] C1–C4 — not started
 - [ ] Docs updates — PROJECT_STATUS.md phase table + this file kept in sync
-      as of 2026-07-07 (A4 landed); CLAUDE.md architecture-map note on the
-      frontend wiring added same commit as A4.
+      as of 2026-07-07 (A5 landed, Phase A now fully done); CLAUDE.md
+      architecture-map note on the frontend wiring added same commit as A4.

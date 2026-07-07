@@ -268,6 +268,130 @@ class BonusVelocityTests(TestCase):
             engine._bonus_months_needed(self._card('Any', 5000)), float('inf'))
 
 
+class CreditAllocationTests(TestCase):
+    """A5: _allocate_portfolio_credits is the single dedup authority for
+    stackability — non-stackable credits (membership/subscription benefits)
+    count once per portfolio; stackable ones count per card."""
+
+    def setUp(self):
+        from cards.models import SpendingCategory, SpendingCredit, UserSpendingCreditPreference
+        self.user = User.objects.create_user(username='allocator', email='a@example.com')
+        self.profile = UserSpendingProfile.objects.create(user=self.user)
+        self.cashback = RewardType.objects.create(name='Cashback', slug='cashback')
+        self.issuer = Issuer.objects.create(name='Generic Bank', slug='generic-bank')
+        travel = SpendingCategory.objects.create(name='Travel', slug='travel')
+        dining = SpendingCategory.objects.create(name='Dining', slug='dining')
+        self.lounge = SpendingCredit.objects.create(
+            name='Airport Lounge', slug='airport_lounge', display_name='Airport Lounge',
+            category=travel, stackable=False)
+        self.uber_eats = SpendingCredit.objects.create(
+            name='Uber Eats', slug='uber_eats', display_name='Uber Eats',
+            category=dining, stackable=True)
+        UserSpendingCreditPreference.objects.create(
+            profile=self.profile, spending_credit=self.lounge, values_credit=True)
+        UserSpendingCreditPreference.objects.create(
+            profile=self.profile, spending_credit=self.uber_eats, values_credit=True)
+
+    def _card(self, name):
+        from django.utils.text import slugify
+        return CreditCard.objects.create(
+            name=name, slug=slugify(name), issuer=self.issuer,
+            signup_bonus_type=self.cashback, primary_reward_type=self.cashback)
+
+    def _credit(self, card, spending_credit, value):
+        from cards.models import CardCredit
+        return CardCredit.objects.create(
+            card=card, spending_credit=spending_credit,
+            description=spending_credit.display_name, value=Decimal(str(value)))
+
+    def _engine(self):
+        from .recommendation_engine import RecommendationEngine
+        return RecommendationEngine(self.profile)
+
+    def test_non_stackable_duplicate_counts_once_with_info_line_on_loser(self):
+        low = self._card('Low Lounge Card')
+        high = self._card('High Lounge Card')
+        self._credit(low, self.lounge, 300)
+        self._credit(high, self.lounge, 550)
+
+        allocation = self._engine()._allocate_portfolio_credits([low, high])
+
+        low_value, low_items = allocation[low.id]
+        high_value, high_items = allocation[high.id]
+        self.assertEqual(high_value, 550.0)
+        self.assertEqual(low_value, 0.0)
+        # Winner gets a real credit line item, not an info line
+        self.assertTrue(any(i['type'] == 'credit' for i in high_items))
+        # Loser gets a $0 info line naming the winning card
+        info_items = [i for i in low_items if i['type'] == 'info']
+        self.assertEqual(len(info_items), 1)
+        self.assertEqual(info_items[0]['category_rewards'], 0)
+        self.assertIn('High Lounge Card', info_items[0]['calculation'])
+
+    def test_stackable_duplicate_counts_on_every_card(self):
+        card_a = self._card('Uber Card A')
+        card_b = self._card('Uber Card B')
+        self._credit(card_a, self.uber_eats, 120)
+        self._credit(card_b, self.uber_eats, 120)
+
+        allocation = self._engine()._allocate_portfolio_credits([card_a, card_b])
+
+        self.assertEqual(allocation[card_a.id][0], 120.0)
+        self.assertEqual(allocation[card_b.id][0], 120.0)
+
+    def test_opt_out_row_equals_absent_row(self):
+        from cards.models import UserSpendingCreditPreference
+        card = self._card('Lounge Card')
+        self._credit(card, self.lounge, 300)
+
+        # No preference row at all (setUp's blanket preference removed)
+        UserSpendingCreditPreference.objects.filter(
+            profile=self.profile, spending_credit=self.lounge).delete()
+        no_row_value = self._engine()._allocate_portfolio_credits([card])[card.id][0]
+
+        # Explicit opt-out row (values_credit=False)
+        UserSpendingCreditPreference.objects.create(
+            profile=self.profile, spending_credit=self.lounge, values_credit=False)
+        opt_out_value = self._engine()._allocate_portfolio_credits([card])[card.id][0]
+
+        self.assertEqual(no_row_value, 0.0)
+        self.assertEqual(opt_out_value, 0.0)
+
+    def test_tie_break_is_deterministic_on_card_id(self):
+        first = self._card('First Lounge Card')
+        second = self._card('Second Lounge Card')
+        self.assertLess(first.id, second.id)
+        self._credit(first, self.lounge, 400)
+        self._credit(second, self.lounge, 400)
+
+        allocation = self._engine()._allocate_portfolio_credits([first, second])
+
+        # Equal value -> lowest card id wins
+        self.assertEqual(allocation[first.id][0], 400.0)
+        self.assertEqual(allocation[second.id][0], 0.0)
+        # Order of the input list must not change the outcome
+        reversed_allocation = self._engine()._allocate_portfolio_credits([second, first])
+        self.assertEqual(reversed_allocation[first.id][0], 400.0)
+        self.assertEqual(reversed_allocation[second.id][0], 0.0)
+
+    def test_cancel_counterfactual_credits_already_covered_by_held_cards(self):
+        """Evaluating whether to cancel a card must account for a non-stackable
+        credit already carried by a higher-value held card — the cancel
+        candidate shouldn't get credit for a benefit the user keeps regardless."""
+        held_high = self._card('Held High Lounge Card')
+        cancel_candidate = self._card('Cancel Candidate Lounge Card')
+        self._credit(held_high, self.lounge, 550)
+        self._credit(cancel_candidate, self.lounge, 300)
+
+        allocation = self._engine()._allocate_portfolio_credits(
+            [held_high, cancel_candidate])
+
+        # The candidate contributes $0 credit value to the cancel decision —
+        # the lounge benefit survives on the held card either way.
+        self.assertEqual(allocation[cancel_candidate.id][0], 0.0)
+        self.assertEqual(allocation[held_high.id][0], 550.0)
+
+
 class QuickRecommendationSafetyTests(TestCase):
     """The quick-rec endpoint must never mutate stored profile data
     (the old behavior deleted and recreated it from the form payload)."""
