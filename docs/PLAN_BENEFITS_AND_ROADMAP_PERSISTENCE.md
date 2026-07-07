@@ -299,14 +299,29 @@ Update this section as work proceeds. Uncommitted work-in-progress lives on
       `_calculate_portfolio_summary`, `_calculate_card_allocated_breakdown`,
       and both scoring sites call `_allocate_portfolio_credits`). Standard
       suite (63 tests) and scenario sweep pass as of 2026-07-07.
-- [ ] **A3 — NOT STARTED**: no `credit-preferences` endpoint exists yet in
-      `cards/urls.py`/`cards/views.py`. Next step: build the GET/PUT
-      endpoint per A3 above.
-- [ ] A4 — not started (no `stackable`-aware UI in index.html/profile.html yet)
-- [ ] A5 — not started (no `credit_stackability.json` scenario, no
-      allocation unit tests, no endpoint tests)
+- [x] **A3 — DONE** (2026-07-07): `credit_preferences_view` (GET/PUT) added
+      to `cards/views.py`, wired at `/api/cards/credit-preferences/` in
+      `cards/urls.py`. GET resolves the profile read-only (auth `filter`,
+      anon `session_key` lookup, no creation) and returns only existing
+      rows. PUT upserts both True and False rows via `update_or_create`
+      (never assumes a default), creates the session for first-time anon
+      users (`request.session.create()`) before `get_or_create`-ing the
+      profile, and silently ignores unknown slugs. Did NOT touch
+      `GenerateRoadmapSerializer`'s slug-list contract
+      (roadmaps/serializers.py) — that scratch write stays True-only,
+      inside the rollback, as designed.
+- [x] A5 (partial) — endpoint tests added: `cards/tests.py`
+      `CreditPreferencesAPITests` (5 tests: empty GET, auth round-trip incl.
+      explicit-False persistence, anon session creation, unknown-slug
+      ignored, 400 on non-dict `preferences`). Standard suite now 68 tests,
+      all green; full scenario sweep (`cards.test_json_scenarios`) still
+      green. Allocation unit tests and the `credit_stackability.json`
+      scenario (the rest of A5) still not started.
+- [ ] A4 — not started (no `stackable`-aware UI in index.html/profile.html yet;
+      this is what will call the A3 endpoint)
 - [ ] B1–B5 — not started
 - [ ] C1–C4 — not started
 - [ ] Docs updates — PROJECT_STATUS.md phase table + this file kept in sync
-      as of 2026-07-07; CLAUDE.md architecture-map update (per the Docs
-      section above) still not started — do it alongside A3/A4.
+      as of 2026-07-07; CLAUDE.md architecture-map note on
+      `credit_preferences_view` added same commit as A3. Still need a
+      similar note once A4 lands.

@@ -77,6 +77,16 @@ Key modules:
   is `/api/users/data/`'s job.
 - `templates/index.html` — the roadmap page (all inline JS). Preferences:
   empty max annual fee = no max; empty max recommendations = 1.
+- `cards/views.py` `credit_preferences_view` (`GET`/`PUT
+  /api/cards/credit-preferences/`) — server-persisted
+  `UserSpendingCreditPreference` rows (which spending credits a user values),
+  auth + anon (session-key) capable. Distinct from the quick-rec
+  serializer's scratch `spending_credit_preferences` slug list (roadmaps/
+  serializers.py, True-only, inside the rollback) — this is the durable
+  read/write path; PUT upserts True *and* False rows so an explicit opt-out
+  survives. Stackability (`SpendingCredit.stackable`, curated data) is
+  separate: it controls engine dedup (`_allocate_portfolio_credits`), not
+  which credits count at all.
 
 ## Data
 

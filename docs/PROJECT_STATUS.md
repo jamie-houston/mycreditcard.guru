@@ -53,7 +53,7 @@ something, check here first for which file owns it.
 | 3 | Deploy: refresh PythonAnywhere per `docs/DEPLOYMENT_GUIDE.md` | ✅ Done — live at https://foresterh.pythonanywhere.com on MySQL (see deploy guide for the SQLite/NFS incident); monthly bonus-refresh task scheduled |
 | 4 | Sustainable data pipeline: `import_external_cards` refreshes bonuses/fees from the andenacitelli community API | ✅ Done (monthly cron wiring happens at deploy, Phase 3) |
 | 5 | Cleanup: dead deps/scripts removed, `manage_project.py` menu entries | ✅ Mostly done (see backlog) |
-| A | Benefit preferences (opt-out toggles on profile+roadmap, server-persisted) + stackability dedup (curated `stackable` flag; non-stackable credits count once per portfolio) — see `PLAN_BENEFITS_AND_ROADMAP_PERSISTENCE.md` | 🔨 In progress (A1+A2 done — model, migration, and engine dedup are live and committed; A3 credit-preferences API, A4 frontend, A5 tests still to do) |
+| A | Benefit preferences (opt-out toggles on profile+roadmap, server-persisted) + stackability dedup (curated `stackable` flag; non-stackable credits count once per portfolio) — see `PLAN_BENEFITS_AND_ROADMAP_PERSISTENCE.md` | 🔨 In progress (A1+A2+A3 done — model/migration, engine dedup, and the credit-preferences API are live; A4 frontend, remainder of A5 tests (allocation unit tests + scenario) still to do) |
 | B | Roadmap persistence (survives reload until regenerate; anon via session) + "I have this card"/"remove from my cards" on results | 📋 Planned |
 | C | Roadmap sharing (share toggle + public UUID link, mirrors profile sharing) | 📋 Planned |
 

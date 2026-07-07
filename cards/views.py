@@ -8,7 +8,8 @@ from django.http import Http404
 
 from .models import (
     Issuer, RewardType, SpendingCategory, CreditCard,
-    UserSpendingProfile, SpendingCredit, UserCard
+    UserSpendingProfile, SpendingCredit, UserCard,
+    UserSpendingCreditPreference
 )
 from .serializers import (
     IssuerSerializer, RewardTypeSerializer, SpendingCategorySerializer,
@@ -110,6 +111,65 @@ def spending_profile_view(request):
             response_serializer = UserSpendingProfileSerializer(profile)
             return Response(response_serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+def _serialize_credit_preferences(profile):
+    return {
+        pref.spending_credit.slug: pref.values_credit
+        for pref in profile.spending_credit_preferences.select_related('spending_credit')
+    }
+
+
+@api_view(['GET', 'PUT'])
+def credit_preferences_view(request):
+    """Get or set which spending credits the user values (auth + anon via session).
+
+    Absent slugs are untouched/unchecked; only rows that exist are returned.
+    """
+    if request.method == 'GET':
+        if request.user.is_authenticated:
+            profile = UserSpendingProfile.objects.filter(user=request.user).first()
+        else:
+            session_key = request.session.session_key
+            profile = (
+                UserSpendingProfile.objects.filter(session_key=session_key).first()
+                if session_key else None
+            )
+
+        if not profile:
+            return Response({'preferences': {}})
+
+        return Response({'preferences': _serialize_credit_preferences(profile)})
+
+    # PUT
+    preferences = request.data.get('preferences')
+    if not isinstance(preferences, dict):
+        return Response(
+            {'error': 'preferences must be an object of {credit_slug: bool}'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    if request.user.is_authenticated:
+        profile, _created = UserSpendingProfile.objects.get_or_create(user=request.user)
+    else:
+        if not request.session.session_key:
+            request.session.create()
+        profile, _created = UserSpendingProfile.objects.get_or_create(
+            session_key=request.session.session_key
+        )
+
+    valid_credits = {c.slug: c for c in SpendingCredit.objects.all()}
+    for slug, values_credit in preferences.items():
+        credit = valid_credits.get(slug)
+        if not credit:
+            continue
+        UserSpendingCreditPreference.objects.update_or_create(
+            profile=profile,
+            spending_credit=credit,
+            defaults={'values_credit': bool(values_credit)}
+        )
+
+    return Response({'preferences': _serialize_credit_preferences(profile)})
 
 
 @api_view(['GET'])
