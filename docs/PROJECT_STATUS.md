@@ -5,7 +5,11 @@ backlog of new/changed requirements discovered along the way. Update this when a
 completes or a new requirement appears. (The original product spec is `PRD.md` at the repo
 root — that's the *what*; this file is the *where are we*.)
 
-Last updated: 2026-07-01
+Last updated: 2026-07-05
+
+**Active work (2026-07-05):** benefit preferences & stackability, roadmap
+persistence, and roadmap sharing — full approved plan + progress tracker in
+`docs/PLAN_BENEFITS_AND_ROADMAP_PERSISTENCE.md`. Phases A/B/C below.
 
 ## Phase plan
 
@@ -17,6 +21,9 @@ Last updated: 2026-07-01
 | 3 | Deploy: refresh PythonAnywhere per `docs/DEPLOYMENT_GUIDE.md` | ✅ Done — live at https://foresterh.pythonanywhere.com on MySQL (see deploy guide for the SQLite/NFS incident); monthly bonus-refresh task scheduled |
 | 4 | Sustainable data pipeline: `import_external_cards` refreshes bonuses/fees from the andenacitelli community API | ✅ Done (monthly cron wiring happens at deploy, Phase 3) |
 | 5 | Cleanup: dead deps/scripts removed, `manage_project.py` menu entries | ✅ Mostly done (see backlog) |
+| A | Benefit preferences (opt-out toggles on profile+roadmap, server-persisted) + stackability dedup (curated `stackable` flag; non-stackable credits count once per portfolio) — see `PLAN_BENEFITS_AND_ROADMAP_PERSISTENCE.md` | 🔨 In progress (A1 done) |
+| B | Roadmap persistence (survives reload until regenerate; anon via session) + "I have this card"/"remove from my cards" on results | 📋 Planned |
+| C | Roadmap sharing (share toggle + public UUID link, mirrors profile sharing) | 📋 Planned |
 
 ## Requirements added/changed since the original plan
 

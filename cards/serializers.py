@@ -47,7 +47,7 @@ class SpendingCreditSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = SpendingCredit
-        fields = ['id', 'name', 'slug', 'display_name', 'description', 'category', 'icon', 'sort_order']
+        fields = ['id', 'name', 'slug', 'display_name', 'description', 'category', 'icon', 'sort_order', 'stackable']
 
 
 class RewardCategorySerializer(serializers.ModelSerializer):

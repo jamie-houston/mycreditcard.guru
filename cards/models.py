@@ -147,6 +147,11 @@ class SpendingCredit(models.Model):
     category = models.ForeignKey(SpendingCategory, on_delete=models.CASCADE, related_name='spending_credits')
     icon = models.CharField(max_length=50, blank=True)
     sort_order = models.IntegerField(default=100)
+    # Curated in data/input/system/spending_credits.json. False = membership/
+    # access-type benefit (lounge, Dashpass): counts once across a portfolio
+    # no matter how many cards carry it. True = separately redeemable
+    # statement credit (Uber Eats, StubHub): counts per card.
+    stackable = models.BooleanField(default=True)
     
     class Meta:
         ordering = ['sort_order', 'display_name']

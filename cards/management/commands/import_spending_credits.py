@@ -47,6 +47,7 @@ class Command(BaseCommand):
                 display_name = credit_data['display_name']
                 description = credit_data.get('description', '')
                 category_name = credit_data['category']
+                stackable = credit_data.get('stackable', True)
                 
                 # Find the spending category
                 try:
@@ -65,15 +66,17 @@ class Command(BaseCommand):
                         'display_name': display_name,
                         'description': description,
                         'category': category,
+                        'stackable': stackable,
                     }
                 )
-                
+
                 if not created:
                     # Update existing credit
                     credit.slug = slug
                     credit.display_name = display_name
                     credit.description = description
                     credit.category = category
+                    credit.stackable = stackable
                     credit.save()
                     updated_count += 1
                 else:

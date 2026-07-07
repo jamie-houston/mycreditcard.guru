@@ -3,108 +3,126 @@
     "name": "airport_lounge",
     "display_name": "Airport Lounge",
     "description": "Airport lounges and airport services",
-    "category": "airlines"
+    "category": "airlines",
+    "stackable": false
   },
   {
     "name": "airlines",
     "display_name": "Airline Fee Credit",
     "description": "Annual statement credit for incidental airline fees",
-    "category": "airlines"
+    "category": "airlines",
+    "stackable": true
   },
   {
     "name": "apple_music",
     "display_name": "Apple Music",
     "description": "Apple Music",
-    "category": "streaming"
+    "category": "streaming",
+    "stackable": false
   },
   {
     "name": "apple_tv",
     "display_name": "Apple TV",
     "description": "Apple TV",
-    "category": "streaming"
+    "category": "streaming",
+    "stackable": false
   },
   {
     "name": "dashpass",
     "display_name": "Dashpass",
     "description": "Free Dashpash",
-    "category": "dining"
+    "category": "dining",
+    "stackable": false
   },
   {
     "name": "disney_plus",
     "display_name": "Disney Plus",
     "description": "Disney Plus",
-    "category": "streaming"
+    "category": "streaming",
+    "stackable": false
   },
   {
     "name": "doordash",
     "display_name": "Doordash",
     "description": "Doordash Monthly Credit",
-    "category": "dining"
+    "category": "dining",
+    "stackable": true
   },
   {
     "name": "google_workspace",
     "display_name": "Google Workspace",
     "description": "Google Workspace",
-    "category": "business"
+    "category": "business",
+    "stackable": false
   },
   {
     "name": "precheck",
     "display_name": "PreCheck",
     "description": "PreCheck and TSA PreCheck",
-    "category": "airlines"
+    "category": "airlines",
+    "stackable": true
   },
   {
     "name": "shopping",
     "display_name": "Shopping Credits",
     "description": "Gift cards and shopping credits",
-    "category": "other"
+    "category": "other",
+    "stackable": true
   },
   {
     "name": "uber_eats",
     "display_name": "Uber Eats",
     "description": "Uber Eats Monthly Credit",
-    "category": "dining"
+    "category": "dining",
+    "stackable": true
   },
   {
     "name": "ziprecruiter",
     "display_name": "ZipRecruiter",
     "description": "ZipRecruiter",
-    "category": "business"
+    "category": "business",
+    "stackable": false
   },
   {
     "name": "stubhub",
     "display_name": "StubHub",
     "description": "StubHub",
-    "category": "entertainment"
+    "category": "entertainment",
+    "stackable": true
   },
   {
     "name": "walmart_plus",
     "display_name": "Walmart Plus",
     "description": "Walmart Plus",
-    "category": "groceries"
+    "category": "groceries",
+    "stackable": false
   },
   {
     "name": "clear",
     "display_name": "Clear Plus",
     "description": "Clear Plus",
-    "category": "airlines"
+    "category": "airlines",
+    "stackable": false
   },
   {
     "name": "dunkin",
     "display_name": "Dunkin",
     "description": "Dunkin",
-    "category": "dining"
+    "category": "dining",
+    "stackable": true
   },
   {
     "name": "grubhub",
     "display_name": "Grubhub",
     "description": "Grubhub monthly dining credit",
-    "category": "dining"
+    "category": "dining",
+    "stackable": true
   },
   {
     "name": "lyft",
     "display_name": "Lyft Credit",
     "description": "Monthly Lyft ride credit",
-    "category": "lyft"
+    "category": "lyft",
+    "stackable": true
   }
 ]

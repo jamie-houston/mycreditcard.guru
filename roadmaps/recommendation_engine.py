@@ -70,18 +70,27 @@ class RecommendationEngine:
                                if uc.closed_date is None]
         
         self.spending_amounts = {
-            sa.category.slug: sa.monthly_amount 
+            sa.category.slug: sa.monthly_amount
             for sa in profile.spending_amounts.all()
         }
-        
-    
+        # Per-instance credit caches — selection loops value the same cards
+        # over and over, so counted credits are computed once per card.
+        self._card_credits_cache = {}
+        self._credit_prefs = None
+        self._credit_spending_categories = None
+
+
     def generate_quick_recommendations(self, roadmap: Roadmap) -> List[dict]:
         """Generate recommendations without saving to database (includes breakdowns)"""
         # Reload spending amounts to ensure we have the latest data
         self.spending_amounts = {
-            sa.category.slug: sa.monthly_amount 
+            sa.category.slug: sa.monthly_amount
             for sa in self.profile.spending_amounts.all()
         }
+        # Spending changed ⇒ category-credit matching may change too.
+        self._card_credits_cache = {}
+        self._credit_prefs = None
+        self._credit_spending_categories = None
         logger.debug(f"Reloaded spending_amounts: {dict(self.spending_amounts)}")
         
         # Get all eligible cards based on filters
@@ -344,6 +353,7 @@ class RecommendationEngine:
         # a card recommended for cancellation can't earn category rewards.
         held_cards = [ca['card'] for ca in best_portfolio if ca['action'] in ('keep', 'apply')]
         portfolio_allocation = self._calculate_portfolio_allocation(held_cards)
+        credit_allocation = self._allocate_portfolio_credits(held_cards)
 
         # Convert optimal portfolio to recommendations
         for card_action in best_portfolio:
@@ -357,9 +367,12 @@ class RecommendationEngine:
                 # spending optimally re-allocated across held cards + it.
                 # Shows the honest cost of keeping rather than the bare fee.
                 cancel_allocation = self._calculate_portfolio_allocation(held_cards + [card])
-                rewards_breakdown = self._calculate_card_allocated_breakdown(card, cancel_allocation)
+                cancel_credit_allocation = self._allocate_portfolio_credits(held_cards + [card])
+                rewards_breakdown = self._calculate_card_allocated_breakdown(
+                    card, cancel_allocation, cancel_credit_allocation)
             else:
-                rewards_breakdown = self._calculate_card_allocated_breakdown(card, portfolio_allocation)
+                rewards_breakdown = self._calculate_card_allocated_breakdown(
+                    card, portfolio_allocation, credit_allocation)
             annual_rewards = rewards_breakdown['total_rewards']
             annual_fee = float(card.annual_fee)
             multiplier = rewards_breakdown['reward_multiplier']
@@ -817,13 +830,16 @@ class RecommendationEngine:
         # set) — cards being cancelled can't claim category spending.
         portfolio_allocation = self._calculate_portfolio_allocation(
             [cd['card'] for cd in optimal_cards])
-        
+        credit_allocation = self._allocate_portfolio_credits(
+            [cd['card'] for cd in optimal_cards])
+
         for uc in self.user_cards:
             if uc.card.id not in optimal_card_ids:
                 annual_fee = float(uc.card.annual_fee)
-                
+
                 # Use allocated breakdown for consistent values
-                rewards_breakdown = self._calculate_card_allocated_breakdown(uc.card, portfolio_allocation)
+                rewards_breakdown = self._calculate_card_allocated_breakdown(
+                    uc.card, portfolio_allocation, credit_allocation)
                 annual_rewards = rewards_breakdown['total_rewards']
                 
                 # Skip cancellation recommendations for $0 annual fee cards
@@ -900,11 +916,7 @@ class RecommendationEngine:
                 if card_data['action'] == 'apply':
                     signup_bonus = self._get_signup_bonus_value(card)
                     total_value += signup_bonus * self.weights['signup_bonus_weight']
-                
-                # Add credits/benefits value
-                credits_value, _ = self._calculate_card_credits_value(card)
-                total_value += credits_value
-                
+
                 # Track best reward rate per category across all cards
                 for reward_cat in card.reward_categories.active_on(self.today):
                     category_slug = reward_cat.category.slug
@@ -935,6 +947,13 @@ class RecommendationEngine:
                     # Calculate rewards: spend * rate * value_multiplier
                     category_rewards = effective_spend * rate * float(multiplier)
                     total_value += category_rewards
+
+            # Credits use the portfolio allocation so a second copy of a
+            # non-stackable credit can't win selection on phantom value it
+            # would never display.
+            credit_allocation = self._allocate_portfolio_credits(
+                [cd['card'] for cd in card_combination])
+            total_value += sum(value for value, _ in credit_allocation.values())
 
             # Strategy effort cost: every held card must earn its keep
             card_count_cost = self.weights['per_card_penalty'] * len(card_combination)
@@ -1134,12 +1153,14 @@ class RecommendationEngine:
                 total_signup_bonuses += (self._get_signup_bonus_value(card)
                                          * self.weights['signup_bonus_weight'])
 
-            # Credits the user actually redeems count toward selection —
-            # without this, a credit-heavy card loses the greedy race even
-            # though its displayed value (which includes credits) wins.
-            credits_value, _ = self._calculate_card_credits_value(card)
-            total_signup_bonuses += credits_value
-        
+        # Credits the user actually redeems count toward selection —
+        # without this, a credit-heavy card loses the greedy race even
+        # though its displayed value (which includes credits) wins.
+        # Portfolio-allocated: duplicate non-stackable credits count once.
+        credit_allocation = self._allocate_portfolio_credits(
+            [action['card'] for action in portfolio_cards])
+        total_credits_value = sum(value for value, _ in credit_allocation.values())
+
         # Use cached spending data for performance
         if not hasattr(self, '_cached_parent_spending'):
             self._cached_parent_spending = self._build_parent_category_spending()
@@ -1210,7 +1231,8 @@ class RecommendationEngine:
             general_rewards = unallocated_spending * best_general_rate * float(best_general_multiplier)
             total_portfolio_rewards += general_rewards
         
-        base_portfolio_value = total_portfolio_rewards + total_signup_bonuses - total_annual_fees
+        base_portfolio_value = (total_portfolio_rewards + total_credits_value
+                                + total_signup_bonuses - total_annual_fees)
         
         # Add efficiency bonus: boost portfolios that include highly relevant cards
         total_efficiency_boost = 0
@@ -1591,9 +1613,11 @@ class RecommendationEngine:
 
         return allocation
 
-    def _calculate_card_allocated_breakdown(self, card: CreditCard, portfolio_allocation: list) -> dict:
-        """Breakdown for one card using only the spending allocated to it
-        by _calculate_portfolio_allocation."""
+    def _calculate_card_allocated_breakdown(self, card: CreditCard, portfolio_allocation: list,
+                                            credit_allocation: dict) -> dict:
+        """Breakdown for one card using only the spending allocated to it by
+        _calculate_portfolio_allocation and the credits attributed to it by
+        _allocate_portfolio_credits (computed over the same card set)."""
         total_rewards = 0.0
         breakdown_details = []
         reward_value_multiplier = float(card.metadata.get('reward_value_multiplier', 0.01))
@@ -1619,26 +1643,12 @@ class RecommendationEngine:
                 'type': 'reward_category',
             })
 
-        # Add card credits the user values as separate line items.
-        credits_value, credits_breakdown = self._calculate_card_credits_value(card)
+        # Credits come from the portfolio-wide allocation, so a non-stackable
+        # credit duplicated across cards counts once (the other carriers get
+        # $0 info lines, never invisible subtraction).
+        credits_value, credit_items = credit_allocation.get(card.id, (0.0, []))
         total_rewards += credits_value
-        for credit in credits_breakdown:
-            if credit['times_per_year'] > 1:
-                credit_display = f"{credit['name']} (${credit['value']:.0f}×{credit['times_per_year']})"
-            else:
-                credit_display = f"{credit['name']} (${credit['value']:.0f})"
-            breakdown_details.append({
-                'category_name': credit_display,
-                'monthly_spend': 0,
-                'annual_spend': 0,
-                'reward_rate': 0,
-                'reward_multiplier': 1.0,
-                'points_earned': credit['annual_value'],
-                'category_rewards': credit['annual_value'],
-                'calculation': f"Card benefit: ${credit['annual_value']:.0f} annually",
-                'type': 'credit',
-                'credit_detail': credit,
-            })
+        breakdown_details.extend(credit_items)
 
         total_spending_on_card = sum(
             item['annual_spend'] for item in breakdown_details
@@ -1777,31 +1787,12 @@ class RecommendationEngine:
                 })
         
         # Add card credits to the total rewards if user has selected them
+        # (single-card scoring path — no portfolio context, no dedup)
         credits_value, credits_breakdown = self._calculate_card_credits_value(card)
         total_rewards += credits_value
-        
-        # Add individual credits as separate breakdown items
-        if credits_breakdown:
-            for credit in credits_breakdown:
-                # Format credit name with frequency like "Apple TV ($12×10)" or "Airport Lounge ($469)"
-                if credit['times_per_year'] > 1:
-                    credit_display = f"{credit['name']} (${credit['value']:.0f}×{credit['times_per_year']})"
-                else:
-                    credit_display = f"{credit['name']} (${credit['value']:.0f})"
-                
-                breakdown_details.append({
-                    'category_name': credit_display,
-                    'monthly_spend': 0,
-                    'annual_spend': 0,
-                    'reward_rate': 0,
-                    'reward_multiplier': 1.0,
-                    'points_earned': credit['annual_value'],
-                    'category_rewards': credit['annual_value'],
-                    'calculation': f"Card benefit: ${credit['annual_value']:.0f} annually",
-                    'type': 'credit',
-                    'credit_detail': credit
-                })
-        
+        for credit in credits_breakdown:
+            breakdown_details.append(self._credit_breakdown_item(credit))
+
         # Calculate total spending on this card
         total_spending_on_card = sum(
             item['annual_spend'] for item in breakdown_details 
@@ -1876,7 +1867,9 @@ class RecommendationEngine:
             # the user's existing cards already win.
             current_cards = [uc.card for uc in self.user_cards]
             allocation = self._calculate_portfolio_allocation(current_cards + [best_card])
-            rewards_breakdown = self._calculate_card_allocated_breakdown(best_card, allocation)
+            credit_allocation = self._allocate_portfolio_credits(current_cards + [best_card])
+            rewards_breakdown = self._calculate_card_allocated_breakdown(
+                best_card, allocation, credit_allocation)
             annual_rewards = rewards_breakdown['total_rewards']
             signup_bonus = self._get_signup_bonus_value(best_card)
             annual_fee = float(best_card.annual_fee)
@@ -1930,70 +1923,145 @@ class RecommendationEngine:
                 return bonus_value
         return 0.0
     
-    def _calculate_card_credits_value(self, card: CreditCard) -> tuple[float, list]:
-        """Calculate the annual value of card credits that user has selected as valuable
-        
-        Returns:
-            tuple: (total_credits_value, credits_breakdown)
-            credits_breakdown is a list of dicts with credit details
-        """
-        credits_value = 0.0
-        credits_breakdown = []
-        
-        # Get user's selected spending credit preferences
-        user_spending_credit_preferences = set()
-        if hasattr(self.profile, 'spending_credit_preferences'):
-            user_spending_credit_preferences = set(
-                pref.spending_credit.slug 
-                for pref in self.profile.spending_credit_preferences.filter(values_credit=True)
+    def _counted_card_credits(self, card: CreditCard) -> list:
+        """Credits on this card that count for THIS user (preference-selected
+        benefits + category credits matching real spending), cached per
+        engine instance — selection loops value the same cards heavily.
+
+        Each entry is a credit dict tagged with 'dedup_key' and 'stackable'
+        for _allocate_portfolio_credits, the single dedup authority."""
+        cached = self._card_credits_cache.get(card.id)
+        if cached is not None:
+            return cached
+
+        if self._credit_prefs is None:
+            prefs = set()
+            if hasattr(self.profile, 'spending_credit_preferences'):
+                prefs = set(
+                    pref.spending_credit.slug
+                    for pref in self.profile.spending_credit_preferences.filter(values_credit=True)
+                )
+            self._credit_prefs = prefs
+            self._credit_spending_categories = set(
+                spending.category.slug
+                for spending in self.profile.spending_amounts.all()
+                if spending.monthly_amount > 0
             )
-        
-        # Get user's spending categories (for category-based credits)
-        user_spending_categories = set(
-            spending.category.slug
-            for spending in self.profile.spending_amounts.all()
-            if spending.monthly_amount > 0
-        )
-        
-        # Calculate value of card credits that match user preferences
-        for card_credit in card.credits.filter(is_active=True):
-            credit_matches = False
-            credit_type = None
-            credit_name = None
-            
-            # Check spending_credit system
-            if card_credit.spending_credit and card_credit.spending_credit.slug in user_spending_credit_preferences:
-                credit_matches = True
+
+        entries = []
+        for card_credit in card.credits.filter(is_active=True).select_related(
+                'spending_credit', 'category'):
+            if card_credit.spending_credit and card_credit.spending_credit.slug in self._credit_prefs:
                 credit_type = "benefit"
                 credit_name = card_credit.spending_credit.display_name
-            
-            # Check category-based credits (automatically include if spending in that category)
-            elif card_credit.category and card_credit.category.slug in user_spending_categories:
-                credit_matches = True
+                dedup_key = card_credit.spending_credit.slug
+                stackable = card_credit.spending_credit.stackable
+            elif card_credit.category and card_credit.category.slug in self._credit_spending_categories:
                 credit_type = "category"
                 credit_name = f"{card_credit.category.display_name} Credit"
-            
-            if credit_matches:
-                # Calculate annual value (value * times_per_year)
-                annual_value = float(card_credit.value) * card_credit.times_per_year
-                credits_value += annual_value
-                
-                # Add to breakdown
-                frequency_text = ""
-                if card_credit.times_per_year > 1:
-                    frequency_text = f" (${card_credit.value} × {card_credit.times_per_year}/year)"
-                
-                credits_breakdown.append({
-                    'name': credit_name or card_credit.description,
-                    'value': float(card_credit.value),
-                    'times_per_year': card_credit.times_per_year,
-                    'annual_value': annual_value,
-                    'type': credit_type,
-                    'description': card_credit.description,
-                    'frequency_display': frequency_text
-                })
-        
-        return credits_value, credits_breakdown
+                # Spend-offset statement credits: each card's credit offsets
+                # separate spending, so duplicates always stack.
+                dedup_key = f"category_{card_credit.category.slug}"
+                stackable = True
+            else:
+                continue
+
+            annual_value = float(card_credit.value) * card_credit.times_per_year
+            frequency_text = ""
+            if card_credit.times_per_year > 1:
+                frequency_text = f" (${card_credit.value} × {card_credit.times_per_year}/year)"
+
+            entries.append({
+                'name': credit_name or card_credit.description,
+                'value': float(card_credit.value),
+                'times_per_year': card_credit.times_per_year,
+                'annual_value': annual_value,
+                'type': credit_type,
+                'description': card_credit.description,
+                'frequency_display': frequency_text,
+                'dedup_key': dedup_key,
+                'stackable': stackable,
+            })
+
+        self._card_credits_cache[card.id] = entries
+        return entries
+
+    def _calculate_card_credits_value(self, card: CreditCard) -> tuple[float, list]:
+        """Single-card credit value with NO portfolio context — candidate
+        scoring only. Anything displayed as an assembled portfolio must use
+        _allocate_portfolio_credits instead."""
+        entries = self._counted_card_credits(card)
+        return sum(e['annual_value'] for e in entries), entries
+
+    @staticmethod
+    def _credit_breakdown_item(credit: dict) -> dict:
+        """Breakdown line for a counted credit (same shape as reward lines)."""
+        if credit['times_per_year'] > 1:
+            credit_display = f"{credit['name']} (${credit['value']:.0f}×{credit['times_per_year']})"
+        else:
+            credit_display = f"{credit['name']} (${credit['value']:.0f})"
+        return {
+            'category_name': credit_display,
+            'monthly_spend': 0,
+            'annual_spend': 0,
+            'reward_rate': 0,
+            'reward_multiplier': 1.0,
+            'points_earned': credit['annual_value'],
+            'category_rewards': credit['annual_value'],
+            'calculation': f"Card benefit: ${credit['annual_value']:.0f} annually",
+            'type': 'credit',
+            'credit_detail': credit,
+        }
+
+    def _allocate_portfolio_credits(self, cards: List[CreditCard]) -> dict:
+        """Portfolio-wide credit allocation — the single dedup authority for
+        selection, display, and summary.
+
+        Stackable credits count on every card that carries them. A
+        non-stackable one (lounge membership, streaming subscription — a
+        second copy covers nothing) counts on exactly ONE card: the carrier
+        where it's worth the most, ties to the lowest card id. Every other
+        carrier gets a $0 info line naming the counted card, so each card's
+        line items still sum to its headline and the reconciliation guard
+        stays green by construction.
+
+        Returns {card_id: (credits_value, credit_breakdown_items)} covering
+        every card passed in."""
+        values = {}
+        items = {}
+        non_stackable = {}  # dedup_key -> {card_id: {'card', 'entries', 'total'}}
+        for card in cards:
+            if card.id in values:
+                continue
+            values[card.id] = 0.0
+            items[card.id] = []
+            for entry in self._counted_card_credits(card):
+                if entry['stackable']:
+                    values[card.id] += entry['annual_value']
+                    items[card.id].append(self._credit_breakdown_item(entry))
+                else:
+                    carrier = non_stackable.setdefault(entry['dedup_key'], {}).setdefault(
+                        card.id, {'card': card, 'entries': [], 'total': 0.0})
+                    carrier['entries'].append(entry)
+                    carrier['total'] += entry['annual_value']
+
+        for carriers in non_stackable.values():
+            winner = max(carriers.values(),
+                         key=lambda c: (c['total'], -c['card'].id))
+            for carrier in carriers.values():
+                card_id = carrier['card'].id
+                if carrier is winner:
+                    for entry in carrier['entries']:
+                        values[card_id] += entry['annual_value']
+                        items[card_id].append(self._credit_breakdown_item(entry))
+                else:
+                    name = carrier['entries'][0]['name']
+                    items[card_id].append(self._info_item(
+                        f"{name} (counted once)",
+                        f"{name} doesn't stack across cards — "
+                        f"counted once, on {winner['card'].name}"))
+
+        return {card_id: (values[card_id], items[card_id]) for card_id in values}
     
     def _calculate_total_rewards(self, recommendations: List[Dict]) -> Decimal:
         """Calculate total estimated rewards from all recommendations"""
@@ -2081,46 +2149,13 @@ class RecommendationEngine:
         # Calculate total annual spending for summary
         total_parent_spending = sum(entry['annual_spend'] for entry in portfolio_allocation)
         
-        # Add card benefits/credits (avoid double counting by using set of unique credits)
-        unique_credits = set()
-        total_credits_value = 0
-        
-        # Get user preferences for spending credits
-        user_spending_credit_preferences = set()
-        if hasattr(self.profile, 'spending_credit_preferences'):
-            user_spending_credit_preferences = set(
-                pref.spending_credit.slug 
-                for pref in self.profile.spending_credit_preferences.filter(values_credit=True)
-            )
-        
-        user_spending_categories = set(
-            spending.category.slug
-            for spending in self.profile.spending_amounts.all()
-            if spending.monthly_amount > 0
-        )
-        
-        for card_data in all_portfolio_cards:
-            card = card_data['card']
-            for card_credit in card.credits.filter(is_active=True):
-                credit_key = None
-                credit_matches = False
-                
-                # Check spending_credit system
-                if card_credit.spending_credit and card_credit.spending_credit.slug in user_spending_credit_preferences:
-                    credit_key = f"spending_credit_{card_credit.spending_credit.slug}"
-                    credit_matches = True
-                
-                # Check category-based credits
-                elif card_credit.category and card_credit.category.slug in user_spending_categories:
-                    credit_key = f"category_{card_credit.category.slug}"
-                    credit_matches = True
-                
-                # Add credit value if it matches and we haven't counted this credit type yet
-                if credit_matches and credit_key and credit_key not in unique_credits:
-                    unique_credits.add(credit_key)
-                    annual_value = float(card_credit.value) * card_credit.times_per_year
-                    total_credits_value += annual_value
-        
+        # Card credits from the same portfolio-wide allocation the per-card
+        # breakdowns use, so the summary equals Σ line items by construction:
+        # non-stackable duplicates count once, stackable/category duplicates
+        # count on every card that carries them.
+        credit_allocation = self._allocate_portfolio_credits(portfolio_cards)
+        total_credits_value = sum(value for value, _ in credit_allocation.values())
+
         total_portfolio_rewards += total_credits_value
         
         # Add signup bonuses for new card applications
