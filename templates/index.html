@@ -4,8 +4,8 @@
 {% block title %}Create a Roadmap - Credit Card Guru{% endblock %}
 
 {% block content %}
-<h1>🗺️ Create a Roadmap</h1>
-        <p style="text-align: center; color: #6b7280; margin-bottom: 40px;">
+<h1><span class="ico" style="color:var(--accent);vertical-align:-3px;">route</span> Create a Roadmap</h1>
+        <p style="text-align: center; color: var(--muted); margin-bottom: 40px;">
             Get personalized credit card recommendations based on your spending patterns
         </p>
 
@@ -13,7 +13,7 @@
              Optional — never a gate; skipping it = no strategy, filters-only. -->
         {% if strategies %}
         <div class="section strategy-section">
-            <h2>⚡ How much effort do you want to put in?</h2>
+            <div class="eyebrow">How much effort do you want to put in?</div>
             <p class="strategy-subtitle">
                 Optional — answer and we'll shape the roadmap around a strategy.
                 Skip it and your preferences below run the show. Click again to clear.
@@ -22,6 +22,7 @@
                 {% for s in strategies %}
                 <button type="button" class="effort-option" id="effort-{{ s.key }}"
                         onclick="toggleEffortOption('{{ s.key }}')">
+                    <span class="ico effort-icon"></span>
                     <div class="effort-label">{{ s.effort_label }}</div>
                     <div class="effort-desc">{{ s.description }}</div>
                 </button>
@@ -51,50 +52,40 @@
         <!-- Preferences Section (moved to top) -->
         <div class="section preferences-section">
             <h2 onclick="togglePreferences()" style="cursor: pointer; display: flex; justify-content: space-between; align-items: center;">
-                🔍 Preferences
-                <span id="preferencesToggle" style="font-size: 14px; color: #6b7280;"></span>
+                Preferences
+                <span id="preferencesToggle" class="ico" style="font-size: 20px; color: var(--muted);">expand_more</span>
             </h2>
-            <div id="preferencesContent" class="spending-grid">
-                <div class="preferences-inline">
-                    <div class="input-group">
-                        <span class="input-group-text">Card Type</span>
-                        <select id="cardType">
-                            <option value="personal" selected>Personal</option>
-                            <option value="business">Business</option>
-                            <option value="all">All Types</option>
-                        </select>
-                    </div>
+            <div id="preferencesContent" class="preferences-tile-grid">
+                <div class="preferences-tile">
+                    <label for="cardType">Card type</label>
+                    <select id="cardType">
+                        <option value="personal" selected>Personal</option>
+                        <option value="business">Business</option>
+                        <option value="all">All Types</option>
+                    </select>
                 </div>
-                <div class="preferences-inline">
-                    <div class="input-group">
-                        <span class="input-group-text">Preferred Issuer</span>
-                        <select id="issuer">
-                            <option value="">Any Issuer</option>
-                        </select>
-                    </div>
+                <div class="preferences-tile">
+                    <label for="rewardType">Rewards</label>
+                    <select id="rewardType" required>
+                        <option value="" selected>Any</option>
+                        <option value="Points">Points</option>
+                        <option value="Miles">Miles</option>
+                        <option value="Cashback">Cashback</option>
+                    </select>
                 </div>
-                <div class="preferences-inline">
-                    <div class="input-group">
-                        <span class="input-group-text">Reward Type</span>
-                        <select id="rewardType" required>
-                            <option value="" selected>Any (Points, Miles, Cashback)</option>
-                            <option value="Points">Points</option>
-                            <option value="Miles">Miles</option>
-                            <option value="Cashback">Cashback</option>
-                        </select>
-                    </div>
+                <div class="preferences-tile">
+                    <label for="maxFee">Max annual fee</label>
+                    <input type="number" id="maxFee" placeholder="No limit" min="0" step="25">
                 </div>
-                <div class="preferences-inline">
-                    <div class="input-group">
-                        <span class="input-group-text">Max Annual Fee</span>
-                        <input type="number" id="maxFee" placeholder="No max" min="0" step="25">
-                    </div>
+                <div class="preferences-tile">
+                    <label for="maxRecs">Max new cards</label>
+                    <input type="number" id="maxRecs" class="form-control" min="1" max="20" step="1" placeholder="1">
                 </div>
-                <div class="preferences-inline">
-                    <div class="input-group">
-                        <span class="input-group-text">Max Recommendations</span>
-                        <input type="number" id="maxRecs" class="form-control" min="1" max="20" step="1" placeholder="1">
-                    </div>
+                <div class="preferences-tile" style="grid-column: span 2;">
+                    <label for="issuer">Preferred issuer</label>
+                    <select id="issuer">
+                        <option value="">Any Issuer</option>
+                    </select>
                 </div>
             </div>
         </div>
@@ -102,41 +93,39 @@
         <!-- Spending Profile Section (made collapsible) -->
         <div class="section spending-section">
             <h2 onclick="toggleSpendingProfile()" style="cursor: pointer; display: flex; justify-content: space-between; align-items: center;">
-                💰 Average Monthly Spending
-                <span id="spendingToggle" style="font-size: 14px; color: #6b7280;">▼ Click to expand</span>
+                Monthly spending
+                <span id="spendingToggle" class="ico" style="font-size: 20px; color: var(--muted);">expand_more</span>
             </h2>
             <div id="spendingProfileContent" style="display: none;">
                 <form id="spendingForm">
                     <div id="spendingCategories" class="spending-grid">
-                        <div class="loading">🔄 Loading spending categories...</div>
+                        <div class="loading">Loading spending categories…</div>
                     </div>
-                    
-                    <div style="margin-top: 20px; padding: 15px; background: #f3f4f6; border-radius: 8px; text-align: center;">
-                        <strong style="font-size: 18px;">Total Monthly Spending: $<span id="totalSpending">0</span></strong>
-                        <div style="margin-top: 12px;">
-                            <button onclick="resetSpendingProfile()" style="background: #6b7280; color: white; padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; font-weight: 500; font-size: 14px; transition: background 0.2s;" onmouseover="this.style.background='#4b5563'" onmouseout="this.style.background='#6b7280'">
-                                🗑️ Reset All Data
-                            </button>
-                        </div>
-                    </div>
-                    
 
+                    <div style="margin-top: 12px; text-align: right;">
+                        <button type="button" onclick="resetSpendingProfile()" class="secondary" style="padding: 8px 16px; font-size: 13px;">
+                            <span class="ico" style="font-size:16px;vertical-align:-3px;">delete</span> Reset All Data
+                        </button>
+                    </div>
                 </form>
             </div>
         </div>
 
-        <!-- Action Buttons -->
-        <div style="text-align: center; margin: 30px 0;">
-            <button onclick="getRecommendations()" class="action-button" style="font-size: 18px; padding: 16px 32px;">
-                🚀 Get My Roadmap
+        <!-- Sticky footer: total + submit -->
+        <div class="roadmap-sticky-footer">
+            <div class="roadmap-sticky-total">
+                <span>Total monthly spend</span>
+                <span class="mono">$<span id="totalSpending">0</span></span>
+            </div>
+            <button onclick="getRecommendations()" class="action-button" style="width: 100%; display:flex; align-items:center; justify-content:center; gap:8px;">
+                Get my roadmap <span class="ico" style="font-size:20px;">arrow_forward</span>
             </button>
             {% if is_dev_user %}
-                <button onclick="exportToScenario()" class="action-button secondary" style="font-size: 16px; padding: 12px 24px; margin-left: 20px; background: #6b7280; border-color: #6b7280;">
-                    📝 Export to Test Scenario
+                <button onclick="exportToScenario()" class="action-button secondary" style="width: 100%; margin-top: 10px;">
+                    Export to Test Scenario
                 </button>
             {% endif %}
         </div>
-
 
         <!-- Results Section -->
         <div id="results"></div>
@@ -166,6 +155,17 @@
         function strategyByKey(key) {
             return STRATEGY_PRESETS.find(s => s.key === key) || null;
         }
+
+        // Material Symbols icon per strategy preset, purely cosmetic (Ledger redesign)
+        const STRATEGY_ICONS = {
+            simple_cash_back: 'bolt',
+            travel_points: 'flight_takeoff',
+            maximizer: 'table_chart'
+        };
+        STRATEGY_PRESETS.forEach(s => {
+            const iconEl = document.querySelector(`#effort-${s.key} .effort-icon`);
+            if (iconEl) iconEl.textContent = STRATEGY_ICONS[s.key] || 'bolt';
+        });
 
         function toggleEffortOption(key) {
             // Clicking the selected answer clears it — the question is not a gate
@@ -229,26 +229,26 @@
         function toggleSpendingProfile() {
             const content = document.getElementById('spendingProfileContent');
             const toggle = document.getElementById('spendingToggle');
-            
+
             if (content.style.display === 'none') {
                 content.style.display = 'block';
-                toggle.textContent = '▲ Click to collapse';
+                toggle.textContent = 'expand_less';
             } else {
                 content.style.display = 'none';
-                toggle.textContent = '▼ Click to expand';
+                toggle.textContent = 'expand_more';
             }
         }
 
         function togglePreferences() {
             const content = document.getElementById('preferencesContent');
             const toggle = document.getElementById('preferencesToggle');
-            
+
             if (content.style.display === 'none') {
                 content.style.display = 'grid';
-                toggle.textContent = '▲ Click to collapse';
+                toggle.textContent = 'expand_less';
             } else {
                 content.style.display = 'none';
-                toggle.textContent = '▼ Click to expand';
+                toggle.textContent = 'expand_more';
             }
         }
 
@@ -341,9 +341,27 @@
             }
         }
 
+        // Material Symbols per category slug (Ledger redesign) — falls back to
+        // emoji defaultIcons below for slugs not in this curated list.
+        const CATEGORY_ICONS = {
+            'dining': 'restaurant',
+            'groceries': 'shopping_cart',
+            'travel': 'flight',
+            'gas': 'local_gas_station',
+            'streaming': 'play_circle',
+            'entertainment': 'play_circle',
+            'general': 'category',
+            'other': 'category',
+            'shopping': 'shopping_bag',
+            'online-shopping': 'shopping_bag',
+            'amazon': 'shopping_bag',
+            'utilities': 'bolt',
+            'transportation': 'directions_car'
+        };
+
         function renderSpendingCategories(categories) {
             const container = document.getElementById('spendingCategories');
-            
+
             // Default icons for categories
             const defaultIcons = {
                 'groceries': '🛒',
@@ -373,9 +391,11 @@
                 const description = category.description || '';
                 const slug = category.slug;
                 
-                // Handle icon - prefer emoji, fallback to Font Awesome or default
+                // Handle icon - prefer a curated Material Symbol, fallback to emoji/FA/default
                 let iconHtml = '';
-                if (category.icon && category.icon.includes('fa-')) {
+                if (CATEGORY_ICONS[slug]) {
+                    iconHtml = `<span class="ico" style="font-size: 19px; margin-right: 8px; color: var(--accent);">${CATEGORY_ICONS[slug]}</span>`;
+                } else if (category.icon && category.icon.includes('fa-')) {
                     // Font Awesome icon
                     iconHtml = `<i class="${category.icon}" style="font-size: 18px; margin-right: 8px; width: 20px; text-align: center;"></i>`;
                 } else if (category.icon && !category.icon.includes('fa-')) {
@@ -403,12 +423,12 @@
                             <span class="input-group-text category-label" style="min-width: 160px;">
                                 ${iconHtml}${displayName} ${tooltipHtml}
                             </span>
-                            <span class="input-group-text" style="background: white; border-left: none;">$</span>
-                            <input type="number" id="${htmlId}" data-category-slug="${slug}" 
+                            <span class="input-group-text" style="border-left: none;">$</span>
+                            <input type="number" id="${htmlId}" data-category-slug="${slug}"
                                    placeholder="0" min="0" step="10" class="form-control spending-input"
-                                   ${hasSubcategories ? 'readonly style="background-color: #f8f9fa; color: #6c757d; cursor: not-allowed;"' : ''}>
+                                   ${hasSubcategories ? 'readonly' : ''}>
                         </div>
-                        ${hasSubcategories ? '<div style="font-size: 12px; color: #6b7280; margin-top: 4px; margin-left: 10px;"><em>Total calculated from subcategories below</em></div>' : ''}
+                        ${hasSubcategories ? '<div style="font-size: 12px; color: var(--muted); margin-top: 4px; margin-left: 10px;"><em>Total calculated from subcategories below</em></div>' : ''}
                     </div>
                 `;
                 
@@ -425,21 +445,21 @@
                         // Handle subcategory icon
                         let subIconHtml = '';
                         if (subcat.icon && subcat.icon.includes('fa-')) {
-                            subIconHtml = `<i class="${subcat.icon}" style="font-size: 14px; margin-right: 8px; width: 16px; text-align: center; color: #6b7280;"></i>`;
+                            subIconHtml = `<i class="${subcat.icon}" style="font-size: 14px; margin-right: 8px; width: 16px; text-align: center; color: var(--muted);"></i>`;
                         } else if (subcat.icon && !subcat.icon.includes('fa-')) {
                             subIconHtml = `<span style="font-size: 14px; margin-right: 8px; opacity: 0.7;">${subcat.icon}</span>`;
                         } else {
-                            subIconHtml = `<span style="font-size: 14px; margin-right: 8px; color: #9ca3af;">↳</span>`;
+                            subIconHtml = `<span style="font-size: 14px; margin-right: 8px; color: var(--muted-2);">↳</span>`;
                         }
-                        
+
                         categoryHtml += `
                             <div class="spending-item subcategory-item">
                                 <div class="input-group">
                                     <span class="input-group-text subcategory-label" style="min-width: 140px;">
                                         ${subIconHtml}${subDisplayName} ${subTooltipHtml}
                                     </span>
-                                    <span class="input-group-text" style="background: #f9fafb; border-left: none;">$</span>
-                                    <input type="number" id="${subHtmlId}" data-category-slug="${subSlug}" 
+                                    <span class="input-group-text" style="border-left: none;">$</span>
+                                    <input type="number" id="${subHtmlId}" data-category-slug="${subSlug}"
                                            placeholder="0" min="0" step="10" class="form-control spending-input" style="font-size: 13px;">
                                 </div>
                             </div>
@@ -452,21 +472,21 @@
                 if (categoryCredits && categoryCredits.length > 0) {
                     categoryHtml += `
                         <div class="spending-credits-section" style="margin-top: 10px; margin-left: 20px;">
-                            <div style="font-size: 13px; color: #6b7280; margin-bottom: 8px; font-weight: 500;">
-                                💳 Credits You Use:
+                            <div style="font-size: 13px; color: var(--muted); margin-bottom: 8px; font-weight: 500;">
+                                Credits You Use:
                             </div>
                             <div class="spending-credits-list" style="display: block !important; width: 100%;">
                     `;
-                    
+
                     categoryCredits.forEach(credit => {
-                        const creditDescription = credit.description ? 
+                        const creditDescription = credit.description ?
                             `<span class="tooltip-icon" title="${credit.description}" style="margin-left: 4px;">❓</span>` : '';
-                        
+
                         categoryHtml += `
                             <div class="spending-credit-item" style="display: flex !important; align-items: center !important; gap: 6px; font-size: 12px; width: 100% !important; margin-bottom: 8px; flex-wrap: nowrap !important;">
-                                <input type="checkbox" id="credit_${credit.slug}" name="spending_credit_preferences" 
+                                <input type="checkbox" id="credit_${credit.slug}" name="spending_credit_preferences"
                                        value="${credit.slug}" onchange="handleSpendingCreditChange(this)">
-                                <label for="credit_${credit.slug}" style="cursor: pointer; color: #4b5563; font-weight: normal; margin: 0;">
+                                <label for="credit_${credit.slug}" style="cursor: pointer; color: var(--text); font-weight: normal; margin: 0;">
                                     ${credit.icon ? `${credit.icon} ` : ''}${credit.display_name}${creditDescription}
                                 </label>
                             </div>
@@ -575,7 +595,7 @@
                 // Show success message
                 const totalSection = document.getElementById('totalSpending').parentElement;
                 const originalBg = totalSection.style.background;
-                totalSection.style.background = '#d1fae5';
+                totalSection.style.background = 'var(--accent-soft)';
                 setTimeout(() => {
                     totalSection.style.background = originalBg;
                 }, 2000);
@@ -869,162 +889,76 @@
 
                 const activePreset = strategyByKey(selectedStrategy);
                 let html = `
-                    <div class="results">
-                        <h2 id="roadmapResults">🎯 Your Personalized Credit Card Roadmap</h2>
-                        ${activePreset ? `<p style="text-align: center; color: #6b7280; margin: -10px 0 20px 0;">Strategy: <strong>${activePreset.name}</strong> — ${activePreset.pool_label}</p>` : ''}
+                    <div class="results" style="background:transparent;border:none;padding:0;">
+                        <h2 id="roadmapResults">Your roadmap</h2>
+                        ${activePreset ? `<p style="text-align: center; color: var(--muted); margin: -10px 0 20px 0;">Strategy: <strong style="color:var(--text);">${activePreset.name}</strong> — ${activePreset.pool_label}</p>` : ''}
                 `;
+
+                // Helper: pick the categories that drove most of a card's value,
+                // straight from the same rewards_breakdown shown in its detail panel.
+                function topCategoriesLabel(rec) {
+                    const items = (rec.rewards_breakdown || []).filter(b =>
+                        b.type !== 'credit' && b.type !== 'info' && b.type !== 'bonus_shift' && (b.category_rewards || 0) > 0);
+                    items.sort((a, b) => (b.category_rewards || 0) - (a.category_rewards || 0));
+                    const top = items.slice(0, 2).map(b => b.category_name).filter(Boolean);
+                    return top.length ? `Best for ${top.join(' & ')}` : (rec.reasoning || '');
+                }
+
+                function formatSigned(value) {
+                    const v = parseFloat(value) || 0;
+                    return v < 0 ? `−$${Math.abs(v).toFixed(0)}` : `$${v.toFixed(0)}`;
+                }
 
                 // Add portfolio summary if we have recommendations
                 if (recommendations.length > 0 && portfolioSummary.card_count > 0) {
                     const categoryOptimization = portfolioSummary.category_optimization || {};
                     const categoryOptimizationEntries = Object.entries(categoryOptimization);
-                    
+                    const netValue = portfolioSummary.net_portfolio_value || 0;
+                    const keepCount = recommendations.filter(r => r.action === 'keep').length;
+                    const applyCount = recommendations.filter(r => r.action === 'apply').length;
+                    const cancelCount = recommendations.filter(r => r.action === 'cancel').length;
+
                     html += `
-                        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 12px; margin-bottom: 25px;">
-                            <h3 style="margin: 0 0 15px 0; color: white;">📊 Portfolio Summary</h3>
-                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 15px;">
-                                <div style="background: rgba(255,255,255,0.2); padding: 15px; border-radius: 8px; text-align: center;">
-                                    <div style="font-size: 24px; font-weight: bold;">$${portfolioSummary.total_annual_fees.toFixed(0)}</div>
-                                    <div style="opacity: 0.9; font-size: 14px;">Total Annual Fees</div>
-                                </div>
-                                <div style="background: rgba(255,255,255,0.2); padding: 15px; border-radius: 8px; text-align: center;">
-                                    <div style="font-size: 24px; font-weight: bold;">$${portfolioSummary.total_portfolio_rewards.toFixed(0)}</div>
-                                    <div style="opacity: 0.9; font-size: 14px;">Total Portfolio Rewards</div>
-                                </div>
-                                <div style="background: rgba(255,255,255,0.2); padding: 15px; border-radius: 8px; text-align: center;">
-                                    <div style="font-size: 24px; font-weight: bold;">$${(portfolioSummary.total_annual_spending || 0).toFixed(0)}</div>
-                                    <div style="opacity: 0.9; font-size: 14px;">Total Annual Spending</div>
-                                </div>
-                                <div style="background: rgba(255,255,255,0.2); padding: 15px; border-radius: 8px; text-align: center;">
-                                    <div style="font-size: 24px; font-weight: bold; color: ${portfolioSummary.net_portfolio_value >= 0 ? '#10b981' : '#ef4444'};">$${portfolioSummary.net_portfolio_value.toFixed(0)}</div>
-                                    <div style="opacity: 0.9; font-size: 14px;">Net Portfolio Value</div>
-                                </div>
-                                <div style="background: rgba(255,255,255,0.2); padding: 15px; border-radius: 8px; text-align: center;">
-                                    <div style="font-size: 24px; font-weight: bold;">${portfolioSummary.card_count}</div>
-                                    <div style="opacity: 0.9; font-size: 14px;">Recommended Cards</div>
-                                </div>
+                        <div class="result-hero">
+                            <div class="result-hero-label">Estimated rewards / year</div>
+                            <div class="result-hero-figure-row">
+                                <span class="result-hero-figure">${formatSigned(netValue)}</span>
+                            </div>
+                            <div class="result-hero-sub">$${(portfolioSummary.total_portfolio_rewards || 0).toFixed(0)} rewards − $${(portfolioSummary.total_annual_fees || 0).toFixed(0)} fees · $${(portfolioSummary.total_annual_spending || 0).toLocaleString()}/yr tracked</div>
+                            <div class="result-hero-stats">
+                                <div class="tile"><div class="tile-figure">${keepCount}</div><div class="tile-label">Keep</div></div>
+                                <div class="tile"><div class="tile-figure">${applyCount}</div><div class="tile-label">Apply</div></div>
+                                <div class="tile"><div class="tile-figure">${cancelCount}</div><div class="tile-label">Cancel</div></div>
                             </div>
                             ${(portfolioSummary.bonus_capacity && portfolioSummary.bonus_capacity.deferred_applies && portfolioSummary.bonus_capacity.deferred_applies.length > 0) ? `
-                                <div style="background: rgba(255,255,255,0.15); padding: 12px 15px; border-radius: 8px; margin-bottom: 15px; font-size: 14px;">
-                                    ⏳ At ~$${(portfolioSummary.bonus_capacity.total_monthly_spending || 0).toLocaleString()}/mo of spending, the recommended signup bonuses take
+                                <div style="background: var(--bg); border: 1px solid var(--border); padding: 12px 15px; border-radius: var(--radius-sm); margin-top: 15px; font-size: 13px; color: var(--muted);">
+                                    At ~$${(portfolioSummary.bonus_capacity.total_monthly_spending || 0).toLocaleString()}/mo of spending, the recommended signup bonuses take
                                     ~${portfolioSummary.bonus_capacity.months_committed} of the year's ${portfolioSummary.bonus_capacity.capacity_months} months to earn.
                                     Deferred until next year: ${portfolioSummary.bonus_capacity.deferred_applies.join(', ')}.
                                 </div>
                             ` : ''}
-                            ${categoryOptimizationEntries.length > 0 ? `
-                                <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 8px;">
-                                    <h4 style="margin: 0 0 10px 0; color: white; font-size: 16px;">🎯 Optimized Reward Rates by Category</h4>
-                                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 10px;">
-                                        ${categoryOptimizationEntries.map(([slug, data]) => `
-                                            <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.1); padding: 8px 12px; border-radius: 6px;">
-                                                <div>
-                                                    <div style="font-weight: 600; font-size: 14px;">${data.category_name}</div>
-                                                    <div style="opacity: 0.8; font-size: 12px;">${data.best_card}</div>
-                                                </div>
-                                                <div style="font-weight: bold; font-size: 16px;">${data.best_rate}x</div>
-                                            </div>
-                                        `).join('')}
-                                    </div>
-                                </div>
-                            ` : ''}
                         </div>
                     `;
-                }
 
-                // Add detailed recommendations table
-                if (recommendations.length > 0) {
-                    html += `
-                        <div style="margin-bottom: 25px;">
-                            <h3 style="margin-bottom: 15px; color: #374151;">📋 Detailed Recommendation Breakdown</h3>
-                            <div style="overflow-x: auto; border-radius: 8px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
-                                <table style="width: 100%; border-collapse: collapse; background: white; font-size: 14px;">
-                                    <thead>
-                                        <tr style="background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); color: white;">
-                                            <th style="padding: 12px 8px; text-align: left; font-weight: 600;">Action</th>
-                                            <th style="padding: 12px 8px; text-align: left; font-weight: 600;">Card Name</th>
-                                            <th style="padding: 12px 8px; text-align: right; font-weight: 600;">Spend on Card</th>
-                                            <th style="padding: 12px 8px; text-align: right; font-weight: 600;">Reward Value</th>
-                                            <th style="padding: 12px 8px; text-align: right; font-weight: 600;">Signup Bonus</th>
-                                            <th style="padding: 12px 8px; text-align: right; font-weight: 600;">Annual Fee</th>
-                                            <th style="padding: 12px 8px; text-align: right; font-weight: 600;">Estimated Value</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>`;
-                    
-                    recommendations.forEach((rec, index) => {
-                        // Calculate spending on this card
-                        const cardSpending = rec.rewards_breakdown?.reduce((sum, item) => 
-                            sum + (item.annual_spend || 0), 0) || 0;
-                        
-                        // Calculate reward value (excluding signup bonus and fees)
-                        const rewardValue = rec.rewards_breakdown?.reduce((sum, item) => 
-                            sum + (item.category_rewards || 0), 0) || 0;
-                        
-                        // Get values
-                        const signupBonus = rec.signup_bonus_value || 0;
-                        const annualFee = parseFloat(rec.card.annual_fee) || 0;
-                        const estimatedValue = parseFloat(rec.estimated_rewards) || 0;
-                        
-                        // Action styling
-                        let actionStyle = '';
-                        let actionText = rec.action.toUpperCase();
-                        switch(rec.action) {
-                            case 'apply':
-                                actionStyle = 'background: #10b981; color: white; padding: 4px 8px; border-radius: 4px; font-weight: 600;';
-                                break;
-                            case 'keep':
-                                actionStyle = 'background: #3b82f6; color: white; padding: 4px 8px; border-radius: 4px; font-weight: 600;';
-                                break;
-                            case 'cancel':
-                                actionStyle = 'background: #ef4444; color: white; padding: 4px 8px; border-radius: 4px; font-weight: 600;';
-                                break;
-                            default:
-                                actionStyle = 'background: #6b7280; color: white; padding: 4px 8px; border-radius: 4px; font-weight: 600;';
-                        }
-                        
-                        // Row styling
-                        const rowStyle = index % 2 === 0 ? 'background: #f9fafb;' : 'background: white;';
-                        
+                    if (categoryOptimizationEntries.length > 0) {
                         html += `
-                            <tr style="${rowStyle}">
-                                <td style="padding: 10px 8px; border-bottom: 1px solid #e5e7eb;">
-                                    <span style="${actionStyle}">${actionText}</span>
-                                </td>
-                                <td style="padding: 10px 8px; border-bottom: 1px solid #e5e7eb; font-weight: 500;">
-                                    ${rec.card.name}
-                                </td>
-                                <td style="padding: 10px 8px; border-bottom: 1px solid #e5e7eb; text-align: right;">
-                                    $${cardSpending.toLocaleString()}
-                                </td>
-                                <td style="padding: 10px 8px; border-bottom: 1px solid #e5e7eb; text-align: right; color: #10b981; font-weight: 500;">
-                                    $${rewardValue.toFixed(0)}
-                                </td>
-                                <td style="padding: 10px 8px; border-bottom: 1px solid #e5e7eb; text-align: right; color: #f59e0b; font-weight: 500;">
-                                    ${signupBonus > 0 ? `$${signupBonus.toFixed(0)}` : '-'}
-                                </td>
-                                <td style="padding: 10px 8px; border-bottom: 1px solid #e5e7eb; text-align: right; color: #ef4444; font-weight: 500;">
-                                    ${annualFee > 0 ? `$${annualFee.toFixed(0)}` : '$0'}
-                                </td>
-                                <td style="padding: 10px 8px; border-bottom: 1px solid #e5e7eb; text-align: right; font-weight: 600; color: ${estimatedValue >= 0 ? '#10b981' : '#ef4444'};">
-                                    $${estimatedValue.toFixed(0)}
-                                </td>
-                            </tr>
+                            <div class="result-section-header"><span class="ico">grid_view</span><span class="result-section-header-title">Best card per category</span></div>
+                            <div class="grouped-card"><div class="category-card-body">
+                                ${categoryOptimizationEntries.map(([slug, data]) => `
+                                    <div class="category-row">
+                                        <span class="ico">${CATEGORY_ICONS[slug] || 'category'}</span>
+                                        <span class="category-row-name">${data.category_name}</span>
+                                        <span class="category-row-card">${data.best_card}</span>
+                                        <span class="category-row-rate">${data.best_rate}x</span>
+                                    </div>
+                                `).join('')}
+                            </div></div>
                         `;
-                    });
-                    
-                    html += `
-                                    </tbody>
-                                </table>
-                            </div>
-                            <div style="margin-top: 8px; font-size: 12px; color: #6b7280; text-align: center;">
-                                💡 Formula: Estimated Value = Reward Value + Signup Bonus - Annual Fee
-                            </div>
-                        </div>
-                    `;
+                    }
                 }
 
                 if (recommendations.length === 0) {
-                    html += '<p>No recommendations found with your current criteria. Try adjusting your filters.</p>';
+                    html += '<p style="text-align:center;color:var(--muted);">No recommendations found with your current criteria. Try adjusting your filters.</p>';
                 } else {
                     // Group recommendations by action type
                     const groupedRecs = {
@@ -1035,42 +969,37 @@
                         downgrade: recommendations.filter(rec => rec.action === 'downgrade')
                     };
 
-                    // Define section metadata (reordered: Cancel first, then Keep, then Apply)
+                    // Define section metadata (order matches the mock: Apply, Keep, Cancel, then any Upgrade/Downgrade)
                     const sections = [
                         {
-                            key: 'cancel',
-                            title: '❌ Consider Canceling',
-                            description: 'Cards that provide limited value or overlap with better options',
-                            bgGradient: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
-                            borderColor: '#ef4444'
+                            key: 'apply',
+                            title: 'Apply for these',
+                            icon: 'add_circle',
+                            danger: false
                         },
                         {
                             key: 'keep',
-                            title: '👍 Keep These Cards',
-                            description: 'Cards that provide good value in your current portfolio',
-                            bgGradient: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-                            borderColor: '#10b981'
+                            title: 'Keep',
+                            icon: 'check_circle',
+                            danger: false
                         },
                         {
-                            key: 'apply',
-                            title: '✅ Apply for These Cards',
-                            description: 'New cards that will improve your portfolio',
-                            bgGradient: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
-                            borderColor: '#3b82f6'
+                            key: 'cancel',
+                            title: 'Cancel',
+                            icon: 'cancel',
+                            danger: true
                         },
                         {
                             key: 'upgrade',
-                            title: '⬆️ Upgrade Options',
-                            description: 'Upgrade paths for better rewards',
-                            bgGradient: 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)',
-                            borderColor: '#8b5cf6'
+                            title: 'Upgrade options',
+                            icon: 'trending_up',
+                            danger: false
                         },
                         {
                             key: 'downgrade',
-                            title: '⬇️ Downgrade Options', 
-                            description: 'Consider downgrading to reduce fees',
-                            bgGradient: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
-                            borderColor: '#f59e0b'
+                            title: 'Downgrade options',
+                            icon: 'trending_down',
+                            danger: false
                         }
                     ];
 
@@ -1078,16 +1007,15 @@
                     sections.forEach(section => {
                         const sectionRecs = groupedRecs[section.key];
                         if (sectionRecs && sectionRecs.length > 0) {
+                            const isApply = section.key === 'apply';
                             html += `
-                                <div style="margin-bottom: 30px;">
-                                    <div onclick="toggleSection('${section.key}')" style="background: ${section.bgGradient}; color: white; padding: 15px 20px; border-radius: 10px 10px 0 0; margin-bottom: 0; cursor: pointer; user-select: none; display: flex; justify-content: space-between; align-items: center;">
-                                        <div>
-                                            <h3 style="margin: 0 0 5px 0; font-size: 20px; font-weight: 700;">${section.title}</h3>
-                                            <p style="margin: 0; opacity: 0.9; font-size: 14px;">${section.description}</p>
-                                        </div>
-                                        <div id="toggle-${section.key}" style="font-size: 20px; transition: transform 0.3s ease;">▼</div>
-                                    </div>
-                                    <div id="content-${section.key}" class="roadmap-cards-grid" style="border: 1px solid ${section.borderColor}; border-top: none; border-radius: 0 0 10px 10px; padding: 20px;">
+                                <div class="result-section-header${section.danger ? ' danger' : ''}" onclick="toggleSection('${section.key}')" style="cursor:pointer;">
+                                    <span class="ico">${section.icon}</span>
+                                    <span class="result-section-header-title">${section.title}</span>
+                                    <span class="result-section-header-count">${sectionRecs.length}</span>
+                                    <span class="ico" id="toggle-${section.key}" style="margin-left:auto; font-size:20px; color:var(--muted); transition: transform 0.2s ease;">expand_more</span>
+                                </div>
+                                <div id="content-${section.key}" class="${isApply ? '' : 'grouped-card' + (section.danger ? ' danger' : '')}">
                             `;
 
                             sectionRecs.forEach((rec, index) => {
@@ -1232,79 +1160,58 @@
                                 </div>`;
                         }
 
-                                const isLast = index === sectionRecs.length - 1;
-                                const borderBottom = isLast ? 'border-bottom: none;' : 'border-bottom: 1px solid #e5e7eb;';
+                                const estimatedValue = parseFloat(rec.estimated_rewards) || 0;
+                                const annualFee = parseFloat(rec.card.effective_annual_fee || 0);
+                                const reasonLabel = topCategoriesLabel(rec);
+                                const eligibilityHtml = rec.eligibility_note ? `
+                                    <div class="chip" style="margin-top: 10px;">${rec.eligibility_note}</div>
+                                ` : '';
 
-                        html += `
-                            <div class="roadmap-card ${actionClass}" onclick="openCardModal(${rec.card.id})">
-                                <div class="roadmap-card-header">
-                                    <div class="roadmap-card-issuer">${rec.card.issuer}</div>
-                                    <div class="roadmap-priority-badge" style="background: ${section.borderColor};">
-                                        #${rec.priority}
-                                    </div>
-                                </div>
-                                
-                                <div class="roadmap-card-name">${rec.card.name}</div>
-                                
-                                <div class="roadmap-card-key-info">
-                                    <div class="roadmap-card-value">
-                                        <strong>Estimated Value:</strong> $${rec.estimated_rewards.toFixed(0)}
-                                    </div>
-                                    
-                                    <div class="roadmap-card-fee">
-                                        <strong>Annual Fee:</strong> $${rec.card.effective_annual_fee}${rec.card.annual_fee_waived_first_year && rec.action === 'apply' ? ' (first year waived)' : ''}
-                                    </div>
-                                    
-                                    ${rec.card.signup_bonus_amount && rec.action === 'apply' ?
-                                        `<div class="roadmap-card-bonus">
-                                            <strong>Signup Bonus:</strong> ${rec.card.signup_bonus_amount.toLocaleString()} ${rec.card.signup_bonus_type || 'points'}${rec.card.signup_spending_requirement ? ` — spend $${rec.card.signup_spending_requirement.toLocaleString()} in ${rec.card.signup_time_limit_months || 3} months` : ''}
-                                        </div>` : ''
-                                    }
-                                    ${rec.eligibility_note ? `
-                                        <div style="background: #fef3c7; color: #92400e; padding: 6px 10px; border-radius: 6px; font-size: 13px; margin-top: 6px;">
-                                            ⚠️ ${rec.eligibility_note}
-                                        </div>` : ''
-                                    }
-
-                                    ${breakdownHtml}
-                                    
-                                    <div class="roadmap-card-reasoning">
-                                        <strong>Why:</strong> ${rec.reasoning}
-                                    </div>
-                                </div>
-                                
-                                <div class="roadmap-card-actions">
-                                    ${rec.action === 'apply' ? `
-                                        <button 
-                                            onclick="event.stopPropagation(); openCardOwnershipModal(${rec.card.id})" 
-                                            class="roadmap-btn success"
-                                        >
-                                            ✅ I have this card
-                                        </button>
-                                        ${rec.card.apply_url ? `
-                                            <button 
-                                                onclick="event.stopPropagation(); window.open('${rec.card.apply_url}', '_blank')" 
-                                                class="roadmap-btn apply-btn"
-                                            >
-                                                🚀 Apply Now
-                                            </button>
-                                        ` : ''}
-                                    ` : ''}
-                                    <button 
-                                        onclick="event.stopPropagation(); openCardModal(${rec.card.id})" 
-                                        class="roadmap-btn primary"
-                                    >
-                                        📋 View Details
-                                    </button>
-                                </div>
-                            </div>
-                        `;
-                            });
-
+                        if (isApply) {
                             html += `
+                                <div class="apply-card" onclick="openCardModal(${rec.card.id})">
+                                    <div class="apply-card-top">
+                                        <div>
+                                            <div class="apply-card-name">${rec.card.name}</div>
+                                            <div class="apply-card-reason">${reasonLabel}</div>
+                                        </div>
+                                        <span class="apply-card-value">${formatSigned(estimatedValue)}</span>
+                                    </div>
+                                    <div class="apply-card-stats">
+                                        ${rec.card.signup_bonus_amount ? `
+                                            <div><div class="apply-card-stat-label">BONUS</div><div class="apply-card-stat-value">${rec.card.signup_bonus_amount.toLocaleString()}</div></div>
+                                        ` : ''}
+                                        <div><div class="apply-card-stat-label">FEE</div><div class="apply-card-stat-value">$${annualFee.toFixed(0)}${rec.card.annual_fee_waived_first_year ? '*' : ''}</div></div>
+                                        ${rec.card.signup_spending_requirement ? `
+                                            <div><div class="apply-card-stat-label">SPEND</div><div class="apply-card-stat-value">$${(rec.card.signup_spending_requirement / 1000).toFixed(0)}k/${rec.card.signup_time_limit_months || 3}mo</div></div>
+                                        ` : ''}
+                                    </div>
+                                    ${eligibilityHtml}
+                                    ${breakdownHtml}
+                                    <div style="display:flex; gap:8px; margin-top:12px;">
+                                        <button onclick="event.stopPropagation(); openCardOwnershipModal(${rec.card.id})" class="secondary" style="flex:1; padding:8px; font-size:12px;">I have this card</button>
+                                        ${rec.card.apply_url ? `<button onclick="event.stopPropagation(); window.open('${rec.card.apply_url}', '_blank')" style="flex:1; padding:8px; font-size:12px;">Apply Now</button>` : ''}
                                     </div>
                                 </div>
                             `;
+                        } else {
+                            html += `
+                                <div class="grouped-item">
+                                    <div class="grouped-row" onclick="openCardModal(${rec.card.id})">
+                                        <div>
+                                            <div class="grouped-row-name">${rec.card.name}</div>
+                                            <div class="grouped-row-reason">${reasonLabel}</div>
+                                        </div>
+                                        <span class="grouped-row-value${section.danger ? ' danger' : ''}">${formatSigned(estimatedValue)}</span>
+                                    </div>
+                                    ${eligibilityHtml}
+                                    ${breakdownHtml}
+                                </div>
+                            `;
+                        }
+                            });
+
+                            html += `</div>`;
                         }
                     });
                 }
@@ -1902,18 +1809,21 @@
         function showNotification(message, type = 'info') {
             // Create notification element
             const notification = document.createElement('div');
+            const bg = type === 'success' ? '#3FCF8E' : type === 'error' ? '#F87171' : '#5C6675';
+            const fg = type === 'success' ? '#06251A' : '#FFFFFF';
             notification.style.cssText = `
                 position: fixed;
                 top: 20px;
                 right: 20px;
-                background: ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#3b82f6'};
-                color: white;
+                background: ${bg};
+                color: ${fg};
                 padding: 16px 24px;
-                border-radius: 8px;
-                box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+                border-radius: 12px;
+                box-shadow: 0 10px 25px rgba(0,0,0,0.4);
                 z-index: 10000;
                 max-width: 400px;
                 font-weight: 500;
+                font-family: 'Space Grotesk', sans-serif;
                 animation: slideIn 0.3s ease-out;
             `;
             notification.textContent = message;
@@ -1938,10 +1848,10 @@
         </div>
         
         <!-- Local Storage Notice -->
-        <div id="localStorageNotice" style="display: none; background: #fef3c7; border: 1px solid #f59e0b; color: #92400e; padding: 12px 24px; margin: 0; border-radius: 0;">
+        <div id="localStorageNotice" style="display: none; background: var(--accent-soft); border: 1px solid var(--accent); color: var(--text); padding: 12px 24px; margin: 0; border-radius: 0;">
             <div style="display: flex; align-items: center; gap: 8px;">
-                <span>📱</span>
-                <span><strong>Local Mode:</strong> This card will be saved to your device. <a href="/accounts/login/" style="color: #92400e; text-decoration: underline;">Log in</a> to sync with your account.</span>
+                <span class="ico" style="color:var(--accent);">smartphone</span>
+                <span><strong>Local Mode:</strong> This card will be saved to your device. <a href="/accounts/login/" style="color: var(--accent); text-decoration: underline;">Log in</a> to sync with your account.</span>
             </div>
         </div>
         
@@ -1986,15 +1896,14 @@
 </div>
 
 <style>
-.modal {
+#cardOwnershipModal.modal {
     position: fixed;
-    z-index: 1000;
+    z-index: 2000;
     left: 0;
     top: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(4px);
+    background-color: rgba(0, 0, 0, 0.6);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -2002,120 +1911,126 @@
     box-sizing: border-box;
 }
 
-.modal-content {
-    background-color: white;
+#cardOwnershipModal .modal-content {
+    background-color: var(--surface);
     padding: 0;
-    border-radius: 16px;
+    border-radius: var(--radius-xl);
     width: 100%;
     max-width: 600px;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-lg);
     max-height: 90vh;
     overflow-y: auto;
     position: relative;
 }
 
-.modal-header {
-    padding: 24px 32px 16px;
-    border-bottom: 1px solid #e5e7eb;
+#cardOwnershipModal .modal-header {
+    padding: 22px 26px 18px;
+    border-bottom: 1px solid var(--border);
     display: flex;
     justify-content: space-between;
     align-items: center;
 }
 
-.modal-header h2 {
+#cardOwnershipModal .modal-header h2 {
     margin: 0;
-    color: #1f2937;
-    font-size: 1.5rem;
+    color: var(--text-strong);
+    font-family: var(--font-ui);
+    font-size: 1.35rem;
 }
 
-.close {
+#cardOwnershipModal .close {
     font-size: 28px;
     font-weight: bold;
     cursor: pointer;
-    color: #6b7280;
+    color: var(--muted);
     line-height: 1;
 }
 
-.close:hover {
-    color: #374151;
+#cardOwnershipModal .close:hover {
+    color: var(--text);
 }
 
-.form-group {
+#cardOwnershipModal .form-group {
     margin-bottom: 20px;
-    padding: 0 32px;
+    padding: 0 26px;
 }
 
-.form-row {
+#cardOwnershipModal .form-row {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 20px;
 }
 
-.form-group label {
+#cardOwnershipModal .form-group label {
     display: block;
     margin-bottom: 6px;
     font-weight: 500;
-    color: #374151;
+    color: var(--text);
 }
 
-.form-group input,
-.form-group textarea {
+#cardOwnershipModal .form-group input,
+#cardOwnershipModal .form-group textarea {
     width: 100%;
     padding: 12px 16px;
-    border: 2px solid #e5e7eb;
-    border-radius: 8px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
     font-size: 14px;
     transition: border-color 0.2s;
     box-sizing: border-box;
+    background: var(--bg);
+    color: var(--text);
 }
 
-.form-group input:focus,
-.form-group textarea:focus {
+#cardOwnershipModal .form-group input:focus,
+#cardOwnershipModal .form-group textarea:focus {
     outline: none;
-    border-color: #3b82f6;
+    border-color: var(--accent);
 }
 
-.form-group small {
+#cardOwnershipModal .form-group small {
     display: block;
     margin-top: 4px;
-    color: #6b7280;
+    color: var(--muted);
     font-size: 12px;
 }
 
-.form-actions {
-    padding: 24px 32px;
-    border-top: 1px solid #e5e7eb;
+#cardOwnershipModal .form-actions {
+    padding: 22px 26px;
+    border-top: 1px solid var(--border);
     display: flex;
     justify-content: flex-end;
     gap: 12px;
 }
 
-.btn-primary,
-.btn-secondary {
+#cardOwnershipModal .btn-primary,
+#cardOwnershipModal .btn-secondary {
     padding: 12px 24px;
     border: none;
-    border-radius: 8px;
+    border-radius: var(--radius-sm);
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s;
+    font-family: var(--font-ui);
 }
 
-.btn-primary {
-    background: #3b82f6;
-    color: white;
+#cardOwnershipModal .btn-primary {
+    background: var(--accent);
+    color: var(--accent-ink);
 }
 
-.btn-primary:hover {
-    background: #2563eb;
+#cardOwnershipModal .btn-primary:hover {
+    filter: brightness(1.08);
 }
 
-.btn-secondary {
-    background: #f3f4f6;
-    color: #374151;
+#cardOwnershipModal .btn-secondary {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
 }
 
-.btn-secondary:hover {
-    background: #e5e7eb;
+#cardOwnershipModal .btn-secondary:hover {
+    background: var(--bg);
 }
 
 @keyframes slideIn {

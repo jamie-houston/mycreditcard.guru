@@ -8,14 +8,26 @@
 {% endblock %}
 
 {% block content %}
-<h1>💳 All Credit Cards</h1>
-<p style="text-align: center; color: #6b7280; margin-bottom: 40px;">
-    Browse all available credit cards and manage your collection
-</p>
+<h1 style="margin-bottom:14px;">Browse cards</h1>
+
+<!-- Search -->
+<div class="input-group" style="margin-bottom: 12px;">
+    <span class="input-group-text" style="border-right:1px solid var(--border);"><span class="ico" style="font-size:18px;">search</span></span>
+    <input type="text" id="searchCards" placeholder="Search 200+ cards..." oninput="filterCards()" style="border-left:none;">
+</div>
+
+<!-- Filter chip row -->
+<div class="browse-filter-chips">
+    <span class="chip active" id="chip-all" onclick="applyChipFilter('all')">All</span>
+    <span class="chip" id="chip-nofee" onclick="applyChipFilter('nofee')">No fee</span>
+    <span class="chip" id="chip-travel" onclick="applyChipFilter('travel')">Travel</span>
+    <span class="chip" id="chip-issuer" onclick="applyChipFilter('issuer')">Issuer</span>
+</div>
+<span class="browse-more-filters-toggle" onclick="toggleMoreFilters()" id="moreFiltersToggle">More filters <span class="ico" style="font-size:14px;vertical-align:-2px;">expand_more</span></span>
 
 <!-- Filters Section -->
-<div class="section">
-    <h2>🔍 Filter Cards</h2>
+<div class="section" id="moreFiltersPanel" style="display:none;">
+    <h2>Filter Cards</h2>
     <div class="spending-grid">
         <div class="preferences-inline">
             <div class="input-group">
@@ -83,14 +95,8 @@
         </div>
         <div class="preferences-inline">
             <div class="input-group">
-                <span class="input-group-text">Search Cards</span>
-                <input type="text" id="searchCards" placeholder="Search by name..." oninput="filterCards()">
-            </div>
-        </div>
-        <div class="preferences-inline">
-            <div class="input-group">
                 <span class="input-group-text" style="background: transparent; border: none;"></span>
-                <button onclick="resetFilters()" style="background: #6b7280; color: white; padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; font-weight: 500; font-size: 14px; flex: 1;">
+                <button onclick="resetFilters()" class="secondary" style="flex: 1;">
                     Reset Filters
                 </button>
             </div>
@@ -100,8 +106,52 @@
 
 <!-- Cards Grid -->
 <div id="cardsContainer">
-    <div class="loading">🔄 Loading credit cards...</div>
+    <div class="loading">Loading credit cards…</div>
 </div>
+
+<script>
+// Filter chips: convenience layer over the existing detailed <select> filters.
+function toggleMoreFilters() {
+    const panel = document.getElementById('moreFiltersPanel');
+    const toggle = document.getElementById('moreFiltersToggle');
+    const isHidden = panel.style.display === 'none';
+    panel.style.display = isHidden ? 'block' : 'none';
+    toggle.innerHTML = isHidden
+        ? 'Fewer filters <span class="ico" style="font-size:14px;vertical-align:-2px;">expand_less</span>'
+        : 'More filters <span class="ico" style="font-size:14px;vertical-align:-2px;">expand_more</span>';
+}
+
+function setActiveChip(id) {
+    ['chip-all', 'chip-nofee', 'chip-travel', 'chip-issuer'].forEach(chipId => {
+        document.getElementById(chipId).classList.toggle('active', chipId === id);
+    });
+}
+
+function applyChipFilter(kind) {
+    if (kind === 'all') {
+        setActiveChip('chip-all');
+        resetFilters();
+        return;
+    }
+    if (kind === 'nofee') {
+        setActiveChip('chip-nofee');
+        document.getElementById('filterFee').value = '0';
+        filterCards();
+        return;
+    }
+    if (kind === 'travel') {
+        setActiveChip('chip-travel');
+        document.getElementById('filterRewardCategory').value = 'travel';
+        filterCards();
+        return;
+    }
+    if (kind === 'issuer') {
+        setActiveChip('chip-issuer');
+        document.getElementById('moreFiltersPanel').style.display = 'block';
+        document.getElementById('filterIssuer').focus();
+    }
+}
+</script>
 
 <script>
 // Fixed pagination issue: 2025-07-04-v3
@@ -343,119 +393,140 @@ function resetFilters() {
     document.getElementById('filterCredit').value = '';
     document.getElementById('filterFee').value = '';
     document.getElementById('searchCards').value = '';
+    if (typeof setActiveChip === 'function') setActiveChip('chip-all');
     filterCards();
+}
+
+// Issuer -> card-art gradient (per the Ledger redesign's 5 sample gradients),
+// generic grey fallback for issuers outside that curated set.
+const ISSUER_GRADIENTS = {
+    'american express': 'linear-gradient(135deg,#D9B24B,#8A6A1F)',
+    'amex': 'linear-gradient(135deg,#D9B24B,#8A6A1F)',
+    'chase': 'linear-gradient(135deg,#3A5BA0,#1E2C4F)',
+    'wells fargo': 'linear-gradient(135deg,#C0392B,#7A2018)',
+    'capital one': 'linear-gradient(135deg,#2B2B2E,#0E0E10)',
+    'citi': 'linear-gradient(135deg,#3A5BA0,#1E2C4F)',
+    'citibank': 'linear-gradient(135deg,#3A5BA0,#1E2C4F)'
+};
+function issuerGradient(issuerName) {
+    return ISSUER_GRADIENTS[(issuerName || '').toLowerCase()] || 'linear-gradient(135deg,#6E7B8B,#3A424D)';
 }
 
 function displayCards(cards) {
     const container = document.getElementById('cardsContainer');
-    
+
     if (cards.length === 0) {
         container.innerHTML = '<div class="error">No cards found matching your criteria.</div>';
         return;
     }
-    
+
     const html = cards.map(card => {
         const hasCard = card.hasCard || false;
         const signupBonus = card.signup_bonus_amount || 0;
         const rewardMultiplier = card.metadata?.reward_value_multiplier || 0.01;
-        
+
         // Store card data globally for modal access (avoid JSON.stringify in HTML)
         window[`cardData_${card.id}`] = card.user_card || null;
-        
+
         // Get user's nickname for this card if they own it
         let displayName = card.name;
         if (hasCard && card.user_card && card.user_card.nickname) {
             displayName = `${card.name} (${card.user_card.nickname})`;
         }
-        
+
         // Get top reward categories for display
-        const topCategories = card.reward_categories && card.reward_categories.length > 0 ? 
+        const topCategories = card.reward_categories && card.reward_categories.length > 0 ?
             card.reward_categories
                 .filter(cat => cat.is_active)
                 .sort((a, b) => parseFloat(b.reward_rate) - parseFloat(a.reward_rate))
                 .slice(0, 2)
                 .map(cat => {
-                    const categoryName = (cat.category && cat.category.display_name) || 
-                                       (cat.category && cat.category.name) || 
+                    const categoryName = (cat.category && cat.category.display_name) ||
+                                       (cat.category && cat.category.name) ||
                                        'Unknown';
                     const rate = parseFloat(cat.reward_rate || 0);
                     return `${rate}x ${categoryName}`;
                 })
                 .join(', ') : 'General rewards';
-        
+
         return `
-            <div class="card-box ${hasCard ? 'owned' : ''}" onclick="openCardModal(${card.id})">
-                <div class="card-issuer">${card.issuer.name}</div>
-                <div class="card-name">${displayName}</div>
-                
-                <div class="card-key-info">
-                    <div class="card-annual-fee">
-                        <strong>Annual Fee:</strong> $${card.annual_fee}
+            <div class="card-box ${hasCard ? 'owned' : ''}">
+                <div style="display:flex; align-items:center; gap:12px; cursor:pointer;" onclick="openCardModal(${card.id})">
+                    <div class="card-box-thumb" style="background: ${issuerGradient(card.issuer.name)};"></div>
+                    <div class="card-box-body">
+                        <div class="card-issuer">${card.issuer.name} · ${topCategories}</div>
+                        <div class="card-name">${displayName}</div>
                     </div>
-                    
-                    ${signupBonus ? 
-                        `<div class="card-signup-bonus">
-                            <strong>Bonus:</strong> ${signupBonus.toLocaleString()} ${card.signup_bonus_type ? card.signup_bonus_type.name : 'points'}
-                        </div>` : 
-                        '<div class="card-signup-bonus">No signup bonus</div>'
-                    }
-                    
-                    <div class="card-reward-type">
-                        <span class="badge ${card.primary_reward_type.name.toLowerCase()}">${card.primary_reward_type.name}</span>
-                    </div>
-                    
-                    <div class="card-reward-highlight">
-                        ${(rewardMultiplier * 100).toFixed(1)}¢ per point
-                    </div>
-                    
-                    <div class="card-top-categories">
-                        <strong>Top rewards:</strong><br>
-                        ${topCategories}
+                    <div class="card-box-side">
+                        <div class="card-box-fee">$${card.annual_fee}</div>
+                        ${hasCard ? '<div class="card-box-owned-chip">OWNED</div>' : ''}
                     </div>
                 </div>
-                
-                <div class="card-actions">
-                    ${hasCard ? `
-                        <button 
-                            onclick="event.stopPropagation(); openCardOwnershipModal(${card.id}, window.cardData_${card.id})" 
-                            class="secondary"
+
+                <div class="card-details-expandable" style="display:block;">
+                    <div class="card-key-info">
+                        <div class="card-annual-fee">
+                            <strong>Annual Fee:</strong> $${card.annual_fee}
+                        </div>
+
+                        ${signupBonus ?
+                            `<div class="card-signup-bonus">
+                                <strong>Bonus:</strong> ${signupBonus.toLocaleString()} ${card.signup_bonus_type ? card.signup_bonus_type.name : 'points'}
+                            </div>` :
+                            '<div class="card-signup-bonus">No signup bonus</div>'
+                        }
+
+                        <div class="card-reward-type">
+                            <span class="badge ${card.primary_reward_type.name.toLowerCase()}">${card.primary_reward_type.name}</span>
+                        </div>
+
+                        <div class="card-reward-highlight">
+                            ${(rewardMultiplier * 100).toFixed(1)}¢ per point
+                        </div>
+                    </div>
+
+                    <div class="card-actions">
+                        ${hasCard ? `
+                            <button
+                                onclick="event.stopPropagation(); openCardOwnershipModal(${card.id}, window.cardData_${card.id})"
+                                class="secondary"
+                            >
+                                Edit card details
+                            </button>
+                            <button
+                                onclick="event.stopPropagation(); removeUserCard('${card.user_card ? card.user_card.id : 'null'}', ${card.id})"
+                                class="danger"
+                            >
+                                Remove from my cards
+                            </button>
+                        ` : `
+                            <button
+                                onclick="event.stopPropagation(); openCardOwnershipModal(${card.id})"
+                                class="success"
+                            >
+                                I have this card
+                            </button>
+                        `}
+                        ${card.apply_url ? `
+                            <button
+                                onclick="event.stopPropagation(); window.open('${card.apply_url}', '_blank')"
+                                class="apply-btn"
+                            >
+                                Apply Now
+                            </button>
+                        ` : ''}
+                        <button
+                            onclick="event.stopPropagation(); openCardModal(${card.id})"
+                            class="primary"
                         >
-                            ✏️ Edit card details
+                            View Details
                         </button>
-                        <button 
-                            onclick="event.stopPropagation(); removeUserCard('${card.user_card ? card.user_card.id : 'null'}', ${card.id})" 
-                            class="danger"
-                        >
-                            ❌ Remove from my cards
-                        </button>
-                    ` : `
-                        <button 
-                            onclick="event.stopPropagation(); openCardOwnershipModal(${card.id})" 
-                            class="success"
-                        >
-                            ✅ I have this card
-                        </button>
-                    `}
-                    ${card.apply_url ? `
-                        <button 
-                            onclick="event.stopPropagation(); window.open('${card.apply_url}', '_blank')" 
-                            class="apply-btn"
-                            style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);"
-                        >
-                            🚀 Apply Now
-                        </button>
-                    ` : ''}
-                    <button 
-                        onclick="event.stopPropagation(); openCardModal(${card.id})" 
-                        class="primary"
-                    >
-                        📋 View Details
-                    </button>
+                    </div>
                 </div>
             </div>
         `;
     }).join('');
-    
+
     container.innerHTML = `<div class="cards-grid">${html}</div>`;
 }
 
@@ -479,9 +550,9 @@ function openCardOwnershipModal(cardId, existingUserCard = null) {
     if (isAuthenticated) {
         modalTitle.textContent = existingUserCard ? 'Edit Card Details' : 'Add Card to Collection';
     } else {
-        modalTitle.innerHTML = existingUserCard ? 
-            'Edit Card Details <span style="background: #f59e0b; color: white; padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: 500; margin-left: 8px;">📱 Local Mode</span>' :
-            'Add Card to Collection <span style="background: #f59e0b; color: white; padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: 500; margin-left: 8px;">📱 Local Mode</span>';
+        modalTitle.innerHTML = existingUserCard ?
+            'Edit Card Details <span style="background: #5C6675; color: white; padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: 500; margin-left: 8px;">Local Mode</span>' :
+            'Add Card to Collection <span style="background: #5C6675; color: white; padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: 500; margin-left: 8px;">Local Mode</span>';
     }
     
     // Store card ID in form
@@ -644,8 +715,8 @@ function showNotification(message, type = 'info') {
         font-weight: 500;
         z-index: 1000;
         transition: all 0.3s ease;
-        ${type === 'success' ? 'background: #10b981;' : 
-          type === 'error' ? 'background: #ef4444;' : 'background: #3b82f6;'}
+        ${type === 'success' ? 'background: #3FCF8E; color: #06251A;' :
+          type === 'error' ? 'background: #F87171;' : 'background: #5C6675;'}
     `;
     notification.textContent = message;
     
@@ -849,10 +920,10 @@ loadCards();
         </div>
         
         <!-- Local Storage Notice -->
-        <div id="localStorageNotice" style="display: none; background: #fef3c7; border: 1px solid #f59e0b; color: #92400e; padding: 12px 24px; margin: 0; border-radius: 0;">
+        <div id="localStorageNotice" style="display: none; background: var(--accent-soft); border: 1px solid var(--accent); color: var(--text); padding: 12px 24px; margin: 0; border-radius: 0;">
             <div style="display: flex; align-items: center; gap: 8px;">
-                <span>📱</span>
-                <span><strong>Local Mode:</strong> This card will be saved to your device. <a href="/accounts/login/" style="color: #92400e; text-decoration: underline;">Log in</a> to sync with your account.</span>
+                <span class="ico" style="color:var(--accent);">smartphone</span>
+                <span><strong>Local Mode:</strong> This card will be saved to your device. <a href="/accounts/login/" style="color: var(--accent); text-decoration: underline;">Log in</a> to sync with your account.</span>
             </div>
         </div>
         
@@ -899,13 +970,12 @@ loadCards();
 <style>
 #cardOwnershipModal {
     position: absolute;
-    z-index: 1000;
+    z-index: 2000;
     left: 0;
     top: 0;
     width: 100%;
     height: 100vh; /* Will be overridden by JavaScript */
-    background-color: rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(4px);
+    background-color: rgba(0, 0, 0, 0.6);
     display: none; /* Hidden by default */
     align-items: center;
     justify-content: center;
@@ -918,155 +988,160 @@ loadCards();
 }
 
 #cardOwnershipModal .modal-content {
-    background-color: white;
+    background-color: var(--surface);
     padding: 0;
-    border-radius: 16px;
+    border-radius: var(--radius-xl);
     width: 100%;
     max-width: 600px;
     max-height: 90vh;
     overflow-y: auto;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-lg);
     flex-shrink: 0;
 }
 
 #cardOwnershipModal .modal-header {
-    padding: 24px 32px 16px;
-    border-bottom: 1px solid #e5e7eb;
+    padding: 22px 26px 18px;
+    border-bottom: 1px solid var(--border);
     display: flex;
     justify-content: space-between;
     align-items: center;
 }
 
-.modal-header h2 {
+#cardOwnershipModal .modal-header h2 {
     margin: 0;
-    color: #1f2937;
-    font-size: 1.5rem;
+    color: var(--text-strong);
+    font-family: var(--font-ui);
+    font-size: 1.35rem;
 }
 
-.close {
-    color: #9ca3af;
+#cardOwnershipModal .close {
+    color: var(--muted);
     font-size: 28px;
     font-weight: bold;
     cursor: pointer;
     transition: color 0.2s;
 }
 
-.close:hover {
-    color: #374151;
+#cardOwnershipModal .close:hover {
+    color: var(--text);
 }
 
 #cardOwnershipForm {
-    padding: 24px 32px 32px;
+    padding: 22px 26px 26px;
 }
 
-.form-group {
+#cardOwnershipModal .form-group {
     margin-bottom: 20px;
 }
 
-.form-row {
+#cardOwnershipModal .form-row {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 20px;
 }
 
-.form-group label {
+#cardOwnershipModal .form-group label {
     display: block;
     margin-bottom: 6px;
     font-weight: 500;
-    color: #374151;
+    color: var(--text);
 }
 
-.form-group input,
-.form-group textarea {
+#cardOwnershipModal .form-group input,
+#cardOwnershipModal .form-group textarea {
     width: 100%;
     padding: 12px 16px;
-    border: 2px solid #e5e7eb;
-    border-radius: 8px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
     font-size: 14px;
     transition: border-color 0.2s;
     box-sizing: border-box;
+    background: var(--bg);
+    color: var(--text);
 }
 
-.form-group input:focus,
-.form-group textarea:focus {
+#cardOwnershipModal .form-group input:focus,
+#cardOwnershipModal .form-group textarea:focus {
     outline: none;
-    border-color: #3b82f6;
+    border-color: var(--accent);
 }
 
-.form-group small {
+#cardOwnershipModal .form-group small {
     display: block;
     margin-top: 4px;
-    color: #6b7280;
+    color: var(--muted);
     font-size: 12px;
 }
 
-.form-actions {
+#cardOwnershipModal .form-actions {
     display: flex;
     gap: 12px;
     justify-content: flex-end;
     margin-top: 32px;
     padding-top: 24px;
-    border-top: 1px solid #e5e7eb;
+    border-top: 1px solid var(--border);
 }
 
-.btn-primary,
-.btn-secondary {
+#cardOwnershipModal .btn-primary,
+#cardOwnershipModal .btn-secondary {
     padding: 12px 24px;
-    border-radius: 8px;
+    border-radius: var(--radius-sm);
     font-weight: 500;
     font-size: 14px;
     cursor: pointer;
     transition: all 0.2s;
     border: none;
+    font-family: var(--font-ui);
 }
 
-.btn-primary {
-    background: #3b82f6;
-    color: white;
+#cardOwnershipModal .btn-primary {
+    background: var(--accent);
+    color: var(--accent-ink);
 }
 
-.btn-primary:hover {
-    background: #2563eb;
+#cardOwnershipModal .btn-primary:hover {
+    filter: brightness(1.08);
 }
 
-.btn-primary:disabled {
-    background: #9ca3af;
+#cardOwnershipModal .btn-primary:disabled {
+    background: var(--muted-2);
     cursor: not-allowed;
 }
 
-.btn-secondary {
-    background: #f3f4f6;
-    color: #374151;
-    border: 1px solid #d1d5db;
+#cardOwnershipModal .btn-secondary {
+    background: var(--surface);
+    color: var(--text);
+    border: 1px solid var(--border);
 }
 
-.btn-secondary:hover {
-    background: #e5e7eb;
+#cardOwnershipModal .btn-secondary:hover {
+    background: var(--bg);
 }
 
 @media (max-width: 768px) {
-    .modal-content {
+    #cardOwnershipModal .modal-content {
         width: 95%;
         margin: 10% auto;
     }
-    
-    .modal-header,
+
+    #cardOwnershipModal .modal-header,
     #cardOwnershipForm {
         padding-left: 20px;
         padding-right: 20px;
     }
-    
-    .form-row {
+
+    #cardOwnershipModal .form-row {
         grid-template-columns: 1fr;
         gap: 20px;
     }
-    
-    .form-actions {
+
+    #cardOwnershipModal .form-actions {
         flex-direction: column-reverse;
     }
-    
-    .btn-primary,
-    .btn-secondary {
+
+    #cardOwnershipModal .btn-primary,
+    #cardOwnershipModal .btn-secondary {
         width: 100%;
     }
 }

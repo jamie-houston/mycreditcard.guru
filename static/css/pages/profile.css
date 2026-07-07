@@ -1,4 +1,4 @@
-/* Profile page styles - extracted from profile.html */
+/* Profile / My Cards page styles (Ledger redesign) */
 
 .privacy-toggle-section {
     flex-wrap: wrap;
@@ -21,17 +21,16 @@
 }
 
 .profile-card {
-    background: rgba(255, 255, 255, 0.9);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    border-radius: 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
     padding: 20px;
     margin-bottom: 16px;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: var(--transition-default);
 }
 
 .profile-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    border-color: var(--accent);
 }
 
 .card-header {
@@ -42,15 +41,16 @@
 }
 
 .card-name {
+    font-family: var(--font-ui);
     font-size: 18px;
     font-weight: 700;
-    color: #1f2937;
+    color: var(--text-strong);
     margin: 0;
 }
 
 .card-nickname {
     font-size: 14px;
-    color: #6b7280;
+    color: var(--muted);
     margin: 2px 0 0 0;
 }
 
@@ -58,18 +58,19 @@
     font-size: 16px;
     font-weight: 600;
     padding: 6px 12px;
-    border-radius: 8px;
+    border-radius: var(--radius-sm);
     margin-left: 10px;
+    font-family: var(--font-mono);
 }
 
 .fee-zero {
-    background: #dcfce7;
-    color: #166534;
+    background: var(--accent-soft);
+    color: var(--accent);
 }
 
 .fee-paid {
-    background: #fef3c7;
-    color: #92400e;
+    background: var(--bg);
+    color: var(--muted);
 }
 
 .card-details {
@@ -80,16 +81,16 @@
 }
 
 .detail-item {
-    background: #f8fafc;
+    background: var(--bg);
     padding: 12px;
-    border-radius: 8px;
-    border: 1px solid #e2e8f0;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
 }
 
 .detail-label {
     font-size: 12px;
     font-weight: 600;
-    color: #64748b;
+    color: var(--muted-2);
     text-transform: uppercase;
     letter-spacing: 0.5px;
     margin-bottom: 4px;
@@ -98,13 +99,14 @@
 .detail-value {
     font-size: 16px;
     font-weight: 600;
-    color: #1e293b;
+    color: var(--text);
+    font-family: var(--font-mono);
 }
 
 .category-optimization-simple {
-    background: linear-gradient(135deg, rgba(239, 246, 255, 0.9) 0%, rgba(239, 246, 255, 0.7) 100%);
-    border: 1px solid rgba(59, 130, 246, 0.2);
-    border-radius: 12px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
     padding: 16px;
     margin-bottom: 12px;
     display: flex;
@@ -115,45 +117,45 @@
 .category-simple-name {
     font-size: 16px;
     font-weight: 600;
-    color: #1e40af;
+    color: var(--text-strong);
     min-width: 120px;
     flex-shrink: 0;
 }
 
 .rate-simple {
-    background: #10b981;
-    color: white;
+    background: var(--accent);
+    color: var(--accent-ink);
     padding: 6px 12px;
-    border-radius: 8px;
+    border-radius: var(--radius-sm);
     font-size: 14px;
     font-weight: 700;
     min-width: 50px;
     text-align: center;
     flex-shrink: 0;
+    font-family: var(--font-mono);
 }
 
 .card-simple-name {
     font-size: 15px;
     font-weight: 600;
-    color: #1f2937;
+    color: var(--text);
     flex: 1;
 }
 
 .spending-cap-simple {
     font-size: 12px;
-    color: #64748b;
+    color: var(--muted);
     font-style: italic;
     margin-left: auto;
     flex-shrink: 0;
 }
 
-/* Card Table Styles */
+/* Card Table Styles ("Active cards") */
 .card-table-container {
     overflow-x: auto;
-    border-radius: 12px;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-    background: white;
-    border: 1px solid #e5e7eb;
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+    border: 1px solid var(--border);
 }
 
 .cards-table {
@@ -163,31 +165,31 @@
 }
 
 .cards-table th {
-    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-    color: #374151;
+    background: var(--bg);
+    color: var(--muted);
     font-weight: 600;
     text-align: left;
-    padding: 16px 12px;
-    border-bottom: 2px solid #e5e7eb;
-    font-size: 13px;
+    padding: 14px 12px;
+    border-bottom: 1px solid var(--border);
+    font-size: 12px;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.05em;
 }
 
 .cards-table td {
-    padding: 16px 12px;
-    border-bottom: 1px solid #f3f4f6;
+    padding: 14px 12px;
+    border-bottom: 1px solid var(--border);
     vertical-align: top;
+    color: var(--text);
 }
 
 .card-row {
-    transition: all 0.2s ease;
+    transition: var(--transition-default);
     cursor: pointer;
 }
 
 .card-row:hover {
-    background-color: #f8fafc;
-    transform: scale(1.01);
+    background-color: var(--bg);
 }
 
 .card-row:last-child td {
@@ -199,14 +201,14 @@
 }
 
 .card-name-wrapper strong {
-    color: #1f2937;
+    color: var(--text-strong);
     font-weight: 600;
     display: block;
     margin-bottom: 2px;
 }
 
 .card-nicknames {
-    color: #6b7280;
+    color: var(--muted);
     font-style: italic;
     font-size: 12px;
 }
@@ -217,12 +219,13 @@
 }
 
 .card-count {
-    background: #e0f2fe;
-    color: #0891b2;
+    background: var(--accent-soft);
+    color: var(--accent);
     padding: 4px 8px;
     border-radius: 12px;
     font-weight: 600;
     font-size: 12px;
+    font-family: var(--font-mono);
 }
 
 .multiple-indicator {
@@ -236,37 +239,40 @@
 }
 
 .table-action-btn {
-    background: #f3f4f6;
-    border: 1px solid #d1d5db;
-    border-radius: 6px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
     padding: 6px 8px;
     cursor: pointer;
     transition: all 0.2s ease;
     font-size: 14px;
+    color: var(--text);
 }
 
 .table-action-btn:hover {
-    background: #e5e7eb;
-    transform: scale(1.1);
+    background: var(--surface);
+    border-color: var(--accent);
 }
 
 /* Fee styling in table */
 .cards-table .fee-zero {
-    background: #dcfce7;
-    color: #166534;
+    background: var(--accent-soft);
+    color: var(--accent);
     padding: 4px 8px;
     border-radius: 6px;
     font-weight: 600;
     font-size: 12px;
+    font-family: var(--font-mono);
 }
 
 .cards-table .fee-paid {
-    background: #fef3c7;
-    color: #92400e;
+    background: var(--bg);
+    color: var(--muted);
     padding: 4px 8px;
     border-radius: 6px;
     font-weight: 600;
     font-size: 12px;
+    font-family: var(--font-mono);
 }
 
 /* Responsive table */
@@ -287,9 +293,9 @@
 
 /* Legacy styles for backward compatibility */
 .category-optimization-item {
-    background: linear-gradient(135deg, rgba(239, 246, 255, 0.9) 0%, rgba(239, 246, 255, 0.7) 100%);
-    border: 1px solid rgba(59, 130, 246, 0.2);
-    border-radius: 12px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
     padding: 16px;
     margin-bottom: 12px;
     display: flex;
@@ -304,13 +310,13 @@
 .category-name {
     font-size: 16px;
     font-weight: 600;
-    color: #1e40af;
+    color: var(--text-strong);
     margin-bottom: 4px;
 }
 
 .category-details {
     font-size: 14px;
-    color: #64748b;
+    color: var(--muted);
 }
 
 .category-recommendation {
@@ -321,24 +327,25 @@
 .recommended-card {
     font-size: 14px;
     font-weight: 600;
-    color: #1f2937;
+    color: var(--text);
     margin-bottom: 4px;
 }
 
 .reward-rate {
-    background: #10b981;
-    color: white;
+    background: var(--accent);
+    color: var(--accent-ink);
     padding: 4px 8px;
     border-radius: 6px;
     font-size: 12px;
     font-weight: 600;
     display: inline-block;
+    font-family: var(--font-mono);
 }
 
 .spending-item {
-    background: rgba(255, 255, 255, 0.8);
-    border: 1px solid rgba(229, 231, 235, 0.6);
-    border-radius: 10px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
     padding: 15px;
     margin-bottom: 12px;
     display: flex;
@@ -349,7 +356,7 @@
 .spending-category {
     font-size: 16px;
     font-weight: 600;
-    color: #374151;
+    color: var(--text);
 }
 
 .spending-amounts {
@@ -359,18 +366,20 @@
 .monthly-amount {
     font-size: 18px;
     font-weight: 700;
-    color: #059669;
+    color: var(--accent);
     margin-bottom: 2px;
+    font-family: var(--font-mono);
 }
 
 .annual-amount {
     font-size: 14px;
-    color: #6b7280;
+    color: var(--muted);
+    font-family: var(--font-mono);
 }
 
 .no-data {
     text-align: center;
-    color: #6b7280;
+    color: var(--muted);
     padding: 40px 20px;
     font-style: italic;
 }
@@ -378,11 +387,11 @@
 .empty-state {
     text-align: center;
     padding: 40px 20px;
-    color: #6b7280;
+    color: var(--muted);
 }
 
 .empty-state h3 {
-    color: #374151;
+    color: var(--text-strong);
     margin-bottom: 8px;
 }
 
@@ -392,17 +401,17 @@
 
 .empty-state a {
     display: inline-block;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
+    background: var(--accent);
+    color: var(--accent-ink);
     padding: 12px 24px;
-    border-radius: 8px;
+    border-radius: var(--radius-sm);
     text-decoration: none;
     font-weight: 600;
-    transition: transform 0.2s;
+    transition: var(--transition-default);
 }
 
 .empty-state a:hover {
-    transform: translateY(-2px);
+    filter: brightness(1.08);
 }
 
 @media (max-width: 768px) {

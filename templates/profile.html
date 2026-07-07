@@ -10,81 +10,56 @@
 
 {% block content %}
 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-    <h1>My Credit Card Profile</h1>
-    
-    <!-- Privacy Toggle Section -->
-    <div class="privacy-toggle-section" style="display: flex; align-items: center; gap: 15px;">
-        <label style="color: #6b7280; font-weight: 500;">Profile Visibility:</label>
-        
+    <h1 style="margin:0;">My cards</h1>
+    <div style="display:flex; align-items:center; gap: 8px;">
+        <span class="ico" onclick="document.getElementById('cardSearch').scrollIntoView({behavior:'smooth', block:'center'}); document.getElementById('cardSearch').focus();" style="font-size:28px; color:var(--accent); cursor:pointer;" title="Add a card">add_circle</span>
+        <span class="ico" onclick="togglePrivacySettings()" style="font-size:24px; color:var(--muted); cursor:pointer;" title="Sharing settings">settings</span>
+    </div>
+</div>
+
+<!-- Privacy / Sharing Settings (tucked away, opened via the settings icon) -->
+<div id="privacySettingsPanel" class="section" style="display:none;">
+    <div class="privacy-toggle-section" style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+        <label style="color: var(--muted); font-weight: 500; margin:0;">Profile Visibility:</label>
+
         <div class="toggle-switch">
             <input type="radio" id="privacy-private" name="privacy" value="private" checked>
             <label for="privacy-private" class="toggle-option">
-                🔒 Private
+                <span class="ico" style="font-size:14px;vertical-align:-2px;">lock</span> Private
             </label>
-            
+
             <input type="radio" id="privacy-public" name="privacy" value="public">
             <label for="privacy-public" class="toggle-option">
-                🌐 Public
+                <span class="ico" style="font-size:14px;vertical-align:-2px;">public</span> Public
             </label>
         </div>
-        
+
         <!-- Shareable URL Section (hidden by default) -->
-        <div id="shareable-url-section" style="display: none; margin-left: 15px;">
+        <div id="shareable-url-section" style="display: none;">
             <div style="display: flex; align-items: center; gap: 10px;">
-                <label style="color: #6b7280; font-size: 14px;">Share URL:</label>
+                <label style="color: var(--muted); font-size: 14px; margin:0;">Share URL:</label>
                 <div style="display: flex; align-items: center; gap: 5px;">
-                    <input type="text" id="shareable-url" readonly 
-                           style="background: #f9fafb; border: 1px solid #d1d5db; padding: 5px 8px; border-radius: 6px; font-size: 12px; width: 300px;"
+                    <input type="text" id="shareable-url" readonly
+                           style="font-size: 12px; width: 300px;"
                            placeholder="Generating shareable URL...">
-                    <button id="copy-url-btn" onclick="copyShareableUrl()" 
-                            style="background: #3b82f6; color: white; border: none; padding: 5px 10px; border-radius: 6px; font-size: 12px; cursor: pointer;">
-                        📋 Copy
+                    <button id="copy-url-btn" onclick="copyShareableUrl()" style="padding: 8px 12px; font-size: 12px;">
+                        <span class="ico" style="font-size:14px;vertical-align:-2px;">content_copy</span> Copy
                     </button>
                 </div>
             </div>
         </div>
     </div>
 </div>
+<script>
+function togglePrivacySettings() {
+    const panel = document.getElementById('privacySettingsPanel');
+    panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+}
+</script>
 
-<!-- Category Optimization Section -->
+<!-- Summary strip -->
 <div class="section">
-    <h2>🎯 Which Card to Use for Each Category</h2>
-    <div id="categoryOptimization">
-        <div class="loading">Loading category recommendations...</div>
-    </div>
-
-    <!-- Add Card Input - Always Visible -->
-    <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #e5e7eb;">
-        <h3 style="margin-bottom: 10px; color: #374151; font-size: 16px;">➕ Add Credit Cards</h3>
-        <div style="margin-bottom: 15px;">
-            <!-- Searchable Card Dropdown -->
-            <div style="position: relative;">
-                <input
-                    type="text"
-                    id="cardSearch"
-                    placeholder="Type card name (e.g., 'Chase Sapphire', 'Blue Cash')..."
-                    autocomplete="off"
-                    style="width: 100%; padding: 10px 14px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px; transition: border-color 0.2s; box-sizing: border-box;"
-                >
-                <!-- Dropdown will be moved to body dynamically -->
-                <div id="cardSearchResults" style="display: none;">
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Credits & Benefits Section -->
-<div class="section" style="padding: 20px;">
-    <h2>🎁 Your Card Credits & Benefits</h2>
-    <div id="creditsProfile">
-        <div class="loading">Loading your benefits...</div>
-    </div>
-</div>
-
-<!-- Profile Summary Section -->
-<div class="section" style="padding: 20px;">
-    <h2>📊 Portfolio Summary</h2>
+    <h2>Portfolio Summary</h2>
     <div class="modal-info-grid">
         <div class="modal-info-item">
             <div class="modal-info-label">Total Cards</div>
@@ -106,16 +81,51 @@
 </div>
 
 <!-- Card Collection Section -->
-<div class="section" style="padding: 20px;">
-    <h2>💳 My Card Collection</h2>
+<div class="section">
+    <h2>Active cards</h2>
     <div id="cardCollection">
         <div class="loading">Loading your card collection...</div>
     </div>
 </div>
 
+<!-- Category Optimization Section -->
+<div class="section">
+    <h2><span class="ico" style="vertical-align:-4px;color:var(--accent);">grid_view</span> Best Card Per Category</h2>
+    <div id="categoryOptimization">
+        <div class="loading">Loading category recommendations...</div>
+    </div>
+
+    <!-- Add Card Input - Always Visible -->
+    <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid var(--border);">
+        <h3 style="margin-bottom: 10px; color: var(--text); font-size: 16px;"><span class="ico" style="vertical-align:-3px;">add</span> Add Credit Cards</h3>
+        <div style="margin-bottom: 15px;">
+            <!-- Searchable Card Dropdown -->
+            <div style="position: relative;">
+                <input
+                    type="text"
+                    id="cardSearch"
+                    placeholder="Type card name (e.g., 'Chase Sapphire', 'Blue Cash')..."
+                    autocomplete="off"
+                >
+                <!-- Dropdown will be moved to body dynamically -->
+                <div id="cardSearchResults" style="display: none;">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Credits & Benefits Section -->
+<div class="section">
+    <h2>Your Card Credits &amp; Benefits</h2>
+    <div id="creditsProfile">
+        <div class="loading">Loading your benefits...</div>
+    </div>
+</div>
+
 <!-- Spending Profile Section -->
-<div class="section" style="padding: 20px;">
-    <h2>📈 Your Spending Profile</h2>
+<div class="section">
+    <h2>Your Spending Profile</h2>
     <div id="spendingProfile">
         <div class="loading">Loading spending profile...</div>
     </div>
@@ -134,12 +144,12 @@ document.addEventListener('DOMContentLoaded', async function() {
         });
         
         cardSearchInput.addEventListener('focus', function(e) {
-            e.target.style.borderColor = '#3b82f6';
+            e.target.style.borderColor = 'var(--accent)';
         });
-        
+
         cardSearchInput.addEventListener('blur', function(e) {
             if (!e.target.value) {
-                e.target.style.borderColor = '#e5e7eb';
+                e.target.style.borderColor = 'var(--border)';
             }
             setTimeout(() => hideSearchResults(), 200);
         });
@@ -328,11 +338,11 @@ async function loadCardCollection() {
                         twoMonthsFromNow.setMonth(twoMonthsFromNow.getMonth() + 2);
 
                         const shouldHighlight = annualFee > 0 && date >= today && date <= twoMonthsFromNow;
-                        const style = shouldHighlight ? 'color: #d97706; font-weight: 600;' : '';
+                        const style = shouldHighlight ? 'color: var(--color-warning); font-weight: 600;' : '';
 
                         return `<div style="${style}">${formattedDate}</div>`;
                     });
-                signupDateDisplay = dates.length > 0 ? dates.join('') : '<span style="color: #9ca3af;">-</span>';
+                signupDateDisplay = dates.length > 0 ? dates.join('') : '<span style="color: var(--muted-2);">-</span>';
             } else {
                 const instance = instances[0];
                 if (instance.opened_date) {
@@ -345,11 +355,11 @@ async function loadCardCollection() {
                     twoMonthsFromNow.setMonth(twoMonthsFromNow.getMonth() + 2);
 
                     const shouldHighlight = annualFee > 0 && date >= today && date <= twoMonthsFromNow;
-                    const style = shouldHighlight ? 'color: #d97706; font-weight: 600;' : '';
+                    const style = shouldHighlight ? 'color: var(--color-warning); font-weight: 600;' : '';
 
                     signupDateDisplay = `<span style="${style}">${formattedDate}</span>`;
                 } else {
-                    signupDateDisplay = '<span style="color: #9ca3af;">-</span>';
+                    signupDateDisplay = '<span style="color: var(--muted-2);">-</span>';
                 }
             }
 
@@ -597,10 +607,10 @@ async function loadSpendingProfile() {
         
         // Add total
         spendingHtml += `
-            <div class="spending-item" style="border-top: 2px solid #e5e7eb; margin-top: 15px; padding-top: 15px; background: rgba(59, 130, 246, 0.1);">
-                <div class="spending-category" style="font-weight: 700; color: #1e40af;">Total Monthly Spending</div>
+            <div class="spending-item" style="border-top: 2px solid var(--border); margin-top: 15px; padding-top: 15px; background: var(--accent-soft);">
+                <div class="spending-category" style="font-weight: 700; color: var(--accent);">Total Monthly Spending</div>
                 <div class="spending-amounts">
-                    <div class="monthly-amount" style="color: #1e40af;">$${totalMonthly.toLocaleString('en-US', { maximumFractionDigits: 0 })}/mo</div>
+                    <div class="monthly-amount" style="color: var(--accent);">$${totalMonthly.toLocaleString('en-US', { maximumFractionDigits: 0 })}/mo</div>
                     <div class="annual-amount">$${(totalMonthly * 12).toLocaleString('en-US', { maximumFractionDigits: 0 })}/year</div>
                 </div>
             </div>
@@ -695,10 +705,10 @@ async function loadCreditsProfile() {
         // Add total summary (compact version)
         const totalCreditsValue = creditEntries.reduce((sum, credit) => sum + credit.totalAmount, 0);
         let creditsHtml = `
-            <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 15px; border-radius: 10px; margin-bottom: 15px; text-align: center;">
-                <div style="font-size: 13px; font-weight: 500; opacity: 0.9; margin-bottom: 4px;">Total Annual Benefits</div>
-                <div style="font-size: 28px; font-weight: 700;">$${totalCreditsValue.toFixed(0)}</div>
-                <div style="font-size: 12px; opacity: 0.9; margin-top: 2px;">${creditEntries.length} benefit${creditEntries.length !== 1 ? 's' : ''} from ${Object.keys(cardDetails).length} card${Object.keys(cardDetails).length !== 1 ? 's' : ''}</div>
+            <div style="background: var(--accent-soft); border: 1px solid var(--border); color: var(--text); padding: 15px; border-radius: var(--radius-md); margin-bottom: 15px; text-align: center;">
+                <div style="font-size: 13px; font-weight: 500; color: var(--muted); margin-bottom: 4px;">Total Annual Benefits</div>
+                <div style="font-size: 28px; font-weight: 700; font-family: var(--font-mono); color: var(--accent);">$${totalCreditsValue.toFixed(0)}</div>
+                <div style="font-size: 12px; color: var(--muted); margin-top: 2px;">${creditEntries.length} benefit${creditEntries.length !== 1 ? 's' : ''} from ${Object.keys(cardDetails).length} card${Object.keys(cardDetails).length !== 1 ? 's' : ''}</div>
             </div>
         `;
 
@@ -708,18 +718,18 @@ async function loadCreditsProfile() {
             const totalAnnualValue = credit.totalAmount;
 
             creditsHtml += `
-                <div style="background: rgba(255, 255, 255, 0.9); border: 1px solid #e5e7eb; border-left: 3px solid #10b981; border-radius: 8px; padding: 12px;">
+                <div style="background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: var(--radius-sm); padding: 12px;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                        <h3 style="margin: 0; color: #10b981; font-size: 15px; font-weight: 600;">${credit.name}</h3>
-                        <span style="background: #d1fae5; color: #065f46; padding: 3px 8px; border-radius: 8px; font-size: 12px; font-weight: 600; white-space: nowrap;">
+                        <h3 style="margin: 0; color: var(--text-strong); font-size: 15px; font-weight: 600;">${credit.name}</h3>
+                        <span style="background: var(--accent-soft); color: var(--accent); padding: 3px 8px; border-radius: 8px; font-size: 12px; font-weight: 600; white-space: nowrap; font-family: var(--font-mono);">
                             $${totalAnnualValue.toFixed(0)}/yr
                         </span>
                     </div>
                     <div style="margin-top: 8px;">
                         ${credit.cards.map(card => `
-                            <div style="background: #f9fafb; padding: 8px; border-radius: 6px; margin-bottom: 6px; font-size: 13px;">
-                                <div style="font-weight: 600; color: #374151; margin-bottom: 2px;">${card.name}</div>
-                                <div style="color: #10b981; font-weight: 600; font-size: 12px;">$${parseFloat(card.annualValue).toFixed(0)}/year${card.timesPerYear > 1 ? ` ($${parseFloat(card.value).toFixed(0)} × ${card.timesPerYear})` : ''}</div>
+                            <div style="background: var(--bg); padding: 8px; border-radius: 6px; margin-bottom: 6px; font-size: 13px;">
+                                <div style="font-weight: 600; color: var(--text); margin-bottom: 2px;">${card.name}</div>
+                                <div style="color: var(--accent); font-weight: 600; font-size: 12px; font-family: var(--font-mono);">$${parseFloat(card.annualValue).toFixed(0)}/year${card.timesPerYear > 1 ? ` ($${parseFloat(card.value).toFixed(0)} × ${card.timesPerYear})` : ''}</div>
                             </div>
                         `).join('')}
                     </div>
@@ -821,11 +831,11 @@ async function calculatePortfolioSummary() {
         netValueElement.textContent = `$${netPortfolioValue.toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
         
         if (netPortfolioValue > 0) {
-            netValueElement.style.color = '#059669'; // Green for positive
+            netValueElement.style.color = '#3FCF8E'; // Green for positive
         } else if (netPortfolioValue < 0) {
-            netValueElement.style.color = '#dc2626'; // Red for negative
+            netValueElement.style.color = '#F87171'; // Red for negative
         } else {
-            netValueElement.style.color = '#6b7280'; // Gray for zero
+            netValueElement.style.color = '#8B95A4'; // Gray for zero
         }
         
     } catch (error) {
@@ -953,8 +963,8 @@ function showNotification(message, type = 'info') {
         font-weight: 500;
         z-index: 1000;
         transition: all 0.3s ease;
-        ${type === 'success' ? 'background: #10b981;' : 
-          type === 'error' ? 'background: #ef4444;' : 'background: #3b82f6;'}
+        ${type === 'success' ? 'background: #3FCF8E; color: #06251A;' :
+          type === 'error' ? 'background: #F87171;' : 'background: #5C6675;'}
     `;
     notification.textContent = message;
     
@@ -1066,33 +1076,33 @@ function displaySearchResults(cards) {
     resultsDiv.style.left = inputRect.left + 'px';
     resultsDiv.style.width = inputRect.width + 'px';
     resultsDiv.style.zIndex = '10000';
-    resultsDiv.style.background = 'white';
-    resultsDiv.style.border = '2px solid #e5e7eb';
+    resultsDiv.style.background = 'var(--surface)';
+    resultsDiv.style.border = '1px solid var(--border)';
     resultsDiv.style.borderTop = 'none';
-    resultsDiv.style.borderRadius = '0 0 8px 8px';
+    resultsDiv.style.borderRadius = '0 0 var(--radius-sm) var(--radius-sm)';
     resultsDiv.style.maxHeight = '300px';
     resultsDiv.style.overflowY = 'auto';
-    resultsDiv.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.15)';
-    
+    resultsDiv.style.boxShadow = 'var(--shadow-md)';
+
     if (cards.length === 0) {
-        resultsDiv.innerHTML = '<div style="padding: 12px; color: #6b7280; text-align: center;">No cards found</div>';
+        resultsDiv.innerHTML = '<div style="padding: 12px; color: var(--muted); text-align: center;">No cards found</div>';
         resultsDiv.style.display = 'block';
         return;
     }
-    
+
     const html = cards.map(card => `
-        <div 
-            class="search-result-item" 
+        <div
+            class="search-result-item"
             onclick="selectCard(${card.id}, '${card.name.replace(/'/g, '\\\'')}')"
-            style="padding: 12px; cursor: pointer; border-bottom: 1px solid #f3f4f6; display: flex; justify-content: space-between; align-items: center; transition: background-color 0.2s;"
-            onmouseover="this.style.backgroundColor='#f9fafb'"
-            onmouseout="this.style.backgroundColor='white'"
+            style="padding: 12px; cursor: pointer; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; transition: background-color 0.2s;"
+            onmouseover="this.style.backgroundColor='var(--bg)'"
+            onmouseout="this.style.backgroundColor='transparent'"
         >
             <div>
-                <div style="font-weight: 600; color: #1f2937;">${card.name}</div>
-                <div style="font-size: 12px; color: #6b7280;">${card.issuer.name} • Annual Fee: $${card.annual_fee}</div>
+                <div style="font-weight: 600; color: var(--text-strong);">${card.name}</div>
+                <div style="font-size: 12px; color: var(--muted);">${card.issuer.name} • Annual Fee: $${card.annual_fee}</div>
             </div>
-            <div style="color: #3b82f6; font-size: 12px; font-weight: 600;">Select →</div>
+            <div style="color: var(--accent); font-size: 12px; font-weight: 600;">Select →</div>
         </div>
     `).join('');
     
@@ -1237,7 +1247,7 @@ function updateAddCardSection() {
             if (!existingBadge) {
                 const badge = document.createElement('span');
                 badge.className = 'local-mode-badge';
-                badge.innerHTML = ' <span style="background: #f59e0b; color: white; padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: 500;">📱 Local Mode</span>';
+                badge.innerHTML = ' <span style="background: #5C6675; color: white; padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: 500;">Local Mode</span>';
                 addCardSection.appendChild(badge);
             }
         }

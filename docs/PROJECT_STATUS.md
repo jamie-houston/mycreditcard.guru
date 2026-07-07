@@ -5,11 +5,23 @@ backlog of new/changed requirements discovered along the way. Update this when a
 completes or a new requirement appears. (The original product spec is `PRD.md` at the repo
 root — that's the *what*; this file is the *where are we*.)
 
-Last updated: 2026-07-05
+Last updated: 2026-07-07
 
 **Active work (2026-07-05):** benefit preferences & stackability, roadmap
 persistence, and roadmap sharing — full approved plan + progress tracker in
 `docs/PLAN_BENEFITS_AND_ROADMAP_PERSISTENCE.md`. Phases A/B/C below.
+
+**UI redesign (2026-07-07):** "Ledger" visual/IA redesign implemented per
+`docs/design_handoff_ccguru_redesign/` — dark theme (tokens in
+`static/css/base.css` `:root`), Space Grotesk/Hanken Grotesk/IBM Plex Mono +
+Material Symbols Rounded, 4-tab bottom nav (Home/Roadmap/My Cards/Browse)
+replacing the old 6-link hamburger nav. Categories/Issuers pages stay live at
+their URLs but dropped from primary nav/footer. Browse (`cards_list.html`)
+re-skinned in place (existing filters kept, new filter-chip row added) rather
+than merged with Categories/Issuers. Visual restyle only — no new interactions
+added (card rows still open the existing detail modal; no deep-linking, no
+cancel-suggested/match-value badges, no Add-category button). Auth pages and
+the public shared-profile page got the same token sweep for consistency.
 
 ## Phase plan
 

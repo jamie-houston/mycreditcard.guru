@@ -23,7 +23,7 @@
 <!-- Category Optimization Section -->
 <div class="section">
     <h2>🎯 Which Card to Use for Each Category</h2>
-    <p style="color: #6b7280; margin-bottom: 20px;">Here's which card {{ profile_owner }} uses for each category to maximize rewards:</p>
+    <p style="color: var(--muted); margin-bottom: 20px;">Here's which card {{ profile_owner }} uses for each category to maximize rewards:</p>
     <div id="categoryOptimization">
         <div class="loading">Loading category recommendations...</div>
     </div>
@@ -63,7 +63,7 @@
 <!-- Spending Profile Section -->
 <div class="section">
     <h2>📈 Spending Profile</h2>
-    <p style="color: #6b7280; margin-bottom: 20px;">{{ profile_owner }}'s monthly spending patterns:</p>
+    <p style="color: var(--muted); margin-bottom: 20px;">{{ profile_owner }}'s monthly spending patterns:</p>
     <div id="spendingProfile">
         <div class="loading">Loading spending profile...</div>
     </div>
@@ -126,7 +126,7 @@ async function loadSharedCardCollection(profileData) {
         
         // For shared profiles, we'll show a message that card details are private
         cardCollectionContainer.innerHTML = `
-            <div style="text-align: center; padding: 40px; color: #6b7280;">
+            <div style="text-align: center; padding: 40px; color: var(--muted);">
                 <p>🔒 Card collection details are kept private in shared profiles</p>
                 <p style="font-size: 14px;">Portfolio summary and optimization data are shown below</p>
             </div>
@@ -224,7 +224,7 @@ async function loadSharedCategoryOptimization(profileData) {
         
         if (recommendations.length === 0) {
             categoryContainer.innerHTML = `
-                <div style="text-align: center; padding: 40px; color: #6b7280;">
+                <div style="text-align: center; padding: 40px; color: var(--muted);">
                     <p>🎯 No card recommendations available</p>
                     <p style="font-size: 14px;">This user may not have card ownership data or spending information</p>
                 </div>
@@ -238,15 +238,15 @@ async function loadSharedCategoryOptimization(profileData) {
         
         recommendations.forEach((rec, index) => {
             recommendationsHtml += `
-                <div class="card-recommendation" style="display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; margin-bottom: 8px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px;">
+                <div class="card-recommendation" style="display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; margin-bottom: 8px; background: var(--bg); border: 1px solid var(--border); border-radius: 6px;">
                     <div style="flex: 1;">
-                        <span style="font-weight: 600; color: #1e293b; font-size: 15px;">${rec.category}</span>
+                        <span style="font-weight: 600; color: var(--text-strong); font-size: 15px;">${rec.category}</span>
                     </div>
                     <div style="flex: 1; text-align: center;">
-                        <span style="color: #64748b; font-size: 14px;">${rec.percentage}</span>
+                        <span style="color: var(--muted); font-size: 14px;">${rec.percentage}</span>
                     </div>
                     <div style="flex: 2; text-align: right;">
-                        <span style="color: #059669; font-weight: 500; font-size: 14px;">
+                        <span style="color: var(--accent); font-weight: 500; font-size: 14px;">
                             ${rec.recommended_card} (${rec.reward_rate})
                         </span>
                     </div>

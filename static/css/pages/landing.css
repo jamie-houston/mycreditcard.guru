@@ -1,20 +1,58 @@
-/* Landing page styles - extracted from landing.html */
+/* Home screen (Ledger redesign) */
 
-@media (max-width: 768px) {
-    h1 {
-        font-size: 2.5rem !important;
-    }
+.home-hero {
+    padding: 20px 0 0;
+    max-width: 480px;
+    margin: 0 auto;
+}
+.home-h1 {
+    font-family: var(--font-ui);
+    font-size: 34px;
+    line-height: 1.1;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--text-strong);
+    text-align: left;
+    margin: 14px 0 10px;
+}
+.home-sub {
+    font-size: 15px;
+    line-height: 1.5;
+    color: var(--muted);
+    margin: 0 0 22px;
+}
+.home-cta-primary {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: var(--accent);
+    color: var(--accent-ink);
+    font-family: var(--font-ui);
+    font-weight: 700;
+    font-size: 16px;
+    padding: 16px;
+    border-radius: 15px;
+    text-decoration: none;
+}
+.home-cta-secondary {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    color: var(--text);
+    font-family: var(--font-ui);
+    font-weight: 600;
+    font-size: 15px;
+    padding: 14px;
+    border-radius: 15px;
+    text-decoration: none;
+    border: 1px solid var(--border);
+    margin-top: 10px;
+    background: var(--surface);
+}
 
-    .btn-large {
-        font-size: 1.1rem !important;
-        padding: 14px 28px !important;
-    }
-
-    div[style*="grid-template-columns: 1fr 1fr"] {
-        grid-template-columns: 1fr !important;
-    }
-
-    div[style*="grid-template-columns: repeat(auto-fit, minmax(350px, 1fr))"] {
-        grid-template-columns: 1fr !important;
-    }
+.home-features {
+    max-width: 480px;
+    margin: 32px auto 0;
 }
