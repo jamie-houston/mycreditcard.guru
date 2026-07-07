@@ -373,8 +373,75 @@ Update this section as work proceeds. Uncommitted work-in-progress lives on
         standard suite (68 tests, unaffected) still passes. **Needs a
         manual pass in the browser** — checkbox wiring and the grey-out/
         counted-once visuals haven't been eyeballed.
-- [ ] B1–B5 — not started
+- [x] **B1 — DONE** (2026-07-07): anon session created in
+      `quick_recommendation_view` (roadmaps/views.py) BEFORE calling
+      `serializer.generate_recommendations()`, so `request.session.create()`
+      commits outside the always-rolled-back transaction. Removed the loose
+      "any anonymous profile with spending data" fallback in
+      `_generate_with_scratch_data` (roadmaps/serializers.py) — anon users
+      now always resolve their own `session_key`-scoped profile via plain
+      `get_or_create`. **Also found and fixed a second bug the plan didn't
+      call out**: the view used to set `request.session.modified = False`
+      after generation (a leftover hack from when session creation happened
+      *inside* the rollback). With the session now legitimately created
+      beforehand, that flag suppressed the Set-Cookie header entirely —
+      anonymous users' browsers never learned their session id, so nothing
+      (Current Roadmap, credit prefs) could survive a second request. Caught
+      by a regression test (`test_generate_persists_for_fresh_anon_client`)
+      that failed until the flag was removed.
+- [x] **B2 — DONE** (2026-07-07): `_build_quick_rec_response()` extracts the
+      response-building dict (used by both the live response and
+      persistence); `_persist_current_roadmap()` resolves the REAL profile
+      (auth `user=`/anon `session_key=`, not the serializer's scratch one)
+      and `update_or_create`s `Roadmap(name="Current Roadmap")` +
+      `RoadmapCalculation.calculation_data = {response, request, generated_at}`,
+      called from `quick_recommendation_view` after
+      `generate_recommendations()` returns (i.e. after its rollback has
+      already happened — this write is a normal, committed write).
+- [x] **B3 — DONE** (2026-07-07): `GET /api/roadmaps/current/` added
+      (`current_roadmap_view`, roadmaps/urls.py `current/`). Read-only —
+      never auto-creates a session or profile; 404 when nothing's been
+      generated yet (empty state) or the session has no profile.
+- [x] **B4 — DONE** (2026-07-07): inline results renderer extracted from
+      index.html into `static/js/roadmap-results.js`
+      (`renderRoadmapResults(data, opts)` — `opts.readOnly` hides
+      ownership/apply actions for Phase C's shared page reuse,
+      `opts.banner`/`opts.strategyLabel` cover both the live-generate and
+      restored-from-current cases). `index.html` now: loads the script,
+      calls it from `getRecommendations()`, and calls a new
+      `loadCurrentRoadmap()` (fetches `/api/roadmaps/current/` on page load,
+      renders with a "Generated on {date} — inputs may have changed" banner,
+      silently no-ops on 404). Added "Remove from my cards" on keep/cancel
+      recommendations (`removeCardOwnership()` in the new JS file — auth via
+      `POST /api/users/cards/toggle/ {action:'remove'}` (soft-close),
+      anon via `UserDataManager`/localStorage), which shows a "regenerate for
+      updated math" notification afterward rather than silently mutating
+      displayed numbers. Deleted the dead `toggle_card_ownership` stub
+      (cards/views.py, cards/urls.py `toggle-ownership/`) — unused by the
+      frontend, which already calls `users/cards/toggle/`.
+      **Drive-by fix required for "Remove from my cards" to actually work**:
+      `UserDataSerializer.create` (users/serializers.py, backing
+      `/api/users/data/`, called by `saveCurrentData()` before every roadmap
+      generation) hard-deleted any `UserCard` not in the posted card-id list
+      — including soft-closed ones, since `to_representation()` already
+      excludes `closed_date`-set rows from that list. So the very next
+      "Get My Roadmap" click after a soft-close would permanently erase the
+      closed_date history the toggle endpoint exists to preserve (exactly
+      the footgun this plan's B4 notes warn against). Fixed by scoping the
+      hard-delete to `closed_date__isnull=True` rows only. Covered by
+      `users.tests.SoftCloseSurvivesBulkSaveTests` (2 tests).
+- [x] **B5 — DONE** (2026-07-07): `roadmaps.tests.RoadmapPersistenceTests`
+      (7 tests: auth generate persists; fresh anon client persists in one
+      request — the B1 regression test; GET current returns stored JSON;
+      GET current 404s with nothing generated; regenerate overwrites, not
+      duplicates; real stored profile data untouched by generate; two
+      anon sessions never share a profile) +
+      `users.tests.SoftCloseSurvivesBulkSaveTests` (2 tests, the drive-by fix
+      above). Standard suite: **85 tests**, all green (was 76, +9). Full
+      scenario sweep unaffected (engine untouched): 64/64.
+      `run_scenario "Jamie Real" --explain`: all line items reconcile.
 - [ ] C1–C4 — not started
-- [ ] Docs updates — PROJECT_STATUS.md phase table + this file kept in sync
-      as of 2026-07-07 (A5 landed, Phase A now fully done); CLAUDE.md
-      architecture-map note on the frontend wiring added same commit as A4.
+- [x] Docs updates — PROJECT_STATUS.md phase table + this file kept in sync
+      as of 2026-07-07 (A5 landed, Phase A now fully done; B1–B5 landed same
+      day); CLAUDE.md architecture-map note on Current Roadmap persistence
+      and the soft-close fix added same commit as B1–B5.

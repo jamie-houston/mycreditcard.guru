@@ -440,6 +440,136 @@ class QuickRecommendationSafetyTests(TestCase):
         self.assertEqual(serializer.validated_data['max_recommendations'], 1)
 
 
+class RoadmapPersistenceTests(TestCase):
+    """B1/B2/B3: generating a roadmap persists it as "Current Roadmap" (both
+    auth and anon-via-session), survives reload via GET .../current/, and
+    regenerating overwrites rather than duplicating."""
+
+    def setUp(self):
+        from cards.models import SpendingCategory
+        self.user = User.objects.create_user(
+            username='persist', email='persist@example.com', password='x')
+        self.cashback = RewardType.objects.create(name='Cashback', slug='cashback')
+        self.issuer = Issuer.objects.create(name='Generic Bank', slug='generic-bank')
+        self.dining = SpendingCategory.objects.create(name='Dining', slug='dining')
+        self.card = CreditCard.objects.create(
+            name='Persist Card', slug='persist-card', issuer=self.issuer,
+            signup_bonus_type=self.cashback, primary_reward_type=self.cashback)
+
+    def _payload(self, amount='500.00'):
+        return {
+            'spending_amounts': {str(self.dining.id): amount},
+            'user_cards': [],
+            'max_recommendations': 1,
+        }
+
+    def test_generate_persists_current_roadmap_for_auth_user(self):
+        self.client.force_login(self.user)
+        response = self.client.post(
+            '/api/roadmaps/quick-recommendation/', self._payload(),
+            content_type='application/json')
+        self.assertEqual(response.status_code, 200)
+
+        profile = UserSpendingProfile.objects.get(user=self.user)
+        roadmap = Roadmap.objects.get(profile=profile, name='Current Roadmap')
+        self.assertTrue(hasattr(roadmap, 'calculation'))
+        self.assertIn('response', roadmap.calculation.calculation_data)
+        self.assertIn('generated_at', roadmap.calculation.calculation_data)
+
+    def test_generate_persists_for_fresh_anon_client(self):
+        """Regression test for the B1 session-rollback trap: a brand new
+        anonymous client (no session cookie yet) must still get a durable
+        session and a persisted Current Roadmap from a single request."""
+        response = self.client.post(
+            '/api/roadmaps/quick-recommendation/', self._payload(),
+            content_type='application/json')
+        self.assertEqual(response.status_code, 200)
+
+        session_key = self.client.session.session_key
+        self.assertIsNotNone(session_key)
+        profile = UserSpendingProfile.objects.get(session_key=session_key)
+        self.assertTrue(
+            Roadmap.objects.filter(profile=profile, name='Current Roadmap').exists()
+        )
+
+    def test_get_current_returns_stored_response(self):
+        self.client.force_login(self.user)
+        self.client.post(
+            '/api/roadmaps/quick-recommendation/', self._payload(),
+            content_type='application/json')
+
+        response = self.client.get('/api/roadmaps/current/')
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertIn('recommendations', data)
+        self.assertIn('generated_at', data)
+
+    def test_get_current_404_when_nothing_generated(self):
+        self.client.force_login(self.user)
+        response = self.client.get('/api/roadmaps/current/')
+        self.assertEqual(response.status_code, 404)
+
+    def test_regenerate_overwrites_rather_than_duplicates(self):
+        self.client.force_login(self.user)
+        self.client.post(
+            '/api/roadmaps/quick-recommendation/', self._payload('500.00'),
+            content_type='application/json')
+        self.client.post(
+            '/api/roadmaps/quick-recommendation/', self._payload('900.00'),
+            content_type='application/json')
+
+        profile = UserSpendingProfile.objects.get(user=self.user)
+        self.assertEqual(
+            Roadmap.objects.filter(profile=profile, name='Current Roadmap').count(), 1
+        )
+        response = self.client.get('/api/roadmaps/current/')
+        stored_request = RoadmapCalculation.objects.get(
+            roadmap__profile=profile, roadmap__name='Current Roadmap'
+        ).calculation_data['request']
+        self.assertEqual(stored_request['spending_amounts'][str(self.dining.id)], '900.00')
+
+    def test_generate_leaves_real_profile_untouched_after_persistence(self):
+        """The scratch-write rollback (pre-existing behavior) must still hold
+        even though a real write (Current Roadmap) now happens afterward."""
+        from cards.models import SpendingAmount
+        self.client.force_login(self.user)
+        profile = UserSpendingProfile.objects.create(user=self.user) if not \
+            UserSpendingProfile.objects.filter(user=self.user).exists() else \
+            UserSpendingProfile.objects.get(user=self.user)
+        SpendingAmount.objects.create(
+            profile=profile, category=self.dining, monthly_amount=Decimal('42'))
+
+        self.client.post(
+            '/api/roadmaps/quick-recommendation/', self._payload('500.00'),
+            content_type='application/json')
+
+        amounts = list(profile.spending_amounts.all())
+        self.assertEqual(len(amounts), 1)
+        self.assertEqual(amounts[0].monthly_amount, Decimal('42'))
+
+    def test_stale_session_anon_users_get_separate_profiles(self):
+        """B1: removing the loose 'any anonymous profile with spending data'
+        fallback means two different anonymous sessions never share a
+        profile (and therefore never share a roadmap/share link)."""
+        from django.test import Client
+        client_a = Client()
+        client_a.post(
+            '/api/roadmaps/quick-recommendation/', self._payload('500.00'),
+            content_type='application/json')
+        session_a = client_a.session.session_key
+
+        client_b = Client()
+        client_b.post(
+            '/api/roadmaps/quick-recommendation/', self._payload('700.00'),
+            content_type='application/json')
+        session_b = client_b.session.session_key
+
+        self.assertNotEqual(session_a, session_b)
+        profile_a = UserSpendingProfile.objects.get(session_key=session_a)
+        profile_b = UserSpendingProfile.objects.get(session_key=session_b)
+        self.assertNotEqual(profile_a.id, profile_b.id)
+
+
 class StrategyUITests(TestCase):
     """S2: effort-tolerance question + advanced strategy picker on the roadmap page"""
 

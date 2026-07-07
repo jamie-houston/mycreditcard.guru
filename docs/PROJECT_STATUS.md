@@ -11,7 +11,7 @@ Last updated: 2026-07-07
 persistence, and roadmap sharing — full approved plan + progress tracker in
 `docs/PLAN_BENEFITS_AND_ROADMAP_PERSISTENCE.md` (**source of truth for
 phase A/B/C detail — update its Progress section, not just this file**).
-Phase A completed 2026-07-07; B and C are next. Phases A/B/C below.
+Phases A and B completed 2026-07-07; C is next. Phases A/B/C below.
 
 **UI redesign (2026-07-07):** "Ledger" visual/IA redesign implemented per
 `docs/design_handoff_ccguru_redesign/` — dark theme (tokens in
@@ -54,7 +54,7 @@ something, check here first for which file owns it.
 | 4 | Sustainable data pipeline: `import_external_cards` refreshes bonuses/fees from the andenacitelli community API | ✅ Done (monthly cron wiring happens at deploy, Phase 3) |
 | 5 | Cleanup: dead deps/scripts removed, `manage_project.py` menu entries | ✅ Mostly done (see backlog) |
 | A | Benefit preferences (opt-out toggles on profile+roadmap, server-persisted) + stackability dedup (curated `stackable` flag; non-stackable credits count once per portfolio) — see `PLAN_BENEFITS_AND_ROADMAP_PERSISTENCE.md` | ✅ Done (A1–A5 all landed 2026-07-07 — model/migration, engine dedup, credit-preferences API, index.html/profile.html UI, and full test coverage incl. `credit_stackability.json`; the UI still needs a manual browser pass, unverified) |
-| B | Roadmap persistence (survives reload until regenerate; anon via session) + "I have this card"/"remove from my cards" on results | 📋 Planned |
+| B | Roadmap persistence (survives reload until regenerate; anon via session) + "I have this card"/"remove from my cards" on results | ✅ Done (B1–B5 all landed 2026-07-07 — anon session-timing + loose-fallback fixes, Current Roadmap persisted post-rollback, `GET /api/roadmaps/current/`, shared `roadmap-results.js` renderer + page-load restore + remove-from-my-cards, full test coverage; see PLAN doc Progress section for the two bugs found along the way — a session-cookie suppression that silently broke anon persistence, and a bulk-save hard-delete that would have erased soft-closed eligibility history) |
 | C | Roadmap sharing (share toggle + public UUID link, mirrors profile sharing) | 📋 Planned |
 
 ## Requirements added/changed since the original plan
@@ -291,10 +291,14 @@ was added (approximated from `opened_date` + ~3 mo when blank).
 - Acceptance scenario: `python manage.py run_scenario "Jamie Real" --explain`
   (every line item must reconcile to the headline; runs against the dev DB)
 - Full scenario sweep: `RUN_ALL_SCENARIOS=1 python manage.py test cards.test_json_scenarios`
-- Standard tests: `python manage.py test` (76 tests)
+- Standard tests: `python manage.py test` (85 tests)
 - Full-sweep baseline (2026-07-07): **OK — 64/64 scenarios pass** (61 + 3 new
   `credit_stackability.json` scenarios from A5). Any failure is a
   regression. To hand-confirm a change's new numbers, re-run the sweep with
   `DUMP_SCENARIOS=1` and diff the printed per-scenario results (the CLI
   `run_scenario` runs against the dev DB, whose real cards pollute fixture pools —
   trust the test-DB dump for scenario work).
+- Standard suite grew 76 → 85 with Phase B (2026-07-07):
+  `roadmaps.tests.RoadmapPersistenceTests` (7) +
+  `users.tests.SoftCloseSurvivesBulkSaveTests` (2). Scenario sweep untouched
+  by Phase B (no engine changes).

@@ -28,7 +28,6 @@ urlpatterns = [
     path('recommendations/preview/', views.card_recommendations_preview, name='recommendations-preview'),
     
     # Card ownership management
-    path('toggle-ownership/', views.toggle_card_ownership, name='toggle-ownership'),
     path('user-cards/', views.get_user_cards, name='user-cards'),
     path('user-cards/add/', views.add_user_card, name='add-user-card'),
     path('user-cards/<int:user_card_id>/', views.update_user_card, name='update-user-card'),

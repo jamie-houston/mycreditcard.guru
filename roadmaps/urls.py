@@ -15,6 +15,7 @@ urlpatterns = [
     # Roadmap generation
     path('<int:roadmap_id>/generate/', views.generate_roadmap_view, name='roadmap-generate'),
     path('quick-recommendation/', views.quick_recommendation_view, name='quick-recommendation'),
+    path('current/', views.current_roadmap_view, name='roadmap-current'),
     
     # Stats
     path('stats/', views.roadmap_stats_view, name='roadmap-stats'),

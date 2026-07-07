@@ -133,6 +133,7 @@
 
     <link rel="stylesheet" href="{% static 'css/pages/roadmap.css' %}">
 
+    <script src="{% static 'js/roadmap-results.js' %}"></script>
     <script>
         // Dynamic issuer loading: 2025-07-04-v1
         let spendingCategories = {}; // For slug -> ID mapping
@@ -304,12 +305,15 @@
                 
                 // Load saved spending and preferences
                 await loadSavedData();
-                
+
                 // Set up auto-save listeners after data is loaded
                 setupAutoSave();
-                
+
                 // Set up total calculation
                 setupTotalCalculation();
+
+                // Restore the last generated roadmap, if any, so it survives a reload
+                await loadCurrentRoadmap();
             } catch (error) {
                 console.error('Error loading data:', error);
                 document.getElementById('spendingCategories').innerHTML = 
@@ -763,6 +767,27 @@
             }
         }
 
+        async function loadCurrentRoadmap() {
+            try {
+                const response = await fetch(`${API_BASE}/roadmaps/current/`);
+                if (!response.ok) {
+                    return; // 404 = nothing generated yet, leave the empty state
+                }
+                const data = await response.json();
+                const generatedAt = data.generated_at ? new Date(data.generated_at) : null;
+                const banner = generatedAt
+                    ? `Generated on ${generatedAt.toLocaleDateString()} — inputs may have changed`
+                    : '';
+                renderRoadmapResults(data, {
+                    container: document.getElementById('results'),
+                    banner,
+                    noScroll: true
+                });
+            } catch (error) {
+                console.error('Error loading current roadmap:', error);
+            }
+        }
+
         async function getRecommendations() {
             // Collapse preferences section
             const preferencesContent = document.getElementById('preferencesContent');
@@ -880,354 +905,12 @@
                 }
 
                 // Display recommendations
-                const recommendations = data.recommendations || [];
-                const portfolioSummary = data.portfolio_summary || {};
-
                 const activePreset = strategyByKey(selectedStrategy);
-                let html = `
-                    <div class="results" style="background:transparent;border:none;padding:0;">
-                        <h2 id="roadmapResults">Your roadmap</h2>
-                        ${activePreset ? `<p style="text-align: center; color: var(--muted); margin: -10px 0 20px 0;">Strategy: <strong style="color:var(--text);">${activePreset.name}</strong> — ${activePreset.pool_label}</p>` : ''}
-                `;
-
-                // Helper: pick the categories that drove most of a card's value,
-                // straight from the same rewards_breakdown shown in its detail panel.
-                function topCategoriesLabel(rec) {
-                    const items = (rec.rewards_breakdown || []).filter(b =>
-                        b.type !== 'credit' && b.type !== 'info' && b.type !== 'bonus_shift' && (b.category_rewards || 0) > 0);
-                    items.sort((a, b) => (b.category_rewards || 0) - (a.category_rewards || 0));
-                    const top = items.slice(0, 2).map(b => b.category_name).filter(Boolean);
-                    return top.length ? `Best for ${top.join(' & ')}` : (rec.reasoning || '');
-                }
-
-                function formatSigned(value) {
-                    const v = parseFloat(value) || 0;
-                    return v < 0 ? `−$${Math.abs(v).toFixed(0)}` : `$${v.toFixed(0)}`;
-                }
-
-                // Add portfolio summary if we have recommendations
-                if (recommendations.length > 0 && portfolioSummary.card_count > 0) {
-                    const categoryOptimization = portfolioSummary.category_optimization || {};
-                    const categoryOptimizationEntries = Object.entries(categoryOptimization);
-                    const netValue = portfolioSummary.net_portfolio_value || 0;
-                    const keepCount = recommendations.filter(r => r.action === 'keep').length;
-                    const applyCount = recommendations.filter(r => r.action === 'apply').length;
-                    const cancelCount = recommendations.filter(r => r.action === 'cancel').length;
-
-                    html += `
-                        <div class="result-hero">
-                            <div class="result-hero-label">Estimated rewards / year</div>
-                            <div class="result-hero-figure-row">
-                                <span class="result-hero-figure">${formatSigned(netValue)}</span>
-                            </div>
-                            <div class="result-hero-sub">$${(portfolioSummary.total_portfolio_rewards || 0).toFixed(0)} rewards − $${(portfolioSummary.total_annual_fees || 0).toFixed(0)} fees · $${(portfolioSummary.total_annual_spending || 0).toLocaleString()}/yr tracked</div>
-                            <div class="result-hero-stats">
-                                <div class="tile"><div class="tile-figure">${keepCount}</div><div class="tile-label">Keep</div></div>
-                                <div class="tile"><div class="tile-figure">${applyCount}</div><div class="tile-label">Apply</div></div>
-                                <div class="tile"><div class="tile-figure">${cancelCount}</div><div class="tile-label">Cancel</div></div>
-                            </div>
-                            ${(portfolioSummary.bonus_capacity && portfolioSummary.bonus_capacity.deferred_applies && portfolioSummary.bonus_capacity.deferred_applies.length > 0) ? `
-                                <div style="background: var(--bg); border: 1px solid var(--border); padding: 12px 15px; border-radius: var(--radius-sm); margin-top: 15px; font-size: 13px; color: var(--muted);">
-                                    At ~$${(portfolioSummary.bonus_capacity.total_monthly_spending || 0).toLocaleString()}/mo of spending, the recommended signup bonuses take
-                                    ~${portfolioSummary.bonus_capacity.months_committed} of the year's ${portfolioSummary.bonus_capacity.capacity_months} months to earn.
-                                    Deferred until next year: ${portfolioSummary.bonus_capacity.deferred_applies.join(', ')}.
-                                </div>
-                            ` : ''}
-                        </div>
-                    `;
-
-                    if (categoryOptimizationEntries.length > 0) {
-                        html += `
-                            <div class="result-section-header"><span class="ico">grid_view</span><span class="result-section-header-title">Best card per category</span></div>
-                            <div class="grouped-card"><div class="category-card-body">
-                                ${categoryOptimizationEntries.map(([slug, data]) => `
-                                    <div class="category-row">
-                                        <span class="ico">${CATEGORY_ICONS[slug] || 'category'}</span>
-                                        <span class="category-row-name">${data.category_name}</span>
-                                        <span class="category-row-card">${data.best_card}</span>
-                                        <span class="category-row-rate">${data.best_rate}x</span>
-                                    </div>
-                                `).join('')}
-                            </div></div>
-                        `;
-                    }
-                }
-
-                if (recommendations.length === 0) {
-                    html += '<p style="text-align:center;color:var(--muted);">No recommendations found with your current criteria. Try adjusting your filters.</p>';
-                } else {
-                    // Group recommendations by action type
-                    const groupedRecs = {
-                        keep: recommendations.filter(rec => rec.action === 'keep'),
-                        cancel: recommendations.filter(rec => rec.action === 'cancel'),
-                        apply: recommendations.filter(rec => rec.action === 'apply'),
-                        upgrade: recommendations.filter(rec => rec.action === 'upgrade'),
-                        downgrade: recommendations.filter(rec => rec.action === 'downgrade')
-                    };
-
-                    // Define section metadata (order matches the mock: Apply, Keep, Cancel, then any Upgrade/Downgrade)
-                    const sections = [
-                        {
-                            key: 'apply',
-                            title: 'Apply for these',
-                            icon: 'add_circle',
-                            danger: false
-                        },
-                        {
-                            key: 'keep',
-                            title: 'Keep',
-                            icon: 'check_circle',
-                            danger: false
-                        },
-                        {
-                            key: 'cancel',
-                            title: 'Cancel',
-                            icon: 'cancel',
-                            danger: true
-                        },
-                        {
-                            key: 'upgrade',
-                            title: 'Upgrade options',
-                            icon: 'trending_up',
-                            danger: false
-                        },
-                        {
-                            key: 'downgrade',
-                            title: 'Downgrade options',
-                            icon: 'trending_down',
-                            danger: false
-                        }
-                    ];
-
-                    // Render each section that has recommendations
-                    sections.forEach(section => {
-                        const sectionRecs = groupedRecs[section.key];
-                        if (sectionRecs && sectionRecs.length > 0) {
-                            const isApply = section.key === 'apply';
-                            html += `
-                                <div class="result-section-header${section.danger ? ' danger' : ''}" onclick="toggleSection('${section.key}')" style="cursor:pointer;">
-                                    <span class="ico">${section.icon}</span>
-                                    <span class="result-section-header-title">${section.title}</span>
-                                    <span class="result-section-header-count">${sectionRecs.length}</span>
-                                    <span class="ico" id="toggle-${section.key}" style="margin-left:auto; font-size:20px; color:var(--muted); transition: transform 0.2s ease;">expand_more</span>
-                                </div>
-                                <div id="content-${section.key}" class="${isApply ? '' : 'grouped-card' + (section.danger ? ' danger' : '')}">
-                            `;
-
-                            sectionRecs.forEach((rec, index) => {
-                        const actionClass = rec.action.toLowerCase();
-
-                        // Generate detailed value breakdown HTML
-                        let breakdownHtml = '';
-                        
-                        if (rec.rewards_breakdown && Array.isArray(rec.rewards_breakdown) && rec.rewards_breakdown.length > 0) {
-                            // Calculate total from breakdown to verify it matches estimated_rewards
-                            let breakdownTotal = 0;
-                            let breakdownItems = [];
-                            
-                            rec.rewards_breakdown.forEach(breakdown => {
-                                const categoryName = breakdown.category_name || 'Unknown Category';
-                                const categoryValue = parseFloat(breakdown.category_rewards || 0);
-                                breakdownTotal += categoryValue;
-                                
-                                breakdownItems.push({
-                                    name: categoryName,
-                                    value: categoryValue,
-                                    type: breakdown.type || 'reward_category',
-                                    calculation: breakdown.calculation || '',
-                                    credits_breakdown: breakdown.credits_breakdown || []
-                                });
-                            });
-                            
-                            // Add signup bonus if this is an 'apply' action
-                            let signupBonusValue = 0;
-                            if (rec.action === 'apply' && rec.signup_bonus_value) {
-                                signupBonusValue = parseFloat(rec.signup_bonus_value);
-                                breakdownTotal += signupBonusValue;
-                            }
-                            
-                            // Add annual fee (negative value)
-                            const annualFee = parseFloat(rec.card.effective_annual_fee || 0);
-                            if (annualFee > 0) {
-                                breakdownTotal -= annualFee;
-                            }
-                            
-                            // Build the HTML
-                            breakdownHtml = `
-                                <div class="value-breakdown">
-                                    <div class="breakdown-header">
-                                        <strong>💰 Value Breakdown</strong>
-                                        <span class="breakdown-total">Total: $${rec.estimated_rewards.toFixed(0)}</span>
-                                    </div>
-                                    <div class="breakdown-items">`;
-                            
-                            // Separate reward categories, credits, bonus shifts and info notes
-                            const rewardCategories = breakdownItems.filter(item =>
-                                item.type !== 'credit' && item.type !== 'info' && item.type !== 'bonus_shift');
-                            const credits = breakdownItems.filter(item => item.type === 'credit');
-                            const bonusShifts = breakdownItems.filter(item => item.type === 'bonus_shift');
-                            const infoNotes = breakdownItems.filter(item => item.type === 'info');
-
-                            // Add reward categories first (hover shows the exact math)
-                            rewardCategories.forEach(item => {
-                                if (item.value > 0) {
-                                    breakdownHtml += `
-                                        <div class="breakdown-item positive" title="${item.calculation}">
-                                            <span class="item-name">🏆 ${item.name}</span>
-                                            <span class="item-value">+$${item.value.toFixed(0)}</span>
-                                        </div>`;
-                                }
-                            });
-
-                            // Bonus-window spending shifts: net cost/gain of moving
-                            // spending here to meet the signup requirement
-                            bonusShifts.forEach(item => {
-                                const cls = item.value >= 0 ? 'positive' : 'negative';
-                                const sign = item.value >= 0 ? '+' : '-';
-                                breakdownHtml += `
-                                    <div class="breakdown-item ${cls}" title="${item.calculation}" style="font-size: 0.85em;">
-                                        <span class="item-name">🔁 ${item.name}</span>
-                                        <span class="item-value">${sign}$${Math.abs(item.value).toFixed(0)}</span>
-                                    </div>`;
-                            });
-                            
-                            // Add credits separately with different styling
-                            credits.forEach(item => {
-                                if (item.value > 0) {
-                                    breakdownHtml += `
-                                        <div class="breakdown-item positive">
-                                            <span class="item-name">🎁 ${item.name}</span>
-                                            <span class="item-value">+$${item.value.toFixed(0)}</span>
-                                        </div>`;
-                                }
-                            });
-                            
-                            // Add signup bonus if applicable (only for 'apply' actions)
-                            if (rec.action === 'apply' && signupBonusValue > 0) {
-                                breakdownHtml += `
-                                    <div class="breakdown-item positive">
-                                        <span class="item-name">🎁 Signup Bonus</span>
-                                        <span class="item-value">+$${signupBonusValue.toFixed(0)}</span>
-                                    </div>`;
-                            }
-                            
-                            // Add annual fee if applicable
-                            if (annualFee > 0) {
-                                const feeLabel = rec.card.annual_fee_waived_first_year && rec.action === 'apply' 
-                                    ? 'Annual Fee (waived Year 1)' 
-                                    : 'Annual Fee';
-                                const feeValue = rec.card.annual_fee_waived_first_year && rec.action === 'apply' ? 0 : annualFee;
-                                
-                                if (feeValue > 0) {
-                                    breakdownHtml += `
-                                        <div class="breakdown-item negative">
-                                            <span class="item-name">${feeLabel}</span>
-                                            <span class="item-value">-$${feeValue.toFixed(0)}</span>
-                                        </div>`;
-                                }
-                            }
-
-                            // Informational notes (e.g. signup bonus spending gap) — $0 items
-                            infoNotes.forEach(item => {
-                                breakdownHtml += `
-                                    <div class="breakdown-item" style="opacity: 0.85; font-size: 0.85em;">
-                                        <span class="item-name">⚠️ ${item.name}: ${item.calculation}</span>
-                                    </div>`;
-                            });
-
-                            // Valuation transparency: how points were valued, and
-                            // first-year vs ongoing when a signup bonus skews year one
-                            if (rec.valuation_note) {
-                                breakdownHtml += `
-                                    <div class="breakdown-item" style="opacity: 0.7; font-size: 0.8em;">
-                                        <span class="item-name">${rec.valuation_note}</span>
-                                    </div>`;
-                            }
-                            if (rec.first_year_value !== undefined && rec.ongoing_value !== undefined
-                                && Math.abs(rec.first_year_value - rec.ongoing_value) >= 1) {
-                                breakdownHtml += `
-                                    <div class="breakdown-item" style="font-size: 0.85em;">
-                                        <span class="item-name">First year: $${rec.first_year_value.toFixed(0)} · Ongoing: $${rec.ongoing_value.toFixed(0)}/yr</span>
-                                    </div>`;
-                            }
-
-                            breakdownHtml += `
-                                    </div>
-                                </div>`;
-                        }
-
-                                const estimatedValue = parseFloat(rec.estimated_rewards) || 0;
-                                const annualFee = parseFloat(rec.card.effective_annual_fee || 0);
-                                const reasonLabel = topCategoriesLabel(rec);
-                                const eligibilityHtml = rec.eligibility_note ? `
-                                    <div class="chip" style="margin-top: 10px;">${rec.eligibility_note}</div>
-                                ` : '';
-
-                        if (isApply) {
-                            html += `
-                                <div class="apply-card" onclick="openCardModal(${rec.card.id})">
-                                    <div class="apply-card-top">
-                                        <div>
-                                            <div class="apply-card-name">${rec.card.name}</div>
-                                            <div class="apply-card-reason">${reasonLabel}</div>
-                                        </div>
-                                        <span class="apply-card-value">${formatSigned(estimatedValue)}</span>
-                                    </div>
-                                    <div class="apply-card-stats">
-                                        ${rec.card.signup_bonus_amount ? `
-                                            <div><div class="apply-card-stat-label">BONUS</div><div class="apply-card-stat-value">${rec.card.signup_bonus_amount.toLocaleString()}</div></div>
-                                        ` : ''}
-                                        <div><div class="apply-card-stat-label">FEE</div><div class="apply-card-stat-value">$${annualFee.toFixed(0)}${rec.card.annual_fee_waived_first_year ? '*' : ''}</div></div>
-                                        ${rec.card.signup_spending_requirement ? `
-                                            <div><div class="apply-card-stat-label">SPEND</div><div class="apply-card-stat-value">$${(rec.card.signup_spending_requirement / 1000).toFixed(0)}k/${rec.card.signup_time_limit_months || 3}mo</div></div>
-                                        ` : ''}
-                                    </div>
-                                    ${eligibilityHtml}
-                                    ${breakdownHtml}
-                                    <div style="display:flex; gap:8px; margin-top:12px;">
-                                        <button onclick="event.stopPropagation(); openCardOwnershipModal(${rec.card.id})" class="secondary" style="flex:1; padding:8px; font-size:12px;">I have this card</button>
-                                        ${rec.card.apply_url ? `<button onclick="event.stopPropagation(); window.open('${rec.card.apply_url}', '_blank')" style="flex:1; padding:8px; font-size:12px;">Apply Now</button>` : ''}
-                                    </div>
-                                </div>
-                            `;
-                        } else {
-                            html += `
-                                <div class="grouped-item">
-                                    <div class="grouped-row" onclick="openCardModal(${rec.card.id})">
-                                        <div>
-                                            <div class="grouped-row-name">${rec.card.name}</div>
-                                            <div class="grouped-row-reason">${reasonLabel}</div>
-                                        </div>
-                                        <span class="grouped-row-value${section.danger ? ' danger' : ''}">${formatSigned(estimatedValue)}</span>
-                                    </div>
-                                    ${eligibilityHtml}
-                                    ${breakdownHtml}
-                                </div>
-                            `;
-                        }
-                            });
-
-                            html += `</div>`;
-                        }
-                    });
-                }
-
-                html += '</div>';
-                resultsDiv.innerHTML = html;
-                
-                // Apply mobile classes after rendering results
-                applyMobileClasses();
-                
-                // Smooth scroll to the roadmap results
-                setTimeout(() => {
-                    const roadmapElement = document.getElementById('roadmapResults');
-                    if (roadmapElement) {
-                        roadmapElement.scrollIntoView({ 
-                            behavior: 'smooth', 
-                            block: 'start' 
-                        });
-                    }
-                }, 100); // Small delay to ensure DOM is updated
+                renderRoadmapResults(data, {
+                    container: resultsDiv,
+                    strategyLabel: activePreset ? activePreset.name : '',
+                    poolLabel: activePreset ? activePreset.pool_label : ''
+                });
 
             } catch (error) {
                 resultsDiv.innerHTML = '<div class="error">Error generating recommendations. Please try again.</div>';

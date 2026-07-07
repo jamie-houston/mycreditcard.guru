@@ -1566,7 +1566,7 @@ class RecommendationEngine:
                     'card': card,
                     'rate': float(reward_cat.reward_rate),
                     'annual_spend': take,
-                    'max_spend': reward_cat.max_annual_spend,
+                    'max_spend': float(reward_cat.max_annual_spend) if reward_cat.max_annual_spend else None,
                     'reward_category_id': reward_cat.id,
                     'is_base_rate': reward_cat.category.slug in self.BASE_CATEGORY_SLUGS,
                 })

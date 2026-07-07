@@ -75,8 +75,14 @@ class UserDataSerializer(serializers.Serializer):
         
         # Update cards
         from cards.models import CreditCard
-        # Remove existing cards not in the new list
-        UserCard.objects.filter(user=user).exclude(card_id__in=cards_data).delete()
+        # Remove active cards not in the new list. Only touch active
+        # (closed_date__isnull=True) rows — soft-closed cards (e.g. via
+        # /api/users/cards/toggle/ remove) must survive untouched, since
+        # eligibility rules (5/24, Amex lifetime, etc.) read full history
+        # including closed cards.
+        UserCard.objects.filter(
+            user=user, closed_date__isnull=True
+        ).exclude(card_id__in=cards_data).delete()
         
         # Add new cards
         for card_id in cards_data:

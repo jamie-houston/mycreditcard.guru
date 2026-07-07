@@ -415,35 +415,6 @@ def profile_view(request):
 
 
 @api_view(['POST'])
-def toggle_card_ownership(request):
-    """Add or remove a card from user's collection"""
-    try:
-        card_id = request.data.get('card_id')
-        action = request.data.get('action')  # 'add' or 'remove'
-        
-        if not card_id or action not in ['add', 'remove']:
-            return Response(
-                {'error': 'card_id and action (add/remove) required'}, 
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        
-        # For now, we'll just return success since we don't have UserCard model
-        # In a full implementation, this would manage UserCard records
-        return Response({
-            'success': True,
-            'message': f'Card {"added to" if action == "add" else "removed from"} your collection',
-            'card_id': card_id,
-            'action': action
-        })
-        
-    except Exception as e:
-        return Response(
-            {'error': str(e)}, 
-            status=status.HTTP_500_INTERNAL_SERVER_ERROR
-        )
-
-
-@api_view(['POST'])
 def update_profile_privacy(request):
     """Update the privacy setting for a user's profile"""
     try:

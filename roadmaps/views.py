@@ -3,15 +3,16 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
-from django.contrib.sessions.exceptions import SessionInterrupted
 
 from cards.models import UserSpendingProfile
-from .models import Roadmap, RoadmapFilter
+from .models import Roadmap, RoadmapCalculation, RoadmapFilter
 from .serializers import (
     RoadmapFilterSerializer, RoadmapSerializer,
     CreateRoadmapSerializer, GenerateRoadmapSerializer
 )
 from .recommendation_engine import RecommendationEngine
+
+CURRENT_ROADMAP_NAME = "Current Roadmap"
 
 
 class RoadmapFilterListView(generics.ListCreateAPIView):
@@ -122,9 +123,110 @@ def generate_roadmap_view(request, roadmap_id):
         )
 
 
+def _build_quick_rec_response(recommendations):
+    """Build the quick-recommendation JSON payload as a plain dict.
+
+    Shared by the live response and Current Roadmap persistence, so what a
+    user sees is exactly what gets stored and later replayed.
+    """
+    # Get portfolio summary from the first recommendation (they all have the same summary)
+    portfolio_summary = recommendations[0].get('portfolio_summary', {}) if recommendations else {}
+
+    return {
+        'recommendations': [
+            {
+                'card': {
+                    'id': rec['card'].id,
+                    'name': rec['card'].name,
+                    'issuer': rec['card'].issuer.name,
+                    'annual_fee': float(rec['card'].annual_fee),
+                    'effective_annual_fee': 0 if (rec['action'] == 'apply' and rec['card'].metadata.get('annual_fee_waived_first_year', False)) else float(rec['card'].annual_fee),
+                    'annual_fee_waived_first_year': rec['card'].metadata.get('annual_fee_waived_first_year', False),
+                    'signup_bonus_amount': rec['card'].signup_bonus_amount,
+                    'signup_bonus_type': rec['card'].signup_bonus_type.name if rec['card'].signup_bonus_type else 'points',
+                    'signup_spending_requirement': float((rec['card'].metadata.get('signup_bonus') or {}).get('spending_requirement') or 0),
+                    'signup_time_limit_months': (rec['card'].metadata.get('signup_bonus') or {}).get('time_limit_months'),
+                    'apply_url': rec['card'].apply_url,
+                },
+                'action': rec['action'],
+                'estimated_rewards': float(rec['estimated_rewards']),
+                'first_year_value': float(rec.get('first_year_value', rec['estimated_rewards'])),
+                'ongoing_value': float(rec.get('ongoing_value', rec['estimated_rewards'])),
+                'reward_value_multiplier': float(rec.get('reward_value_multiplier', 0.01)),
+                'valuation_note': rec.get('valuation_note', ''),
+                'reasoning': rec['reasoning'],
+                'rewards_breakdown': rec.get('rewards_breakdown', []),
+                'total_spending_on_card': float(rec.get('total_spending_on_card', 0)),
+                'signup_bonus_value': float(rec.get('signup_bonus_value', 0)),
+                'eligibility_note': rec.get('eligibility_note', ''),
+                'priority': rec['priority']
+            }
+            for rec in recommendations
+        ],
+        'total_estimated_rewards': sum(
+            float(rec['estimated_rewards']) for rec in recommendations
+        ),
+        'portfolio_summary': {
+            'total_annual_fees': portfolio_summary.get('total_annual_fees', 0),
+            'total_portfolio_rewards': portfolio_summary.get('total_portfolio_rewards', 0),
+            'net_portfolio_value': portfolio_summary.get('net_portfolio_value', 0),
+            'category_optimization': portfolio_summary.get('category_optimization', {}),
+            'card_count': portfolio_summary.get('card_count', 0),
+            'total_credits_value': portfolio_summary.get('total_credits_value', 0),
+            'total_annual_spending': portfolio_summary.get('total_annual_spending', 0),
+            'bonus_capacity': portfolio_summary.get('bonus_capacity', {})
+        }
+    }
+
+
+def _persist_current_roadmap(request, response_data):
+    """Save the just-generated roadmap as the user's "Current Roadmap".
+
+    Runs AFTER `generate_recommendations()`'s always-rolled-back transaction
+    has committed nothing, against the user's REAL profile (not the
+    serializer's scratch one) so it survives a reload. Anonymous users need
+    the durable session created up front in the view (see
+    `quick_recommendation_view`) — without it this silently attaches to
+    nothing on the next request.
+    """
+    if request.user.is_authenticated:
+        profile, _ = UserSpendingProfile.objects.get_or_create(user=request.user)
+    else:
+        session_key = request.session.session_key
+        if not session_key:
+            return
+        profile, _ = UserSpendingProfile.objects.get_or_create(session_key=session_key)
+
+    roadmap, _ = Roadmap.objects.update_or_create(
+        profile=profile,
+        name=CURRENT_ROADMAP_NAME,
+        defaults={
+            'max_recommendations': len(response_data['recommendations']) or 1,
+        }
+    )
+    RoadmapCalculation.objects.update_or_create(
+        roadmap=roadmap,
+        defaults={
+            'total_estimated_rewards': response_data['total_estimated_rewards'],
+            'calculation_data': {
+                'response': response_data,
+                'request': request.data,
+                'generated_at': timezone.now().isoformat(),
+            }
+        }
+    )
+
+
 @api_view(['POST'])
 def quick_recommendation_view(request):
     """Get quick recommendations without saving a roadmap"""
+    # Anonymous users need a durable session BEFORE the generation transaction
+    # (which is always rolled back) — otherwise request.session.create() inside
+    # that transaction gets rolled back too, and the anon user ends up with no
+    # session, so nothing (credit prefs, and now Current Roadmap) can persist.
+    if not request.user.is_authenticated and not request.session.session_key:
+        request.session.create()
+
     serializer = GenerateRoadmapSerializer(
         data=request.data,
         context={'request': request}
@@ -133,62 +235,11 @@ def quick_recommendation_view(request):
     if serializer.is_valid():
         try:
             recommendations = serializer.generate_recommendations()
+            response_data = _build_quick_rec_response(recommendations)
 
-            # Get portfolio summary from the first recommendation (they all have the same summary)
-            portfolio_summary = recommendations[0].get('portfolio_summary', {}) if recommendations else {}
+            _persist_current_roadmap(request, response_data)
 
-            response = Response({
-                'recommendations': [
-                    {
-                        'card': {
-                            'id': rec['card'].id,
-                            'name': rec['card'].name,
-                            'issuer': rec['card'].issuer.name,
-                            'annual_fee': float(rec['card'].annual_fee),
-                            'effective_annual_fee': 0 if (rec['action'] == 'apply' and rec['card'].metadata.get('annual_fee_waived_first_year', False)) else float(rec['card'].annual_fee),
-                            'annual_fee_waived_first_year': rec['card'].metadata.get('annual_fee_waived_first_year', False),
-                            'signup_bonus_amount': rec['card'].signup_bonus_amount,
-                            'signup_bonus_type': rec['card'].signup_bonus_type.name if rec['card'].signup_bonus_type else 'points',
-                            'signup_spending_requirement': float((rec['card'].metadata.get('signup_bonus') or {}).get('spending_requirement') or 0),
-                            'signup_time_limit_months': (rec['card'].metadata.get('signup_bonus') or {}).get('time_limit_months'),
-                            'apply_url': rec['card'].apply_url,
-                        },
-                        'action': rec['action'],
-                        'estimated_rewards': float(rec['estimated_rewards']),
-                        'first_year_value': float(rec.get('first_year_value', rec['estimated_rewards'])),
-                        'ongoing_value': float(rec.get('ongoing_value', rec['estimated_rewards'])),
-                        'reward_value_multiplier': float(rec.get('reward_value_multiplier', 0.01)),
-                        'valuation_note': rec.get('valuation_note', ''),
-                        'reasoning': rec['reasoning'],
-                        'rewards_breakdown': rec.get('rewards_breakdown', []),
-                        'total_spending_on_card': float(rec.get('total_spending_on_card', 0)),
-                        'signup_bonus_value': float(rec.get('signup_bonus_value', 0)),
-                        'eligibility_note': rec.get('eligibility_note', ''),
-                        'priority': rec['priority']
-                    }
-                    for rec in recommendations
-                ],
-                'total_estimated_rewards': sum(
-                    float(rec['estimated_rewards']) for rec in recommendations
-                ),
-                'portfolio_summary': {
-                    'total_annual_fees': portfolio_summary.get('total_annual_fees', 0),
-                    'total_portfolio_rewards': portfolio_summary.get('total_portfolio_rewards', 0),
-                    'net_portfolio_value': portfolio_summary.get('net_portfolio_value', 0),
-                    'category_optimization': portfolio_summary.get('category_optimization', {}),
-                    'card_count': portfolio_summary.get('card_count', 0),
-                    'total_credits_value': portfolio_summary.get('total_credits_value', 0),
-                    'total_annual_spending': portfolio_summary.get('total_annual_spending', 0),
-                    'bonus_capacity': portfolio_summary.get('bonus_capacity', {})
-                }
-            })
-
-            # After the rolled-back transaction, session may be out of sync.
-            # Mark it as unmodified so middleware doesn't try to save it.
-            if not request.user.is_authenticated:
-                request.session.modified = False
-
-            return response
+            return Response(response_data)
 
         except Exception as e:
             return Response(
@@ -197,6 +248,36 @@ def quick_recommendation_view(request):
             )
 
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['GET'])
+def current_roadmap_view(request):
+    """Return the user's most recently generated ("Current Roadmap"), if any.
+
+    Never auto-creates a session/profile — GET is read-only; a 404 means the
+    frontend shows its empty state instead of a roadmap.
+    """
+    if request.user.is_authenticated:
+        roadmap = Roadmap.objects.filter(
+            profile__user=request.user, name=CURRENT_ROADMAP_NAME
+        ).select_related('calculation').first()
+    else:
+        session_key = request.session.session_key
+        roadmap = (
+            Roadmap.objects.filter(
+                profile__session_key=session_key, name=CURRENT_ROADMAP_NAME
+            ).select_related('calculation').first()
+            if session_key else None
+        )
+
+    if not roadmap or not hasattr(roadmap, 'calculation'):
+        return Response({'message': 'No current roadmap found'}, status=status.HTTP_404_NOT_FOUND)
+
+    calculation_data = roadmap.calculation.calculation_data
+    return Response({
+        **calculation_data.get('response', {}),
+        'generated_at': calculation_data.get('generated_at'),
+    })
 
 
 @api_view(['GET'])

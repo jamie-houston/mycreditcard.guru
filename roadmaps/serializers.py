@@ -161,20 +161,8 @@ class GenerateRoadmapSerializer(serializers.Serializer):
             if not session_key:
                 request.session.create()
                 session_key = request.session.session_key
-            
-            # Try to find existing profile first, then create if needed
-            profile = UserSpendingProfile.objects.filter(session_key=session_key).first()
-            if not profile:
-                # If no profile found with current session, don't create empty one
-                # Instead, find any existing profile with data and use it temporarily
-                existing_profile = UserSpendingProfile.objects.filter(
-                    user=None,
-                    spending_amounts__isnull=False
-                ).first()
-                if existing_profile:
-                    profile = existing_profile
-                else:
-                    profile, created = UserSpendingProfile.objects.get_or_create(session_key=session_key)
+
+            profile, created = UserSpendingProfile.objects.get_or_create(session_key=session_key)
         
         # Update spending amounts if provided
         if 'spending_amounts' in validated_data:

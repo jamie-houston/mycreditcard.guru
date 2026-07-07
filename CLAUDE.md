@@ -29,12 +29,12 @@ phases complete or requirements change.
 ## Verification gates (run before calling anything done)
 
 ```bash
-venv/bin/python manage.py test                                   # standard suite (54 tests)
-RUN_ALL_SCENARIOS=1 venv/bin/python manage.py test cards.test_json_scenarios   # full sweep: 61/61 must pass
+venv/bin/python manage.py test                                   # standard suite (85 tests)
+RUN_ALL_SCENARIOS=1 venv/bin/python manage.py test cards.test_json_scenarios   # full sweep: 64/64 must pass
 venv/bin/python manage.py run_scenario "Jamie Real" --explain    # acceptance: every line item reconciles
 ```
 
-- The full sweep passes 61/61 as of 2026-07-01. Any failure is a regression.
+- The full sweep passes 64/64 as of 2026-07-07. Any failure is a regression.
 - `run_scenario` (CLI) runs against the **dev DB**, so real cards pollute
   fixture pools. For scenario debugging use the test DB instead:
   `DUMP_SCENARIOS=1 RUN_ALL_SCENARIOS=1 venv/bin/python manage.py test cards.test_json_scenarios`
@@ -75,8 +75,36 @@ Key modules:
   payload into profile tables to feed the engine, inside an
   **always-rolled-back transaction**. Never let it persist; saving profiles
   is `/api/users/data/`'s job.
+- `roadmaps/views.py` `quick_recommendation_view` — anonymous users need a
+  durable session created **before** `generate_recommendations()`'s
+  transaction starts, or `request.session.create()` gets rolled back with
+  everything else and the anon user ends up with no session at all. After
+  generation, `_persist_current_roadmap()` resolves the REAL profile (never
+  the scratch one from the rollback) and `update_or_create`s a
+  `Roadmap(name="Current Roadmap")` + `RoadmapCalculation.calculation_data =
+  {response, request, generated_at}` — a normal, committed write that runs
+  *after* the rollback. `GET /api/roadmaps/current/` (`current/` in
+  roadmaps/urls.py) reads it back read-only (no session/profile
+  auto-creation; 404 = nothing generated yet). Don't reintroduce a
+  "mark session unmodified" hack here — that was the OLD fix for the
+  rollback trap, and it silently suppresses the Set-Cookie header needed
+  for the session to actually reach the anon user's browser.
 - `templates/index.html` — the roadmap page (all inline JS). Preferences:
-  empty max annual fee = no max; empty max recommendations = 1.
+  empty max annual fee = no max; empty max recommendations = 1. The results
+  renderer lives in `static/js/roadmap-results.js`
+  (`renderRoadmapResults(data, opts)`), shared with the (planned) public
+  shared-roadmap page via `opts.readOnly`; index.html calls it both from
+  live generation and from `loadCurrentRoadmap()` on page load (restores
+  the persisted Current Roadmap with a "Generated on {date}" banner).
+  "Remove from my cards" on keep/cancel recommendations soft-closes via
+  `POST /api/users/cards/toggle/` (auth) or localStorage (anon) — never the
+  hard-delete `cards/user-cards/<id>/delete/` endpoint, which would erase
+  eligibility history. Note: `/api/users/data/`'s bulk save (`users/
+  serializers.py` `UserDataSerializer.create`) only hard-deletes ACTIVE
+  (`closed_date__isnull=True`) cards missing from the posted list — it used
+  to delete soft-closed rows too (since they're never in that list), which
+  would have erased a card's closed_date on the very next roadmap
+  generation (`saveCurrentData()` calls this endpoint every time).
 - `cards/views.py` `credit_preferences_view` (`GET`/`PUT
   /api/cards/credit-preferences/`) — server-persisted
   `UserSpendingCreditPreference` rows (which spending credits a user values),

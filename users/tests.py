@@ -2,7 +2,7 @@ from django.test import TestCase
 from django.contrib.auth.models import User
 from decimal import Decimal
 from .models import UserProfile, UserPreferences
-from cards.models import CreditCard, SpendingCategory
+from cards.models import CreditCard, SpendingCategory, Issuer, RewardType, UserCard
 
 
 class UserModelTests(TestCase):
@@ -59,3 +59,61 @@ class UserAPITests(TestCase):
         self.client.force_login(self.user)
         response = self.client.get('/api/users/profile/')
         self.assertEqual(response.status_code, 200)
+
+
+class SoftCloseSurvivesBulkSaveTests(TestCase):
+    """Regression test: /api/users/cards/toggle/ soft-closes a card via
+    closed_date (never hard-deletes, to preserve eligibility history like
+    Chase 5/24 and Amex-lifetime). The bulk /api/users/data/ save (which
+    index.html's saveCurrentData() calls before every roadmap generation)
+    used to hard-delete any UserCard not in its posted card-id list —
+    including soft-closed ones, since to_representation() already excludes
+    them from that list. That silently destroyed the closed_date history
+    the very next time a roadmap was generated."""
+
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username='closer', email='closer@example.com', password='x')
+        cashback = RewardType.objects.create(name='Cashback', slug='cashback')
+        issuer = Issuer.objects.create(name='Generic Bank', slug='generic-bank')
+        self.card = CreditCard.objects.create(
+            name='Closable Card', slug='closable-card', issuer=issuer,
+            signup_bonus_type=cashback, primary_reward_type=cashback)
+        self.client.force_login(self.user)
+
+    def test_soft_closed_card_survives_bulk_data_save(self):
+        from datetime import date
+        user_card = UserCard.objects.create(
+            user=self.user, card=self.card, opened_date=date(2024, 1, 1))
+
+        toggle_response = self.client.post(
+            '/api/users/cards/toggle/',
+            {'card_id': self.card.id, 'action': 'remove'},
+            content_type='application/json')
+        self.assertEqual(toggle_response.status_code, 200)
+        user_card.refresh_from_db()
+        self.assertIsNotNone(user_card.closed_date)
+
+        # Bulk save posts an empty active-card list (mirrors saveCurrentData())
+        save_response = self.client.post(
+            '/api/users/data/',
+            {'spending': {}, 'cards': [], 'preferences': {}},
+            content_type='application/json')
+        self.assertEqual(save_response.status_code, 200)
+
+        # The closed card row must still exist with its closed_date intact
+        self.assertTrue(UserCard.objects.filter(id=user_card.id).exists())
+        user_card.refresh_from_db()
+        self.assertIsNotNone(user_card.closed_date)
+
+    def test_bulk_save_still_removes_active_cards_not_in_list(self):
+        from datetime import date
+        UserCard.objects.create(
+            user=self.user, card=self.card, opened_date=date(2024, 1, 1))
+
+        response = self.client.post(
+            '/api/users/data/',
+            {'spending': {}, 'cards': [], 'preferences': {}},
+            content_type='application/json')
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(UserCard.objects.filter(user=self.user).exists())
