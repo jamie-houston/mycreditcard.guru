@@ -481,13 +481,15 @@
                     categoryCredits.forEach(credit => {
                         const creditDescription = credit.description ?
                             `<span class="tooltip-icon" title="${credit.description}" style="margin-left: 4px;">❓</span>` : '';
+                        const stackabilityHint = credit.stackable === false ?
+                            `<span style="color: var(--muted); font-size: 11px; margin-left: 4px;" title="If you hold more than one card with this credit, it only counts once toward your total">(counted once across cards)</span>` : '';
 
                         categoryHtml += `
                             <div class="spending-credit-item" style="display: flex !important; align-items: center !important; gap: 6px; font-size: 12px; width: 100% !important; margin-bottom: 8px; flex-wrap: nowrap !important;">
                                 <input type="checkbox" id="credit_${credit.slug}" name="spending_credit_preferences"
                                        value="${credit.slug}" onchange="handleSpendingCreditChange(this)">
                                 <label for="credit_${credit.slug}" style="cursor: pointer; color: var(--text); font-weight: normal; margin: 0;">
-                                    ${credit.icon ? `${credit.icon} ` : ''}${credit.display_name}${creditDescription}
+                                    ${credit.icon ? `${credit.icon} ` : ''}${credit.display_name}${creditDescription}${stackabilityHint}
                                 </label>
                             </div>
                         `;
@@ -608,10 +610,11 @@
             try {
                 // Clear spending data
                 await UserDataManager.saveSpending({});
-                
-                // Clear spending credit preferences from localStorage
-                localStorage.removeItem('userSpendingCreditPreferences');
-                
+
+                // Persist cleared credit preferences (resetSpendingProfile
+                // already unchecked the checkboxes before calling this).
+                await saveSpendingCreditPreferences();
+
                 console.log('Saved data cleared successfully');
             } catch (error) {
                 console.error('Error clearing saved data:', error);
@@ -676,18 +679,15 @@
 
         async function saveSpendingCreditPreferences() {
             try {
-                const selectedCredits = [];
-                const creditCheckboxes = document.querySelectorAll('input[name="spending_credit_preferences"]:checked');
-                creditCheckboxes.forEach(checkbox => {
-                    selectedCredits.push(checkbox.value);
+                // Send the full checkbox state (not just the checked ones) so
+                // unchecking a credit persists an explicit False, not just
+                // the absence of a True.
+                const preferences = {};
+                document.querySelectorAll('input[name="spending_credit_preferences"]').forEach(checkbox => {
+                    preferences[checkbox.value] = checkbox.checked;
                 });
-                
-                // Save to localStorage for immediate persistence
-                localStorage.setItem('userSpendingCreditPreferences', JSON.stringify(selectedCredits));
-                
-                // TODO: Save to server for authenticated users
-                console.log('Spending credit preferences saved:', selectedCredits);
-                
+
+                await UserDataManager.saveCreditPreferences(preferences);
             } catch (error) {
                 console.error('Error saving spending credit preferences:', error);
             }
@@ -695,17 +695,13 @@
 
         async function loadSpendingCreditPreferences() {
             try {
-                // Load from localStorage
-                const savedCredits = JSON.parse(localStorage.getItem('userSpendingCreditPreferences') || '[]');
-                
-                // Apply saved preferences
-                savedCredits.forEach(creditSlug => {
+                const preferences = await UserDataManager.getCreditPreferences();
+                Object.entries(preferences).forEach(([creditSlug, valuesCredit]) => {
                     const checkbox = document.querySelector(`input[name="spending_credit_preferences"][value="${creditSlug}"]`);
                     if (checkbox) {
-                        checkbox.checked = true;
+                        checkbox.checked = valuesCredit;
                     }
                 });
-                
             } catch (error) {
                 console.error('Error loading spending credit preferences:', error);
             }

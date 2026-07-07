@@ -641,53 +641,81 @@ async function loadCreditsProfile() {
             return;
         }
 
-        // Fetch detailed card information to get credits
+        // Fetch detailed card information to get credits, and which credits
+        // this user actually values (server-persisted, same source the
+        // engine reads — a credit only counts if explicitly opted in).
         const cardDetails = {};
         const allCredits = {};
+        const [_, preferences] = await Promise.all([
+            (async () => {
+                for (const cardId of userCards) {
+                    try {
+                        const response = await fetch(`${API_BASE}/cards/cards/${cardId}/`);
+                        if (response.ok) {
+                            const card = await response.json();
+                            cardDetails[cardId] = card;
 
-        for (const cardId of userCards) {
-            try {
-                const response = await fetch(`${API_BASE}/cards/cards/${cardId}/`);
-                if (response.ok) {
-                    const card = await response.json();
-                    cardDetails[cardId] = card;
-
-                    // Collect all credits from this card
-                    if (card.credits && card.credits.length > 0) {
-                        card.credits.forEach(credit => {
-                            // Credits can be in either spending_credit or credit_type
-                            const creditType = credit.spending_credit || credit.credit_type;
-                            if (creditType) {
-                                const creditKey = creditType.slug;
-                                if (!allCredits[creditKey]) {
-                                    allCredits[creditKey] = {
-                                        name: creditType.display_name || creditType.name,
-                                        slug: creditType.slug,
-                                        totalAmount: 0,
-                                        cards: []
-                                    };
-                                }
-                                // Use annual_value if available, otherwise calculate
-                                const annualValue = credit.annual_value || (parseFloat(credit.value || 0) * (credit.times_per_year || 1));
-                                allCredits[creditKey].totalAmount += annualValue;
-                                allCredits[creditKey].cards.push({
-                                    name: card.name,
-                                    value: credit.value,
-                                    annualValue: annualValue,
-                                    timesPerYear: credit.times_per_year,
-                                    description: credit.description
+                            // Collect all credits from this card
+                            if (card.credits && card.credits.length > 0) {
+                                card.credits.forEach(credit => {
+                                    const creditType = credit.spending_credit;
+                                    if (creditType) {
+                                        const creditKey = creditType.slug;
+                                        if (!allCredits[creditKey]) {
+                                            allCredits[creditKey] = {
+                                                name: creditType.display_name || creditType.name,
+                                                slug: creditType.slug,
+                                                stackable: creditType.stackable !== false,
+                                                cards: []
+                                            };
+                                        }
+                                        // Use annual_value if available, otherwise calculate
+                                        const annualValue = credit.annual_value || (parseFloat(credit.value || 0) * (credit.times_per_year || 1));
+                                        allCredits[creditKey].cards.push({
+                                            cardId: cardId,
+                                            name: card.name,
+                                            value: credit.value,
+                                            annualValue: annualValue,
+                                            timesPerYear: credit.times_per_year,
+                                            description: credit.description
+                                        });
+                                    }
                                 });
                             }
-                        });
+                        }
+                    } catch (error) {
+                        console.error(`Error fetching card ${cardId}:`, error);
                     }
                 }
-            } catch (error) {
-                console.error(`Error fetching card ${cardId}:`, error);
-            }
-        }
+            })(),
+            UserDataManager.getCreditPreferences()
+        ]);
 
-        // Display credits grouped by type
-        const creditEntries = Object.values(allCredits);
+        // Resolve stackability: a non-stackable credit only counts once,
+        // on whichever card carries it for the most value — mirrors the
+        // engine's _allocate_portfolio_credits dedup rule. An opted-out
+        // credit (or one never opted into) counts $0, same as the engine.
+        const creditEntries = Object.values(allCredits).map(credit => {
+            const isUsed = preferences[credit.slug] === true;
+            let winnerCardId = null;
+            let rawAmount = 0;
+
+            if (credit.stackable) {
+                rawAmount = credit.cards.reduce((sum, c) => sum + c.annualValue, 0);
+            } else {
+                const winner = credit.cards.reduce(
+                    (best, c) => (c.annualValue > best.annualValue ? c : best), credit.cards[0]);
+                winnerCardId = winner.cardId;
+                rawAmount = winner.annualValue;
+            }
+
+            return {
+                ...credit,
+                isUsed,
+                winnerCardId,
+                effectiveAmount: isUsed ? rawAmount : 0
+            };
+        });
 
         if (creditEntries.length === 0) {
             creditsContainer.innerHTML = `
@@ -699,39 +727,57 @@ async function loadCreditsProfile() {
             return;
         }
 
-        // Sort by total amount (highest first)
-        creditEntries.sort((a, b) => b.totalAmount - a.totalAmount);
+        // Sort by effective (counted) amount, highest first
+        creditEntries.sort((a, b) => b.effectiveAmount - a.effectiveAmount);
 
-        // Add total summary (compact version)
-        const totalCreditsValue = creditEntries.reduce((sum, credit) => sum + credit.totalAmount, 0);
+        // Add total summary (compact version) — only counts benefits the
+        // user has opted into, same as the roadmap engine
+        const totalCreditsValue = creditEntries.reduce((sum, credit) => sum + credit.effectiveAmount, 0);
         let creditsHtml = `
             <div style="background: var(--accent-soft); border: 1px solid var(--border); color: var(--text); padding: 15px; border-radius: var(--radius-md); margin-bottom: 15px; text-align: center;">
                 <div style="font-size: 13px; font-weight: 500; color: var(--muted); margin-bottom: 4px;">Total Annual Benefits</div>
                 <div style="font-size: 28px; font-weight: 700; font-family: var(--font-mono); color: var(--accent);">$${totalCreditsValue.toFixed(0)}</div>
-                <div style="font-size: 12px; color: var(--muted); margin-top: 2px;">${creditEntries.length} benefit${creditEntries.length !== 1 ? 's' : ''} from ${Object.keys(cardDetails).length} card${Object.keys(cardDetails).length !== 1 ? 's' : ''}</div>
+                <div style="font-size: 12px; color: var(--muted); margin-top: 2px;">${creditEntries.length} benefit${creditEntries.length !== 1 ? 's' : ''} from ${Object.keys(cardDetails).length} card${Object.keys(cardDetails).length !== 1 ? 's' : ''} &mdash; check the ones you actually use</div>
             </div>
         `;
 
         creditsHtml += '<div class="credits-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px;">';
 
         creditEntries.forEach(credit => {
-            const totalAnnualValue = credit.totalAmount;
+            const notStacking = !credit.stackable && credit.cards.length > 1;
+            const winnerName = credit.cards.find(c => c.cardId === credit.winnerCardId)?.name;
 
             creditsHtml += `
-                <div style="background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: var(--radius-sm); padding: 12px;">
+                <div style="background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: var(--radius-sm); padding: 12px; ${credit.isUsed ? '' : 'opacity: 0.55;'}">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                        <h3 style="margin: 0; color: var(--text-strong); font-size: 15px; font-weight: 600;">${credit.name}</h3>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <input type="checkbox" id="creditUse_${credit.slug}" ${credit.isUsed ? 'checked' : ''}
+                                   onchange="toggleCreditUsage('${credit.slug}', this.checked)"
+                                   title="I use this benefit" style="cursor: pointer;">
+                            <label for="creditUse_${credit.slug}" style="cursor: pointer; margin: 0;">
+                                <h3 style="margin: 0; color: var(--text-strong); font-size: 15px; font-weight: 600;">${credit.name}</h3>
+                            </label>
+                        </div>
                         <span style="background: var(--accent-soft); color: var(--accent); padding: 3px 8px; border-radius: 8px; font-size: 12px; font-weight: 600; white-space: nowrap; font-family: var(--font-mono);">
-                            $${totalAnnualValue.toFixed(0)}/yr
+                            $${credit.effectiveAmount.toFixed(0)}/yr
                         </span>
                     </div>
+                    ${notStacking ? `<div style="font-size: 11px; color: var(--muted); margin-bottom: 6px;">Doesn't stack across cards — counted once, on ${winnerName}</div>` : ''}
                     <div style="margin-top: 8px;">
-                        ${credit.cards.map(card => `
-                            <div style="background: var(--bg); padding: 8px; border-radius: 6px; margin-bottom: 6px; font-size: 13px;">
-                                <div style="font-weight: 600; color: var(--text); margin-bottom: 2px;">${card.name}</div>
-                                <div style="color: var(--accent); font-weight: 600; font-size: 12px; font-family: var(--font-mono);">$${parseFloat(card.annualValue).toFixed(0)}/year${card.timesPerYear > 1 ? ` ($${parseFloat(card.value).toFixed(0)} × ${card.timesPerYear})` : ''}</div>
-                            </div>
-                        `).join('')}
+                        ${credit.cards.map(card => {
+                            const isWinner = credit.stackable || card.cardId === credit.winnerCardId;
+                            const amountLabel = !credit.isUsed
+                                ? '$0/year'
+                                : (isWinner
+                                    ? `$${parseFloat(card.annualValue).toFixed(0)}/year${card.timesPerYear > 1 ? ` ($${parseFloat(card.value).toFixed(0)} × ${card.timesPerYear})` : ''}`
+                                    : `counted once — on ${winnerName}`);
+                            return `
+                                <div style="background: var(--bg); padding: 8px; border-radius: 6px; margin-bottom: 6px; font-size: 13px;">
+                                    <div style="font-weight: 600; color: var(--text); margin-bottom: 2px;">${card.name}</div>
+                                    <div style="color: ${isWinner ? 'var(--accent)' : 'var(--muted)'}; font-weight: 600; font-size: 12px; font-family: var(--font-mono);">${amountLabel}</div>
+                                </div>
+                            `;
+                        }).join('')}
                     </div>
                 </div>
             `;
@@ -746,6 +792,15 @@ async function loadCreditsProfile() {
         document.getElementById('creditsProfile').innerHTML = `
             <div class="error">Error loading benefits. Please try refreshing the page.</div>
         `;
+    }
+}
+
+async function toggleCreditUsage(slug, checked) {
+    try {
+        await UserDataManager.saveCreditPreferences({ [slug]: checked });
+        await loadCreditsProfile();
+    } catch (error) {
+        console.error('Error updating credit preference:', error);
     }
 }
 

@@ -752,6 +752,37 @@
                 }
             }
 
+            // Which spending credits the user values — server-persisted for
+            // both auth and anon (session-key) users, so no LocalStorage
+            // branch is needed here.
+            static async getCreditPreferences() {
+                try {
+                    const response = await fetch(`${API_BASE}/cards/credit-preferences/`);
+                    const data = await response.json();
+                    return data.preferences || {};
+                } catch (error) {
+                    console.error('Error loading credit preferences:', error);
+                    return {};
+                }
+            }
+
+            static async saveCreditPreferences(preferences) {
+                try {
+                    const response = await fetch(`${API_BASE}/cards/credit-preferences/`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': getCookie('csrftoken')
+                        },
+                        body: JSON.stringify({ preferences })
+                    });
+                    return response.ok;
+                } catch (error) {
+                    console.error('Error saving credit preferences:', error);
+                    return false;
+                }
+            }
+
             // New methods for handling detailed user cards
             static async getUserCardsDetails() {
                 if (isAuthenticated) {

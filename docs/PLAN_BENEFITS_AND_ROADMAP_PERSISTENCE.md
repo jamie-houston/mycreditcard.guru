@@ -317,11 +317,43 @@ Update this section as work proceeds. Uncommitted work-in-progress lives on
       all green; full scenario sweep (`cards.test_json_scenarios`) still
       green. Allocation unit tests and the `credit_stackability.json`
       scenario (the rest of A5) still not started.
-- [ ] A4 — not started (no `stackable`-aware UI in index.html/profile.html yet;
-      this is what will call the A3 endpoint)
+- [x] **A4 — DONE** (2026-07-07): `UserDataManager.getCreditPreferences()`/
+      `saveCreditPreferences()` added in `base.html` (server-persisted for
+      auth *and* anon via the A3 endpoint — no LocalStorage branch needed,
+      unlike spending/cards, since the endpoint already handles anon
+      sessions itself).
+      - `index.html`: `saveSpendingCreditPreferences()` now PUTs the full
+        checkbox state (true *and* false) instead of a checked-only array,
+        so unchecking persists an explicit opt-out (was a TODO);
+        `loadSpendingCreditPreferences()` reads from the server. Each
+        `stackable: false` checkbox gets a "(counted once across cards)"
+        hint. `resetSpendingProfile()` → `clearSavedData()` now pushes the
+        cleared (all-false) state to the server too.
+      - `profile.html` `loadCreditsProfile()`: added an "I use this"
+        checkbox per credit group wired to the same GET/PUT endpoint via a
+        new `toggleCreditUsage(slug, checked)`. Un-opted-in groups (default
+        — matches the engine's opt-in-only semantics in
+        `_counted_card_credits`) grey out at $0. For `stackable: false`
+        groups spanning >1 card, only the highest-value card counts
+        (mirrors `_allocate_portfolio_credits`'s max-value/lowest-id
+        tiebreak, minus the id tiebreak since ties are rare in this
+        display context); other cards show "counted once — on {card}".
+        "Total Annual Benefits" now sums only counted, opted-in amounts.
+        Drive-by fix: removed the dead `credit.credit_type` fallback (that
+        field was removed from the API in commit `778f397`) — credits only
+        ever come from `credit.spending_credit` now.
+      - Could not browser-verify (Jamie runs the dev server); rendered both
+        pages via Django's test client (200 OK, no template errors) and the
+        standard suite (68 tests, unaffected) still passes. **Needs a
+        manual pass in the browser** — checkbox wiring and the grey-out/
+        counted-once visuals haven't been eyeballed.
+- [ ] A5 remainder — allocation unit tests (roadmaps/tests.py: non-stackable
+      duplicate → one winner + $0 info lines; stackable duplicate → both
+      count; opt-out row ≡ absent row; deterministic tie-break; cancel
+      counterfactual) and `data/tests/scenarios/credit_stackability.json`
+      still not started.
 - [ ] B1–B5 — not started
 - [ ] C1–C4 — not started
 - [ ] Docs updates — PROJECT_STATUS.md phase table + this file kept in sync
-      as of 2026-07-07; CLAUDE.md architecture-map note on
-      `credit_preferences_view` added same commit as A3. Still need a
-      similar note once A4 lands.
+      as of 2026-07-07 (A4 landed); CLAUDE.md architecture-map note on the
+      frontend wiring added same commit as A4.

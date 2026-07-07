@@ -87,6 +87,15 @@ Key modules:
   survives. Stackability (`SpendingCredit.stackable`, curated data) is
   separate: it controls engine dedup (`_allocate_portfolio_credits`), not
   which credits count at all.
+- `templates/base.html` `UserDataManager.getCreditPreferences()`/
+  `saveCreditPreferences()` — the frontend's only entry point to the
+  endpoint above; no auth/anon branching needed there (the endpoint already
+  handles both via session). `index.html` PUTs the full checkbox state
+  (true and false) on every change; `profile.html`'s `loadCreditsProfile()`
+  reads it to grey out un-opted-in credits at $0 and, for
+  `stackable: false` credits spanning multiple owned cards, count only the
+  highest-value card (mirrors `_allocate_portfolio_credits`'s tiebreak) with
+  a "counted once — on {card}" note on the rest.
 
 ## Data
 
