@@ -440,8 +440,67 @@ Update this section as work proceeds. Uncommitted work-in-progress lives on
       above). Standard suite: **85 tests**, all green (was 76, +9). Full
       scenario sweep unaffected (engine untouched): 64/64.
       `run_scenario "Jamie Real" --explain`: all line items reconcile.
-- [ ] C1–C4 — not started
+- [x] **C1 — DONE** (2026-07-10): `Roadmap` gained `privacy_setting`
+      (private/public, default private) + `share_uuid` (nullable unique
+      UUID) + `generate_share_uuid()`/`shareable_url`/`is_public`, copied
+      from `UserSpendingProfile` (cards/models.py:183-225). Migration
+      `roadmaps/migrations/0003_roadmap_privacy_setting_roadmap_share_uuid.py`.
+- [x] **C2 — DONE** (2026-07-10): `GET/POST /api/roadmaps/current/share/`
+      (`current_roadmap_share_view`, roadmaps/views.py) mirrors
+      `get_profile_privacy`/`update_profile_privacy` but is **anon-capable**
+      — resolves via `get_current_roadmap(request)` (auth or session), the
+      same helper the persistence/read paths already use, instead of
+      requiring `request.user.is_authenticated`. GET with no Current Roadmap
+      returns `{privacy_setting:'private', is_public:false}` rather than
+      404 (so the toggle UI has something to render before a roadmap
+      exists); POST 404s if there's nothing to share yet, 400s on an
+      invalid `privacy_setting`. `GET /api/roadmaps/shared/<uuid>/`
+      (`shared_roadmap_data_view`) is public/no-auth, filters
+      `share_uuid=..., privacy_setting='public'`, and builds its response
+      straight from `calculation_data` (never the profile serializer, per
+      the plan's warning about its broken `user_cards` field) plus
+      `owner_display_name` (username, or "A Credit Card Guru user" for
+      anon owners).
+- [x] **C3 — DONE** (2026-07-10): `roadmap/shared/<uuid>/` route
+      (`creditcard_guru/urls.py`) → `shared_roadmap_view` (roadmaps/views.py,
+      404s unless public) → new `templates/shared_roadmap.html`, modeled on
+      `shared_profile.html` but much thinner since it delegates to the
+      already-Phase-B-ready `renderRoadmapResults(data, {readOnly:true})` —
+      this is the first real exercise of that `readOnly` path. The page
+      only needs to supply `toggleSection()` locally (`openCardModal` and
+      the card-detail modal markup are already global via base.html).
+- [x] **C4 — DONE** (2026-07-10): share toggle + copy-link added to
+      `#resultsHeader` in index.html (a share icon next to "Update
+      roadmap" opens a collapsible panel — private/public radios +
+      shareable-URL/copy button, copied from profile.html's privacy toggle
+      and repointed at the roadmap endpoints). State loads via
+      `initializeRoadmapSharePanel()` called from both settle points
+      (`loadCurrentRoadmap()` and `getRecommendations()`), same as
+      profile.html's eager-load pattern — not lazy-loaded on open, so
+      there's no flash-to-"Private" the first time a user opens the panel.
+      Works logged-out since the endpoint is anon-capable — no login gate,
+      unlike the profile page's share toggle.
+- [x] **C5 — DONE** (2026-07-10): `roadmaps.tests.RoadmapSharingTests` (9
+      tests) — GET with no Current Roadmap defaults to private (not 404);
+      POST public mints a `share_uuid` + `shareable_url`; POST with no
+      Current Roadmap 404s; invalid `privacy_setting` 400s; a private
+      roadmap 404s on both the page and the data endpoint even with a
+      minted (but unused) `share_uuid`; a public roadmap renders for a
+      logged-out `Client()` on both the page and data endpoint; regenerating
+      (second quick-recommendation call) preserves the same `share_uuid`
+      (confirms `_persist_current_roadmap`'s `update_or_create` only ever
+      touches `max_recommendations` in `defaults`, never sharing fields);
+      flipping back to private kills both the page and data endpoint
+      (404 again); an anon session-owned roadmap can be shared and read
+      back by a *different* logged-out client — the deliberate anon-capable
+      divergence from profile sharing. Standard suite: **100 tests**, all
+      green (was 91 going into this phase — 85 after Phase B plus 6 from
+      Phase D's `LandingRedirectTests`, landed 2026-07-08; +9 for C5).
+      Full sweep unaffected (no engine changes): still green. `run_scenario
+      "Jamie Real" --explain`: all line items reconcile. (Dev DB needed
+      `manage.py migrate roadmaps` to pick up the C1 migration before
+      `run_scenario` — it runs against the dev DB, not the test DB.)
 - [x] Docs updates — PROJECT_STATUS.md phase table + this file kept in sync
-      as of 2026-07-07 (A5 landed, Phase A now fully done; B1–B5 landed same
-      day); CLAUDE.md architecture-map note on Current Roadmap persistence
-      and the soft-close fix added same commit as B1–B5.
+      as of 2026-07-10 (C1–C5 landed, Phase C now fully done, plan
+      complete); CLAUDE.md architecture-map note on roadmap sharing added
+      same commit.

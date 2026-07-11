@@ -570,6 +570,170 @@ class RoadmapPersistenceTests(TestCase):
         self.assertNotEqual(profile_a.id, profile_b.id)
 
 
+class RoadmapSharingTests(TestCase):
+    """C1-C4: sharing a Current Roadmap mirrors profile sharing
+    (UserSpendingProfile.share_uuid), but is anon-capable — a session-owned
+    roadmap can be made public and read back logged-out, unlike profile
+    sharing which requires auth."""
+
+    def setUp(self):
+        # shared_roadmap.html extends base.html, which renders a Google
+        # sign-in link for anon visitors; allauth needs a SocialApp for
+        # provider_login_url to resolve (see LandingRedirectTests).
+        from django.contrib.sites.models import Site
+        from allauth.socialaccount.models import SocialApp
+        app = SocialApp.objects.create(
+            provider='google', name='Google', client_id='test', secret='test'
+        )
+        app.sites.add(Site.objects.get_current())
+
+        from cards.models import SpendingCategory
+        self.user = User.objects.create_user(
+            username='sharer', email='sharer@example.com', password='x')
+        self.cashback = RewardType.objects.create(name='Cashback', slug='cashback')
+        self.issuer = Issuer.objects.create(name='Generic Bank', slug='generic-bank')
+        self.dining = SpendingCategory.objects.create(name='Dining', slug='dining')
+        self.card = CreditCard.objects.create(
+            name='Share Card', slug='share-card', issuer=self.issuer,
+            signup_bonus_type=self.cashback, primary_reward_type=self.cashback)
+
+    def _payload(self, amount='500.00'):
+        return {
+            'spending_amounts': {str(self.dining.id): amount},
+            'user_cards': [],
+            'max_recommendations': 1,
+        }
+
+    def _generate(self, client):
+        return client.post(
+            '/api/roadmaps/quick-recommendation/', self._payload(),
+            content_type='application/json')
+
+    def test_get_share_with_no_current_roadmap_returns_private_default(self):
+        self.client.force_login(self.user)
+        response = self.client.get('/api/roadmaps/current/share/')
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertEqual(data['privacy_setting'], 'private')
+        self.assertFalse(data['is_public'])
+
+    def test_post_public_mints_share_uuid_and_url(self):
+        self.client.force_login(self.user)
+        self._generate(self.client)
+
+        response = self.client.post(
+            '/api/roadmaps/current/share/', {'privacy_setting': 'public'},
+            content_type='application/json')
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertTrue(data['is_public'])
+        self.assertIn('share_uuid', data)
+        self.assertIn('shareable_url', data)
+
+        roadmap = Roadmap.objects.get(profile__user=self.user, name='Current Roadmap')
+        self.assertTrue(roadmap.is_public)
+        self.assertIsNotNone(roadmap.share_uuid)
+        self.assertEqual(str(roadmap.share_uuid), data['share_uuid'])
+
+    def test_post_share_404s_with_no_current_roadmap(self):
+        self.client.force_login(self.user)
+        response = self.client.post(
+            '/api/roadmaps/current/share/', {'privacy_setting': 'public'},
+            content_type='application/json')
+        self.assertEqual(response.status_code, 404)
+
+    def test_post_share_400s_on_invalid_privacy_setting(self):
+        self.client.force_login(self.user)
+        self._generate(self.client)
+        response = self.client.post(
+            '/api/roadmaps/current/share/', {'privacy_setting': 'nonsense'},
+            content_type='application/json')
+        self.assertEqual(response.status_code, 400)
+
+    def test_private_roadmap_404s_on_page_and_data_endpoint(self):
+        self.client.force_login(self.user)
+        self._generate(self.client)
+        roadmap = Roadmap.objects.get(profile__user=self.user, name='Current Roadmap')
+        roadmap.generate_share_uuid()  # mint a uuid without making it public
+
+        page_response = self.client.get(f'/roadmap/shared/{roadmap.share_uuid}/')
+        self.assertEqual(page_response.status_code, 404)
+        data_response = self.client.get(f'/api/roadmaps/shared/{roadmap.share_uuid}/')
+        self.assertEqual(data_response.status_code, 404)
+
+    def test_public_roadmap_renders_for_logged_out_client(self):
+        self.client.force_login(self.user)
+        self._generate(self.client)
+        self.client.post(
+            '/api/roadmaps/current/share/', {'privacy_setting': 'public'},
+            content_type='application/json')
+        roadmap = Roadmap.objects.get(profile__user=self.user, name='Current Roadmap')
+
+        from django.test import Client
+        logged_out = Client()
+        page_response = logged_out.get(f'/roadmap/shared/{roadmap.share_uuid}/')
+        self.assertEqual(page_response.status_code, 200)
+
+        data_response = logged_out.get(f'/api/roadmaps/shared/{roadmap.share_uuid}/')
+        self.assertEqual(data_response.status_code, 200)
+        data = data_response.json()
+        self.assertIn('recommendations', data)
+        self.assertIn('generated_at', data)
+        self.assertEqual(data['owner_display_name'], 'sharer')
+
+    def test_regenerate_keeps_the_same_share_uuid(self):
+        self.client.force_login(self.user)
+        self._generate(self.client)
+        self.client.post(
+            '/api/roadmaps/current/share/', {'privacy_setting': 'public'},
+            content_type='application/json')
+        original_uuid = Roadmap.objects.get(
+            profile__user=self.user, name='Current Roadmap').share_uuid
+
+        self._generate(self.client)  # regenerate
+        roadmap = Roadmap.objects.get(profile__user=self.user, name='Current Roadmap')
+        self.assertEqual(roadmap.share_uuid, original_uuid)
+        self.assertTrue(roadmap.is_public)
+
+    def test_flipping_to_private_kills_the_link(self):
+        self.client.force_login(self.user)
+        self._generate(self.client)
+        self.client.post(
+            '/api/roadmaps/current/share/', {'privacy_setting': 'public'},
+            content_type='application/json')
+        roadmap = Roadmap.objects.get(profile__user=self.user, name='Current Roadmap')
+        share_uuid = roadmap.share_uuid
+
+        response = self.client.post(
+            '/api/roadmaps/current/share/', {'privacy_setting': 'private'},
+            content_type='application/json')
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(response.json()['is_public'])
+
+        from django.test import Client
+        logged_out = Client()
+        data_response = logged_out.get(f'/api/roadmaps/shared/{share_uuid}/')
+        self.assertEqual(data_response.status_code, 404)
+
+    def test_anon_session_owned_roadmap_can_be_shared_and_read_logged_out(self):
+        """The deliberate divergence from profile sharing: no auth required
+        to share, since a session-owned Current Roadmap already exists."""
+        from django.test import Client
+        anon = Client()
+        self._generate(anon)
+
+        share_response = anon.post(
+            '/api/roadmaps/current/share/', {'privacy_setting': 'public'},
+            content_type='application/json')
+        self.assertEqual(share_response.status_code, 200)
+        share_uuid = share_response.json()['share_uuid']
+
+        other_client = Client()
+        data_response = other_client.get(f'/api/roadmaps/shared/{share_uuid}/')
+        self.assertEqual(data_response.status_code, 200)
+        self.assertEqual(data_response.json()['owner_display_name'], 'A Credit Card Guru user')
+
+
 class LandingRedirectTests(TestCase):
     """Phase D: `/` skips the landing page and redirects straight to
     `/roadmap/` for visitors who already have a persisted Current Roadmap

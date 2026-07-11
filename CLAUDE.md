@@ -29,7 +29,7 @@ phases complete or requirements change.
 ## Verification gates (run before calling anything done)
 
 ```bash
-venv/bin/python manage.py test                                   # standard suite (85 tests)
+venv/bin/python manage.py test                                   # standard suite (100 tests)
 RUN_ALL_SCENARIOS=1 venv/bin/python manage.py test cards.test_json_scenarios   # full sweep: 64/64 must pass
 venv/bin/python manage.py run_scenario "Jamie Real" --explain    # acceptance: every line item reconciles
 ```
@@ -144,6 +144,24 @@ Key modules:
   `stackable: false` credits spanning multiple owned cards, count only the
   highest-value card (mirrors `_allocate_portfolio_credits`'s tiebreak) with
   a "counted once — on {card}" note on the rest.
+- Roadmap sharing mirrors `UserSpendingProfile`'s privacy/`share_uuid`
+  pattern (cards/models.py) but on `Roadmap` and **anon-capable** (a
+  session-owned Current Roadmap is a first-class case; profile sharing
+  requires auth). `GET/POST /api/roadmaps/current/share/`
+  (`current_roadmap_share_view`, roadmaps/views.py) resolves the roadmap via
+  `get_current_roadmap(request)` — no `is_authenticated` gate. `GET
+  /api/roadmaps/shared/<uuid>/` (`shared_roadmap_data_view`) is the public,
+  no-auth data endpoint, built straight from `calculation_data` (never a
+  profile serializer). `/roadmap/shared/<uuid>/` (`shared_roadmap_view` →
+  `templates/shared_roadmap.html`) is the public page — it's the first real
+  caller of `renderRoadmapResults(data, {readOnly: true})` from
+  `roadmap-results.js` (built in Phase B, unused until now). Share UI lives
+  in index.html's `#resultsHeader` (a share icon opens a collapsible
+  private/public toggle + copy-link, mirroring profile.html's privacy
+  panel). `_persist_current_roadmap`'s `update_or_create` only ever sets
+  `max_recommendations` in `defaults`, so regenerating a roadmap preserves
+  its `privacy_setting`/`share_uuid` — don't add sharing fields to that
+  `defaults` dict.
 
 ## Data
 

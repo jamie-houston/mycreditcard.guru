@@ -16,7 +16,9 @@ urlpatterns = [
     path('<int:roadmap_id>/generate/', views.generate_roadmap_view, name='roadmap-generate'),
     path('quick-recommendation/', views.quick_recommendation_view, name='quick-recommendation'),
     path('current/', views.current_roadmap_view, name='roadmap-current'),
-    
+    path('current/share/', views.current_roadmap_share_view, name='roadmap-current-share'),
+    path('shared/<uuid:share_uuid>/', views.shared_roadmap_data_view, name='roadmap-shared-data'),
+
     # Stats
     path('stats/', views.roadmap_stats_view, name='roadmap-stats'),
     

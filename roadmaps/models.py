@@ -21,6 +21,11 @@ class RoadmapFilter(models.Model):
 
 
 class Roadmap(models.Model):
+    PRIVACY_CHOICES = [
+        ('private', 'Private'),
+        ('public', 'Public'),
+    ]
+
     profile = models.ForeignKey(UserSpendingProfile, on_delete=models.CASCADE, related_name='roadmaps')
     name = models.CharField(max_length=200)
     description = models.TextField(blank=True)
@@ -28,12 +33,38 @@ class Roadmap(models.Model):
     max_recommendations = models.IntegerField(default=1)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    
+
+    # Roadmap sharing settings (mirrors UserSpendingProfile's privacy/share_uuid
+    # pattern in cards/models.py, but anon-capable — see roadmaps/views.py)
+    privacy_setting = models.CharField(max_length=10, choices=PRIVACY_CHOICES, default='private')
+    share_uuid = models.UUIDField(default=None, null=True, blank=True, unique=True, help_text="Unique ID for sharing public roadmaps")
+
     class Meta:
         unique_together = ['profile', 'name']
-    
+
     def __str__(self):
         return f"{self.profile} - {self.name}"
+
+    def generate_share_uuid(self):
+        """Generate a unique UUID for sharing this roadmap"""
+        import uuid
+        if not self.share_uuid:
+            self.share_uuid = uuid.uuid4()
+            self.save(update_fields=['share_uuid'])
+        return self.share_uuid
+
+    @property
+    def shareable_url(self):
+        """Get the full shareable URL for this roadmap"""
+        if self.privacy_setting == 'public' and self.share_uuid:
+            from django.urls import reverse
+            return reverse('shared_roadmap', kwargs={'share_uuid': str(self.share_uuid)})
+        return None
+
+    @property
+    def is_public(self):
+        """Check if this roadmap is publicly shareable"""
+        return self.privacy_setting == 'public'
 
 
 class RoadmapRecommendation(models.Model):

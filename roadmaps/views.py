@@ -1,7 +1,7 @@
 from rest_framework import generics, status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, render
 from django.utils import timezone
 
 from cards.models import UserSpendingProfile
@@ -268,6 +268,97 @@ def current_roadmap_view(request):
         **calculation_data.get('response', {}),
         'generated_at': calculation_data.get('generated_at'),
     })
+
+
+def _roadmap_share_response(roadmap):
+    data = {
+        'privacy_setting': roadmap.privacy_setting,
+        'is_public': roadmap.is_public,
+    }
+    if roadmap.is_public and roadmap.share_uuid:
+        data['share_uuid'] = str(roadmap.share_uuid)
+        data['shareable_url'] = roadmap.shareable_url
+    return data
+
+
+@api_view(['GET', 'POST'])
+def current_roadmap_share_view(request):
+    """Get or update the sharing settings for the visitor's Current Roadmap.
+
+    Mirrors cards.views.get_profile_privacy/update_profile_privacy, but
+    anon-capable (session-owned Current Roadmaps are a first-class case here,
+    unlike profile sharing which requires auth) — resolved via
+    `get_current_roadmap`, the same helper the persistence/read paths use.
+    """
+    roadmap = get_current_roadmap(request)
+
+    if request.method == 'GET':
+        if not roadmap:
+            return Response({'privacy_setting': 'private', 'is_public': False})
+        return Response(_roadmap_share_response(roadmap))
+
+    # POST
+    if not roadmap:
+        return Response(
+            {'error': 'No current roadmap to share — generate one first'},
+            status=status.HTTP_404_NOT_FOUND
+        )
+
+    privacy_setting = request.data.get('privacy_setting')
+    if privacy_setting not in ('private', 'public'):
+        return Response(
+            {'error': 'privacy_setting must be "private" or "public"'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    roadmap.privacy_setting = privacy_setting
+    if privacy_setting == 'public':
+        roadmap.generate_share_uuid()
+    roadmap.save()
+
+    return Response(_roadmap_share_response(roadmap))
+
+
+@api_view(['GET'])
+def shared_roadmap_data_view(request, share_uuid):
+    """Return the stored recommendation payload for a public shared roadmap.
+
+    Public, no auth. Built straight from `calculation_data` — never reuse a
+    profile serializer here (see PLAN doc: the profile one has a broken
+    `user_cards` field, and this data already IS the exact response the owner
+    saw, so there's nothing to re-derive).
+    """
+    roadmap = get_object_or_404(
+        Roadmap.objects.select_related('calculation', 'profile__user'),
+        share_uuid=share_uuid,
+        privacy_setting='public',
+    )
+    calculation_data = roadmap.calculation.calculation_data
+    owner = roadmap.profile.user
+    return Response({
+        **calculation_data.get('response', {}),
+        'generated_at': calculation_data.get('generated_at'),
+        'owner_display_name': owner.username if owner else 'A Credit Card Guru user',
+    })
+
+
+def shared_roadmap_view(request, share_uuid):
+    """Public, read-only page for a shared roadmap (mirrors
+    cards.views.shared_profile_view). The page itself just loads the shell;
+    `shared_roadmap.html` fetches the actual data from
+    `shared_roadmap_data_view` and renders it with `roadmap-results.js`.
+    """
+    roadmap = get_object_or_404(
+        Roadmap.objects.select_related('profile__user'),
+        share_uuid=share_uuid,
+        privacy_setting='public',
+    )
+    owner = roadmap.profile.user
+    context = {
+        'share_uuid': share_uuid,
+        'owner_display_name': owner.username if owner else 'A Credit Card Guru user',
+    }
+    return render(request, 'shared_roadmap.html', context)
 
 
 @api_view(['GET'])

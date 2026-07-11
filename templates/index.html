@@ -13,10 +13,41 @@
              pattern as Preferences/Monthly spending. Hidden until a Current Roadmap
              exists (see setRoadmapViewMode/loadCurrentRoadmap). -->
         <div id="resultsHeader" class="section" style="{% if not has_current_roadmap %}display:none;{% endif %}">
-            <h2 onclick="toggleRoadmapBuilder()" style="cursor: pointer; display: flex; justify-content: space-between; align-items: center; margin-bottom:0;">
-                Update roadmap
-                <span id="builderToggle" class="ico" style="font-size: 20px; color: var(--muted);">expand_more</span>
+            <h2 style="cursor: pointer; display: flex; justify-content: space-between; align-items: center; margin-bottom:0;">
+                <span onclick="toggleRoadmapBuilder()" style="flex:1;">Update roadmap</span>
+                <span class="ico" onclick="toggleRoadmapSharePanel()" style="font-size: 20px; color: var(--muted); margin-right:4px;" title="Share this roadmap">share</span>
+                <span onclick="toggleRoadmapBuilder()" id="builderToggle" class="ico" style="font-size: 20px; color: var(--muted);">expand_more</span>
             </h2>
+            <!-- Roadmap sharing panel: mirrors profile.html's privacy toggle
+                 (16-45), but anon-capable (see current_roadmap_share_view). -->
+            <div id="roadmapSharePanel" style="display:none; margin-top:16px; padding-top:16px; border-top:1px solid var(--border);">
+                <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+                    <label style="color: var(--muted); font-weight: 500; margin:0;">Roadmap Visibility:</label>
+                    <div class="toggle-switch">
+                        <input type="radio" id="roadmap-privacy-private" name="roadmap-privacy" value="private" checked onclick="updateRoadmapPrivacySetting('private')">
+                        <label for="roadmap-privacy-private" class="toggle-option">
+                            <span class="ico" style="font-size:14px;vertical-align:-2px;">lock</span> Private
+                        </label>
+                        <input type="radio" id="roadmap-privacy-public" name="roadmap-privacy" value="public" onclick="updateRoadmapPrivacySetting('public')">
+                        <label for="roadmap-privacy-public" class="toggle-option">
+                            <span class="ico" style="font-size:14px;vertical-align:-2px;">public</span> Public
+                        </label>
+                    </div>
+                    <div id="roadmap-shareable-url-section" style="display: none;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <label style="color: var(--muted); font-size: 14px; margin:0;">Share URL:</label>
+                            <div style="display: flex; align-items: center; gap: 5px;">
+                                <input type="text" id="roadmap-shareable-url" readonly
+                                       style="font-size: 12px; width: 300px;"
+                                       placeholder="Generating shareable URL...">
+                                <button id="roadmap-copy-url-btn" onclick="copyRoadmapShareableUrl()" style="padding: 8px 12px; font-size: 12px;">
+                                    <span class="ico" style="font-size:14px;vertical-align:-2px;">content_copy</span> Copy
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <div id="roadmapBuilder" style="{% if has_current_roadmap %}display:none;{% endif %}">
@@ -293,6 +324,92 @@
             setRoadmapViewMode(builderOpen ? 'results' : 'builder');
             if (!builderOpen) {
                 builder.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+
+        // Roadmap Sharing — mirrors profile.html's privacy toggle
+        // (initializePrivacySettings/updatePrivacySetting/showShareableUrl/
+        // copyShareableUrl, templates/profile.html:916-1006), repointed at
+        // the roadmap-sharing endpoints. Unlike profile sharing, this works
+        // for anon (session-owned Current Roadmap) — no login required.
+        function toggleRoadmapSharePanel() {
+            const panel = document.getElementById('roadmapSharePanel');
+            panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+        }
+
+        async function initializeRoadmapSharePanel() {
+            try {
+                const response = await fetch(`${API_BASE}/roadmaps/current/share/`);
+                if (!response.ok) return;
+                const data = await response.json();
+
+                const privacyRadio = document.querySelector(`input[name="roadmap-privacy"][value="${data.privacy_setting}"]`);
+                if (privacyRadio) privacyRadio.checked = true;
+
+                if (data.is_public && data.shareable_url) {
+                    showRoadmapShareableUrl(window.location.origin + data.shareable_url);
+                } else {
+                    hideRoadmapShareableUrl();
+                }
+            } catch (error) {
+                console.log('Could not load roadmap sharing settings', error);
+            }
+        }
+
+        async function updateRoadmapPrivacySetting(privacySetting) {
+            try {
+                const response = await fetch(`${API_BASE}/roadmaps/current/share/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify({ privacy_setting: privacySetting })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.is_public && data.shareable_url) {
+                        showRoadmapShareableUrl(window.location.origin + data.shareable_url);
+                    } else {
+                        hideRoadmapShareableUrl();
+                    }
+                    showNotification(privacySetting === 'public' ?
+                        'Roadmap is now public and shareable!' :
+                        'Roadmap is now private', 'success');
+                } else {
+                    const errorData = await response.json();
+                    showNotification(errorData.error || 'Failed to update roadmap sharing', 'error');
+                }
+            } catch (error) {
+                showNotification('Error updating roadmap sharing. Please try again.', 'error');
+            }
+        }
+
+        function showRoadmapShareableUrl(url) {
+            const section = document.getElementById('roadmap-shareable-url-section');
+            const input = document.getElementById('roadmap-shareable-url');
+            input.value = url;
+            section.style.display = 'block';
+        }
+
+        function hideRoadmapShareableUrl() {
+            document.getElementById('roadmap-shareable-url-section').style.display = 'none';
+        }
+
+        function copyRoadmapShareableUrl() {
+            const input = document.getElementById('roadmap-shareable-url');
+            input.select();
+            input.setSelectionRange(0, 99999);
+            try {
+                document.execCommand('copy');
+                showNotification('URL copied to clipboard!', 'success');
+                const copyBtn = document.getElementById('roadmap-copy-url-btn');
+                const originalText = copyBtn.innerHTML;
+                copyBtn.innerHTML = '✅ Copied!';
+                setTimeout(() => { copyBtn.innerHTML = originalText; }, 2000);
+            } catch (err) {
+                showNotification('Failed to copy URL', 'error');
             }
         }
 
@@ -832,6 +949,7 @@
                 });
                 setRoadmapViewMode('results');
                 document.getElementById('resultsHeader').style.display = 'block';
+                initializeRoadmapSharePanel();
             } catch (error) {
                 console.error('Error loading current roadmap:', error);
             }
@@ -964,6 +1082,7 @@
                 // that this roadmap is persisted as the Current Roadmap.
                 setRoadmapViewMode('results');
                 document.getElementById('resultsHeader').style.display = 'block';
+                initializeRoadmapSharePanel();
 
             } catch (error) {
                 resultsDiv.innerHTML = '<div class="error">Error generating recommendations. Please try again.</div>';
