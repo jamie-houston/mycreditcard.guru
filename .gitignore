@@ -47,6 +47,7 @@ venv.bak/
 *.njsproj
 *.sln
 *.sw?
+.claude
 
 # VSCode - include shared configs
 .vscode/
