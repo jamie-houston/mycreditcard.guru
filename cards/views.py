@@ -3,7 +3,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
 from django.db.models import Q
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.http import Http404
 
 from .models import (
@@ -380,16 +380,27 @@ def card_recommendations_preview(request):
 
 # Template Views
 def landing_view(request):
-    """Landing page - welcome and feature overview"""
+    """Landing page - welcome and feature overview.
+
+    Skips straight to /roadmap/ for visitors (auth or anon-via-session) who
+    already have a persisted Current Roadmap — Home is meant as an entry
+    point into the roadmap, not a page returning users need to pass through.
+    Read-only check: never creates a session for a fresh anonymous visitor.
+    """
+    from roadmaps.models import get_current_roadmap
+    if get_current_roadmap(request):
+        return redirect('roadmap')
     return render(request, 'landing.html')
 
 def index_view(request):
     """Roadmap creation page"""
     from roadmaps.strategies import ui_presets
+    from roadmaps.models import get_current_roadmap
     context = {
         'user_email': request.user.email if request.user.is_authenticated else None,
         'is_dev_user': request.user.is_authenticated and request.user.email == 'foresterh@gmail.com',
-        'strategies': ui_presets()
+        'strategies': ui_presets(),
+        'has_current_roadmap': get_current_roadmap(request) is not None,
     }
     return render(request, 'index.html', context)
 

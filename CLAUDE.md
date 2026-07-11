@@ -85,13 +85,33 @@ Key modules:
   {response, request, generated_at}` — a normal, committed write that runs
   *after* the rollback. `GET /api/roadmaps/current/` (`current/` in
   roadmaps/urls.py) reads it back read-only (no session/profile
-  auto-creation; 404 = nothing generated yet). Don't reintroduce a
+  auto-creation; 404 = nothing generated yet) via `get_current_roadmap(request)`
+  (`roadmaps/models.py`) — the shared auth/anon-session lookup, also used by
+  `cards/views.py` `landing_view` (see below) and `index_view`'s
+  `has_current_roadmap` context flag. Don't reintroduce a
   "mark session unmodified" hack here — that was the OLD fix for the
   rollback trap, and it silently suppresses the Set-Cookie header needed
   for the session to actually reach the anon user's browser.
+- `cards/views.py` `landing_view`/`index_view` — `landing_view` (`/`)
+  redirects straight to `/roadmap/` for any visitor who already has a
+  persisted Current Roadmap (`get_current_roadmap(request)`), so returning
+  users skip the marketing landing page. `index_view` passes
+  `has_current_roadmap` into `templates/index.html` only to pick the
+  *initial* CSS display state (avoids a builder-flash on paint) — it does
+  not own the view-mode toggle; that's client-side (see below).
 - `templates/index.html` — the roadmap page (all inline JS). Preferences:
-  empty max annual fee = no max; empty max recommendations = 1. The results
-  renderer lives in `static/js/roadmap-results.js`
+  empty max annual fee = no max; empty max recommendations = 1. The builder
+  (strategy/preferences/spending/sticky-footer) is wrapped in
+  `#roadmapBuilder`; `setRoadmapViewMode('results'|'builder')` shows/hides it
+  as a unit and swaps the `#pageHeading`/`#pageSubtitle` text, toggled
+  manually via the `#resultsHeader` "Update roadmap" bar
+  (`toggleRoadmapBuilder()`, same accordion pattern as Preferences/Monthly
+  spending). `loadCurrentRoadmap()` (called on page load) is the
+  authoritative source of truth for initial view mode — it opens on results
+  ("Your Roadmap") if a Current Roadmap exists, builder otherwise, correcting
+  any stale `has_current_roadmap` server hint within one round trip;
+  `getRecommendations()` settles back into results mode on a successful
+  generation. The results renderer lives in `static/js/roadmap-results.js`
   (`renderRoadmapResults(data, opts)`), shared with the (planned) public
   shared-roadmap page via `opts.readOnly`; index.html calls it both from
   live generation and from `loadCurrentRoadmap()` on page load (restores

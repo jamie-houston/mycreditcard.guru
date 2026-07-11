@@ -67,6 +67,33 @@ class RoadmapCalculation(models.Model):
     total_estimated_rewards = models.DecimalField(max_digits=12, decimal_places=2)
     calculation_data = models.JSONField(default=dict)  # Store detailed breakdown
     calculated_at = models.DateTimeField(auto_now_add=True)
-    
+
     def __str__(self):
         return f"Calculation for {self.roadmap}"
+
+
+CURRENT_ROADMAP_NAME = "Current Roadmap"
+
+
+def get_current_roadmap(request):
+    """Return the request's persisted "Current Roadmap" (with `.calculation`
+    select_related), or None if there isn't one.
+
+    Read-only — never creates a session or a UserSpendingProfile as a side
+    effect, so a fresh anonymous visitor always gets None rather than having
+    state fabricated for them. Shared by `roadmaps.views.current_roadmap_view`
+    and `cards.views.landing_view`'s roadmap-first redirect.
+    """
+    if request.user.is_authenticated:
+        roadmap = Roadmap.objects.filter(
+            profile__user=request.user, name=CURRENT_ROADMAP_NAME
+        ).select_related('calculation').first()
+    else:
+        session_key = request.session.session_key
+        roadmap = (
+            Roadmap.objects.filter(
+                profile__session_key=session_key, name=CURRENT_ROADMAP_NAME
+            ).select_related('calculation').first()
+            if session_key else None
+        )
+    return roadmap if roadmap and hasattr(roadmap, 'calculation') else None

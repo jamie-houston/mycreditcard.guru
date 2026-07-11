@@ -5,14 +5,15 @@ from django.shortcuts import get_object_or_404
 from django.utils import timezone
 
 from cards.models import UserSpendingProfile
-from .models import Roadmap, RoadmapCalculation, RoadmapFilter
+from .models import (
+    Roadmap, RoadmapCalculation, RoadmapFilter,
+    CURRENT_ROADMAP_NAME, get_current_roadmap,
+)
 from .serializers import (
     RoadmapFilterSerializer, RoadmapSerializer,
     CreateRoadmapSerializer, GenerateRoadmapSerializer
 )
 from .recommendation_engine import RecommendationEngine
-
-CURRENT_ROADMAP_NAME = "Current Roadmap"
 
 
 class RoadmapFilterListView(generics.ListCreateAPIView):
@@ -257,20 +258,9 @@ def current_roadmap_view(request):
     Never auto-creates a session/profile — GET is read-only; a 404 means the
     frontend shows its empty state instead of a roadmap.
     """
-    if request.user.is_authenticated:
-        roadmap = Roadmap.objects.filter(
-            profile__user=request.user, name=CURRENT_ROADMAP_NAME
-        ).select_related('calculation').first()
-    else:
-        session_key = request.session.session_key
-        roadmap = (
-            Roadmap.objects.filter(
-                profile__session_key=session_key, name=CURRENT_ROADMAP_NAME
-            ).select_related('calculation').first()
-            if session_key else None
-        )
+    roadmap = get_current_roadmap(request)
 
-    if not roadmap or not hasattr(roadmap, 'calculation'):
+    if not roadmap:
         return Response({'message': 'No current roadmap found'}, status=status.HTTP_404_NOT_FOUND)
 
     calculation_data = roadmap.calculation.calculation_data

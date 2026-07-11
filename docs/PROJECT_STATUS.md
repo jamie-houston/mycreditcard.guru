@@ -5,7 +5,7 @@ backlog of new/changed requirements discovered along the way. Update this when a
 completes or a new requirement appears. (The original product spec is `PRD.md` at the repo
 root — that's the *what*; this file is the *where are we*.)
 
-Last updated: 2026-07-07
+Last updated: 2026-07-08
 
 **Active work (2026-07-05):** benefit preferences & stackability, roadmap
 persistence, and roadmap sharing — full approved plan + progress tracker in
@@ -42,6 +42,7 @@ something, check here first for which file owns it.
 | `docs/COMPREHENSIVE_DOCUMENTATION.md` | General architecture/API walkthrough | Living reference, not verified as part of this update — spot-check before trusting specifics |
 | `docs/README_TESTING.md` | How the JSON scenario test suite works (`data/tests/scenarios/*.json`), how to add scenarios, recalibration workflow | Rewritten 2026-07-07 to match the current system (was describing a pre-refactor single-file setup) |
 | `docs/README.md` | Doc folder index | Refreshed 2026-07-07 — now points to this file and the PLAN doc |
+| `docs/MANUAL_TEST_PLAN.md` | Manual/browser QA checklists per phase (for client-side behavior automated tests don't cover) | **Living — add a new section per phase, don't delete old ones** |
 
 ## Phase plan
 
@@ -56,6 +57,7 @@ something, check here first for which file owns it.
 | A | Benefit preferences (opt-out toggles on profile+roadmap, server-persisted) + stackability dedup (curated `stackable` flag; non-stackable credits count once per portfolio) — see `PLAN_BENEFITS_AND_ROADMAP_PERSISTENCE.md` | ✅ Done (A1–A5 all landed 2026-07-07 — model/migration, engine dedup, credit-preferences API, index.html/profile.html UI, and full test coverage incl. `credit_stackability.json`; the UI still needs a manual browser pass, unverified) |
 | B | Roadmap persistence (survives reload until regenerate; anon via session) + "I have this card"/"remove from my cards" on results | ✅ Done (B1–B5 all landed 2026-07-07 — anon session-timing + loose-fallback fixes, Current Roadmap persisted post-rollback, `GET /api/roadmaps/current/`, shared `roadmap-results.js` renderer + page-load restore + remove-from-my-cards, full test coverage; see PLAN doc Progress section for the two bugs found along the way — a session-cookie suppression that silently broke anon persistence, and a bulk-save hard-delete that would have erased soft-closed eligibility history) |
 | C | Roadmap sharing (share toggle + public UUID link, mirrors profile sharing) | 📋 Planned |
+| D | Roadmap-first navigation cleanup: `/` skips the landing page and redirects to `/roadmap/` once a visitor already has a persisted Current Roadmap; `/roadmap/` itself opens results-first ("Your Roadmap") for those visitors instead of the builder, with an "Update roadmap" toggle revealing the pre-filled builder in place — same URL, client-side toggle, no new routes/templates | ✅ Done (2026-07-08 — new `get_current_roadmap()` helper in `roadmaps/models.py` shared by `current_roadmap_view` and `landing_view`; `index_view` passes a `has_current_roadmap` hint only to avoid an initial-paint flash, `loadCurrentRoadmap()` remains the authoritative source of truth for view mode; 6 new tests in `roadmaps/tests.py` `LandingRedirectTests`; manual browser pass checklist in `docs/MANUAL_TEST_PLAN.md` — still pending) |
 
 ## Requirements added/changed since the original plan
 

@@ -4,10 +4,22 @@
 {% block title %}Create a Roadmap - Credit Card Guru{% endblock %}
 
 {% block content %}
-<h1><span class="ico" style="color:var(--accent);vertical-align:-3px;">route</span> Create a Roadmap</h1>
-        <p style="text-align: center; color: var(--muted); margin-bottom: 40px;">
+<h1 id="pageHeading"><span class="ico" style="color:var(--accent);vertical-align:-3px;">route</span> {% if has_current_roadmap %}Your Roadmap{% else %}Create a Roadmap{% endif %}</h1>
+        <p id="pageSubtitle" style="text-align: center; color: var(--muted); margin-bottom: 40px;{% if has_current_roadmap %} display:none;{% endif %}">
             Get personalized credit card recommendations based on your spending patterns
         </p>
+
+        <!-- "Update roadmap" toggle: reveals #roadmapBuilder below, same accordion
+             pattern as Preferences/Monthly spending. Hidden until a Current Roadmap
+             exists (see setRoadmapViewMode/loadCurrentRoadmap). -->
+        <div id="resultsHeader" class="section" style="{% if not has_current_roadmap %}display:none;{% endif %}">
+            <h2 onclick="toggleRoadmapBuilder()" style="cursor: pointer; display: flex; justify-content: space-between; align-items: center; margin-bottom:0;">
+                Update roadmap
+                <span id="builderToggle" class="ico" style="font-size: 20px; color: var(--muted);">expand_more</span>
+            </h2>
+        </div>
+
+        <div id="roadmapBuilder" style="{% if has_current_roadmap %}display:none;{% endif %}">
 
         <!-- Strategy Section: effort-tolerance question picks a preset.
              Optional — never a gate; skipping it = no strategy, filters-only. -->
@@ -126,6 +138,8 @@
                 </button>
             {% endif %}
         </div>
+
+        </div><!-- /#roadmapBuilder -->
 
         <!-- Results Section -->
         <div id="results"></div>
@@ -250,6 +264,35 @@
             } else {
                 content.style.display = 'none';
                 toggle.textContent = 'expand_more';
+            }
+        }
+
+        // Toggles the whole page between "Your Roadmap" (results-first, the
+        // default once a Current Roadmap exists) and "Create a Roadmap"
+        // (the builder form). Driven by loadCurrentRoadmap() on page load and
+        // by getRecommendations() after a fresh generation; toggleRoadmapBuilder()
+        // is the manual "Update roadmap" / collapse-again entry point.
+        function setRoadmapViewMode(mode) {
+            const builder = document.getElementById('roadmapBuilder');
+            const builderToggle = document.getElementById('builderToggle');
+            const heading = document.getElementById('pageHeading');
+            const subtitle = document.getElementById('pageSubtitle');
+            const showBuilder = mode === 'builder';
+
+            builder.style.display = showBuilder ? 'block' : 'none';
+            if (builderToggle) builderToggle.textContent = showBuilder ? 'expand_less' : 'expand_more';
+            if (heading) {
+                heading.innerHTML = `<span class="ico" style="color:var(--accent);vertical-align:-3px;">route</span> ${showBuilder ? 'Create a Roadmap' : 'Your Roadmap'}`;
+            }
+            if (subtitle) subtitle.style.display = showBuilder ? '' : 'none';
+        }
+
+        function toggleRoadmapBuilder() {
+            const builder = document.getElementById('roadmapBuilder');
+            const builderOpen = builder.style.display !== 'none';
+            setRoadmapViewMode(builderOpen ? 'results' : 'builder');
+            if (!builderOpen) {
+                builder.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
         }
 
@@ -771,7 +814,11 @@
             try {
                 const response = await fetch(`${API_BASE}/roadmaps/current/`);
                 if (!response.ok) {
-                    return; // 404 = nothing generated yet, leave the empty state
+                    // 404 = nothing generated yet: first-time-user path, builder
+                    // open, nothing to "update" yet.
+                    setRoadmapViewMode('builder');
+                    document.getElementById('resultsHeader').style.display = 'none';
+                    return;
                 }
                 const data = await response.json();
                 const generatedAt = data.generated_at ? new Date(data.generated_at) : null;
@@ -783,6 +830,8 @@
                     banner,
                     noScroll: true
                 });
+                setRoadmapViewMode('results');
+                document.getElementById('resultsHeader').style.display = 'block';
             } catch (error) {
                 console.error('Error loading current roadmap:', error);
             }
@@ -911,6 +960,10 @@
                     strategyLabel: activePreset ? activePreset.name : '',
                     poolLabel: activePreset ? activePreset.pool_label : ''
                 });
+                // Settle into results mode — matches what a reload will show now
+                // that this roadmap is persisted as the Current Roadmap.
+                setRoadmapViewMode('results');
+                document.getElementById('resultsHeader').style.display = 'block';
 
             } catch (error) {
                 resultsDiv.innerHTML = '<div class="error">Error generating recommendations. Please try again.</div>';

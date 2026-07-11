@@ -570,6 +570,86 @@ class RoadmapPersistenceTests(TestCase):
         self.assertNotEqual(profile_a.id, profile_b.id)
 
 
+class LandingRedirectTests(TestCase):
+    """Phase D: `/` skips the landing page and redirects straight to
+    `/roadmap/` for visitors who already have a persisted Current Roadmap
+    (auth or anon-via-session), and `/roadmap/`'s `has_current_roadmap`
+    context flag drives the initial results-vs-builder view mode."""
+
+    def setUp(self):
+        # base.html renders a Google sign-in link for anon visitors; allauth
+        # needs a SocialApp for provider_login_url to resolve.
+        from django.contrib.sites.models import Site
+        from allauth.socialaccount.models import SocialApp
+        app = SocialApp.objects.create(
+            provider='google', name='Google', client_id='test', secret='test'
+        )
+        app.sites.add(Site.objects.get_current())
+
+        self.user = User.objects.create_user(
+            username='landing', email='landing@example.com', password='x')
+        self.cashback = RewardType.objects.create(name='Cashback', slug='cashback')
+        self.issuer = Issuer.objects.create(name='Generic Bank', slug='generic-bank')
+        from cards.models import SpendingCategory
+        self.dining = SpendingCategory.objects.create(name='Dining', slug='dining')
+        self.card = CreditCard.objects.create(
+            name='Landing Card', slug='landing-card', issuer=self.issuer,
+            signup_bonus_type=self.cashback, primary_reward_type=self.cashback)
+
+    def _payload(self, amount='500.00'):
+        return {
+            'spending_amounts': {str(self.dining.id): amount},
+            'user_cards': [],
+            'max_recommendations': 1,
+        }
+
+    def test_landing_renders_for_visitor_with_no_roadmap(self):
+        response = self.client.get('/')
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'landing.html')
+
+    def test_landing_does_not_create_profile_for_fresh_anon_visitor(self):
+        """get_current_roadmap()'s read-only lookup must not fabricate a
+        UserSpendingProfile/Roadmap for a visitor who has never generated
+        one — a session cookie itself is already set on any full-page
+        render in this app (messages framework), so that's not the
+        guarantee to test; profile/roadmap creation is."""
+        response = self.client.get('/')
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(UserSpendingProfile.objects.exists())
+        self.assertFalse(Roadmap.objects.exists())
+
+    def test_landing_redirects_for_auth_user_with_current_roadmap(self):
+        self.client.force_login(self.user)
+        self.client.post(
+            '/api/roadmaps/quick-recommendation/', self._payload(),
+            content_type='application/json')
+
+        response = self.client.get('/')
+        self.assertRedirects(response, '/roadmap/')
+
+    def test_landing_redirects_for_anon_session_with_current_roadmap(self):
+        self.client.post(
+            '/api/roadmaps/quick-recommendation/', self._payload(),
+            content_type='application/json')
+
+        response = self.client.get('/')
+        self.assertRedirects(response, '/roadmap/')
+
+    def test_roadmap_page_has_current_roadmap_flag_false_for_new_visitor(self):
+        response = self.client.get('/roadmap/')
+        self.assertFalse(response.context['has_current_roadmap'])
+
+    def test_roadmap_page_has_current_roadmap_flag_true_once_generated(self):
+        self.client.force_login(self.user)
+        self.client.post(
+            '/api/roadmaps/quick-recommendation/', self._payload(),
+            content_type='application/json')
+
+        response = self.client.get('/roadmap/')
+        self.assertTrue(response.context['has_current_roadmap'])
+
+
 class StrategyUITests(TestCase):
     """S2: effort-tolerance question + advanced strategy picker on the roadmap page"""
 
