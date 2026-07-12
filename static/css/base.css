@@ -1404,6 +1404,27 @@ button.danger {
     white-space: nowrap;
     margin-left: 12px;
 }
+.modal-credit-checkbox {
+    display: flex;
+    align-items: center;
+    margin-right: 12px;
+}
+.modal-credit-checkbox input[type="checkbox"] {
+    cursor: pointer;
+}
+.modal-credit-item.modal-credit-unused {
+    opacity: 0.6;
+}
+.modal-credit-item.modal-credit-unused .modal-credit-value {
+    background: transparent;
+    color: var(--muted);
+}
+.modal-credit-note {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 4px;
+    font-style: italic;
+}
 .modal-card-clickable {
     cursor: pointer;
     transition: var(--transition-default);

@@ -176,6 +176,43 @@
     letter-spacing: 0.05em;
 }
 
+.cards-table th.sortable {
+    cursor: pointer;
+    user-select: none;
+    white-space: nowrap;
+}
+
+.cards-table th.sortable:hover {
+    color: var(--text);
+}
+
+.cards-table th.sortable.active {
+    color: var(--accent);
+}
+
+.sort-caret {
+    display: inline-block;
+    margin-left: 4px;
+    width: 0;
+    height: 0;
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-bottom: 5px solid var(--muted-2, var(--border));
+    vertical-align: middle;
+    opacity: 0.5;
+}
+
+.sort-caret.asc,
+.sort-caret.desc {
+    opacity: 1;
+    border-bottom-color: var(--accent);
+}
+
+.sort-caret.desc {
+    border-bottom: none;
+    border-top: 5px solid var(--accent);
+}
+
 .cards-table td {
     padding: 14px 12px;
     border-bottom: 1px solid var(--border);

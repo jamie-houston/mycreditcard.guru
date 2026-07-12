@@ -55,6 +55,17 @@
     background: linear-gradient(135deg, #6E7B8B, #3A424D);
 }
 
+.card-box-thumb.network {
+    background: none;
+    overflow: hidden;
+}
+
+.card-box-thumb.network svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
 .card-box-body {
     flex: 1;
     min-width: 0;

@@ -412,6 +412,42 @@ function issuerGradient(issuerName) {
     return ISSUER_GRADIENTS[(issuerName || '').toLowerCase()] || 'linear-gradient(135deg,#6E7B8B,#3A424D)';
 }
 
+// Network -> stylized inline SVG mark (not the real trademarked logos, just a
+// recognizable color+wordmark stand-in). Falls back to the issuer gradient
+// thumb when the network is missing or unrecognized.
+const NETWORK_MARKS = {
+    'visa': `
+        <svg viewBox="0 0 46 30" xmlns="http://www.w3.org/2000/svg">
+            <rect width="46" height="30" fill="#1A1F71"/>
+            <text x="23" y="20" text-anchor="middle" font-family="Arial, sans-serif" font-weight="700" font-style="italic" font-size="13" fill="#ffffff">VISA</text>
+        </svg>`,
+    'mastercard': `
+        <svg viewBox="0 0 46 30" xmlns="http://www.w3.org/2000/svg">
+            <rect width="46" height="30" fill="#1B1B1B"/>
+            <circle cx="19" cy="15" r="9" fill="#EB001B"/>
+            <circle cx="27" cy="15" r="9" fill="#F79E1B" fill-opacity="0.9"/>
+        </svg>`,
+    'american express': `
+        <svg viewBox="0 0 46 30" xmlns="http://www.w3.org/2000/svg">
+            <rect width="46" height="30" fill="#006FCF"/>
+            <text x="23" y="19" text-anchor="middle" font-family="Arial, sans-serif" font-weight="700" font-size="10.5" fill="#ffffff">AMEX</text>
+        </svg>`,
+    'amex': `
+        <svg viewBox="0 0 46 30" xmlns="http://www.w3.org/2000/svg">
+            <rect width="46" height="30" fill="#006FCF"/>
+            <text x="23" y="19" text-anchor="middle" font-family="Arial, sans-serif" font-weight="700" font-size="10.5" fill="#ffffff">AMEX</text>
+        </svg>`,
+    'discover': `
+        <svg viewBox="0 0 46 30" xmlns="http://www.w3.org/2000/svg">
+            <rect width="46" height="30" fill="#1B1B1B"/>
+            <circle cx="36" cy="21" r="10" fill="#FF6000"/>
+            <text x="20" y="18" text-anchor="middle" font-family="Arial, sans-serif" font-weight="700" font-size="8" fill="#ffffff">DISC</text>
+        </svg>`
+};
+function networkMark(networkName) {
+    return NETWORK_MARKS[(networkName || '').toLowerCase()] || null;
+}
+
 function displayCards(cards) {
     const container = document.getElementById('cardsContainer');
 
@@ -449,10 +485,15 @@ function displayCards(cards) {
                 })
                 .join(', ') : 'General rewards';
 
+        const mark = networkMark(card.metadata?.network);
+        const thumbHtml = mark
+            ? `<div class="card-box-thumb network">${mark}</div>`
+            : `<div class="card-box-thumb" style="background: ${issuerGradient(card.issuer.name)};"></div>`;
+
         return `
             <div class="card-box ${hasCard ? 'owned' : ''}">
                 <div style="display:flex; align-items:center; gap:12px; cursor:pointer;" onclick="openCardModal(${card.id})">
-                    <div class="card-box-thumb" style="background: ${issuerGradient(card.issuer.name)};"></div>
+                    ${thumbHtml}
                     <div class="card-box-body">
                         <div class="card-issuer">${card.issuer.name} · ${topCategories}</div>
                         <div class="card-name">${displayName}</div>

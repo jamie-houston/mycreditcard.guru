@@ -20,6 +20,76 @@ function _roadmapFormatSigned(value) {
     return v < 0 ? `−$${Math.abs(v).toFixed(0)}` : `$${v.toFixed(0)}`;
 }
 
+function _roadmapBenefitsValue(rec) {
+    return (rec.rewards_breakdown || [])
+        .filter(b => b.type === 'credit')
+        .reduce((sum, b) => sum + (parseFloat(b.category_rewards) || 0), 0);
+}
+
+// Everything that isn't a credit — category rewards plus bonus-shift
+// opportunity-cost adjustments. Together with benefits, signup bonus and
+// fee this reconciles exactly to estimated_rewards (see recommendation_engine's
+// reconciliation guard), so the summary table's columns add up to Value/yr.
+function _roadmapRewardsValue(rec) {
+    return (rec.rewards_breakdown || [])
+        .filter(b => b.type !== 'credit')
+        .reduce((sum, b) => sum + (parseFloat(b.category_rewards) || 0), 0);
+}
+
+const ROADMAP_ACTION_LABELS = { apply: 'Apply', keep: 'Keep', cancel: 'Cancel', upgrade: 'Upgrade', downgrade: 'Downgrade' };
+const ROADMAP_ACTION_DANGER = { cancel: true };
+
+function _roadmapSummaryTableHtml(recommendations) {
+    const order = ['apply', 'keep', 'cancel', 'upgrade', 'downgrade'];
+    const rows = order
+        .flatMap(action => recommendations.filter(rec => rec.action === action))
+        .map(rec => {
+            const danger = !!ROADMAP_ACTION_DANGER[rec.action];
+            const annualFee = parseFloat(rec.card.effective_annual_fee || 0);
+            const feeWaived = rec.card.annual_fee_waived_first_year && rec.action === 'apply';
+            const feeLabel = annualFee > 0 ? (feeWaived ? '$0*' : `−$${annualFee.toFixed(0)}`) : '$0';
+            const rewardsValue = _roadmapRewardsValue(rec);
+            const rewardsLabel = _roadmapFormatSigned(rewardsValue);
+            const signupBonusValue = rec.action === 'apply' ? (parseFloat(rec.signup_bonus_value) || 0) : 0;
+            const signupBonusLabel = signupBonusValue > 0 ? `+$${signupBonusValue.toFixed(0)}` : '—';
+            const benefitsValue = _roadmapBenefitsValue(rec);
+            const benefitsLabel = benefitsValue > 0 ? `+$${benefitsValue.toFixed(0)}` : '—';
+            const estimatedValue = parseFloat(rec.estimated_rewards) || 0;
+
+            return `
+                <tr class="roadmap-summary-row" onclick="openCardModal(${rec.card.id})">
+                    <td class="roadmap-summary-card">${rec.card.name}</td>
+                    <td><span class="roadmap-summary-action${danger ? ' danger' : ''}">${ROADMAP_ACTION_LABELS[rec.action] || rec.action}</span></td>
+                    <td class="roadmap-summary-num">${rewardsLabel}</td>
+                    <td class="roadmap-summary-num">${signupBonusLabel}</td>
+                    <td class="roadmap-summary-num">${benefitsLabel}</td>
+                    <td class="roadmap-summary-num">${feeLabel}</td>
+                    <td class="roadmap-summary-num roadmap-summary-value${danger ? ' danger' : ''}">${_roadmapFormatSigned(estimatedValue)}</td>
+                </tr>
+            `;
+        }).join('');
+
+    return `
+        <div class="result-section-header"><span class="ico">table_view</span><span class="result-section-header-title">Card summary</span></div>
+        <div class="roadmap-summary-table-wrap">
+            <table class="roadmap-summary-table">
+                <thead>
+                    <tr>
+                        <th>Card</th>
+                        <th>Action</th>
+                        <th class="roadmap-summary-num">Rewards</th>
+                        <th class="roadmap-summary-num">Signup Bonus</th>
+                        <th class="roadmap-summary-num">Benefits</th>
+                        <th class="roadmap-summary-num">Fee</th>
+                        <th class="roadmap-summary-num">Value/yr</th>
+                    </tr>
+                </thead>
+                <tbody>${rows}</tbody>
+            </table>
+        </div>
+    `;
+}
+
 async function removeCardOwnership(cardId, cardName, buttonEl) {
     if (buttonEl) {
         buttonEl.disabled = true;
@@ -99,6 +169,8 @@ function renderRoadmapResults(data, opts = {}) {
                 ` : ''}
             </div>
         `;
+
+        html += _roadmapSummaryTableHtml(recommendations);
 
         if (categoryOptimizationEntries.length > 0) {
             html += `

@@ -116,6 +116,19 @@ Key modules:
   shared-roadmap page via `opts.readOnly`; index.html calls it both from
   live generation and from `loadCurrentRoadmap()` on page load (restores
   the persisted Current Roadmap with a "Generated on {date}" banner).
+  `renderRoadmapResults()` renders a "Card summary" table
+  (`_roadmapSummaryTableHtml`) above "Best card per category" and the
+  detailed Apply/Keep/Cancel sections (which are unchanged below it) — one
+  row per recommendation with Rewards / Signup Bonus / Benefits / Fee
+  columns that sum to Value/yr by construction: Rewards is every non-credit
+  `rewards_breakdown` line (`_roadmapRewardsValue`, includes `bonus_shift`
+  opportunity-cost adjustments), Benefits is the credit lines
+  (`_roadmapBenefitsValue`), Signup Bonus is `rec.signup_bonus_value`
+  (apply only), Fee is `rec.card.effective_annual_fee` (already the
+  waived-year-aware fee the engine's reconciliation guard checks against).
+  Don't add a column here without checking it's actually one of the terms
+  in that guard's `line_total + signup_bonus_value - fee_in_headline`
+  equation, or the columns will stop adding up to Value/yr.
   "Remove from my cards" on keep/cancel recommendations soft-closes via
   `POST /api/users/cards/toggle/` (auth) or localStorage (anon) — never the
   hard-delete `cards/user-cards/<id>/delete/` endpoint, which would erase
@@ -143,7 +156,18 @@ Key modules:
   reads it to grey out un-opted-in credits at $0 and, for
   `stackable: false` credits spanning multiple owned cards, count only the
   highest-value card (mirrors `_allocate_portfolio_credits`'s tiebreak) with
-  a "counted once — on {card}" note on the rest.
+  a "counted once — on {card}" note on the rest. The generic card-detail
+  modal (`templates/base.html` `populateCardCredits()`, opened via
+  `openCardModal()` from anywhere — cards list, category detail, profile,
+  roadmap results) reads/writes the same preferences and shows the same
+  checkbox toggle for any credit backed by a `spending_credit` (calling
+  `toggleModalCreditUsage()`, which re-renders just the credits section);
+  category-based credits (`credit.category`, no `spending_credit`) have no
+  checkbox there since the engine counts them automatically whenever the
+  user has matching spending (`_counted_card_credits`), not via opt-in.
+  `_formatCreditValue()` shows the per-occurrence rate alongside the annual
+  total for `times_per_year > 1` credits (e.g. "$7/mo = $84/yr") instead of
+  just the raw per-occurrence value.
 - Roadmap sharing mirrors `UserSpendingProfile`'s privacy/`share_uuid`
   pattern (cards/models.py) but on `Roadmap` and **anon-capable** (a
   session-owned Current Roadmap is a first-class case; profile sharing

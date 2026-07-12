@@ -84,8 +84,8 @@ and the updated `loadCurrentRoadmap()`/`getRecommendations()`.
 
 Covers: the share toggle in `#resultsHeader`, `GET/POST
 /api/roadmaps/current/share/`, and the public `/roadmap/shared/<uuid>/`
-page. See `docs/PLAN_BENEFITS_AND_ROADMAP_PERSISTENCE.md` Phase C and
-`CLAUDE.md`'s roadmap-sharing note for the implementation.
+page. See mybrain `Requirements/Complete/PLAN_BENEFITS_AND_ROADMAP_PERSISTENCE_complete.md`
+Phase C and `CLAUDE.md`'s roadmap-sharing note for the implementation.
 
 ### 1. Share a roadmap (logged in)
 1. Log in, generate a roadmap if you don't have a Current Roadmap yet.

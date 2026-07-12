@@ -181,6 +181,202 @@ async function loadProfileData() {
     }
 }
 
+// Card collection table: state kept module-scoped so sorting can re-render
+// without re-fetching (loadCardCollection populates these, then calls
+// renderCardCollectionTable()).
+let _cardCollectionGroups = null;
+let _cardCollectionDetails = null;
+let _cardSort = { key: null, dir: 1 };
+
+const CARD_SORT_COLUMNS = [
+    { key: 'name', label: 'Card Name', type: 'string' },
+    { key: 'issuer', label: 'Issuer', type: 'string' },
+    { key: 'signup_date', label: 'Signup Date', type: 'date' },
+    { key: 'annual_fee', label: 'Annual Fee', type: 'number' },
+    { key: 'reward_type', label: 'Reward Type', type: 'string' },
+    { key: 'point_value', label: 'Point Value', type: 'number' },
+    { key: 'signup_bonus', label: 'Signup Bonus', type: 'number' },
+    { key: 'card_type', label: 'Card Type', type: 'string' },
+    { key: 'count', label: 'Count', type: 'number' },
+    { key: null, label: 'Actions', type: null }
+];
+
+function cardSortValue(key, group, cardInfo) {
+    switch (key) {
+        case 'name': return cardInfo.name || '';
+        case 'issuer': return cardInfo.issuer?.name || '';
+        case 'signup_date': {
+            const dates = group.instances.filter(i => i.opened_date).map(i => new Date(i.opened_date).getTime());
+            return dates.length > 0 ? Math.min(...dates) : Infinity; // no date sorts last (ascending)
+        }
+        case 'annual_fee': return parseFloat(cardInfo.annual_fee || 0);
+        case 'reward_type': return cardInfo.primary_reward_type?.name || '';
+        case 'point_value': return cardInfo.metadata?.reward_value_multiplier || 0.01;
+        case 'signup_bonus': return cardInfo.signup_bonus_amount || 0;
+        case 'card_type': return cardInfo.card_type || '';
+        case 'count': return group.instances.length;
+        default: return '';
+    }
+}
+
+function sortCardCollection(key) {
+    if (!key) return;
+    if (_cardSort.key === key) {
+        _cardSort.dir *= -1;
+    } else {
+        _cardSort = { key, dir: 1 };
+    }
+    renderCardCollectionTable();
+}
+
+function buildCardRow(cardId, group, cardInfo) {
+    const instances = group.instances;
+    const hasMultiple = instances.length > 1;
+
+    // Calculate annual fee
+    const annualFee = parseFloat(cardInfo.annual_fee || 0);
+    const feeClass = annualFee === 0 ? 'fee-zero' : 'fee-paid';
+    const feeText = annualFee === 0 ? 'No Fee' : `$${annualFee}/year`;
+
+    // Get reward type and value
+    const rewardType = cardInfo.primary_reward_type?.name || 'Unknown';
+    const rewardMultiplier = cardInfo.metadata?.reward_value_multiplier || 0.01;
+    const pointValue = `${(rewardMultiplier * 100).toFixed(1)}¢`;
+
+    // Get signup bonus
+    const signupBonus = cardInfo.signup_bonus_amount ?
+        `${cardInfo.signup_bonus_amount.toLocaleString()} ${rewardType}` : 'None';
+
+    // Create nicknames display for table
+    let nicknamesDisplay = '';
+    if (hasMultiple) {
+        const nicknames = instances.filter(i => i.nickname).map(i => i.nickname);
+        nicknamesDisplay = nicknames.length > 0 ?
+            `<small class="card-nicknames">${nicknames.join(', ')}</small>` : '';
+    } else {
+        const instance = instances[0];
+        nicknamesDisplay = instance.nickname ?
+            `<small class="card-nicknames">${instance.nickname}</small>` : '';
+    }
+
+    // Calculate signup date display with yellow highlighting logic
+    let signupDateDisplay = '';
+    if (hasMultiple) {
+        // For multiple cards, show all signup dates
+        const dates = instances
+            .filter(i => i.opened_date)
+            .map(i => {
+                const date = new Date(i.opened_date);
+                const formattedDate = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+
+                // Check if date is within 2 months and has annual fee
+                const today = new Date();
+                const twoMonthsFromNow = new Date(today);
+                twoMonthsFromNow.setMonth(twoMonthsFromNow.getMonth() + 2);
+
+                const shouldHighlight = annualFee > 0 && date >= today && date <= twoMonthsFromNow;
+                const style = shouldHighlight ? 'color: var(--color-warning); font-weight: 600;' : '';
+
+                return `<div style="${style}">${formattedDate}</div>`;
+            });
+        signupDateDisplay = dates.length > 0 ? dates.join('') : '<span style="color: var(--muted-2);">-</span>';
+    } else {
+        const instance = instances[0];
+        if (instance.opened_date) {
+            const date = new Date(instance.opened_date);
+            const formattedDate = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+
+            // Check if date is within 2 months and has annual fee
+            const today = new Date();
+            const twoMonthsFromNow = new Date(today);
+            twoMonthsFromNow.setMonth(twoMonthsFromNow.getMonth() + 2);
+
+            const shouldHighlight = annualFee > 0 && date >= today && date <= twoMonthsFromNow;
+            const style = shouldHighlight ? 'color: var(--color-warning); font-weight: 600;' : '';
+
+            signupDateDisplay = `<span style="${style}">${formattedDate}</span>`;
+        } else {
+            signupDateDisplay = '<span style="color: var(--muted-2);">-</span>';
+        }
+    }
+
+    return `
+        <tr class="card-row modal-card-clickable" onclick="openCardModal(${cardId})" title="Click to view details">
+            <td class="card-name-cell">
+                <div class="card-name-wrapper">
+                    <strong>${cardInfo.name}</strong>
+                    ${nicknamesDisplay ? `<br>${nicknamesDisplay}` : ''}
+                </div>
+            </td>
+            <td>${cardInfo.issuer?.name || 'Unknown'}</td>
+            <td>${signupDateDisplay}</td>
+            <td><span class="${feeClass}">${feeText}</span></td>
+            <td>${rewardType}</td>
+            <td>${pointValue}</td>
+            <td>${signupBonus}</td>
+            <td>${cardInfo.card_type ? cardInfo.card_type.charAt(0).toUpperCase() + cardInfo.card_type.slice(1) : 'Personal'}</td>
+            <td class="card-count-cell">
+                <span class="card-count">${instances.length}</span>
+                ${hasMultiple ? ' <span class="multiple-indicator" title="Multiple cards">📚</span>' : ''}
+            </td>
+            <td class="actions-cell">
+                <button class="table-action-btn" onclick="event.stopPropagation(); openCardModal(${cardId})" title="View Details">
+                    👁️
+                </button>
+            </td>
+        </tr>
+    `;
+}
+
+function renderCardCollectionTable() {
+    const cardCollectionContainer = document.getElementById('cardCollection');
+    const cardGroups = _cardCollectionGroups || {};
+    const cardDetails = _cardCollectionDetails || {};
+
+    // Only rows with fetched details are sortable/renderable
+    let rows = Object.entries(cardGroups)
+        .filter(([cardId]) => cardDetails[cardId])
+        .map(([cardId, group]) => ({ cardId, group, cardInfo: cardDetails[cardId] }));
+
+    if (_cardSort.key) {
+        rows.sort((a, b) => {
+            const va = cardSortValue(_cardSort.key, a.group, a.cardInfo);
+            const vb = cardSortValue(_cardSort.key, b.group, b.cardInfo);
+            let cmp;
+            if (typeof va === 'string') {
+                cmp = va.localeCompare(vb);
+            } else {
+                cmp = va - vb;
+            }
+            return cmp * _cardSort.dir;
+        });
+    }
+
+    const headerHtml = CARD_SORT_COLUMNS.map(col => {
+        if (!col.key) {
+            return `<th>${col.label}</th>`;
+        }
+        const isActive = _cardSort.key === col.key;
+        const caretClass = isActive ? (_cardSort.dir === 1 ? 'asc' : 'desc') : '';
+        return `<th class="sortable${isActive ? ' active' : ''}" onclick="sortCardCollection('${col.key}')">
+            ${col.label}<span class="sort-caret ${caretClass}"></span>
+        </th>`;
+    }).join('');
+
+    const rowsHtml = rows.map(({ cardId, group, cardInfo }) => buildCardRow(cardId, group, cardInfo)).join('');
+
+    cardCollectionContainer.innerHTML = `
+        <div class="card-table-container">
+            <table class="cards-table">
+                <thead>
+                    <tr>${headerHtml}</tr>
+                </thead>
+                <tbody>${rowsHtml}</tbody>
+            </table>
+        </div>
+    `;
+}
+
 async function loadCardCollection() {
     try {
         let userCardsDetails;
@@ -256,7 +452,7 @@ async function loadCardCollection() {
         // Fetch detailed card information
         const cardIds = Object.keys(cardGroups);
         const cardDetails = {};
-        
+
         for (const cardId of cardIds) {
             try {
                 const response = await fetch(`${API_BASE}/cards/cards/${cardId}/`);
@@ -267,138 +463,13 @@ async function loadCardCollection() {
                 console.error(`Error fetching details for card ${cardId}:`, error);
             }
         }
-        
-        // Create table structure
-        let cardsHtml = `
-            <div class="card-table-container">
-                <table class="cards-table">
-                    <thead>
-                        <tr>
-                            <th>Card Name</th>
-                            <th>Issuer</th>
-                            <th>Signup Date</th>
-                            <th>Annual Fee</th>
-                            <th>Reward Type</th>
-                            <th>Point Value</th>
-                            <th>Signup Bonus</th>
-                            <th>Card Type</th>
-                            <th>Count</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-        `;
-        
-        for (const [cardId, group] of Object.entries(cardGroups)) {
-            const cardInfo = cardDetails[cardId];
-            if (!cardInfo) continue;
-            
-            const instances = group.instances;
-            const hasMultiple = instances.length > 1;
-            
-            // Calculate annual fee
-            const annualFee = parseFloat(cardInfo.annual_fee || 0);
-            const feeClass = annualFee === 0 ? 'fee-zero' : 'fee-paid';
-            const feeText = annualFee === 0 ? 'No Fee' : `$${annualFee}/year`;
-            
-            // Get reward type and value
-            const rewardType = cardInfo.primary_reward_type?.name || 'Unknown';
-            const rewardMultiplier = cardInfo.metadata?.reward_value_multiplier || 0.01;
-            const pointValue = `${(rewardMultiplier * 100).toFixed(1)}¢`;
-            
-            // Get signup bonus
-            const signupBonus = cardInfo.signup_bonus_amount ? 
-                `${cardInfo.signup_bonus_amount.toLocaleString()} ${rewardType}` : 'None';
-            
-            // Create nicknames display for table
-            let nicknamesDisplay = '';
-            if (hasMultiple) {
-                const nicknames = instances.filter(i => i.nickname).map(i => i.nickname);
-                nicknamesDisplay = nicknames.length > 0 ?
-                    `<small class="card-nicknames">${nicknames.join(', ')}</small>` : '';
-            } else {
-                const instance = instances[0];
-                nicknamesDisplay = instance.nickname ?
-                    `<small class="card-nicknames">${instance.nickname}</small>` : '';
-            }
 
-            // Calculate signup date display with yellow highlighting logic
-            let signupDateDisplay = '';
-            if (hasMultiple) {
-                // For multiple cards, show all signup dates
-                const dates = instances
-                    .filter(i => i.opened_date)
-                    .map(i => {
-                        const date = new Date(i.opened_date);
-                        const formattedDate = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        // Stash for re-render on sort (avoids re-fetching)
+        _cardCollectionGroups = cardGroups;
+        _cardCollectionDetails = cardDetails;
 
-                        // Check if date is within 2 months and has annual fee
-                        const today = new Date();
-                        const twoMonthsFromNow = new Date(today);
-                        twoMonthsFromNow.setMonth(twoMonthsFromNow.getMonth() + 2);
+        renderCardCollectionTable();
 
-                        const shouldHighlight = annualFee > 0 && date >= today && date <= twoMonthsFromNow;
-                        const style = shouldHighlight ? 'color: var(--color-warning); font-weight: 600;' : '';
-
-                        return `<div style="${style}">${formattedDate}</div>`;
-                    });
-                signupDateDisplay = dates.length > 0 ? dates.join('') : '<span style="color: var(--muted-2);">-</span>';
-            } else {
-                const instance = instances[0];
-                if (instance.opened_date) {
-                    const date = new Date(instance.opened_date);
-                    const formattedDate = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-
-                    // Check if date is within 2 months and has annual fee
-                    const today = new Date();
-                    const twoMonthsFromNow = new Date(today);
-                    twoMonthsFromNow.setMonth(twoMonthsFromNow.getMonth() + 2);
-
-                    const shouldHighlight = annualFee > 0 && date >= today && date <= twoMonthsFromNow;
-                    const style = shouldHighlight ? 'color: var(--color-warning); font-weight: 600;' : '';
-
-                    signupDateDisplay = `<span style="${style}">${formattedDate}</span>`;
-                } else {
-                    signupDateDisplay = '<span style="color: var(--muted-2);">-</span>';
-                }
-            }
-
-            cardsHtml += `
-                <tr class="card-row modal-card-clickable" onclick="openCardModal(${cardId})" title="Click to view details">
-                    <td class="card-name-cell">
-                        <div class="card-name-wrapper">
-                            <strong>${cardInfo.name}</strong>
-                            ${nicknamesDisplay ? `<br>${nicknamesDisplay}` : ''}
-                        </div>
-                    </td>
-                    <td>${cardInfo.issuer?.name || 'Unknown'}</td>
-                    <td>${signupDateDisplay}</td>
-                    <td><span class="${feeClass}">${feeText}</span></td>
-                    <td>${rewardType}</td>
-                    <td>${pointValue}</td>
-                    <td>${signupBonus}</td>
-                    <td>${cardInfo.card_type ? cardInfo.card_type.charAt(0).toUpperCase() + cardInfo.card_type.slice(1) : 'Personal'}</td>
-                    <td class="card-count-cell">
-                        <span class="card-count">${instances.length}</span>
-                        ${hasMultiple ? ' <span class="multiple-indicator" title="Multiple cards">📚</span>' : ''}
-                    </td>
-                    <td class="actions-cell">
-                        <button class="table-action-btn" onclick="event.stopPropagation(); openCardModal(${cardId})" title="View Details">
-                            👁️
-                        </button>
-                    </td>
-                </tr>
-            `;
-        }
-        
-        cardsHtml += `
-                    </tbody>
-                </table>
-            </div>
-        `;
-        
-        cardCollectionContainer.innerHTML = cardsHtml;
-        
     } catch (error) {
         console.error('Error loading card collection:', error);
         document.getElementById('cardCollection').innerHTML = `

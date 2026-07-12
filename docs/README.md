@@ -5,12 +5,14 @@ This folder contains detailed documentation for the Credit Card Guru project.
 ## 📄 Documentation Index
 
 ### 📍 Start here
-- **[PROJECT_STATUS.md](PROJECT_STATUS.md)** - **Where the project is right now**: phase
-  plan, active work, backlog. Read this first — it links out to the plan doc for
-  whatever feature is currently in progress.
-- **[PLAN_BENEFITS_AND_ROADMAP_PERSISTENCE.md](PLAN_BENEFITS_AND_ROADMAP_PERSISTENCE.md)** -
-  Detailed design + progress checklist for the active benefit-preferences/
-  roadmap-persistence/sharing work (Phases A/B/C in PROJECT_STATUS.md)
+- **[PROJECT_STATUS.md](PROJECT_STATUS.md)** - **Active to-do tracker**: only
+  what's in progress or still to do, as checkboxes. Completed phase history
+  and design docs are archived to mybrain (pointers at the bottom of the
+  file) once a phase finishes, to keep this doc lean.
+- **[PLAN_PHASE_E_BONUS_SEQUENCING.md](PLAN_PHASE_E_BONUS_SEQUENCING.md)** -
+  Approved implementation plan for Phase E (selection-aware bonus capacity
+  & apply sequencing) — the active PLAN doc; archive to mybrain when the
+  phase completes.
 - **[../CLAUDE.md](../CLAUDE.md)** - Architecture map and working rules for Claude Code
 
 ### 🚀 Getting Started

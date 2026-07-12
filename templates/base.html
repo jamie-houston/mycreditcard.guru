@@ -1049,7 +1049,7 @@
             populateRewardCategories(card.reward_categories || []);
 
             // Credits/Benefits
-            populateCardCredits(card.credits || []);
+            await populateCardCredits(card.credits || []);
 
             // Update ownership button
             updateModalOwnershipButton(card.id);
@@ -1130,7 +1130,25 @@
             rewardsSection.style.display = 'block';
         }
 
-        function populateCardCredits(credits) {
+        // Formats a per-occurrence credit value with its frequency and the
+        // resulting annual total, e.g. "$7/mo = $84/yr" instead of just "$7".
+        function _formatCreditValue(value, timesPerYear, currency) {
+            const v = parseFloat(value || 0);
+            if (v <= 0) return 'Included';
+
+            const isUSD = !currency || currency === 'USD';
+            const fmt = (n) => isUSD ? `$${n.toLocaleString(undefined, {maximumFractionDigits: 0})}` : `${n.toLocaleString(undefined, {maximumFractionDigits: 0})} ${currency}`;
+
+            const perYear = timesPerYear || 1;
+            if (perYear <= 1) {
+                return `${fmt(v)}/yr`;
+            }
+            const annual = v * perYear;
+            const freqLabel = perYear === 12 ? '/mo' : perYear === 4 ? '/qtr' : perYear === 52 ? '/wk' : ` × ${perYear}/yr`;
+            return `${fmt(v)}${freqLabel} = ${fmt(annual)}/yr`;
+        }
+
+        async function populateCardCredits(credits) {
             const creditsList = document.getElementById('modalCreditsList');
             const creditsSection = document.getElementById('modalCreditsSection');
 
@@ -1148,25 +1166,20 @@
                 return;
             }
 
+            // Same server-persisted opt-in preferences the profile page and
+            // the recommendation engine read — a credit only counts toward
+            // value if the user has checked it here or on /profile/.
+            const preferences = await UserDataManager.getCreditPreferences();
+
             const creditsHtml = activeCredits.map(credit => {
                 const value = parseFloat(credit.value || 0);
                 const currency = credit.currency || 'USD';
-
-                // Format value display
-                let valueDisplay = '';
-                if (value > 0) {
-                    if (currency === 'USD') {
-                        valueDisplay = `$${value.toLocaleString()}`;
-                    } else {
-                        valueDisplay = `${value.toLocaleString()} ${currency}`;
-                    }
-                } else {
-                    valueDisplay = 'Included';
-                }
+                const valueDisplay = _formatCreditValue(value, credit.times_per_year, currency);
 
                 // Get proper display name and description from spending_credit or category
                 let creditName = 'Benefit';
                 let creditDescription = credit.description || '';
+                const slug = credit.spending_credit?.slug;
 
                 if (credit.spending_credit) {
                     // For spending credits (like airport_lounge, precheck, etc.)
@@ -1178,19 +1191,57 @@
                     creditDescription = credit.category.description || creditDescription;
                 }
 
-                return `
-                    <div class="modal-credit-item">
-                        <div class="modal-credit-content">
-                            <div class="modal-credit-name">${creditName}</div>
-                            ${creditDescription ? `<div class="modal-credit-description">${creditDescription}</div>` : ''}
+                // Only spending-credit-backed benefits are individually
+                // toggle-able (matches profile.html) — category credits are
+                // counted automatically by the engine whenever the user has
+                // matching spending, so there's nothing to opt in/out of.
+                if (!slug) {
+                    return `
+                        <div class="modal-credit-item">
+                            <div class="modal-credit-content">
+                                <div class="modal-credit-name">${creditName}</div>
+                                ${creditDescription ? `<div class="modal-credit-description">${creditDescription}</div>` : ''}
+                                <div class="modal-credit-note">Counted automatically based on your spending</div>
+                            </div>
+                            <div class="modal-credit-value">${valueDisplay}</div>
                         </div>
-                        <div class="modal-credit-value">${valueDisplay}</div>
+                    `;
+                }
+
+                const isUsed = preferences[slug] === true;
+
+                return `
+                    <div class="modal-credit-item${isUsed ? '' : ' modal-credit-unused'}">
+                        <div class="modal-credit-checkbox">
+                            <input type="checkbox" id="modalCreditUse_${slug}" ${isUsed ? 'checked' : ''}
+                                   onchange="toggleModalCreditUsage('${slug}', this.checked)"
+                                   title="I use this benefit">
+                        </div>
+                        <div class="modal-credit-content">
+                            <label for="modalCreditUse_${slug}" style="cursor:pointer;">
+                                <div class="modal-credit-name">${creditName}</div>
+                            </label>
+                            ${creditDescription ? `<div class="modal-credit-description">${creditDescription}</div>` : ''}
+                            ${!isUsed ? '<div class="modal-credit-note">Not counted — you said you don\'t use this</div>' : ''}
+                        </div>
+                        <div class="modal-credit-value">${isUsed ? valueDisplay : '$0'}</div>
                     </div>
                 `;
             }).join('');
 
             creditsList.innerHTML = `<div class="modal-credits-list">${creditsHtml}</div>`;
             creditsSection.style.display = 'block';
+        }
+
+        async function toggleModalCreditUsage(slug, checked) {
+            try {
+                await UserDataManager.saveCreditPreferences({ [slug]: checked });
+                if (currentModalCard) {
+                    await populateCardCredits(currentModalCard.credits || []);
+                }
+            } catch (error) {
+                console.error('Error updating credit preference:', error);
+            }
         }
 
         async function updateModalOwnershipButton(cardId) {
