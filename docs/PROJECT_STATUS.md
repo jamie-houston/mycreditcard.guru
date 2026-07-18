@@ -88,6 +88,12 @@ Detail archived — see pointers under "Where everything else went."
       aren't under-ranked before the portfolio comparison (which does count
       them). Guard the reconciliation invariant — the label is display-only.
 
+### Technical Debt & Refactoring
+- [ ] **Standardize Card Metadata & Rule Representation**
+      Implement validation schemas (e.g. via Pydantic or Django JSON schemas) for `CreditCard.metadata` to prevent typos (like `once_per_life_time`) during imports. Refactor the static `ISSUER_RULES` dict in `roadmaps/eligibility.py` into structured classes (`BaseIssuerRule`, `WindowRule`, etc.) to plug in velocity limits cleanly.
+- [ ] **Decouple Test Suite from Database Operations**
+      Refactor tests in `roadmaps/tests.py` so mathematical algorithms (e.g. the 12-month capacity plan scheduler) can be unit-tested using pure Python mocks/dataclasses instead of Django model database fixtures.
+
 ## Operational to-do (not phases)
 
 - [ ] **Manual browser passes** — code has shipped but nothing's been

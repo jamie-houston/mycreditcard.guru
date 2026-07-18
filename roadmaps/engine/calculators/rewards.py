@@ -20,13 +20,15 @@ class RewardsCalculator:
 
     def own_multiplier(self, card: CreditCard) -> float:
         """This card's own points/miles value, ignoring any points program it belongs to."""
+        if hasattr(card, 'reward_value_multiplier') and card.reward_value_multiplier is not None:
+            return float(card.reward_value_multiplier)
         return float(card.metadata.get('reward_value_multiplier', 0.01))
 
     def program_multipliers(self, portfolio_cards: List[CreditCard]) -> dict:
         """{points_program slug: best own multiplier among held cards in that program}."""
         best = {}
         for c in portfolio_cards or []:
-            program = (c.metadata or {}).get('points_program')
+            program = c.points_program.slug if getattr(c, 'points_program_id', None) else (c.metadata or {}).get('points_program')
             if not program:
                 continue
             best[program] = max(best.get(program, 0.0), self.own_multiplier(c))
@@ -36,7 +38,7 @@ class RewardsCalculator:
         """{points_program slug: the held card achieving that program's best multiplier}."""
         best = {}
         for c in portfolio_cards or []:
-            program = (c.metadata or {}).get('points_program')
+            program = c.points_program.slug if getattr(c, 'points_program_id', None) else (c.metadata or {}).get('points_program')
             if not program:
                 continue
             current = best.get(program)
@@ -47,7 +49,7 @@ class RewardsCalculator:
     def effective_multiplier(self, card: CreditCard, program_multipliers: dict = None) -> float:
         """A card's points are worth whatever the best redemption card in the SAME points program can get."""
         own = self.own_multiplier(card)
-        program = (card.metadata or {}).get('points_program')
+        program = card.points_program.slug if getattr(card, 'points_program_id', None) else (card.metadata or {}).get('points_program')
         if not program or not program_multipliers:
             return own
         return max(own, program_multipliers.get(program, 0.0))

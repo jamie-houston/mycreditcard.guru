@@ -436,7 +436,7 @@ class RecommendationEngineOrchestrator:
 
             own_multiplier = self._own_multiplier(card)
             if multiplier > own_multiplier:
-                program = (card.metadata or {}).get('points_program')
+                program = card.points_program.slug if getattr(card, 'points_program_id', None) else (card.metadata or {}).get('points_program')
                 best_card = active_program_best_cards.get(program)
                 best_name = best_card.name if best_card else 'a program card'
                 rewards_breakdown['breakdown'].append(self._info_item(

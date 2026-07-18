@@ -311,7 +311,9 @@ class RecommendationItemCardSerializer(serializers.Serializer):
     def get_redemption(self, obj):
         from .redemption import redemption_guidance_for
         card = obj['card']
-        return redemption_guidance_for(card)
+        request = self.context.get('request')
+        user = request.user if request and hasattr(request, 'user') else None
+        return redemption_guidance_for(card, user=user)
 
 
 

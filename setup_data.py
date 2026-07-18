@@ -54,13 +54,14 @@ def main():
     system_files = [
         'data/input/system/spending_categories.json',
         'data/input/system/issuers.json',
-        'data/input/system/reward_types.json'
+        'data/input/system/reward_types.json',
+        'data/input/system/points_programs.json'
     ]
 
     for file_path in system_files:
         if os.path.exists(file_path):
             total_commands += 1
-            if run_command(f'python manage.py import_cards {file_path}', f'Loading {Path(file_path).name}'):
+            if run_command(f'{sys.executable} manage.py import_cards {file_path}', f'Loading {Path(file_path).name}'):
                 success_count += 1
         else:
             print(f"⚠️  Warning: {file_path} not found, skipping...")
@@ -75,7 +76,7 @@ def main():
         for card_file in sorted(card_files):
             total_commands += 1
             issuer_name = Path(card_file).stem.replace('_', ' ').title()
-            if run_command(f'python manage.py import_cards {card_file}', f'Importing {issuer_name} cards'):
+            if run_command(f'{sys.executable} manage.py import_cards {card_file}', f'Importing {issuer_name} cards'):
                 success_count += 1
     else:
         print("⚠️  Warning: No card files found in data/input/cards/")

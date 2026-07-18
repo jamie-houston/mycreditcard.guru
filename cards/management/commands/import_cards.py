@@ -7,7 +7,7 @@ from django.contrib.auth.models import User
 from cards.models import (
     Issuer, RewardType, SpendingCategory, CreditCard, 
     RewardCategory, CardCredit, UserSpendingProfile, UserCard,
-    SpendingCredit
+    SpendingCredit, PointsProgram, PointsValuation
 )
 
 
@@ -45,6 +45,8 @@ class Command(BaseCommand):
             self.import_issuers(data)
         elif filename == 'reward_types.json':
             self.import_reward_types(data)
+        elif filename == 'points_programs.json':
+            self.import_points_programs(data)
         elif filename == 'spending_categories.json':
             self.import_spending_categories(data)
         elif filename == 'credit_cards.json':
@@ -113,6 +115,39 @@ class Command(BaseCommand):
             )
             if created:
                 self.stdout.write(f'Created reward type: {reward_type.name}')
+
+    def import_points_programs(self, points_programs):
+        for program_data in points_programs:
+            program, created = PointsProgram.objects.get_or_create(
+                slug=program_data['slug'],
+                defaults={
+                    'name': program_data['name'],
+                    'portal_url': program_data.get('portal_url'),
+                    'transfer_partners': program_data.get('transfer_partners', []),
+                    'note': program_data.get('note', ''),
+                }
+            )
+            if not created:
+                # Update existing program
+                program.name = program_data['name']
+                program.portal_url = program_data.get('portal_url')
+                program.transfer_partners = program_data.get('transfer_partners', [])
+                program.note = program_data.get('note', '')
+                program.save()
+                self.stdout.write(f'Updated points program: {program.name}')
+            else:
+                self.stdout.write(f'Created points program: {program.name}')
+
+            # Create or update default valuation (user=None)
+            if 'default_valuation' in program_data:
+                val, val_created = PointsValuation.objects.get_or_create(
+                    points_program=program,
+                    user=None,
+                    defaults={'value': program_data['default_valuation']}
+                )
+                if not val_created:
+                    val.value = program_data['default_valuation']
+                    val.save()
 
     def import_spending_categories(self, categories):
         for category_data in categories:

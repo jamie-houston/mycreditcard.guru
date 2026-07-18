@@ -1,0 +1,32 @@
+[
+  {
+    "name": "Chase Ultimate Rewards",
+    "slug": "chase_ultimate_rewards",
+    "portal_url": "https://www.chase.com/personal/credit-cards/ultimate-rewards",
+    "transfer_partners": [
+      "United MileagePlus",
+      "Southwest Rapid Rewards",
+      "World of Hyatt",
+      "Marriott Bonvoy",
+      "British Airways Executive Club",
+      "Air Canada Aeroplan"
+    ],
+    "note": "Best value transferring to airline/hotel partners or booking travel through the Chase portal (Sapphire Reserve/Preferred or Ink Business Preferred cardholders get the boosted portal rate).",
+    "default_valuation": 0.0150
+  },
+  {
+    "name": "Amex Membership Rewards",
+    "slug": "amex_membership_rewards",
+    "portal_url": "https://global.americanexpress.com/rewards/membershiprewards",
+    "transfer_partners": [
+      "Delta SkyMiles",
+      "British Airways Executive Club",
+      "Air Canada Aeroplan",
+      "Air France-KLM Flying Blue",
+      "Marriott Bonvoy",
+      "Hilton Honors"
+    ],
+    "note": "Best value transferring to airline/hotel partners; Pay With Points and Amex Travel redemptions run well below that.",
+    "default_valuation": 0.0100
+  }
+]

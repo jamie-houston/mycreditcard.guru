@@ -1304,3 +1304,45 @@ class RedemptionGuidanceTests(TestCase):
         self.assertIsNone(guidance['program_label'])
         self.assertEqual(guidance['portal_url'], 'https://issuer.example.com/rewards')
         self.assertNotIn('statement credit', guidance['note'])
+
+    def test_custom_user_valuation_override(self):
+        from .redemption import redemption_guidance_for
+        from django.contrib.auth.models import User
+        from cards.models import PointsProgram, PointsValuation
+
+        # Create points program
+        program = PointsProgram.objects.create(
+            name='Test Ultimate Rewards',
+            slug='chase_ultimate_rewards',
+            portal_url='https://www.chase.com',
+            transfer_partners=['Hyatt', 'United'],
+            note='Test note'
+        )
+
+        card = self._card('Chase Card', self.points,
+                           metadata={'points_program': 'chase_ultimate_rewards'})
+        # Verify the program was linked to the card automatically via save()
+        self.assertEqual(card.points_program, program)
+
+        # Create system default valuation
+        PointsValuation.objects.create(
+            points_program=program,
+            user=None,
+            value=0.0150
+        )
+
+        # Create user and user valuation override
+        user = User.objects.create_user(username='testuser', email='test@example.com', password='password')
+        PointsValuation.objects.create(
+            points_program=program,
+            user=user,
+            value=0.0200
+        )
+
+        # Test anonymous/no-user guidance returns system default (0.015)
+        guidance_anon = redemption_guidance_for(card)
+        self.assertEqual(guidance_anon['value_per_point'], 0.015)
+
+        # Test authenticated user guidance returns user override (0.020)
+        guidance_user = redemption_guidance_for(card, user=user)
+        self.assertEqual(guidance_user['value_per_point'], 0.020)

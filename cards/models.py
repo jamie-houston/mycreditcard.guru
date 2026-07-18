@@ -23,6 +23,32 @@ class RewardType(models.Model):
         return self.name
 
 
+class PointsProgram(models.Model):
+    name = models.CharField(max_length=100)
+    slug = models.SlugField(unique=True)
+    portal_url = models.URLField(max_length=500, blank=True, null=True)
+    transfer_partners = models.JSONField(default=list, blank=True)
+    note = models.TextField(blank=True)
+
+    def __str__(self):
+        return self.name
+
+
+class PointsValuation(models.Model):
+    points_program = models.ForeignKey(PointsProgram, on_delete=models.CASCADE, related_name='valuations')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True, related_name='points_valuations')
+    value = models.DecimalField(max_digits=6, decimal_places=4)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ['points_program', 'user']
+
+    def __str__(self):
+        user_str = self.user.username if self.user else "System Default"
+        return f"{self.points_program.name} - {self.value} ({user_str})"
+
+
 class SpendingCategory(models.Model):
     name = models.CharField(max_length=100, unique=True)
     slug = models.SlugField(unique=True)
@@ -75,11 +101,35 @@ class CreditCard(models.Model):
     # JSON field for additional metadata (including signup_bonus.referral_url)
     metadata = models.JSONField(default=dict, blank=True)
     
+    points_program = models.ForeignKey(PointsProgram, on_delete=models.SET_NULL, null=True, blank=True, related_name='cards')
+    reward_value_multiplier = models.DecimalField(max_digits=6, decimal_places=4, default=0.01)
+    
     class Meta:
         unique_together = ['name', 'issuer']
     
     def __str__(self):
         return f"{self.issuer.name} {self.name}"
+
+    def save(self, *args, **kwargs):
+        # Extract points_program from metadata if not explicitly set or if metadata has updated
+        if self.metadata and 'points_program' in self.metadata:
+            program_slug = self.metadata['points_program']
+            if program_slug:
+                program, _ = PointsProgram.objects.get_or_create(
+                    slug=program_slug,
+                    defaults={'name': program_slug.replace('_', ' ').title()}
+                )
+                self.points_program = program
+            else:
+                self.points_program = None
+        
+        # Extract reward_value_multiplier from metadata if not explicitly set or if metadata has updated
+        if self.metadata and 'reward_value_multiplier' in self.metadata:
+            self.reward_value_multiplier = self.metadata['reward_value_multiplier']
+        elif not self.reward_value_multiplier:
+            self.reward_value_multiplier = 0.01
+
+        super().save(*args, **kwargs)
     
     @property
     def referral_url(self):
