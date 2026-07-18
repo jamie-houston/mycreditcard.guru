@@ -202,8 +202,16 @@ class RecommendationEngine:
             # Shrinking the set can only free up budget, never take it away
             # (removing entries can't increase any prefix's committed
             # total), so a bonus counted here was already counted upstream.
+            # Points pooling: use the same held set (kept cards + the final
+            # applies) as upstream so this recompute's bonus-value density
+            # order agrees with the capacity_plan that already decided what
+            # counts (_generate_portfolio_optimized_recommendations).
+            sequencing_held_cards = (
+                [rec['card'] for rec in current_card_actions if rec['action'] == 'keep']
+                + [rec['card'] for rec in selected_applies])
+            sequencing_program_multipliers = self._program_multipliers(sequencing_held_cards)
             sequence_plan = self._bonus_capacity_plan(
-                [rec['card'] for rec in selected_applies])
+                [rec['card'] for rec in selected_applies], sequencing_program_multipliers)
             if abs(sequence_plan['months_committed'] - months_committed) > 0.05:
                 logger.warning(
                     f"Sequencing plan months_committed "
@@ -447,13 +455,19 @@ class RecommendationEngine:
         held_cards = [ca['card'] for ca in best_portfolio if ca['action'] in ('keep', 'apply')]
         portfolio_allocation = self._calculate_portfolio_allocation(held_cards)
         credit_allocation = self._allocate_portfolio_credits(held_cards)
+        # A card's points are valued at the best same-program multiplier
+        # actually held, not just its own (see _effective_multiplier) —
+        # computed once over the held set, consulted by every display site
+        # below so the reconciliation guard holds by construction.
+        program_multipliers = self._program_multipliers(held_cards)
+        program_best_cards = self._program_best_cards(held_cards)
 
         # Bonus capacity, computed once over the final apply set so display
         # agrees with selection: a bonus that didn't fit the 12-month budget
         # shows $0 here too (see _bonus_capacity_plan). Stashed for Step 3's
         # sequencing, which reuses this same computation.
         apply_cards = [ca['card'] for ca in best_portfolio if ca['action'] == 'apply']
-        capacity_plan = self._bonus_capacity_plan(apply_cards)
+        capacity_plan = self._bonus_capacity_plan(apply_cards, program_multipliers)
         self._last_capacity_plan = capacity_plan
 
         # Convert optimal portfolio to recommendations
@@ -469,19 +483,37 @@ class RecommendationEngine:
                 # Shows the honest cost of keeping rather than the bare fee.
                 cancel_allocation = self._calculate_portfolio_allocation(held_cards + [card])
                 cancel_credit_allocation = self._allocate_portfolio_credits(held_cards + [card])
+                cancel_program_multipliers = self._program_multipliers(held_cards + [card])
+                cancel_program_best_cards = self._program_best_cards(held_cards + [card])
                 rewards_breakdown = self._calculate_card_allocated_breakdown(
-                    card, cancel_allocation, cancel_credit_allocation)
+                    card, cancel_allocation, cancel_credit_allocation, cancel_program_multipliers)
+                active_program_best_cards = cancel_program_best_cards
             else:
                 rewards_breakdown = self._calculate_card_allocated_breakdown(
-                    card, portfolio_allocation, credit_allocation)
+                    card, portfolio_allocation, credit_allocation, program_multipliers)
+                active_program_best_cards = program_best_cards
             annual_rewards = rewards_breakdown['total_rewards']
             annual_fee = float(card.annual_fee)
             multiplier = rewards_breakdown['reward_multiplier']
 
+            # Pooling lifted this card's points value above its own — a $0
+            # info line so the "why" is visible; the dollar lift is already
+            # baked into the line items above, so the reconciliation guard
+            # (below) holds by construction.
+            own_multiplier = self._own_multiplier(card)
+            if multiplier > own_multiplier:
+                program = (card.metadata or {}).get('points_program')
+                best_card = active_program_best_cards.get(program)
+                best_name = best_card.name if best_card else 'a program card'
+                rewards_breakdown['breakdown'].append(self._info_item(
+                    f"Points valued via {best_name}",
+                    f"{card.name}'s points valued at {multiplier * 100:.2f}¢ each "
+                    f"(redeemed via {best_name}) instead of {own_multiplier * 100:.2f}¢ on its own"))
+
             eligibility_note = ''
             bonus_deferred = False
             if action == 'apply':
-                signup_bonus_value = self._get_signup_bonus_value(card)
+                signup_bonus_value = self._get_signup_bonus_value(card, program_multipliers)
                 annual_fee_waived = card.metadata.get('annual_fee_waived_first_year', False)
                 effective_fee = 0 if annual_fee_waived else annual_fee
                 # Ongoing value reflects steady state — no bonus, no
@@ -612,6 +644,52 @@ class RecommendationEngine:
     def _total_monthly_spending(self) -> float:
         return sum(float(amount) for amount in self.spending_amounts.values())
 
+    def _own_multiplier(self, card: CreditCard) -> float:
+        """This card's own points/miles value, ignoring any points program
+        it belongs to. The one place the raw metadata key is read."""
+        return float(card.metadata.get('reward_value_multiplier', 0.01))
+
+    def _program_multipliers(self, portfolio_cards: List[CreditCard]) -> dict:
+        """{points_program slug: best own multiplier among held cards in
+        that program}. Cards with no metadata.points_program don't pool —
+        same-program pooling only, no transfer-partner modeling."""
+        best = {}
+        for c in portfolio_cards or []:
+            program = (c.metadata or {}).get('points_program')
+            if not program:
+                continue
+            best[program] = max(best.get(program, 0.0), self._own_multiplier(c))
+        return best
+
+    def _program_best_cards(self, portfolio_cards: List[CreditCard]) -> dict:
+        """{points_program slug: the held card achieving that program's best
+        multiplier} — the same "best" as _program_multipliers, but keeping
+        the card object for the display-only "points valued via {card}"
+        note. Selection sites only need the numeric map; this is for
+        _generate_portfolio_optimized_recommendations alone."""
+        best = {}
+        for c in portfolio_cards or []:
+            program = (c.metadata or {}).get('points_program')
+            if not program:
+                continue
+            current = best.get(program)
+            if current is None or self._own_multiplier(c) > self._own_multiplier(current):
+                best[program] = c
+        return best
+
+    def _effective_multiplier(self, card: CreditCard, program_multipliers: dict = None) -> float:
+        """A card's points are worth whatever the best redemption card in
+        the SAME points program (actually held) can get for them — e.g.
+        Chase Freedom points earned are worth Sapphire Reserve's rate if a
+        Reserve is also held. Falls back to the card's own multiplier when
+        it has no program, or when no portfolio context is given (solo
+        scoring: a lone card is its own portfolio, so max(own, own) = own)."""
+        own = self._own_multiplier(card)
+        program = (card.metadata or {}).get('points_program')
+        if not program or not program_multipliers:
+            return own
+        return max(own, program_multipliers.get(program, 0.0))
+
     def _bonus_months_needed(self, card: CreditCard) -> float:
         """Months of the user's TOTAL spending it takes to meet this card's
         signup requirement — the scarce resource behind bonus sequencing.
@@ -627,7 +705,8 @@ class RecommendationEngine:
             return float('inf')
         return requirement / monthly
 
-    def _bonus_capacity_plan(self, cards: List[CreditCard]) -> dict:
+    def _bonus_capacity_plan(self, cards: List[CreditCard],
+                             program_multipliers: dict = None) -> dict:
         """Single capacity authority: which of these cards' signup bonuses
         fit within BONUS_CAPACITY_MONTHS of the user's spending this year.
 
@@ -648,6 +727,12 @@ class RecommendationEngine:
         the same portfolio always yields the same counted/uncounted split
         — and the walk order doubles as the sequencing order.
 
+        program_multipliers (optional): {points_program: multiplier} from
+        _program_multipliers(held_cards) — points/miles bonuses pool the
+        same as ongoing rewards (a bonus paid in UR is worth more if a
+        Sapphire Reserve is also held). Callers pass the full held set
+        (keep + apply), not just these candidate cards.
+
         Returns:
             by_card_id: {card.id: {'bonus_value', 'months', 'counted',
                          'start_month'}} ('start_month' is None when
@@ -657,7 +742,7 @@ class RecommendationEngine:
         """
         entries = [{
             'card': card,
-            'bonus_value': self._get_signup_bonus_value(card),
+            'bonus_value': self._get_signup_bonus_value(card, program_multipliers),
             'months': self._bonus_months_needed(card),
         } for card in cards]
 
@@ -741,7 +826,12 @@ class RecommendationEngine:
         # Spending must shift from other cards. This card earns its base
         # rate on shifted spend (anything it rated higher already won that
         # category in the allocation).
-        this_mult = float(card.metadata.get('reward_value_multiplier', 0.01))
+        #
+        # Deliberately NOT pooled (own multiplier only, not
+        # _effective_multiplier): this is a second-order opportunity-cost
+        # delta, not the headline reward math, and own is conservative here
+        # — it never overstates the value of chasing this bonus.
+        this_mult = self._own_multiplier(card)
         this_rate = 1.0
         for rc in card.reward_categories.active_on(self.today).select_related('category'):
             if rc.category.slug in self.BASE_CATEGORY_SLUGS:
@@ -757,7 +847,7 @@ class RecommendationEngine:
             if entry['card'] is None:
                 other_value = 0.0
             else:
-                other_mult = float(entry['card'].metadata.get('reward_value_multiplier', 0.01))
+                other_mult = self._own_multiplier(entry['card'])  # see note above
                 other_value = entry['rate'] * other_mult
             sources.append((other_value - this_value, other_value, entry))
         sources.sort(key=lambda s: s[0])  # cheapest opportunity cost first
@@ -1030,10 +1120,10 @@ class RecommendationEngine:
         
         # Allocation spans only the cards the user would hold (the optimal
         # set) — cards being cancelled can't claim category spending.
-        portfolio_allocation = self._calculate_portfolio_allocation(
-            [cd['card'] for cd in optimal_cards])
-        credit_allocation = self._allocate_portfolio_credits(
-            [cd['card'] for cd in optimal_cards])
+        held_for_optimal = [cd['card'] for cd in optimal_cards]
+        portfolio_allocation = self._calculate_portfolio_allocation(held_for_optimal)
+        credit_allocation = self._allocate_portfolio_credits(held_for_optimal)
+        program_multipliers = self._program_multipliers(held_for_optimal)
 
         for uc in self.user_cards:
             if uc.card.id not in optimal_card_ids:
@@ -1041,7 +1131,7 @@ class RecommendationEngine:
 
                 # Use allocated breakdown for consistent values
                 rewards_breakdown = self._calculate_card_allocated_breakdown(
-                    uc.card, portfolio_allocation, credit_allocation)
+                    uc.card, portfolio_allocation, credit_allocation, program_multipliers)
                 annual_rewards = rewards_breakdown['total_rewards']
                 
                 # Skip cancellation recommendations for $0 annual fee cards
@@ -1106,9 +1196,16 @@ class RecommendationEngine:
             # _calculate_scenario_portfolio_value (see _bonus_capacity_plan)
             # — this combination's applies may not be the same set the
             # caller ultimately picks, so it's recomputed per combination.
+            # Points pooling likewise recomputed per combination: which
+            # cards are actually held (keep+apply) determines the effective
+            # multiplier (see _effective_multiplier).
             apply_cards_in_combination = [cd['card'] for cd in card_combination
                                           if cd['action'] == 'apply']
-            combination_capacity_plan = self._bonus_capacity_plan(apply_cards_in_combination)
+            held_cards_in_combination = [cd['card'] for cd in card_combination
+                                         if cd['action'] in ('keep', 'apply')]
+            combination_program_multipliers = self._program_multipliers(held_cards_in_combination)
+            combination_capacity_plan = self._bonus_capacity_plan(
+                apply_cards_in_combination, combination_program_multipliers)
 
             # Calculate credits/benefits value for each card
             for card_data in card_combination:
@@ -1140,7 +1237,7 @@ class RecommendationEngine:
                             'rate': rate,
                             'max_spend': max_spend,
                             'card': card,
-                            'multiplier': card.metadata.get('reward_value_multiplier', 0.01)
+                            'multiplier': self._effective_multiplier(card, combination_program_multipliers)
                         }
             
             # Calculate spending rewards using ONLY the best rate per category
@@ -1355,10 +1452,16 @@ class RecommendationEngine:
         # Capacity-aware: only bonuses that fit this year's 12-month budget
         # count toward the scenario's value — an over-budget bonus can't
         # inflate a portfolio's ranking, only its ongoing value can win it
-        # a slot (see _bonus_capacity_plan).
+        # a slot (see _bonus_capacity_plan). Points pooling: this scenario's
+        # held cards (keep+apply) determine the effective multiplier (see
+        # _effective_multiplier) for both the bonus sum here and the
+        # category reward math below.
         apply_cards_in_scenario = [action['card'] for action in portfolio_cards
                                    if action['action'] == 'apply']
-        capacity_plan = self._bonus_capacity_plan(apply_cards_in_scenario)
+        held_cards_in_scenario = [action['card'] for action in portfolio_cards]
+        scenario_program_multipliers = self._program_multipliers(held_cards_in_scenario)
+        capacity_plan = self._bonus_capacity_plan(
+            apply_cards_in_scenario, scenario_program_multipliers)
 
         for action in portfolio_cards:
             card = action['card']
@@ -1428,9 +1531,10 @@ class RecommendationEngine:
                 reward_rate = rate_data['rate']
                 best_card = rate_data['card']
                 
-                reward_value_multiplier = best_card.metadata.get('reward_value_multiplier', 0.01)
+                reward_value_multiplier = self._effective_multiplier(
+                    best_card, scenario_program_multipliers)
                 points_earned = annual_spend * reward_rate
-                category_rewards = points_earned * float(reward_value_multiplier)
+                category_rewards = points_earned * reward_value_multiplier
                 total_portfolio_rewards += category_rewards
         
         # Handle unallocated spending with best general category (simplified)
@@ -1449,7 +1553,8 @@ class RecommendationEngine:
                         rate = float(reward_category.reward_rate)
                         if rate > best_general_rate:
                             best_general_rate = rate
-                            best_general_multiplier = card.metadata.get('reward_value_multiplier', 0.01)
+                            best_general_multiplier = self._effective_multiplier(
+                                card, scenario_program_multipliers)
             
             general_rewards = unallocated_spending * best_general_rate * float(best_general_multiplier)
             total_portfolio_rewards += general_rewards
@@ -1532,7 +1637,11 @@ class RecommendationEngine:
         return parent_category_spending
     
     def _calculate_smart_card_value(self, card: CreditCard, signup_bonus: bool = True) -> float:
-        """Calculate card value considering actual user spending and category competition"""
+        """Calculate card value considering actual user spending and category competition.
+
+        Deliberately solo (own multiplier, no points pooling): this scores a
+        card on its own before/independent of the combination search — a
+        lone card is its own portfolio (see _effective_multiplier)."""
         if not hasattr(self, '_cached_parent_spending'):
             self._cached_parent_spending = self._build_parent_category_spending()
         
@@ -1567,8 +1676,8 @@ class RecommendationEngine:
                     effective_spend = min(annual_spend, float(reward_category.max_annual_spend))
                 
                 # Calculate rewards: spend * rate * value_multiplier
-                reward_value_multiplier = card.metadata.get('reward_value_multiplier', 0.01)
-                category_rewards = effective_spend * reward_rate * float(reward_value_multiplier)
+                reward_value_multiplier = self._own_multiplier(card)
+                category_rewards = effective_spend * reward_rate * reward_value_multiplier
                 total_rewards += category_rewards
         
         # Add signup bonus if requested
@@ -1844,13 +1953,19 @@ class RecommendationEngine:
         return allocation
 
     def _calculate_card_allocated_breakdown(self, card: CreditCard, portfolio_allocation: list,
-                                            credit_allocation: dict) -> dict:
+                                            credit_allocation: dict,
+                                            program_multipliers: dict = None) -> dict:
         """Breakdown for one card using only the spending allocated to it by
         _calculate_portfolio_allocation and the credits attributed to it by
-        _allocate_portfolio_credits (computed over the same card set)."""
+        _allocate_portfolio_credits (computed over the same card set).
+
+        program_multipliers (optional): {points_program: multiplier} from
+        _program_multipliers(held_cards) — this card's points are valued at
+        the best same-program multiplier actually held, not just its own
+        (see _effective_multiplier)."""
         total_rewards = 0.0
         breakdown_details = []
-        reward_value_multiplier = float(card.metadata.get('reward_value_multiplier', 0.01))
+        reward_value_multiplier = self._effective_multiplier(card, program_multipliers)
 
         for entry in portfolio_allocation:
             if entry['card'] is None or entry['card'].id != card.id:
@@ -1895,12 +2010,18 @@ class RecommendationEngine:
         }
 
     def _calculate_card_rewards_breakdown(self, card: CreditCard) -> dict:
-        """Calculate detailed rewards breakdown for a card"""
+        """Calculate detailed rewards breakdown for a card.
+
+        Deliberately NOT points-pooling-aware (own multiplier only): this is
+        the older standalone per-card breakdown (no portfolio context is
+        passed in), superseded for the canonical display path by
+        _calculate_card_allocated_breakdown, which IS portfolio-relative.
+        Kept as-is to avoid scope creep — see _effective_multiplier."""
         total_rewards = 0.0
         breakdown_details = []
-        
+
         # Get the card's reward value multiplier (how much each point/mile is worth)
-        reward_value_multiplier = card.metadata.get('reward_value_multiplier', 0.01)
+        reward_value_multiplier = self._own_multiplier(card)
         
         # Create a map of spending by category slug and also track all spending
         all_spending = {}
@@ -2100,10 +2221,11 @@ class RecommendationEngine:
             current_cards = [uc.card for uc in self.user_cards]
             allocation = self._calculate_portfolio_allocation(current_cards + [best_card])
             credit_allocation = self._allocate_portfolio_credits(current_cards + [best_card])
+            fallback_program_multipliers = self._program_multipliers(current_cards + [best_card])
             rewards_breakdown = self._calculate_card_allocated_breakdown(
-                best_card, allocation, credit_allocation)
+                best_card, allocation, credit_allocation, fallback_program_multipliers)
             annual_rewards = rewards_breakdown['total_rewards']
-            signup_bonus = self._get_signup_bonus_value(best_card)
+            signup_bonus = self._get_signup_bonus_value(best_card, fallback_program_multipliers)
             annual_fee = float(best_card.annual_fee)
             
             # Calculate net estimated value same as main logic
@@ -2124,12 +2246,18 @@ class RecommendationEngine:
         
         return None
 
-    def _get_signup_bonus_value(self, card: CreditCard) -> float:
+    def _get_signup_bonus_value(self, card: CreditCard,
+                                program_multipliers: dict = None) -> float:
         """Get signup bonus value using card's specific reward value multiplier.
 
         Returns $0 when issuer bonus rules make the bonus unearnable for
         THIS user (see _bonus_ineligibility_note) — the card still competes
-        on ongoing value, matching the unreachable-requirement pathway."""
+        on ongoing value, matching the unreachable-requirement pathway.
+
+        program_multipliers (optional): {points_program: multiplier} from
+        _program_multipliers(held_cards) — a points/miles bonus pools the
+        same way ongoing rewards do (see _effective_multiplier). Omitted by
+        solo pre-sort scoring, which keeps the card's own multiplier."""
         if self._bonus_ineligibility_note(card):
             return 0.0
         if card.signup_bonus_amount and self._can_meet_signup_requirement(card):
@@ -2149,9 +2277,10 @@ class RecommendationEngine:
                 # card's source data is wrong — fix the data, not the math.
                 return float(card.signup_bonus_amount)
             else:
-                # Points/miles need to be converted using reward value multiplier
-                reward_value_multiplier = card.metadata.get('reward_value_multiplier', 0.01)
-                bonus_value = float(card.signup_bonus_amount) * float(reward_value_multiplier)
+                # Points/miles need to be converted using the effective
+                # (pooled, if applicable) reward value multiplier
+                reward_value_multiplier = self._effective_multiplier(card, program_multipliers)
+                bonus_value = float(card.signup_bonus_amount) * reward_value_multiplier
                 return bonus_value
         return 0.0
     
@@ -2360,7 +2489,12 @@ class RecommendationEngine:
             rate = entry['rate']
             annual_spend = entry['annual_spend']
 
-            reward_value_multiplier = float(card.metadata.get('reward_value_multiplier', 0.01))
+            # Deliberately NOT points-pooling-aware (own multiplier only):
+            # this is a separate aggregate summary, not the per-card
+            # reconciliation path (_calculate_card_allocated_breakdown owns
+            # that) — kept as-is to avoid scope creep. See
+            # _effective_multiplier.
+            reward_value_multiplier = self._own_multiplier(card)
             category_rewards = annual_spend * rate * reward_value_multiplier
             total_portfolio_rewards += category_rewards
 

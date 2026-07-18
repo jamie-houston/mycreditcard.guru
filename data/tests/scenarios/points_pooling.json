@@ -1,0 +1,58 @@
+{
+  "description": "Phase J: points-program pooled valuation. A card's points are valued at the best same-program multiplier actually held (metadata.points_program), never across different programs and never without a program tag at all.",
+  "category": "points_pooling",
+  "scenarios": [
+    {
+      "name": "Points Pooling - held premium lifts earner's points value",
+      "description": "Holding UR Premium Test Card (0.02 own multiplier, points_program=test_ur) lifts UR Earner Test Card's points (0.01 own, same program) to 0.02 when applied.",
+      "user_profile": {
+        "spending": {
+          "dining": 400
+        }
+      },
+      "owned_cards": ["ur-premium-test"],
+      "available_cards": ["ur-premium-test", "ur-earner-test"],
+      "max_recommendations": 1,
+      "expected_recommendations": {
+        "actions": ["keep", "apply"],
+        "must_include_cards": ["ur-earner-test", "ur-premium-test"],
+        "min_total_value": 650
+      }
+    },
+    {
+      "name": "Points Pooling - different program does not cross-pool",
+      "description": "MR Premium Test Card (0.02, points_program=test_mr) must NOT lift UR Earner Test Card (test_ur) — different programs never pool (same-program pooling only, no transfer-partner modeling).",
+      "user_profile": {
+        "spending": {
+          "dining": 400
+        }
+      },
+      "owned_cards": ["mr-premium-test"],
+      "available_cards": ["mr-premium-test", "ur-earner-test"],
+      "max_recommendations": 1,
+      "expected_recommendations": {
+        "actions": ["keep", "apply"],
+        "must_include_cards": ["ur-earner-test", "mr-premium-test"],
+        "min_total_value": 340
+      }
+    },
+    {
+      "name": "Points Pooling - card without a points_program never pools",
+      "description": "Premium Grocery Card carries no metadata.points_program at all, so holding it must not lift UR Earner Test Card's multiplier even though its own multiplier is higher. Groceries spending is included so Premium Grocery Card earns enough ($144) to beat its $95 fee and is worth keeping on its own merits.",
+      "user_profile": {
+        "spending": {
+          "dining": 400,
+          "groceries": 200
+        }
+      },
+      "owned_cards": ["premium-grocery-card"],
+      "available_cards": ["premium-grocery-card", "ur-earner-test"],
+      "max_recommendations": 1,
+      "expected_recommendations": {
+        "actions": ["keep", "apply"],
+        "must_include_cards": ["ur-earner-test", "premium-grocery-card"],
+        "min_total_value": 385
+      }
+    }
+  ]
+}

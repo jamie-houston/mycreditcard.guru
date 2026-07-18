@@ -29,12 +29,12 @@ phases complete or requirements change.
 ## Verification gates (run before calling anything done)
 
 ```bash
-venv/bin/python manage.py test                                   # standard suite (110 tests)
-RUN_ALL_SCENARIOS=1 venv/bin/python manage.py test cards.test_json_scenarios   # full sweep: 68/68 must pass
+venv/bin/python manage.py test                                   # standard suite (113 tests)
+RUN_ALL_SCENARIOS=1 venv/bin/python manage.py test cards.test_json_scenarios   # full sweep: 71/71 must pass
 venv/bin/python manage.py run_scenario "Jamie Real" --explain    # acceptance: every line item reconciles
 ```
 
-- The full sweep passes 68/68 as of 2026-07-17. Any failure is a regression.
+- The full sweep passes 71/71 as of 2026-07-18. Any failure is a regression.
 - `run_scenario` (CLI) runs against the **dev DB**, so real cards pollute
   fixture pools. For scenario debugging use the test DB instead:
   `DUMP_SCENARIOS=1 RUN_ALL_SCENARIOS=1 venv/bin/python manage.py test cards.test_json_scenarios`
@@ -86,7 +86,28 @@ Key modules:
   `bonus_capacity.timeline` (applies ascending by start_month, bonus-less
   last) and `bonus_capacity.bonus_less_applies` list. Southwest Companion
   Pass timing is explicitly unmodeled; the density sort-key is where that
-  would slot in later.
+  would slot in later. **Points pooling (Phase G→J)**: a card's points are
+  valued at `max(own multiplier, best same-program multiplier among cards
+  actually HELD)` via `_effective_multiplier(card, program_multipliers)`,
+  where `program_multipliers` comes from `_program_multipliers(held_cards)`
+  — a portfolio-relative map computed once per portfolio/combination, same
+  shape as `_bonus_capacity_plan`. `_own_multiplier(card)` is now the ONLY
+  place the raw `metadata.reward_value_multiplier` key is read (default
+  `0.01`) — every other site goes through one of the three helpers. Threaded
+  into the canonical display path (`_calculate_card_allocated_breakdown`,
+  `_get_signup_bonus_value` — a points/miles bonus pools too) and the three
+  portfolio-valuation sites above; solo pre-sort scoring
+  (`_calculate_smart_card_value`, `_select_optimal_card_combination`) and
+  two legacy/summary paths (`_calculate_card_rewards_breakdown`,
+  `_calculate_portfolio_summary`) deliberately keep the card's own
+  multiplier only, noted inline. When pooling lifts a card, a $0
+  `_info_item` ("Points valued via {redemption card}", from
+  `_program_best_cards(held_cards)`) is appended to its breakdown — the
+  dollar lift already lives in the real line items, so the reconciliation
+  guard holds by construction. Same-program pooling only — no
+  transfer-partner modeling (locked scope). Hand-curated
+  `metadata.points_program` (e.g. `chase_ultimate_rewards`,
+  `amex_membership_rewards`) drives it; cards without the key never pool.
 - `static/js/roadmap-results.js` `_roadmapTimingLabel(recommendedMonth,
   baseDate)` — Phase E Step 6: renders "Apply now" (falsy month) or "Apply
   in ~N month(s) (Mon YYYY)" from `rec.recommended_month` and the roadmap's
@@ -297,8 +318,12 @@ Key modules:
   `data/input/system/spending_categories.json`). `import_spending_credits`
   seeds SpendingCredits. `setup_data.py` does a full fresh setup.
 - Hand-curated metadata (e.g. `bonus_eligibility`, `application_family`,
-  `reward_value_multiplier`) lives in the card JSONs and survives the
-  external refresh.
+  `reward_value_multiplier`, `points_program`) lives in the card JSONs and
+  survives the external refresh. `points_program` (Phase J) is curated on
+  the Chase Ultimate Rewards and Amex Membership Rewards transferable
+  families only (`chase_ultimate_rewards`/`amex_membership_rewards`) — never
+  on co-brand cards that earn their own loyalty currency (Delta, Hilton,
+  Marriott, etc.), which must NOT carry the key.
 
 ## Scenario test system
 

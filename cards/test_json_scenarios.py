@@ -257,14 +257,76 @@ class JSONScenarioTest(JSONScenarioTestBase):
         self.assertAlmostEqual(capacity['months_committed'], 9.0, places=1)
         self.print_scenario_results(scenario, recommendations)
 
+    def test_points_pooling_lifts_earner_multiplier(self):
+        """Phase J: holding UR Premium Test Card (0.02 own, points_program=
+        test_ur) lifts UR Earner Test Card's points (0.01 own, same
+        program) to 0.02 — both the category-reward line item and the
+        signup bonus pool, and a $0 info line names the redemption card."""
+        if not self.scenarios:
+            self.skipTest("No scenarios found in JSON file")
+        scenario = self.get_scenario("Points Pooling - held premium lifts earner's points value")
+        recommendations = self.run_scenario_test(scenario)
+        earner = next(rec for rec in recommendations if rec['card'].slug == 'ur-earner-test')
+
+        self.assertAlmostEqual(float(earner['reward_value_multiplier']), 0.02, places=3,
+                               msg="Pooling must lift the earner to the held premium card's 0.02")
+        dining_line = next(b for b in earner['rewards_breakdown']
+                           if b.get('type') == 'reward_category')
+        self.assertAlmostEqual(dining_line['category_rewards'], 288.0, places=2,
+                               msg="$4,800 x 3.0x x 0.02 = $288 (pooled), not $144 (own 0.01)")
+        self.assertAlmostEqual(float(earner['signup_bonus_value']), 400.0, places=2,
+                               msg="20,000-point bonus at the pooled 0.02 rate = $400, not $200")
+        info_lines = [b for b in earner['rewards_breakdown'] if b.get('type') == 'info']
+        self.assertTrue(
+            any('Points valued via UR Premium Test Card' in b['category_name'] for b in info_lines),
+            "Breakdown must carry a $0 info line naming the redemption card")
+        self.print_scenario_results(scenario, recommendations)
+
+    def test_points_pooling_no_cross_program(self):
+        """Phase J: MR Premium Test Card (0.02, points_program=test_mr)
+        must NOT lift UR Earner Test Card (test_ur) — different programs
+        never pool (same-program pooling only, no transfer partners)."""
+        if not self.scenarios:
+            self.skipTest("No scenarios found in JSON file")
+        scenario = self.get_scenario('Points Pooling - different program does not cross-pool')
+        recommendations = self.run_scenario_test(scenario)
+        earner = next(rec for rec in recommendations if rec['card'].slug == 'ur-earner-test')
+
+        self.assertAlmostEqual(float(earner['reward_value_multiplier']), 0.01, places=3,
+                               msg="A different points_program must never lift the multiplier")
+        self.assertAlmostEqual(float(earner['signup_bonus_value']), 200.0, places=2)
+        self.assertFalse(
+            any('Points valued via' in b.get('category_name', '')
+                for b in earner['rewards_breakdown']),
+            "No cross-program lift means no 'points valued via' info line")
+        self.print_scenario_results(scenario, recommendations)
+
+    def test_points_pooling_requires_program_key(self):
+        """Phase J: Premium Grocery Card carries no metadata.points_program
+        at all (higher own multiplier notwithstanding) — holding it must
+        not lift UR Earner Test Card's multiplier."""
+        if not self.scenarios:
+            self.skipTest("No scenarios found in JSON file")
+        scenario = self.get_scenario('Points Pooling - card without a points_program never pools')
+        recommendations = self.run_scenario_test(scenario)
+        earner = next(rec for rec in recommendations if rec['card'].slug == 'ur-earner-test')
+
+        self.assertAlmostEqual(float(earner['reward_value_multiplier']), 0.01, places=3,
+                               msg="A program-less held card must never lift the multiplier")
+        self.assertFalse(
+            any('Points valued via' in b.get('category_name', '')
+                for b in earner['rewards_breakdown']),
+            "No pooling means no 'points valued via' info line")
+        self.print_scenario_results(scenario, recommendations)
+
     # The broad scenario suite has ~22 stale expectations (card counts and
     # keep/cancel policies written for an older engine; baseline was 27
     # failures before the allocation rework). Math-integrity checks
-    # (breakdown reconciliation, double counting) pass on all 68. Run with:
+    # (breakdown reconciliation, double counting) pass on all 71. Run with:
     #   RUN_ALL_SCENARIOS=1 python manage.py test cards.test_json_scenarios
     # and recalibrate expectations via `run_scenario "<name>" --explain`.
     @unittest.skipUnless(os.environ.get('RUN_ALL_SCENARIOS'),
-                         'set RUN_ALL_SCENARIOS=1 to audit all 68 scenarios')
+                         'set RUN_ALL_SCENARIOS=1 to audit all 71 scenarios')
     def test_all_scenarios(self):
         """Run every JSON scenario against its expectations.
 

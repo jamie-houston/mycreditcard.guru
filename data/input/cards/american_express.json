@@ -59,7 +59,10 @@
     "image_url": "/images/amex/platinum.webp",
     "discontinued": false,
     "verified": true,
-    "slug": "the-platinum-card-from-american-express"
+    "slug": "the-platinum-card-from-american-express",
+    "metadata": {
+      "points_program": "amex_membership_rewards"
+    }
   },
   {
     "name": "American Express Gold Card",
@@ -119,7 +122,10 @@
     "image_url": "/images/amex/gold.webp",
     "discontinued": false,
     "verified": true,
-    "slug": "american-express-gold-card"
+    "slug": "american-express-gold-card",
+    "metadata": {
+      "points_program": "amex_membership_rewards"
+    }
   },
   {
     "name": "Blue Cash Preferred Card from American Express",
@@ -219,7 +225,10 @@
     "url": "https://www.americanexpress.com/us/credit-cards/business/business-credit-cards/american-express-blue-business-plus-credit-card-amex/",
     "image_url": "/images/amex/blue-business-plus.webp",
     "discontinued": false,
-    "slug": "blue-business-plus"
+    "slug": "blue-business-plus",
+    "metadata": {
+      "points_program": "amex_membership_rewards"
+    }
   },
   {
     "name": "Blue Cash Everyday",
@@ -691,7 +700,10 @@
         "weight": 0.25
       }
     ],
-    "slug": "green"
+    "slug": "green",
+    "metadata": {
+      "points_program": "amex_membership_rewards"
+    }
   },
   {
     "name": "Hilton Honors",

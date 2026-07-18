@@ -5,17 +5,17 @@ detail have been archived to mybrain — see the pointers at the bottom. Check
 items off here as they land; when a phase's own detail doc is done, archive
 it the same way and trim this file back down.
 
-Last updated: 2026-07-17
+Last updated: 2026-07-18
 
 ## Planned phases (E–M)
 
 E–I planned in `.claude/plans/look-at-any-outstanding-wild-wirth.md`;
 J–M planned in `.claude/plans/plan-out-the-following-sharded-nest.md`
 (scoping decisions with Jamie, 2026-07-17). Recommended order:
-**E (done) → F (done) → J → K → G → L → M → I** — engine work first, L after G
-(needs G's `CardCredit.offer_type` to tell coupon-book credits from
-always-on perks), I last so analysis views can use program-aware
-valuations.
+**E (done) → F (done) → J (done) → K → G (done) → L → M → I** — engine work
+first, L after G (needs G's `CardCredit.offer_type` to tell coupon-book
+credits from always-on perks), I last so analysis views can use
+program-aware valuations.
 
 - [x] **Phase E — Engine: selection-aware bonus capacity & sequencing**
       Made the greedy optimizer bonus-capacity-aware during selection (not
@@ -79,19 +79,26 @@ valuations.
       scheduled elsewhere.
 - [ ] **Phase I — Roadmap analysis views** Cards × categories matrix,
       per-category value-over-time split, redemption guidance/links per card.
-- [ ] **Phase J — Engine: points-program pooled valuation** If the
-      portfolio holds a higher-redemption card in the same points program
-      (e.g. Sapphire Reserve for Chase UR), value all that program's points
-      at the best held card's multiplier. Hand-curated `points_program`
-      metadata key in `data/input/cards/*.json` (survives external refresh,
-      like `bonus_eligibility`). Engine: centralize the ~15 raw
-      `reward_value_multiplier` reads into one helper first, then make it
-      portfolio-aware (`max(own, best same-program multiplier in
-      portfolio)`); selection values per-combination (same shape as Phase
-      E's capacity plan), pre-sort solo scoring keeps own multiplier; a
-      "points valued via {card}" info line keeps the reconciliation guard
-      holding by construction. Same-program pooling only — no transfer-
-      partner modeling (locked scope). Expect sweep recalibration.
+- [x] **Phase J — Engine: points-program pooled valuation** (2026-07-18). If
+      the portfolio holds a higher-redemption card in the same points
+      program (e.g. Sapphire Reserve for Chase UR), value all that
+      program's points at the best held card's multiplier. Centralized
+      every `reward_value_multiplier` read behind `_own_multiplier`/
+      `_program_multipliers`/`_effective_multiplier` (inert refactor first,
+      verified byte-identical against the pre-change sweep, then activated).
+      Threaded into the canonical display path and the three portfolio-
+      valuation sites (selection stays portfolio-relative); pre-sort solo
+      scoring and two legacy/summary paths deliberately keep the card's own
+      multiplier, noted inline. A $0 "Points valued via {card}" info line
+      keeps the reconciliation guard holding by construction. Same-program
+      pooling only — no transfer-partner modeling (locked scope). Curated
+      hand-tagged `metadata.points_program` on the Chase Ultimate Rewards
+      and Amex Membership Rewards transferable families (not co-brand
+      cards); fixed an inverted real-data multiplier (Chase Sapphire
+      Reserve was priced below the Preferred). New `points_pooling.json`
+      scenario file (3 scenarios) plus 3 dedicated Python assertions. 113
+      standard tests (was 110), 71/71 scenario sweep (was 68/68), "Jamie
+      Real" reconciles.
 - [ ] **Phase K — Multi-player households & per-entity rules** Replace the
       implicit one-person assumption with N personal players + M business
       entities on `UserSpendingProfile`, plus `UserCard.owner` (relax
@@ -168,12 +175,12 @@ sync with production's automated monthly refresh if this also runs locally
 ## Verification quick reference
 
 ```bash
-venv/bin/python manage.py test                                                # standard suite (110 tests)
-RUN_ALL_SCENARIOS=1 venv/bin/python manage.py test cards.test_json_scenarios   # full sweep: 68/68 must pass
+venv/bin/python manage.py test                                                # standard suite (113 tests)
+RUN_ALL_SCENARIOS=1 venv/bin/python manage.py test cards.test_json_scenarios   # full sweep: 71/71 must pass
 venv/bin/python manage.py run_scenario "Jamie Real" --explain                  # every line item reconciles
 ```
 
-Baseline as of 2026-07-17: 110 standard tests green, 68/68 scenario sweep,
+Baseline as of 2026-07-18: 113 standard tests green, 71/71 scenario sweep,
 "Jamie Real" reconciles. Any failure is a regression.
 
 ## Where everything else went

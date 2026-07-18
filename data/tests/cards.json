@@ -969,5 +969,92 @@
       }
     ],
     "slug": "seq-order-card-2"
+  },
+  {
+    "name": "UR Earner Test Card",
+    "issuer": "Generic Bank",
+    "annual_fee": 0,
+    "signup_bonus_amount": 20000,
+    "signup_bonus_type": "Points",
+    "primary_reward_type": "Points",
+    "metadata": {
+      "reward_value_multiplier": 0.01,
+      "discontinued": false,
+      "points_program": "test_ur",
+      "signup_bonus": {
+        "bonus_amount": 20000,
+        "spending_requirement": 1000,
+        "time_limit_months": 3
+      }
+    },
+    "reward_categories": [
+      {
+        "category": "dining",
+        "reward_rate": 3.0
+      },
+      {
+        "category": "other",
+        "reward_rate": 1.0
+      }
+    ],
+    "slug": "ur-earner-test"
+  },
+  {
+    "name": "UR Premium Test Card",
+    "issuer": "Generic Bank",
+    "annual_fee": 0,
+    "signup_bonus_amount": 50000,
+    "signup_bonus_type": "Points",
+    "primary_reward_type": "Points",
+    "metadata": {
+      "reward_value_multiplier": 0.02,
+      "discontinued": false,
+      "points_program": "test_ur",
+      "signup_bonus": {
+        "bonus_amount": 50000,
+        "spending_requirement": 4000,
+        "time_limit_months": 3
+      }
+    },
+    "reward_categories": [
+      {
+        "category": "travel",
+        "reward_rate": 2.0
+      },
+      {
+        "category": "other",
+        "reward_rate": 1.0
+      }
+    ],
+    "slug": "ur-premium-test"
+  },
+  {
+    "name": "MR Premium Test Card",
+    "issuer": "Generic Bank",
+    "annual_fee": 0,
+    "signup_bonus_amount": 50000,
+    "signup_bonus_type": "Points",
+    "primary_reward_type": "Points",
+    "metadata": {
+      "reward_value_multiplier": 0.02,
+      "discontinued": false,
+      "points_program": "test_mr",
+      "signup_bonus": {
+        "bonus_amount": 50000,
+        "spending_requirement": 4000,
+        "time_limit_months": 3
+      }
+    },
+    "reward_categories": [
+      {
+        "category": "travel",
+        "reward_rate": 2.0
+      },
+      {
+        "category": "other",
+        "reward_rate": 1.0
+      }
+    ],
+    "slug": "mr-premium-test"
   }
 ]

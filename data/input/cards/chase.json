@@ -6,7 +6,8 @@
       "bonus_eligibility": {
         "once_per_lifetime": true,
         "label": "Sapphire bonus: once per lifetime per card"
-      }
+      },
+      "points_program": "chase_ultimate_rewards"
     },
     "annual_fee": 795,
     "signup_bonus": {
@@ -15,7 +16,7 @@
       "time_limit_months": 3
     },
     "reward_type": "Points",
-    "reward_value_multiplier": 0.01,
+    "reward_value_multiplier": 0.015,
     "reward_categories": [
       {
         "category": "dining",
@@ -116,7 +117,10 @@
     "image_url": "/images/chase/freedom-unlimited.png",
     "discontinued": false,
     "verified": true,
-    "slug": "chase-freedom-unlimited"
+    "slug": "chase-freedom-unlimited",
+    "metadata": {
+      "points_program": "chase_ultimate_rewards"
+    }
   },
   {
     "name": "Chase Sapphire Preferred Card",
@@ -125,7 +129,8 @@
       "bonus_eligibility": {
         "once_per_lifetime": true,
         "label": "Sapphire bonus: once per lifetime per card"
-      }
+      },
+      "points_program": "chase_ultimate_rewards"
     },
     "annual_fee": 95,
     "signup_bonus": {
@@ -187,7 +192,8 @@
       "bonus_eligibility": {
         "once_per_lifetime": true,
         "label": "Sapphire bonus: once per lifetime per card"
-      }
+      },
+      "points_program": "chase_ultimate_rewards"
     },
     "annual_fee": 795,
     "signup_bonus": {
@@ -473,7 +479,10 @@
     "image_url": "/images/chase/freedom-flex.png",
     "discontinued": false,
     "verified": true,
-    "slug": "chase-freedom-flex"
+    "slug": "chase-freedom-flex",
+    "metadata": {
+      "points_program": "chase_ultimate_rewards"
+    }
   },
   {
     "name": "Iberia Signature",
@@ -607,7 +616,10 @@
     "image_url": "/images/chase/ink-business-preferred.png",
     "discontinued": false,
     "verified": true,
-    "slug": "ink-business-preferred-credit-card"
+    "slug": "ink-business-preferred-credit-card",
+    "metadata": {
+      "points_program": "chase_ultimate_rewards"
+    }
   },
   {
     "name": "Ink Business Cash Credit Card",
@@ -652,7 +664,10 @@
     "image_url": "/images/chase/ink-business-cash.png",
     "discontinued": false,
     "verified": true,
-    "slug": "ink-business-cash-credit-card"
+    "slug": "ink-business-cash-credit-card",
+    "metadata": {
+      "points_program": "chase_ultimate_rewards"
+    }
   },
   {
     "name": "Ink Business Unlimited Credit Card",
@@ -677,7 +692,10 @@
     "image_url": "/images/chase/ink-business-unlimited.png",
     "discontinued": false,
     "verified": true,
-    "slug": "ink-business-unlimited-credit-card"
+    "slug": "ink-business-unlimited-credit-card",
+    "metadata": {
+      "points_program": "chase_ultimate_rewards"
+    }
   },
   {
     "name": "Ink Business Premier",
@@ -1425,6 +1443,9 @@
         "category": "other",
         "reward_rate": 1
       }
-    ]
+    ],
+    "metadata": {
+      "points_program": "chase_ultimate_rewards"
+    }
   }
 ]
