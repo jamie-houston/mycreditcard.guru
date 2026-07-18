@@ -174,3 +174,65 @@ engine side (archived — Phase E's code is done).
    (same `generated_at`, same math).
 5. Open the roadmap's public share link (logged out). Expect: WHEN labels
    and the capacity note render the same way on the read-only page.
+
+---
+
+## Phase F: Ownership consolidation & line-item polish (2026-07-17)
+
+Covers F4 (bonus_shift $0 filter + aggregation in `roadmap-results.js`) and
+F5 (all `UserCard` ownership CRUD moved from `users/` onto `cards/`, with
+every frontend caller repointed). Automated coverage is green (109 standard
+tests incl. new `cards/tests.py` `UserCardOwnershipSoftCloseTests` /
+`UserCardToggleEndpointTests`, 67/67 scenario sweep, `node
+scripts/test_roadmap_results.js`) — this pass is about the UI wiring, which
+tests don't touch. See `CLAUDE.md`'s "Card ownership (`UserCard`) lives
+entirely in `cards/`" bullet and `docs/PLAN_PHASE_F_OWNERSHIP_CLEANUP.md`
+for implementation detail.
+
+### 1. F4 — Bonus-window opportunity cost row
+1. Generate a roadmap where an apply recommendation shifts spending from
+   another owned card to meet a signup bonus (e.g. Jamie's real spending
+   profile — several applies shift spend). Expect: **one** "🔁 Bonus-window
+   opportunity cost" row per such card (not one row per shifted source),
+   signed correctly (net negative usually — shifted spend earns a worse
+   rate on the new card), and hovering it shows a tooltip with the
+   per-source breakdown.
+2. If a recommendation's shifts happen to net to ~$0, confirm **no** row
+   renders for it (rather than a pointless "+$0" line).
+
+### 2. F5 — Card ownership through every entry point
+Run each of these as **both** an authenticated user and an anonymous
+session (anon uses localStorage, should behave identically from the UI).
+
+3. **Card browse page** (`/cards/`): click "I have this card" on an unowned
+   card. Expect: chip flips to "OWNED", button becomes "Remove". Click it
+   again to remove. Expect: chip disappears, button flips back. Reload the
+   page after each step to confirm the state persisted server-side (auth)
+   or in localStorage (anon).
+4. **Card ownership modal** (`/cards/` → click a card → add/edit details):
+   add a card with a nickname + opened date, then edit just the nickname.
+   Expect: both save correctly and show up in the profile's "Active cards"
+   table.
+5. **Profile page** (`/profile/`): use the card search to add a new card.
+   Confirm it appears immediately in "Active cards" without a reload.
+   Delete it from the table. Confirm it disappears and does **not**
+   reappear after a reload (soft-close, not stuck in a weird state).
+6. **Generic card-detail modal** (open a card from anywhere — cards list,
+   category detail, roadmap results): use "I have this card" / "Edit card
+   details" from inside the modal. Expect: same behavior as steps 3–4,
+   confirms `base.html`'s `UserDataManager` methods work from every call
+   site, not just the page that happens to open the modal first.
+7. **Re-add after remove** (the F2/F5 risk spot): remove a card via any
+   entry point above, then immediately re-add the *same* card via a
+   *different* entry point (e.g. remove from profile, re-add from the
+   generic modal). Expect: it comes back as a **single** active row with
+   sensible nickname/opened_date (not duplicated, not stuck closed) — this
+   exercises the `unique_together` reopen fix in `add_user_card`/
+   `toggle_user_card`.
+8. **Roadmap results** (`/roadmap/`): on a keep/cancel recommendation,
+   click "Remove from my cards". Expect: button shows "Removed", a success
+   toast appears. Regenerate the roadmap and confirm the card no longer
+   shows as owned/keep. Then re-add it via the card browse page and
+   confirm eligibility rules (e.g. Chase 5/24 count) still reflect its
+   full history — not reset — since the removal was a soft-close, not a
+   delete.

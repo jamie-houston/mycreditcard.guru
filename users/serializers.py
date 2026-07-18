@@ -2,7 +2,7 @@ from rest_framework import serializers
 from django.contrib.auth.models import User
 from .models import UserProfile, UserPreferences
 from cards.models import UserCard, UserSpendingProfile, SpendingAmount
-from cards.serializers import CreditCardListSerializer, SpendingCategorySerializer, UserCardSerializer
+from cards.serializers import CreditCardListSerializer, SpendingCategorySerializer
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -20,9 +20,6 @@ class UserProfileSerializer(serializers.ModelSerializer):
         fields = ['user', 'preferred_issuer', 'preferred_reward_type', 'max_annual_fee', 'created_at', 'updated_at']
         read_only_fields = ['created_at', 'updated_at']
 
-
-# UserCardSerializer moved to cards.serializers to avoid duplication
-# Import from cards.serializers import UserCardSerializer
 
 
 class UserSpendingSerializer(serializers.ModelSerializer):
@@ -77,9 +74,9 @@ class UserDataSerializer(serializers.Serializer):
         from cards.models import CreditCard
         # Remove active cards not in the new list. Only touch active
         # (closed_date__isnull=True) rows — soft-closed cards (e.g. via
-        # /api/users/cards/toggle/ remove) must survive untouched, since
-        # eligibility rules (5/24, Amex lifetime, etc.) read full history
-        # including closed cards.
+        # /api/cards/user-cards/toggle/ remove) must survive untouched,
+        # since eligibility rules (5/24, Amex lifetime, etc.) read full
+        # history including closed cards.
         UserCard.objects.filter(
             user=user, closed_date__isnull=True
         ).exclude(card_id__in=cards_data).delete()

@@ -29,12 +29,12 @@ phases complete or requirements change.
 ## Verification gates (run before calling anything done)
 
 ```bash
-venv/bin/python manage.py test                                   # standard suite (103 tests)
+venv/bin/python manage.py test                                   # standard suite (109 tests)
 RUN_ALL_SCENARIOS=1 venv/bin/python manage.py test cards.test_json_scenarios   # full sweep: 67/67 must pass
 venv/bin/python manage.py run_scenario "Jamie Real" --explain    # acceptance: every line item reconciles
 ```
 
-- The full sweep passes 67/67 as of 2026-07-15. Any failure is a regression.
+- The full sweep passes 67/67 as of 2026-07-17. Any failure is a regression.
 - `run_scenario` (CLI) runs against the **dev DB**, so real cards pollute
   fixture pools. For scenario debugging use the test DB instead:
   `DUMP_SCENARIOS=1 RUN_ALL_SCENARIOS=1 venv/bin/python manage.py test cards.test_json_scenarios`
@@ -179,14 +179,35 @@ Key modules:
   in that guard's `line_total + signup_bonus_value - fee_in_headline`
   equation, or the columns will stop adding up to Value/yr.
   "Remove from my cards" on keep/cancel recommendations soft-closes via
-  `POST /api/users/cards/toggle/` (auth) or localStorage (anon) — never the
-  hard-delete `cards/user-cards/<id>/delete/` endpoint, which would erase
-  eligibility history. Note: `/api/users/data/`'s bulk save (`users/
+  `POST /api/cards/user-cards/toggle/` (auth) or localStorage (anon). Note:
+  `/api/users/data/`'s bulk save (`users/
   serializers.py` `UserDataSerializer.create`) only hard-deletes ACTIVE
   (`closed_date__isnull=True`) cards missing from the posted list — it used
   to delete soft-closed rows too (since they're never in that list), which
   would have erased a card's closed_date on the very next roadmap
   generation (`saveCurrentData()` calls this endpoint every time).
+- **Card ownership (`UserCard`) lives entirely in `cards/`** (Phase F5) —
+  the `users/` app's parallel `cards/`, `cards/<pk>/`, `cards/toggle/`,
+  `cards/update-details/`, `cards/details/` endpoints were retired, and
+  every frontend caller (`templates/base.html`'s `UserDataManager`,
+  `static/js/roadmap-results.js`'s `removeCardOwnership`) repointed to the
+  `cards/` equivalents. `cards/urls.py` `user-cards/*`: `GET` (list, all
+  cards incl. closed — used for the browse-page OWNED badge), `POST add/`
+  (create-or-reopen), `POST toggle/` (single-call add/remove ergonomics —
+  add reopens a soft-closed row rather than erroring on the `['user',
+  'card']` `unique_together` constraint or creating a duplicate; remove
+  soft-closes), `PATCH/PUT <id>/` (edit nickname/dates, keyed by `UserCard`
+  id — `base.html`'s `updateCardDetails()` resolves that id from
+  `getUserCardsDetails()` first, since it's only ever handed a `CreditCard`
+  id), `DELETE <id>/delete/` (soft-close). **Every removal path sets
+  `closed_date` — none hard-delete** — eligibility rules (Chase 5/24, BofA
+  2/3/4, Amex lifetime, Citi 48-month) evaluate closed cards' history too.
+  All five endpoints use DRF `permission_classes = [IsAuthenticated]`
+  (anon → 403, not 401 — no `WWW-Authenticate` challenge is configured, so
+  don't add a 401 assertion for these). `cards/serializers.py`
+  `UserCardSerializer` is now defined exactly once (a stale duplicate used
+  to shadow itself depending on which consumer imported it first — fixed
+  in Phase F1).
 - `cards/views.py` `credit_preferences_view` (`GET`/`PUT
   /api/cards/credit-preferences/`) — server-persisted
   `UserSpendingCreditPreference` rows (which spending credits a user values),

@@ -1855,6 +1855,8 @@ class RecommendationEngine:
             if entry['card'] is None or entry['card'].id != card.id:
                 continue
             annual_spend = entry['annual_spend']
+            if annual_spend <= 0:
+                continue
             rate = entry['rate']
             points_earned = annual_spend * rate
             category_rewards = points_earned * reward_value_multiplier

@@ -285,12 +285,23 @@ Plus:
 
 ## Progress
 
-- [ ] F1 — duplicate `UserCardSerializer` fix
-- [ ] F3 — $0 line-item filtering (allocated breakdown builder)
-- [ ] F4 — bonus_shift $0 filter + aggregation
-- [ ] F2 — hard-delete → soft-close (both endpoints)
-- [ ] F5 — structural consolidation onto `cards/`, retire `users/`
-      ownership endpoints, repoint frontend callers
-- [ ] Manual browser pass (F4 + F5)
-- [ ] Docs updated (CLAUDE.md, PROJECT_STATUS.md, this file) in the same
-      commit as the code
+- [x] F1 — duplicate `UserCardSerializer` fix (2026-07-17)
+- [x] F3 — $0 line-item filtering (allocated breakdown builder) (2026-07-17)
+- [x] F4 — bonus_shift $0 filter + aggregation (2026-07-17)
+- [x] F2 — hard-delete → soft-close (both endpoints) (2026-07-17)
+- [x] F5 — structural consolidation onto `cards/`, retire `users/`
+      ownership endpoints, repoint frontend callers (2026-07-17). Added
+      `cards/user-cards/toggle/`; retired `users/`'s `UserCardListView`,
+      `UserCardDetailView`, `toggle_user_card`, `update_user_card_details`,
+      `get_user_cards_details`; repointed `base.html`'s `UserDataManager`
+      (`getUserCardsDetails`, `addCardWithDetails`, `updateCardDetails`,
+      `toggleCardOwnership`) and `roadmap-results.js`'s
+      `removeCardOwnership`; standardized the five surviving `cards/`
+      ownership endpoints on DRF `permission_classes = [IsAuthenticated]`
+      (anon now gets 403, not 401 — no test asserted 401, verified before
+      the change). `/api/users/data/` left untouched per plan. 109
+      standard tests, 67/67 sweep, Jamie Real reconciles.
+- [ ] Manual browser pass (F4 + F5) — automated coverage green; Jamie to
+      run interactively (see `docs/MANUAL_TEST_PLAN.md` Phase F checklist)
+- [x] Docs updated (CLAUDE.md, PROJECT_STATUS.md, this file) in the same
+      commit as the code (2026-07-17)

@@ -12,7 +12,7 @@ Last updated: 2026-07-17
 E–I planned in `.claude/plans/look-at-any-outstanding-wild-wirth.md`;
 J–M planned in `.claude/plans/plan-out-the-following-sharded-nest.md`
 (scoping decisions with Jamie, 2026-07-17). Recommended order:
-**E (done) → F → J → K → G → L → M → I** — engine work first, L after G
+**E (done) → F (done) → J → K → G → L → M → I** — engine work first, L after G
 (needs G's `CardCredit.offer_type` to tell coupon-book credits from
 always-on perks), I last so analysis views can use program-aware
 valuations.
@@ -28,11 +28,22 @@ valuations.
       browser walkthrough (skipped this session per Jamie's call in favor of
       `scripts/test_roadmap_results.js`) — lives on in the operational to-do
       below, not blocking archival.
-- [ ] **Phase F — Cleanup: ownership consolidation & line-item polish**
-      Consolidate `users/` and `cards/` ownership endpoints onto `cards/`
-      (soft-close semantics; stop hard-deleting eligibility history). Fix
-      duplicate `UserCardSerializer` definition bug. Polish $0 line-item
-      filtering and negative `bonus_shift` grouping.
+- [x] **Phase F — Cleanup: ownership consolidation & line-item polish**
+      Consolidated `users/` and `cards/` ownership endpoints onto `cards/`
+      (soft-close semantics; stop hard-deleting eligibility history). Fixed
+      duplicate `UserCardSerializer` definition bug. Polished $0 line-item
+      filtering and negative `bonus_shift` grouping. All 5 steps done
+      (2026-07-17): F1 (duplicate serializer), F3 ($0 line-item guard on
+      the allocated breakdown builder), F4 (bonus_shift aggregation in
+      `roadmap-results.js`, with a new `_roadmapBonusShiftAggregate`
+      pure helper + smoke tests), F2 (hard-delete → soft-close on both
+      `remove_user_card` and the retired `UserCardDetailView`, plus a
+      re-add-after-soft-close reopen fix in `add_user_card`), F5
+      (retired all `users/` ownership endpoints, added `cards/user-cards/
+      toggle/`, repointed every frontend caller, standardized the five
+      surviving endpoints on DRF `IsAuthenticated`). 109 standard tests,
+      67/67 scenario sweep, "Jamie Real" reconciles. Manual browser pass
+      still outstanding (see Operational to-do below).
       **Plan: [PLAN_PHASE_F_OWNERSHIP_CLEANUP.md](PLAN_PHASE_F_OWNERSHIP_CLEANUP.md)**
       (F1–F5 breakdown, recommended order F1→F3→F4→F2→F5, 2026-07-17).
 - [ ] **Phase G — Card data & ownership admin** Add `offer_type` choices
@@ -136,12 +147,12 @@ sync with production's automated monthly refresh if this also runs locally
 ## Verification quick reference
 
 ```bash
-venv/bin/python manage.py test                                                # standard suite (103 tests)
+venv/bin/python manage.py test                                                # standard suite (109 tests)
 RUN_ALL_SCENARIOS=1 venv/bin/python manage.py test cards.test_json_scenarios   # full sweep: 67/67 must pass
 venv/bin/python manage.py run_scenario "Jamie Real" --explain                  # every line item reconciles
 ```
 
-Baseline as of 2026-07-15: 103 standard tests green, 67/67 scenario sweep,
+Baseline as of 2026-07-17: 109 standard tests green, 67/67 scenario sweep,
 "Jamie Real" reconciles. Any failure is a regression.
 
 ## Where everything else went

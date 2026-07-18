@@ -787,9 +787,11 @@
             static async getUserCardsDetails() {
                 if (isAuthenticated) {
                     try {
-                        const response = await fetch(`${API_BASE}/users/cards/details/`);
+                        const response = await fetch(`${API_BASE}/cards/user-cards/`);
                         const data = await response.json();
-                        return data.user_cards || [];
+                        // Active cards only — mirrors the retired
+                        // users/cards/details/ endpoint's server-side filter.
+                        return (data || []).filter(uc => !uc.closed_date);
                     } catch (error) {
                         console.error('Error fetching user cards details:', error);
                         return [];
@@ -809,7 +811,7 @@
             static async addCardWithDetails(cardId, nickname, openedDate) {
                 if (isAuthenticated) {
                     try {
-                        const response = await fetch(`${API_BASE}/users/cards/toggle/`, {
+                        const response = await fetch(`${API_BASE}/cards/user-cards/toggle/`, {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
@@ -841,20 +843,25 @@
             static async updateCardDetails(cardId, nickname, openedDate) {
                 if (isAuthenticated) {
                     try {
-                        const response = await fetch(`${API_BASE}/users/cards/update-details/`, {
-                            method: 'POST',
+                        // The surviving cards/ update endpoint is keyed by
+                        // UserCard id, not CreditCard id — resolve it first.
+                        const userCards = await this.getUserCardsDetails();
+                        const existing = userCards.find(uc => uc.card.id === cardId);
+                        if (!existing) {
+                            return false;
+                        }
+                        const response = await fetch(`${API_BASE}/cards/user-cards/${existing.id}/`, {
+                            method: 'PATCH',
                             headers: {
                                 'Content-Type': 'application/json',
                                 'X-CSRFToken': getCookie('csrftoken')
                             },
                             body: JSON.stringify({
-                                card_id: cardId,
                                 nickname: nickname,
                                 opened_date: openedDate
                             })
                         });
-                        const data = await response.json();
-                        return data.success;
+                        return response.ok;
                     } catch (error) {
                         console.error('Error updating card details:', error);
                         return false;
@@ -900,7 +907,7 @@
                 if (isAuthenticated) {
                     // Sync with authenticated API
                     try {
-                        const response = await fetch(`${API_BASE}/users/cards/toggle/`, {
+                        const response = await fetch(`${API_BASE}/cards/user-cards/toggle/`, {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',

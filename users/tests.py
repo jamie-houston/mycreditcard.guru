@@ -62,14 +62,16 @@ class UserAPITests(TestCase):
 
 
 class SoftCloseSurvivesBulkSaveTests(TestCase):
-    """Regression test: /api/users/cards/toggle/ soft-closes a card via
-    closed_date (never hard-deletes, to preserve eligibility history like
-    Chase 5/24 and Amex-lifetime). The bulk /api/users/data/ save (which
-    index.html's saveCurrentData() calls before every roadmap generation)
-    used to hard-delete any UserCard not in its posted card-id list —
-    including soft-closed ones, since to_representation() already excludes
-    them from that list. That silently destroyed the closed_date history
-    the very next time a roadmap was generated."""
+    """Regression test: /api/cards/user-cards/toggle/ (the Phase F5
+    consolidated home for card-ownership toggling, formerly
+    /api/users/cards/toggle/) soft-closes a card via closed_date (never
+    hard-deletes, to preserve eligibility history like Chase 5/24 and
+    Amex-lifetime). The bulk /api/users/data/ save (which index.html's
+    saveCurrentData() calls before every roadmap generation) used to
+    hard-delete any UserCard not in its posted card-id list — including
+    soft-closed ones, since to_representation() already excludes them from
+    that list. That silently destroyed the closed_date history the very
+    next time a roadmap was generated."""
 
     def setUp(self):
         self.user = User.objects.create_user(
@@ -87,7 +89,7 @@ class SoftCloseSurvivesBulkSaveTests(TestCase):
             user=self.user, card=self.card, opened_date=date(2024, 1, 1))
 
         toggle_response = self.client.post(
-            '/api/users/cards/toggle/',
+            '/api/cards/user-cards/toggle/',
             {'card_id': self.card.id, 'action': 'remove'},
             content_type='application/json')
         self.assertEqual(toggle_response.status_code, 200)

@@ -49,6 +49,25 @@ function _roadmapRewardsValue(rec) {
         .reduce((sum, b) => sum + (parseFloat(b.category_rewards) || 0), 0);
 }
 
+// F4: collapse the (possibly several) bonus_shift breakdown items — one per
+// spending source moved to meet a signup bonus — into a single display row.
+// Returns null when there's nothing to show (no shifts, or they net to $0),
+// otherwise {total, title} where title is the per-source detail for a tooltip.
+function _roadmapBonusShiftAggregate(bonusShifts) {
+    if (!bonusShifts || bonusShifts.length === 0) {
+        return null;
+    }
+    const total = bonusShifts.reduce((sum, item) => sum + item.value, 0);
+    if (Math.round(total) === 0) {
+        return null;
+    }
+    const title = bonusShifts
+        .map(item => item.calculation || item.name)
+        .filter(Boolean)
+        .join('\n');
+    return { total, title };
+}
+
 const ROADMAP_ACTION_LABELS = { apply: 'Apply', keep: 'Keep', cancel: 'Cancel', upgrade: 'Upgrade', downgrade: 'Downgrade' };
 const ROADMAP_ACTION_DANGER = { cancel: true };
 
@@ -110,7 +129,7 @@ async function removeCardOwnership(cardId, cardName, buttonEl) {
     }
     try {
         if (isAuthenticated) {
-            const response = await fetch(`${API_BASE}/users/cards/toggle/`, {
+            const response = await fetch(`${API_BASE}/cards/user-cards/toggle/`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -295,15 +314,16 @@ function renderRoadmapResults(data, opts = {}) {
                             }
                         });
 
-                        bonusShifts.forEach(item => {
-                            const cls = item.value >= 0 ? 'positive' : 'negative';
-                            const sign = item.value >= 0 ? '+' : '-';
+                        const shiftAggregate = _roadmapBonusShiftAggregate(bonusShifts);
+                        if (shiftAggregate) {
+                            const cls = shiftAggregate.total >= 0 ? 'positive' : 'negative';
+                            const sign = shiftAggregate.total >= 0 ? '+' : '-';
                             breakdownHtml += `
-                                <div class="breakdown-item ${cls}" title="${item.calculation}" style="font-size: 0.85em;">
-                                    <span class="item-name">🔁 ${item.name}</span>
-                                    <span class="item-value">${sign}$${Math.abs(item.value).toFixed(0)}</span>
+                                <div class="breakdown-item ${cls}" title="${shiftAggregate.title}" style="font-size: 0.85em;">
+                                    <span class="item-name">🔁 Bonus-window opportunity cost</span>
+                                    <span class="item-value">${sign}$${Math.abs(shiftAggregate.total).toFixed(0)}</span>
                                 </div>`;
-                        });
+                        }
 
                         credits.forEach(item => {
                             if (item.value > 0) {

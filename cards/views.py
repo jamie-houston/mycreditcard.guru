@@ -1,10 +1,12 @@
 from rest_framework import generics, filters, status
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
 from django.db.models import Q
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import Http404
+from django.utils import timezone
 
 from .models import (
     Issuer, RewardType, SpendingCategory, CreditCard,
@@ -648,34 +650,24 @@ def shared_profile_data_view(request, share_uuid):
 
 
 @api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def get_user_cards(request):
     """Get all cards owned by the current user"""
-    if not request.user.is_authenticated:
-        return Response(
-            {'error': 'Authentication required'}, 
-            status=status.HTTP_401_UNAUTHORIZED
-        )
-    
     try:
         user_cards = UserCard.objects.filter(user=request.user).order_by('-opened_date', '-created_at')
         serializer = UserCardSerializer(user_cards, many=True)
         return Response(serializer.data)
     except Exception as e:
         return Response(
-            {'error': str(e)}, 
+            {'error': str(e)},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
 
 
 @api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def add_user_card(request):
     """Add or update a card in user's collection"""
-    if not request.user.is_authenticated:
-        return Response(
-            {'error': 'Authentication required'}, 
-            status=status.HTTP_401_UNAUTHORIZED
-        )
-    
     try:
         card_id = request.data.get('card_id')
         if not card_id:
@@ -706,6 +698,15 @@ def add_user_card(request):
         )
         
         if not created:
+            # Found an existing row for this user+card (unique_together) —
+            # this happens for genuine edits, but also when re-adding a
+            # card that was previously soft-closed via remove_user_card.
+            # 'add' always means "I currently own this card", so reopen it
+            # unless the caller explicitly wants to set/keep a closed_date.
+            if 'closed_date' not in request.data and user_card.closed_date is not None:
+                user_card.closed_date = None
+                user_card.save(update_fields=['closed_date'])
+
             # Update existing card
             serializer = UserCardCreateUpdateSerializer(user_card, data=request.data, partial=True)
             if serializer.is_valid():
@@ -730,14 +731,9 @@ def add_user_card(request):
 
 
 @api_view(['PUT', 'PATCH'])
+@permission_classes([IsAuthenticated])
 def update_user_card(request, user_card_id):
     """Update details of a user's card"""
-    if not request.user.is_authenticated:
-        return Response(
-            {'error': 'Authentication required'}, 
-            status=status.HTTP_401_UNAUTHORIZED
-        )
-    
     try:
         user_card = get_object_or_404(UserCard, id=user_card_id, user=request.user)
         
@@ -765,28 +761,82 @@ def update_user_card(request, user_card_id):
 
 
 @api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
 def remove_user_card(request, user_card_id):
-    """Remove a card from user's collection"""
-    if not request.user.is_authenticated:
-        return Response(
-            {'error': 'Authentication required'}, 
-            status=status.HTTP_401_UNAUTHORIZED
-        )
-    
+    """Remove a card from user's collection.
+
+    Soft-close rather than delete — eligibility rules (Chase 5/24, BofA
+    2/3/4, Amex lifetime, Citi 48-month) evaluate against closed cards'
+    opened/closed/bonus_earned dates, so a hard delete would erase history
+    the engine still needs.
+    """
     try:
         user_card = get_object_or_404(UserCard, id=user_card_id, user=request.user)
         card_name = user_card.display_name
-        user_card.delete()
-        
+        user_card.closed_date = timezone.now().date()
+        user_card.save(update_fields=['closed_date'])
+
         return Response({
             'message': f'Removed {card_name} from your collection'
         })
-        
+
     except Exception as e:
         return Response(
-            {'error': str(e)}, 
+            {'error': str(e)},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def toggle_user_card(request):
+    """Add or remove a card from the user's collection in one call — the
+    single add/remove ergonomics some callers (the card-detail modal's
+    ownership toggle, roadmap results' "Remove from my cards") want instead
+    of a two-step add-then-delete flow. Reopens a soft-closed row on 'add'
+    (see add_user_card's docstring-adjacent comment for why) and soft-closes
+    on 'remove' — never hard-deletes."""
+    card_id = request.data.get('card_id')
+    action = request.data.get('action')
+
+    if not card_id or action not in ('add', 'remove'):
+        return Response(
+            {'error': 'card_id and action (add/remove) required'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    card = get_object_or_404(CreditCard, id=card_id)
+
+    if action == 'add':
+        user_card, created = UserCard.objects.get_or_create(
+            user=request.user,
+            card=card,
+            defaults={
+                'nickname': request.data.get('nickname', ''),
+                'opened_date': request.data.get('opened_date'),
+            }
+        )
+        if not created:
+            if user_card.closed_date is not None:
+                user_card.closed_date = None
+            if 'nickname' in request.data:
+                user_card.nickname = request.data.get('nickname', '')
+            if 'opened_date' in request.data:
+                user_card.opened_date = request.data.get('opened_date')
+            user_card.save()
+        message = 'Card added to your collection'
+    else:
+        UserCard.objects.filter(
+            user=request.user, card=card, closed_date__isnull=True
+        ).update(closed_date=timezone.now().date())
+        message = 'Card removed from your collection'
+
+    return Response({
+        'success': True,
+        'message': message,
+        'card_id': card_id,
+        'action': action
+    })
 
 
 @api_view(['GET'])

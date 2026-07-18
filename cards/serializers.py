@@ -122,15 +122,32 @@ class SpendingAmountSerializer(serializers.ModelSerializer):
         fields = ['id', 'category', 'category_id', 'monthly_amount']
 
 
-# NOTE: This simpler UserCardSerializer is kept for basic operations
-# The more detailed one below (lines 184+) should be used for full CRUD operations
 class UserCardSerializer(serializers.ModelSerializer):
+    """Serializer for UserCard model with detailed ownership information"""
     card = CreditCardListSerializer(read_only=True)
     card_id = serializers.IntegerField(write_only=True)
-    
+    display_name = serializers.ReadOnlyField()
+    is_active = serializers.ReadOnlyField()
+
     class Meta:
         model = UserCard
-        fields = ['id', 'card', 'card_id', 'nickname', 'opened_date', 'is_active']
+        fields = [
+            'id', 'card', 'card_id', 'nickname', 'opened_date', 'closed_date',
+            'notes', 'display_name', 'is_active', 'created_at', 'updated_at'
+        ]
+        read_only_fields = ['created_at', 'updated_at']
+
+    def validate(self, data):
+        """Validate that closed_date is not before opened_date"""
+        opened_date = data.get('opened_date')
+        closed_date = data.get('closed_date')
+
+        if opened_date and closed_date and closed_date < opened_date:
+            raise serializers.ValidationError(
+                "Closed date cannot be before opened date"
+            )
+
+        return data
 
 
 class UserSpendingProfileSerializer(serializers.ModelSerializer):
@@ -181,34 +198,6 @@ class CreateSpendingProfileSerializer(serializers.Serializer):
         # They are no longer part of the UserSpendingProfile serializer
         
         return profile
-
-
-class UserCardSerializer(serializers.ModelSerializer):
-    """Serializer for UserCard model with detailed ownership information"""
-    card = CreditCardListSerializer(read_only=True)
-    card_id = serializers.IntegerField(write_only=True)
-    display_name = serializers.ReadOnlyField()
-    is_active = serializers.ReadOnlyField()
-    
-    class Meta:
-        model = UserCard
-        fields = [
-            'id', 'card', 'card_id', 'nickname', 'opened_date', 'closed_date',
-            'notes', 'display_name', 'is_active', 'created_at', 'updated_at'
-        ]
-        read_only_fields = ['created_at', 'updated_at']
-    
-    def validate(self, data):
-        """Validate that closed_date is not before opened_date"""
-        opened_date = data.get('opened_date')
-        closed_date = data.get('closed_date')
-        
-        if opened_date and closed_date and closed_date < opened_date:
-            raise serializers.ValidationError(
-                "Closed date cannot be before opened date"
-            )
-        
-        return data
 
 
 class UserCardCreateUpdateSerializer(serializers.ModelSerializer):

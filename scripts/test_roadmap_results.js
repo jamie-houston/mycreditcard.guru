@@ -18,7 +18,7 @@ vm.createContext(sandbox);
 vm.runInContext(source, sandbox);
 
 const { _roadmapTimingLabel, _roadmapFormatSigned, _roadmapBenefitsValue,
-        _roadmapRewardsValue } = sandbox;
+        _roadmapRewardsValue, _roadmapBonusShiftAggregate } = sandbox;
 
 function test(name, fn) {
     try {
@@ -69,6 +69,30 @@ test('_roadmapBenefitsValue / _roadmapRewardsValue partition rewards_breakdown',
     };
     assert.strictEqual(_roadmapBenefitsValue(rec), 50);
     assert.strictEqual(_roadmapRewardsValue(rec), 80); // 100 + (-20), info excluded
+});
+
+test('_roadmapBonusShiftAggregate: no shifts renders nothing', () => {
+    assert.strictEqual(_roadmapBonusShiftAggregate([]), null);
+    assert.strictEqual(_roadmapBonusShiftAggregate(undefined), null);
+});
+
+test('_roadmapBonusShiftAggregate: net-zero shifts render nothing', () => {
+    const shifts = [
+        { name: 'Groceries from Card A', value: 22, calculation: '22 earned' },
+        { name: 'Gas from Card B', value: -22, calculation: '22 forgone' },
+    ];
+    assert.strictEqual(_roadmapBonusShiftAggregate(shifts), null);
+});
+
+test('_roadmapBonusShiftAggregate: non-zero shifts produce one aggregated row', () => {
+    const shifts = [
+        { name: 'Groceries from Card A', value: -4.65, calculation: 'calc A' },
+        { name: 'Gas from Card B', value: -33.85, calculation: 'calc B' },
+    ];
+    const result = _roadmapBonusShiftAggregate(shifts);
+    assert.ok(result);
+    assert.strictEqual(Math.round(result.total), -38);
+    assert.strictEqual(result.title, 'calc A\ncalc B');
 });
 
 if (process.exitCode) {
