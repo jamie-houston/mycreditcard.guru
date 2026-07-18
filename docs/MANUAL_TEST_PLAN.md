@@ -236,3 +236,55 @@ session (anon uses localStorage, should behave identically from the UI).
    confirm eligibility rules (e.g. Chase 5/24 count) still reflect its
    full history — not reset — since the removal was a soft-close, not a
    delete.
+
+---
+
+## Phase G: Card data & ownership admin (2026-07-17)
+
+Covers: `CardCredit.offer_type` badge, `UserCard.bonus_earned_date`/
+`bonus_override` in the shared edit-card modal, and the profile "Renews"
+column. Automated coverage is green (110 standard tests incl. new
+`roadmaps/tests.py` `test_bonus_override_false_unblocks_repeat_bonus`,
+68/68 scenario sweep incl. new `data/tests/scenarios/eligibility.json`
+"bonus_override=false unblocks a repeat bonus" scenario) — this pass is
+about the UI wiring and visual correctness, which tests don't touch. See
+`CLAUDE.md`'s Phase G notes (in the "Card ownership" and profile.html
+bullets) for implementation detail.
+
+### 1. Bonus earned date + override (edit modal)
+1. Open a card you own (any entry point — cards list, profile, roadmap
+   results) → "Edit Details". Expect: two new fields below Opening Date —
+   "Bonus Earned Date" (date picker) and "Signup Bonus Status" (Auto / "I
+   earned this bonus" / "I did not earn this bonus").
+2. Set a bonus earned date and choose "I did not earn this bonus", save.
+   Reopen the modal. Expect: both values persisted and re-populate
+   correctly (auth: server round-trip; anon: localStorage).
+3. Confirm the read-only "Your Card Details" section (before clicking Edit)
+   shows the bonus earned date and a "Signup Bonus Status" line reading
+   "Confirmed not earned" (or "Confirmed earned" / "Auto (inferred from
+   issuer rules)" for the other two states).
+4. Pick a scenario where this matters: own a card with a once-per-lifetime
+   or months-since-bonus issuer rule (e.g. an Amex card), mark its bonus
+   override "I did not earn this bonus", then regenerate the roadmap and
+   confirm a fresh application for that same card is recommended with a
+   **non-zero** signup bonus (not the usual "$0, bonus unlikely" note).
+
+### 2. offer_type badge
+5. `offer_type` ships with no curated data yet, so nothing will show by
+   default. To sanity-check the rendering: temporarily set `offer_type`
+   on a `CardCredit` row via `manage.py shell` (e.g.
+   `CardCredit.objects.filter(pk=X).update(offer_type='statement_credit')`),
+   reload the card's detail modal, and confirm a small badge (e.g.
+   "Statement credit") appears next to that credit's name. Revert the
+   change afterward — no fixture data should be left mutated.
+
+### 3. Renews column
+6. On `/profile/`, confirm the "Active cards" table has a new **Renews**
+   column, sortable like the others (click the header to toggle asc/desc).
+7. For a fee-bearing card whose `opened_date` anniversary falls within the
+   next 2 months, confirm the Renews cell is **highlighted** (amber/warning
+   style) and the Signup Date cell is plain (no highlight) — the highlight
+   moved off Signup Date onto Renews as part of this phase's bug fix.
+8. For a no-fee card or one whose anniversary is far off, confirm the
+   Renews cell shows a plain (unhighlighted) date, and that the date shown
+   is next year's anniversary if this year's has already passed.

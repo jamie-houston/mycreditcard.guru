@@ -260,11 +260,11 @@ class JSONScenarioTest(JSONScenarioTestBase):
     # The broad scenario suite has ~22 stale expectations (card counts and
     # keep/cancel policies written for an older engine; baseline was 27
     # failures before the allocation rework). Math-integrity checks
-    # (breakdown reconciliation, double counting) pass on all 67. Run with:
+    # (breakdown reconciliation, double counting) pass on all 68. Run with:
     #   RUN_ALL_SCENARIOS=1 python manage.py test cards.test_json_scenarios
     # and recalibrate expectations via `run_scenario "<name>" --explain`.
     @unittest.skipUnless(os.environ.get('RUN_ALL_SCENARIOS'),
-                         'set RUN_ALL_SCENARIOS=1 to audit all 67 scenarios')
+                         'set RUN_ALL_SCENARIOS=1 to audit all 68 scenarios')
     def test_all_scenarios(self):
         """Run every JSON scenario against its expectations.
 

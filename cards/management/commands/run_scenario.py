@@ -697,7 +697,10 @@ class Command(BaseCommand):
         #   {"card": "card-slug",             -> full history entry, for
         #    "opened_days_ago": 90,              eligibility-rule scenarios
         #    "closed_days_ago": 30,              (5/24 windows, Amex lifetime,
-        #    "bonus_earned_days_ago": 60}        Citi 48-month...)
+        #    "bonus_earned_days_ago": 60,        Citi 48-month...)
+        #    "bonus_override": false}            optional tri-state override
+        #                                         (true=earned, false=didn't,
+        #                                         omitted=infer from rules)
         # Days-ago values keep scenarios evergreen (an absolute date would
         # silently drift out of every eligibility window); absolute
         # "opened_date"/"closed_date"/"bonus_earned_date" ISO strings are
@@ -726,6 +729,7 @@ class Command(BaseCommand):
                     opened_date=parse('opened') or (date.today() - timedelta(days=180)),
                     closed_date=parse('closed'),
                     bonus_earned_date=parse('bonus_earned'),
+                    bonus_override=owned_entry.get('bonus_override'),
                 )
             elif owned_entry in created_cards:
                 UserCard.objects.create(

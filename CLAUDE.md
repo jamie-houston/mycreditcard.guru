@@ -29,12 +29,12 @@ phases complete or requirements change.
 ## Verification gates (run before calling anything done)
 
 ```bash
-venv/bin/python manage.py test                                   # standard suite (109 tests)
-RUN_ALL_SCENARIOS=1 venv/bin/python manage.py test cards.test_json_scenarios   # full sweep: 67/67 must pass
+venv/bin/python manage.py test                                   # standard suite (110 tests)
+RUN_ALL_SCENARIOS=1 venv/bin/python manage.py test cards.test_json_scenarios   # full sweep: 68/68 must pass
 venv/bin/python manage.py run_scenario "Jamie Real" --explain    # acceptance: every line item reconciles
 ```
 
-- The full sweep passes 67/67 as of 2026-07-17. Any failure is a regression.
+- The full sweep passes 68/68 as of 2026-07-17. Any failure is a regression.
 - `run_scenario` (CLI) runs against the **dev DB**, so real cards pollute
   fixture pools. For scenario debugging use the test DB instead:
   `DUMP_SCENARIOS=1 RUN_ALL_SCENARIOS=1 venv/bin/python manage.py test cards.test_json_scenarios`
@@ -113,7 +113,14 @@ Key modules:
   Southwest via card `metadata.bonus_eligibility`) zero the bonus but keep
   the card competing on ongoing value, with a user-facing note. Evaluated
   against full card history INCLUDING closed cards
-  (`UserCard.bonus_earned_date`, approximated when blank).
+  (`UserCard.bonus_earned_date`, approximated when blank). `UserCard.
+  bonus_override` (Phase G) is a tri-state escape hatch over that
+  rule-based inference: `null` (default) infers as before, `True` confirms
+  the user actually earned that prior card's bonus, `False` says they
+  didn't (referred instead of applying, never activated) — `bonus_
+  ineligibility()`'s `prior` list excludes any `False`-overridden card
+  before checking once-per-lifetime/months-since-bonus, so it can't block
+  a new bonus the user never actually got credit for.
 - `roadmaps/serializers.py` — quick-recommendation writes the request
   payload into profile tables to feed the engine, inside an
   **always-rolled-back transaction**. Never let it persist; saving profiles
@@ -207,7 +214,27 @@ Key modules:
   don't add a 401 assertion for these). `cards/serializers.py`
   `UserCardSerializer` is now defined exactly once (a stale duplicate used
   to shadow itself depending on which consumer imported it first — fixed
-  in Phase F1).
+  in Phase F1). Its fields now also include `bonus_earned_date` and
+  `bonus_override` (Phase G) — both editable via `PATCH .../user-cards/
+  <id>/` and surfaced in `base.html`'s shared edit-card modal
+  (`#editCardDetailsModal`, `openEditCardDetailsModal()`/
+  `saveCardDetails()`), the single edit path opened from both the card
+  browse page and `/profile/`. `CardCredit.offer_type` (Phase G, choices:
+  `statement_credit`/`discount`/`points_miles`/`membership`/
+  `companion_pass`/`other`, blank=unknown) is a display-only taxonomy
+  rendered as a small badge next to each credit's name in the same modal
+  (`populateCardCredits()`) — nothing in the engine reads it yet, and no
+  card JSON has been curated with it.
+- `templates/profile.html` `renderCardCollectionTable()`/`buildCardRow()` —
+  the "Active cards" dashboard's sortable columns (`CARD_SORT_COLUMNS`)
+  include a **Renews** column (Phase G) showing the next anniversary of
+  `opened_date` (`nextAnniversary()` helper), highlighted when within 2
+  months and the card carries an annual fee. This replaced a pre-existing
+  bug where the "renewal soon" highlight compared the raw (always-past)
+  `opened_date` straight to `today..+2mo` and could therefore never fire —
+  the fix moved that highlight logic onto the Renews column and rebased it
+  on the anniversary instead. The Signup Date column itself is now
+  unhighlighted, plain formatted dates.
 - `cards/views.py` `credit_preferences_view` (`GET`/`PUT
   /api/cards/credit-preferences/`) — server-persisted
   `UserSpendingCreditPreference` rows (which spending credits a user values),

@@ -161,6 +161,15 @@ class SpendingCredit(models.Model):
 
 
 class CardCredit(models.Model):
+    OFFER_TYPE_CHOICES = [
+        ('statement_credit', 'Statement credit'),
+        ('discount', 'Discount'),
+        ('points_miles', 'Points / miles'),
+        ('membership', 'Membership / subscription'),
+        ('companion_pass', 'Companion pass'),
+        ('other', 'Other'),
+    ]
+
     card = models.ForeignKey(CreditCard, on_delete=models.CASCADE, related_name='credits')
     spending_credit = models.ForeignKey(SpendingCredit, on_delete=models.CASCADE, related_name='card_credits', null=True, blank=True)
     category = models.ForeignKey(SpendingCategory, on_delete=models.CASCADE, null=True, blank=True)  # For category-based credits
@@ -170,6 +179,9 @@ class CardCredit(models.Model):
     weight = models.FloatField(default=1.0)
     currency = models.CharField(max_length=20, default='USD', blank=True)
     is_active = models.BooleanField(default=True)
+    offer_type = models.CharField(
+        max_length=20, choices=OFFER_TYPE_CHOICES, blank=True,
+        help_text="How this credit pays out (display only, not read by the engine)")
     
     def __str__(self):
         return f"{self.card} - {self.description}"
@@ -250,6 +262,11 @@ class UserCard(models.Model):
         null=True, blank=True,
         help_text="Date the signup bonus was earned (feeds issuer bonus-eligibility rules; "
                   "approximated as opened_date + ~3 months when blank)")
+    bonus_override = models.BooleanField(
+        null=True, blank=True,
+        help_text="Manual override of whether this card's signup bonus was earned: "
+                  "null=infer from issuer rules, True=earned it, False=did not "
+                  "(e.g. referred instead of applying, never activated)")
     
     # Metadata
     created_at = models.DateTimeField(auto_now_add=True)

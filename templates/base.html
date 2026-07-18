@@ -183,6 +183,14 @@
                             <div class="modal-info-label">Opening Date</div>
                             <div class="modal-info-value" id="modalUserOpeningDate">Not set</div>
                         </div>
+                        <div class="modal-info-item">
+                            <div class="modal-info-label">Bonus Earned Date</div>
+                            <div class="modal-info-value" id="modalUserBonusEarnedDate">Not set</div>
+                        </div>
+                        <div class="modal-info-item">
+                            <div class="modal-info-label">Signup Bonus Status</div>
+                            <div class="modal-info-value" id="modalUserBonusOverride">Auto (inferred from issuer rules)</div>
+                        </div>
                     </div>
                     <div style="margin-top: 15px;">
                         <button onclick="openEditCardDetailsModal()" class="secondary" style="background: #10b981; color: white;">
@@ -254,13 +262,29 @@
                             style="width: 100%;"
                         >
                     </div>
-                    <div class="form-group" style="margin-bottom: 30px;">
+                    <div class="form-group" style="margin-bottom: 20px;">
                         <label for="cardOpeningDate" style="display: block; margin-bottom: 8px; font-weight: 600;">Opening Date (Optional)</label>
                         <input
                             type="date"
                             id="cardOpeningDate"
                             style="width: 100%; color-scheme: dark;"
                         >
+                    </div>
+                    <div class="form-group" style="margin-bottom: 20px;">
+                        <label for="cardBonusEarnedDate" style="display: block; margin-bottom: 8px; font-weight: 600;">Bonus Earned Date (Optional)</label>
+                        <input
+                            type="date"
+                            id="cardBonusEarnedDate"
+                            style="width: 100%; color-scheme: dark;"
+                        >
+                    </div>
+                    <div class="form-group" style="margin-bottom: 30px;">
+                        <label for="cardBonusOverride" style="display: block; margin-bottom: 8px; font-weight: 600;">Signup Bonus Status</label>
+                        <select id="cardBonusOverride" style="width: 100%; color-scheme: dark;">
+                            <option value="">Auto (infer from issuer rules)</option>
+                            <option value="true">I earned this bonus</option>
+                            <option value="false">I did not earn this bonus</option>
+                        </select>
                     </div>
                     <div style="display: flex; gap: 15px; justify-content: center;">
                         <button type="submit" class="success" style="padding: 12px 24px;">
@@ -840,7 +864,7 @@
                 }
             }
 
-            static async updateCardDetails(cardId, nickname, openedDate) {
+            static async updateCardDetails(cardId, nickname, openedDate, bonusEarnedDate, bonusOverride) {
                 if (isAuthenticated) {
                     try {
                         // The surviving cards/ update endpoint is keyed by
@@ -858,7 +882,9 @@
                             },
                             body: JSON.stringify({
                                 nickname: nickname,
-                                opened_date: openedDate
+                                opened_date: openedDate,
+                                bonus_earned_date: bonusEarnedDate || null,
+                                bonus_override: bonusOverride
                             })
                         });
                         return response.ok;
@@ -868,7 +894,11 @@
                     }
                 } else {
                     // For anonymous users, store in localStorage
-                    LocalStorage.setCardDetails(cardId, { nickname, opened_date: openedDate });
+                    LocalStorage.setCardDetails(cardId, {
+                        nickname, opened_date: openedDate,
+                        bonus_earned_date: bonusEarnedDate || null,
+                        bonus_override: bonusOverride
+                    });
                     return true;
                 }
             }
@@ -879,7 +909,10 @@
                     return userCards.find(uc => uc.card.id === cardId) || null;
                 } else {
                     const cardDetails = LocalStorage.getCardDetails();
-                    return cardDetails[cardId] || { nickname: '', opened_date: null };
+                    return cardDetails[cardId] || {
+                        nickname: '', opened_date: null,
+                        bonus_earned_date: null, bonus_override: null
+                    };
                 }
             }
         }
@@ -1084,6 +1117,25 @@
                         openingDateEl.textContent = 'Not set';
                     }
 
+                    // Show bonus earned date
+                    const bonusEarnedDateEl = document.getElementById('modalUserBonusEarnedDate');
+                    if (cardDetails?.bonus_earned_date) {
+                        const date = new Date(cardDetails.bonus_earned_date);
+                        bonusEarnedDateEl.textContent = date.toLocaleDateString();
+                    } else {
+                        bonusEarnedDateEl.textContent = 'Not set';
+                    }
+
+                    // Show bonus override status
+                    const bonusOverrideEl = document.getElementById('modalUserBonusOverride');
+                    if (cardDetails?.bonus_override === true) {
+                        bonusOverrideEl.textContent = 'Confirmed earned';
+                    } else if (cardDetails?.bonus_override === false) {
+                        bonusOverrideEl.textContent = 'Confirmed not earned';
+                    } else {
+                        bonusOverrideEl.textContent = 'Auto (inferred from issuer rules)';
+                    }
+
                     userDetailsSection.style.display = 'block';
                 } else {
                     userDetailsSection.style.display = 'none';
@@ -1155,6 +1207,21 @@
             return `${fmt(v)}${freqLabel} = ${fmt(annual)}/yr`;
         }
 
+        const OFFER_TYPE_LABELS = {
+            statement_credit: 'Statement credit',
+            discount: 'Discount',
+            points_miles: 'Points / miles',
+            membership: 'Membership',
+            companion_pass: 'Companion pass',
+            other: 'Other',
+        };
+
+        function _offerTypeBadge(offerType) {
+            const label = OFFER_TYPE_LABELS[offerType];
+            if (!label) return '';
+            return `<span class="modal-credit-offer-type" style="font-size: 0.75em; color: var(--muted-2); border: 1px solid var(--border); border-radius: 4px; padding: 1px 6px; margin-left: 6px;">${label}</span>`;
+        }
+
         async function populateCardCredits(credits) {
             const creditsList = document.getElementById('modalCreditsList');
             const creditsSection = document.getElementById('modalCreditsSection');
@@ -1202,11 +1269,13 @@
                 // toggle-able (matches profile.html) — category credits are
                 // counted automatically by the engine whenever the user has
                 // matching spending, so there's nothing to opt in/out of.
+                const offerTypeBadge = _offerTypeBadge(credit.offer_type);
+
                 if (!slug) {
                     return `
                         <div class="modal-credit-item">
                             <div class="modal-credit-content">
-                                <div class="modal-credit-name">${creditName}</div>
+                                <div class="modal-credit-name">${creditName}${offerTypeBadge}</div>
                                 ${creditDescription ? `<div class="modal-credit-description">${creditDescription}</div>` : ''}
                                 <div class="modal-credit-note">Counted automatically based on your spending</div>
                             </div>
@@ -1226,7 +1295,7 @@
                         </div>
                         <div class="modal-credit-content">
                             <label for="modalCreditUse_${slug}" style="cursor:pointer;">
-                                <div class="modal-credit-name">${creditName}</div>
+                                <div class="modal-credit-name">${creditName}${offerTypeBadge}</div>
                             </label>
                             ${creditDescription ? `<div class="modal-credit-description">${creditDescription}</div>` : ''}
                             ${!isUsed ? '<div class="modal-credit-note">Not counted — you said you don\'t use this</div>' : ''}
@@ -1424,6 +1493,10 @@
                 document.getElementById('editModalCardName').textContent = currentModalCard.name;
                 document.getElementById('cardNickname').value = cardDetails?.nickname || '';
                 document.getElementById('cardOpeningDate').value = cardDetails?.opened_date || '';
+                document.getElementById('cardBonusEarnedDate').value = cardDetails?.bonus_earned_date || '';
+                document.getElementById('cardBonusOverride').value =
+                    cardDetails?.bonus_override === true ? 'true' :
+                    cardDetails?.bonus_override === false ? 'false' : '';
 
                 // Show edit modal
                 document.getElementById('editCardDetailsModal').style.display = 'block';
@@ -1438,6 +1511,8 @@
             // Clear form
             document.getElementById('cardNickname').value = '';
             document.getElementById('cardOpeningDate').value = '';
+            document.getElementById('cardBonusEarnedDate').value = '';
+            document.getElementById('cardBonusOverride').value = '';
         }
 
         async function saveCardDetails(event) {
@@ -1448,11 +1523,16 @@
             try {
                 const nickname = document.getElementById('cardNickname').value.trim();
                 const openingDate = document.getElementById('cardOpeningDate').value;
+                const bonusEarnedDate = document.getElementById('cardBonusEarnedDate').value;
+                const bonusOverrideRaw = document.getElementById('cardBonusOverride').value;
+                const bonusOverride = bonusOverrideRaw === '' ? null : bonusOverrideRaw === 'true';
 
                 const success = await UserDataManager.updateCardDetails(
                     currentModalCard.id,
                     nickname,
-                    openingDate
+                    openingDate,
+                    bonusEarnedDate,
+                    bonusOverride
                 );
 
                 if (success) {

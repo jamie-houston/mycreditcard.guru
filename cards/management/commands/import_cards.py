@@ -395,6 +395,7 @@ class Command(BaseCommand):
                 times_per_year=credit_data.get('times_per_year', 1),
                 weight=credit_data.get('weight', 1.0),
                 currency=credit_data.get('currency', 'USD'),
+                offer_type=credit_data.get('offer_type', ''),
             )
 
     def import_personal_cards(self, data):

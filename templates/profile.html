@@ -198,8 +198,23 @@ const CARD_SORT_COLUMNS = [
     { key: 'signup_bonus', label: 'Signup Bonus', type: 'number' },
     { key: 'card_type', label: 'Card Type', type: 'string' },
     { key: 'count', label: 'Count', type: 'number' },
+    { key: 'renewal', label: 'Renews', type: 'date' },
     { key: null, label: 'Actions', type: null }
 ];
+
+// Next annual-fee renewal: the upcoming anniversary (this year if it hasn't
+// passed yet, otherwise next year) of the card's opened_date.
+function nextAnniversary(openedDateStr) {
+    if (!openedDateStr) return null;
+    const opened = new Date(openedDateStr);
+    const todayMidnight = new Date();
+    todayMidnight.setHours(0, 0, 0, 0);
+    const anniversary = new Date(todayMidnight.getFullYear(), opened.getMonth(), opened.getDate());
+    if (anniversary < todayMidnight) {
+        anniversary.setFullYear(anniversary.getFullYear() + 1);
+    }
+    return anniversary;
+}
 
 function cardSortValue(key, group, cardInfo) {
     switch (key) {
@@ -215,6 +230,12 @@ function cardSortValue(key, group, cardInfo) {
         case 'signup_bonus': return cardInfo.signup_bonus_amount || 0;
         case 'card_type': return cardInfo.card_type || '';
         case 'count': return group.instances.length;
+        case 'renewal': {
+            const anniversaries = group.instances
+                .filter(i => i.opened_date)
+                .map(i => nextAnniversary(i.opened_date).getTime());
+            return anniversaries.length > 0 ? Math.min(...anniversaries) : Infinity;
+        }
         default: return '';
     }
 }
@@ -259,44 +280,49 @@ function buildCardRow(cardId, group, cardInfo) {
             `<small class="card-nicknames">${instance.nickname}</small>` : '';
     }
 
-    // Calculate signup date display with yellow highlighting logic
+    // Signup date display (plain — the "renews soon" highlight lives on
+    // the Renews column below, computed from the anniversary, not this).
     let signupDateDisplay = '';
     if (hasMultiple) {
-        // For multiple cards, show all signup dates
         const dates = instances
             .filter(i => i.opened_date)
+            .map(i => new Date(i.opened_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }));
+        signupDateDisplay = dates.length > 0 ? dates.map(d => `<div>${d}</div>`).join('') : '<span style="color: var(--muted-2);">-</span>';
+    } else {
+        const instance = instances[0];
+        signupDateDisplay = instance.opened_date
+            ? new Date(instance.opened_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+            : '<span style="color: var(--muted-2);">-</span>';
+    }
+
+    // Renewal date display: the next anniversary of opened_date, highlighted
+    // when it's within 2 months and the card carries an annual fee.
+    const today = new Date();
+    const twoMonthsFromNow = new Date(today);
+    twoMonthsFromNow.setMonth(twoMonthsFromNow.getMonth() + 2);
+
+    let renewalDateDisplay = '';
+    if (hasMultiple) {
+        const renewals = instances
+            .filter(i => i.opened_date)
             .map(i => {
-                const date = new Date(i.opened_date);
-                const formattedDate = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-
-                // Check if date is within 2 months and has annual fee
-                const today = new Date();
-                const twoMonthsFromNow = new Date(today);
-                twoMonthsFromNow.setMonth(twoMonthsFromNow.getMonth() + 2);
-
-                const shouldHighlight = annualFee > 0 && date >= today && date <= twoMonthsFromNow;
+                const anniversary = nextAnniversary(i.opened_date);
+                const formattedDate = anniversary.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                const shouldHighlight = annualFee > 0 && anniversary <= twoMonthsFromNow;
                 const style = shouldHighlight ? 'color: var(--color-warning); font-weight: 600;' : '';
-
                 return `<div style="${style}">${formattedDate}</div>`;
             });
-        signupDateDisplay = dates.length > 0 ? dates.join('') : '<span style="color: var(--muted-2);">-</span>';
+        renewalDateDisplay = renewals.length > 0 ? renewals.join('') : '<span style="color: var(--muted-2);">-</span>';
     } else {
         const instance = instances[0];
         if (instance.opened_date) {
-            const date = new Date(instance.opened_date);
-            const formattedDate = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-
-            // Check if date is within 2 months and has annual fee
-            const today = new Date();
-            const twoMonthsFromNow = new Date(today);
-            twoMonthsFromNow.setMonth(twoMonthsFromNow.getMonth() + 2);
-
-            const shouldHighlight = annualFee > 0 && date >= today && date <= twoMonthsFromNow;
+            const anniversary = nextAnniversary(instance.opened_date);
+            const formattedDate = anniversary.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+            const shouldHighlight = annualFee > 0 && anniversary <= twoMonthsFromNow;
             const style = shouldHighlight ? 'color: var(--color-warning); font-weight: 600;' : '';
-
-            signupDateDisplay = `<span style="${style}">${formattedDate}</span>`;
+            renewalDateDisplay = `<span style="${style}">${formattedDate}</span>`;
         } else {
-            signupDateDisplay = '<span style="color: var(--muted-2);">-</span>';
+            renewalDateDisplay = '<span style="color: var(--muted-2);">-</span>';
         }
     }
 
@@ -319,6 +345,7 @@ function buildCardRow(cardId, group, cardInfo) {
                 <span class="card-count">${instances.length}</span>
                 ${hasMultiple ? ' <span class="multiple-indicator" title="Multiple cards">📚</span>' : ''}
             </td>
+            <td>${renewalDateDisplay}</td>
             <td class="actions-cell">
                 <button class="table-action-btn" onclick="event.stopPropagation(); openCardModal(${cardId})" title="View Details">
                     👁️

@@ -97,7 +97,7 @@ class EligibilityRuleTests(TestCase):
             metadata=metadata or {})
 
     def _held(self, card, opened_days_ago=None, closed_days_ago=None,
-              bonus_earned_days_ago=None):
+              bonus_earned_days_ago=None, bonus_override=None):
         from datetime import timedelta
         from types import SimpleNamespace
         days = lambda n: self.today - timedelta(days=n) if n is not None else None
@@ -106,6 +106,7 @@ class EligibilityRuleTests(TestCase):
             opened_date=days(opened_days_ago),
             closed_date=days(closed_days_ago),
             bonus_earned_date=days(bonus_earned_days_ago),
+            bonus_override=bonus_override,
         )
 
     def test_months_before_is_calendar_accurate(self):
@@ -174,6 +175,20 @@ class EligibilityRuleTests(TestCase):
         self.assertIsNotNone(bonus_ineligibility(gold, [held_gold], self.today))
         # Per-card, not per-issuer: Platinum bonus is still earnable
         self.assertIsNone(bonus_ineligibility(plat, [held_gold], self.today))
+
+    def test_bonus_override_false_unblocks_repeat_bonus(self):
+        """User says they never actually earned the prior card's bonus
+        (referred instead of applying, never activated) — the once-per-
+        lifetime rule must not hold that against a new application."""
+        from .eligibility import bonus_ineligibility
+        gold = self._card('Amex Gold', self.amex)
+        held_no_bonus = self._held(gold, opened_days_ago=1200,
+                                   closed_days_ago=800, bonus_override=False)
+        self.assertIsNone(bonus_ineligibility(gold, [held_no_bonus], self.today))
+        # override=True (or unset) still blocks, same as today's behavior
+        held_confirmed = self._held(gold, opened_days_ago=1200,
+                                    closed_days_ago=800, bonus_override=True)
+        self.assertIsNotNone(bonus_ineligibility(gold, [held_confirmed], self.today))
 
     def test_citi_48_month_window(self):
         from .eligibility import bonus_ineligibility

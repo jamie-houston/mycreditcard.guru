@@ -46,9 +46,26 @@ valuations.
       still outstanding (see Operational to-do below).
       **Plan: [PLAN_PHASE_F_OWNERSHIP_CLEANUP.md](PLAN_PHASE_F_OWNERSHIP_CLEANUP.md)**
       (F1–F5 breakdown, recommended order F1→F3→F4→F2→F5, 2026-07-17).
-- [ ] **Phase G — Card data & ownership admin** Add `offer_type` choices
-      to `CardCredit`, expose `bonus_earned_date` + new bonus-override field
-      in profile.html, add renewal-date tracking to card dashboard.
+- [x] **Phase G — Card data & ownership admin** (2026-07-17). `CardCredit.offer_type`
+      (display-only taxonomy: statement_credit/discount/points_miles/membership/
+      companion_pass/other; shown as a badge in the card-detail modal, no engine
+      consumer yet — no data curated into `data/input/cards/*.json` this phase).
+      `UserCard.bonus_earned_date` (already existed) is now serialized and
+      editable via the shared edit-card modal (`templates/base.html`); new
+      tri-state `UserCard.bonus_override` (null=infer from issuer rules,
+      True=confirmed earned, False=confirmed not earned — e.g. referred instead
+      of applying) lets a user un-block a repeat bonus that
+      `roadmaps/eligibility.py` `bonus_ineligibility()` would otherwise zero;
+      `bonus_override=False` excludes that prior card from the once-per-lifetime/
+      months-since-bonus checks entirely. Profile dashboard
+      (`templates/profile.html`) gained a sortable "Renews" column showing the
+      next anniversary of `opened_date`, and the fix for a pre-existing bug
+      where the "renewal soon" highlight compared the raw (always-past)
+      `opened_date` to today+2mo and could never fire — the highlight now lives
+      on the Renews column and compares against the anniversary. 110 standard
+      tests (was 109), 68/68 scenario sweep (was 67/67, new eligibility
+      scenario added), "Jamie Real" reconciles. Manual browser pass still
+      outstanding (see Operational to-do below).
 - [x] **Phase H — Roadmap display polish** Scope narrowed per product decision
       (Jamie, 2026-07-11) to two items: (1) click-to-sort column headers on
       the profile page's "Active cards" table (`templates/profile.html`
@@ -126,6 +143,10 @@ valuations.
         opt-out checkboxes (`templates/base.html` `populateCardCredits()`)
         — confirm the checkbox state matches `/profile/`'s and that
         toggling either place updates the other after a roadmap refresh
+  - [ ] Phase G card data & ownership admin (bonus_earned_date/
+        bonus_override fields in the edit-card modal, offer_type badge,
+        profile.html "Renews" column + highlight fix) — checklist in
+        `docs/MANUAL_TEST_PLAN.md`
 - [ ] **Deploy loose ends** — after Jamie's first Google login on
       production, promote his user to staff/superuser via the
       PythonAnywhere console; consider revoking the PythonAnywhere API
@@ -147,12 +168,12 @@ sync with production's automated monthly refresh if this also runs locally
 ## Verification quick reference
 
 ```bash
-venv/bin/python manage.py test                                                # standard suite (109 tests)
-RUN_ALL_SCENARIOS=1 venv/bin/python manage.py test cards.test_json_scenarios   # full sweep: 67/67 must pass
+venv/bin/python manage.py test                                                # standard suite (110 tests)
+RUN_ALL_SCENARIOS=1 venv/bin/python manage.py test cards.test_json_scenarios   # full sweep: 68/68 must pass
 venv/bin/python manage.py run_scenario "Jamie Real" --explain                  # every line item reconciles
 ```
 
-Baseline as of 2026-07-17: 109 standard tests green, 67/67 scenario sweep,
+Baseline as of 2026-07-17: 110 standard tests green, 68/68 scenario sweep,
 "Jamie Real" reconciles. Any failure is a regression.
 
 ## Where everything else went

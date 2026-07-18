@@ -61,6 +61,7 @@ class RecommendationEngine:
                         'closed_date': None if card_data.get('is_active', True) else parse_date(card_data.get('opened_date', '2020-01-01')),
                         'nickname': card_data.get('nickname', ''),
                         'bonus_earned_date': parse_date(card_data['bonus_earned_date']) if card_data.get('bonus_earned_date') else None,
+                        'bonus_override': card_data.get('bonus_override'),
                     })()
                     mock_user_cards.append(mock_card)
                 except CreditCard.DoesNotExist:

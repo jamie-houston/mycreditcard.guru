@@ -98,6 +98,31 @@
       }
     },
     {
+      "name": "Eligibility - bonus_override=false unblocks a repeat bonus",
+      "description": "Same setup as the Amex lifetime-rule scenario, but the user has marked the prior card's bonus_override=false (they were referred, never actually earned it) — the once-per-lifetime rule must not zero the new bonus.",
+      "user_profile": {
+        "spending": {
+          "dining": 1500,
+          "general": 1500
+        }
+      },
+      "owned_cards": [
+        {"card": "amex-test-gold", "opened_days_ago": 1200, "closed_days_ago": 800, "bonus_override": false}
+      ],
+      "available_cards": [
+        "amex-test-gold"
+      ],
+      "expected_recommendations": {
+        "actions": ["apply"],
+        "must_include_cards": ["amex-test-gold"],
+        "test_conditions": [
+          "bonus_override=false excludes this prior card from the once-per-lifetime prior-bonus check",
+          "Signup bonus is valued normally (not zeroed)",
+          "Unit test asserts bonus_ineligibility() returns None (roadmaps/tests.py test_bonus_override_false_unblocks_repeat_bonus)"
+        ]
+      }
+    },
+    {
       "name": "Bonus capacity - only two 10K bonuses fit a year",
       "description": "A $2,000/month spender is offered three cards that each need $10,000 of spending (~5 months each). Only two bonuses fit in 12 months of spending. Phase E makes selection itself capacity-aware: the third card (lowest bonus density, and its one reward category is already claimed by a better-rate card) competes bonus-less, scores $0, and never makes the portfolio at all — assembly-time deferral is just a safety net and never fires here.",
       "max_recommendations": 3,

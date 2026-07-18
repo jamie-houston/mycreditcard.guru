@@ -19,7 +19,10 @@ cards (5/24 counts since-closed cards; Amex's lifetime rule outlives
 cancellation). When a bonus-earned date is unknown it's approximated as
 opened_date + BONUS_EARN_APPROX_MONTHS; a prior card with no dates at all is
 treated as bonus-earned-recently — better to undersell a bonus than to
-promise one the issuer will refuse.
+promise one the issuer will refuse. `UserCard.bonus_override=False` (user
+says they never actually earned that prior card's bonus — referred, never
+activated) excludes it from these prior-bonus checks entirely; `True` or
+`None` (infer from rules) behaves as before.
 
 Card metadata keys understood here:
   metadata['bonus_eligibility'] = {
@@ -189,6 +192,10 @@ def bonus_ineligibility(card, card_history, today):
                  .get('family') == family]
     else:
         prior = [uc for uc in card_history if uc.card.id == card.id]
+    # bonus_override=False is the user telling us they never actually earned
+    # that prior card's bonus (referred, never activated) — it must not
+    # block a new one. override=True/None (infer from rules) still counts.
+    prior = [uc for uc in prior if getattr(uc, 'bonus_override', None) is not False]
     if not prior:
         return None
 
