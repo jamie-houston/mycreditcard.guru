@@ -34,14 +34,8 @@ math) since they touch the same builder UI.
 Detail archived — see pointers under "Where everything else went."
 
 ### Open
-- [ ] **Phase M — "Export for AI" (LLM doc export)** Button on profile +
-      roadmap `#resultsHeader` generating a self-contained markdown doc —
-      owned cards with rewards/credits/open dates, spending, persisted
-      Current Roadmap (`get_current_roadmap`), plus suggested prompts
-      ("Which card should I use for groceries?", "Am I under 5/24?") —
-      copy-to-clipboard + `.md` download. Anon-capable. Markdown export
-      only, no public URL (locked scope). Smallest phase.
-- [ ] **Phase N — Enforce max cards per lifetime & per issuer (business/personal)**
+
+- [ ] **Phase M — Enforce max cards per lifetime & per issuer (business/personal)**
       Largely ALREADY DONE in Phase K — verify then close gaps. Existing
       (`roadmaps/eligibility.py`): Chase 5/24, BofA 2/3/4, CapOne 1/6mo
       (window rules), Amex 5-card open cap (`max_open_cards`), once-per-lifetime
@@ -53,7 +47,7 @@ Detail archived — see pointers under "Where everything else went."
       (c) no cross-issuer velocity throttle. Also confirm the "10 Chase cards
       in 24mo for 2 people" example behaves right via a scenario. Likely a
       small verify-and-document phase unless a specific gap is prioritized.
-- [ ] **Phase O — One-off upcoming-expense mode**
+- [ ] **Phase N — One-off upcoming-expense mode**
       GREENFIELD. Let a user say "I have a $10k expense coming up" (instead of,
       or alongside, monthly spending) and recommend the best card to use/get
       for it (signup-bonus minimum-spend fit + best category rate). Today
@@ -62,13 +56,13 @@ Detail archived — see pointers under "Where everything else went."
       field threaded through `roadmaps/serializers.py`, and engine handling
       that treats the lump sum as spend directed at one card. Interacts with
       bonus-capacity/min-spend logic (`_bonus_capacity_plan`).
-- [ ] **Phase P — Category-less "easy mode" spending**
+- [ ] **Phase O — Category-less "easy mode" spending**
       GREENFIELD. Let a user enter total monthly OR yearly spend without
       picking categories ("$4k/month"), for a quick low-effort estimate.
       New builder toggle + input (`templates/index.html`), scratch field in
       `roadmaps/serializers.py`, and engine fallback that values a flat total
       at base/uncategorized rates. Complements, not replaces, the category grid.
-- [ ] **Phase Q — Surface cards that "pay for themselves" via recurring credits**
+- [ ] **Phase P — Surface cards that "pay for themselves" via recurring credits**
       MOSTLY ALREADY COMPUTED — surface it + one real fix. The engine already
       annualizes recurring credits and nets them against the annual fee in
       keep/select decisions (`_counted_card_credits`,
