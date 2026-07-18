@@ -406,9 +406,25 @@ working rules).
       running and it shouldn't be started for this — confirmed
       `generated_at`, all `bonus_capacity` keys, and per-rec sequencing
       fields all present and consistent with the test-suite numbers.
-- [ ] Step 6 — frontend timing labels, apply sort, reworked capacity note
-      (deferred — needs Jamie's browser pass; not started this session)
-- [ ] Manual browser pass done (Jamie); MANUAL_TEST_PLAN.md updated
-- [x] Docs updated (CLAUDE.md engine section, PROJECT_STATUS.md) for
-      Steps 1–5, 2026-07-15. This doc archives to mybrain once Step 6 +
-      the manual pass land.
+- [x] Step 6 — frontend timing labels (`_roadmapTimingLabel` in
+      `static/js/roadmap-results.js`), Apply-section sort by
+      `(recommended_month, priority)`, WHEN stat on each apply card, and
+      the capacity note reworked to render whenever
+      `bonus_capacity.months_committed > 0` (sequenced timeline + deferred
+      + bonus-less sentences), 2026-07-17. Per Jamie's instruction this
+      session, the manual browser pass was explicitly skipped in favor of
+      automated coverage: `scripts/test_roadmap_results.js` is a
+      framework-free Node smoke test (`node scripts/test_roadmap_results.js`)
+      that loads the file via `vm` and asserts on `_roadmapTimingLabel`
+      (now/singular/plural/year-rollover), `_roadmapFormatSigned`, and the
+      rewards/benefits split — the pure, DOM-free logic Step 6 added.
+      Standard suite (103), full sweep (67/67), and `run_scenario "Jamie
+      Real" --explain` all still green (unaffected — this step touched no
+      Python).
+- [ ] Manual browser pass — intentionally not done this session (Jamie's
+      call); still worth a real walkthrough next time the roadmap page is
+      touched. Checklist added to `docs/MANUAL_TEST_PLAN.md`.
+- [x] Docs updated (CLAUDE.md engine section + new `roadmap-results.js`
+      bullet, PROJECT_STATUS.md, this file) for Steps 1–6, 2026-07-17. Ready
+      to archive to mybrain `Requirements/Complete/` once the manual pass
+      lands (or Jamie decides to skip it permanently).

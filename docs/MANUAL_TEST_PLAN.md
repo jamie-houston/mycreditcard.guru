@@ -140,3 +140,36 @@ Phase C and `CLAUDE.md`'s roadmap-sharing note for the implementation.
 page is `templates/shared_roadmap.html`; server-side is
 `current_roadmap_share_view`/`shared_roadmap_data_view`/`shared_roadmap_view`
 in `roadmaps/views.py`.
+
+---
+
+## Phase E, Step 6: Bonus sequencing timing display (2026-07-17)
+
+Covers: `static/js/roadmap-results.js` `_roadmapTimingLabel()`, the Apply
+section's sort by `(recommended_month, priority)`, the new WHEN stat on
+each apply card, and the reworked capacity note above the summary table.
+Not walked in a browser this session (Jamie's call — automated coverage in
+`scripts/test_roadmap_results.js` stood in for it instead); worth a real
+pass next time this page is touched. See `docs/PLAN_PHASE_E_BONUS_SEQUENCING.md`
+for the engine side.
+
+1. Generate a roadmap with several apply recommendations spanning more than
+   one bonus-capacity window (e.g. Jamie's real spending profile with a
+   strategy that recommends 3+ new cards). Expect: apply cards are ordered
+   soonest-first, each showing a WHEN stat — "Apply now" for month 0,
+   "Apply in ~N months (Mon YYYY)" otherwise, with the month arithmetic
+   matching the "Generated on" date.
+2. If any recommended bonus doesn't fit the 12-month capacity, confirm its
+   apply card shows a "Signup bonus deferred" info line, $0 signup bonus in
+   the summary table, and no WHEN stat implying it needs to happen by a
+   specific month (should read "Apply now" — bonus-less applies have no
+   window).
+3. Confirm the capacity note above "Card summary" appears whenever any
+   bonus consumes capacity (not just when something is deferred), lists
+   each counted card with its month offset, and — only if applicable —
+   appends the deferred-until-next-year and bonus-less sentences.
+4. Reload the page (restores the persisted Current Roadmap). Expect: WHEN
+   labels and the capacity note are identical to the live-generated view
+   (same `generated_at`, same math).
+5. Open the roadmap's public share link (logged out). Expect: WHEN labels
+   and the capacity note render the same way on the read-only page.

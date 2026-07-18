@@ -84,11 +84,26 @@ Key modules:
   annotates each apply with `recommended_month`/`bonus_months_needed`
   (bonus-less applies get `0`/`0.0` — "apply whenever") plus a
   `bonus_capacity.timeline` (applies ascending by start_month, bonus-less
-  last) and `bonus_capacity.bonus_less_applies` list. Frontend timing
-  display (Step 6: "Apply in ~N months") is not yet built — see
-  `docs/PLAN_PHASE_E_BONUS_SEQUENCING.md` for remaining scope. Southwest
-  Companion Pass timing is explicitly unmodeled; the density sort-key is
-  where that would slot in later.
+  last) and `bonus_capacity.bonus_less_applies` list. Southwest Companion
+  Pass timing is explicitly unmodeled; the density sort-key is where that
+  would slot in later.
+- `static/js/roadmap-results.js` `_roadmapTimingLabel(recommendedMonth,
+  baseDate)` — Phase E Step 6: renders "Apply now" (falsy month) or "Apply
+  in ~N month(s) (Mon YYYY)" from `rec.recommended_month` and the roadmap's
+  `generated_at`. `renderRoadmapResults` derives `baseDate` once per call
+  (falls back to `new Date()` for older data with no `generated_at`), sorts
+  the Apply section by `(recommended_month, priority)`, and shows the label
+  in a WHEN stat on each apply card. The capacity note above the summary
+  table (previously shown only when `deferred_applies` was non-empty) now
+  renders whenever `bonus_capacity.months_committed > 0`, listing the
+  sequenced timeline plus the deferred/bonus-less sentences from
+  `bonus_capacity.deferred_applies`/`bonus_less_applies`. Pure-logic
+  coverage (no DOM) lives in `scripts/test_roadmap_results.js` — a
+  framework-free Node smoke test (`node scripts/test_roadmap_results.js`)
+  that loads the file via `vm` and asserts on `_roadmapTimingLabel`,
+  `_roadmapFormatSigned`, and the rewards/benefits split; this repo has no
+  JS test framework by design (see `docs/README_TESTING.md`), so this is a
+  plain script, not a new dependency.
 - `roadmaps/strategies.py` — strategy presets are data, not code
   (filters + max_recommendations + selection weights). UI effort question
   maps onto these.

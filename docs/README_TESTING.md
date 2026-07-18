@@ -144,6 +144,19 @@ the printed line items, then update the expectation JSON. **Never update an
 expectation to a number you haven't verified line-by-line** — that's how
 untrusted math creeps back in.
 
+## Frontend (JS) smoke coverage
+
+This repo has no JS test framework — client-side behavior is normally
+verified by hand (see `docs/MANUAL_TEST_PLAN.md`). The one exception is
+`scripts/test_roadmap_results.js`, a plain Node script (just `assert` +
+`vm`, no dependency added) covering the pure, DOM-free helpers in
+`static/js/roadmap-results.js` (Phase E's `_roadmapTimingLabel`, plus the
+older `_roadmapFormatSigned`/rewards-vs-benefits split). Run it with:
+
+```bash
+node scripts/test_roadmap_results.js
+```
+
 ## Troubleshooting
 
 - **Missing categories / invalid issuers** — check the current lists above

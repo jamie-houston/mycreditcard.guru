@@ -20,6 +20,19 @@ function _roadmapFormatSigned(value) {
     return v < 0 ? `−$${Math.abs(v).toFixed(0)}` : `$${v.toFixed(0)}`;
 }
 
+// Phase E timing label. `recommendedMonth` is the engine's month offset
+// (0/null = no bonus window to wait on — "apply now"); `baseDate` is the
+// roadmap's generated_at (or "now" as a fallback for older persisted data).
+function _roadmapTimingLabel(recommendedMonth, baseDate) {
+    if (!recommendedMonth) {
+        return 'Apply now';
+    }
+    const target = new Date(baseDate.getTime());
+    target.setMonth(target.getMonth() + recommendedMonth);
+    const monthYear = target.toLocaleString('en-US', { month: 'short', year: 'numeric' });
+    return `Apply in ~${recommendedMonth} month${recommendedMonth === 1 ? '' : 's'} (${monthYear})`;
+}
+
 function _roadmapBenefitsValue(rec) {
     return (rec.rewards_breakdown || [])
         .filter(b => b.type === 'credit')
@@ -131,6 +144,7 @@ function renderRoadmapResults(data, opts = {}) {
     const readOnly = !!opts.readOnly;
     const recommendations = data.recommendations || [];
     const portfolioSummary = data.portfolio_summary || {};
+    const baseDate = data.generated_at ? new Date(data.generated_at) : new Date();
 
     let html = `
         <div class="results" style="background:transparent;border:none;padding:0;">
@@ -160,11 +174,19 @@ function renderRoadmapResults(data, opts = {}) {
                     <div class="tile"><div class="tile-figure">${applyCount}</div><div class="tile-label">Apply</div></div>
                     <div class="tile"><div class="tile-figure">${cancelCount}</div><div class="tile-label">Cancel</div></div>
                 </div>
-                ${(portfolioSummary.bonus_capacity && portfolioSummary.bonus_capacity.deferred_applies && portfolioSummary.bonus_capacity.deferred_applies.length > 0) ? `
+                ${(portfolioSummary.bonus_capacity && portfolioSummary.bonus_capacity.months_committed > 0) ? `
                     <div style="background: var(--bg); border: 1px solid var(--border); padding: 12px 15px; border-radius: var(--radius-sm); margin-top: 15px; font-size: 13px; color: var(--muted);">
                         At ~$${(portfolioSummary.bonus_capacity.total_monthly_spending || 0).toLocaleString()}/mo of spending, the recommended signup bonuses take
-                        ~${portfolioSummary.bonus_capacity.months_committed} of the year's ${portfolioSummary.bonus_capacity.capacity_months} months to earn.
-                        Deferred until next year: ${portfolioSummary.bonus_capacity.deferred_applies.join(', ')}.
+                        ~${portfolioSummary.bonus_capacity.months_committed} of the year's ${portfolioSummary.bonus_capacity.capacity_months} months to earn:
+                        ${(portfolioSummary.bonus_capacity.timeline || []).filter(t => t.bonus_counted).map(t =>
+                            `${t.card_name} ${t.recommended_month ? `in ~${t.recommended_month} mo` : 'now'}`).join(', ')}.
+                        ${portfolioSummary.bonus_capacity.deferred_applies && portfolioSummary.bonus_capacity.deferred_applies.length > 0 ? `
+                            Deferred until next year: ${portfolioSummary.bonus_capacity.deferred_applies.join(', ')}.
+                        ` : ''}
+                        ${portfolioSummary.bonus_capacity.bonus_less_applies && portfolioSummary.bonus_capacity.bonus_less_applies.length > 0 ? `
+                            ${portfolioSummary.bonus_capacity.bonus_less_applies.join(', ')} ${portfolioSummary.bonus_capacity.bonus_less_applies.length === 1 ? 'is' : 'are'}
+                            recommended on ongoing value alone — ${portfolioSummary.bonus_capacity.bonus_less_applies.length === 1 ? 'its' : 'their'} bonus doesn't fit this year's spending.
+                        ` : ''}
                     </div>
                 ` : ''}
             </div>
@@ -196,7 +218,8 @@ function renderRoadmapResults(data, opts = {}) {
         const groupedRecs = {
             keep: recommendations.filter(rec => rec.action === 'keep'),
             cancel: recommendations.filter(rec => rec.action === 'cancel'),
-            apply: recommendations.filter(rec => rec.action === 'apply'),
+            apply: recommendations.filter(rec => rec.action === 'apply')
+                .sort((a, b) => (a.recommended_month || 0) - (b.recommended_month || 0) || a.priority - b.priority),
             upgrade: recommendations.filter(rec => rec.action === 'upgrade'),
             downgrade: recommendations.filter(rec => rec.action === 'downgrade')
         };
@@ -371,6 +394,7 @@ function renderRoadmapResults(data, opts = {}) {
                                     ${rec.card.signup_spending_requirement ? `
                                         <div><div class="apply-card-stat-label">SPEND</div><div class="apply-card-stat-value">$${(rec.card.signup_spending_requirement / 1000).toFixed(0)}k/${rec.card.signup_time_limit_months || 3}mo</div></div>
                                     ` : ''}
+                                    <div><div class="apply-card-stat-label">WHEN</div><div class="apply-card-stat-value">${_roadmapTimingLabel(rec.recommended_month, baseDate)}</div></div>
                                 </div>
                                 ${eligibilityHtml}
                                 ${breakdownHtml}

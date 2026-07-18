@@ -23,14 +23,18 @@ valuations.
       Lays the timing rails for the Southwest Companion Pass use case
       (CP modeling itself is a follow-up, not in E).
       **Plan: [PLAN_PHASE_E_BONUS_SEQUENCING.md](PLAN_PHASE_E_BONUS_SEQUENCING.md)**
-      Steps 1–5 of 6 done (2026-07-15): `_bonus_capacity_plan`, all three
+      All 6 steps done (2026-07-17): `_bonus_capacity_plan`, all three
       capacity-aware valuation sites, bonus-less display pathway, sequencing
       annotations + safety-net assembly, expectation-schema tests (3 new
-      `bonus_sequencing.json` scenarios, 67/67 sweep green), and the API
+      `bonus_sequencing.json` scenarios, 67/67 sweep green), the API
       payload (`recommended_month`/`bonus_deferred`/`bonus_months_needed`,
-      `bonus_capacity.timeline`, live-POST `generated_at`). **Remaining:**
-      Step 6 frontend timing labels (`static/js/roadmap-results.js`) +
-      manual browser pass + doc archival.
+      `bonus_capacity.timeline`, live-POST `generated_at`), and frontend
+      timing labels (`static/js/roadmap-results.js` `_roadmapTimingLabel`,
+      Apply-section sort, WHEN stat, reworked capacity note) with a
+      framework-free Node smoke test (`scripts/test_roadmap_results.js`)
+      standing in for a manual browser pass, per Jamie's call this session.
+      **Remaining:** an actual browser walkthrough next time this page is
+      touched (checklist in `docs/MANUAL_TEST_PLAN.md`), then doc archival.
 - [ ] **Phase F — Cleanup: ownership consolidation & line-item polish**
       Consolidate `users/` and `cards/` ownership endpoints onto `cards/`
       (soft-close semantics; stop hard-deleting eligibility history). Fix
