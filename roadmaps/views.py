@@ -14,6 +14,7 @@ from .serializers import (
     CreateRoadmapSerializer, GenerateRoadmapSerializer
 )
 from .recommendation_engine import RecommendationEngine
+from .redemption import redemption_guidance_for
 
 
 class RoadmapFilterListView(generics.ListCreateAPIView):
@@ -147,6 +148,7 @@ def _build_quick_rec_response(recommendations):
                 'signup_spending_requirement': float((rec['card'].metadata.get('signup_bonus') or {}).get('spending_requirement') or 0),
                 'signup_time_limit_months': (rec['card'].metadata.get('signup_bonus') or {}).get('time_limit_months'),
                 'apply_url': rec['card'].apply_url,
+                'redemption': redemption_guidance_for(rec['card']),
             },
             'action': rec['action'],
             'estimated_rewards': float(rec['estimated_rewards']),
@@ -181,6 +183,7 @@ def _build_quick_rec_response(recommendations):
             'total_portfolio_rewards': portfolio_summary.get('total_portfolio_rewards', 0),
             'net_portfolio_value': portfolio_summary.get('net_portfolio_value', 0),
             'category_optimization': portfolio_summary.get('category_optimization', {}),
+            'category_allocation': portfolio_summary.get('category_allocation', []),
             'card_count': portfolio_summary.get('card_count', 0),
             'total_credits_value': portfolio_summary.get('total_credits_value', 0),
             'total_annual_spending': portfolio_summary.get('total_annual_spending', 0),

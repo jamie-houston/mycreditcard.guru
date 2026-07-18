@@ -2553,6 +2553,7 @@ class RecommendationEngine:
                 'total_portfolio_rewards': 0,
                 'net_portfolio_value': 0,
                 'category_optimization': {},
+                'category_allocation': [],
                 'card_count': 0
             }
         
@@ -2591,17 +2592,38 @@ class RecommendationEngine:
         # Calculate total portfolio rewards from the allocation
         total_portfolio_rewards = 0
         category_optimization = {}
-        
+        # Phase I: JSON-safe per-category -> per-card allocation (the full
+        # "who actually earns this spend" list, cap rollover and uncovered
+        # spend included) — category_optimization above only keeps a single
+        # highest-rate winner per category. Same source list, so it's
+        # consistent with category_optimization and the per-card breakdowns
+        # by construction.
+        category_allocation = []
+
         logger.debug(f"self.spending_amounts in portfolio summary: {dict(self.spending_amounts)}")
         for category_slug, monthly_amount in self.spending_amounts.items():
             annual_spend = float(monthly_amount) * 12
             logger.debug(f"{category_slug}: ${monthly_amount}/month -> ${annual_spend}/year")
-        
+
         # Build category optimization from portfolio allocation
         for entry in portfolio_allocation:
             card = entry['card']
             if card is None:
-                continue  # spending no portfolio card covers earns nothing
+                # Spending no portfolio card covers — earns nothing, but
+                # still surfaced in category_allocation so the matrix view
+                # can show it as uncovered.
+                category_allocation.append({
+                    'category_slug': entry['category_slug'],
+                    'category_name': entry['category_name'],
+                    'card_id': None,
+                    'card_name': None,
+                    'rate': 0.0,
+                    'annual_spend': entry['annual_spend'],
+                    'annual_rewards': 0.0,
+                    'is_base_rate': False,
+                    'uncovered': True,
+                })
+                continue
             rate = entry['rate']
             annual_spend = entry['annual_spend']
 
@@ -2613,6 +2635,18 @@ class RecommendationEngine:
             reward_value_multiplier = self._own_multiplier(card)
             category_rewards = annual_spend * rate * reward_value_multiplier
             total_portfolio_rewards += category_rewards
+
+            category_allocation.append({
+                'category_slug': entry['category_slug'],
+                'category_name': entry['category_name'],
+                'card_id': card.id,
+                'card_name': card.name,
+                'rate': rate,
+                'annual_spend': annual_spend,
+                'annual_rewards': category_rewards,
+                'is_base_rate': entry['is_base_rate'],
+                'uncovered': False,
+            })
 
             # Category optimization display: primary (highest-rate) entry
             # per category, only when it beats the 1x floor
@@ -2668,6 +2702,7 @@ class RecommendationEngine:
             'total_portfolio_rewards': total_portfolio_rewards,
             'net_portfolio_value': net_portfolio_value,
             'category_optimization': category_optimization,
+            'category_allocation': category_allocation,
             'card_count': len(all_portfolio_cards),
             'total_credits_value': total_credits_value,
             'total_annual_spending': total_parent_spending,

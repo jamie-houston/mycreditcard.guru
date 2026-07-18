@@ -1202,3 +1202,105 @@ class StrategyUITests(TestCase):
         for strategy in STRATEGIES.values():
             self.assertIn(strategy['effort_label'], content)
             self.assertIn(f'effort-{strategy["key"]}', content)
+
+
+class RoadmapAnalysisPayloadTests(TestCase):
+    """Phase I: portfolio_summary.category_allocation (the full per-category
+    -> per-card allocation, superseding the single-winner category_optimization
+    for the new matrix view) and per-card redemption guidance both reach the
+    quick-recommendation JSON payload, and the allocation reconciles with the
+    existing per-card rewards_breakdown line for the same category."""
+
+    def setUp(self):
+        from cards.models import SpendingCategory, RewardCategory
+        self.user = User.objects.create_user(
+            username='analyst', email='analyst@example.com', password='x')
+        self.points = RewardType.objects.create(name='Points', slug='points')
+        self.issuer = Issuer.objects.create(name='Analysis Bank', slug='analysis-bank')
+        self.dining = SpendingCategory.objects.create(name='Dining', slug='dining')
+        self.card = CreditCard.objects.create(
+            name='UR Dining Card', slug='ur-dining-card', issuer=self.issuer,
+            signup_bonus_type=self.points, primary_reward_type=self.points,
+            metadata={'points_program': 'chase_ultimate_rewards', 'reward_value_multiplier': 0.01})
+        RewardCategory.objects.create(
+            card=self.card, category=self.dining, reward_rate=Decimal('3.00'),
+            reward_type=self.points)
+
+    def _generate(self):
+        self.client.force_login(self.user)
+        response = self.client.post(
+            '/api/roadmaps/quick-recommendation/',
+            {'spending_amounts': {str(self.dining.id): '500.00'},
+             'user_cards': [], 'max_recommendations': 1},
+            content_type='application/json')
+        self.assertEqual(response.status_code, 200)
+        return response.json()
+
+    def test_category_allocation_reaches_payload_and_reconciles(self):
+        data = self._generate()
+        allocation = data['portfolio_summary']['category_allocation']
+        dining_entries = [e for e in allocation if e['category_slug'] == 'dining']
+        self.assertEqual(len(dining_entries), 1)
+        entry = dining_entries[0]
+        self.assertEqual(entry['card_id'], self.card.id)
+        self.assertEqual(entry['card_name'], self.card.name)
+        self.assertEqual(entry['rate'], 3.0)
+        self.assertAlmostEqual(entry['annual_spend'], 500 * 12)
+        self.assertFalse(entry['uncovered'])
+
+        # Reconciles with the per-card breakdown line for the same category
+        rec = next(r for r in data['recommendations'] if r['card']['id'] == self.card.id)
+        breakdown_line = next(
+            b for b in rec['rewards_breakdown'] if b['type'] == 'reward_category')
+        self.assertAlmostEqual(entry['annual_rewards'], breakdown_line['category_rewards'], places=2)
+
+    def test_redemption_guidance_reaches_payload_for_curated_program(self):
+        data = self._generate()
+        rec = next(r for r in data['recommendations'] if r['card']['id'] == self.card.id)
+        redemption = rec['card']['redemption']
+        self.assertEqual(redemption['program_label'], 'Chase Ultimate Rewards')
+        self.assertTrue(redemption['transfer_partners'])
+        self.assertEqual(redemption['value_per_point'], 0.015)
+
+
+class RedemptionGuidanceTests(TestCase):
+    """Phase I: roadmaps/redemption.py's curated-lookup-with-fallback logic,
+    independent of the recommendation engine."""
+
+    def setUp(self):
+        self.points = RewardType.objects.create(name='Points', slug='points')
+        self.cashback = RewardType.objects.create(name='Cashback', slug='cashback')
+        self.issuer = Issuer.objects.create(name='Redemption Bank', slug='redemption-bank')
+
+    def _card(self, name, reward_type, metadata=None, url=''):
+        from django.utils.text import slugify
+        return CreditCard.objects.create(
+            name=name, slug=slugify(name), issuer=self.issuer,
+            signup_bonus_type=reward_type, primary_reward_type=reward_type,
+            metadata=metadata or {}, url=url)
+
+    def test_curated_program_returns_chase_guidance(self):
+        from .redemption import redemption_guidance_for
+        card = self._card('Curated Chase Card', self.points,
+                           metadata={'points_program': 'chase_ultimate_rewards'})
+        guidance = redemption_guidance_for(card)
+        self.assertEqual(guidance['program_label'], 'Chase Ultimate Rewards')
+        self.assertIn('United MileagePlus', guidance['transfer_partners'])
+        self.assertEqual(guidance['value_per_point'], 0.015)
+
+    def test_cashback_card_gets_generic_cashback_note(self):
+        from .redemption import redemption_guidance_for
+        card = self._card('Plain Cashback Card', self.cashback)
+        guidance = redemption_guidance_for(card)
+        self.assertIsNone(guidance['program_label'])
+        self.assertEqual(guidance['transfer_partners'], [])
+        self.assertIn('statement credit', guidance['note'])
+
+    def test_uncurated_points_card_gets_generic_portal_note(self):
+        from .redemption import redemption_guidance_for
+        card = self._card('Uncurated Points Card', self.points,
+                           url='https://issuer.example.com/rewards')
+        guidance = redemption_guidance_for(card)
+        self.assertIsNone(guidance['program_label'])
+        self.assertEqual(guidance['portal_url'], 'https://issuer.example.com/rewards')
+        self.assertNotIn('statement credit', guidance['note'])

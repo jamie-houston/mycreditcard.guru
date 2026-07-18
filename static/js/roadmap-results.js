@@ -91,6 +91,49 @@ function _roadmapBonusShiftAggregate(bonusShifts) {
     return { total, title };
 }
 
+// Phase I: groups the engine's per-category -> per-card allocation
+// (roadmaps/recommendation_engine.py _calculate_portfolio_allocation, via
+// portfolio_summary.category_allocation) into one row group per spending
+// category — the full "who actually earns this spend" list, cap rollover
+// and uncovered spend included. Entries arrive already ordered
+// primary-earner-first per category (then uncovered last, if any) — this
+// only groups, it doesn't re-sort.
+function _roadmapCategoryMatrix(categoryAllocation) {
+    const groups = [];
+    const bySlug = {};
+    (categoryAllocation || []).forEach(entry => {
+        let group = bySlug[entry.category_slug];
+        if (!group) {
+            group = { slug: entry.category_slug, category_name: entry.category_name, rows: [], total_rewards: 0 };
+            bySlug[entry.category_slug] = group;
+            groups.push(group);
+        }
+        group.rows.push({
+            card_id: entry.card_id,
+            card_name: entry.card_name,
+            rate: entry.rate,
+            annual_spend: entry.annual_spend,
+            annual_rewards: entry.annual_rewards,
+            uncovered: !!entry.uncovered,
+        });
+        group.total_rewards += entry.annual_rewards || 0;
+    });
+    return groups;
+}
+
+// Phase I: portfolio-level first-year vs ongoing summary. Only 'keep'/
+// 'apply' recs count toward the portfolio (matches _calculate_portfolio_summary's
+// own card set — cancel/upgrade/downgrade recs aren't part of it). Per-card
+// first_year_value/ongoing_value already reconcile to estimated_rewards, so
+// this is just a sum — one headline for "this year" vs "every year after"
+// instead of requiring the user to open each card's breakdown.
+function _roadmapValueOverTime(recommendations) {
+    const portfolioRecs = (recommendations || []).filter(rec => rec.action === 'keep' || rec.action === 'apply');
+    const firstYear = portfolioRecs.reduce((sum, rec) => sum + (parseFloat(rec.first_year_value) || 0), 0);
+    const ongoing = portfolioRecs.reduce((sum, rec) => sum + (parseFloat(rec.ongoing_value) || 0), 0);
+    return { first_year: firstYear, ongoing, first_year_extras: firstYear - ongoing };
+}
+
 const ROADMAP_ACTION_LABELS = { apply: 'Apply', keep: 'Keep', cancel: 'Cancel', upgrade: 'Upgrade', downgrade: 'Downgrade' };
 const ROADMAP_ACTION_DANGER = { cancel: true };
 
@@ -141,6 +184,103 @@ function _roadmapSummaryTableHtml(recommendations) {
                 </thead>
                 <tbody>${rows}</tbody>
             </table>
+        </div>
+    `;
+}
+
+// Phase I: the full Cards x categories allocation matrix (see
+// _roadmapCategoryMatrix). Falls back to the older single-winner
+// "Best card per category" block (portfolioSummary.category_optimization)
+// when category_allocation isn't in the payload — Current Roadmaps and
+// shared roadmaps persisted before this field existed only carry the old
+// shape.
+function _roadmapCategoryMatrixHtml(matrix) {
+    if (!matrix || matrix.length === 0) {
+        return '';
+    }
+    const rows = matrix.map(group => `
+        <tr class="roadmap-summary-row">
+            <td class="roadmap-summary-card">
+                <span class="ico" style="font-size:16px; vertical-align:-3px; color:var(--accent);">${(typeof CATEGORY_ICONS !== 'undefined' && CATEGORY_ICONS[group.slug]) || 'category'}</span>
+                ${_roadmapEscapeHtml(group.category_name)}
+            </td>
+            <td>${group.rows.map(r => r.uncovered
+                ? `<div style="color:var(--muted);">Uncovered — no portfolio card rates this</div>`
+                : `<div>${_roadmapEscapeHtml(r.card_name)} <span style="color:var(--muted);">(${r.rate.toFixed(1)}x)</span></div>`
+            ).join('')}</td>
+            <td class="roadmap-summary-num">${group.rows.map(r => `$${r.annual_spend.toFixed(0)}`).join('<br>')}</td>
+            <td class="roadmap-summary-num">$${group.total_rewards.toFixed(0)}</td>
+        </tr>
+    `).join('');
+
+    return `
+        <div class="result-section-header"><span class="ico">grid_view</span><span class="result-section-header-title">Cards by category</span></div>
+        <div class="roadmap-summary-table-wrap">
+            <table class="roadmap-summary-table">
+                <thead>
+                    <tr>
+                        <th>Category</th>
+                        <th>Earning card</th>
+                        <th class="roadmap-summary-num">Annual spend</th>
+                        <th class="roadmap-summary-num">Annual rewards</th>
+                    </tr>
+                </thead>
+                <tbody>${rows}</tbody>
+            </table>
+        </div>
+    `;
+}
+
+// Phase I: portfolio-level first-year vs ongoing panel (see
+// _roadmapValueOverTime). Skips itself when the two figures are
+// effectively equal — nothing extra to call out.
+function _roadmapValueOverTimeHtml(split) {
+    if (Math.abs(split.first_year_extras) < 1) {
+        return '';
+    }
+    const extrasLabel = split.first_year_extras > 0
+        ? `Includes ${_roadmapFormatSigned(split.first_year_extras)} in signup bonuses & waived first-year fees`
+        : `First year runs ${_roadmapFormatSigned(Math.abs(split.first_year_extras))} below ongoing (first-year fees outweigh any bonuses)`;
+    return `
+        <div class="result-section-header"><span class="ico">timeline</span><span class="result-section-header-title">This year vs. every year after</span></div>
+        <div class="grouped-card"><div class="category-card-body" style="padding:12px 14px;">
+            <div class="result-hero-stats" style="margin-top:0;">
+                <div class="tile"><div class="tile-figure">${_roadmapFormatSigned(split.first_year)}</div><div class="tile-label">This year</div></div>
+                <div class="tile"><div class="tile-figure">${_roadmapFormatSigned(split.ongoing)}</div><div class="tile-label">Every year after</div></div>
+            </div>
+            <div style="text-align:center; color:var(--muted); font-size:12px; margin-top:10px;">${extrasLabel}</div>
+        </div></div>
+    `;
+}
+
+// Phase I: minimal curated redemption guidance (roadmaps/redemption.py).
+// rec.card.redemption is always present with the same shape once the
+// payload carries it — absent entirely on older persisted/shared payloads
+// generated before this field existed, so this returns '' rather than
+// throwing on missing keys.
+function _roadmapRedemptionHtml(rec) {
+    const redemption = rec.card && rec.card.redemption;
+    if (!redemption || !redemption.note) {
+        return '';
+    }
+    const headlineParts = [];
+    if (redemption.program_label) {
+        headlineParts.push(_roadmapEscapeHtml(redemption.program_label));
+    }
+    if (redemption.value_per_point) {
+        headlineParts.push(`~${(redemption.value_per_point * 100).toFixed(1)}¢/pt`);
+    }
+    const headline = headlineParts.length ? `${headlineParts.join(' · ')} — ` : '';
+    const partners = (redemption.transfer_partners && redemption.transfer_partners.length)
+        ? `<div style="margin-top:2px;">Transfer partners: ${redemption.transfer_partners.map(_roadmapEscapeHtml).join(', ')}</div>`
+        : '';
+    const link = redemption.portal_url
+        ? ` <a href="${_roadmapEscapeHtml(redemption.portal_url)}" target="_blank" rel="noopener" onclick="event.stopPropagation();">Redeem &rarr;</a>`
+        : '';
+    return `
+        <div class="breakdown-item" style="opacity: 0.85; font-size: 0.8em; display:block;">
+            <span class="item-name">\u{1F4B3} ${headline}${_roadmapEscapeHtml(redemption.note)}${link}</span>
+            ${partners}
         </div>
     `;
 }
@@ -236,7 +376,14 @@ function renderRoadmapResults(data, opts = {}) {
 
         html += _roadmapSummaryTableHtml(recommendations);
 
-        if (categoryOptimizationEntries.length > 0) {
+        // Phase I: the full allocation matrix supersedes the older
+        // single-winner "Best card per category" block — but fall back to
+        // the old block for payloads persisted/shared before
+        // category_allocation existed.
+        const categoryAllocation = portfolioSummary.category_allocation || [];
+        if (categoryAllocation.length > 0) {
+            html += _roadmapCategoryMatrixHtml(_roadmapCategoryMatrix(categoryAllocation));
+        } else if (categoryOptimizationEntries.length > 0) {
             html += `
                 <div class="result-section-header"><span class="ico">grid_view</span><span class="result-section-header-title">Best card per category</span></div>
                 <div class="grouped-card"><div class="category-card-body">
@@ -251,6 +398,8 @@ function renderRoadmapResults(data, opts = {}) {
                 </div></div>
             `;
         }
+
+        html += _roadmapValueOverTimeHtml(_roadmapValueOverTime(recommendations));
     }
 
     if (recommendations.length === 0) {
@@ -401,6 +550,8 @@ function renderRoadmapResults(data, opts = {}) {
                                     <span class="item-name">First year: $${rec.first_year_value.toFixed(0)} · Ongoing: $${rec.ongoing_value.toFixed(0)}/yr</span>
                                 </div>`;
                         }
+
+                        breakdownHtml += _roadmapRedemptionHtml(rec);
 
                         breakdownHtml += `
                                 </div>

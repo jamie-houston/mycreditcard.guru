@@ -146,7 +146,37 @@ Key modules:
   always the holder, always ineligible for their own card) — see
   `roadmaps/tests.py` `SecondCopyApplyTests`. Bonus capacity
   (`_bonus_capacity_plan`) stays household-wide (shared spend, locked
-  scope) — only apply slots multiply per entity.
+  scope) — only apply slots multiply per entity. **Phase I** added
+  `category_allocation` to `_calculate_portfolio_summary`'s result (built
+  in the same loop as the existing single-winner `category_optimization`,
+  from the same `_calculate_portfolio_allocation` call — same source, so
+  the two always agree): a JSON-safe list of every per-category → per-card
+  assignment, cap rollover and uncovered spend included (`{category_slug,
+  category_name, card_id, card_name, rate, annual_spend, annual_rewards,
+  is_base_rate, uncovered}`), vs. `category_optimization`'s single
+  highest-rate winner per category. Forwarded in `_build_quick_rec_response`
+  (`roadmaps/views.py`) as `portfolio_summary.category_allocation`.
+  Deliberately not points-pooling-aware (own multiplier only), matching
+  `category_optimization`'s existing choice, for the same reason (separate
+  aggregate summary, not the per-card reconciliation path).
+- `roadmaps/redemption.py` (Phase I) — minimal curated redemption
+  guidance, display-only (feeds no engine math, so the reconciliation
+  guard is untouched). `REDEMPTION_GUIDANCE` is a small hand-curated dict
+  keyed on `metadata.points_program` (today: `chase_ultimate_rewards`,
+  `amex_membership_rewards` — the same two programs Phase J curates for
+  points pooling) with `{program_label, portal_url, value_per_point,
+  transfer_partners, note}`; `value_per_point` is dollars-per-point, same
+  convention as `reward_value_multiplier`/`_own_multiplier`, NOT cents.
+  `redemption_guidance_for(card)` returns the curated entry when
+  `points_program` matches, else a generic fallback branching only on
+  `primary_reward_type` (cashback → statement-credit note; otherwise →
+  generic "check the issuer's portal" note using `card.url`) — always the
+  same shape, so callers never branch on missing keys. Deliberately a
+  dict, not a new model/migration — transfer-partner data is small and
+  changes rarely, and a schema would be premature maintenance surface with
+  an engine-cleanup pass planned soon. Wired into
+  `_build_quick_rec_response`'s `card` dict as `card.redemption`
+  (`roadmaps/views.py`).
 - `static/js/roadmap-results.js` `_roadmapTimingLabel(recommendedMonth,
   baseDate)` — Phase E Step 6: renders "Apply now" (falsy month) or "Apply
   in ~N month(s) (Mon YYYY)" from `rec.recommended_month` and the roadmap's
@@ -168,7 +198,25 @@ Key modules:
   `.grouped-row-reason` when `rec.apply_as` is present, via
   `_roadmapEscapeHtml()` (`ProfileEntity.name` is user input) — absent
   entirely on old payloads/single-entity households, both covered in the
-  same Node smoke test.
+  same Node smoke test. **Phase I** added three more sections, all pure
+  helper + `_roadmap*Html` builder pairs unit-tested the same way:
+  `_roadmapCategoryMatrix`/`_roadmapCategoryMatrixHtml` render the full
+  Cards × categories allocation table from `portfolio_summary.
+  category_allocation` (grouping entries by category — they arrive
+  already ordered primary-earner-first per category, so this only groups,
+  never re-sorts) as the "Cards by category" section, **replacing** the
+  old single-winner "Best card per category" block; that block is kept as
+  a **fallback** or `category_allocation` (via `category_optimization`)
+  for Current Roadmaps/shared roadmaps persisted before this field
+  existed. `_roadmapValueOverTime`/`_roadmapValueOverTimeHtml` sum
+  `first_year_value`/`ongoing_value` over `keep`/`apply` recs only
+  (matching `_calculate_portfolio_summary`'s own portfolio definition) into
+  a "This year vs. every year after" panel, reusing the existing
+  `.tile`/`.result-hero-stats` classes — skips itself when the two figures
+  are within $1 (nothing extra to call out). `_roadmapRedemptionHtml(rec)`
+  renders `rec.card.redemption` (see `roadmaps/redemption.py`) as a line
+  in the per-card value breakdown — portal link, ¢/point, transfer
+  partners — and returns `''` when the field is absent (older payloads).
 - `roadmaps/strategies.py` — strategy presets are data, not code
   (filters + max_recommendations + selection weights). UI effort question
   maps onto these.

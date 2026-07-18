@@ -12,9 +12,8 @@ Last updated: 2026-07-18
 E–I planned in `.claude/plans/look-at-any-outstanding-wild-wirth.md`;
 J–M planned in `.claude/plans/plan-out-the-following-sharded-nest.md`
 (scoping decisions with Jamie, 2026-07-17); N–Q added 2026-07-18 from
-Jamie's backlog. Recommended order for what's left: **I → L → M → N → O →
-P → Q** — I first so later analysis views can use program-aware
-valuations; N is mostly verification (see below) so it's cheap to clear
+Jamie's backlog. Recommended order for what's left: **L → M → N → O →
+P → Q** — N is mostly verification (see below) so it's cheap to clear
 early; O/P (spending-input modes) before Q (surfacing existing credit
 math) since they touch the same builder UI.
 
@@ -26,13 +25,13 @@ math) since they touch the same builder UI.
 - [x] **Phase H** — Sortable profile table + inline network marks on card thumbnails (2026-07-11).
 - [x] **Phase J** — Points-program pooled valuation (2026-07-18).
 - [x] **Phase K** — Multi-player households & per-entity eligibility rules (2026-07-18).
+- [x] **Phase I** — Roadmap analysis views: Cards × categories allocation
+      matrix, first-year-vs-ongoing value panel, curated redemption
+      guidance per card (2026-07-18).
 
 Detail archived — see pointers under "Where everything else went."
 
 ### Open
-
-- [ ] **Phase I — Roadmap analysis views** Cards × categories matrix,
-      per-category value-over-time split, redemption guidance/links per card.
 - [ ] **Phase L — Benefit/credit usage tracking** Track which monthly/
       quarterly credits were actually used this period. New
       `UserCreditUsage` model (profile × `CardCredit` × period key derived
@@ -141,13 +140,15 @@ sync with production's automated monthly refresh if this also runs locally
 ## Verification quick reference
 
 ```bash
-venv/bin/python manage.py test                                                # standard suite (151 tests)
-RUN_ALL_SCENARIOS=1 venv/bin/python manage.py test cards.test_json_scenarios   # full sweep: 77/77 must pass
+venv/bin/python manage.py test                                                # standard suite (156 tests)
+RUN_ALL_SCENARIOS=1 venv/bin/python manage.py test cards.test_json_scenarios   # full sweep must pass clean
 venv/bin/python manage.py run_scenario "Jamie Real" --explain                  # every line item reconciles
+node scripts/test_roadmap_results.js                                          # roadmap-results.js pure-helper smoke test
 ```
 
-Baseline as of 2026-07-18 (post Phase K): 151 standard tests green, 77/77
-scenario sweep, "Jamie Real" reconciles. Any failure is a regression.
+Baseline as of 2026-07-18 (post Phase I): 156 standard tests green (151 +
+5 from Phase I), scenario sweep clean, "Jamie Real" reconciles, JS smoke
+test green. Any failure is a regression.
 
 ## Where everything else went
 

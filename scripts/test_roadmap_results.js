@@ -19,7 +19,10 @@ vm.runInContext(source, sandbox);
 
 const { _roadmapTimingLabel, _roadmapFormatSigned, _roadmapBenefitsValue,
         _roadmapRewardsValue, _roadmapBonusShiftAggregate,
-        _roadmapApplyAsLabel, _roadmapEscapeHtml } = sandbox;
+        _roadmapApplyAsLabel, _roadmapEscapeHtml,
+        _roadmapCategoryMatrix, _roadmapCategoryMatrixHtml,
+        _roadmapValueOverTime, _roadmapValueOverTimeHtml,
+        _roadmapRedemptionHtml } = sandbox;
 
 function test(name, fn) {
     try {
@@ -119,6 +122,105 @@ test('_roadmapEscapeHtml: escapes the standard HTML-sensitive characters', () =>
         '&lt;a href=&quot;x&quot;&gt;it&#39;s &amp; &quot;fun&quot;&lt;/a&gt;');
     assert.strictEqual(_roadmapEscapeHtml(null), '');
     assert.strictEqual(_roadmapEscapeHtml(undefined), '');
+});
+
+test('_roadmapCategoryMatrix: groups allocation entries by category, sums rewards', () => {
+    const allocation = [
+        { category_slug: 'dining', category_name: 'Dining', card_id: 1, card_name: 'Card A', rate: 3.0, annual_spend: 6000, annual_rewards: 180, is_base_rate: false, uncovered: false },
+        { category_slug: 'dining', category_name: 'Dining', card_id: 2, card_name: 'Card B', rate: 1.0, annual_spend: 500, annual_rewards: 5, is_base_rate: true, uncovered: false },
+        { category_slug: 'travel', category_name: 'Travel', card_id: null, card_name: null, rate: 0.0, annual_spend: 1000, annual_rewards: 0, is_base_rate: false, uncovered: true },
+    ];
+    const matrix = _roadmapCategoryMatrix(allocation);
+    assert.strictEqual(matrix.length, 2);
+    assert.strictEqual(matrix[0].slug, 'dining');
+    assert.strictEqual(matrix[0].rows.length, 2);
+    assert.strictEqual(matrix[0].total_rewards, 185);
+    assert.strictEqual(matrix[1].slug, 'travel');
+    assert.strictEqual(matrix[1].rows[0].uncovered, true);
+    assert.strictEqual(matrix[1].total_rewards, 0);
+});
+
+test('_roadmapCategoryMatrix: empty/missing allocation renders no groups', () => {
+    assert.strictEqual(_roadmapCategoryMatrix([]).length, 0);
+    assert.strictEqual(_roadmapCategoryMatrix(undefined).length, 0);
+});
+
+test('_roadmapCategoryMatrixHtml: empty matrix renders nothing', () => {
+    assert.strictEqual(_roadmapCategoryMatrixHtml([]), '');
+});
+
+test('_roadmapCategoryMatrixHtml: non-empty matrix renders the section + card name', () => {
+    const matrix = _roadmapCategoryMatrix([
+        { category_slug: 'dining', category_name: 'Dining', card_id: 1, card_name: 'Card A', rate: 3.0, annual_spend: 6000, annual_rewards: 180, is_base_rate: false, uncovered: false },
+    ]);
+    const html = _roadmapCategoryMatrixHtml(matrix);
+    assert.ok(html.includes('Cards by category'));
+    assert.ok(html.includes('Card A'));
+    assert.ok(html.includes('Dining'));
+});
+
+test('_roadmapValueOverTime: sums only keep/apply recs, excludes cancel', () => {
+    const recs = [
+        { action: 'apply', first_year_value: 300, ongoing_value: 100 },
+        { action: 'keep', first_year_value: 80, ongoing_value: 80 },
+        { action: 'cancel', first_year_value: -95, ongoing_value: -95 },
+    ];
+    const split = _roadmapValueOverTime(recs);
+    assert.strictEqual(split.first_year, 380);
+    assert.strictEqual(split.ongoing, 180);
+    assert.strictEqual(split.first_year_extras, 200);
+});
+
+test('_roadmapValueOverTimeHtml: near-equal first-year/ongoing renders nothing', () => {
+    assert.strictEqual(_roadmapValueOverTimeHtml({ first_year: 100, ongoing: 100, first_year_extras: 0 }), '');
+    assert.strictEqual(_roadmapValueOverTimeHtml({ first_year: 100.4, ongoing: 100, first_year_extras: 0.4 }), '');
+});
+
+test('_roadmapValueOverTimeHtml: a real gap renders the this-year/ongoing panel', () => {
+    const html = _roadmapValueOverTimeHtml({ first_year: 380, ongoing: 180, first_year_extras: 200 });
+    assert.ok(html.includes('This year'));
+    assert.ok(html.includes('Every year after'));
+    assert.ok(html.includes('$380'));
+    assert.ok(html.includes('$180'));
+});
+
+test('_roadmapRedemptionHtml: missing redemption data renders nothing', () => {
+    assert.strictEqual(_roadmapRedemptionHtml({ card: {} }), '');
+    assert.strictEqual(_roadmapRedemptionHtml({ card: { redemption: null } }), '');
+    assert.strictEqual(_roadmapRedemptionHtml({}), '');
+});
+
+test('_roadmapRedemptionHtml: curated program renders portal link, rate, and partners', () => {
+    const rec = {
+        card: {
+            redemption: {
+                program_label: 'Chase Ultimate Rewards',
+                portal_url: 'https://www.chase.com/personal/credit-cards/ultimate-rewards',
+                value_per_point: 0.015,
+                transfer_partners: ['United MileagePlus', 'World of Hyatt'],
+                note: 'Best value transferring to airline/hotel partners.',
+            },
+        },
+    };
+    const html = _roadmapRedemptionHtml(rec);
+    assert.ok(html.includes('Chase Ultimate Rewards'));
+    assert.ok(html.includes('1.5¢/pt'));
+    assert.ok(html.includes('United MileagePlus'));
+    assert.ok(html.includes('https://www.chase.com/personal/credit-cards/ultimate-rewards'));
+});
+
+test('_roadmapRedemptionHtml: generic fallback has no program label or partners', () => {
+    const rec = { card: { redemption: { program_label: null, portal_url: null, value_per_point: null, transfer_partners: [], note: 'Redeem as a statement credit or direct deposit.' } } };
+    const html = _roadmapRedemptionHtml(rec);
+    assert.ok(html.includes('Redeem as a statement credit or direct deposit.'));
+    assert.ok(!html.includes('Transfer partners'));
+});
+
+test('_roadmapRedemptionHtml: issuer-supplied note text is HTML-escaped', () => {
+    const rec = { card: { redemption: { program_label: null, portal_url: null, value_per_point: null, transfer_partners: [], note: '<script>alert(1)</script>' } } };
+    const html = _roadmapRedemptionHtml(rec);
+    assert.ok(!html.includes('<script>alert(1)</script>'));
+    assert.ok(html.includes('&lt;script&gt;'));
 });
 
 if (process.exitCode) {
