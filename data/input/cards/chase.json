@@ -7,6 +7,11 @@
         "once_per_lifetime": true,
         "label": "Sapphire bonus: once per lifetime per card"
       },
+      "application_eligibility": {
+        "once_per_lifetime": true,
+        "family": "chase-sapphire-personal",
+        "label": "Chase Sapphire application rule: one lifetime application across Sapphire Preferred/Reserve"
+      },
       "points_program": "chase_ultimate_rewards"
     },
     "annual_fee": 795,
@@ -129,6 +134,11 @@
       "bonus_eligibility": {
         "once_per_lifetime": true,
         "label": "Sapphire bonus: once per lifetime per card"
+      },
+      "application_eligibility": {
+        "once_per_lifetime": true,
+        "family": "chase-sapphire-personal",
+        "label": "Chase Sapphire application rule: one lifetime application across Sapphire Preferred/Reserve"
       },
       "points_program": "chase_ultimate_rewards"
     },

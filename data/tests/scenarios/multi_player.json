@@ -1,0 +1,219 @@
+{
+  "description": "Phase K: multi-player households. Every scenario here declares a top-level \"entities\" list (in addition to the implicit primary) and asserts apply_as attribution — the one thing that distinguishes these from every other scenario in the sweep, which stay single-entity and (per the K4 validator) must never carry apply_as at all.",
+  "category": "multi_player",
+  "scenarios": [
+    {
+      "name": "Multi-Player - P1 at 5/24, apply attributed to P2",
+      "description": "The primary (Jamie) has 5 personal cards opened within 24 months, tripping Chase 5/24 for him specifically. Sam, a second household entity, has a clean history — the Chase candidate must still be recommended, attributed to Sam.",
+      "entities": [
+        {"name": "Sam", "kind": "personal"}
+      ],
+      "user_profile": {
+        "spending": {
+          "dining": 500,
+          "groceries": 700,
+          "gas": 300,
+          "general": 1500
+        }
+      },
+      "owned_cards": [
+        {"card": "basic-card-1", "opened_days_ago": 60},
+        {"card": "low-reward-card", "opened_days_ago": 150},
+        {"card": "dining-card", "opened_days_ago": 300},
+        {"card": "warehouse-card", "opened_days_ago": 450},
+        {"card": "better-card-1", "opened_days_ago": 600}
+      ],
+      "available_cards": [
+        "basic-card-1",
+        "low-reward-card",
+        "dining-card",
+        "warehouse-card",
+        "better-card-1",
+        "chase-test-rewards"
+      ],
+      "expected_recommendations": {
+        "actions": ["apply"],
+        "must_include_cards": ["chase-test-rewards"],
+        "apply_as": {
+          "chase-test-rewards": "Sam"
+        },
+        "test_conditions": [
+          "Jamie (primary) is at 5/24 via his 5 owned cards — blocked from applying",
+          "Sam has zero cards — clean 5/24 budget, eligible",
+          "_eligible_entity_for_card picks Sam; apply_as.name == 'Sam'"
+        ]
+      }
+    },
+    {
+      "name": "Multi-Player - both players at 5/24, card excluded",
+      "description": "Both the primary and Sam independently hold the same 5 cards (as their own copies), so BOTH are at 5/24 — the Chase candidate has no eligible entity left and must be excluded entirely, same as the single-player case.",
+      "entities": [
+        {"name": "Sam", "kind": "personal"}
+      ],
+      "user_profile": {
+        "spending": {
+          "dining": 500,
+          "groceries": 700,
+          "gas": 300,
+          "general": 1500
+        }
+      },
+      "owned_cards": [
+        {"card": "basic-card-1", "opened_days_ago": 60},
+        {"card": "low-reward-card", "opened_days_ago": 150},
+        {"card": "dining-card", "opened_days_ago": 300},
+        {"card": "warehouse-card", "opened_days_ago": 450},
+        {"card": "better-card-1", "opened_days_ago": 600},
+        {"card": "basic-card-1", "opened_days_ago": 60, "owner": "Sam"},
+        {"card": "low-reward-card", "opened_days_ago": 150, "owner": "Sam"},
+        {"card": "dining-card", "opened_days_ago": 300, "owner": "Sam"},
+        {"card": "warehouse-card", "opened_days_ago": 450, "owner": "Sam"},
+        {"card": "better-card-1", "opened_days_ago": 600, "owner": "Sam"}
+      ],
+      "available_cards": [
+        "basic-card-1",
+        "low-reward-card",
+        "dining-card",
+        "warehouse-card",
+        "better-card-1",
+        "chase-test-rewards"
+      ],
+      "expected_recommendations": {
+        "actions": ["keep"],
+        "must_not_include_cards": ["chase-test-rewards"],
+        "test_conditions": [
+          "Both Jamie and Sam independently hold 5 cards each -> both at 5/24",
+          "_eligible_entity_for_card returns None for every entity -> card silently excluded"
+        ]
+      }
+    },
+    {
+      "name": "Multi-Player - business entity gets the business card",
+      "description": "A declared business entity (Acme LLC) is the one attributed on a business-card apply — business cards prefer a business entity over the personal primary.",
+      "entities": [
+        {"name": "Acme LLC", "kind": "business"}
+      ],
+      "user_profile": {
+        "spending": {
+          "business": 1500,
+          "general": 500
+        }
+      },
+      "owned_cards": [],
+      "available_cards": [
+        "chase-biz-test"
+      ],
+      "expected_recommendations": {
+        "actions": ["apply"],
+        "must_include_cards": ["chase-biz-test"],
+        "apply_as": {
+          "chase-biz-test": "Acme LLC"
+        },
+        "test_conditions": [
+          "card_type=business -> candidates are business entities first",
+          "Acme LLC is the only business entity -> gets the apply attribution"
+        ]
+      }
+    },
+    {
+      "name": "Multi-Player - second-copy apply is bonus-only",
+      "description": "Jamie already holds and keeps a card; Sam applies for a fresh copy of the exact same card. Sam's copy is valued on its signup bonus alone (Jamie's copy already earns the category rewards).",
+      "entities": [
+        {"name": "Sam", "kind": "personal"}
+      ],
+      "user_profile": {
+        "spending": {
+          "general": 1000
+        }
+      },
+      "owned_cards": [
+        {"card": "chase-test-rewards", "opened_days_ago": 400}
+      ],
+      "available_cards": [
+        "chase-test-rewards"
+      ],
+      "expected_recommendations": {
+        "count": 2,
+        "actions": ["keep", "apply"],
+        "apply_as": {
+          "chase-test-rewards": "Sam"
+        },
+        "test_conditions": [
+          "Jamie's copy shows as KEEP with its normal category-rewards breakdown",
+          "Sam's copy shows as APPLY, valued on signup bonus minus fee alone",
+          "Reconciliation guard holds: Sam's breakdown line total is $0"
+        ]
+      }
+    },
+    {
+      "name": "Multi-Player - lifetime application rule blocks per entity even after close",
+      "description": "Jamie held (and long ago closed) a card sharing a once-per-lifetime application family with a new candidate — he's blocked from ever applying again, even though the prior card is closed. Sam has no such history and is recommended the new card instead.",
+      "entities": [
+        {"name": "Sam", "kind": "personal"}
+      ],
+      "user_profile": {
+        "spending": {
+          "travel": 1500,
+          "general": 500
+        }
+      },
+      "owned_cards": [
+        {"card": "lifetime-app-test-a", "opened_days_ago": 3000, "closed_days_ago": 2000}
+      ],
+      "available_cards": [
+        "lifetime-app-test-a",
+        "lifetime-app-test-b"
+      ],
+      "expected_recommendations": {
+        "actions": ["apply"],
+        "must_include_cards": ["lifetime-app-test-b"],
+        "apply_as": {
+          "lifetime-app-test-b": "Sam"
+        },
+        "test_conditions": [
+          "Jamie's once-per-lifetime application_eligibility family blocks him from A or B forever, even closed",
+          "Sam has a clean history -> eligible, gets the apply_as attribution for card B"
+        ]
+      }
+    },
+    {
+      "name": "Multi-Player - Amex 5-card max blocks that entity, other eligible",
+      "description": "Jamie holds 5 open Amex cards (the issuer's own-card cap) and is blocked from a 6th. Sam has no Amex cards and is recommended the candidate instead.",
+      "entities": [
+        {"name": "Sam", "kind": "personal"}
+      ],
+      "user_profile": {
+        "spending": {
+          "dining": 1500,
+          "general": 500
+        }
+      },
+      "owned_cards": [
+        {"card": "amex-test-gold", "opened_days_ago": 900},
+        {"card": "amex-test-2", "opened_days_ago": 800},
+        {"card": "amex-test-3", "opened_days_ago": 700},
+        {"card": "amex-test-4", "opened_days_ago": 600},
+        {"card": "amex-test-5", "opened_days_ago": 500}
+      ],
+      "available_cards": [
+        "amex-test-gold",
+        "amex-test-2",
+        "amex-test-3",
+        "amex-test-4",
+        "amex-test-5",
+        "amex-test-candidate"
+      ],
+      "expected_recommendations": {
+        "actions": ["apply"],
+        "must_include_cards": ["amex-test-candidate"],
+        "apply_as": {
+          "amex-test-candidate": "Sam"
+        },
+        "test_conditions": [
+          "Jamie holds 5 open Amex cards -> at the issuer's max_open_cards cap",
+          "Sam holds none -> eligible, gets the apply_as attribution"
+        ]
+      }
+    }
+  ]
+}

@@ -2,7 +2,7 @@ from rest_framework import serializers
 from .models import (
     Issuer, RewardType, SpendingCategory, CreditCard,
     RewardCategory, CardCredit, UserSpendingProfile,
-    SpendingAmount, UserCard, SpendingCredit
+    SpendingAmount, UserCard, SpendingCredit, ProfileEntity
 )
 
 
@@ -122,21 +122,41 @@ class SpendingAmountSerializer(serializers.ModelSerializer):
         fields = ['id', 'category', 'category_id', 'monthly_amount']
 
 
+class ProfileEntitySerializer(serializers.ModelSerializer):
+    """A person or business within a household profile (Phase K)."""
+    active_card_count = serializers.SerializerMethodField()
+
+    class Meta:
+        model = ProfileEntity
+        fields = ['id', 'name', 'kind', 'is_primary', 'active_card_count']
+        read_only_fields = ['is_primary']
+
+    def get_active_card_count(self, obj):
+        return obj.cards.filter(closed_date__isnull=True).count()
+
+
 class UserCardSerializer(serializers.ModelSerializer):
     """Serializer for UserCard model with detailed ownership information"""
     card = CreditCardListSerializer(read_only=True)
     card_id = serializers.IntegerField(write_only=True)
     display_name = serializers.ReadOnlyField()
     is_active = serializers.ReadOnlyField()
+    owner_name = serializers.SerializerMethodField()
 
     class Meta:
         model = UserCard
         fields = [
             'id', 'card', 'card_id', 'nickname', 'opened_date', 'closed_date',
-            'bonus_earned_date', 'bonus_override',
+            'bonus_earned_date', 'bonus_override', 'owner', 'owner_name',
             'notes', 'display_name', 'is_active', 'created_at', 'updated_at'
         ]
         read_only_fields = ['created_at', 'updated_at']
+
+    def get_owner_name(self, obj):
+        if obj.owner_id:
+            return obj.owner.name
+        profile = UserSpendingProfile.objects.filter(user=obj.user_id).first()
+        return profile.primary_entity().name if profile else None
 
     def validate(self, data):
         """Validate that closed_date is not before opened_date"""
@@ -203,7 +223,18 @@ class CreateSpendingProfileSerializer(serializers.Serializer):
 
 class UserCardCreateUpdateSerializer(serializers.ModelSerializer):
     """Simplified serializer for creating/updating UserCard"""
-    
+
     class Meta:
         model = UserCard
-        fields = ['card', 'nickname', 'opened_date', 'closed_date', 'notes']
+        fields = ['card', 'nickname', 'opened_date', 'closed_date', 'notes', 'owner']
+        extra_kwargs = {'owner': {'required': False}}
+
+    def validate_owner(self, owner):
+        request = self.context.get('request')
+        if owner is not None and request is not None:
+            if not ProfileEntity.objects.filter(
+                pk=owner.pk, profile__user=request.user
+            ).exists():
+                raise serializers.ValidationError(
+                    "owner must be one of your own household entities")
+        return owner

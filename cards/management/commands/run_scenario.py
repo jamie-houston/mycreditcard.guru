@@ -17,7 +17,7 @@ from datetime import date, timedelta
 
 from cards.models import (
     Issuer, RewardType, SpendingCategory, CreditCard, RewardCategory,
-    UserSpendingProfile, SpendingAmount, UserCard
+    UserSpendingProfile, SpendingAmount, UserCard, ProfileEntity
 )
 from roadmaps.models import Roadmap
 from roadmaps.recommendation_engine import RecommendationEngine
@@ -249,7 +249,7 @@ class Command(BaseCommand):
         # Validate against expectations if provided
         expected = scenario_data.get('expected_recommendations', {})
         if expected:
-            self.validate_expectations(recommendations, expected, scenario_data['name'])
+            self.validate_expectations(recommendations, expected, scenario_data)
     
     def print_reconciliation(self, rec):
         """Print the check-it-by-hand math for one recommendation."""
@@ -278,7 +278,7 @@ class Command(BaseCommand):
                     f'   First year: ${float(rec["first_year_value"]):,.2f} | '
                     f'Ongoing: ${float(rec["ongoing_value"]):,.2f}/yr')
 
-    def validate_expectations(self, recommendations, expected, scenario_name):
+    def validate_expectations(self, recommendations, expected, scenario_data):
         """Validate recommendations against expected results."""
         issues = []
         
@@ -332,6 +332,34 @@ class Command(BaseCommand):
         # Check Phase E bonus-sequencing expectations (expected_apply_sequence /
         # expected_recommended_months) — no-ops for scenarios that don't set them
         issues.extend(self.validate_apply_sequencing(recommendations, expected))
+
+        # Phase K4: apply_as attribution ({slug: entity_name}) + the
+        # single-entity no-op guarantee — a scenario with no top-level
+        # "entities" key must never see apply_as on any recommendation
+        # (proves the per-entity engine refactor is provably inert here).
+        # Keyed on APPLY recs only — a second-copy apply (K2c) can share a
+        # slug with a 'keep' rec for the same card, and that keep rec never
+        # carries apply_as.
+        apply_recs_by_slug = {
+            rec['card'].slug: rec for rec in recommendations if rec['action'] == 'apply'}
+        for card_slug, entity_name in (expected.get('apply_as') or {}).items():
+            rec = apply_recs_by_slug.get(card_slug)
+            if rec is None:
+                issues.append(
+                    f'Expected apply_as for "{card_slug}" but no recommendation '
+                    f'for that card exists')
+                continue
+            actual_name = (rec.get('apply_as') or {}).get('name')
+            if actual_name != entity_name:
+                issues.append(
+                    f'Expected "{card_slug}" apply_as name "{entity_name}", '
+                    f'got "{actual_name}"')
+        if 'entities' not in scenario_data:
+            for rec in recommendations:
+                if 'apply_as' in rec:
+                    issues.append(
+                        f'Single-entity scenario unexpectedly carries apply_as '
+                        f'on "{rec["card"].slug}"')
 
         # Check value breakdown accuracy (always validate)
         breakdown_issues = self.validate_breakdown_accuracy(recommendations)
@@ -631,7 +659,23 @@ class Command(BaseCommand):
         )
         
         profile = UserSpendingProfile.objects.create(user=user)
-        
+
+        # Phase K4: household entities. The primary is implicit — every
+        # scenario gets one, named via top-level "primary_name" (default
+        # 'Player 1') — so old scenarios (no "entities" key) parse exactly
+        # as before: one entity, engine-inert. "entities": [{"name":...,
+        # "kind": "personal"|"business"}] adds more, referenced by name from
+        # owned_cards' "owner" key.
+        primary_entity = ProfileEntity.objects.create(
+            profile=profile, name=scenario_data.get('primary_name', 'Player 1'),
+            kind='personal', is_primary=True)
+        entities_by_name = {primary_entity.name: primary_entity}
+        for entity_def in scenario_data.get('entities', []):
+            entity = ProfileEntity.objects.create(
+                profile=profile, name=entity_def['name'],
+                kind=entity_def.get('kind', 'personal'))
+            entities_by_name[entity.name] = entity
+
         # Create spending amounts. Scenario slugs that don't exist as
         # categories map onto their closest real category; anything still
         # unmatched is a loud error — silently dropping spending makes
@@ -698,9 +742,14 @@ class Command(BaseCommand):
         #    "opened_days_ago": 90,              eligibility-rule scenarios
         #    "closed_days_ago": 30,              (5/24 windows, Amex lifetime,
         #    "bonus_earned_days_ago": 60,        Citi 48-month...)
-        #    "bonus_override": false}            optional tri-state override
+        #    "bonus_override": false,            optional tri-state override
         #                                         (true=earned, false=didn't,
         #                                         omitted=infer from rules)
+        #    "owner": "Sam"}                      optional — must name an
+        #                                         entity from the top-level
+        #                                         "entities" list (or the
+        #                                         primary's name); omitted
+        #                                         defaults to the primary.
         # Days-ago values keep scenarios evergreen (an absolute date would
         # silently drift out of every eligibility window); absolute
         # "opened_date"/"closed_date"/"bonus_earned_date" ISO strings are
@@ -714,6 +763,17 @@ class Command(BaseCommand):
                         f"Scenario owned card '{owned_card_slug}' is not in "
                         f"available_cards — history entries must reference "
                         f"cards the scenario defines")
+
+                owner_name = owned_entry.get('owner')
+                if owner_name is None:
+                    owner_entity = primary_entity
+                elif owner_name in entities_by_name:
+                    owner_entity = entities_by_name[owner_name]
+                else:
+                    raise ValueError(
+                        f"Scenario owned card owner '{owner_name}' doesn't match "
+                        f"any declared entity (known: {sorted(entities_by_name)}) "
+                        f"— add it to the scenario's top-level \"entities\" list")
 
                 def parse(key):
                     if owned_entry.get(f'{key}_days_ago') is not None:
@@ -730,6 +790,7 @@ class Command(BaseCommand):
                     closed_date=parse('closed'),
                     bonus_earned_date=parse('bonus_earned'),
                     bonus_override=owned_entry.get('bonus_override'),
+                    owner=owner_entity,
                 )
             elif owned_entry in created_cards:
                 UserCard.objects.create(
@@ -738,6 +799,7 @@ class Command(BaseCommand):
                     opened_date=date.today() - timedelta(days=180),
                     # Note: is_active is now a property based on closed_date
                     # Card is active by default since closed_date is None
+                    owner=primary_entity,
                 )
             else:
                 # Used to skip silently — four scenarios spent months
@@ -852,6 +914,7 @@ class Command(BaseCommand):
             signup_bonus_amount=signup_bonus_amount,
             signup_bonus_type=self.reward_types[card_data.get('signup_bonus_type', 'Points')],
             primary_reward_type=self.reward_types[card_data.get('primary_reward_type', 'Points')],
+            card_type=card_data.get('card_type', 'personal'),
             metadata=metadata
         )
         

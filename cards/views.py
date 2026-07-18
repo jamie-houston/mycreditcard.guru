@@ -3,7 +3,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
-from django.db.models import Q
+from django.db.models import Q, ProtectedError, RestrictedError
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import Http404
 from django.utils import timezone
@@ -11,13 +11,13 @@ from django.utils import timezone
 from .models import (
     Issuer, RewardType, SpendingCategory, CreditCard,
     UserSpendingProfile, SpendingCredit, UserCard,
-    UserSpendingCreditPreference
+    UserSpendingCreditPreference, ProfileEntity
 )
 from .serializers import (
     IssuerSerializer, RewardTypeSerializer, SpendingCategorySerializer,
     CreditCardSerializer, CreditCardListSerializer, UserSpendingProfileSerializer,
     CreateSpendingProfileSerializer, SpendingCreditSerializer, UserCardSerializer,
-    UserCardCreateUpdateSerializer
+    UserCardCreateUpdateSerializer, ProfileEntitySerializer
 )
 
 
@@ -649,6 +649,104 @@ def shared_profile_data_view(request, share_uuid):
         )
 
 
+def _resolve_owner_entity(profile, owner_id):
+    """Resolve an 'owner' request param to a ProfileEntity, or the profile's
+    primary entity if none was given. Returns (entity, error_response) —
+    error_response is None on success. Phase K owner-CRUD helper."""
+    if owner_id in (None, ''):
+        return profile.primary_entity(), None
+    entity = ProfileEntity.objects.filter(id=owner_id, profile=profile).first()
+    if entity is None:
+        return None, Response(
+            {'error': 'owner must be one of your own household entities'},
+            status=status.HTTP_400_BAD_REQUEST)
+    return entity, None
+
+
+def _get_or_create_owned_card(user, card, owner_entity, defaults):
+    """get_or_create for (user, card, owner_entity) that also matches a
+    legacy NULL-owner row when owner_entity is the primary — NULL and the
+    primary entity are the same row conceptually (UserCard.owner=NULL means
+    "the primary entity"), but the DB unique constraint treats them as
+    distinct values, so a plain get_or_create(owner=owner_entity) would
+    create a duplicate instead of reopening a pre-Phase-K row."""
+    lookup = Q(user=user, card=card, owner=owner_entity)
+    if owner_entity.is_primary:
+        lookup |= Q(user=user, card=card, owner__isnull=True)
+    existing = UserCard.objects.filter(lookup).first()
+    if existing:
+        return existing, False
+    return UserCard.objects.create(user=user, card=card, owner=owner_entity, **defaults), True
+
+
+@api_view(['GET', 'POST'])
+@permission_classes([IsAuthenticated])
+def profile_entities_view(request):
+    """List or create the household's ProfileEntities (Phase K).
+
+    GET lazily creates the primary entity if it doesn't exist yet — this is
+    the entry point that brings a household's first entity into being.
+    POST creates an additional (never-primary) entity: {"name", "kind"}.
+    """
+    profile, _ = UserSpendingProfile.objects.get_or_create(user=request.user)
+
+    if request.method == 'GET':
+        profile.primary_entity()
+        entities = profile.entities.all()
+        return Response(ProfileEntitySerializer(entities, many=True).data)
+
+    profile.primary_entity()
+
+    name = (request.data.get('name') or '').strip()
+    if not name:
+        return Response({'error': 'name is required'}, status=status.HTTP_400_BAD_REQUEST)
+    kind = request.data.get('kind', 'personal')
+    if kind not in dict(ProfileEntity.KIND_CHOICES):
+        return Response({'error': 'invalid kind'}, status=status.HTTP_400_BAD_REQUEST)
+
+    if profile.entities.filter(name=name).exists():
+        return Response({'error': 'an entity with this name already exists'},
+                         status=status.HTTP_400_BAD_REQUEST)
+
+    entity = ProfileEntity.objects.create(profile=profile, name=name, kind=kind)
+    return Response(ProfileEntitySerializer(entity).data, status=status.HTTP_201_CREATED)
+
+
+@api_view(['PATCH', 'DELETE'])
+@permission_classes([IsAuthenticated])
+def profile_entity_detail_view(request, entity_id):
+    """Rename or remove a single ProfileEntity (Phase K)."""
+    profile, _ = UserSpendingProfile.objects.get_or_create(user=request.user)
+    entity = get_object_or_404(ProfileEntity, id=entity_id, profile=profile)
+
+    if request.method == 'PATCH':
+        name = request.data.get('name')
+        if name is not None:
+            name = name.strip()
+            if not name:
+                return Response({'error': 'name cannot be blank'}, status=status.HTTP_400_BAD_REQUEST)
+            if profile.entities.filter(name=name).exclude(pk=entity.pk).exists():
+                return Response({'error': 'an entity with this name already exists'},
+                                 status=status.HTTP_400_BAD_REQUEST)
+            entity.name = name
+            entity.save(update_fields=['name'])
+        return Response(ProfileEntitySerializer(entity).data)
+
+    # DELETE
+    if entity.is_primary:
+        return Response({'error': 'the primary entity cannot be removed'},
+                         status=status.HTTP_400_BAD_REQUEST)
+    try:
+        entity.delete()
+    except (ProtectedError, RestrictedError):
+        card_count = entity.cards.count()
+        return Response(
+            {'error': f'reassign or remove this player\'s {card_count} card(s) first'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    return Response({'message': 'entity removed'})
+
+
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_user_cards(request):
@@ -681,14 +779,18 @@ def add_user_card(request):
             card = CreditCard.objects.get(id=card_id)
         except CreditCard.DoesNotExist:
             return Response(
-                {'error': 'Card not found'}, 
+                {'error': 'Card not found'},
                 status=status.HTTP_404_NOT_FOUND
             )
-        
-        # Check if user already owns this card
-        user_card, created = UserCard.objects.get_or_create(
-            user=request.user,
-            card=card,
+
+        profile, _ = UserSpendingProfile.objects.get_or_create(user=request.user)
+        owner_entity, error = _resolve_owner_entity(profile, request.data.get('owner'))
+        if error:
+            return error
+
+        # Check if user already owns this card (as this owner)
+        user_card, created = _get_or_create_owned_card(
+            request.user, card, owner_entity,
             defaults={
                 'nickname': request.data.get('nickname', ''),
                 'opened_date': request.data.get('opened_date'),
@@ -708,7 +810,9 @@ def add_user_card(request):
                 user_card.save(update_fields=['closed_date'])
 
             # Update existing card
-            serializer = UserCardCreateUpdateSerializer(user_card, data=request.data, partial=True)
+            serializer = UserCardCreateUpdateSerializer(
+                user_card, data=request.data, partial=True,
+                context={'request': request})
             if serializer.is_valid():
                 serializer.save()
                 user_card.refresh_from_db()
@@ -738,9 +842,10 @@ def update_user_card(request, user_card_id):
         user_card = get_object_or_404(UserCard, id=user_card_id, user=request.user)
         
         serializer = UserCardCreateUpdateSerializer(
-            user_card, 
-            data=request.data, 
-            partial=(request.method == 'PATCH')
+            user_card,
+            data=request.data,
+            partial=(request.method == 'PATCH'),
+            context={'request': request}
         )
         
         if serializer.is_valid():
@@ -806,11 +911,14 @@ def toggle_user_card(request):
         )
 
     card = get_object_or_404(CreditCard, id=card_id)
+    profile, _ = UserSpendingProfile.objects.get_or_create(user=request.user)
 
     if action == 'add':
-        user_card, created = UserCard.objects.get_or_create(
-            user=request.user,
-            card=card,
+        owner_entity, error = _resolve_owner_entity(profile, request.data.get('owner'))
+        if error:
+            return error
+        user_card, created = _get_or_create_owned_card(
+            request.user, card, owner_entity,
             defaults={
                 'nickname': request.data.get('nickname', ''),
                 'opened_date': request.data.get('opened_date'),
@@ -826,9 +934,29 @@ def toggle_user_card(request):
             user_card.save()
         message = 'Card added to your collection'
     else:
-        UserCard.objects.filter(
-            user=request.user, card=card, closed_date__isnull=True
-        ).update(closed_date=timezone.now().date())
+        owner_id = request.data.get('owner')
+        open_rows = UserCard.objects.filter(
+            user=request.user, card=card, closed_date__isnull=True)
+        if owner_id not in (None, ''):
+            target = open_rows.filter(owner_id=owner_id).first()
+        else:
+            primary = profile.primary_entity()
+            target = open_rows.filter(Q(owner__isnull=True) | Q(owner=primary)).first()
+            if target is None and open_rows.count() == 1:
+                target = open_rows.first()
+        if target is None:
+            if open_rows.count() > 1:
+                return Response(
+                    {'error': 'multiple household members hold this card — specify owner'},
+                    status=status.HTTP_400_BAD_REQUEST)
+            return Response({
+                'success': True,
+                'message': 'Card was not in your collection',
+                'card_id': card_id,
+                'action': action
+            })
+        target.closed_date = timezone.now().date()
+        target.save(update_fields=['closed_date'])
         message = 'Card removed from your collection'
 
     return Response({

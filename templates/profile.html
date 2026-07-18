@@ -80,6 +80,28 @@ function togglePrivacySettings() {
     </div>
 </div>
 
+<!-- Household Section (Phase K, auth-only — hidden for anon via JS) -->
+<div class="section" id="householdSection" style="display:none;">
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+        <h2 style="margin:0;">Household</h2>
+        <button class="secondary" onclick="showAddHouseholdEntityForm()" style="padding:6px 12px; font-size:13px;">+ Add player/business</button>
+    </div>
+    <div id="householdList" style="margin-top:12px;">
+        <div class="loading">Loading household...</div>
+    </div>
+    <div id="addHouseholdEntityForm" style="display:none; margin-top:15px; padding-top:15px; border-top:1px solid var(--border);">
+        <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+            <input type="text" id="newEntityName" placeholder="Name (e.g. Sam, Acme LLC)" style="flex:1; min-width:180px;">
+            <select id="newEntityKind" style="min-width:120px;">
+                <option value="personal">Personal</option>
+                <option value="business">Business</option>
+            </select>
+            <button onclick="submitAddHouseholdEntity()" class="success" style="padding:8px 16px;">Add</button>
+            <button onclick="hideAddHouseholdEntityForm()" class="secondary" style="padding:8px 16px;">Cancel</button>
+        </div>
+    </div>
+</div>
+
 <!-- Card Collection Section -->
 <div class="section">
     <h2>Active cards</h2>
@@ -169,7 +191,8 @@ async function loadProfileData() {
             loadCardCollection(),
             loadCategoryOptimization(),
             loadSpendingProfile(),
-            loadCreditsProfile()
+            loadCreditsProfile(),
+            loadHousehold()
         ]);
 
         // Calculate and display portfolio summary
@@ -197,10 +220,102 @@ const CARD_SORT_COLUMNS = [
     { key: 'point_value', label: 'Point Value', type: 'number' },
     { key: 'signup_bonus', label: 'Signup Bonus', type: 'number' },
     { key: 'card_type', label: 'Card Type', type: 'string' },
+    { key: 'owner', label: 'Owner', type: 'string' },
     { key: 'count', label: 'Count', type: 'number' },
     { key: 'renewal', label: 'Renews', type: 'date' },
     { key: null, label: 'Actions', type: null }
 ];
+
+// Phase K: household management panel (auth-only — hidden entirely for
+// anon users, whose accounts stay single-player per the locked scope).
+async function loadHousehold() {
+    const section = document.getElementById('householdSection');
+    if (!isAuthenticated) {
+        section.style.display = 'none';
+        return;
+    }
+    section.style.display = 'block';
+    try {
+        const entities = await UserDataManager.getEntities(true);
+        renderHouseholdList(entities);
+    } catch (error) {
+        console.error('Error loading household:', error);
+        document.getElementById('householdList').innerHTML =
+            '<p style="color:var(--muted);">Failed to load household.</p>';
+    }
+}
+
+function renderHouseholdList(entities) {
+    const container = document.getElementById('householdList');
+    if (!entities || entities.length === 0) {
+        container.innerHTML = '<p style="color:var(--muted);">No household members yet.</p>';
+        return;
+    }
+    container.innerHTML = entities.map(entity => `
+        <div style="display:flex; align-items:center; gap:10px; padding:8px 0; border-bottom:1px solid var(--border);">
+            <span style="font-weight:600;">${escapeHtml(entity.name)}</span>
+            ${entity.is_primary ? '<span class="chip" style="font-size:11px;">Primary</span>' : ''}
+            <span style="color:var(--muted); font-size:13px; text-transform:capitalize;">${escapeHtml(entity.kind)}</span>
+            <span style="color:var(--muted); font-size:13px;">${entity.active_card_count} card${entity.active_card_count === 1 ? '' : 's'}</span>
+            <div style="margin-left:auto; display:flex; gap:6px;">
+                <button class="table-action-btn" onclick="renameHouseholdEntity(${entity.id}, '${escapeHtml(entity.name).replace(/'/g, "\\'")}')" title="Rename">✏️</button>
+                ${!entity.is_primary ? `<button class="table-action-btn" onclick="removeHouseholdEntity(${entity.id})" title="Remove">🗑️</button>` : ''}
+            </div>
+        </div>
+    `).join('');
+}
+
+function showAddHouseholdEntityForm() {
+    document.getElementById('addHouseholdEntityForm').style.display = 'block';
+    document.getElementById('newEntityName').focus();
+}
+
+function hideAddHouseholdEntityForm() {
+    document.getElementById('addHouseholdEntityForm').style.display = 'none';
+    document.getElementById('newEntityName').value = '';
+}
+
+async function submitAddHouseholdEntity() {
+    const name = document.getElementById('newEntityName').value.trim();
+    const kind = document.getElementById('newEntityKind').value;
+    if (!name) {
+        showNotification('Enter a name first', 'error');
+        return;
+    }
+    const result = await UserDataManager.addEntity(name, kind);
+    if (result.success) {
+        hideAddHouseholdEntityForm();
+        await loadHousehold();
+        showNotification(`Added ${name}`, 'success');
+    } else {
+        showNotification(result.error || 'Failed to add household member', 'error');
+    }
+}
+
+async function renameHouseholdEntity(entityId, currentName) {
+    const name = prompt('Rename to:', currentName);
+    if (!name || !name.trim() || name.trim() === currentName) {
+        return;
+    }
+    const result = await UserDataManager.renameEntity(entityId, name.trim());
+    if (result.success) {
+        await loadHousehold();
+    } else {
+        showNotification(result.error || 'Failed to rename', 'error');
+    }
+}
+
+async function removeHouseholdEntity(entityId) {
+    if (!confirm('Remove this household member?')) {
+        return;
+    }
+    const result = await UserDataManager.removeEntity(entityId);
+    if (result.success) {
+        await loadHousehold();
+    } else {
+        showNotification(result.error || "Failed to remove — reassign or remove their cards first", 'error');
+    }
+}
 
 // Next annual-fee renewal: the upcoming anniversary (this year if it hasn't
 // passed yet, otherwise next year) of the card's opened_date.
@@ -229,6 +344,10 @@ function cardSortValue(key, group, cardInfo) {
         case 'point_value': return cardInfo.metadata?.reward_value_multiplier || 0.01;
         case 'signup_bonus': return cardInfo.signup_bonus_amount || 0;
         case 'card_type': return cardInfo.card_type || '';
+        case 'owner': {
+            const names = group.instances.map(i => i.owner_name || '').filter(Boolean).sort();
+            return names[0] || '';
+        }
         case 'count': return group.instances.length;
         case 'renewal': {
             const anniversaries = group.instances
@@ -326,6 +445,21 @@ function buildCardRow(cardId, group, cardInfo) {
         }
     }
 
+    // Owner display (Phase K): one name per instance, stacked like the
+    // signup-date/renewal columns above — this is exactly the "two owners,
+    // same card" shape the multi-instance stacking already supports.
+    let ownerDisplay;
+    if (hasMultiple) {
+        const names = instances.map(i => i.owner_name).filter(Boolean);
+        ownerDisplay = names.length > 0
+            ? names.map(n => `<div>${escapeHtml(n)}</div>`).join('')
+            : '<span style="color: var(--muted-2);">-</span>';
+    } else {
+        ownerDisplay = instances[0].owner_name
+            ? escapeHtml(instances[0].owner_name)
+            : '<span style="color: var(--muted-2);">-</span>';
+    }
+
     return `
         <tr class="card-row modal-card-clickable" onclick="openCardModal(${cardId})" title="Click to view details">
             <td class="card-name-cell">
@@ -341,6 +475,7 @@ function buildCardRow(cardId, group, cardInfo) {
             <td>${pointValue}</td>
             <td>${signupBonus}</td>
             <td>${cardInfo.card_type ? cardInfo.card_type.charAt(0).toUpperCase() + cardInfo.card_type.slice(1) : 'Personal'}</td>
+            <td>${ownerDisplay}</td>
             <td class="card-count-cell">
                 <span class="card-count">${instances.length}</span>
                 ${hasMultiple ? ' <span class="multiple-indicator" title="Multiple cards">📚</span>' : ''}

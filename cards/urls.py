@@ -27,6 +27,10 @@ urlpatterns = [
     # Quick recommendations
     path('recommendations/preview/', views.card_recommendations_preview, name='recommendations-preview'),
     
+    # Household entities (Phase K)
+    path('profile-entities/', views.profile_entities_view, name='profile-entities'),
+    path('profile-entities/<int:entity_id>/', views.profile_entity_detail_view, name='profile-entity-detail'),
+
     # Card ownership management
     path('user-cards/', views.get_user_cards, name='user-cards'),
     path('user-cards/add/', views.add_user_card, name='add-user-card'),

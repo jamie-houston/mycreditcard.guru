@@ -20,6 +20,29 @@ function _roadmapFormatSigned(value) {
     return v < 0 ? `−$${Math.abs(v).toFixed(0)}` : `$${v.toFixed(0)}`;
 }
 
+// Phase K3: household entity names are user input (ProfileEntity.name) —
+// escape before interpolating into HTML.
+function _roadmapEscapeHtml(str) {
+    if (str === null || str === undefined) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
+// Phase K3: "as {name}" suffix for apply recommendations attributed to a
+// specific household entity (rec.apply_as, set by the engine only when the
+// profile has >1 entity — see roadmaps/recommendation_engine.py). Absent
+// on old/anon payloads and single-entity households, so this returns ''.
+function _roadmapApplyAsLabel(rec) {
+    if (!rec.apply_as || !rec.apply_as.name) {
+        return '';
+    }
+    return ` · as ${_roadmapEscapeHtml(rec.apply_as.name)}`;
+}
+
 // Phase E timing label. `recommendedMonth` is the engine's month offset
 // (0/null = no bonus window to wait on — "apply now"); `baseDate` is the
 // roadmap's generated_at (or "now" as a fallback for older persisted data).
@@ -402,7 +425,7 @@ function renderRoadmapResults(data, opts = {}) {
                                 <div class="apply-card-top">
                                     <div>
                                         <div class="apply-card-name">${rec.card.name}</div>
-                                        <div class="apply-card-reason">${reasonLabel}</div>
+                                        <div class="apply-card-reason">${reasonLabel}${_roadmapApplyAsLabel(rec)}</div>
                                     </div>
                                     <span class="apply-card-value">${_roadmapFormatSigned(estimatedValue)}</span>
                                 </div>
@@ -432,7 +455,7 @@ function renderRoadmapResults(data, opts = {}) {
                                 <div class="grouped-row" onclick="openCardModal(${rec.card.id})">
                                     <div>
                                         <div class="grouped-row-name">${rec.card.name}</div>
-                                        <div class="grouped-row-reason">${reasonLabel}</div>
+                                        <div class="grouped-row-reason">${reasonLabel}${_roadmapApplyAsLabel(rec)}</div>
                                     </div>
                                     <span class="grouped-row-value${section.danger ? ' danger' : ''}">${_roadmapFormatSigned(estimatedValue)}</span>
                                 </div>

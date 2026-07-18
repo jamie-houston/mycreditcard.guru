@@ -98,6 +98,9 @@
                 Preferences
                 <span id="preferencesToggle" class="ico" style="font-size: 20px; color: var(--muted);">expand_more</span>
             </h2>
+            <div id="householdSummaryLine" style="display:none; font-size:13px; color:var(--muted); margin: -8px 0 12px 0;">
+                <span id="householdSummaryText"></span> — <a href="/profile/" style="color:var(--accent);">manage</a>
+            </div>
             <div id="preferencesContent" class="preferences-tile-grid">
                 <div class="preferences-tile">
                     <label for="cardType">Card type</label>
@@ -785,11 +788,34 @@
             }
         }
 
+        // Phase K: auth-only household summary line, linking to the
+        // profile page's Household management panel. Anon users stay
+        // single-player, so this stays hidden for them entirely.
+        async function loadHouseholdSummaryLine() {
+            const line = document.getElementById('householdSummaryLine');
+            if (!isAuthenticated) {
+                line.style.display = 'none';
+                return;
+            }
+            try {
+                const entities = await UserDataManager.getEntities();
+                const players = entities.filter(e => e.kind !== 'business').length;
+                const businesses = entities.filter(e => e.kind === 'business').length;
+                document.getElementById('householdSummaryText').textContent =
+                    `Household: ${players} player${players === 1 ? '' : 's'} · ${businesses} business${businesses === 1 ? '' : 'es'}`;
+                line.style.display = 'block';
+            } catch (error) {
+                console.error('Error loading household summary:', error);
+                line.style.display = 'none';
+            }
+        }
+
         async function loadSavedData() {
             try {
                 // Wait for user state to be initialized
                 await initUserState();
-                
+                await loadHouseholdSummaryLine();
+
                 // Load spending data
                 const savedSpending = await UserDataManager.getSpending();
                 Object.keys(savedSpending).forEach(categorySlug => {
@@ -994,14 +1020,24 @@
                     }
                 });
 
-                // Build user cards array from saved data
-                const userCardIds = await UserDataManager.getCards();
-                const userCards = userCardIds.map(cardId => ({
-                    card_id: cardId,
-                    opened_date: '2023-01-01', // Default date
-                    nickname: '',
-                    is_active: true
-                }));
+                // Build user cards array from saved data. Authenticated users
+                // already have their real UserCard rows in the DB (just
+                // persisted by saveCurrentData() above) — the engine reads
+                // those directly, so sending this placeholder payload would
+                // make the scratch rewrite (roadmaps/serializers.py) flatten
+                // real opened dates, bonus overrides, and owners back to
+                // defaults. Anonymous users have no DB rows, so they still
+                // need to send their session/localStorage card list.
+                let userCards;
+                if (!isAuthenticated) {
+                    const userCardIds = await UserDataManager.getCards();
+                    userCards = userCardIds.map(cardId => ({
+                        card_id: cardId,
+                        opened_date: '2023-01-01', // Default date
+                        nickname: '',
+                        is_active: true
+                    }));
+                }
 
                 // Build filters array
                 const filters = [];

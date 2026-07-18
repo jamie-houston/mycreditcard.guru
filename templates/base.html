@@ -286,6 +286,10 @@
                             <option value="false">I did not earn this bonus</option>
                         </select>
                     </div>
+                    <div class="form-group" id="cardOwnerGroup" style="margin-bottom: 30px; display: none;">
+                        <label for="cardOwner" style="display: block; margin-bottom: 8px; font-weight: 600;">Held By</label>
+                        <select id="cardOwner" style="width: 100%; color-scheme: dark;"></select>
+                    </div>
                     <div style="display: flex; gap: 15px; justify-content: center;">
                         <button type="submit" class="success" style="padding: 12px 24px;">
                             💾 Save Details
@@ -303,6 +307,18 @@
         // Global user state
         let currentUser = null;
         let isAuthenticated = false;
+
+        // Phase K: household entity names (ProfileEntity.name) are user
+        // input — escape before interpolating into HTML anywhere on the site.
+        function escapeHtml(str) {
+            if (str === null || str === undefined) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
 
         function getCookie(name) {
             let cookieValue = null;
@@ -677,6 +693,10 @@
             }
         }
 
+        // Phase K: household entities cache, invalidated on any mutation.
+        // Auth-only feature — anon users always get [].
+        let _householdEntitiesCache = null;
+
         // Unified data management (handles both authenticated and anonymous users)
         class UserDataManager {
             static async saveSpending(spending) {
@@ -864,15 +884,27 @@
                 }
             }
 
-            static async updateCardDetails(cardId, nickname, openedDate, bonusEarnedDate, bonusOverride) {
+            static async updateCardDetails(cardId, nickname, openedDate, bonusEarnedDate, bonusOverride, owner) {
                 if (isAuthenticated) {
                     try {
                         // The surviving cards/ update endpoint is keyed by
                         // UserCard id, not CreditCard id — resolve it first.
+                        // Phase K note: with multiple copies of the same
+                        // card (different owners), this still resolves to
+                        // the FIRST matching row — see openEditCardDetailsModal.
                         const userCards = await this.getUserCardsDetails();
                         const existing = userCards.find(uc => uc.card.id === cardId);
                         if (!existing) {
                             return false;
+                        }
+                        const body = {
+                            nickname: nickname,
+                            opened_date: openedDate,
+                            bonus_earned_date: bonusEarnedDate || null,
+                            bonus_override: bonusOverride
+                        };
+                        if (owner) {
+                            body.owner = owner;
                         }
                         const response = await fetch(`${API_BASE}/cards/user-cards/${existing.id}/`, {
                             method: 'PATCH',
@@ -880,12 +912,7 @@
                                 'Content-Type': 'application/json',
                                 'X-CSRFToken': getCookie('csrftoken')
                             },
-                            body: JSON.stringify({
-                                nickname: nickname,
-                                opened_date: openedDate,
-                                bonus_earned_date: bonusEarnedDate || null,
-                                bonus_override: bonusOverride
-                            })
+                            body: JSON.stringify(body)
                         });
                         return response.ok;
                     } catch (error) {
@@ -913,6 +940,91 @@
                         nickname: '', opened_date: null,
                         bonus_earned_date: null, bonus_override: null
                     };
+                }
+            }
+
+            // Phase K: household entities (multi-player households). Auth-only —
+            // anonymous users always get an empty list, matching the locked
+            // scope (session/localStorage users stay single-player).
+            static async getEntities(forceRefresh = false) {
+                if (!isAuthenticated) {
+                    return [];
+                }
+                if (_householdEntitiesCache && !forceRefresh) {
+                    return _householdEntitiesCache;
+                }
+                try {
+                    const response = await fetch(`${API_BASE}/cards/profile-entities/`);
+                    if (!response.ok) {
+                        return [];
+                    }
+                    _householdEntitiesCache = await response.json();
+                    return _householdEntitiesCache;
+                } catch (error) {
+                    console.error('Error fetching household entities:', error);
+                    return [];
+                }
+            }
+
+            static async addEntity(name, kind) {
+                try {
+                    const response = await fetch(`${API_BASE}/cards/profile-entities/`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': getCookie('csrftoken')
+                        },
+                        body: JSON.stringify({ name, kind })
+                    });
+                    const data = await response.json();
+                    if (!response.ok) {
+                        return { success: false, error: data.error || 'Failed to add household member' };
+                    }
+                    _householdEntitiesCache = null;
+                    return { success: true, entity: data };
+                } catch (error) {
+                    console.error('Error adding household entity:', error);
+                    return { success: false, error: 'Network error' };
+                }
+            }
+
+            static async renameEntity(entityId, name) {
+                try {
+                    const response = await fetch(`${API_BASE}/cards/profile-entities/${entityId}/`, {
+                        method: 'PATCH',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': getCookie('csrftoken')
+                        },
+                        body: JSON.stringify({ name })
+                    });
+                    const data = await response.json();
+                    if (!response.ok) {
+                        return { success: false, error: data.error || 'Failed to rename' };
+                    }
+                    _householdEntitiesCache = null;
+                    return { success: true };
+                } catch (error) {
+                    console.error('Error renaming household entity:', error);
+                    return { success: false, error: 'Network error' };
+                }
+            }
+
+            static async removeEntity(entityId) {
+                try {
+                    const response = await fetch(`${API_BASE}/cards/profile-entities/${entityId}/`, {
+                        method: 'DELETE',
+                        headers: { 'X-CSRFToken': getCookie('csrftoken') }
+                    });
+                    if (!response.ok) {
+                        const data = await response.json().catch(() => ({}));
+                        return { success: false, error: data.error || 'Failed to remove' };
+                    }
+                    _householdEntitiesCache = null;
+                    return { success: true };
+                } catch (error) {
+                    console.error('Error removing household entity:', error);
+                    return { success: false, error: 'Network error' };
                 }
             }
         }
@@ -1498,6 +1610,25 @@
                     cardDetails?.bonus_override === true ? 'true' :
                     cardDetails?.bonus_override === false ? 'false' : '';
 
+                // Phase K: owner selector — only shown for authed, multi-
+                // entity households (single-player accounts see no change).
+                // Note: if this card has multiple copies (different owners),
+                // this still edits the first matching row — the same
+                // longstanding ambiguity the other fields above already have.
+                const ownerGroup = document.getElementById('cardOwnerGroup');
+                const ownerSelect = document.getElementById('cardOwner');
+                const entities = await UserDataManager.getEntities();
+                if (isAuthenticated && entities.length > 1) {
+                    ownerSelect.innerHTML = entities.map(e =>
+                        `<option value="${e.id}">${escapeHtml(e.name)}${e.is_primary ? ' (Primary)' : ''}</option>`
+                    ).join('');
+                    const primaryId = entities.find(e => e.is_primary)?.id || '';
+                    ownerSelect.value = cardDetails?.owner ?? primaryId;
+                    ownerGroup.style.display = 'block';
+                } else {
+                    ownerGroup.style.display = 'none';
+                }
+
                 // Show edit modal
                 document.getElementById('editCardDetailsModal').style.display = 'block';
             } catch (error) {
@@ -1513,6 +1644,7 @@
             document.getElementById('cardOpeningDate').value = '';
             document.getElementById('cardBonusEarnedDate').value = '';
             document.getElementById('cardBonusOverride').value = '';
+            document.getElementById('cardOwnerGroup').style.display = 'none';
         }
 
         async function saveCardDetails(event) {
@@ -1526,13 +1658,16 @@
                 const bonusEarnedDate = document.getElementById('cardBonusEarnedDate').value;
                 const bonusOverrideRaw = document.getElementById('cardBonusOverride').value;
                 const bonusOverride = bonusOverrideRaw === '' ? null : bonusOverrideRaw === 'true';
+                const ownerGroupVisible = document.getElementById('cardOwnerGroup').style.display !== 'none';
+                const owner = ownerGroupVisible ? document.getElementById('cardOwner').value : null;
 
                 const success = await UserDataManager.updateCardDetails(
                     currentModalCard.id,
                     nickname,
                     openingDate,
                     bonusEarnedDate,
-                    bonusOverride
+                    bonusOverride,
+                    owner
                 );
 
                 if (success) {

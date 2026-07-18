@@ -1056,5 +1056,160 @@
       }
     ],
     "slug": "mr-premium-test"
+  },
+  {
+    "name": "Chase Biz Test Card",
+    "issuer": "Chase",
+    "annual_fee": 0,
+    "card_type": "business",
+    "signup_bonus_amount": 500,
+    "signup_bonus_type": "Cashback",
+    "primary_reward_type": "Cashback",
+    "metadata": {
+      "reward_value_multiplier": 0.01,
+      "discontinued": false,
+      "signup_bonus": {
+        "bonus_amount": 500,
+        "spending_requirement": 1000,
+        "time_limit_months": 3
+      }
+    },
+    "reward_categories": [
+      {
+        "category": "business",
+        "reward_rate": 3.0
+      },
+      {
+        "category": "other",
+        "reward_rate": 1.0
+      }
+    ],
+    "slug": "chase-biz-test"
+  },
+  {
+    "name": "Lifetime App Test A",
+    "issuer": "Chase",
+    "annual_fee": 0,
+    "signup_bonus_amount": 600,
+    "signup_bonus_type": "Cashback",
+    "primary_reward_type": "Cashback",
+    "metadata": {
+      "reward_value_multiplier": 0.01,
+      "discontinued": false,
+      "application_eligibility": {
+        "once_per_lifetime": true,
+        "family": "lifetime-app-test-family",
+        "label": "Test lifetime application rule"
+      },
+      "signup_bonus": {
+        "bonus_amount": 600,
+        "spending_requirement": 1000,
+        "time_limit_months": 3
+      }
+    },
+    "reward_categories": [
+      {
+        "category": "travel",
+        "reward_rate": 3.0
+      },
+      {
+        "category": "other",
+        "reward_rate": 1.0
+      }
+    ],
+    "slug": "lifetime-app-test-a"
+  },
+  {
+    "name": "Lifetime App Test B",
+    "issuer": "Chase",
+    "annual_fee": 0,
+    "signup_bonus_amount": 600,
+    "signup_bonus_type": "Cashback",
+    "primary_reward_type": "Cashback",
+    "metadata": {
+      "reward_value_multiplier": 0.01,
+      "discontinued": false,
+      "application_eligibility": {
+        "once_per_lifetime": true,
+        "family": "lifetime-app-test-family",
+        "label": "Test lifetime application rule"
+      },
+      "signup_bonus": {
+        "bonus_amount": 600,
+        "spending_requirement": 1000,
+        "time_limit_months": 3
+      }
+    },
+    "reward_categories": [
+      {
+        "category": "travel",
+        "reward_rate": 3.0
+      },
+      {
+        "category": "other",
+        "reward_rate": 1.0
+      }
+    ],
+    "slug": "lifetime-app-test-b"
+  },
+  {
+    "name": "Amex Test 2",
+    "issuer": "American Express",
+    "annual_fee": 0,
+    "metadata": {"reward_value_multiplier": 0.01, "discontinued": false},
+    "reward_categories": [{"category": "other", "reward_rate": 1.0}],
+    "slug": "amex-test-2"
+  },
+  {
+    "name": "Amex Test 3",
+    "issuer": "American Express",
+    "annual_fee": 0,
+    "metadata": {"reward_value_multiplier": 0.01, "discontinued": false},
+    "reward_categories": [{"category": "other", "reward_rate": 1.0}],
+    "slug": "amex-test-3"
+  },
+  {
+    "name": "Amex Test 4",
+    "issuer": "American Express",
+    "annual_fee": 0,
+    "metadata": {"reward_value_multiplier": 0.01, "discontinued": false},
+    "reward_categories": [{"category": "other", "reward_rate": 1.0}],
+    "slug": "amex-test-4"
+  },
+  {
+    "name": "Amex Test 5",
+    "issuer": "American Express",
+    "annual_fee": 0,
+    "metadata": {"reward_value_multiplier": 0.01, "discontinued": false},
+    "reward_categories": [{"category": "other", "reward_rate": 1.0}],
+    "slug": "amex-test-5"
+  },
+  {
+    "name": "Amex Test Candidate",
+    "issuer": "American Express",
+    "annual_fee": 0,
+    "signup_bonus_amount": 450,
+    "signup_bonus_type": "Cashback",
+    "primary_reward_type": "Cashback",
+    "metadata": {
+      "reward_value_multiplier": 0.01,
+      "discontinued": false,
+      "signup_bonus": {
+        "bonus_amount": 450,
+        "spending_requirement": 1000,
+        "time_limit_months": 3
+      }
+    },
+    "reward_categories": [
+      {
+        "category": "dining",
+        "reward_rate": 4.0
+      },
+      {
+        "category": "other",
+        "reward_rate": 1.0
+      }
+    ],
+    "slug": "amex-test-candidate"
   }
 ]

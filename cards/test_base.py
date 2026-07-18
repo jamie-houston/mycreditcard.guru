@@ -127,6 +127,34 @@ class CreditCardTestBase(TestCase):
         # Phase E: expected_apply_sequence / expected_recommended_months
         # (no-ops for scenarios that don't set them)
         issues.extend(self.command.validate_apply_sequencing(recommendations, expected))
+
+        # Phase K4: apply_as attribution ({slug: entity_name}) + the
+        # single-entity no-op guarantee (see run_scenario.py's
+        # validate_expectations — same check, mirrored here since the CLI
+        # and test paths validate independently). Keyed on APPLY recs only —
+        # a second-copy apply (K2c) can share a slug with a 'keep' rec for
+        # the same card, and that keep rec never carries apply_as.
+        apply_recs_by_slug = {
+            rec['card'].slug: rec for rec in recommendations if rec['action'] == 'apply'}
+        for card_slug, entity_name in (expected.get('apply_as') or {}).items():
+            rec = apply_recs_by_slug.get(card_slug)
+            if rec is None:
+                issues.append(
+                    f'Expected apply_as for "{card_slug}" but no recommendation '
+                    f'for that card exists')
+                continue
+            actual_name = (rec.get('apply_as') or {}).get('name')
+            if actual_name != entity_name:
+                issues.append(
+                    f'Expected "{card_slug}" apply_as name "{entity_name}", '
+                    f'got "{actual_name}"')
+        if 'entities' not in scenario:
+            for rec in recommendations:
+                if 'apply_as' in rec:
+                    issues.append(
+                        f'Single-entity scenario unexpectedly carries apply_as '
+                        f'on "{rec["card"].slug}"')
+
         issues.extend(self.command.validate_breakdown_accuracy(recommendations))
 
         if issues:

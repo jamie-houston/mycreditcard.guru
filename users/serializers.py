@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
+from django.db.models import Q
 from .models import UserProfile, UserPreferences
 from cards.models import UserCard, UserSpendingProfile, SpendingAmount
 from cards.serializers import CreditCardListSerializer, SpendingCategorySerializer
@@ -56,6 +57,7 @@ class UserDataSerializer(serializers.Serializer):
         
         # Get or create user spending profile
         profile, _ = UserSpendingProfile.objects.get_or_create(user=user)
+        primary = profile.primary_entity()
         
         # Update spending
         from cards.models import SpendingCategory
@@ -73,22 +75,31 @@ class UserDataSerializer(serializers.Serializer):
         # Update cards
         from cards.models import CreditCard
         # Remove active cards not in the new list. Only touch active
-        # (closed_date__isnull=True) rows — soft-closed cards (e.g. via
-        # /api/cards/user-cards/toggle/ remove) must survive untouched,
-        # since eligibility rules (5/24, Amex lifetime, etc.) read full
-        # history including closed cards.
+        # (closed_date__isnull=True) rows owned by the primary entity (or
+        # legacy NULL-owner rows, which read as the primary) — this flat
+        # list is the browse page's view of the PRIMARY's cards only, so
+        # other household members' cards (Phase K) must survive untouched.
+        # Soft-closed cards (e.g. via /api/cards/user-cards/toggle/ remove)
+        # must also survive untouched, since eligibility rules (5/24, Amex
+        # lifetime, etc.) read full history including closed cards.
         UserCard.objects.filter(
             user=user, closed_date__isnull=True
+        ).filter(
+            Q(owner__isnull=True) | Q(owner=primary)
         ).exclude(card_id__in=cards_data).delete()
-        
-        # Add new cards
+
+        # Add new cards. Skip if ANY household member already has a row for
+        # this card (any owner, open or closed) — matches the existing
+        # no-reopen-on-bulk-save semantics and avoids spawning a duplicate
+        # primary-owned row for a card another entity already holds.
         for card_id in cards_data:
             try:
                 card = CreditCard.objects.get(id=card_id)
-                UserCard.objects.get_or_create(
-                    user=user, 
-                    card=card,
-                    defaults={'opened_date': '2023-01-01'}  # Default date
+                if UserCard.objects.filter(user=user, card=card).exists():
+                    continue
+                UserCard.objects.create(
+                    user=user, card=card, owner=primary,
+                    opened_date='2023-01-01'  # Default date
                 )
             except CreditCard.DoesNotExist:
                 continue

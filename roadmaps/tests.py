@@ -221,6 +221,48 @@ class EligibilityRuleTests(TestCase):
         note = bonus_ineligibility(sapphire, [prior], self.today)
         self.assertIn('Sapphire once per lifetime', note)
 
+    def test_amex_5_card_limit_counts_open_cards_same_issuer(self):
+        """Phase K: max_open_cards rule shape — a cap on OPEN cards, unlike
+        the windowed max_new_cards rules above (no time bound)."""
+        from .eligibility import application_block
+        candidate = self._card('Amex Candidate', self.amex)
+        held = [self._card(f'Amex {i}', self.amex) for i in range(5)]
+        history = [self._held(c, opened_days_ago=1000) for c in held]
+        self.assertIsNotNone(application_block(candidate, history, self.today))
+        # At 4 open Amex cards, the 5th application goes through
+        self.assertIsNone(application_block(candidate, history[:4], self.today))
+        # A closed card doesn't count toward the open-card cap
+        closed_history = [self._held(c, opened_days_ago=1000, closed_days_ago=10)
+                          for c in held]
+        self.assertIsNone(application_block(candidate, closed_history, self.today))
+        # Other issuers' cards don't count toward Amex's own-issuer cap
+        other = [self._held(self._card(f'Chase {i}', self.chase), opened_days_ago=1000)
+                 for i in range(5)]
+        self.assertIsNone(application_block(candidate, other, self.today))
+
+    def test_sapphire_once_per_lifetime_application_blocks_even_after_close(self):
+        """Phase K: application_eligibility once_per_lifetime is a stronger,
+        forever block — distinct from application_family (blocks only while
+        OPEN) and from bonus_eligibility (only zeroes the bonus)."""
+        from .eligibility import application_block
+        family_meta = {'application_eligibility': {
+            'once_per_lifetime': True, 'family': 'chase-sapphire-personal',
+            'label': 'Chase Sapphire application rule'}}
+        reserve = self._card('Sapphire Reserve', self.chase, metadata=family_meta)
+        preferred = self._card('Sapphire Preferred', self.chase, metadata=family_meta)
+        # Never held either -> free to apply
+        self.assertIsNone(application_block(preferred, [], self.today))
+        # Held Reserve, even closed long ago -> Preferred is blocked forever
+        closed = self._held(reserve, opened_days_ago=3000, closed_days_ago=2000)
+        note = application_block(preferred, [closed], self.today)
+        self.assertIsNotNone(note)
+        self.assertIn('Chase Sapphire application rule', note)
+        # A business Sapphire (no application_eligibility) never blocks
+        business = self._card('Sapphire Reserve for Business', self.chase,
+                              card_type='business')
+        biz_held = self._held(business, opened_days_ago=3000)
+        self.assertIsNone(application_block(preferred, [biz_held], self.today))
+
     def test_southwest_family_rules(self):
         from .eligibility import application_block, bonus_ineligibility
         family_meta = {
@@ -238,6 +280,299 @@ class EligibilityRuleTests(TestCase):
         self.assertIsNone(application_block(priority, [closed], self.today))
         # ...but a family bonus earned within 24 months zeroes the bonus
         self.assertIsNotNone(bonus_ineligibility(priority, [closed], self.today))
+
+
+class MultiEntityEligibilityTests(TestCase):
+    """Phase K2b: application eligibility moves from household-wide to
+    per-entity — see RecommendationEngine._eligible_entity_for_card. Single-
+    entity behavior is provably unchanged (existing EligibilityRuleTests +
+    the JSON scenario sweep + Jamie Real cover that); these tests cover the
+    genuinely new multi-entity behavior."""
+
+    def setUp(self):
+        from datetime import date
+        from cards.models import ProfileEntity
+        self.today = date.today()
+        self.user = User.objects.create_user(username='household3', password='x')
+        self.profile = UserSpendingProfile.objects.create(user=self.user)
+        self.primary = self.profile.primary_entity()
+        self.sam = ProfileEntity.objects.create(profile=self.profile, name='Sam')
+        self.points = RewardType.objects.create(name='Points', slug='points')
+        self.chase = Issuer.objects.create(name='Chase', slug='chase')
+        self.amex = Issuer.objects.create(name='American Express', slug='american-express')
+        self.generic = Issuer.objects.create(name='Generic Bank', slug='generic-bank')
+
+    def _card(self, name, issuer=None, card_type='personal', metadata=None):
+        from django.utils.text import slugify
+        return CreditCard.objects.create(
+            name=name, slug=slugify(name), issuer=issuer or self.generic,
+            card_type=card_type, signup_bonus_type=self.points,
+            primary_reward_type=self.points, metadata=metadata or {})
+
+    def _engine(self):
+        from .recommendation_engine import RecommendationEngine
+        return RecommendationEngine(self.profile)
+
+    def test_two_entities_get_independent_524_budgets(self):
+        """Primary alone is at 5/24, but Sam has a clean budget — the
+        household as a whole is still eligible, via Sam."""
+        from datetime import timedelta
+        from cards.models import UserCard
+        candidate = self._card('Chase Candidate', issuer=self.chase)
+        for i in range(5):
+            other = self._card(f'Primary Card {i}')
+            UserCard.objects.create(
+                user=self.user, card=other, owner=self.primary,
+                opened_date=self.today - timedelta(days=100))
+
+        engine = self._engine()
+        self.assertTrue(engine._is_eligible_for_card(candidate))
+        entity = engine._eligible_entity_for_card(candidate)
+        self.assertEqual(entity.id, self.sam.id)
+
+    def test_both_entities_at_524_blocks_card(self):
+        from datetime import timedelta
+        from cards.models import UserCard
+        candidate = self._card('Chase Candidate 2', issuer=self.chase)
+        for owner in (self.primary, self.sam):
+            for i in range(5):
+                other = self._card(f'{owner.name} Card {i}')
+                UserCard.objects.create(
+                    user=self.user, card=other, owner=owner,
+                    opened_date=self.today - timedelta(days=100))
+
+        engine = self._engine()
+        self.assertFalse(engine._is_eligible_for_card(candidate))
+        self.assertIsNone(engine._eligible_entity_for_card(candidate))
+
+    def test_business_card_prefers_business_entity(self):
+        from cards.models import ProfileEntity
+        biz = ProfileEntity.objects.create(
+            profile=self.profile, name='Acme LLC', kind='business')
+        card = self._card('Biz Card', card_type='business')
+
+        engine = self._engine()
+        entity = engine._eligible_entity_for_card(card)
+        self.assertEqual(entity.id, biz.id)
+
+    def test_business_card_falls_back_to_primary_without_business_entity(self):
+        """No declared business entity — sole-proprietor business cards are
+        common, so fall back to the primary rather than strictly requiring
+        one (this is what keeps Jamie Real's business cards working)."""
+        card = self._card('Sole Prop Card', card_type='business')
+
+        engine = self._engine()
+        entity = engine._eligible_entity_for_card(card)
+        self.assertEqual(entity.id, self.primary.id)
+
+    def test_primary_first_tie_break_when_both_eligible(self):
+        card = self._card('Either Card')
+
+        engine = self._engine()
+        entity = engine._eligible_entity_for_card(card)
+        self.assertEqual(entity.id, self.primary.id)
+
+    def test_bonus_note_evaluated_against_the_applying_entity(self):
+        """Primary already holds this exact Amex card (open) — Sam doesn't.
+        Sam is the one who'd apply, and the bonus note must be evaluated
+        against SAM's clean history, not primary's (which would otherwise
+        look Amex-lifetime-blocked)."""
+        from datetime import timedelta
+        from cards.models import UserCard
+        card = self._card('Amex Card', issuer=self.amex)
+        UserCard.objects.create(
+            user=self.user, card=card, owner=self.primary,
+            opened_date=self.today - timedelta(days=100))
+
+        engine = self._engine()
+        entity = engine._eligible_entity_for_card(card)
+        self.assertEqual(entity.id, self.sam.id)
+        self.assertIsNone(engine._bonus_ineligibility_note(card))
+
+    def test_apply_as_attribution_end_to_end(self):
+        """Primary is pinned at 5/24 (blocked); Sam is clean, so the apply
+        recommendation for a new Chase card must be attributed to Sam."""
+        from datetime import timedelta
+        from cards.models import SpendingCategory, SpendingAmount, UserCard, RewardCategory
+        from .models import Roadmap
+        from .recommendation_engine import RecommendationEngine
+
+        dining = SpendingCategory.objects.create(name='Dining', slug='dining')
+        SpendingAmount.objects.create(
+            profile=self.profile, category=dining, monthly_amount=Decimal('1000'))
+
+        for i in range(5):
+            other = self._card(f'Primary Card {i}', issuer=self.chase)
+            UserCard.objects.create(
+                user=self.user, card=other, owner=self.primary,
+                opened_date=self.today - timedelta(days=100))
+
+        candidate = self._card('New Chase Card', issuer=self.chase, metadata={
+            'reward_value_multiplier': 0.01,
+            'signup_bonus': {'bonus_amount': 500, 'spending_requirement': 1000,
+                              'time_limit_months': 3}})
+        candidate.signup_bonus_amount = 500
+        candidate.save()
+        RewardCategory.objects.create(
+            card=candidate, category=dining, reward_rate=Decimal('3.00'),
+            reward_type=self.points)
+
+        roadmap = Roadmap.objects.create(profile=self.profile, name='Test', max_recommendations=1)
+        engine = RecommendationEngine(self.profile)
+        recommendations = engine.generate_quick_recommendations(roadmap)
+
+        applies = [r for r in recommendations if r['action'] == 'apply'
+                   and r['card'].id == candidate.id]
+        self.assertEqual(len(applies), 1)
+        self.assertIn('apply_as', applies[0])
+        self.assertEqual(applies[0]['apply_as']['name'], 'Sam')
+
+    def test_apply_as_absent_for_single_entity_household(self):
+        """Single-entity households (the common case) must not carry an
+        apply_as key at all — old/anon payloads stay byte-identical."""
+        from cards.models import SpendingCategory, SpendingAmount, ProfileEntity
+        from .models import Roadmap
+        from .recommendation_engine import RecommendationEngine
+
+        self.sam.delete()  # back to a single-entity (primary-only) household
+        self.assertEqual(ProfileEntity.objects.filter(profile=self.profile).count(), 1)
+
+        dining = SpendingCategory.objects.create(name='Dining2', slug='dining2')
+        SpendingAmount.objects.create(
+            profile=self.profile, category=dining, monthly_amount=Decimal('1000'))
+        candidate = self._card('Solo Chase Card', issuer=self.chase, metadata={
+            'reward_value_multiplier': 0.01,
+            'signup_bonus': {'bonus_amount': 500, 'spending_requirement': 1000,
+                              'time_limit_months': 3}})
+        candidate.signup_bonus_amount = 500
+        candidate.save()
+        from cards.models import RewardCategory
+        RewardCategory.objects.create(
+            card=candidate, category=dining, reward_rate=Decimal('3.00'),
+            reward_type=self.points)
+
+        roadmap = Roadmap.objects.create(profile=self.profile, name='Test2', max_recommendations=1)
+        engine = RecommendationEngine(self.profile)
+        recommendations = engine.generate_quick_recommendations(roadmap)
+
+        for rec in recommendations:
+            self.assertNotIn('apply_as', rec)
+
+
+class SecondCopyApplyTests(TestCase):
+    """Phase K2c: another household entity can apply for a card someone
+    else already holds open (e.g. Player 2 applying for Player 1's held
+    card). Valued on signup bonus alone — the held copy already earns the
+    category rewards, so the reconciliation guard (headline == line items +
+    bonus - fee) must hold with an all-zero line-item total."""
+
+    def setUp(self):
+        from cards.models import ProfileEntity
+        self.user = User.objects.create_user(username='household4', password='x')
+        self.profile = UserSpendingProfile.objects.create(user=self.user)
+        self.primary = self.profile.primary_entity()
+        self.sam = ProfileEntity.objects.create(profile=self.profile, name='Sam')
+        self.cashback = RewardType.objects.create(name='Cashback', slug='cashback')
+        self.generic = Issuer.objects.create(name='Generic Bank', slug='generic-bank')
+
+    def _card(self, name, annual_fee=0, bonus_amount=500, requirement=1000):
+        from django.utils.text import slugify
+        return CreditCard.objects.create(
+            name=name, slug=slugify(name), issuer=self.generic,
+            annual_fee=Decimal(str(annual_fee)),
+            signup_bonus_type=self.cashback, primary_reward_type=self.cashback,
+            signup_bonus_amount=bonus_amount,
+            metadata={'reward_value_multiplier': 0.01,
+                      'signup_bonus': {'bonus_amount': bonus_amount,
+                                       'spending_requirement': requirement,
+                                       'time_limit_months': 3}})
+
+    def _spending(self, amount='1000'):
+        from cards.models import SpendingCategory, SpendingAmount
+        other = SpendingCategory.objects.create(name='Other', slug='other')
+        SpendingAmount.objects.create(
+            profile=self.profile, category=other, monthly_amount=Decimal(amount))
+
+    def _generate(self, max_recommendations=2):
+        from cards.models import UserCard
+        from .models import Roadmap
+        from .recommendation_engine import RecommendationEngine
+        roadmap = Roadmap.objects.create(
+            profile=self.profile, name='Test', max_recommendations=max_recommendations)
+        engine = RecommendationEngine(self.profile)
+        return engine.generate_quick_recommendations(roadmap)
+
+    def test_single_entity_household_never_gets_second_copy(self):
+        """Explicit no-op-equivalence guard: a lone entity is always the
+        only (and therefore ineligible) candidate for its own held card, so
+        no duplicate_copy apply is ever produced."""
+        from cards.models import UserCard
+        self.sam.delete()
+        self._spending()
+        card = self._card('Solo Household Card')
+        UserCard.objects.create(user=self.user, card=card, owner=self.primary)
+
+        recs = self._generate()
+        duplicates = [r for r in recs if r['action'] == 'apply' and r['card'].id == card.id]
+        self.assertEqual(duplicates, [])
+
+    def test_second_copy_apply_is_bonus_only_and_reconciles(self):
+        from cards.models import UserCard
+        self._spending()
+        card = self._card('Shared Household Card')
+        UserCard.objects.create(user=self.user, card=card, owner=self.primary)
+
+        recs = self._generate()
+        second_copy = [r for r in recs if r['action'] == 'apply' and r['card'].id == card.id]
+        self.assertEqual(len(second_copy), 1)
+        rec = second_copy[0]
+
+        self.assertTrue(rec.get('bonus_deferred') is False or 'bonus_deferred' not in rec)
+        self.assertIn('apply_as', rec)
+        self.assertEqual(rec['apply_as']['name'], 'Sam')
+        self.assertEqual(float(rec['signup_bonus_value']), 500.0)
+        # No category rewards double-counted — bonus (500) minus $0 fee.
+        self.assertAlmostEqual(float(rec['estimated_rewards']), 500.0, places=2)
+        line_total = sum(item['category_rewards'] for item in rec['rewards_breakdown'])
+        self.assertEqual(line_total, 0)
+        self.assertTrue(any(
+            "already counted" in item.get('calculation', '')
+            for item in rec['rewards_breakdown']))
+
+        # The original keep is untouched and still present.
+        keep = [r for r in recs if r['action'] == 'keep' and r['card'].id == card.id]
+        self.assertEqual(len(keep), 1)
+
+    def test_second_copy_skipped_when_no_other_entity_eligible(self):
+        """Sam is also blocked (holds the family-blocking equivalent via
+        being pinned at the issuer's own application cap) — no duplicate
+        apply should be offered."""
+        from datetime import timedelta, date
+        from cards.models import UserCard
+        self._spending()
+        amex = Issuer.objects.create(name='American Express', slug='american-express')
+        card = CreditCard.objects.create(
+            name='Amex Shared Card', slug='amex-shared-card', issuer=amex,
+            annual_fee=Decimal('0'), signup_bonus_type=self.cashback,
+            primary_reward_type=self.cashback, signup_bonus_amount=500,
+            metadata={'reward_value_multiplier': 0.01,
+                      'signup_bonus': {'bonus_amount': 500,
+                                       'spending_requirement': 1000,
+                                       'time_limit_months': 3}})
+        UserCard.objects.create(user=self.user, card=card, owner=self.primary)
+        # Give Sam 5 open Amex cards -> at the 5-card cap, ineligible too.
+        today = date.today()
+        for i in range(5):
+            other = CreditCard.objects.create(
+                name=f'Sam Amex {i}', slug=f'sam-amex-{i}', issuer=amex,
+                signup_bonus_type=self.cashback, primary_reward_type=self.cashback)
+            UserCard.objects.create(
+                user=self.user, card=other, owner=self.sam,
+                opened_date=today - timedelta(days=100))
+
+        recs = self._generate()
+        duplicates = [r for r in recs if r['action'] == 'apply' and r['card'].id == card.id]
+        self.assertEqual(duplicates, [])
 
 
 class BonusVelocityTests(TestCase):

@@ -1,6 +1,6 @@
 {
   "description": "Index of all scenario test files (informational — the loader globs *.json, so a missing entry here doesn't skip a file)",
-  "total_scenarios": 67,
+  "total_scenarios": 77,
   "files": [
     {
       "filename": "basic_profiles.json",
@@ -73,6 +73,18 @@
       "category": "bonus_sequencing",
       "scenario_count": 3,
       "description": "Phase E: selection-aware bonus capacity and sequencing (_bonus_capacity_plan) — avoiding wasted selection, bonus-less cards winning on ongoing value, and multi-card sequencing order"
+    },
+    {
+      "filename": "points_pooling.json",
+      "category": "points_pooling",
+      "scenario_count": 3,
+      "description": "Phase J: same-program points pooling — a held premium card lifts an earner's points value, different programs don't cross-pool, a card without points_program never pools"
+    },
+    {
+      "filename": "multi_player.json",
+      "category": "multi_player",
+      "scenario_count": 6,
+      "description": "Phase K: multi-player households — per-entity 5/24, business attribution, second-copy applies, once-per-lifetime application rule, and the Amex 5-card cap, each proving the effect is per-entity via apply_as"
     }
   ]
 }

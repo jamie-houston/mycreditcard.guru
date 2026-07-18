@@ -186,8 +186,8 @@ tests incl. new `cards/tests.py` `UserCardOwnershipSoftCloseTests` /
 `UserCardToggleEndpointTests`, 67/67 scenario sweep, `node
 scripts/test_roadmap_results.js`) — this pass is about the UI wiring, which
 tests don't touch. See `CLAUDE.md`'s "Card ownership (`UserCard`) lives
-entirely in `cards/`" bullet and `docs/PLAN_PHASE_F_OWNERSHIP_CLEANUP.md`
-for implementation detail.
+entirely in `cards/`" bullet and mybrain `Requirements/Complete/
+PLAN_PHASE_F_OWNERSHIP_CLEANUP_complete.md` for implementation detail.
 
 ### 1. F4 — Bonus-window opportunity cost row
 1. Generate a roadmap where an apply recommendation shifts spending from
@@ -287,4 +287,82 @@ bullets) for implementation detail.
    moved off Signup Date onto Renews as part of this phase's bug fix.
 8. For a no-fee card or one whose anniversary is far off, confirm the
    Renews cell shows a plain (unhighlighted) date, and that the date shown
+   is next year's anniversary if this year's has already passed.
+
+---
+
+## Phase K: Multi-player households (2026-07-18)
+
+Covers: `ProfileEntity` CRUD (household management panel), owner-aware
+card ownership (Owner column, owner selector in the edit-card modal), and
+`apply_as` attribution on roadmap results. Auth-only feature — anonymous
+users must see zero change anywhere in this checklist. Automated coverage
+is green (150 standard tests, 71/71 scenario sweep unchanged, `node
+scripts/test_roadmap_results.js` — see mybrain `Requirements/Complete/
+PLAN_PHASE_K_HOUSEHOLDS_complete.md`'s Progress section for exactly what
+each automated layer covers); this pass
+is the UI wiring and visual correctness that tests don't touch.
+
+### 1. Household management panel (`/profile/`)
+1. Log in as a user with no other household members yet. Confirm a new
+   **Household** section appears above "Active cards" showing one entry
+   (your own name) tagged **Primary**.
+2. Click "+ Add player/business", enter a name (e.g. "Sam"), leave kind as
+   Personal, submit. Expect: a second row appears, no "Primary" tag, a
+   working rename (✏️) and remove (🗑️) button.
+3. Add a third entity with kind **Business** (e.g. "Acme LLC"). Confirm its
+   kind shows as "Business" in the row.
+4. Click ✏️ on a non-primary entity, rename it, confirm the row updates
+   and the name persists on page reload.
+5. Try adding a duplicate name (same as an existing entity, case-sensitive
+   exact match) — expect an error toast, no new row.
+6. Confirm the Primary entity has **no** remove button at all.
+7. Log out and reload `/profile/` in an incognito window (anonymous) —
+   confirm the Household section never appears.
+
+### 2. Owner column + owner selector
+8. On `/profile/`, confirm the Active cards table has a new **Owner**
+   column (after Card Type), showing your primary entity's name for every
+   card by default. Confirm it's sortable like the other columns.
+9. Open a card's "Edit Details" modal (from the card browse page or
+   profile table). With only your own entity in the household, confirm the
+   "Held By" selector is **not shown** at all.
+10. Add a second household member (per step 2 above), then reopen the
+    same card's edit modal — confirm a "Held By" dropdown now appears,
+    defaulting to whichever entity currently owns that row, listing every
+    household entity (Primary tagged).
+11. Change "Held By" to the other entity, save, reload the profile table —
+    confirm the Owner column now shows the new entity's name for that card.
+12. Try (via the card browse page's "I have this card" flow, or the API
+    directly) assigning ownership using another user's entity id — expect
+    a 400/rejection, never a silent success.
+
+### 3. Second-copy applies + `apply_as` label
+13. As a household with 2+ personal entities, set up spending such that
+    Player 1 is pinned at Chase 5/24 (5+ open cards opened within 24
+    months) while Player 2 has headroom, and Player 2 holds no card that
+    Player 1 already holds. Generate a roadmap. Confirm an apply
+    recommendation appears attributed to Player 2 — the apply tile's
+    reason line shows "· as {Player 2's name}".
+14. With a household member already holding a card that has a strong
+    signup bonus, and a SECOND entity that's eligible for a fresh copy,
+    confirm a second apply recommendation for the SAME card can appear,
+    labeled with the second entity's name, and its value breakdown shows
+    only a "Category rewards already earned on {holder}'s copy" info line
+    plus the signup bonus (no double-counted category rewards).
+15. Single-player accounts (no second entity created): confirm apply tiles
+    **never** show an "as {name}" suffix anywhere — the label must be
+    entirely absent, not just blank.
+16. Business cards: with a declared Business entity, confirm a business
+    card's apply recommendation (if any) attributes to the business
+    entity, not a personal one.
+
+### 4. Household summary line (`/roadmap/`)
+17. Log in with 2+ household entities, load `/roadmap/`. Confirm a small
+    "Household: N players · M businesses — manage" line appears near the
+    Preferences header, linking to `/profile/`.
+18. Log in with only your own entity (no additions yet) — confirm the line
+    still renders (e.g. "Household: 1 player · 0 businesses") rather than
+    being hidden, so the feature stays discoverable.
+19. Anonymous/incognito: confirm the line never appears.
    is next year's anniversary if this year's has already passed.

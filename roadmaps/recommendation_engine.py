@@ -62,6 +62,7 @@ class RecommendationEngine:
                         'nickname': card_data.get('nickname', ''),
                         'bonus_earned_date': parse_date(card_data['bonus_earned_date']) if card_data.get('bonus_earned_date') else None,
                         'bonus_override': card_data.get('bonus_override'),
+                        'owner_id': None,
                     })()
                     mock_user_cards.append(mock_card)
                 except CreditCard.DoesNotExist:
@@ -69,7 +70,32 @@ class RecommendationEngine:
             self.card_history = mock_user_cards
             self.user_cards = [uc for uc in mock_user_cards
                                if uc.closed_date is None]
-        
+
+        # Phase K: multi-player households. self.entities is [primary] + any
+        # other players/businesses (primary-first, per ProfileEntity.Meta.
+        # ordering); anon/session users get one implicit entity so their
+        # behavior is provably unchanged (its history slice == card_history).
+        if profile.user:
+            self.entities = list(profile.entities.all())
+            if not self.entities:
+                self.entities = [profile.primary_entity()]
+            self._primary_entity = next(
+                (e for e in self.entities if e.is_primary), self.entities[0])
+        else:
+            from types import SimpleNamespace
+            self._primary_entity = SimpleNamespace(
+                id=None, name='You', kind='personal', is_primary=True)
+            self.entities = [self._primary_entity]
+
+        # Bucket card_history by owner (NULL/mock owner_id -> primary) so
+        # eligibility can be evaluated per-entity instead of household-wide.
+        self.entity_histories = {e.id: [] for e in self.entities}
+        for uc in self.card_history:
+            owner_id = getattr(uc, 'owner_id', None)
+            if owner_id is None:
+                owner_id = self._primary_entity.id
+            self.entity_histories.setdefault(owner_id, []).append(uc)
+
         self.spending_amounts = {
             sa.category.slug: sa.monthly_amount
             for sa in profile.spending_amounts.all()
@@ -439,20 +465,56 @@ class RecommendationEngine:
         best_portfolio = self._find_optimal_portfolio(current_cards, available_new_cards, max_total_cards)
 
         # De-dup: scenario assembly can emit the same card twice (e.g. a
-        # keep from optimization plus a cancel appended separately).
-        # Keep/apply wins over cancel; otherwise first occurrence wins.
+        # keep from optimization plus a cancel appended separately). Keyed
+        # on (card_id, is_apply) rather than just card_id — Phase K's
+        # second-copy applies (below) deliberately let a 'keep' (the
+        # existing copy) and an 'apply' (another entity's fresh copy)
+        # coexist for the same card. Keep/apply still wins over cancel;
+        # otherwise first occurrence wins; two applies of the same card
+        # still can't coexist (only one 'apply' entry is ever produced per
+        # card, whether fresh or second-copy — they're mutually exclusive).
         actions_by_card = {}
         for card_action in best_portfolio:
-            card_id = card_action['card'].id
-            existing = actions_by_card.get(card_id)
+            key = (card_action['card'].id, card_action['action'] == 'apply')
+            existing = actions_by_card.get(key)
             if existing is None or (existing['action'] == 'cancel'
                                     and card_action['action'] in ('keep', 'apply')):
-                actions_by_card[card_id] = card_action
+                actions_by_card[key] = card_action
         best_portfolio = list(actions_by_card.values())
+
+        # Second-copy applies (Phase K2c): another household entity can
+        # apply for a card someone else already holds open — e.g. Player 2
+        # applying for a card Player 1 keeps. _eligible_entity_for_card
+        # already does the per-entity open-copy + issuer-rule check, so this
+        # reduces to a no-op for single-entity households (the only
+        # candidate is always the holder, who's always ineligible for their
+        # own card). Only considered against KEEP actions — a card headed
+        # for cancellation isn't a "someone else could hold this too" case.
+        for card_action in list(best_portfolio):
+            if card_action['action'] != 'keep':
+                continue
+            card = card_action['card']
+            second_entity = self._eligible_entity_for_card(card)
+            if second_entity is None:
+                continue
+            best_portfolio.append({
+                'card': card,
+                'action': 'apply',
+                # Ranked after every "normal" apply candidate (whose
+                # priorities are small integers) — prefer giving each
+                # household member their own best card before doubling up.
+                'priority': 500 + card.id,
+                'duplicate_copy': True,
+                'duplicate_copy_owner': self._holding_entity_for_card(card),
+            })
 
         # Spending allocation spans only cards the user will actually hold;
         # a card recommended for cancellation can't earn category rewards.
-        held_cards = [ca['card'] for ca in best_portfolio if ca['action'] in ('keep', 'apply')]
+        # Second-copy applies are excluded here (not `+= [card]`) — the
+        # held copy is already counted via its 'keep' entry, and adding the
+        # same CreditCard a second time would double-count its allocation.
+        held_cards = [ca['card'] for ca in best_portfolio
+                      if ca['action'] in ('keep', 'apply') and not ca.get('duplicate_copy')]
         portfolio_allocation = self._calculate_portfolio_allocation(held_cards)
         credit_allocation = self._allocate_portfolio_credits(held_cards)
         # A card's points are valued at the best same-program multiplier
@@ -488,6 +550,25 @@ class RecommendationEngine:
                 rewards_breakdown = self._calculate_card_allocated_breakdown(
                     card, cancel_allocation, cancel_credit_allocation, cancel_program_multipliers)
                 active_program_best_cards = cancel_program_best_cards
+            elif card_action.get('duplicate_copy'):
+                # Second-copy apply: this card's category rewards are
+                # already counted on the holder's copy (in held_cards) —
+                # running the normal allocation breakdown here would
+                # double-count them. This copy is valued on its signup
+                # bonus alone (see the 'apply' branch below).
+                owner_entity = card_action.get('duplicate_copy_owner')
+                owner_name = owner_entity.name if owner_entity else 'another entity'
+                rewards_breakdown = {
+                    'total_rewards': 0.0,
+                    'reward_multiplier': self._own_multiplier(card),
+                    'total_spending_on_card': 0,
+                    'breakdown': [self._info_item(
+                        f"Category rewards already earned on {owner_name}'s copy",
+                        f"{card.name}'s category rewards are already counted via "
+                        f"{owner_name}'s copy of this card — this application is "
+                        f"valued on its signup bonus alone")],
+                }
+                active_program_best_cards = program_best_cards
             else:
                 rewards_breakdown = self._calculate_card_allocated_breakdown(
                     card, portfolio_allocation, credit_allocation, program_multipliers)
@@ -546,6 +627,26 @@ class RecommendationEngine:
                         "spending level — card recommended on ongoing value; "
                         "earn the bonus next year")],
                         'value_delta': 0.0, 'bonus_earnable': False}
+                elif card_action.get('duplicate_copy'):
+                    # No allocation baseline to shift spending from/to for a
+                    # second copy of a card the household already holds —
+                    # bonus-only math, no shift-cost modeling (see the
+                    # duplicate_copy breakdown branch above).
+                    plan = {'items': [], 'value_delta': 0.0,
+                            'bonus_earnable': self._can_meet_signup_requirement(card)}
+                    if not plan['bonus_earnable']:
+                        signup_bonus_value = 0
+                    elif signup_bonus_value > 0:
+                        months_needed = self._bonus_months_needed(card)
+                        if months_needed > 0:
+                            requirement = float((card.metadata.get('signup_bonus')
+                                                 or {}).get('spending_requirement') or 0)
+                            plan['items'].append(self._info_item(
+                                'Bonus timeline',
+                                f"${requirement:,.0f} requirement ÷ "
+                                f"${self._total_monthly_spending():,.0f}/mo total "
+                                f"spending ≈ {months_needed:.1f} months of your "
+                                f"spending devoted to this bonus"))
                 else:
                     plan = self._signup_bonus_plan(
                         card, portfolio_allocation,
@@ -613,7 +714,7 @@ class RecommendationEngine:
                     f"Breakdown mismatch for {card.name} ({action}): headline "
                     f"${estimated_value:.2f} vs line items ${expected:.2f}")
 
-            recommendations.append({
+            rec = {
                 'card': card,
                 'action': action,
                 'estimated_rewards': Decimal(str(estimated_value)),  # Show true value, including negative for cancel cards
@@ -628,7 +729,18 @@ class RecommendationEngine:
                 'eligibility_note': eligibility_note,
                 'bonus_deferred': bonus_deferred,
                 'priority': card_action.get('priority', 1)
-            })
+            }
+            # Phase K: which household entity would apply — omitted entirely
+            # (not even as None) for single-entity households so anon/
+            # single-player payloads stay byte-identical.
+            if action == 'apply' and len(self.entities) > 1:
+                apply_entity = self._eligible_entity_for_card(card) or self._primary_entity
+                rec['apply_as'] = {
+                    'entity_id': apply_entity.id,
+                    'name': apply_entity.name,
+                    'kind': apply_entity.kind,
+                }
+            recommendations.append(rec)
 
         return recommendations
 
@@ -1742,95 +1854,91 @@ class RecommendationEngine:
         final_score = (weighted_efficiency * 0.7) + (coverage_ratio * 0.3)
         return min(1.0, final_score)
     
-    def _find_new_cards(self, eligible_cards: List[CreditCard], max_cards: int) -> List[dict]:
-        """Find best new cards to apply for"""
-        recommendations = []
-        
-        # Remove cards user already has
-        current_card_ids = {uc.card.id for uc in self.user_cards}
-        available_cards = [c for c in eligible_cards if c.id not in current_card_ids]
-        
-        # Score cards by potential value
-        card_scores = []
-        for card in available_cards:
-            if not self._is_eligible_for_card(card):
-                continue
-                
-            rewards_breakdown = self._calculate_card_rewards_breakdown(card)
-            annual_rewards = rewards_breakdown['total_rewards']
-            signup_bonus_value = self._get_signup_bonus_value(card)
-            
-            # Check if annual fee is waived first year for new applications
-            annual_fee = float(card.annual_fee)
-            annual_fee_waived_first_year = card.metadata.get('annual_fee_waived_first_year', False)
-            effective_annual_fee = 0 if annual_fee_waived_first_year else annual_fee
-            
-            # Scoring: use annual rewards only (no signup bonus) for consistency with owned cards
-            annual_value = annual_rewards - effective_annual_fee
-            
-            # Include signup bonus in total value assessment for filtering
-            total_value = annual_value + signup_bonus_value
-            
-            # Only consider cards with non-negative total estimated value (including signup bonus)
-            if total_value >= 0:
-                card_scores.append({
-                    'card': card,
-                    'score': annual_value,
-                    'annual_rewards': annual_rewards,
-                    'signup_bonus': signup_bonus_value,
-                    'rewards_breakdown': rewards_breakdown['breakdown'],
-                    'total_spending_on_card': rewards_breakdown.get('total_spending_on_card', 0),
-                    'reasoning': f"Total estimated value: ${total_estimated_value:.0f} (${annual_rewards:.0f} annual rewards - ${effective_annual_fee} fee{' - first year fee waived' if annual_fee_waived_first_year else ''} + ${signup_bonus_value:.0f} signup bonus)"
-                })
-        
-        # Sort by score and take top cards
-        card_scores.sort(key=lambda x: x['score'], reverse=True)
-        
-        for i, card_data in enumerate(card_scores[:max_cards]):
-            # For new card recommendations, include signup bonus in estimated rewards
-            total_estimated_value = card_data['score'] + card_data['signup_bonus']
-            
-            recommendations.append({
-                'card': card_data['card'],
-                'action': 'apply',
-                'estimated_rewards': Decimal(str(total_estimated_value)),
-                'reasoning': card_data['reasoning'],
-                'rewards_breakdown': card_data['rewards_breakdown'],
-                'total_spending_on_card': card_data.get('total_spending_on_card', 0),
-                'signup_bonus_value': card_data['signup_bonus'],
-                'priority': i + 1
-            })
-        
-        return recommendations
-    
-    def _is_eligible_for_card(self, card: CreditCard) -> bool:
-        """Application eligibility: can the user get approved at all?
+    def _eligible_entity_for_card(self, card: CreditCard):
+        """Which household entity (if any) could apply for `card`.
 
-        Data-driven issuer rules (Chase 5/24, BofA 2/3/4, Capital One
-        1-per-6-months, family blocks) live in roadmaps/eligibility.py and
-        are evaluated against the full card history, closed cards included.
-        Blocked cards are silently skipped — the roadmap picks the
-        next-best card instead.
+        Phase K: application eligibility is per-entity, not household-wide —
+        two players in a household get independent 5/24 budgets, etc.
+        Business cards prefer a business entity (falling back to the
+        primary — sole-proprietor cards are common and we don't want to
+        strictly require a declared business entity); personal cards
+        consider personal entities, primary-first (self.entities is already
+        ordered that way). Anon/single-entity households reduce to exactly
+        today's global check: one entity, one history slice == card_history.
+        Returns the first eligible entity, or None if every candidate is
+        blocked (already holds an open copy, or an issuer/application rule
+        blocks it). Cached per card — entity choice is deterministic for a
+        given engine instance.
         """
+        if not hasattr(self, '_entity_eligibility_cache'):
+            self._entity_eligibility_cache = {}
+        if card.id in self._entity_eligibility_cache:
+            return self._entity_eligibility_cache[card.id]
+
         from .eligibility import application_block
 
-        # Already holds this exact card (open) — can't apply again.
-        if any(uc.card.id == card.id for uc in self.user_cards):
-            return False
+        if card.card_type == 'business':
+            candidates = [e for e in self.entities if e.kind == 'business'] \
+                or [self._primary_entity]
+        else:
+            candidates = [e for e in self.entities if e.kind != 'business'] \
+                or [self._primary_entity]
 
-        return application_block(card, self.card_history, self.today) is None
+        result = None
+        for entity in candidates:
+            history = self.entity_histories.get(entity.id, [])
+            already_holds = any(
+                uc.card.id == card.id for uc in history if uc.closed_date is None)
+            if already_holds:
+                continue
+            if application_block(card, history, self.today) is not None:
+                continue
+            result = entity
+            break
+
+        self._entity_eligibility_cache[card.id] = result
+        return result
+
+    def _holding_entity_for_card(self, card: CreditCard):
+        """Which entity currently holds an OPEN copy of `card`, or None.
+        Used to attribute a second-copy apply's "already earned on X's
+        copy" note to the right household member."""
+        for entity in self.entities:
+            history = self.entity_histories.get(entity.id, [])
+            if any(uc.card.id == card.id and uc.closed_date is None
+                   for uc in history):
+                return entity
+        return None
+
+    def _is_eligible_for_card(self, card: CreditCard) -> bool:
+        """Application eligibility: can ANY household entity get approved?
+
+        Data-driven issuer rules (Chase 5/24, BofA 2/3/4, Capital One
+        1-per-6-months, Amex 5-card cap, family/lifetime-application blocks)
+        live in roadmaps/eligibility.py and are evaluated per-entity (see
+        _eligible_entity_for_card) against that entity's full card history,
+        closed cards included. Blocked cards are silently skipped — the
+        roadmap picks the next-best card instead.
+        """
+        return self._eligible_entity_for_card(card) is not None
 
     def _bonus_ineligibility_note(self, card: CreditCard):
         """User-facing reason this card's signup bonus is valued at $0
         (Amex lifetime, Citi 48-month, Sapphire/Southwest rules...), or
         None when the bonus looks earnable. Cached per card — it's called
-        from every scoring site via _get_signup_bonus_value."""
+        from every scoring site via _get_signup_bonus_value.
+
+        Phase K: evaluated against whichever entity would actually apply
+        (_eligible_entity_for_card), falling back to the primary's history
+        for held (keep/cancel) cards where no entity is "applying"."""
         if not hasattr(self, '_bonus_notes'):
             self._bonus_notes = {}
         if card.id not in self._bonus_notes:
             from .eligibility import bonus_ineligibility
+            entity = self._eligible_entity_for_card(card) or self._primary_entity
+            history = self.entity_histories.get(entity.id, self.card_history)
             self._bonus_notes[card.id] = bonus_ineligibility(
-                card, self.card_history, self.today)
+                card, history, self.today)
         return self._bonus_notes[card.id]
     
     def _calculate_card_annual_rewards(self, card: CreditCard) -> float:
@@ -2233,7 +2341,7 @@ class RecommendationEngine:
             effective_fee = 0 if annual_fee_waived else annual_fee
             estimated_rewards = annual_rewards - effective_fee + signup_bonus
             
-            return {
+            fallback_rec = {
                 'card': best_card,
                 'action': 'apply',
                 'estimated_rewards': estimated_rewards,
@@ -2243,7 +2351,15 @@ class RecommendationEngine:
                 'total_spending_on_card': rewards_breakdown.get('total_spending_on_card', 0),
                 'signup_bonus_value': signup_bonus
             }
-        
+            if len(self.entities) > 1:
+                apply_entity = self._eligible_entity_for_card(best_card) or self._primary_entity
+                fallback_rec['apply_as'] = {
+                    'entity_id': apply_entity.id,
+                    'name': apply_entity.name,
+                    'kind': apply_entity.kind,
+                }
+            return fallback_rec
+
         return None
 
     def _get_signup_bonus_value(self, card: CreditCard,

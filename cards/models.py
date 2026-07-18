@@ -236,6 +236,53 @@ class UserSpendingProfile(models.Model):
         """Check if this profile is publicly shareable"""
         return self.privacy_setting == 'public'
 
+    def primary_entity(self):
+        """The profile's primary ProfileEntity, lazily created on first use.
+
+        UserCard.owner=NULL means "the primary entity" (see UserCard docs),
+        so every profile needs exactly one primary — this is the single
+        place that invariant is enforced.
+        """
+        entity = self.entities.filter(is_primary=True).first()
+        if entity:
+            return entity
+        if self.user:
+            name = self.user.first_name or self.user.username or 'Player 1'
+        else:
+            name = 'Player 1'
+        return ProfileEntity.objects.create(
+            profile=self, name=name, kind='personal', is_primary=True)
+
+
+class ProfileEntity(models.Model):
+    """A person or business within a household profile that can hold cards
+    and has its own eligibility history (Chase 5/24, Amex lifetime, etc.).
+
+    Phase K: multi-player households. Anonymous (session) profiles never
+    surface more than the implicit primary in the UI, but still get one
+    created lazily so the data shape is uniform.
+    """
+    KIND_CHOICES = [
+        ('personal', 'Personal'),
+        ('business', 'Business'),
+    ]
+
+    profile = models.ForeignKey(UserSpendingProfile, on_delete=models.CASCADE, related_name='entities')
+    name = models.CharField(max_length=100)
+    kind = models.CharField(max_length=10, choices=KIND_CHOICES, default='personal')
+    is_primary = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-is_primary', 'id']
+        constraints = [
+            models.UniqueConstraint(fields=['profile', 'name'], name='uniq_entity_name_per_profile'),
+        ]
+
+    def __str__(self):
+        return f"{self.name} ({self.profile})"
+
 
 class SpendingAmount(models.Model):
     profile = models.ForeignKey(UserSpendingProfile, on_delete=models.CASCADE, related_name='spending_amounts')
@@ -267,14 +314,26 @@ class UserCard(models.Model):
         help_text="Manual override of whether this card's signup bonus was earned: "
                   "null=infer from issuer rules, True=earned it, False=did not "
                   "(e.g. referred instead of applying, never activated)")
-    
+    owner = models.ForeignKey(
+        'ProfileEntity', on_delete=models.RESTRICT, null=True, blank=True,
+        related_name='cards',
+        help_text="NULL = the profile's primary entity (legacy rows / mocks). "
+                  "RESTRICT (not PROTECT) so deleting an entity ON ITS OWN can't "
+                  "silently transplant its card history onto the primary and "
+                  "corrupt 5/24-style math, while still letting a whole User "
+                  "cascade-delete cleanly (PROTECT unconditionally blocks even "
+                  "when the referencing UserCard is being deleted in the same "
+                  "cascade; RESTRICT defers to that).")
+
     # Metadata
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     notes = models.TextField(blank=True, help_text="Additional notes about this card")
-    
+
     class Meta:
-        unique_together = ['user', 'card']
+        constraints = [
+            models.UniqueConstraint(fields=['user', 'card', 'owner'], name='uniq_usercard_user_card_owner'),
+        ]
         ordering = ['-opened_date', '-created_at']
     
     def __str__(self):

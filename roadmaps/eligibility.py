@@ -34,6 +34,23 @@ Card metadata keys understood here:
   }
   metadata['application_family'] = 'southwest-personal'
       # currently holding any OPEN card in this family blocks applying
+  metadata['application_eligibility'] = {
+      'once_per_lifetime': true,      # can never apply again once ever held
+      'family': 'chase-sapphire-personal',  # scans cards sharing this family
+                                             # (open OR closed), not just this
+                                             # exact card
+      'label': 'Chase Sapphire application rule',  # shown in the block reason
+  }
+      # Distinct from application_family above: application_family only
+      # blocks while a family card is OPEN; application_eligibility blocks
+      # forever, even after the prior card is closed (Phase K, per-entity —
+      # see application_block's ISSUER_RULES-driven max_open_cards rule too).
+
+An issuer's 'application_rules' entries come in two shapes: a window rule
+('max_new_cards' + 'period_months'/'period_days') counts cards OPENED in
+that window; a cap rule ('max_open_cards') counts cards currently OPEN,
+uncapped by time (e.g. Amex's 5-card limit) — both keyed on 'counts' (see
+_counts_toward).
 """
 
 import calendar
@@ -82,6 +99,11 @@ ISSUER_RULES = {
         # unmodelable noise; prior ownership is the signal we act on.
         'bonus_rule': {'once_per_lifetime': True,
                        'label': 'Amex once-per-lifetime rule'},
+        # Amex caps how many cards you can hold open at once (Phase K).
+        'application_rules': [
+            {'rule': '5-card-limit', 'max_open_cards': 5,
+             'counts': 'same_issuer'},
+        ],
     },
     'citi': {
         # No bonus if you earned THAT card's bonus in the past 48 months
@@ -136,6 +158,17 @@ def application_block(card, card_history, today):
     with opened_date/closed_date (UserCard rows or equivalent mocks).
     """
     for rule in _issuer_rules(card.issuer.slug).get('application_rules', []):
+        if 'max_open_cards' in rule:
+            count = sum(
+                1 for uc in card_history
+                if uc.closed_date is None
+                and _counts_toward(rule['counts'], uc, card)
+            )
+            if count >= rule['max_open_cards']:
+                return (f"{card.issuer.name} {rule['rule']} rule: already "
+                        f"holds {count} open cards")
+            continue
+
         if 'period_months' in rule:
             window_start = months_before(today, rule['period_months'])
         else:
@@ -159,6 +192,22 @@ def application_block(card, card_history, today):
             if (uc.card.metadata or {}).get('application_family') == family:
                 return (f"holding {uc.card.name} blocks new "
                         f"{family.replace('-', ' ')} applications")
+
+    # Once-per-lifetime application rules (e.g. Chase Sapphire): unlike the
+    # family block above, this checks the FULL history (open or closed) —
+    # having ever held a card in the family blocks applying again, forever.
+    app_elig = (card.metadata or {}).get('application_eligibility') or {}
+    if app_elig.get('once_per_lifetime'):
+        elig_family = app_elig.get('family')
+        label = app_elig.get('label') or f"{card.name} application rules"
+        if elig_family:
+            prior = [uc for uc in card_history
+                     if ((uc.card.metadata or {}).get('application_eligibility') or {})
+                     .get('family') == elig_family]
+        else:
+            prior = [uc for uc in card_history if uc.card.id == card.id]
+        if prior:
+            return f"can't reapply — {label} (once per lifetime)"
     return None
 
 

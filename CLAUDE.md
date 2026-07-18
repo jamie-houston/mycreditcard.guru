@@ -29,12 +29,12 @@ phases complete or requirements change.
 ## Verification gates (run before calling anything done)
 
 ```bash
-venv/bin/python manage.py test                                   # standard suite (113 tests)
-RUN_ALL_SCENARIOS=1 venv/bin/python manage.py test cards.test_json_scenarios   # full sweep: 71/71 must pass
+venv/bin/python manage.py test                                   # standard suite (151 tests)
+RUN_ALL_SCENARIOS=1 venv/bin/python manage.py test cards.test_json_scenarios   # full sweep: 77/77 must pass
 venv/bin/python manage.py run_scenario "Jamie Real" --explain    # acceptance: every line item reconciles
 ```
 
-- The full sweep passes 71/71 as of 2026-07-18. Any failure is a regression.
+- The full sweep passes 77/77 as of 2026-07-18 (post Phase K). Any failure is a regression.
 - `run_scenario` (CLI) runs against the **dev DB**, so real cards pollute
   fixture pools. For scenario debugging use the test DB instead:
   `DUMP_SCENARIOS=1 RUN_ALL_SCENARIOS=1 venv/bin/python manage.py test cards.test_json_scenarios`
@@ -108,6 +108,45 @@ Key modules:
   transfer-partner modeling (locked scope). Hand-curated
   `metadata.points_program` (e.g. `chase_ultimate_rewards`,
   `amex_membership_rewards`) drives it; cards without the key never pool.
+  **Multi-player households (Phase K)**: `self.entities` (`[primary] +`
+  other players/businesses, primary-first — `ProfileEntity.Meta.ordering`;
+  anon/session users get one implicit `SimpleNamespace` entity) and
+  `self.entity_histories` (`{entity_id: [UserCard...]}`, bucketed by
+  `owner_id`, NULL→primary) are built once per engine instance.
+  `_eligible_entity_for_card(card)` (cached per `card.id`) is the
+  per-entity replacement for the old household-wide held-card check:
+  business cards prefer a business entity (falling back to the primary for
+  sole proprietors — Jamie Real has no declared business entity), personal
+  cards consider personal entities primary-first; returns the first entity
+  with no open copy of the card AND no `application_block` against ITS OWN
+  history. Backs `_is_eligible_for_card` and `_bonus_ineligibility_note`
+  (issuer bonus rules evaluated against the APPLYING entity's history, not
+  the household's — a card one entity's bonus-blocked on can still be
+  earnable for another). `apply_as` (`{entity_id, name, kind}`) is set on
+  apply recs only when the profile has >1 entity — omitted entirely (not
+  `None`) for single-entity households, so anon/single-player payloads
+  stay byte-identical; threaded through `roadmaps/views.py`
+  `_build_quick_rec_response` the same way. **Second-copy applies**
+  (another entity applying for a card someone else already holds):
+  `_generate_portfolio_optimized_recommendations`'s portfolio de-dup key
+  became `(card.id, action == 'apply')` (was just `card.id`) so a 'keep'
+  and a second-copy 'apply' for the same card can coexist; after that dedup
+  it walks every 'keep' action and, for each entity `_eligible_entity_for_card`
+  still returns, appends a synthetic apply entry tagged `duplicate_copy`/
+  `duplicate_copy_owner`. Those bypass `_calculate_card_allocated_breakdown`
+  entirely (the held copy already earns the category rewards — `held_cards`
+  for allocation explicitly excludes `duplicate_copy` entries so the card
+  isn't double-counted) and are valued at `signup_bonus_value −
+  effective_annual_fee` alone (no `_signup_bonus_plan` shift modeling — no
+  allocation baseline to shift from/to), so the reconciliation guard holds
+  by construction. Ranked after every normal apply candidate
+  (`priority = 500 + card.id`) — prefer giving each household member their
+  own best card before doubling up. This whole mechanism reduces to a
+  provable no-op for single-entity households (the sole candidate is
+  always the holder, always ineligible for their own card) — see
+  `roadmaps/tests.py` `SecondCopyApplyTests`. Bonus capacity
+  (`_bonus_capacity_plan`) stays household-wide (shared spend, locked
+  scope) — only apply slots multiply per entity.
 - `static/js/roadmap-results.js` `_roadmapTimingLabel(recommendedMonth,
   baseDate)` — Phase E Step 6: renders "Apply now" (falsy month) or "Apply
   in ~N month(s) (Mon YYYY)" from `rec.recommended_month` and the roadmap's
@@ -124,7 +163,12 @@ Key modules:
   that loads the file via `vm` and asserts on `_roadmapTimingLabel`,
   `_roadmapFormatSigned`, and the rewards/benefits split; this repo has no
   JS test framework by design (see `docs/README_TESTING.md`), so this is a
-  plain script, not a new dependency.
+  plain script, not a new dependency. `_roadmapApplyAsLabel(rec)` (Phase K)
+  renders " · as {name}" under both `.apply-card-reason` and
+  `.grouped-row-reason` when `rec.apply_as` is present, via
+  `_roadmapEscapeHtml()` (`ProfileEntity.name` is user input) — absent
+  entirely on old payloads/single-entity households, both covered in the
+  same Node smoke test.
 - `roadmaps/strategies.py` — strategy presets are data, not code
   (filters + max_recommendations + selection weights). UI effort question
   maps onto these.
@@ -141,7 +185,22 @@ Key modules:
   didn't (referred instead of applying, never activated) — `bonus_
   ineligibility()`'s `prior` list excludes any `False`-overridden card
   before checking once-per-lifetime/months-since-bonus, so it can't block
-  a new bonus the user never actually got credit for.
+  a new bonus the user never actually got credit for. **Phase K** added two
+  application-side rule shapes: an `application_rules` entry with
+  `max_open_cards` (vs. the existing windowed `max_new_cards` +
+  `period_months`/`period_days`) counts currently-OPEN same-issuer cards,
+  uncapped by time — Amex's own 5-card limit
+  (`ISSUER_RULES['american-express']`). `card.metadata.
+  application_eligibility = {once_per_lifetime, family, label}` is a
+  stronger, forever block (scans OPEN and CLOSED history) distinct from
+  the existing `application_family` (open-cards-only) — curated on
+  `chase-sapphire-reserve`/`chase-sapphire-preferred-card` sharing a
+  `chase-sapphire-personal` family, deliberately excluding the business
+  Sapphire (`chase-sapphire-reserve-for-business`, no metadata key).
+  `application_block`/`bonus_ineligibility` keep their exact `(card,
+  card_history, today)` signatures — Phase K passes a per-entity history
+  slice instead of the household-wide one (see `_eligible_entity_for_card`
+  above); anon/single-entity households pass the same slice as before.
 - `roadmaps/serializers.py` — quick-recommendation writes the request
   payload into profile tables to feed the engine, inside an
   **always-rolled-back transaction**. Never let it persist; saving profiles
@@ -245,7 +304,47 @@ Key modules:
   `companion_pass`/`other`, blank=unknown) is a display-only taxonomy
   rendered as a small badge next to each credit's name in the same modal
   (`populateCardCredits()`) — nothing in the engine reads it yet, and no
-  card JSON has been curated with it.
+  card JSON has been curated with it. **Multi-player households (Phase
+  K)**: `UserCard.owner` (nullable FK to `ProfileEntity`, `related_name=
+  'cards'`; NULL means "the profile's primary entity" — legacy rows and
+  the anon/session mock path never set it) replaced `unique_together
+  ['user', 'card']` with `UniqueConstraint(user, card, owner)` (migration
+  `0007`, hand-ordered — the new index must exist before the old
+  `unique_together` drops, or MySQL raises error 1553 on the `user_id` FK's
+  index requirement; `0008` backfills a primary `ProfileEntity` for every
+  existing profile and points existing `UserCard`s at it), so a household
+  can hold two copies of the same card. `on_delete=RESTRICT`, not
+  `PROTECT` — `0009` fixed this after `run_scenario`'s cleanup started
+  raising `ProtectedError`: `PROTECT` unconditionally blocks deleting the
+  referenced `ProfileEntity` even when the referencing `UserCard` is ALSO
+  being deleted in the same cascade (e.g. a whole `User.delete()`);
+  `RESTRICT` still blocks a standalone entity delete with live cards
+  (`profile_entity_detail_view`'s DELETE catches both `ProtectedError` and
+  `RestrictedError` → 400 "reassign or remove this player's N cards
+  first") but defers to same-batch cascades. `ProfileEntity` hangs off
+  `UserSpendingProfile` (`related_name='entities'`; `name`, `kind`
+  personal/business, `is_primary`); `UserSpendingProfile.primary_entity()`
+  lazily creates the primary on first touch. `cards/urls.py`
+  `profile-entities/` (`GET`/`POST`) and `profile-entities/<id>/`
+  (`PATCH`/`DELETE`) are the CRUD surface (all `IsAuthenticated` — auth-only
+  feature, anon stays single-player). `add_user_card`/`toggle_user_card`
+  resolve an `owner` param (or default to the primary) via
+  `_resolve_owner_entity`/`_get_or_create_owned_card` — the latter also
+  matches a legacy NULL-owner row when the target is the primary, since
+  NULL and the primary entity are the same row conceptually but the DB
+  constraint treats them as distinct values. **Security note**: both
+  `add_user_card`'s re-add branch and `update_user_card` instantiate
+  `UserCardCreateUpdateSerializer` with `context={'request': request}` —
+  without it, `validate_owner`'s cross-household check silently no-ops
+  (this was a real gap, fixed alongside the K3 owner selector). `base.html`
+  `#editCardDetailsModal` gained a "Held By" `<select>` (`#cardOwnerGroup`),
+  shown only when authenticated with >1 entity; `updateCardDetails()`'s
+  row resolution still targets the FIRST matching `UserCard` for a given
+  `CreditCard` id when multiple copies exist — a longstanding ambiguity
+  (predates Phase K) not fully resolved here. `profile.html` has a new
+  Household management panel (list/add/rename/remove entities) and an
+  Owner column on the card table (`owner_name`, stacked per instance like
+  the existing signup-date/renewal columns for multi-copy cards).
 - `templates/profile.html` `renderCardCollectionTable()`/`buildCardRow()` —
   the "Active cards" dashboard's sortable columns (`CARD_SORT_COLUMNS`)
   include a **Renews** column (Phase G) showing the next anniversary of
@@ -340,6 +439,24 @@ JSON scenarios in `data/tests/scenarios/*.json` run through the REAL engine
 - A top-level `"strategy"` key applies a preset; a top-level
   `"max_recommendations"` beats the count-derived default (needed when a
   scenario must allow more applies than it expects, e.g. capacity tests).
+- **Multi-player households (Phase K)**: a top-level `"entities": [{"name":
+  ..., "kind": "personal"|"business"}]` list adds household entities beyond
+  the implicit primary (named via top-level `"primary_name"`, default
+  `'Player 1'`). A history-dict owned card's `"owner"` key names an entity
+  from that list (or the primary's name) — must resolve, or it's a loud
+  error; omitted defaults to the primary. Scenarios with no `"entities"`
+  key get exactly one entity, so the engine's per-entity refactor is
+  provably a no-op for them — enforced automatically:
+  `expected_recommendations.apply_as` is absent → every recommendation must
+  have NO `apply_as` key at all. `expected_recommendations.apply_as =
+  {slug: entity_name}` asserts a specific apply's attribution (checked
+  against APPLY recs only — a second-copy apply can share a slug with a
+  'keep' rec for the same card, which never carries `apply_as`).
+  `data/tests/scenarios/multi_player.json` (6 scenarios, one per Phase K
+  behavior: per-entity 5/24 headroom, both-entities-blocked exclusion,
+  business attribution, second-copy bonus-only apply, once-per-lifetime
+  application rule surviving a close, Amex 5-card cap) brought the sweep
+  from 71 to 77.
 - Real cards referenced by a scenario (e.g. jamie_real) are imported into
   the test DB on demand from `data/input/cards/` via the import machinery.
 - Recalibration workflow: run the sweep with `DUMP_SCENARIOS=1`, hand-confirm

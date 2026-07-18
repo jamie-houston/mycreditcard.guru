@@ -133,40 +133,46 @@ def _build_quick_rec_response(recommendations):
     # Get portfolio summary from the first recommendation (they all have the same summary)
     portfolio_summary = recommendations[0].get('portfolio_summary', {}) if recommendations else {}
 
+    def _rec_dict(rec):
+        d = {
+            'card': {
+                'id': rec['card'].id,
+                'name': rec['card'].name,
+                'issuer': rec['card'].issuer.name,
+                'annual_fee': float(rec['card'].annual_fee),
+                'effective_annual_fee': 0 if (rec['action'] == 'apply' and rec['card'].metadata.get('annual_fee_waived_first_year', False)) else float(rec['card'].annual_fee),
+                'annual_fee_waived_first_year': rec['card'].metadata.get('annual_fee_waived_first_year', False),
+                'signup_bonus_amount': rec['card'].signup_bonus_amount,
+                'signup_bonus_type': rec['card'].signup_bonus_type.name if rec['card'].signup_bonus_type else 'points',
+                'signup_spending_requirement': float((rec['card'].metadata.get('signup_bonus') or {}).get('spending_requirement') or 0),
+                'signup_time_limit_months': (rec['card'].metadata.get('signup_bonus') or {}).get('time_limit_months'),
+                'apply_url': rec['card'].apply_url,
+            },
+            'action': rec['action'],
+            'estimated_rewards': float(rec['estimated_rewards']),
+            'first_year_value': float(rec.get('first_year_value', rec['estimated_rewards'])),
+            'ongoing_value': float(rec.get('ongoing_value', rec['estimated_rewards'])),
+            'reward_value_multiplier': float(rec.get('reward_value_multiplier', 0.01)),
+            'valuation_note': rec.get('valuation_note', ''),
+            'reasoning': rec['reasoning'],
+            'rewards_breakdown': rec.get('rewards_breakdown', []),
+            'total_spending_on_card': float(rec.get('total_spending_on_card', 0)),
+            'signup_bonus_value': float(rec.get('signup_bonus_value', 0)),
+            'eligibility_note': rec.get('eligibility_note', ''),
+            'bonus_deferred': rec.get('bonus_deferred', False),
+            'recommended_month': rec.get('recommended_month'),
+            'bonus_months_needed': rec.get('bonus_months_needed'),
+            'priority': rec['priority']
+        }
+        # Phase K: household attribution — omitted entirely (not just None)
+        # for single-entity households, so old/anon payloads render
+        # unchanged (see static/js/roadmap-results.js's apply_as handling).
+        if 'apply_as' in rec:
+            d['apply_as'] = rec['apply_as']
+        return d
+
     return {
-        'recommendations': [
-            {
-                'card': {
-                    'id': rec['card'].id,
-                    'name': rec['card'].name,
-                    'issuer': rec['card'].issuer.name,
-                    'annual_fee': float(rec['card'].annual_fee),
-                    'effective_annual_fee': 0 if (rec['action'] == 'apply' and rec['card'].metadata.get('annual_fee_waived_first_year', False)) else float(rec['card'].annual_fee),
-                    'annual_fee_waived_first_year': rec['card'].metadata.get('annual_fee_waived_first_year', False),
-                    'signup_bonus_amount': rec['card'].signup_bonus_amount,
-                    'signup_bonus_type': rec['card'].signup_bonus_type.name if rec['card'].signup_bonus_type else 'points',
-                    'signup_spending_requirement': float((rec['card'].metadata.get('signup_bonus') or {}).get('spending_requirement') or 0),
-                    'signup_time_limit_months': (rec['card'].metadata.get('signup_bonus') or {}).get('time_limit_months'),
-                    'apply_url': rec['card'].apply_url,
-                },
-                'action': rec['action'],
-                'estimated_rewards': float(rec['estimated_rewards']),
-                'first_year_value': float(rec.get('first_year_value', rec['estimated_rewards'])),
-                'ongoing_value': float(rec.get('ongoing_value', rec['estimated_rewards'])),
-                'reward_value_multiplier': float(rec.get('reward_value_multiplier', 0.01)),
-                'valuation_note': rec.get('valuation_note', ''),
-                'reasoning': rec['reasoning'],
-                'rewards_breakdown': rec.get('rewards_breakdown', []),
-                'total_spending_on_card': float(rec.get('total_spending_on_card', 0)),
-                'signup_bonus_value': float(rec.get('signup_bonus_value', 0)),
-                'eligibility_note': rec.get('eligibility_note', ''),
-                'bonus_deferred': rec.get('bonus_deferred', False),
-                'recommended_month': rec.get('recommended_month'),
-                'bonus_months_needed': rec.get('bonus_months_needed'),
-                'priority': rec['priority']
-            }
-            for rec in recommendations
-        ],
+        'recommendations': [_rec_dict(rec) for rec in recommendations],
         'total_estimated_rewards': sum(
             float(rec['estimated_rewards']) for rec in recommendations
         ),

@@ -18,7 +18,8 @@ vm.createContext(sandbox);
 vm.runInContext(source, sandbox);
 
 const { _roadmapTimingLabel, _roadmapFormatSigned, _roadmapBenefitsValue,
-        _roadmapRewardsValue, _roadmapBonusShiftAggregate } = sandbox;
+        _roadmapRewardsValue, _roadmapBonusShiftAggregate,
+        _roadmapApplyAsLabel, _roadmapEscapeHtml } = sandbox;
 
 function test(name, fn) {
     try {
@@ -93,6 +94,31 @@ test('_roadmapBonusShiftAggregate: non-zero shifts produce one aggregated row', 
     assert.ok(result);
     assert.strictEqual(Math.round(result.total), -38);
     assert.strictEqual(result.title, 'calc A\ncalc B');
+});
+
+test('_roadmapApplyAsLabel: absent apply_as renders nothing', () => {
+    assert.strictEqual(_roadmapApplyAsLabel({}), '');
+    assert.strictEqual(_roadmapApplyAsLabel({ apply_as: null }), '');
+});
+
+test('_roadmapApplyAsLabel: present apply_as renders "as {name}"', () => {
+    const rec = { apply_as: { entity_id: 2, name: 'Sam', kind: 'personal' } };
+    assert.strictEqual(_roadmapApplyAsLabel(rec), ' · as Sam');
+});
+
+test('_roadmapApplyAsLabel: entity name is HTML-escaped', () => {
+    const rec = { apply_as: { entity_id: 3, name: '<script>alert(1)</script>', kind: 'personal' } };
+    assert.strictEqual(
+        _roadmapApplyAsLabel(rec),
+        ' · as &lt;script&gt;alert(1)&lt;/script&gt;');
+});
+
+test('_roadmapEscapeHtml: escapes the standard HTML-sensitive characters', () => {
+    assert.strictEqual(
+        _roadmapEscapeHtml(`<a href="x">it's & "fun"</a>`),
+        '&lt;a href=&quot;x&quot;&gt;it&#39;s &amp; &quot;fun&quot;&lt;/a&gt;');
+    assert.strictEqual(_roadmapEscapeHtml(null), '');
+    assert.strictEqual(_roadmapEscapeHtml(undefined), '');
 });
 
 if (process.exitCode) {

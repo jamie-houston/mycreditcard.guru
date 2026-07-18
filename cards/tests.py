@@ -88,7 +88,7 @@ class UserCardOwnershipSoftCloseTests(TestCase):
     against closed cards' dates — see roadmaps/eligibility.py). It must
     soft-close via closed_date instead. Also covers the re-add round trip:
     /user-cards/add/ must reopen a previously soft-closed row rather than
-    erroring on the user+card unique_together constraint or leaving it
+    erroring on the (user, card, owner) unique constraint or leaving it
     closed."""
 
     def setUp(self):
@@ -128,7 +128,7 @@ class UserCardOwnershipSoftCloseTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertFalse(response.json()['created'])
 
-        # Must reopen the SAME row (unique_together), not create a duplicate
+        # Must reopen the SAME row (unique constraint), not create a duplicate
         self.assertEqual(UserCard.objects.filter(user=self.user, card=self.card).count(), 1)
         user_card.refresh_from_db()
         self.assertEqual(user_card.id, UserCard.objects.get(user=self.user, card=self.card).id)

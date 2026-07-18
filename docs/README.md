@@ -9,11 +9,6 @@ This folder contains detailed documentation for the Credit Card Guru project.
   what's in progress or still to do, as checkboxes. Completed phase history
   and design docs are archived to mybrain (pointers at the bottom of the
   file) once a phase finishes, to keep this doc lean.
-- **[PLAN_PHASE_F_OWNERSHIP_CLEANUP.md](PLAN_PHASE_F_OWNERSHIP_CLEANUP.md)** -
-  Approved implementation plan for Phase F (ownership consolidation onto
-  `cards/`, soft-close semantics, duplicate-serializer fix, line-item
-  polish) — the active PLAN doc; archive to mybrain when the phase
-  completes.
 - **[../CLAUDE.md](../CLAUDE.md)** - Architecture map and working rules for Claude Code
 
 ### 🚀 Getting Started

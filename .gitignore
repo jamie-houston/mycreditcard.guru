@@ -48,6 +48,7 @@ venv.bak/
 *.sln
 *.sw?
 .claude
+graphify-out/
 
 # VSCode - include shared configs
 .vscode/

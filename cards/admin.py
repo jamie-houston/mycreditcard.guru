@@ -2,7 +2,7 @@ from django.contrib import admin
 from .models import (
     Issuer, RewardType, SpendingCategory, CreditCard,
     RewardCategory, CardCredit, UserSpendingProfile,
-    SpendingAmount, UserCard
+    SpendingAmount, UserCard, ProfileEntity
 )
 
 
@@ -67,8 +67,16 @@ class UserSpendingProfileAdmin(admin.ModelAdmin):
 
 @admin.register(UserCard)
 class UserCardAdmin(admin.ModelAdmin):
-    list_display = ['user', 'card', 'display_name', 'opened_date', 'closed_date', 'is_active']
+    list_display = ['user', 'card', 'owner', 'display_name', 'opened_date', 'closed_date', 'is_active']
     list_filter = ['card__issuer', 'opened_date', 'closed_date']
     search_fields = ['user__username', 'card__name', 'nickname']
     date_hierarchy = 'opened_date'
     readonly_fields = ['created_at', 'updated_at']
+    raw_id_fields = ['owner']
+
+
+@admin.register(ProfileEntity)
+class ProfileEntityAdmin(admin.ModelAdmin):
+    list_display = ['name', 'profile', 'kind', 'is_primary', 'created_at']
+    list_filter = ['kind', 'is_primary']
+    search_fields = ['name', 'profile__user__username']
