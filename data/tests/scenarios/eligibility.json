@@ -99,7 +99,7 @@
     },
     {
       "name": "Bonus capacity - only two 10K bonuses fit a year",
-      "description": "A $2,000/month spender is offered three cards that each need $10,000 of spending (~5 months each). Only two bonuses fit in 12 months of spending; the third card is deferred even though max_recommendations allows it.",
+      "description": "A $2,000/month spender is offered three cards that each need $10,000 of spending (~5 months each). Only two bonuses fit in 12 months of spending. Phase E makes selection itself capacity-aware: the third card (lowest bonus density, and its one reward category is already claimed by a better-rate card) competes bonus-less, scores $0, and never makes the portfolio at all — assembly-time deferral is just a safety net and never fires here.",
       "max_recommendations": 3,
       "user_profile": {
         "spending": {
@@ -117,10 +117,17 @@
         "actions": ["apply"],
         "must_include_cards": ["bonus-card-alpha", "bonus-card-beta"],
         "must_not_include_cards": ["bonus-card-gamma"],
+        "expected_apply_sequence": ["bonus-card-alpha", "bonus-card-beta"],
+        "expected_recommended_months": {
+          "bonus-card-alpha": 0,
+          "bonus-card-beta": 5
+        },
         "test_conditions": [
           "Each $10K requirement consumes ~5 months of the $2K/mo spending",
-          "5 + 5 = 10 months fits; the third bonus (15 months) is deferred",
-          "max_recommendations=3 proves the cap comes from spend velocity, not the count"
+          "5 + 5 = 10 months fits; the third bonus (15 months cumulative) doesn't",
+          "Gamma's bonus is zeroed by _bonus_capacity_plan; with its category already claimed by Alpha's better rate, its bonus-less value is $0, so selection excludes it outright",
+          "max_recommendations=3 proves the cap comes from spend velocity, not the count",
+          "Alpha (density 500/5=100) sorts ahead of Beta (450/5=90) — no tie-break needed here"
         ]
       }
     }

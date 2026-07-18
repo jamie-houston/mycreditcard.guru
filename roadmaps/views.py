@@ -160,6 +160,9 @@ def _build_quick_rec_response(recommendations):
                 'total_spending_on_card': float(rec.get('total_spending_on_card', 0)),
                 'signup_bonus_value': float(rec.get('signup_bonus_value', 0)),
                 'eligibility_note': rec.get('eligibility_note', ''),
+                'bonus_deferred': rec.get('bonus_deferred', False),
+                'recommended_month': rec.get('recommended_month'),
+                'bonus_months_needed': rec.get('bonus_months_needed'),
                 'priority': rec['priority']
             }
             for rec in recommendations
@@ -212,7 +215,11 @@ def _persist_current_roadmap(request, response_data):
             'calculation_data': {
                 'response': response_data,
                 'request': request.data,
-                'generated_at': timezone.now().isoformat(),
+                # Reuse the SAME timestamp shown in the live response (set
+                # on response_data by the caller) rather than computing a
+                # fresh one here — Phase E's calendar-month rendering needs
+                # what the user saw and what got persisted to agree exactly.
+                'generated_at': response_data.get('generated_at') or timezone.now().isoformat(),
             }
         }
     )
@@ -237,6 +244,12 @@ def quick_recommendation_view(request):
         try:
             recommendations = serializer.generate_recommendations()
             response_data = _build_quick_rec_response(recommendations)
+            # The live POST response didn't carry generated_at before Phase
+            # E — only the GET current/shared endpoints did. Sequencing's
+            # calendar-month display ("Apply in ~4 months (Nov 2026)") needs
+            # a base date on every path, so set it here once and persist
+            # the SAME value (see _persist_current_roadmap).
+            response_data['generated_at'] = timezone.now().isoformat()
 
             _persist_current_roadmap(request, response_data)
 

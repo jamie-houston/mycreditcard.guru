@@ -353,16 +353,62 @@ working rules).
 
 ## Progress
 
-- [ ] Step 1 — `_bonus_capacity_plan` + three valuation sites; sweep
-      recalibrated (hand-verified)
-- [ ] Step 2 — bonus-less display pathway ($0 bonus, deferral info line,
-      `bonus_deferred` flag)
-- [ ] Step 3 — `recommended_month`/`bonus_months_needed` annotations,
-      `bonus_capacity.timeline`, safety-net warning
-- [ ] Step 4 — expectation-schema extension, capacity fixture updated,
-      `bonus_sequencing.json` scenarios
-- [ ] Step 5 — API fields + `generated_at` on the live POST response
+- [x] Step 1 — `_bonus_capacity_plan` + three valuation sites; sweep
+      recalibrated (hand-verified, 2026-07-15). Zero behavioral diffs
+      across the existing 64 scenarios — verified via debug trace that the
+      capacity-aware code path is exercised (e.g. Bonus Card Gamma is
+      correctly recognized as not-counted), but the pre-existing
+      efficiency-boost quirk (uses each card's standalone value, not its
+      marginal portfolio contribution) meant no scenario's final selection
+      actually flipped yet — expected, since assembly-time deferral
+      (unchanged until Step 2) still drove the one capacity fixture's
+      outcome.
+- [x] Step 2 — bonus-less display pathway ($0 bonus, deferral info line,
+      `bonus_deferred` flag). This is what actually changed the capacity
+      fixture's outcome: Gamma's bonus now shows $0, its ongoing value is
+      also $0 (category already claimed by a better-rate card), so it's
+      filtered out by the `estimated_rewards > 0` check before ever
+      reaching assembly — `deferred_applies` is now `[]` instead of
+      `['Bonus Card Gamma']`. Updated `eligibility.json`'s capacity test
+      and fixture comments accordingly.
+- [x] Step 3 — `recommended_month`/`bonus_months_needed` annotations,
+      `bonus_capacity.timeline`, safety-net warning. Also enhanced
+      `cards/test_base.py print_scenario_results` to print the new fields
+      (recommended_month, bonus capacity timeline) — needed for the
+      DUMP_SCENARIOS hand-verification workflow going forward.
+- [x] Step 4 — expectation-schema extension
+      (`validate_apply_sequencing` on the `run_scenario.py` Command class,
+      shared by both `test_base.py` and `run_scenario.py` per the existing
+      `validate_portfolio_optimization` pattern; supports
+      `expected_apply_sequence` and `expected_recommended_months`).
+      Capacity fixture updated (see Step 2). New
+      `data/tests/scenarios/bonus_sequencing.json` (3 scenarios + 9 new
+      fixture cards in `data/tests/cards.json`): selection avoiding a
+      wasted select-then-defer round trip, a bonus-less card winning a
+      slot on ongoing value alone, and two-card sequencing order. Sweep is
+      67/67. Note: the "capacity overflow with reordering" case from the
+      original plan turned out to not be constructible as a genuinely
+      *different final portfolio* given `_optimize_card_portfolio`'s
+      forward-only greedy (it only ever adds cards, never swaps out an
+      earlier pick) — the first card chosen is invariant to capacity
+      awareness since solo evaluation is identical either way. What *is*
+      demonstrable, and what the first new scenario asserts, is the
+      cleaner accounting: selection now avoids ever choosing a card whose
+      bonus can't coexist with a bigger one already claiming the budget,
+      rather than picking it and deferring it at assembly.
+- [x] Step 5 — API fields (`recommended_month`, `bonus_deferred`,
+      `bonus_months_needed` per rec; `bonus_capacity.timeline`/
+      `bonus_less_applies` already rode along free) + `generated_at` on
+      the live POST response (`quick_recommendation_view` sets it once,
+      `_persist_current_roadmap` reuses the same value). Verified via a
+      throwaway `TestCase` hitting the view through Django's test client
+      (test DB, not dev DB) rather than curl, since no dev server was
+      running and it shouldn't be started for this — confirmed
+      `generated_at`, all `bonus_capacity` keys, and per-rec sequencing
+      fields all present and consistent with the test-suite numbers.
 - [ ] Step 6 — frontend timing labels, apply sort, reworked capacity note
+      (deferred — needs Jamie's browser pass; not started this session)
 - [ ] Manual browser pass done (Jamie); MANUAL_TEST_PLAN.md updated
-- [ ] Docs updated (CLAUDE.md engine section, PROJECT_STATUS.md); this doc
-      archived to mybrain on completion
+- [x] Docs updated (CLAUDE.md engine section, PROJECT_STATUS.md) for
+      Steps 1–5, 2026-07-15. This doc archives to mybrain once Step 6 +
+      the manual pass land.

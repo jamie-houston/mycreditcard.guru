@@ -124,6 +124,9 @@ class CreditCardTestBase(TestCase):
         if expected.get('portfolio_optimization'):
             issues.extend(self.command.validate_portfolio_optimization(
                 recommendations, expected['portfolio_optimization']))
+        # Phase E: expected_apply_sequence / expected_recommended_months
+        # (no-ops for scenarios that don't set them)
+        issues.extend(self.command.validate_apply_sequencing(recommendations, expected))
         issues.extend(self.command.validate_breakdown_accuracy(recommendations))
 
         if issues:
@@ -152,8 +155,25 @@ class CreditCardTestBase(TestCase):
             print(f"   Annual Fee: ${rec['card'].annual_fee}")
             print(f"   Estimated Annual Value: ${rec['estimated_rewards']}")
             print(f"   Reasoning: {rec['reasoning']}")
+            if rec['action'] == 'apply':
+                print(f"   Recommended month: {rec.get('recommended_month')}"
+                     f" (bonus needs {rec.get('bonus_months_needed')} months;"
+                     f" bonus_deferred={rec.get('bonus_deferred')})")
             for breakdown in rec.get('rewards_breakdown') or []:
                 print(f"     • {breakdown['category_name']}: {breakdown['calculation']}")
+
+        bonus_capacity = recommendations[0].get('portfolio_summary', {}).get('bonus_capacity')
+        if bonus_capacity:
+            print(f"\nBonus capacity: {bonus_capacity['months_committed']}/"
+                 f"{bonus_capacity['capacity_months']} months committed")
+            for entry in bonus_capacity.get('timeline') or []:
+                print(f"   {entry['card_name']}: month {entry['recommended_month']}"
+                     f" (needs {entry['months_needed']} mo, counted={entry['bonus_counted']})")
+            if bonus_capacity.get('deferred_applies'):
+                print(f"   Deferred (assembly safety net): {bonus_capacity['deferred_applies']}")
+            if bonus_capacity.get('bonus_less_applies'):
+                print(f"   Bonus-less (fits selection, not this year's budget): "
+                     f"{bonus_capacity['bonus_less_applies']}")
 
         print(f"\n{'=' * 50}")
 

@@ -1,0 +1,108 @@
+{
+  "description": "Phase E: selection-aware bonus capacity and sequencing (_bonus_capacity_plan). Companion scenarios to eligibility.json's 'Bonus capacity' case, exercising properties that fixture doesn't reach: selection avoiding a wasted select-then-defer round trip, a bonus-less card winning a slot on ongoing value alone, and multi-card sequencing order/timing.",
+  "category": "bonus_sequencing",
+  "scenarios": [
+    {
+      "name": "Bonus sequencing - selection never wastes a slot on an unrealizable bonus",
+      "description": "Three cards, each in its own non-overlapping category so every card's ongoing value stands on its own. The big card (2200 bonus, 30000 requirement) and the denser groceries card (900 bonus, 6000 requirement) exactly fill the 12-month budget together (10 + 2 = 12). The travel card's bonus (850/6000, also 2 months, denser than the big card) would only fit by displacing the big card's much larger bonus — a net loss — so capacity-aware selection never picks it at all. Before Phase E, selection (blind to capacity) would have picked all three and let assembly defer the travel card at the end, showing it in deferred_applies; now it's simply never selected, so deferred_applies is empty by construction.",
+      "max_recommendations": 3,
+      "user_profile": {
+        "spending": {
+          "dining": 1000,
+          "groceries": 1000,
+          "travel": 1000
+        }
+      },
+      "owned_cards": [],
+      "available_cards": [
+        "seq-big-card",
+        "seq-dense-card-1",
+        "seq-dense-card-2"
+      ],
+      "expected_recommendations": {
+        "count": 2,
+        "actions": ["apply"],
+        "must_include_cards": ["seq-big-card", "seq-dense-card-1"],
+        "must_not_include_cards": ["seq-dense-card-2"],
+        "expected_apply_sequence": ["seq-dense-card-1", "seq-big-card"],
+        "expected_recommended_months": {
+          "seq-dense-card-1": 0,
+          "seq-big-card": 2
+        },
+        "test_conditions": [
+          "seq-big-card (2200/30000 = 10mo) + seq-dense-card-1 (900/6000 = 2mo) = 12mo exactly, both bonuses counted",
+          "seq-dense-card-2 (850/6000 = 2mo, denser than seq-big-card) is never selected: adding it would flip seq-big-card's much larger bonus off for a net loss",
+          "bonus_capacity.deferred_applies is empty — the card is excluded at selection, not deferred at assembly",
+          "seq-dense-card-1 is denser (450) than seq-big-card (220), so it's sequenced first (month 0); seq-big-card starts at month 2"
+        ]
+      }
+    },
+    {
+      "name": "Bonus sequencing - bonus-less card wins a slot on ongoing value alone",
+      "description": "Two dense bonuses (dining 1000/21000=7mo, groceries 950/15000=5mo) exactly exhaust the 12-month budget between them. A third card (travel, 3x rate) has a bonus that can't fit in the 0 months remaining, but its strong ongoing value (non-overlapping category) still earns it a recommended slot — bonus-less, at $0, with a deferral note.",
+      "max_recommendations": 3,
+      "user_profile": {
+        "spending": {
+          "dining": 1000,
+          "groceries": 1000,
+          "travel": 1000
+        }
+      },
+      "owned_cards": [],
+      "available_cards": [
+        "seq-budget-card-1",
+        "seq-budget-card-2",
+        "seq-strong-ongoing-card"
+      ],
+      "expected_recommendations": {
+        "count": 3,
+        "actions": ["apply"],
+        "must_include_cards": ["seq-budget-card-1", "seq-budget-card-2", "seq-strong-ongoing-card"],
+        "expected_apply_sequence": ["seq-strong-ongoing-card", "seq-budget-card-2", "seq-budget-card-1"],
+        "expected_recommended_months": {
+          "seq-budget-card-2": 0,
+          "seq-budget-card-1": 5,
+          "seq-strong-ongoing-card": 0
+        },
+        "test_conditions": [
+          "seq-budget-card-2 (950/15000=5mo, density 190) is denser than seq-budget-card-1 (1000/21000=7mo, density 142.9) — sequenced first, both counted, 5+7=12mo exactly",
+          "seq-strong-ongoing-card's bonus (700/21000=7mo) has 0 months of budget left and is never counted — but its 3x travel rate gives real ongoing value, so it's still recommended, just bonus-less",
+          "Assert directly (hand-written test): seq-strong-ongoing-card has signup_bonus_value == 0.0, bonus_deferred == True, a 'Signup bonus deferred' info line, and recommended_month == 0 ('apply whenever' — it consumes no bonus budget)",
+          "months_committed == 12.0 exactly; deferred_applies is empty (nothing overflowed assembly — the zeroed bonus needs 0 months)",
+          "expected_apply_sequence puts seq-strong-ongoing-card first: its recommended_month is also 0 (bonus-less ties sort by priority), and selection's efficiency-boost scoring (its 3x rate drives a bigger boost) gives it priority 1 — verified via DUMP_SCENARIOS, not hand-derived"
+        ]
+      }
+    },
+    {
+      "name": "Bonus sequencing - two-card ordering by density",
+      "description": "Simple two-card case with no capacity conflict (3 + 6 = 9 months, well under the 12-month budget) to pin the basic sequencing order and month arithmetic: the denser card (200) goes first at month 0, the less dense card (83.3) follows at month 3.",
+      "max_recommendations": 2,
+      "user_profile": {
+        "spending": {
+          "general": 500,
+          "gas": 500
+        }
+      },
+      "owned_cards": [],
+      "available_cards": [
+        "seq-order-card-1",
+        "seq-order-card-2"
+      ],
+      "expected_recommendations": {
+        "count": 2,
+        "actions": ["apply"],
+        "must_include_cards": ["seq-order-card-1", "seq-order-card-2"],
+        "expected_apply_sequence": ["seq-order-card-1", "seq-order-card-2"],
+        "expected_recommended_months": {
+          "seq-order-card-1": 0,
+          "seq-order-card-2": 3
+        },
+        "test_conditions": [
+          "seq-order-card-1 (600/3000=3mo, density 200) is denser than seq-order-card-2 (500/6000=6mo, density 83.3)",
+          "Both fit comfortably (3+6=9mo of 12); the sequence is purely a density ordering, no exclusion involved",
+          "months_committed == 9.0"
+        ]
+      }
+    }
+  ]
+}

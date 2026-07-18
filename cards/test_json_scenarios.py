@@ -129,13 +129,21 @@ class JSONScenarioTest(JSONScenarioTestBase):
         self.print_scenario_results(scenario, recommendations)
 
     def test_bonus_capacity_defers_third_card(self):
-        """S3: two $10K bonuses fit a $2K/mo year; the third is deferred."""
+        """Phase E: two $10K bonuses fit a $2K/mo year. Selection is now
+        capacity-aware (_bonus_capacity_plan), so the third card's bonus is
+        zeroed at display time too (not just deferred at assembly) — and
+        since these fixture cards are pure bonus vehicles (their one
+        reward category is already claimed by a better-rate card), Gamma's
+        bonus-less ongoing value is $0, so it's filtered out entirely
+        rather than surfacing as a deferred apply. deferred_applies is
+        empty by construction now: assembly is a safety net, and nothing
+        with a positive bonus reaches it in this scenario."""
         if not self.scenarios:
             self.skipTest("No scenarios found in JSON file")
         scenario = self.get_scenario('Bonus capacity - only two 10K bonuses fit a year')
         recommendations = self.run_scenario_test(scenario)
         capacity = recommendations[0]['portfolio_summary']['bonus_capacity']
-        self.assertEqual(capacity['deferred_applies'], ['Bonus Card Gamma'])
+        self.assertEqual(capacity['deferred_applies'], [])
         self.assertAlmostEqual(capacity['months_committed'], 10.0, places=1)
         self.print_scenario_results(scenario, recommendations)
 
@@ -196,14 +204,67 @@ class JSONScenarioTest(JSONScenarioTestBase):
             "Un-opted-in credit must not appear in the breakdown at all")
         self.print_scenario_results(scenario, recommendations)
 
+    def test_bonus_sequencing_avoids_wasted_selection(self):
+        """Phase E: selection is capacity-aware enough to never pick a card
+        whose bonus can't coexist with a bigger one already claiming the
+        12-month budget — no select-then-defer round trip, so
+        deferred_applies stays empty."""
+        if not self.scenarios:
+            self.skipTest("No scenarios found in JSON file")
+        scenario = self.get_scenario(
+            'Bonus sequencing - selection never wastes a slot on an unrealizable bonus')
+        recommendations = self.run_scenario_test(scenario)
+        capacity = recommendations[0]['portfolio_summary']['bonus_capacity']
+        self.assertEqual(capacity['deferred_applies'], [])
+        self.assertAlmostEqual(capacity['months_committed'], 12.0, places=1)
+        self.print_scenario_results(scenario, recommendations)
+
+    def test_bonus_sequencing_bonus_less_wins_on_ongoing_value(self):
+        """Phase E: once two dense bonuses exhaust the 12-month budget, a
+        third card with strong (non-overlapping) ongoing value still earns
+        a recommended slot bonus-less, at $0, with a deferral note."""
+        if not self.scenarios:
+            self.skipTest("No scenarios found in JSON file")
+        scenario = self.get_scenario(
+            'Bonus sequencing - bonus-less card wins a slot on ongoing value alone')
+        recommendations = self.run_scenario_test(scenario)
+        strong = next(rec for rec in recommendations
+                     if rec['card'].slug == 'seq-strong-ongoing-card')
+        self.assertEqual(float(strong['signup_bonus_value']), 0.0,
+                         "Bonus-less card must show $0 signup bonus")
+        self.assertTrue(strong['bonus_deferred'],
+                        "Card must be flagged bonus_deferred")
+        self.assertTrue(
+            any('Signup bonus deferred' in b.get('category_name', '')
+                for b in strong['rewards_breakdown']),
+            "Breakdown must carry the deferral info line")
+        self.assertEqual(strong['recommended_month'], 0,
+                         "Bonus-less applies consume no budget — apply whenever")
+        capacity = recommendations[0]['portfolio_summary']['bonus_capacity']
+        self.assertEqual(capacity['deferred_applies'], [])
+        self.assertAlmostEqual(capacity['months_committed'], 12.0, places=1)
+        self.assertIn('Sequencing Strong Ongoing Card', capacity['bonus_less_applies'])
+        self.print_scenario_results(scenario, recommendations)
+
+    def test_bonus_sequencing_two_card_order(self):
+        """Phase E: simple two-card case with no capacity conflict — pins
+        the basic density ordering and month arithmetic."""
+        if not self.scenarios:
+            self.skipTest("No scenarios found in JSON file")
+        scenario = self.get_scenario('Bonus sequencing - two-card ordering by density')
+        recommendations = self.run_scenario_test(scenario)
+        capacity = recommendations[0]['portfolio_summary']['bonus_capacity']
+        self.assertAlmostEqual(capacity['months_committed'], 9.0, places=1)
+        self.print_scenario_results(scenario, recommendations)
+
     # The broad scenario suite has ~22 stale expectations (card counts and
     # keep/cancel policies written for an older engine; baseline was 27
     # failures before the allocation rework). Math-integrity checks
-    # (breakdown reconciliation, double counting) pass on all 53. Run with:
+    # (breakdown reconciliation, double counting) pass on all 67. Run with:
     #   RUN_ALL_SCENARIOS=1 python manage.py test cards.test_json_scenarios
     # and recalibrate expectations via `run_scenario "<name>" --explain`.
     @unittest.skipUnless(os.environ.get('RUN_ALL_SCENARIOS'),
-                         'set RUN_ALL_SCENARIOS=1 to audit all 53 scenarios')
+                         'set RUN_ALL_SCENARIOS=1 to audit all 67 scenarios')
     def test_all_scenarios(self):
         """Run every JSON scenario against its expectations.
 

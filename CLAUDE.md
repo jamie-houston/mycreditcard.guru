@@ -29,12 +29,12 @@ phases complete or requirements change.
 ## Verification gates (run before calling anything done)
 
 ```bash
-venv/bin/python manage.py test                                   # standard suite (100 tests)
-RUN_ALL_SCENARIOS=1 venv/bin/python manage.py test cards.test_json_scenarios   # full sweep: 64/64 must pass
+venv/bin/python manage.py test                                   # standard suite (103 tests)
+RUN_ALL_SCENARIOS=1 venv/bin/python manage.py test cards.test_json_scenarios   # full sweep: 67/67 must pass
 venv/bin/python manage.py run_scenario "Jamie Real" --explain    # acceptance: every line item reconciles
 ```
 
-- The full sweep passes 64/64 as of 2026-07-07. Any failure is a regression.
+- The full sweep passes 67/67 as of 2026-07-15. Any failure is a regression.
 - `run_scenario` (CLI) runs against the **dev DB**, so real cards pollute
   fixture pools. For scenario debugging use the test DB instead:
   `DUMP_SCENARIOS=1 RUN_ALL_SCENARIOS=1 venv/bin/python manage.py test cards.test_json_scenarios`
@@ -60,7 +60,35 @@ Key modules:
   (`_signup_bonus_plan`: organic / shifted-with-opportunity-cost /
   unreachable→$0). Bonus capacity: counted bonuses consume
   `requirement ÷ monthly spend` months; applies must fit 12 months
-  (`BONUS_CAPACITY_MONTHS`); excess applies are deferred.
+  (`BONUS_CAPACITY_MONTHS`) — enforced by **`_bonus_capacity_plan(cards)`**
+  (Phase E, near `_bonus_months_needed`), the single capacity authority.
+  It sorts candidate applies by bonus value density (`bonus_value/months`
+  desc, total-order tie-break on bonus value then `card.id`) and walks the
+  12-month budget all-or-nothing, returning which bonuses are `counted`
+  and each one's `start_month`. **Selection is capacity-aware**: the three
+  portfolio-valuation sites (`_calculate_scenario_portfolio_value`'s bonus
+  sum and its efficiency-boost block, and the `calculate_portfolio_value`
+  closure in `_optimize_card_portfolio`) all count only `counted` bonuses,
+  so an over-budget bonus can't inflate a portfolio's score — it can still
+  win a slot on ongoing value alone. Pre-sort scoring
+  (`_select_optimal_card_combination`) keeps the full bonus (capacity is
+  portfolio-relative; a solo card has the whole budget) except a defensive
+  cap when a bonus can't fit even alone. Display
+  (`_generate_portfolio_optimized_recommendations`) recomputes the plan
+  over the final apply set and shows `$0` + a "Signup bonus deferred" info
+  line + `bonus_deferred=True` for anything not counted — a third pathway
+  alongside the existing issuer-ineligibility (`bonus_block`) one.
+  `generate_quick_recommendations`'s assembly loop is now just a **safety
+  net** (logs a warning if a positive bonus still lands in
+  `deferred_applies` — selection should have already zeroed it) and
+  annotates each apply with `recommended_month`/`bonus_months_needed`
+  (bonus-less applies get `0`/`0.0` — "apply whenever") plus a
+  `bonus_capacity.timeline` (applies ascending by start_month, bonus-less
+  last) and `bonus_capacity.bonus_less_applies` list. Frontend timing
+  display (Step 6: "Apply in ~N months") is not yet built — see
+  `docs/PLAN_PHASE_E_BONUS_SEQUENCING.md` for remaining scope. Southwest
+  Companion Pass timing is explicitly unmodeled; the density sort-key is
+  where that would slot in later.
 - `roadmaps/strategies.py` — strategy presets are data, not code
   (filters + max_recommendations + selection weights). UI effort question
   maps onto these.
@@ -78,12 +106,18 @@ Key modules:
 - `roadmaps/views.py` `quick_recommendation_view` — anonymous users need a
   durable session created **before** `generate_recommendations()`'s
   transaction starts, or `request.session.create()` gets rolled back with
-  everything else and the anon user ends up with no session at all. After
-  generation, `_persist_current_roadmap()` resolves the REAL profile (never
-  the scratch one from the rollback) and `update_or_create`s a
-  `Roadmap(name="Current Roadmap")` + `RoadmapCalculation.calculation_data =
-  {response, request, generated_at}` — a normal, committed write that runs
-  *after* the rollback. `GET /api/roadmaps/current/` (`current/` in
+  everything else and the anon user ends up with no session at all. The
+  view sets `response_data['generated_at'] = timezone.now().isoformat()`
+  itself (Phase E) — previously only the GET current/shared endpoints
+  carried this field, but sequencing's calendar-month display needs a base
+  date on the live path too. After generation, `_persist_current_roadmap()`
+  resolves the REAL profile (never the scratch one from the rollback) and
+  `update_or_create`s a `Roadmap(name="Current Roadmap")` +
+  `RoadmapCalculation.calculation_data = {response, request, generated_at}`
+  — reusing the SAME `generated_at` the caller already set on
+  `response_data`, so the live response and the persisted copy always
+  agree — a normal, committed write that runs *after* the rollback.
+  `GET /api/roadmaps/current/` (`current/` in
   roadmaps/urls.py) reads it back read-only (no session/profile
   auto-creation; 404 = nothing generated yet) via `get_current_roadmap(request)`
   (`roadmaps/models.py`) — the shared auth/anon-session lookup, also used by

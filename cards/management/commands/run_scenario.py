@@ -328,7 +328,11 @@ class Command(BaseCommand):
         portfolio_opt = expected.get('portfolio_optimization')
         if portfolio_opt:
             issues.extend(self.validate_portfolio_optimization(recommendations, portfolio_opt))
-        
+
+        # Check Phase E bonus-sequencing expectations (expected_apply_sequence /
+        # expected_recommended_months) — no-ops for scenarios that don't set them
+        issues.extend(self.validate_apply_sequencing(recommendations, expected))
+
         # Check value breakdown accuracy (always validate)
         breakdown_issues = self.validate_breakdown_accuracy(recommendations)
         issues.extend(breakdown_issues)
@@ -540,9 +544,43 @@ class Command(BaseCommand):
             for category in complementary_cats:
                 if category not in recommended_categories:
                     issues.append(f'Expected complementary category "{category}" not covered by recommendations')
-        
+
         return issues
-    
+
+    def validate_apply_sequencing(self, recommendations, expected):
+        """Validate Phase E bonus-sequencing expectations (optional keys):
+
+        - expected_apply_sequence: ordered card slugs, checked against
+          applies sorted by (recommended_month, priority) — the same order
+          the frontend will display them in.
+        - expected_recommended_months: {slug: int} exact match against each
+          apply's recommended_month.
+        """
+        issues = []
+        applies = [rec for rec in recommendations if rec['action'] == 'apply']
+
+        expected_sequence = expected.get('expected_apply_sequence')
+        if expected_sequence is not None:
+            ordered = sorted(applies, key=lambda rec: (rec.get('recommended_month') or 0, rec['priority']))
+            actual_sequence = [rec['card'].slug for rec in ordered]
+            if actual_sequence != list(expected_sequence):
+                issues.append(
+                    f'Expected apply sequence {list(expected_sequence)}, got {actual_sequence}')
+
+        expected_months = expected.get('expected_recommended_months')
+        if expected_months:
+            by_slug = {rec['card'].slug: rec.get('recommended_month') for rec in applies}
+            for slug, expected_month in expected_months.items():
+                if slug not in by_slug:
+                    issues.append(
+                        f'Expected recommended_month for "{slug}" but card not recommended')
+                elif by_slug[slug] != expected_month:
+                    issues.append(
+                        f'Expected recommended_month {expected_month} for "{slug}", '
+                        f'got {by_slug[slug]}')
+
+        return issues
+
     def setup_test_data(self):
         """Set up references to existing data."""
         # Ensure test setup data exists

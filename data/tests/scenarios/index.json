@@ -1,6 +1,6 @@
 {
   "description": "Index of all scenario test files (informational — the loader globs *.json, so a missing entry here doesn't skip a file)",
-  "total_scenarios": 64,
+  "total_scenarios": 67,
   "files": [
     {
       "filename": "basic_profiles.json",
@@ -67,6 +67,12 @@
       "category": "credit_stackability",
       "scenario_count": 3,
       "description": "Stackability (A5): non-stackable credits count once per portfolio, stackable credits count per card, no-preference zeroes a credit"
+    },
+    {
+      "filename": "bonus_sequencing.json",
+      "category": "bonus_sequencing",
+      "scenario_count": 3,
+      "description": "Phase E: selection-aware bonus capacity and sequencing (_bonus_capacity_plan) — avoiding wasted selection, bonus-less cards winning on ongoing value, and multi-card sequencing order"
     }
   ]
 }

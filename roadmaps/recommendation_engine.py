@@ -154,6 +154,8 @@ class RecommendationEngine:
         # same dollars if windows overlapped).
         months_committed = 0.0
         deferred_applies = []
+        timeline = []
+        bonus_less_applies = []
         if new_card_actions:
             # An apply worth $0 or less is noise — never tell someone to
             # open a card that earns them nothing. (Selection-time
@@ -172,14 +174,102 @@ class RecommendationEngine:
                     months_committed += months
                     selected_applies.append(rec)
                 else:
+                    # Selection (_bonus_capacity_plan, via the valuation
+                    # sites) already zeroes signup_bonus_value for bonuses
+                    # that don't fit, so nothing with a positive bonus
+                    # should legitimately land here anymore — this loop is
+                    # now just a safety net. A positive bonus arriving here
+                    # means selection and this priority-ordered assembly
+                    # disagreed on what fits (e.g. differing sort order);
+                    # it's still deferred, but log it as unexpected.
+                    if float(rec.get('signup_bonus_value', 0)) > 0:
+                        logger.warning(
+                            f"Unexpected assembly-time deferral for {rec['card'].name}: "
+                            f"signup_bonus_value=${float(rec['signup_bonus_value']):.0f} "
+                            f"survived selection's capacity check but doesn't fit assembly's "
+                            f"running total — selection/display divergence.")
                     logger.debug(
                         f"Deferring {rec['card'].name}: bonus needs "
                         f"{months:.1f} months of spending, only "
                         f"{self.BONUS_CAPACITY_MONTHS - months_committed:.1f} left this year")
                     deferred_applies.append(rec)
             filtered_other_keeps_applies.extend(selected_applies)
-        
+
+            # Sequencing: recompute the capacity plan over the FINAL apply
+            # set so each apply's month offset reflects exactly what's
+            # being shown, not the possibly-larger candidate set Step 2 saw.
+            # Shrinking the set can only free up budget, never take it away
+            # (removing entries can't increase any prefix's committed
+            # total), so a bonus counted here was already counted upstream.
+            sequence_plan = self._bonus_capacity_plan(
+                [rec['card'] for rec in selected_applies])
+            if abs(sequence_plan['months_committed'] - months_committed) > 0.05:
+                logger.warning(
+                    f"Sequencing plan months_committed "
+                    f"({sequence_plan['months_committed']:.1f}) disagrees with "
+                    f"assembly's running total ({months_committed:.1f}).")
+
+            for rec in selected_applies:
+                entry = sequence_plan['by_card_id'].get(rec['card'].id)
+                is_bonus_less = (rec.get('bonus_deferred')
+                                 or not float(rec.get('signup_bonus_value', 0)) > 0)
+                if is_bonus_less:
+                    # No bonus budget consumed — "apply whenever" (a later
+                    # Companion-Pass-era phase may push these to chase next
+                    # year's bonus instead).
+                    rec['recommended_month'] = 0
+                    rec['bonus_months_needed'] = 0.0
+                    if rec.get('bonus_deferred') and entry and entry['counted']:
+                        # Self-heals on regenerate: the smaller final apply
+                        # set freed enough budget that this bonus would now
+                        # fit, but Step 2 already froze the display at $0
+                        # for this round (see Phase E risk notes).
+                        logger.warning(
+                            f"{rec['card'].name} shows bonus_deferred but the "
+                            f"final sequence plan counts its bonus — will "
+                            f"self-heal on the next regeneration.")
+                elif entry and entry['counted']:
+                    rec['recommended_month'] = int(round(entry['start_month']))
+                    rec['bonus_months_needed'] = round(entry['months'], 1)
+                else:
+                    # Shouldn't happen — a positive-bonus apply that
+                    # survived assembly but the recomputed plan says its
+                    # bonus doesn't fit. Treat like bonus-less rather than
+                    # crash; log for investigation.
+                    logger.warning(
+                        f"{rec['card'].name} has signup_bonus_value="
+                        f"${float(rec.get('signup_bonus_value', 0)):.0f} but the final "
+                        f"sequence plan doesn't count it — selection/display divergence.")
+                    rec['recommended_month'] = 0
+                    rec['bonus_months_needed'] = round(entry['months'], 1) if entry else 0.0
+
+            # Timeline: applies ascending by actual start_month, bonus-less
+            # last (they have no window to place on the timeline).
+            timeline_entries = []
+            for rec in selected_applies:
+                entry = sequence_plan['by_card_id'].get(rec['card'].id)
+                is_bonus_less = (rec.get('bonus_deferred')
+                                 or not float(rec.get('signup_bonus_value', 0)) > 0)
+                sort_key = (float('inf') if is_bonus_less
+                           else (entry['start_month'] if entry else float('inf')))
+                timeline_entries.append((sort_key, {
+                    'card_name': rec['card'].name,
+                    'recommended_month': rec.get('recommended_month', 0),
+                    'months_needed': rec.get('bonus_months_needed', 0.0),
+                    'bonus_counted': not is_bonus_less,
+                }))
+            timeline_entries.sort(key=lambda t: t[0])
+            timeline = [item for _, item in timeline_entries]
+            bonus_less_applies = [rec['card'].name for rec in selected_applies
+                                  if rec.get('bonus_deferred')]
+
         recommendations = filtered_other_keeps_applies + zero_fee_keeps
+
+        # Non-apply recs carry no sequencing fields.
+        for rec in recommendations:
+            if rec['action'] != 'apply':
+                rec['recommended_month'] = None
+                rec['bonus_months_needed'] = None
         
         # VALIDATION: Convert negative-value keeps to cancels
         for rec in recommendations:
@@ -214,6 +304,8 @@ class RecommendationEngine:
             'months_committed': round(months_committed, 1),
             'capacity_months': self.BONUS_CAPACITY_MONTHS,
             'deferred_applies': [rec['card'].name for rec in deferred_applies],
+            'timeline': timeline,
+            'bonus_less_applies': bonus_less_applies,
         }
         
         # NOTE: breakdowns are intentionally never stripped — every card's
@@ -355,6 +447,14 @@ class RecommendationEngine:
         portfolio_allocation = self._calculate_portfolio_allocation(held_cards)
         credit_allocation = self._allocate_portfolio_credits(held_cards)
 
+        # Bonus capacity, computed once over the final apply set so display
+        # agrees with selection: a bonus that didn't fit the 12-month budget
+        # shows $0 here too (see _bonus_capacity_plan). Stashed for Step 3's
+        # sequencing, which reuses this same computation.
+        apply_cards = [ca['card'] for ca in best_portfolio if ca['action'] == 'apply']
+        capacity_plan = self._bonus_capacity_plan(apply_cards)
+        self._last_capacity_plan = capacity_plan
+
         # Convert optimal portfolio to recommendations
         for card_action in best_portfolio:
             card = card_action['card']
@@ -378,6 +478,7 @@ class RecommendationEngine:
             multiplier = rewards_breakdown['reward_multiplier']
 
             eligibility_note = ''
+            bonus_deferred = False
             if action == 'apply':
                 signup_bonus_value = self._get_signup_bonus_value(card)
                 annual_fee_waived = card.metadata.get('annual_fee_waived_first_year', False)
@@ -387,6 +488,7 @@ class RecommendationEngine:
                 ongoing_value = annual_rewards - annual_fee
 
                 bonus_block = self._bonus_ineligibility_note(card)
+                capacity_entry = capacity_plan['by_card_id'].get(card.id)
                 if bonus_block:
                     # Issuer bonus rules zero the bonus for THIS user; no
                     # point modeling shift spending for a bonus that won't
@@ -395,6 +497,21 @@ class RecommendationEngine:
                     signup_bonus_value = 0
                     plan = {'items': [self._info_item(
                         'Signup bonus not counted', bonus_block)],
+                        'value_delta': 0.0, 'bonus_earnable': False}
+                elif (capacity_entry is not None and not capacity_entry['counted']
+                      and signup_bonus_value > 0):
+                    # Bonus is earnable but doesn't fit this year's 12-month
+                    # spending budget (selection already scored it this way —
+                    # see _bonus_capacity_plan). No bonus_shift items: we're
+                    # not chasing a bonus we're not counting, so the
+                    # reconciliation guard holds by construction.
+                    bonus_deferred = True
+                    signup_bonus_value = 0
+                    plan = {'items': [self._info_item(
+                        'Signup bonus deferred',
+                        "Doesn't fit this year's bonus capacity at your "
+                        "spending level — card recommended on ongoing value; "
+                        "earn the bonus next year")],
                         'value_delta': 0.0, 'bonus_earnable': False}
                 else:
                     plan = self._signup_bonus_plan(
@@ -433,7 +550,10 @@ class RecommendationEngine:
                                  f"(${rewards_breakdown['total_rewards']:.0f} annual rewards - {fee_text} "
                                  f"+ ${signup_bonus_value:.0f} signup bonus{shift_text})")
                 elif not plan['bonus_earnable']:
-                    why = eligibility_note or 'spending requirement unreachable'
+                    if bonus_deferred:
+                        why = "doesn't fit this year's bonus capacity at your spending level"
+                    else:
+                        why = eligibility_note or 'spending requirement unreachable'
                     reasoning = (f"Total estimated value: ${estimated_value:.0f} "
                                  f"(${annual_rewards:.0f} annual rewards - {fee_text}; "
                                  f"signup bonus not counted — {why})")
@@ -473,6 +593,7 @@ class RecommendationEngine:
                 'total_spending_on_card': rewards_breakdown.get('total_spending_on_card', 0),
                 'signup_bonus_value': signup_bonus_value,
                 'eligibility_note': eligibility_note,
+                'bonus_deferred': bonus_deferred,
                 'priority': card_action.get('priority', 1)
             })
 
@@ -504,6 +625,78 @@ class RecommendationEngine:
         if monthly <= 0:
             return float('inf')
         return requirement / monthly
+
+    def _bonus_capacity_plan(self, cards: List[CreditCard]) -> dict:
+        """Single capacity authority: which of these cards' signup bonuses
+        fit within BONUS_CAPACITY_MONTHS of the user's spending this year.
+
+        Reuses _get_signup_bonus_value and _bonus_months_needed — no second
+        source of truth. Bonuses with no spending requirement (months == 0)
+        are free: always counted, consume no budget. Bonuses with a
+        requirement are sorted by value density (bonus_value / months,
+        descending) — the right greedy heuristic for "budget of months,
+        maximize counted bonus dollars" — with a total-order tie-break
+        (bonus_value desc, then card.id) so equal-density fixtures can't
+        flap. All-or-nothing per bonus: walk the budget in that order, each
+        bonus either fits (counted, consuming months starting where the
+        previous counted bonus left off) or doesn't (uncounted). A bonus
+        needing infinite months (zero total spending) always falls out
+        uncounted.
+
+        Computed from the SET of candidate cards, not greedy add order, so
+        the same portfolio always yields the same counted/uncounted split
+        — and the walk order doubles as the sequencing order.
+
+        Returns:
+            by_card_id: {card.id: {'bonus_value', 'months', 'counted',
+                         'start_month'}} ('start_month' is None when
+                         uncounted)
+            months_committed: sum of counted bonuses' months
+            sequence: counted card ids in spend-consumption order
+        """
+        entries = [{
+            'card': card,
+            'bonus_value': self._get_signup_bonus_value(card),
+            'months': self._bonus_months_needed(card),
+        } for card in cards]
+
+        free = sorted((e for e in entries if e['months'] == 0),
+                      key=lambda e: e['card'].id)
+        metered = sorted(
+            (e for e in entries if e['months'] > 0),
+            key=lambda e: (-(e['bonus_value'] / e['months']),
+                           -e['bonus_value'], e['card'].id))
+
+        by_card_id = {}
+        sequence = []
+        for e in free:
+            by_card_id[e['card'].id] = {
+                'bonus_value': e['bonus_value'], 'months': 0.0,
+                'counted': True, 'start_month': 0.0,
+            }
+            sequence.append(e['card'].id)
+
+        committed = 0.0
+        for e in metered:
+            months = e['months']
+            if months != float('inf') and committed + months <= self.BONUS_CAPACITY_MONTHS:
+                by_card_id[e['card'].id] = {
+                    'bonus_value': e['bonus_value'], 'months': months,
+                    'counted': True, 'start_month': committed,
+                }
+                sequence.append(e['card'].id)
+                committed += months
+            else:
+                by_card_id[e['card'].id] = {
+                    'bonus_value': e['bonus_value'], 'months': months,
+                    'counted': False, 'start_month': None,
+                }
+
+        return {
+            'by_card_id': by_card_id,
+            'months_committed': committed,
+            'sequence': sequence,
+        }
 
     def _signup_bonus_plan(self, card: CreditCard, portfolio_allocation: list,
                            allocated_annual_spend: float) -> dict:
@@ -778,6 +971,14 @@ class RecommendationEngine:
                     continue
                 annual_rewards = self._calculate_smart_card_value(card, signup_bonus=False)
                 signup_bonus_value = self._get_signup_bonus_value(card)
+                # Pre-sort scoring keeps the full bonus — capacity is
+                # portfolio-relative and a solo card has the whole budget —
+                # except a defensive cap: a bonus that can't fit even alone
+                # shouldn't rank the card as if it will. The real,
+                # portfolio-relative capacity decision happens in the
+                # valuation sites below (_bonus_capacity_plan).
+                if self._bonus_months_needed(card) > self.BONUS_CAPACITY_MONTHS:
+                    signup_bonus_value = 0
                 annual_fee_waived = card.metadata.get('annual_fee_waived_first_year', False)
                 effective_fee = 0 if annual_fee_waived else float(card.annual_fee)
                 base_net_value = annual_rewards - effective_fee + signup_bonus_value
@@ -899,23 +1100,33 @@ class RecommendationEngine:
             total_value = 0
             total_fees = 0
             category_allocated = {}  # Track best rate per category
-            
+
+            # Capacity-aware bonus counting, same authority as
+            # _calculate_scenario_portfolio_value (see _bonus_capacity_plan)
+            # — this combination's applies may not be the same set the
+            # caller ultimately picks, so it's recomputed per combination.
+            apply_cards_in_combination = [cd['card'] for cd in card_combination
+                                          if cd['action'] == 'apply']
+            combination_capacity_plan = self._bonus_capacity_plan(apply_cards_in_combination)
+
             # Calculate credits/benefits value for each card
             for card_data in card_combination:
                 card = card_data['card']
-                
+
                 # Add annual fee
                 if card_data['action'] == 'apply' and card.metadata.get('annual_fee_waived_first_year', False):
                     # First year fee waived
                     pass
                 else:
                     total_fees += float(card.annual_fee)
-                
+
                 # Add signup bonus for new cards (strategy-weighted: this
                 # function only ranks combinations, it never reaches the UI)
+                # — only if it's counted within this combination's capacity.
                 if card_data['action'] == 'apply':
-                    signup_bonus = self._get_signup_bonus_value(card)
-                    total_value += signup_bonus * self.weights['signup_bonus_weight']
+                    entry = combination_capacity_plan['by_card_id'].get(card.id)
+                    if entry and entry['counted']:
+                        total_value += entry['bonus_value'] * self.weights['signup_bonus_weight']
 
                 # Track best reward rate per category across all cards
                 for reward_cat in card.reward_categories.active_on(self.today):
@@ -1139,19 +1350,30 @@ class RecommendationEngine:
         # Calculate total annual fees
         total_annual_fees = 0
         total_signup_bonuses = 0
-        
+
+        # Capacity-aware: only bonuses that fit this year's 12-month budget
+        # count toward the scenario's value — an over-budget bonus can't
+        # inflate a portfolio's ranking, only its ongoing value can win it
+        # a slot (see _bonus_capacity_plan).
+        apply_cards_in_scenario = [action['card'] for action in portfolio_cards
+                                   if action['action'] == 'apply']
+        capacity_plan = self._bonus_capacity_plan(apply_cards_in_scenario)
+
         for action in portfolio_cards:
             card = action['card']
             if action['action'] == 'apply' and card.metadata.get('annual_fee_waived_first_year', False):
                 total_annual_fees += 0  # First year waived
             else:
                 total_annual_fees += float(card.annual_fee)
-            
+
             # Add signup bonus for new cards (strategy-weighted: scenario
-            # values only rank portfolios, they're never displayed)
+            # values only rank portfolios, they're never displayed) — only
+            # if it's counted within this scenario's bonus capacity.
             if action['action'] == 'apply':
-                total_signup_bonuses += (self._get_signup_bonus_value(card)
-                                         * self.weights['signup_bonus_weight'])
+                entry = capacity_plan['by_card_id'].get(card.id)
+                if entry and entry['counted']:
+                    total_signup_bonuses += (entry['bonus_value']
+                                             * self.weights['signup_bonus_weight'])
 
         # Credits the user actually redeems count toward selection —
         # without this, a credit-heavy card loses the greedy race even
@@ -1242,9 +1464,16 @@ class RecommendationEngine:
             
             if efficiency_score > 0.1:  # Boost any somewhat relevant cards (lowered threshold)
                 card_annual_value = self._calculate_smart_card_value(card, signup_bonus=False) - float(card.annual_fee)
-                card_signup_value = ((self._get_signup_bonus_value(card)
-                                      * self.weights['signup_bonus_weight'])
-                                     if action['action'] == 'apply' else 0)
+                # Capacity-aware, same as the bonus sum above: an
+                # over-budget bonus must not inflate value through the
+                # efficiency boost either, or it partially defeats
+                # bonus-less competition (see _bonus_capacity_plan).
+                if action['action'] == 'apply':
+                    entry = capacity_plan['by_card_id'].get(card.id)
+                    card_signup_value = ((entry['bonus_value'] * self.weights['signup_bonus_weight'])
+                                         if entry and entry['counted'] else 0)
+                else:
+                    card_signup_value = 0
                 card_base_value = card_annual_value + card_signup_value
                 efficiency_boost = card_base_value * efficiency_score * 0.5  # 50% max boost for perfect efficiency
                 total_efficiency_boost += efficiency_boost
