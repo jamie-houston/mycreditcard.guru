@@ -433,6 +433,7 @@ Key modules:
   `_formatCreditValue()` shows the per-occurrence rate alongside the annual
   total for `times_per_year > 1` credits (e.g. "$7/mo = $84/yr") instead of
   just the raw per-occurrence value.
+- `cards/views.py` `credit_usage_view` (`GET`/`PUT` `/api/cards/credit-usage/`) — server-persisted `UserCreditUsage` rows, tracking which specific card benefits have been checked off as used in the current period (month, quarter, half, year). The period keys (e.g. `2026-07`, `2026-Q3`, `2026-H2`, `2026`) are derived dynamically on the server and client based on `times_per_year` (monthly, quarterly, semi-annual, annual). Checked off benefits are grouped separately in `profile.html` (`⚠️ Unused / Expiring Soon` vs. `✅ Used This Period`) and in the card modal for owned cards.
 - Roadmap sharing mirrors `UserSpendingProfile`'s privacy/`share_uuid`
   pattern (cards/models.py) but on `Roadmap` and **anon-capable** (a
   session-owned Current Roadmap is a first-class case; profile sharing

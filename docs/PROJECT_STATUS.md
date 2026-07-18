@@ -28,18 +28,12 @@ math) since they touch the same builder UI.
 - [x] **Phase I** — Roadmap analysis views: Cards × categories allocation
       matrix, first-year-vs-ongoing value panel, curated redemption
       guidance per card (2026-07-18).
+- [x] **Phase L** — Benefit/credit usage tracking: Current period check-offs
+      and expiring-soon grouping on profile and modal (2026-07-18).
 
 Detail archived — see pointers under "Where everything else went."
 
 ### Open
-- [ ] **Phase L — Benefit/credit usage tracking** Track which monthly/
-      quarterly credits were actually used this period. New
-      `UserCreditUsage` model (profile × `CardCredit` × period key derived
-      from `times_per_year` — `2026-07` / `2026-Q3` / `2026`), GET/PUT
-      endpoint cloning `credit_preferences_view`'s auth+anon pattern.
-      UI: this-period check-offs + "unused, expiring soon" grouping on
-      profile.html's credits section and the base.html card modal. No
-      engine impact. Sequence after Phase G (needs `offer_type`).
 - [ ] **Phase M — "Export for AI" (LLM doc export)** Button on profile +
       roadmap `#resultsHeader` generating a self-contained markdown doc —
       owned cards with rewards/credits/open dates, spending, persisted

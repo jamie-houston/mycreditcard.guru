@@ -827,6 +827,35 @@
                 }
             }
 
+            static async getCreditUsages() {
+                try {
+                    const response = await fetch(`${API_BASE}/cards/credit-usage/`);
+                    const data = await response.json();
+                    return data.usages || {};
+                } catch (error) {
+                    console.error('Error loading credit usages:', error);
+                    return {};
+                }
+            }
+
+            static async saveCreditUsages(usages) {
+                try {
+                    const response = await fetch(`${API_BASE}/cards/credit-usage/`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': getCookie('csrftoken')
+                        },
+                        body: JSON.stringify({ usages })
+                    });
+                    return response.ok;
+                } catch (error) {
+                    console.error('Error saving credit usages:', error);
+                    return false;
+                }
+            }
+
+
             // New methods for handling detailed user cards
             static async getUserCardsDetails() {
                 if (isAuthenticated) {
@@ -1301,6 +1330,41 @@
             rewardsSection.style.display = 'block';
         }
 
+        function getCurrentPeriodLabel(timesPerYear) {
+            const now = new Date();
+            const year = now.getFullYear();
+            const p = parseInt(timesPerYear || 1);
+            if (p === 12) {
+                const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+                return `${monthNames[now.getMonth()]} ${year}`;
+            } else if (p === 4) {
+                const quarter = Math.floor(now.getMonth() / 3) + 1;
+                return `Q${quarter} ${year}`;
+            } else if (p === 2) {
+                const half = now.getMonth() < 6 ? "H1" : "H2";
+                return `${half} ${year}`;
+            } else {
+                return `${year}`;
+            }
+        }
+
+        function getPeriodKeyJS(timesPerYear) {
+            const now = new Date();
+            const year = now.getFullYear();
+            const p = parseInt(timesPerYear || 1);
+            if (p === 12) {
+                return `${year}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+            } else if (p === 4) {
+                const quarter = Math.floor(now.getMonth() / 3) + 1;
+                return `${year}-Q${quarter}`;
+            } else if (p === 2) {
+                const half = now.getMonth() < 6 ? 1 : 2;
+                return `${year}-H${half}`;
+            } else {
+                return `${year}`;
+            }
+        }
+
         // Formats a per-occurrence credit value with its frequency and the
         // resulting annual total, e.g. "$7/mo = $84/yr" instead of just "$7".
         function _formatCreditValue(value, timesPerYear, currency) {
@@ -1356,6 +1420,9 @@
             // the recommendation engine read — a credit only counts toward
             // value if the user has checked it here or on /profile/.
             const preferences = await UserDataManager.getCreditPreferences();
+            const userCards = await UserDataManager.getCards();
+            const isOwned = currentModalCard ? userCards.includes(currentModalCard.id) : false;
+            const usages = isOwned ? await UserDataManager.getCreditUsages() : {};
 
             const creditsHtml = activeCredits.map(credit => {
                 const value = parseFloat(credit.value || 0);
@@ -1397,6 +1464,22 @@
                 }
 
                 const isUsed = preferences[slug] === true;
+                const isUsedThisPeriod = usages[credit.id] === true;
+
+                let usageTrackingHtml = '';
+                if (isUsed && isOwned) {
+                    const periodLabel = getCurrentPeriodLabel(credit.times_per_year);
+                    usageTrackingHtml = `
+                        <div class="modal-credit-usage-row" style="margin-top: 6px; display: flex; align-items: center; gap: 6px; font-size: 12px;">
+                            <input type="checkbox" id="modalCreditPeriodUse_${credit.id}" ${isUsedThisPeriod ? 'checked' : ''}
+                                   onchange="toggleModalCreditUsagePeriod(${credit.id}, this.checked)"
+                                   style="cursor: pointer;">
+                            <label for="modalCreditPeriodUse_${credit.id}" style="cursor: pointer; color: var(--muted); margin: 0; font-weight: normal;">
+                                Used this period (${periodLabel})
+                            </label>
+                        </div>
+                    `;
+                }
 
                 return `
                     <div class="modal-credit-item${isUsed ? '' : ' modal-credit-unused'}">
@@ -1411,6 +1494,7 @@
                             </label>
                             ${creditDescription ? `<div class="modal-credit-description">${creditDescription}</div>` : ''}
                             ${!isUsed ? '<div class="modal-credit-note">Not counted — you said you don\'t use this</div>' : ''}
+                            ${usageTrackingHtml}
                         </div>
                         <div class="modal-credit-value">${isUsed ? valueDisplay : '$0'}</div>
                     </div>
@@ -1431,6 +1515,21 @@
                 console.error('Error updating credit preference:', error);
             }
         }
+
+        async function toggleModalCreditUsagePeriod(creditId, checked) {
+            try {
+                await UserDataManager.saveCreditUsages({ [creditId]: checked });
+                if (currentModalCard) {
+                    await populateCardCredits(currentModalCard.credits || []);
+                }
+                if (typeof loadCreditsProfile === 'function') {
+                    await loadCreditsProfile();
+                }
+            } catch (error) {
+                console.error('Error updating credit usage period:', error);
+            }
+        }
+
 
         async function updateModalOwnershipButton(cardId) {
             try {

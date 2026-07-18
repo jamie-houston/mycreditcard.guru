@@ -241,6 +241,23 @@ class CardCredit(models.Model):
         """Calculate the total annual value of this credit"""
         return float(self.value) * self.times_per_year
 
+    def get_period_key(self, date_obj=None):
+        """Derive the period key based on times_per_year and a date"""
+        from datetime import date
+        if date_obj is None:
+            date_obj = date.today()
+        year = date_obj.year
+        if self.times_per_year == 12:
+            return f"{year}-{date_obj.month:02d}"
+        elif self.times_per_year == 4:
+            quarter = (date_obj.month - 1) // 3 + 1
+            return f"{year}-Q{quarter}"
+        elif self.times_per_year == 2:
+            half = 1 if date_obj.month <= 6 else 2
+            return f"{year}-H{half}"
+        else:
+            return f"{year}"
+
 
 class UserSpendingProfile(models.Model):
     PRIVACY_CHOICES = [
@@ -414,3 +431,22 @@ class UserSpendingCreditPreference(models.Model):
     
     def __str__(self):
         return f"{self.profile} - {self.spending_credit.display_name}: {self.values_credit}"
+
+
+class UserCreditUsage(models.Model):
+    """Tracks which card credits were actually used in a given period (month, quarter, half, year)"""
+    profile = models.ForeignKey(UserSpendingProfile, on_delete=models.CASCADE, related_name='credit_usages')
+    card_credit = models.ForeignKey(CardCredit, on_delete=models.CASCADE, related_name='usages')
+    period_key = models.CharField(
+        max_length=20,
+        help_text="Derived from times_per_year: YYYY-MM, YYYY-QX, YYYY-HY, or YYYY"
+    )
+    used = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ['profile', 'card_credit', 'period_key']
+
+    def __str__(self):
+        return f"{self.profile} - Credit {self.card_credit_id} ({self.period_key}): {self.used}"

@@ -11,7 +11,8 @@ from django.utils import timezone
 from .models import (
     Issuer, RewardType, SpendingCategory, CreditCard,
     UserSpendingProfile, SpendingCredit, UserCard,
-    UserSpendingCreditPreference, ProfileEntity
+    UserSpendingCreditPreference, ProfileEntity, CardCredit,
+    UserCreditUsage
 )
 from .serializers import (
     IssuerSerializer, RewardTypeSerializer, SpendingCategorySerializer,
@@ -173,6 +174,74 @@ def credit_preferences_view(request):
         )
 
     return Response({'preferences': _serialize_credit_preferences(profile)})
+
+
+def _serialize_credit_usages(profile):
+    from datetime import date
+    today = date.today()
+    usages_qs = profile.credit_usages.select_related('card_credit').all()
+    usages_dict = {}
+    for usage in usages_qs:
+        current_period = usage.card_credit.get_period_key(today)
+        if usage.period_key == current_period:
+            usages_dict[str(usage.card_credit_id)] = usage.used
+    return usages_dict
+
+
+@api_view(['GET', 'PUT'])
+def credit_usage_view(request):
+    """Get or set which card credits the user has used in the current period (auth + anon via session)."""
+    if request.method == 'GET':
+        if request.user.is_authenticated:
+            profile = UserSpendingProfile.objects.filter(user=request.user).first()
+        else:
+            session_key = request.session.session_key
+            profile = (
+                UserSpendingProfile.objects.filter(session_key=session_key).first()
+                if session_key else None
+            )
+
+        if not profile:
+            return Response({'usages': {}})
+
+        return Response({'usages': _serialize_credit_usages(profile)})
+
+    # PUT
+    usages = request.data.get('usages')
+    if not isinstance(usages, dict):
+        return Response(
+            {'error': 'usages must be an object of {card_credit_id: bool}'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    if request.user.is_authenticated:
+        profile, _created = UserSpendingProfile.objects.get_or_create(user=request.user)
+    else:
+        if not request.session.session_key:
+            request.session.create()
+        profile, _created = UserSpendingProfile.objects.get_or_create(
+            session_key=request.session.session_key
+        )
+
+    from datetime import date
+    today = date.today()
+    
+    valid_credits = {str(c.id): c for c in CardCredit.objects.filter(is_active=True)}
+    for credit_id_str, used_val in usages.items():
+        credit = valid_credits.get(credit_id_str)
+        if not credit:
+            continue
+        
+        period_key = credit.get_period_key(today)
+        UserCreditUsage.objects.update_or_create(
+            profile=profile,
+            card_credit=credit,
+            period_key=period_key,
+            defaults={'used': bool(used_val)}
+        )
+
+    return Response({'usages': _serialize_credit_usages(profile)})
+
 
 
 

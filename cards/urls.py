@@ -23,6 +23,7 @@ urlpatterns = [
     path('profile/privacy/update/', views.update_profile_privacy, name='update-profile-privacy'),
     path('profile/shared/<uuid:share_uuid>/', views.shared_profile_data_view, name='shared-profile-data'),
     path('credit-preferences/', views.credit_preferences_view, name='credit-preferences'),
+    path('credit-usage/', views.credit_usage_view, name='credit-usage'),
 
     # Quick recommendations
     path('recommendations/preview/', views.card_recommendations_preview, name='recommendations-preview'),
