@@ -17,8 +17,12 @@ from .serializers import (
     IssuerSerializer, RewardTypeSerializer, SpendingCategorySerializer,
     CreditCardSerializer, CreditCardListSerializer, UserSpendingProfileSerializer,
     CreateSpendingProfileSerializer, SpendingCreditSerializer, UserCardSerializer,
-    UserCardCreateUpdateSerializer, ProfileEntitySerializer
+    UserCardCreateUpdateSerializer, ProfileEntitySerializer,
+    UserSpendingCreditPreferenceSerializer, CategoryDetailSerializer,
+    CategoryWithRewardsSerializer, RecommendationPreviewSerializer,
+    SharedProfileDataSerializer
 )
+
 
 
 class IssuerListView(generics.ListAPIView):
@@ -116,10 +120,7 @@ def spending_profile_view(request):
 
 
 def _serialize_credit_preferences(profile):
-    return {
-        pref.spending_credit.slug: pref.values_credit
-        for pref in profile.spending_credit_preferences.select_related('spending_credit')
-    }
+    return UserSpendingCreditPreferenceSerializer(profile).data
 
 
 @api_view(['GET', 'PUT'])
@@ -172,6 +173,7 @@ def credit_preferences_view(request):
         )
 
     return Response({'preferences': _serialize_credit_preferences(profile)})
+
 
 
 @api_view(['GET'])
@@ -244,7 +246,6 @@ def card_search_view(request):
     serializer = CreditCardListSerializer(queryset, many=True)
     return Response(serializer.data)
 
-
 @api_view(['GET'])
 def category_detail_view(request, category_slug):
     """Get detailed information about a spending category including top reward rates and cards"""
@@ -252,44 +253,24 @@ def category_detail_view(request, category_slug):
         from cards.models import SpendingCategory, RewardCategory
         from django.db.models import Max
         
-        # Get the category
         category = get_object_or_404(SpendingCategory, slug=category_slug)
         
-        # Get all reward categories for this spending category with reward rate > 1%
         reward_categories = RewardCategory.objects.filter(
             category=category,
             is_active=True,
             reward_rate__gt=1.0
         ).select_related('card', 'card__issuer').order_by('-reward_rate')
         
-        # Get top reward rate for this category
         top_rate = reward_categories.aggregate(max_rate=Max('reward_rate'))['max_rate'] or 0
         
-        # Build response
-        category_data = {
-            'id': category.id,
-            'name': category.name,
-            'display_name': category.display_name,
-            'description': category.description,
-            'icon': category.icon,
-            'slug': category.slug,
-            'sort_order': category.sort_order,
-            'top_reward_rate': float(top_rate),
-            'cards_with_rewards': [
-                {
-                    'id': rc.card.id,
-                    'name': rc.card.name,
-                    'issuer': rc.card.issuer.name,
-                    'reward_rate': float(rc.reward_rate),
-                    'annual_fee': float(rc.card.annual_fee),
-                    'max_annual_spend': float(rc.max_annual_spend) if rc.max_annual_spend else None,
-                    'signup_bonus_amount': rc.card.signup_bonus_amount
-                }
-                for rc in reward_categories
-            ]
-        }
-        
-        return Response(category_data)
+        serializer = CategoryDetailSerializer(
+            category,
+            context={
+                'top_rate': float(top_rate),
+                'reward_categories': reward_categories
+            }
+        )
+        return Response(serializer.data)
         
     except Exception as e:
         return Response(
@@ -297,45 +278,14 @@ def category_detail_view(request, category_slug):
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
 
-
 @api_view(['GET'])
 def categories_with_rewards_view(request):
     """Get all categories with their top reward rates"""
     try:
-        from cards.models import SpendingCategory, RewardCategory
-        from django.db.models import Max
-        
-        # Get all categories with their top reward rates
+        from cards.models import SpendingCategory
         categories = SpendingCategory.objects.all().order_by('sort_order', 'name')
-        
-        categories_data = []
-        for category in categories:
-            # Get top reward rate for this category
-            top_rate = RewardCategory.objects.filter(
-                category=category,
-                is_active=True
-            ).aggregate(max_rate=Max('reward_rate'))['max_rate'] or 0
-            
-            # Count cards with rewards > 1% for this category
-            cards_count = RewardCategory.objects.filter(
-                category=category,
-                is_active=True,
-                reward_rate__gt=1.0
-            ).count()
-            
-            categories_data.append({
-                'id': category.id,
-                'name': category.name,
-                'display_name': category.display_name or category.name,
-                'description': category.description,
-                'icon': category.icon,
-                'slug': category.slug,
-                'sort_order': category.sort_order,
-                'top_reward_rate': float(top_rate),
-                'cards_with_rewards_count': cards_count
-            })
-        
-        return Response(categories_data)
+        serializer = CategoryWithRewardsSerializer(categories, many=True)
+        return Response(serializer.data)
         
     except Exception as e:
         return Response(
@@ -357,20 +307,8 @@ def card_recommendations_preview(request):
     if serializer.is_valid():
         try:
             recommendations = serializer.generate_recommendations()
-            return Response({
-                'recommendations': [
-                    {
-                        'card_id': rec['card'].id,
-                        'card_slug': rec['card'].slug,
-                        'card_name': str(rec['card']),
-                        'action': rec['action'],
-                        'estimated_rewards': float(rec['estimated_rewards']),
-                        'reasoning': rec['reasoning'],
-                        'priority': rec['priority']
-                    }
-                    for rec in recommendations
-                ]
-            })
+            response_serializer = RecommendationPreviewSerializer({'recommendations': recommendations})
+            return Response(response_serializer.data)
         except Exception as e:
             return Response(
                 {'error': f'Failed to generate recommendations: {str(e)}'}, 
@@ -546,101 +484,8 @@ def shared_profile_data_view(request, share_uuid):
             privacy_setting='public'
         )
         
-        # Get the profile data using the existing serializer
-        from .serializers import UserSpendingProfileSerializer
-        profile_data = UserSpendingProfileSerializer(profile).data
-        
-        # Add profile owner information
-        profile_data['profile_owner'] = profile.user.username if profile.user else 'Anonymous User'
-        
-        # Add portfolio summary information (without revealing specific cards)
-        if profile.user:
-            user_cards = profile.user.owned_cards.filter(closed_date__isnull=True)
-            total_cards = user_cards.count()
-            total_annual_fees = sum(float(card.card.annual_fee or 0) for card in user_cards)
-            
-            profile_data['portfolio_summary'] = {
-                'total_cards': total_cards,
-                'total_annual_fees': total_annual_fees,
-                'has_cards': total_cards > 0
-            }
-        else:
-            profile_data['portfolio_summary'] = {
-                'total_cards': 0,
-                'total_annual_fees': 0,
-                'has_cards': False
-            }
-        
-        # Generate card-to-category recommendations based on actual owned cards
-        card_recommendations = []
-        
-        if profile.user:
-            user_cards = profile.user.owned_cards.filter(closed_date__isnull=True)
-            spending_amounts = profile.spending_amounts.all().order_by('-monthly_amount')
-            
-            # Create a mapping of categories to best cards
-            for spending in spending_amounts:
-                if float(spending.monthly_amount) < 50:  # Skip very small spending categories
-                    continue
-                    
-                category_name = spending.category.display_name
-                category_slug = spending.category.slug
-                monthly_amount = float(spending.monthly_amount)
-                
-                # Determine best card for this category based on Jamie's actual cards
-                best_card = None
-                reward_rate = "1x"
-                
-                # Check each card for this category
-                for user_card in user_cards:
-                    card = user_card.card
-                    
-                    # Check if this card has rewards for this category
-                    has_category = card.reward_categories.filter(
-                        category__slug=category_slug
-                    ).exists()
-                    
-                    if has_category:
-                        reward_cat = card.reward_categories.filter(
-                            category__slug=category_slug
-                        ).first()
-                        if reward_cat:
-                            best_card = card.name
-                            reward_rate = f"{reward_cat.reward_rate}x"
-                            break
-                
-                # If no specific category match, assign based on card specialties
-                if not best_card:
-                    if category_slug in ['dining']:
-                        best_card = "Chase Sapphire Reserve"
-                        reward_rate = "3x"
-                    elif category_slug in ['airlines', 'hotels', 'rental_cars']:
-                        best_card = "Chase Sapphire Reserve"
-                        reward_rate = "3x" 
-                    elif category_slug in ['in_store_grocery', 'groceries']:
-                        best_card = "Blue Cash Preferred Card from American Express"
-                        reward_rate = "6x"
-                    elif category_slug in ['gas']:
-                        best_card = "Blue Cash Preferred Card from American Express"
-                        reward_rate = "3x"
-                    elif category_slug in ['streaming']:
-                        best_card = "Blue Cash Preferred Card from American Express"
-                        reward_rate = "6x"
-                    else:
-                        best_card = "Chase Sapphire Reserve"
-                        reward_rate = "1x"
-                
-                card_recommendations.append({
-                    'category': category_name,
-                    'monthly_spending': monthly_amount,
-                    'recommended_card': best_card,
-                    'reward_rate': reward_rate,
-                    'percentage': f"${monthly_amount:,.0f}/month"
-                })
-        
-        profile_data['card_recommendations'] = card_recommendations
-        
-        return Response(profile_data)
+        serializer = SharedProfileDataSerializer(profile)
+        return Response(serializer.data)
         
     except (ValueError, UserSpendingProfile.DoesNotExist):
         return Response(

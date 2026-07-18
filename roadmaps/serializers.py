@@ -269,3 +269,118 @@ class GenerateRoadmapSerializer(serializers.Serializer):
         roadmap.delete()
         
         return recommendations
+
+
+class RecommendationItemCardSerializer(serializers.Serializer):
+    id = serializers.IntegerField(source='card.id')
+    name = serializers.CharField(source='card.name')
+    issuer = serializers.CharField(source='card.issuer.name')
+    annual_fee = serializers.FloatField(source='card.annual_fee')
+    effective_annual_fee = serializers.SerializerMethodField()
+    annual_fee_waived_first_year = serializers.SerializerMethodField()
+    signup_bonus_amount = serializers.IntegerField(source='card.signup_bonus_amount')
+    signup_bonus_type = serializers.SerializerMethodField()
+    signup_spending_requirement = serializers.SerializerMethodField()
+    signup_time_limit_months = serializers.SerializerMethodField()
+    apply_url = serializers.CharField(source='card.apply_url')
+    redemption = serializers.SerializerMethodField()
+
+    def get_effective_annual_fee(self, obj):
+        card = obj['card']
+        action = obj['action']
+        if action == 'apply' and card.metadata.get('annual_fee_waived_first_year', False):
+            return 0.0
+        return float(card.annual_fee)
+
+    def get_annual_fee_waived_first_year(self, obj):
+        card = obj['card']
+        return card.metadata.get('annual_fee_waived_first_year', False)
+
+    def get_signup_bonus_type(self, obj):
+        card = obj['card']
+        return card.signup_bonus_type.name if card.signup_bonus_type else 'points'
+
+    def get_signup_spending_requirement(self, obj):
+        card = obj['card']
+        return float((card.metadata.get('signup_bonus') or {}).get('spending_requirement') or 0)
+
+    def get_signup_time_limit_months(self, obj):
+        card = obj['card']
+        return (card.metadata.get('signup_bonus') or {}).get('time_limit_months')
+
+    def get_redemption(self, obj):
+        from .redemption import redemption_guidance_for
+        card = obj['card']
+        return redemption_guidance_for(card)
+
+
+
+class RecommendationItemSerializer(serializers.Serializer):
+    card = serializers.SerializerMethodField()
+    action = serializers.CharField()
+    estimated_rewards = serializers.FloatField()
+    first_year_value = serializers.SerializerMethodField()
+    ongoing_value = serializers.SerializerMethodField()
+    reward_value_multiplier = serializers.SerializerMethodField()
+    valuation_note = serializers.CharField(required=False, default='')
+    reasoning = serializers.CharField()
+    rewards_breakdown = serializers.ListField(child=serializers.DictField(), required=False, default=list)
+    total_spending_on_card = serializers.SerializerMethodField()
+    signup_bonus_value = serializers.SerializerMethodField()
+    eligibility_note = serializers.CharField(required=False, default='')
+    bonus_deferred = serializers.BooleanField(required=False, default=False)
+    recommended_month = serializers.IntegerField(required=False, allow_null=True)
+    bonus_months_needed = serializers.FloatField(required=False, allow_null=True)
+    priority = serializers.IntegerField()
+    apply_as = serializers.DictField(required=False)
+
+    def get_card(self, obj):
+        return RecommendationItemCardSerializer(obj).data
+
+    def get_first_year_value(self, obj):
+        return float(obj.get('first_year_value', obj['estimated_rewards']))
+
+    def get_ongoing_value(self, obj):
+        return float(obj.get('ongoing_value', obj['estimated_rewards']))
+
+    def get_reward_value_multiplier(self, obj):
+        return float(obj.get('reward_value_multiplier', 0.01))
+
+    def get_total_spending_on_card(self, obj):
+        return float(obj.get('total_spending_on_card', 0))
+
+    def get_signup_bonus_value(self, obj):
+        return float(obj.get('signup_bonus_value', 0))
+
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+        if 'apply_as' not in instance:
+            ret.pop('apply_as', None)
+        return ret
+
+
+class PortfolioSummarySerializer(serializers.Serializer):
+    total_annual_fees = serializers.FloatField(required=False, default=0.0)
+    total_portfolio_rewards = serializers.FloatField(required=False, default=0.0)
+    net_portfolio_value = serializers.FloatField(required=False, default=0.0)
+    category_optimization = serializers.DictField(required=False, default=dict)
+    category_allocation = serializers.ListField(child=serializers.DictField(), required=False, default=list)
+    card_count = serializers.IntegerField(required=False, default=0)
+    total_credits_value = serializers.FloatField(required=False, default=0.0)
+    total_annual_spending = serializers.FloatField(required=False, default=0.0)
+    bonus_capacity = serializers.DictField(required=False, default=dict)
+
+
+class RoadmapRecommendationResponseSerializer(serializers.Serializer):
+    recommendations = RecommendationItemSerializer(many=True)
+    total_estimated_rewards = serializers.SerializerMethodField()
+    portfolio_summary = serializers.SerializerMethodField()
+
+    def get_total_estimated_rewards(self, obj):
+        recommendations = obj.get('recommendations', [])
+        return sum(float(rec['estimated_rewards']) for rec in recommendations)
+
+    def get_portfolio_summary(self, obj):
+        recommendations = obj.get('recommendations', [])
+        portfolio_summary = recommendations[0].get('portfolio_summary', {}) if recommendations else {}
+        return PortfolioSummarySerializer(portfolio_summary).data
