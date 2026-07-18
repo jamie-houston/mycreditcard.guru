@@ -12,34 +12,29 @@ Last updated: 2026-07-17
 E–I planned in `.claude/plans/look-at-any-outstanding-wild-wirth.md`;
 J–M planned in `.claude/plans/plan-out-the-following-sharded-nest.md`
 (scoping decisions with Jamie, 2026-07-17). Recommended order:
-**E (finish) → F → J → K → G → L → M → I** — engine work first, L after G
+**E (done) → F → J → K → G → L → M → I** — engine work first, L after G
 (needs G's `CardCredit.offer_type` to tell coupon-book credits from
 always-on perks), I last so analysis views can use program-aware
 valuations.
 
-- [ ] **Phase E — Engine: selection-aware bonus capacity & sequencing**
-      Make the greedy optimizer bonus-capacity-aware during selection (not
-      just at final assembly), then layer in sequencing/timing decisions.
-      Lays the timing rails for the Southwest Companion Pass use case
-      (CP modeling itself is a follow-up, not in E).
-      **Plan: [PLAN_PHASE_E_BONUS_SEQUENCING.md](PLAN_PHASE_E_BONUS_SEQUENCING.md)**
-      All 6 steps done (2026-07-17): `_bonus_capacity_plan`, all three
-      capacity-aware valuation sites, bonus-less display pathway, sequencing
-      annotations + safety-net assembly, expectation-schema tests (3 new
-      `bonus_sequencing.json` scenarios, 67/67 sweep green), the API
-      payload (`recommended_month`/`bonus_deferred`/`bonus_months_needed`,
-      `bonus_capacity.timeline`, live-POST `generated_at`), and frontend
-      timing labels (`static/js/roadmap-results.js` `_roadmapTimingLabel`,
-      Apply-section sort, WHEN stat, reworked capacity note) with a
-      framework-free Node smoke test (`scripts/test_roadmap_results.js`)
-      standing in for a manual browser pass, per Jamie's call this session.
-      **Remaining:** an actual browser walkthrough next time this page is
-      touched (checklist in `docs/MANUAL_TEST_PLAN.md`), then doc archival.
+- [x] **Phase E — Engine: selection-aware bonus capacity & sequencing**
+      Made the greedy optimizer bonus-capacity-aware during selection (not
+      just at final assembly), then layered in sequencing/timing decisions.
+      All 6 steps done (2026-07-17): `_bonus_capacity_plan`, capacity-aware
+      valuation, bonus-less display pathway, sequencing annotations, API
+      payload (`recommended_month`/`bonus_deferred`/`bonus_capacity.timeline`),
+      and frontend timing labels. Archived to mybrain `Requirements/Complete/
+      PLAN_PHASE_E_BONUS_SEQUENCING_complete.md`. The one open item — a real
+      browser walkthrough (skipped this session per Jamie's call in favor of
+      `scripts/test_roadmap_results.js`) — lives on in the operational to-do
+      below, not blocking archival.
 - [ ] **Phase F — Cleanup: ownership consolidation & line-item polish**
       Consolidate `users/` and `cards/` ownership endpoints onto `cards/`
       (soft-close semantics; stop hard-deleting eligibility history). Fix
       duplicate `UserCardSerializer` definition bug. Polish $0 line-item
       filtering and negative `bonus_shift` grouping.
+      **Plan: [PLAN_PHASE_F_OWNERSHIP_CLEANUP.md](PLAN_PHASE_F_OWNERSHIP_CLEANUP.md)**
+      (F1–F5 breakdown, recommended order F1→F3→F4→F2→F5, 2026-07-17).
 - [ ] **Phase G — Card data & ownership admin** Add `offer_type` choices
       to `CardCredit`, expose `bonus_earned_date` + new bonus-override field
       in profile.html, add renewal-date tracking to card dashboard.
@@ -102,6 +97,13 @@ valuations.
 - [ ] **Manual browser passes** — code has shipped but nothing's been
       eyeballed in a real browser (Jamie runs the dev server himself).
       Checklists already written in `docs/MANUAL_TEST_PLAN.md`:
+  - [ ] Phase E timing labels (`static/js/roadmap-results.js`
+        `_roadmapTimingLabel`) on live generation, reload-restore, and the
+        shared read-only page — check "Apply in ~N months (Mon YYYY)"
+        arithmetic against `generated_at`, the Apply-section sort, and the
+        reworked capacity note (sequenced timeline + deferred/bonus-less
+        sentences). Skipped in favor of the automated
+        `scripts/test_roadmap_results.js` smoke test, 2026-07-17.
   - [ ] Phase A credit-preferences UI (`index.html`/`profile.html`
         checkbox wiring, grey-out + "counted once" visuals for
         non-stackable credits)
@@ -149,6 +151,9 @@ Baseline as of 2026-07-15: 103 standard tests green, 67/67 scenario sweep,
 - **Full Phase A/B/C design + bug-fix log** (benefit preferences/
   stackability, roadmap persistence, roadmap sharing) → mybrain
   `Requirements/Complete/PLAN_BENEFITS_AND_ROADMAP_PERSISTENCE_complete.md`
+- **Full Phase E design + step-by-step progress log** (selection-aware
+  bonus capacity & sequencing) → mybrain
+  `Requirements/Complete/PLAN_PHASE_E_BONUS_SEQUENCING_complete.md`
 - **Feature backlog / future ideas** → mybrain
   `Requirements/Backlog/Review.md`
 - **Architecture, working rules** → `CLAUDE.md` (this repo)

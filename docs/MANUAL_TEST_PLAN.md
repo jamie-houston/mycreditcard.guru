@@ -150,8 +150,9 @@ section's sort by `(recommended_month, priority)`, the new WHEN stat on
 each apply card, and the reworked capacity note above the summary table.
 Not walked in a browser this session (Jamie's call — automated coverage in
 `scripts/test_roadmap_results.js` stood in for it instead); worth a real
-pass next time this page is touched. See `docs/PLAN_PHASE_E_BONUS_SEQUENCING.md`
-for the engine side.
+pass next time this page is touched. See mybrain
+`Requirements/Complete/PLAN_PHASE_E_BONUS_SEQUENCING_complete.md` for the
+engine side (archived — Phase E's code is done).
 
 1. Generate a roadmap with several apply recommendations spanning more than
    one bonus-capacity window (e.g. Jamie's real spending profile with a
