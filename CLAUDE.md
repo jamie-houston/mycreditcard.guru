@@ -50,6 +50,11 @@ Three Django apps: `cards/` (card database, spending profiles, ownership),
 `roadmaps/` (recommendation engine + API), `users/` (auth via allauth,
 preferences). Anonymous users work via session keys.
 
+Frontend JavaScript:
+- Template-specific JavaScript is extracted from Django templates into static files located in `static/js/pages/` (e.g., `cards.js`, `roadmap.js`, `profile.js`, `shared-profile.js`, `shared-roadmap.js`, `issuers.js`, `categories.js`, `category-detail.js`) and `static/js/base.js` for global scripts.
+- Templates import these using `{% static 'js/...' %}`.
+- Any dynamic context values (e.g., `share_uuid`) are declared globally inline prior to loading the external scripts.
+
 Key modules:
 
 - `roadmaps/recommendation_engine.py` — the engine. Portfolio selection

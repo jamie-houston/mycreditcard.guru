@@ -78,15 +78,15 @@ Detail archived — see pointers under "Where everything else went."
       + `shared_profile.html`); standardized the JS-generated "Local Mode"
       badge to the plain `#5C6675` style (no emoji) while touching the
       modal. Verified: `node scripts/test_roadmap_results.js` (28/28),
-      `venv/bin/python manage.py test` (174/174), full scenario sweep clean,
+      `venv/bin/python manage.py test` (178/178), full scenario sweep clean,
       `manage.py check` clean. **Phase 4 (full inline-`<script>` extraction
-      into `static/js/pages/*.js`) deliberately deferred** — larger blast
-      radius, needs a manual browser pass per template; not started. CSS
-      reorg / CSS-framework adoption remain out of scope (recommendation
+      into `static/js/pages/*.js` and `static/js/base.js`) completed** on
+      2026-07-19. Extracted script blocks from all HTML templates and
+      updated template files. Verified via Django test suite (all 178 tests
+      passed). CSS reorg / CSS-framework adoption remain out of scope (recommendation
       only). Detail: `docs/plans/phase-frontend-cleanup.md`. **Still
-      needed: the Phase 1–3 manual browser checklists** (toast/escaping,
-      ownership toggle + re-filter, modal + stat grid rendering) — add to
-      the manual-passes list below.
+      needed: Phase 1-4 manual browser checklists** — add to the manual-passes
+      list below.
 - [ ] **Standardize Card Metadata & Rule Representation**
       Implement validation schemas (e.g. via Pydantic or Django JSON schemas) for `CreditCard.metadata` to prevent typos (like `once_per_life_time`) during imports. Refactor the static `ISSUER_RULES` dict in `roadmaps/eligibility.py` into structured classes (`BaseIssuerRule`, `WindowRule`, etc.) to plug in velocity limits cleanly.
 - [ ] **Decouple Test Suite from Database Operations**
@@ -97,7 +97,7 @@ Detail archived — see pointers under "Where everything else went."
 - [ ] **Manual browser passes** — code has shipped but nothing's been
       eyeballed in a real browser (Jamie runs the dev server himself).
       Checklists already written in `docs/MANUAL_TEST_PLAN.md`:
-  - [ ] Frontend cleanup Phases 1–3 (`docs/plans/phase-frontend-cleanup.md`)
+  - [ ] Frontend cleanup Phases 1–4 (`docs/plans/phase-frontend-cleanup.md`)
         — P1: `/roadmap/` entity name with an apostrophe still escapes in
         the "as {name}" label; `/cards/`, `/profile/` a toast still appears
         and clears; `/categories/`, `/cards/` ownership filter reflects
@@ -107,7 +107,9 @@ Detail archived — see pointers under "Where everything else went."
         flow still works; console clean on both. P3: `/roadmap/` and
         `/cards/` ownership modal opens/renders/submits, each page's
         positioning unaffected; `/profile/` and a shared-profile URL — 4
-        stat tiles render correct numbers.
+        stat tiles render correct numbers. P4: Verify that all pages load
+        properly with externalized scripts, AJAX actions (toggles, preferences,
+        saving) succeed, and the browser console has zero script errors.
   - [ ] Phase E timing labels (`static/js/roadmap-results.js`
         `_roadmapTimingLabel`) on live generation, reload-restore, and the
         shared read-only page — check "Apply in ~N months (Mon YYYY)"

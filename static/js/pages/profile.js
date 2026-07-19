@@ -1,0 +1,1472 @@
+function togglePrivacySettings() {
+    const panel = document.getElementById('privacySettingsPanel');
+    panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+}
+
+document.addEventListener('DOMContentLoaded', async function() {
+    await loadProfileData();
+    
+    // Set up card search event listeners
+    const cardSearchInput = document.getElementById('cardSearch');
+    if (cardSearchInput) {
+        cardSearchInput.addEventListener('input', function(e) {
+            searchCards(e.target.value);
+        });
+        
+        cardSearchInput.addEventListener('focus', function(e) {
+            e.target.style.borderColor = 'var(--accent)';
+        });
+
+        cardSearchInput.addEventListener('blur', function(e) {
+            if (!e.target.value) {
+                e.target.style.borderColor = 'var(--border)';
+            }
+            setTimeout(() => hideSearchResults(), 200);
+        });
+    }
+});
+
+async function loadProfileData() {
+    try {
+        // Initialize user state first
+        await initUserState();
+        
+        // Update UI based on authentication status
+        updateAddCardSection();
+        
+        // Load all profile data
+        await Promise.all([
+            loadCardCollection(),
+            loadCategoryOptimization(),
+            loadSpendingProfile(),
+            loadCreditsProfile(),
+            loadHousehold()
+        ]);
+
+        // Calculate and display portfolio summary
+        calculatePortfolioSummary();
+        
+    } catch (error) {
+        console.error('Error loading profile data:', error);
+        showError('Failed to load profile data. Please try refreshing the page.');
+    }
+}
+
+// Card collection table: state kept module-scoped so sorting can re-render
+// without re-fetching (loadCardCollection populates these, then calls
+// renderCardCollectionTable()).
+let _cardCollectionGroups = null;
+let _cardCollectionDetails = null;
+let _cardSort = { key: null, dir: 1 };
+
+const CARD_SORT_COLUMNS = [
+    { key: 'name', label: 'Card Name', type: 'string' },
+    { key: 'issuer', label: 'Issuer', type: 'string' },
+    { key: 'signup_date', label: 'Signup Date', type: 'date' },
+    { key: 'annual_fee', label: 'Annual Fee', type: 'number' },
+    { key: 'reward_type', label: 'Reward Type', type: 'string' },
+    { key: 'point_value', label: 'Point Value', type: 'number' },
+    { key: 'signup_bonus', label: 'Signup Bonus', type: 'number' },
+    { key: 'card_type', label: 'Card Type', type: 'string' },
+    { key: 'owner', label: 'Owner', type: 'string' },
+    { key: 'count', label: 'Count', type: 'number' },
+    { key: 'renewal', label: 'Renews', type: 'date' },
+    { key: null, label: 'Actions', type: null }
+];
+
+// Phase K: household management panel (auth-only — hidden entirely for
+// anon users, whose accounts stay single-player per the locked scope).
+async function loadHousehold() {
+    const section = document.getElementById('householdSection');
+    if (!isAuthenticated) {
+        section.style.display = 'none';
+        return;
+    }
+    section.style.display = 'block';
+    try {
+        const entities = await UserDataManager.getEntities(true);
+        renderHouseholdList(entities);
+    } catch (error) {
+        console.error('Error loading household:', error);
+        document.getElementById('householdList').innerHTML =
+            '<p style="color:var(--muted);">Failed to load household.</p>';
+    }
+}
+
+function renderHouseholdList(entities) {
+    const container = document.getElementById('householdList');
+    if (!entities || entities.length === 0) {
+        container.innerHTML = '<p style="color:var(--muted);">No household members yet.</p>';
+        return;
+    }
+    container.innerHTML = entities.map(entity => `
+        <div style="display:flex; align-items:center; gap:10px; padding:8px 0; border-bottom:1px solid var(--border);">
+            <span style="font-weight:600;">${escapeHtml(entity.name)}</span>
+            ${entity.is_primary ? '<span class="chip" style="font-size:11px;">Primary</span>' : ''}
+            <span style="color:var(--muted); font-size:13px; text-transform:capitalize;">${escapeHtml(entity.kind)}</span>
+            <span style="color:var(--muted); font-size:13px;">${entity.active_card_count} card${entity.active_card_count === 1 ? '' : 's'}</span>
+            <div style="margin-left:auto; display:flex; gap:6px;">
+                <button class="table-action-btn" onclick="renameHouseholdEntity(${entity.id}, '${escapeHtml(entity.name).replace(/'/g, "\\'")}')" title="Rename">✏️</button>
+                ${!entity.is_primary ? `<button class="table-action-btn" onclick="removeHouseholdEntity(${entity.id})" title="Remove">🗑️</button>` : ''}
+            </div>
+        </div>
+    `).join('');
+}
+
+function showAddHouseholdEntityForm() {
+    document.getElementById('addHouseholdEntityForm').style.display = 'block';
+    document.getElementById('newEntityName').focus();
+}
+
+function hideAddHouseholdEntityForm() {
+    document.getElementById('addHouseholdEntityForm').style.display = 'none';
+    document.getElementById('newEntityName').value = '';
+}
+
+async function submitAddHouseholdEntity() {
+    const name = document.getElementById('newEntityName').value.trim();
+    const kind = document.getElementById('newEntityKind').value;
+    if (!name) {
+        showNotification('Enter a name first', 'error');
+        return;
+    }
+    const result = await UserDataManager.addEntity(name, kind);
+    if (result.success) {
+        hideAddHouseholdEntityForm();
+        await loadHousehold();
+        showNotification(`Added ${name}`, 'success');
+    } else {
+        showNotification(result.error || 'Failed to add household member', 'error');
+    }
+}
+
+async function renameHouseholdEntity(entityId, currentName) {
+    const name = prompt('Rename to:', currentName);
+    if (!name || !name.trim() || name.trim() === currentName) {
+        return;
+    }
+    const result = await UserDataManager.renameEntity(entityId, name.trim());
+    if (result.success) {
+        await loadHousehold();
+    } else {
+        showNotification(result.error || 'Failed to rename', 'error');
+    }
+}
+
+async function removeHouseholdEntity(entityId) {
+    if (!confirm('Remove this household member?')) {
+        return;
+    }
+    const result = await UserDataManager.removeEntity(entityId);
+    if (result.success) {
+        await loadHousehold();
+    } else {
+        showNotification(result.error || "Failed to remove — reassign or remove their cards first", 'error');
+    }
+}
+
+// Next annual-fee renewal: the upcoming anniversary (this year if it hasn't
+// passed yet, otherwise next year) of the card's opened_date.
+function nextAnniversary(openedDateStr) {
+    if (!openedDateStr) return null;
+    const opened = new Date(openedDateStr);
+    const todayMidnight = new Date();
+    todayMidnight.setHours(0, 0, 0, 0);
+    const anniversary = new Date(todayMidnight.getFullYear(), opened.getMonth(), opened.getDate());
+    if (anniversary < todayMidnight) {
+        anniversary.setFullYear(anniversary.getFullYear() + 1);
+    }
+    return anniversary;
+}
+
+function cardSortValue(key, group, cardInfo) {
+    switch (key) {
+        case 'name': return cardInfo.name || '';
+        case 'issuer': return cardInfo.issuer?.name || '';
+        case 'signup_date': {
+            const dates = group.instances.filter(i => i.opened_date).map(i => new Date(i.opened_date).getTime());
+            return dates.length > 0 ? Math.min(...dates) : Infinity; // no date sorts last (ascending)
+        }
+        case 'annual_fee': return parseFloat(cardInfo.annual_fee || 0);
+        case 'reward_type': return cardInfo.primary_reward_type?.name || '';
+        case 'point_value': return cardInfo.metadata?.reward_value_multiplier || 0.01;
+        case 'signup_bonus': return cardInfo.signup_bonus_amount || 0;
+        case 'card_type': return cardInfo.card_type || '';
+        case 'owner': {
+            const names = group.instances.map(i => i.owner_name || '').filter(Boolean).sort();
+            return names[0] || '';
+        }
+        case 'count': return group.instances.length;
+        case 'renewal': {
+            const anniversaries = group.instances
+                .filter(i => i.opened_date)
+                .map(i => nextAnniversary(i.opened_date).getTime());
+            return anniversaries.length > 0 ? Math.min(...anniversaries) : Infinity;
+        }
+        default: return '';
+    }
+}
+
+function sortCardCollection(key) {
+    if (!key) return;
+    if (_cardSort.key === key) {
+        _cardSort.dir *= -1;
+    } else {
+        _cardSort = { key, dir: 1 };
+    }
+    renderCardCollectionTable();
+}
+
+function buildCardRow(cardId, group, cardInfo) {
+    const instances = group.instances;
+    const hasMultiple = instances.length > 1;
+
+    // Calculate annual fee
+    const annualFee = parseFloat(cardInfo.annual_fee || 0);
+    const feeClass = annualFee === 0 ? 'fee-zero' : 'fee-paid';
+    const feeText = annualFee === 0 ? 'No Fee' : `$${annualFee}/year`;
+
+    // Get reward type and value
+    const rewardType = cardInfo.primary_reward_type?.name || 'Unknown';
+    const rewardMultiplier = cardInfo.metadata?.reward_value_multiplier || 0.01;
+    const pointValue = `${(rewardMultiplier * 100).toFixed(1)}¢`;
+
+    // Get signup bonus
+    const signupBonus = cardInfo.signup_bonus_amount ?
+        `${cardInfo.signup_bonus_amount.toLocaleString()} ${rewardType}` : 'None';
+
+    // Create nicknames display for table
+    let nicknamesDisplay = '';
+    if (hasMultiple) {
+        const nicknames = instances.filter(i => i.nickname).map(i => i.nickname);
+        nicknamesDisplay = nicknames.length > 0 ?
+            `<small class="card-nicknames">${nicknames.join(', ')}</small>` : '';
+    } else {
+        const instance = instances[0];
+        nicknamesDisplay = instance.nickname ?
+            `<small class="card-nicknames">${instance.nickname}</small>` : '';
+    }
+
+    // Signup date display (plain — the "renews soon" highlight lives on
+    // the Renews column below, computed from the anniversary, not this).
+    let signupDateDisplay = '';
+    if (hasMultiple) {
+        const dates = instances
+            .filter(i => i.opened_date)
+            .map(i => new Date(i.opened_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }));
+        signupDateDisplay = dates.length > 0 ? dates.map(d => `<div>${d}</div>`).join('') : '<span style="color: var(--muted-2);">-</span>';
+    } else {
+        const instance = instances[0];
+        signupDateDisplay = instance.opened_date
+            ? new Date(instance.opened_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+            : '<span style="color: var(--muted-2);">-</span>';
+    }
+
+    // Renewal date display: the next anniversary of opened_date, highlighted
+    // when it's within 2 months and the card carries an annual fee.
+    const today = new Date();
+    const twoMonthsFromNow = new Date(today);
+    twoMonthsFromNow.setMonth(twoMonthsFromNow.getMonth() + 2);
+
+    let renewalDateDisplay = '';
+    if (hasMultiple) {
+        const renewals = instances
+            .filter(i => i.opened_date)
+            .map(i => {
+                const anniversary = nextAnniversary(i.opened_date);
+                const formattedDate = anniversary.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                const shouldHighlight = annualFee > 0 && anniversary <= twoMonthsFromNow;
+                const style = shouldHighlight ? 'color: var(--color-warning); font-weight: 600;' : '';
+                return `<div style="${style}">${formattedDate}</div>`;
+            });
+        renewalDateDisplay = renewals.length > 0 ? renewals.join('') : '<span style="color: var(--muted-2);">-</span>';
+    } else {
+        const instance = instances[0];
+        if (instance.opened_date) {
+            const anniversary = nextAnniversary(instance.opened_date);
+            const formattedDate = anniversary.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+            const shouldHighlight = annualFee > 0 && anniversary <= twoMonthsFromNow;
+            const style = shouldHighlight ? 'color: var(--color-warning); font-weight: 600;' : '';
+            renewalDateDisplay = `<span style="${style}">${formattedDate}</span>`;
+        } else {
+            renewalDateDisplay = '<span style="color: var(--muted-2);">-</span>';
+        }
+    }
+
+    // Owner display (Phase K): one name per instance, stacked like the
+    // signup-date/renewal columns above — this is exactly the "two owners,
+    // same card" shape the multi-instance stacking already supports.
+    let ownerDisplay;
+    if (hasMultiple) {
+        const names = instances.map(i => i.owner_name).filter(Boolean);
+        ownerDisplay = names.length > 0
+            ? names.map(n => `<div>${escapeHtml(n)}</div>`).join('')
+            : '<span style="color: var(--muted-2);">-</span>';
+    } else {
+        ownerDisplay = instances[0].owner_name
+            ? escapeHtml(instances[0].owner_name)
+            : '<span style="color: var(--muted-2);">-</span>';
+    }
+
+    return `
+        <tr class="card-row modal-card-clickable" onclick="openCardModal(${cardId})" title="Click to view details">
+            <td class="card-name-cell">
+                <div class="card-name-wrapper">
+                    <strong>${cardInfo.name}</strong>
+                    ${nicknamesDisplay ? `<br>${nicknamesDisplay}` : ''}
+                </div>
+            </td>
+            <td>${cardInfo.issuer?.name || 'Unknown'}</td>
+            <td>${signupDateDisplay}</td>
+            <td><span class="${feeClass}">${feeText}</span></td>
+            <td>${rewardType}</td>
+            <td>${pointValue}</td>
+            <td>${signupBonus}</td>
+            <td>${cardInfo.card_type ? cardInfo.card_type.charAt(0).toUpperCase() + cardInfo.card_type.slice(1) : 'Personal'}</td>
+            <td>${ownerDisplay}</td>
+            <td class="card-count-cell">
+                <span class="card-count">${instances.length}</span>
+                ${hasMultiple ? ' <span class="multiple-indicator" title="Multiple cards">📚</span>' : ''}
+            </td>
+            <td>${renewalDateDisplay}</td>
+            <td class="actions-cell">
+                <button class="table-action-btn" onclick="event.stopPropagation(); openCardModal(${cardId})" title="View Details">
+                    👁️
+                </button>
+            </td>
+        </tr>
+    `;
+}
+
+function renderCardCollectionTable() {
+    const cardCollectionContainer = document.getElementById('cardCollection');
+    const cardGroups = _cardCollectionGroups || {};
+    const cardDetails = _cardCollectionDetails || {};
+
+    // Only rows with fetched details are sortable/renderable
+    let rows = Object.entries(cardGroups)
+        .filter(([cardId]) => cardDetails[cardId])
+        .map(([cardId, group]) => ({ cardId, group, cardInfo: cardDetails[cardId] }));
+
+    if (_cardSort.key) {
+        rows.sort((a, b) => {
+            const va = cardSortValue(_cardSort.key, a.group, a.cardInfo);
+            const vb = cardSortValue(_cardSort.key, b.group, b.cardInfo);
+            let cmp;
+            if (typeof va === 'string') {
+                cmp = va.localeCompare(vb);
+            } else {
+                cmp = va - vb;
+            }
+            return cmp * _cardSort.dir;
+        });
+    }
+
+    const headerHtml = CARD_SORT_COLUMNS.map(col => {
+        if (!col.key) {
+            return `<th>${col.label}</th>`;
+        }
+        const isActive = _cardSort.key === col.key;
+        const caretClass = isActive ? (_cardSort.dir === 1 ? 'asc' : 'desc') : '';
+        return `<th class="sortable${isActive ? ' active' : ''}" onclick="sortCardCollection('${col.key}')">
+            ${col.label}<span class="sort-caret ${caretClass}"></span>
+        </th>`;
+    }).join('');
+
+    const rowsHtml = rows.map(({ cardId, group, cardInfo }) => buildCardRow(cardId, group, cardInfo)).join('');
+
+    cardCollectionContainer.innerHTML = `
+        <div class="card-table-container">
+            <table class="cards-table">
+                <thead>
+                    <tr>${headerHtml}</tr>
+                </thead>
+                <tbody>${rowsHtml}</tbody>
+            </table>
+        </div>
+    `;
+}
+
+async function loadCardCollection() {
+    try {
+        let userCardsDetails;
+        const cardCollectionContainer = document.getElementById('cardCollection');
+        
+        if (!isAuthenticated) {
+            // For unauthenticated users, get cards from local storage
+            const localCardIds = LocalStorage.getCards();
+            const localCardDetails = LocalStorage.getCardDetails();
+            
+            if (localCardIds.length === 0) {
+                cardCollectionContainer.innerHTML = `
+                    <div class="empty-state">
+                        <h3>No Cards Added Yet</h3>
+                        <p>Start building your credit card portfolio by adding your cards using the search above. Your cards will be saved locally, and you can sync them to your account when you log in.</p>
+                        <a href="/cards/">Browse All Credit Cards</a>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Convert local storage data to match expected format
+            userCardsDetails = [];
+            for (const cardId of localCardIds) {
+                try {
+                    const response = await fetch(`${API_BASE}/cards/cards/${cardId}/`);
+                    if (response.ok) {
+                        const cardData = await response.json();
+                        const details = localCardDetails[cardId] || {};
+                        userCardsDetails.push({
+                            id: `local_${cardId}`,
+                            card: cardData,
+                            nickname: details.nickname || '',
+                            opened_date: details.opened_date || null,
+                            closed_date: null,
+                            notes: details.notes || '',
+                            is_local: true
+                        });
+                    }
+                } catch (error) {
+                    console.error(`Error fetching card ${cardId}:`, error);
+                }
+            }
+        } else {
+            // For authenticated users, get from server
+            userCardsDetails = await UserDataManager.getUserCardsDetails();
+        }
+        
+        if (!userCardsDetails || userCardsDetails.length === 0) {
+            cardCollectionContainer.innerHTML = `
+                <div class="empty-state">
+                    <h3>No Cards Added Yet</h3>
+                    <p>Start building your credit card portfolio by adding your cards using the search above.</p>
+                    <a href="/cards/">Browse All Credit Cards</a>
+                </div>
+            `;
+            return;
+        }
+        
+        // Group cards by card ID and count duplicates
+        const cardGroups = {};
+        for (const userCard of userCardsDetails) {
+            const cardId = userCard.card.id;
+            if (!cardGroups[cardId]) {
+                cardGroups[cardId] = {
+                    card: userCard.card,
+                    instances: []
+                };
+            }
+            cardGroups[cardId].instances.push(userCard);
+        }
+        
+        // Fetch detailed card information
+        const cardIds = Object.keys(cardGroups);
+        const cardDetails = {};
+
+        for (const cardId of cardIds) {
+            try {
+                const response = await fetch(`${API_BASE}/cards/cards/${cardId}/`);
+                if (response.ok) {
+                    cardDetails[cardId] = await response.json();
+                }
+            } catch (error) {
+                console.error(`Error fetching details for card ${cardId}:`, error);
+            }
+        }
+
+        // Stash for re-render on sort (avoids re-fetching)
+        _cardCollectionGroups = cardGroups;
+        _cardCollectionDetails = cardDetails;
+
+        renderCardCollectionTable();
+
+    } catch (error) {
+        console.error('Error loading card collection:', error);
+        document.getElementById('cardCollection').innerHTML = `
+            <div class="error">Error loading card collection. Please try refreshing the page.</div>
+        `;
+    }
+}
+
+async function loadCategoryOptimization() {
+    try {
+        const userCards = await UserDataManager.getCards();
+        const categoryContainer = document.getElementById('categoryOptimization');
+        
+        if (!userCards || userCards.length === 0) {
+            categoryContainer.innerHTML = `
+                <div class="empty-state">
+                    <h3>Add Cards to See Categories</h3>
+                    <p>Add your credit cards using the search box below to see which card to use for each spending category.</p>
+                </div>
+            `;
+            return;
+        }
+        
+        // Get detailed card information for all user cards
+        const cardDetails = {};
+        for (const cardId of userCards) {
+            try {
+                const response = await fetch(`${API_BASE}/cards/cards/${cardId}/`);
+                if (response.ok) {
+                    cardDetails[cardId] = await response.json();
+                }
+            } catch (error) {
+                console.error(`Error fetching card ${cardId}:`, error);
+            }
+        }
+        
+        // Load category names for display
+        let categoriesResponse;
+        try {
+            categoriesResponse = await fetch(`${API_BASE}/cards/spending-categories/`);
+            if (!categoriesResponse.ok) throw new Error('Failed to fetch categories');
+        } catch (error) {
+            console.error('Error fetching categories:', error);
+            categoriesResponse = null;
+        }
+        
+        const categoriesData = categoriesResponse ? await categoriesResponse.json() : [];
+        // Handle both paginated (results array) and direct array responses
+        const categories = Array.isArray(categoriesData) ? categoriesData : (categoriesData.results || []);
+        const categoryMap = {};
+        categories.forEach(cat => {
+            categoryMap[cat.slug] = cat.display_name || cat.name;
+        });
+        
+        // Build a map of all reward categories from user's cards
+        const categoryRewards = {};
+        
+        for (const cardId of userCards) {
+            const card = cardDetails[cardId];
+            if (!card || !card.reward_categories) continue;
+            
+            for (const rewardCategory of card.reward_categories) {
+                if (!rewardCategory.is_active) continue;
+                
+                const categorySlug = rewardCategory.category.slug;
+                const categoryName = categoryMap[categorySlug] || rewardCategory.category.display_name || rewardCategory.category.name;
+                const rewardRate = parseFloat(rewardCategory.reward_rate);
+                const cardName = card.name;
+                
+                // Track the best rate for each category
+                if (!categoryRewards[categorySlug] || rewardRate > categoryRewards[categorySlug].rate) {
+                    categoryRewards[categorySlug] = {
+                        categoryName: categoryName,
+                        rate: rewardRate,
+                        cardName: cardName,
+                        maxSpend: rewardCategory.max_annual_spend
+                    };
+                }
+            }
+        }
+        
+        if (Object.keys(categoryRewards).length === 0) {
+            categoryContainer.innerHTML = `
+                <div class="no-data">
+                    Your cards don't have specific reward categories. They may earn a flat rate on all purchases.
+                </div>
+            `;
+            return;
+        }
+        
+        // Sort categories alphabetically for consistent display
+        const sortedCategories = Object.entries(categoryRewards)
+            .sort((a, b) => a[1].categoryName.localeCompare(b[1].categoryName));
+        
+        let optimizationHtml = '';
+        
+        for (const [categorySlug, categoryData] of sortedCategories) {
+            const { categoryName, rate, cardName, maxSpend } = categoryData;
+            
+            // Skip general/catch-all categories at 1x rate
+            if (rate <= 1.0 && ['other', 'general', 'everything-else'].includes(categorySlug)) {
+                continue;
+            }
+            
+            let spendingCapText = '';
+            if (maxSpend) {
+                spendingCapText = ` (up to $${parseFloat(maxSpend).toLocaleString()}/year)`;
+            }
+            
+            optimizationHtml += `
+                <div class="category-optimization-simple">
+                    <div class="category-simple-name">${categoryName}</div>
+                    <div class="rate-simple">${rate}%</div>
+                    <div class="card-simple-name">${cardName}</div>
+                    ${spendingCapText ? `<div class="spending-cap-simple">${spendingCapText}</div>` : ''}
+                </div>
+            `;
+        }
+        
+        if (optimizationHtml === '') {
+            categoryContainer.innerHTML = `
+                <div class="no-data">
+                    Your cards appear to have only general earning rates (1x). Consider adding cards with bonus categories for better optimization.
+                </div>
+            `;
+        } else {
+            categoryContainer.innerHTML = optimizationHtml;
+        }
+        
+    } catch (error) {
+        console.error('Error loading category optimization:', error);
+        document.getElementById('categoryOptimization').innerHTML = `
+            <div class="error">Error loading category optimization. Please try refreshing the page.</div>
+        `;
+    }
+}
+
+async function loadSpendingProfile() {
+    try {
+        const spending = await UserDataManager.getSpending();
+        const spendingContainer = document.getElementById('spendingProfile');
+        
+        if (!spending || Object.keys(spending).length === 0) {
+            spendingContainer.innerHTML = `
+                <div class="empty-state">
+                    <h3>No Spending Profile Set</h3>
+                    <p>Set up your spending profile to see detailed analysis and recommendations.</p>
+                    <a href="/">Set Up Spending Profile</a>
+                </div>
+            `;
+            return;
+        }
+        
+        // Load category names
+        let categoriesResponse;
+        try {
+            categoriesResponse = await fetch(`${API_BASE}/cards/spending-categories/`);
+            if (!categoriesResponse.ok) throw new Error('Failed to fetch categories');
+        } catch (error) {
+            console.error('Error fetching categories:', error);
+            categoriesResponse = null;
+        }
+        
+        const categoriesData = categoriesResponse ? await categoriesResponse.json() : [];
+        // Handle both paginated (results array) and direct array responses
+        const categories = Array.isArray(categoriesData) ? categoriesData : (categoriesData.results || []);
+        const categoryMap = {};
+        categories.forEach(cat => {
+            categoryMap[cat.slug] = cat.display_name || cat.name;
+        });
+        
+        // Sort spending by amount (highest first)
+        const sortedSpending = Object.entries(spending)
+            .filter(([, amount]) => parseFloat(amount) > 0)
+            .sort((a, b) => parseFloat(b[1]) - parseFloat(a[1]));
+        
+        if (sortedSpending.length === 0) {
+            spendingContainer.innerHTML = `
+                <div class="no-data">
+                    No spending categories with positive amounts found.
+                </div>
+            `;
+            return;
+        }
+        
+        let spendingHtml = '';
+        let totalMonthly = 0;
+        
+        for (const [categorySlug, monthlyAmount] of sortedSpending) {
+            const amount = parseFloat(monthlyAmount);
+            const annualAmount = amount * 12;
+            totalMonthly += amount;
+            
+            const categoryName = categoryMap[categorySlug] || categorySlug.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+            
+            spendingHtml += `
+                <div class="spending-item">
+                    <div class="spending-category">${categoryName}</div>
+                    <div class="spending-amounts">
+                        <div class="monthly-amount">$${amount.toLocaleString('en-US', { maximumFractionDigits: 0 })}/mo</div>
+                        <div class="annual-amount">$${annualAmount.toLocaleString('en-US', { maximumFractionDigits: 0 })}/year</div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Add total
+        spendingHtml += `
+            <div class="spending-item" style="border-top: 2px solid var(--border); margin-top: 15px; padding-top: 15px; background: var(--accent-soft);">
+                <div class="spending-category" style="font-weight: 700; color: var(--accent);">Total Monthly Spending</div>
+                <div class="spending-amounts">
+                    <div class="monthly-amount" style="color: var(--accent);">$${totalMonthly.toLocaleString('en-US', { maximumFractionDigits: 0 })}/mo</div>
+                    <div class="annual-amount">$${(totalMonthly * 12).toLocaleString('en-US', { maximumFractionDigits: 0 })}/year</div>
+                </div>
+            </div>
+        `;
+        
+        spendingContainer.innerHTML = spendingHtml;
+ 
+    } catch (error) {
+        console.error('Error loading spending profile:', error);
+        document.getElementById('spendingProfile').innerHTML = `
+            <div class="error">Error loading spending profile. Please try refreshing the page.</div>
+        `;
+    }
+}
+
+async function loadCreditsProfile() {
+    try {
+        const userCards = await UserDataManager.getCards();
+        const creditsContainer = document.getElementById('creditsProfile');
+
+        if (!userCards || userCards.length === 0) {
+            creditsContainer.innerHTML = `
+                <div class="info-box">
+                    <h3>📱 No Cards Added Yet</h3>
+                    <p>Add your credit cards above to see all the benefits and credits you're earning!</p>
+                </div>
+            `;
+            return;
+        }
+
+        // Fetch detailed card information to get credits, and which credits
+        // this user actually values (server-persisted, same source the
+        // engine reads — a credit only counts if explicitly opted in).
+        const cardDetails = {};
+        const allCredits = {};
+        const [_, preferences, usages] = await Promise.all([
+            (async () => {
+                for (const cardId of userCards) {
+                    try {
+                        const response = await fetch(`${API_BASE}/cards/cards/${cardId}/`);
+                        if (response.ok) {
+                            const card = await response.json();
+                            cardDetails[cardId] = card;
+
+                            // Collect all credits from this card
+                            if (card.credits && card.credits.length > 0) {
+                                card.credits.forEach(credit => {
+                                    const creditType = credit.spending_credit;
+                                    if (creditType) {
+                                        const creditKey = creditType.slug;
+                                        if (!allCredits[creditKey]) {
+                                            allCredits[creditKey] = {
+                                                name: creditType.display_name || creditType.name,
+                                                slug: creditType.slug,
+                                                stackable: creditType.stackable !== false,
+                                                cards: []
+                                            };
+                                        }
+                                        // Use annual_value if available, otherwise calculate
+                                        const annualValue = credit.annual_value || (parseFloat(credit.value || 0) * (credit.times_per_year || 1));
+                                        allCredits[creditKey].cards.push({
+                                            creditId: credit.id,
+                                            cardId: cardId,
+                                            name: card.name,
+                                            value: credit.value,
+                                            annualValue: annualValue,
+                                            timesPerYear: credit.times_per_year,
+                                            description: credit.description
+                                        });
+                                    }
+                                });
+                            }
+                        }
+                    } catch (error) {
+                        console.error(`Error fetching card ${cardId}:`, error);
+                    }
+                }
+            })(),
+            UserDataManager.getCreditPreferences(),
+            UserDataManager.getCreditUsages()
+        ]);
+
+        // Resolve stackability: a non-stackable credit only counts once,
+        // on whichever card carries it for the most value — mirrors the
+        // engine's _allocate_portfolio_credits dedup rule. An opted-out
+        // credit (or one never opted into) counts $0, same as the engine.
+        const creditEntries = Object.values(allCredits).map(credit => {
+            const isUsed = preferences[credit.slug] === true;
+            let winnerCardId = null;
+            let rawAmount = 0;
+
+            if (credit.stackable) {
+                rawAmount = credit.cards.reduce((sum, c) => sum + c.annualValue, 0);
+            } else {
+                const winner = credit.cards.reduce(
+                    (best, c) => (c.annualValue > best.annualValue ? c : best), credit.cards[0]);
+                winnerCardId = winner.cardId;
+                rawAmount = winner.annualValue;
+            }
+
+            return {
+                ...credit,
+                isUsed,
+                winnerCardId,
+                effectiveAmount: isUsed ? rawAmount : 0
+            };
+        });
+
+        if (creditEntries.length === 0) {
+            creditsContainer.innerHTML = `
+                <div class="info-box">
+                    <h3>ℹ️ No Card Benefits Found</h3>
+                    <p>Your current cards don't have any tracked benefits or credits. Consider adding cards with travel credits, statement credits, or other perks!</p>
+                </div>
+            `;
+            return;
+        }
+
+        // Compile trackable credit instances
+        const trackableCredits = [];
+        creditEntries.forEach(entry => {
+            if (entry.isUsed) {
+                entry.cards.forEach(cardCredit => {
+                    trackableCredits.push({
+                        creditId: cardCredit.creditId,
+                        cardName: cardCredit.name,
+                        benefitName: entry.name,
+                        description: cardCredit.description,
+                        value: cardCredit.value,
+                        timesPerYear: cardCredit.timesPerYear,
+                        isUsedThisPeriod: usages[cardCredit.creditId] === true
+                    });
+                });
+            }
+        });
+
+        const unusedCredits = trackableCredits.filter(c => !c.isUsedThisPeriod);
+        const usedCredits = trackableCredits.filter(c => c.isUsedThisPeriod);
+
+        let trackerHtml = '';
+        if (trackableCredits.length > 0) {
+            trackerHtml = `
+                <div class="credit-tracker-card" style="background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--accent); border-radius: var(--radius-md); padding: 15px; margin-bottom: 20px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);">
+                    <h3 style="margin-top: 0; color: var(--text-strong); display: flex; align-items: center; gap: 8px; font-size: 16px; font-weight: 600;">
+                        📅 Track Benefits for This Period
+                    </h3>
+                    <p style="font-size: 13px; color: var(--muted); margin-bottom: 15px;">
+                        Check off the benefits you have used. Unused monthly/quarterly/annual credits are highlighted below to help you maximize their value before they expire.
+                    </p>
+            `;
+
+            // Unused group
+            if (unusedCredits.length > 0) {
+                trackerHtml += `
+                    <div id="unusedCreditsGroup" style="margin-bottom: 15px;">
+                        <h4 style="margin: 0 0 10px 0; font-size: 11px; color: #ef4444; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">
+                            ⚠️ Unused / Expiring Soon (${unusedCredits.length})
+                        </h4>
+                        <div class="unused-list" style="display: flex; flex-direction: column; gap: 8px;">
+                `;
+                unusedCredits.forEach(c => {
+                    const periodLabel = getCurrentPeriodLabel(c.timesPerYear);
+                    const formattedValue = parseFloat(c.value) > 0 ? `$${parseFloat(c.value).toFixed(0)}` : 'Benefit';
+                    const freqLabel = c.timesPerYear === 12 ? '/mo' : c.timesPerYear === 4 ? '/qtr' : c.timesPerYear === 2 ? '/half' : '/yr';
+                    trackerHtml += `
+                        <div style="display: flex; align-items: center; justify-content: space-between; background: var(--bg); border: 1px solid var(--border); padding: 10px 12px; border-radius: var(--radius-sm); border-left: 3px solid #ef4444;">
+                            <div style="display: flex; align-items: center; gap: 10px; width: 100%;">
+                                <input type="checkbox" id="trackerUse_${c.creditId}"
+                                       onchange="toggleCreditUsagePeriod(${c.creditId}, this.checked)"
+                                       style="cursor: pointer; width: 16px; height: 16px;">
+                                <label for="trackerUse_${c.creditId}" style="cursor: pointer; margin: 0; font-size: 13px; color: var(--text-strong); display: flex; flex-direction: column; line-height: 1.3;">
+                                    <span><strong>${c.cardName}</strong> &middot; ${c.benefitName}</span>
+                                    <span style="font-size: 11px; color: var(--muted); font-weight: normal;">${c.description || ''}</span>
+                                </label>
+                            </div>
+                            <span style="font-family: var(--font-mono); font-size: 11px; background: #fee2e2; color: #b91c1c; padding: 2px 8px; border-radius: 9999px; font-weight: 600; white-space: nowrap; margin-left: 10px;">
+                                ${formattedValue}${freqLabel} (${periodLabel})
+                            </span>
+                        </div>
+                    `;
+                });
+                trackerHtml += `
+                        </div>
+                    </div>
+                `;
+            } else {
+                trackerHtml += `
+                    <div id="unusedCreditsGroup" style="margin-bottom: 15px; padding: 10px; background: var(--accent-soft); border-radius: var(--radius-sm); border: 1px dashed var(--accent);">
+                        <h4 style="margin: 0; font-size: 13px; color: var(--accent); font-weight: 600; text-align: center; display: flex; align-items: center; justify-content: center; gap: 6px;">
+                            🎉 All benefits checked off for this period!
+                        </h4>
+                    </div>
+                `;
+            }
+
+            // Used group
+            if (usedCredits.length > 0) {
+                trackerHtml += `
+                    <div id="usedCreditsGroup" style="border-top: 1px solid var(--border); padding-top: 15px;">
+                        <h4 style="margin: 0 0 10px 0; font-size: 11px; color: #10b981; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">
+                            ✅ Used This Period (${usedCredits.length})
+                        </h4>
+                        <div class="used-list" style="display: flex; flex-direction: column; gap: 8px; opacity: 0.7;">
+                `;
+                usedCredits.forEach(c => {
+                    const periodLabel = getCurrentPeriodLabel(c.timesPerYear);
+                    const formattedValue = parseFloat(c.value) > 0 ? `$${parseFloat(c.value).toFixed(0)}` : 'Benefit';
+                    const freqLabel = c.timesPerYear === 12 ? '/mo' : c.timesPerYear === 4 ? '/qtr' : c.timesPerYear === 2 ? '/half' : '/yr';
+                    trackerHtml += `
+                        <div style="display: flex; align-items: center; justify-content: space-between; background: var(--bg); border: 1px solid var(--border); padding: 8px 12px; border-radius: var(--radius-sm); border-left: 3px solid #10b981;">
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <input type="checkbox" id="trackerUse_${c.creditId}" checked
+                                       onchange="toggleCreditUsagePeriod(${c.creditId}, this.checked)"
+                                       style="cursor: pointer; width: 16px; height: 16px;">
+                                <label for="trackerUse_${c.creditId}" style="cursor: pointer; margin: 0; font-size: 13px; color: var(--muted); text-decoration: line-through; display: flex; flex-direction: column; line-height: 1.3;">
+                                    <span><strong>${c.cardName}</strong> &middot; ${c.benefitName}</span>
+                                    <span style="font-size: 11px; color: var(--muted-2); font-weight: normal; text-decoration: line-through;">${c.description || ''}</span>
+                                </label>
+                            </div>
+                            <span style="font-family: var(--font-mono); font-size: 11px; color: var(--muted); font-weight: 600; white-space: nowrap; margin-left: 10px;">
+                                Used (${periodLabel})
+                            </span>
+                        </div>
+                    `;
+                });
+                trackerHtml += `
+                        </div>
+                    </div>
+                `;
+            }
+
+            trackerHtml += `</div>`;
+        }
+
+        // Sort by effective (counted) amount, highest first
+        creditEntries.sort((a, b) => b.effectiveAmount - a.effectiveAmount);
+
+        // Add total summary (compact version) — only counts benefits the
+        // user has opted into, same as the roadmap engine
+        const totalCreditsValue = creditEntries.reduce((sum, credit) => sum + credit.effectiveAmount, 0);
+        let creditsHtml = trackerHtml;
+        creditsHtml += `
+            <div style="background: var(--accent-soft); border: 1px solid var(--border); color: var(--text); padding: 15px; border-radius: var(--radius-md); margin-bottom: 15px; text-align: center;">
+                <div style="font-size: 13px; font-weight: 500; color: var(--muted); margin-bottom: 4px;">Total Annual Benefits</div>
+                <div style="font-size: 28px; font-weight: 700; font-family: var(--font-mono); color: var(--accent);">$${totalCreditsValue.toFixed(0)}</div>
+                <div style="font-size: 12px; color: var(--muted); margin-top: 2px;">${creditEntries.length} benefit${creditEntries.length !== 1 ? 's' : ''} from ${Object.keys(cardDetails).length} card${Object.keys(cardDetails).length !== 1 ? 's' : ''} &mdash; check the ones you actually use</div>
+            </div>
+        `;
+
+
+        creditsHtml += '<div class="credits-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px;">';
+
+        creditEntries.forEach(credit => {
+            const notStacking = !credit.stackable && credit.cards.length > 1;
+            const winnerName = credit.cards.find(c => c.cardId === credit.winnerCardId)?.name;
+
+            creditsHtml += `
+                <div style="background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: var(--radius-sm); padding: 12px; ${credit.isUsed ? '' : 'opacity: 0.55;'}">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <input type="checkbox" id="creditUse_${credit.slug}" ${credit.isUsed ? 'checked' : ''}
+                                   onchange="toggleCreditUsage('${credit.slug}', this.checked)"
+                                   title="I use this benefit" style="cursor: pointer;">
+                            <label for="creditUse_${credit.slug}" style="cursor: pointer; margin: 0;">
+                                <h3 style="margin: 0; color: var(--text-strong); font-size: 15px; font-weight: 600;">${credit.name}</h3>
+                            </label>
+                        </div>
+                        <span style="background: var(--accent-soft); color: var(--accent); padding: 3px 8px; border-radius: 8px; font-size: 12px; font-weight: 600; white-space: nowrap; font-family: var(--font-mono);">
+                             $${credit.effectiveAmount.toFixed(0)}/yr
+                        </span>
+                    </div>
+                    ${notStacking ? `<div style="font-size: 11px; color: var(--muted); margin-bottom: 6px;">Doesn't stack across cards — counted once, on ${winnerName}</div>` : ''}
+                    <div style="margin-top: 8px;">
+                        ${credit.cards.map(card => {
+                            const isWinner = credit.stackable || card.cardId === credit.winnerCardId;
+                            const amountLabel = !credit.isUsed
+                                ? '$0/year'
+                                : (isWinner
+                                    ? `$${parseFloat(card.annualValue).toFixed(0)}/year${card.timesPerYear > 1 ? ` ($${parseFloat(card.value).toFixed(0)} × ${card.timesPerYear})` : ''}`
+                                    : `counted once — on ${winnerName}`);
+                            return `
+                                <div style="background: var(--bg); padding: 8px; border-radius: 6px; margin-bottom: 6px; font-size: 13px;">
+                                    <div style="font-weight: 600; color: var(--text); margin-bottom: 2px;">${card.name}</div>
+                                    <div style="color: ${isWinner ? 'var(--accent)' : 'var(--muted)'}; font-weight: 600; font-size: 12px; font-family: var(--font-mono);">${amountLabel}</div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+            `;
+        });
+
+        creditsHtml += '</div>';
+
+        creditsContainer.innerHTML = creditsHtml;
+
+    } catch (error) {
+        console.error('Error loading credits profile:', error);
+        document.getElementById('creditsProfile').innerHTML = `
+            <div class="error">Error loading benefits. Please try refreshing the page.</div>
+        `;
+    }
+}
+
+async function toggleCreditUsage(slug, checked) {
+    try {
+        await UserDataManager.saveCreditPreferences({ [slug]: checked });
+        await loadCreditsProfile();
+    } catch (error) {
+        console.error('Error updating credit preference:', error);
+    }
+}
+
+async function toggleCreditUsagePeriod(creditId, checked) {
+    try {
+        await UserDataManager.saveCreditUsages({ [creditId]: checked });
+        await loadCreditsProfile();
+    } catch (error) {
+        console.error('Error updating credit usage period:', error);
+    }
+}
+
+async function calculatePortfolioSummary() {
+    try {
+        const userCards = await UserDataManager.getCards();
+        const spending = await UserDataManager.getSpending();
+        
+        // Initialize default values
+        let totalCards = 0;
+        let totalAnnualFees = 0;
+        let totalAnnualRewards = 0;
+        let netPortfolioValue = 0;
+        
+        if (userCards && userCards.length > 0) {
+            // Get detailed card information and calculate fees
+            const cardDetails = {};
+            for (const cardId of userCards) {
+                try {
+                    const response = await fetch(`${API_BASE}/cards/cards/${cardId}/`);
+                    if (response.ok) {
+                        const card = await response.json();
+                        cardDetails[cardId] = card;
+                        totalAnnualFees += parseFloat(card.annual_fee || 0);
+                    }
+                } catch (error) {
+                    console.error(`Error fetching card ${cardId}:`, error);
+                }
+            }
+            
+            totalCards = userCards.length;
+            
+            // If we have spending data, calculate optimized rewards
+            if (spending && Object.keys(spending).length > 0) {
+                try {
+                    const requestData = {
+                        spending: spending,
+                        cards: userCards,
+                        preferences: await UserDataManager.getPreferences(),
+                        max_recommendations: 10
+                    };
+                    
+                    const response = await fetch(`${API_BASE}/roadmaps/quick-recommendation/`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': getCookie('csrftoken')
+                        },
+                        body: JSON.stringify(requestData)
+                    });
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        const portfolioSummary = data.portfolio_summary;
+                        
+                        if (portfolioSummary) {
+                            totalAnnualRewards = portfolioSummary.total_portfolio_rewards || 0;
+                            netPortfolioValue = portfolioSummary.net_portfolio_value || 0;
+                            // Use the optimized fees from the portfolio summary if available
+                            if (portfolioSummary.total_annual_fees !== undefined) {
+                                totalAnnualFees = portfolioSummary.total_annual_fees;
+                            }
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error calculating portfolio optimization:', error);
+                    // Fall back to simple calculation
+                    netPortfolioValue = Math.max(0, totalAnnualRewards - totalAnnualFees);
+                }
+            } else {
+                // No spending data, so no rewards
+                netPortfolioValue = -totalAnnualFees;
+            }
+        }
+        
+        // Update the display
+        document.getElementById('totalCards').textContent = totalCards.toString();
+        document.getElementById('totalAnnualFees').textContent = `$${totalAnnualFees.toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
+        document.getElementById('totalAnnualRewards').textContent = `$${totalAnnualRewards.toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
+        
+        // Color code the net value
+        const netValueElement = document.getElementById('netPortfolioValue');
+        netValueElement.textContent = `$${netPortfolioValue.toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
+        
+        if (netPortfolioValue > 0) {
+            netValueElement.style.color = '#3FCF8E'; // Green for positive
+        } else if (netPortfolioValue < 0) {
+            netValueElement.style.color = '#F87171'; // Red for negative
+        } else {
+            netValueElement.style.color = '#8B95A4'; // Gray for zero
+        }
+        
+    } catch (error) {
+        console.error('Error calculating portfolio summary:', error);
+        // Show error state
+        document.getElementById('totalCards').textContent = 'Error';
+        document.getElementById('totalAnnualFees').textContent = 'Error';
+        document.getElementById('totalAnnualRewards').textContent = 'Error';
+        document.getElementById('netPortfolioValue').textContent = 'Error';
+    }
+}
+
+// Profile Privacy and Sharing Functionality
+async function initializePrivacySettings() {
+    try {
+        const response = await fetch('/api/cards/profile/privacy/');
+        if (response.ok) {
+            const data = await response.json();
+            
+            // Set the current privacy setting
+            const privacyRadio = document.querySelector(`input[name="privacy"][value="${data.privacy_setting}"]`);
+            if (privacyRadio) {
+                privacyRadio.checked = true;
+            }
+            
+            // Show shareable URL if public
+            if (data.is_public && data.shareable_url) {
+                showShareableUrl(data.shareable_url);
+            }
+        }
+    } catch (error) {
+        console.log('Could not load privacy settings (user may not be logged in)');
+    }
+}
+
+async function updatePrivacySetting(privacySetting) {
+    try {
+        const response = await fetch('/api/cards/profile/privacy/update/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify({
+                privacy_setting: privacySetting
+            })
+        });
+        
+        if (response.ok) {
+            const data = await response.json();
+            
+            if (data.is_public && data.shareable_url) {
+                showShareableUrl(window.location.origin + data.shareable_url);
+            } else {
+                hideShareableUrl();
+            }
+            
+            // Show success message
+            showNotification(privacySetting === 'public' ? 
+                'Profile is now public and shareable!' : 
+                'Profile is now private', 'success');
+        } else {
+            const errorData = await response.json();
+            showNotification(errorData.error || 'Failed to update privacy setting', 'error');
+        }
+    } catch (error) {
+        showNotification('Error updating privacy setting. Please try again.', 'error');
+    }
+}
+
+function showShareableUrl(url) {
+    const shareableUrlSection = document.getElementById('shareable-url-section');
+    const shareableUrlInput = document.getElementById('shareable-url');
+    
+    shareableUrlInput.value = url;
+    shareableUrlSection.style.display = 'block';
+}
+
+function hideShareableUrl() {
+    const shareableUrlSection = document.getElementById('shareable-url-section');
+    shareableUrlSection.style.display = 'none';
+}
+
+function copyShareableUrl() {
+    const shareableUrlInput = document.getElementById('shareable-url');
+    shareableUrlInput.select();
+    shareableUrlInput.setSelectionRange(0, 99999); // For mobile devices
+    
+    try {
+        document.execCommand('copy');
+        showNotification('URL copied to clipboard!', 'success');
+        
+        // Change button text briefly
+        const copyBtn = document.getElementById('copy-url-btn');
+        const originalText = copyBtn.innerHTML;
+        copyBtn.innerHTML = '✅ Copied!';
+        setTimeout(() => {
+            copyBtn.innerHTML = originalText;
+        }, 2000);
+    } catch (err) {
+        showNotification('Failed to copy URL', 'error');
+    }
+}
+
+// Event listeners
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize privacy settings on page load
+    initializePrivacySettings();
+    
+    // Add event listeners for privacy toggle
+    const privacyRadios = document.querySelectorAll('input[name="privacy"]');
+    privacyRadios.forEach(radio => {
+        radio.addEventListener('change', function() {
+            if (this.checked) {
+                updatePrivacySetting(this.value);
+            }
+        });
+    });
+});
+
+// Card Search Functionality
+let allCards = [];
+let selectedCard = null;
+let searchTimeout = null;
+
+// Load all cards for search
+async function loadAllCards() {
+    try {
+        const response = await fetch('/api/cards/cards/');
+        allCards = await response.json();
+    } catch (error) {
+        console.error('Error loading cards:', error);
+    }
+}
+
+// Search cards as user types
+function searchCards(query) {
+    const resultsDiv = document.getElementById('cardSearchResults');
+    const addButton = document.getElementById('addSelectedCard');
+    
+    // Clear previous timeout
+    if (searchTimeout) {
+        clearTimeout(searchTimeout);
+    }
+    
+    // Reset selected card
+    selectedCard = null;
+    if (addButton) {
+        addButton.disabled = true;
+        addButton.style.opacity = '0.5';
+    }
+    
+    if (!query || query.length < 2) {
+        resultsDiv.style.display = 'none';
+        return;
+    }
+    
+    // Debounce search
+    searchTimeout = setTimeout(() => {
+        const filtered = allCards.filter(card =>
+            cardMatchesQuery(card, query)
+        ).slice(0, 8); // Limit to 8 results
+        
+        displaySearchResults(filtered);
+    }, 300);
+}
+
+// Display search results
+function displaySearchResults(cards) {
+    let resultsDiv = document.getElementById('cardSearchResults');
+    
+    // Move dropdown to body to escape all stacking contexts
+    if (resultsDiv.parentNode !== document.body) {
+        document.body.appendChild(resultsDiv);
+    }
+    
+    // Position dropdown relative to search input
+    const searchInput = document.getElementById('cardSearch');
+    const inputRect = searchInput.getBoundingClientRect();
+    
+    // Style the dropdown as a portal
+    resultsDiv.style.position = 'fixed';
+    resultsDiv.style.top = (inputRect.bottom + 2) + 'px';
+    resultsDiv.style.left = inputRect.left + 'px';
+    resultsDiv.style.width = inputRect.width + 'px';
+    resultsDiv.style.zIndex = '10000';
+    resultsDiv.style.background = 'var(--surface)';
+    resultsDiv.style.border = '1px solid var(--border)';
+    resultsDiv.style.borderTop = 'none';
+    resultsDiv.style.borderRadius = '0 0 var(--radius-sm) var(--radius-sm)';
+    resultsDiv.style.maxHeight = '300px';
+    resultsDiv.style.overflowY = 'auto';
+    resultsDiv.style.boxShadow = 'var(--shadow-md)';
+
+    if (cards.length === 0) {
+        resultsDiv.innerHTML = '<div style="padding: 12px; color: var(--muted); text-align: center;">No cards found</div>';
+        resultsDiv.style.display = 'block';
+        return;
+    }
+
+    const html = cards.map(card => `
+        <div
+            class="search-result-item"
+            onclick="selectCard(${card.id}, '${card.name.replace(/'/g, '\\\'')}')"
+            style="padding: 12px; cursor: pointer; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; transition: background-color 0.2s;"
+            onmouseover="this.style.backgroundColor='var(--bg)'"
+            onmouseout="this.style.backgroundColor='transparent'"
+        >
+            <div>
+                <div style="font-weight: 600; color: var(--text-strong);">${card.name}</div>
+                <div style="font-size: 12px; color: var(--muted);">${card.issuer.name} • Annual Fee: $${card.annual_fee}</div>
+            </div>
+            <div style="color: var(--accent); font-size: 12px; font-weight: 600;">Select →</div>
+        </div>
+    `).join('');
+    
+    resultsDiv.innerHTML = html;
+    resultsDiv.style.display = 'block';
+}
+
+// Hide search results dropdown
+function hideSearchResults() {
+    const resultsDiv = document.getElementById('cardSearchResults');
+    if (resultsDiv) {
+        resultsDiv.style.display = 'none';
+    }
+}
+
+// Select a card from search results
+async function selectCard(cardId, cardName) {
+    selectedCard = cardId;
+    
+    // Update input value
+    document.getElementById('cardSearch').value = cardName;
+    
+    // Hide results and clean up positioning
+    const resultsDiv = document.getElementById('cardSearchResults');
+    resultsDiv.style.display = 'none';
+    
+    // Since there's no button, automatically add the card
+    await addSelectedCardToCollection();
+}
+
+// Add selected card to collection
+async function addSelectedCardToCollection() {
+    if (!selectedCard) {
+        showNotification('Please select a card first', 'error');
+        return;
+    }
+    
+    const addButton = document.getElementById('addSelectedCard');
+    let originalText = '';
+    if (addButton) {
+        originalText = addButton.innerHTML;
+        addButton.innerHTML = '⏳ Adding...';
+        addButton.disabled = true;
+    }
+    
+    try {
+        if (isAuthenticated) {
+            // For authenticated users, save to server
+            const response = await fetch('/api/cards/user-cards/add/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({
+                    card_id: selectedCard
+                })
+            });
+            
+            if (response.ok) {
+                const data = await response.json();
+                showNotification(data.message || 'Card added successfully!', 'success');
+                
+                // Reload the page data to show the new card
+                loadProfileData();
+            } else {
+                const errorData = await response.json();
+                showNotification(errorData.error || 'Failed to add card', 'error');
+                return;
+            }
+        } else {
+            // For unauthenticated users, save to local storage
+            const currentCards = LocalStorage.getCards();
+            if (!currentCards.includes(selectedCard)) {
+                currentCards.push(selectedCard);
+                LocalStorage.setCards(currentCards);
+                
+                showNotification('Card added to your local collection! Log in to sync with your account.', 'success');
+                
+                // Reload the page data to show the new card
+                loadProfileData();
+            } else {
+                showNotification('Card is already in your collection', 'info');
+            }
+        }
+        
+        // Clear search
+        document.getElementById('cardSearch').value = '';
+        selectedCard = null;
+        if (addButton) {
+            addButton.disabled = true;
+            addButton.style.opacity = '0.5';
+        }
+        
+    } catch (error) {
+        console.error('Error adding card:', error);
+        showNotification('Error adding card. Please try again.', 'error');
+    } finally {
+        if (addButton) {
+            addButton.innerHTML = originalText;
+            addButton.disabled = selectedCard === null;
+        }
+    }
+}
+
+// Hide search results when clicking outside
+document.addEventListener('click', function(event) {
+    const searchInput = document.getElementById('cardSearch');
+    const resultsDiv = document.getElementById('cardSearchResults');
+    
+    if (!searchInput.contains(event.target) && !resultsDiv.contains(event.target)) {
+        resultsDiv.style.display = 'none';
+    }
+});
+
+// Load cards when page loads
+loadAllCards();
+
+// Update add card section based on authentication status
+function updateAddCardSection() {
+    const searchInput = document.getElementById('cardSearch');
+    const addButton = document.getElementById('addSelectedCard');
+    
+    // Enable for both authenticated and unauthenticated users
+    if (searchInput) {
+        searchInput.disabled = false;
+        searchInput.style.opacity = '1';
+        if (isAuthenticated) {
+            searchInput.placeholder = "Type card name (e.g., 'Chase Sapphire', 'Blue Cash')...";
+        } else {
+            searchInput.placeholder = "Type card name (e.g., 'Chase Sapphire', 'Blue Cash')... (saves locally)";
+        }
+    }
+    
+    // Button functionality removed - cards are now added automatically on selection
+    
+    // Add visual indicator for local storage mode
+    if (!isAuthenticated) {
+        const addCardSection = document.querySelector('.section h2');
+        if (addCardSection && addCardSection.textContent.includes('➕ Add Credit Cards')) {
+            const existingBadge = addCardSection.querySelector('.local-mode-badge');
+            if (!existingBadge) {
+                const badge = document.createElement('span');
+                badge.className = 'local-mode-badge';
+                badge.innerHTML = ' <span style="background: #5C6675; color: white; padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: 500;">Local Mode</span>';
+                addCardSection.appendChild(badge);
+            }
+        }
+    } else {
+        // Remove local mode badge for authenticated users
+        const badge = document.querySelector('.local-mode-badge');
+        if (badge) {
+            badge.remove();
+        }
+    }
+}
