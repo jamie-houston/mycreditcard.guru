@@ -129,7 +129,19 @@ const ROADMAP_ACTION_DANGER = { cancel: true };
 function _roadmapSummaryTableHtml(recommendations) {
     const order = ['apply', 'keep', 'cancel', 'upgrade', 'downgrade'];
     const rows = order
-        .flatMap(action => recommendations.filter(rec => rec.action === action))
+        .flatMap(action => {
+            const group = recommendations.filter(rec => rec.action === action);
+            if (renderRoadmapResults.state && renderRoadmapResults.state.sortMode === 'selffunding') {
+                group.sort((a, b) => {
+                    const aSelf = a.pays_for_itself ? 1 : 0;
+                    const bSelf = b.pays_for_itself ? 1 : 0;
+                    return bSelf - aSelf;
+                });
+            } else if (action === 'apply') {
+                group.sort((a, b) => (a.recommended_month || 0) - (b.recommended_month || 0) || a.priority - b.priority);
+            }
+            return group;
+        })
         .map(rec => {
             const danger = !!ROADMAP_ACTION_DANGER[rec.action];
             const annualFee = parseFloat(rec.card.effective_annual_fee || 0);
@@ -379,12 +391,51 @@ async function removeCardOwnership(cardId, cardName, buttonEl) {
     }
 }
 
+// Register global control change handler for filtering/sorting
+if (typeof window !== 'undefined' && typeof window._onRoadmapControlChange === 'undefined') {
+    window._onRoadmapControlChange = function() {
+        const filterCheckbox = document.getElementById('filterSelfFunding');
+        const sortSelect = document.getElementById('sortRecommendations');
+        if (filterCheckbox) {
+            renderRoadmapResults.state.filterSelfFunding = filterCheckbox.checked;
+        }
+        if (sortSelect) {
+            renderRoadmapResults.state.sortMode = sortSelect.value;
+        }
+        if (renderRoadmapResults.lastData) {
+            renderRoadmapResults(renderRoadmapResults.lastData, {
+                ...renderRoadmapResults.lastOpts,
+                noScroll: true
+            });
+        }
+    };
+}
+
 function renderRoadmapResults(data, opts = {}) {
+    // Cache inputs for client-side filtering/sorting re-renders
+    renderRoadmapResults.lastData = data;
+    renderRoadmapResults.lastOpts = opts;
+
+    if (!renderRoadmapResults.state) {
+        renderRoadmapResults.state = {
+            filterSelfFunding: false,
+            sortMode: 'default'
+        };
+    }
+
     const container = opts.container || document.getElementById('results');
     const readOnly = !!opts.readOnly;
     const recommendations = data.recommendations || [];
     const portfolioSummary = data.portfolio_summary || {};
     const baseDate = data.generated_at ? new Date(data.generated_at) : new Date();
+
+    const filterSelfFunding = renderRoadmapResults.state.filterSelfFunding;
+    const sortMode = renderRoadmapResults.state.sortMode;
+
+    let filteredRecs = [...recommendations];
+    if (filterSelfFunding) {
+        filteredRecs = filteredRecs.filter(rec => rec.pays_for_itself);
+    }
 
     let html = `
         <div class="results" style="background:transparent;border:none;padding:0;">
@@ -397,6 +448,28 @@ function renderRoadmapResults(data, opts = {}) {
     // whenever the request posted an 'expense', even if there are no
     // apply/keep/cancel recommendations to show otherwise.
     html += _roadmapExpensePanelHtml(data.expense_recommendation);
+
+    // Render client-side controls bar
+    if (recommendations.length > 0) {
+        html += `
+            <div class="roadmap-controls" style="display:flex; justify-content:space-between; align-items:center; margin: 15px 4px 20px; gap: 10px; flex-wrap: wrap; padding: 10px 12px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md);">
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <span style="font-size: 13px; color: var(--muted); font-weight: 500;">Filter:</span>
+                    <label style="display:inline-flex; align-items:center; gap:6px; font-size:13px; color:var(--text); cursor:pointer; margin:0; user-select:none;">
+                        <input type="checkbox" id="filterSelfFunding" ${filterSelfFunding ? 'checked' : ''} onchange="window._onRoadmapControlChange()" style="margin:0; width:16px; height:16px; cursor:pointer;">
+                        Self-funding cards only
+                    </label>
+                </div>
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <span style="font-size: 13px; color: var(--muted); font-weight: 500;">Sort:</span>
+                    <select id="sortRecommendations" onchange="window._onRoadmapControlChange()" style="padding: 4px 8px; font-size: 13px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--bg); color: var(--text); cursor:pointer;">
+                        <option value="default" ${sortMode === 'default' ? 'selected' : ''}>Recommended order</option>
+                        <option value="selffunding" ${sortMode === 'selffunding' ? 'selected' : ''}>Self-funding first</option>
+                    </select>
+                </div>
+            </div>
+        `;
+    }
 
     // Add portfolio summary if we have recommendations
     if (recommendations.length > 0 && portfolioSummary.card_count > 0) {
@@ -437,7 +510,7 @@ function renderRoadmapResults(data, opts = {}) {
             </div>
         `;
 
-        html += _roadmapSummaryTableHtml(recommendations);
+        html += _roadmapSummaryTableHtml(filteredRecs);
 
         // Phase I: the full allocation matrix supersedes the older
         // single-winner "Best card per category" block — but fall back to
@@ -467,15 +540,56 @@ function renderRoadmapResults(data, opts = {}) {
 
     if (recommendations.length === 0) {
         html += '<p style="text-align:center;color:var(--muted);">No recommendations found with your current criteria. Try adjusting your filters.</p>';
+    } else if (filteredRecs.length === 0) {
+        html += '<p style="text-align:center;color:var(--muted);margin-top:20px;margin-bottom:20px;">No self-funding cards found in this roadmap. Try clearing the filter.</p>';
     } else {
-        // Group recommendations by action type
+        // Group recommendations by action type with sort mode applied
         const groupedRecs = {
-            keep: recommendations.filter(rec => rec.action === 'keep'),
-            cancel: recommendations.filter(rec => rec.action === 'cancel'),
-            apply: recommendations.filter(rec => rec.action === 'apply')
-                .sort((a, b) => (a.recommended_month || 0) - (b.recommended_month || 0) || a.priority - b.priority),
-            upgrade: recommendations.filter(rec => rec.action === 'upgrade'),
-            downgrade: recommendations.filter(rec => rec.action === 'downgrade')
+            keep: filteredRecs.filter(rec => rec.action === 'keep')
+                .sort((a, b) => {
+                    if (sortMode === 'selffunding') {
+                        const aSelf = a.pays_for_itself ? 1 : 0;
+                        const bSelf = b.pays_for_itself ? 1 : 0;
+                        if (aSelf !== bSelf) return bSelf - aSelf;
+                    }
+                    return 0;
+                }),
+            cancel: filteredRecs.filter(rec => rec.action === 'cancel')
+                .sort((a, b) => {
+                    if (sortMode === 'selffunding') {
+                        const aSelf = a.pays_for_itself ? 1 : 0;
+                        const bSelf = b.pays_for_itself ? 1 : 0;
+                        if (aSelf !== bSelf) return bSelf - aSelf;
+                    }
+                    return 0;
+                }),
+            apply: filteredRecs.filter(rec => rec.action === 'apply')
+                .sort((a, b) => {
+                    if (sortMode === 'selffunding') {
+                        const aSelf = a.pays_for_itself ? 1 : 0;
+                        const bSelf = b.pays_for_itself ? 1 : 0;
+                        if (aSelf !== bSelf) return bSelf - aSelf;
+                    }
+                    return (a.recommended_month || 0) - (b.recommended_month || 0) || a.priority - b.priority;
+                }),
+            upgrade: filteredRecs.filter(rec => rec.action === 'upgrade')
+                .sort((a, b) => {
+                    if (sortMode === 'selffunding') {
+                        const aSelf = a.pays_for_itself ? 1 : 0;
+                        const bSelf = b.pays_for_itself ? 1 : 0;
+                        if (aSelf !== bSelf) return bSelf - aSelf;
+                    }
+                    return 0;
+                }),
+            downgrade: filteredRecs.filter(rec => rec.action === 'downgrade')
+                .sort((a, b) => {
+                    if (sortMode === 'selffunding') {
+                        const aSelf = a.pays_for_itself ? 1 : 0;
+                        const bSelf = b.pays_for_itself ? 1 : 0;
+                        if (aSelf !== bSelf) return bSelf - aSelf;
+                    }
+                    return 0;
+                })
         };
 
         // Section metadata (order: Apply, Keep, Cancel, then any Upgrade/Downgrade)
@@ -627,6 +741,9 @@ function renderRoadmapResults(data, opts = {}) {
                     const eligibilityHtml = rec.eligibility_note ? `
                         <div class="chip" style="margin-top: 10px;">${rec.eligibility_note}</div>
                     ` : '';
+                    const paysForItselfHtml = rec.pays_for_itself ? `
+                        <div class="chip accent" style="margin-top: 10px;"><span class="ico" style="font-size: 14px;">savings</span> Pays for itself via credits</div>
+                    ` : '';
                     const removeHtml = canRemove ? `
                         <div style="margin-top:8px;">
                             <button onclick="event.stopPropagation(); removeCardOwnership(${rec.card.id}, '${(rec.card.name || '').replace(/'/g, "\\'")}', this)" class="secondary" style="padding:6px 10px; font-size:12px;">Remove from my cards</button>
@@ -654,6 +771,7 @@ function renderRoadmapResults(data, opts = {}) {
                                     <div><div class="apply-card-stat-label">WHEN</div><div class="apply-card-stat-value">${_roadmapTimingLabel(rec.recommended_month, baseDate)}</div></div>
                                 </div>
                                 ${eligibilityHtml}
+                                ${paysForItselfHtml}
                                 ${breakdownHtml}
                                 ${!readOnly ? `
                                 <div style="display:flex; gap:8px; margin-top:12px;">
@@ -674,6 +792,7 @@ function renderRoadmapResults(data, opts = {}) {
                                     <span class="grouped-row-value${section.danger ? ' danger' : ''}">${_roadmapFormatSigned(estimatedValue)}</span>
                                 </div>
                                 ${eligibilityHtml}
+                                ${paysForItselfHtml}
                                 ${breakdownHtml}
                                 ${removeHtml}
                             </div>

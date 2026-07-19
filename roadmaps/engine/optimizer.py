@@ -563,6 +563,10 @@ class PortfolioOptimizer:
                 category_rewards = effective_spend * reward_rate * reward_value_multiplier
                 total_rewards += category_rewards
 
+        # Add single-card credits value
+        credits_value, _ = self.engine._calculate_card_credits_value(card)
+        total_rewards += credits_value
+
         if signup_bonus:
             signup_value = self.engine._get_signup_bonus_value(card)
             total_rewards += signup_value

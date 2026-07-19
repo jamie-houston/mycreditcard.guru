@@ -550,6 +550,16 @@ class RecommendationEngineOrchestrator:
                     f"Breakdown mismatch for {card.name} ({action}): headline "
                     f"${estimated_value:.2f} vs line items ${expected:.2f}")
 
+            annual_fee_float = float(card.annual_fee)
+            if action == 'cancel':
+                card_credits_val, _ = cancel_credit_allocation.get(card.id, (0.0, []))
+            elif card_action.get('duplicate_copy'):
+                card_credits_val = 0.0
+            else:
+                card_credits_val, _ = credit_allocation.get(card.id, (0.0, []))
+
+            pays_for_itself = (annual_fee_float > 0) and (card_credits_val >= annual_fee_float)
+
             rec = {
                 'card': card,
                 'action': action,
@@ -564,6 +574,7 @@ class RecommendationEngineOrchestrator:
                 'signup_bonus_value': signup_bonus_value,
                 'eligibility_note': eligibility_note,
                 'bonus_deferred': bonus_deferred,
+                'pays_for_itself': pays_for_itself,
                 'priority': card_action.get('priority', 1)
             }
             if action == 'apply' and len(self.entities) > 1:

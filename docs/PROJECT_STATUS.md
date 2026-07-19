@@ -48,30 +48,12 @@ existing credit math) since they touch the same builder UI.
 - [x] **Phase M** — Verified max-cards-per-lifetime/per-issuer enforcement
       (2026-07-19). No code changes — closed as verify-and-document per
       Jamie's call. See below.
+- [x] **Phase O** — Category-less "easy mode" spending (2026-07-19). Added builder toggle and Easy Mode input, scratch field in serializer, engine fallback mapping to uncategorized base rate.
+- [x] **Phase P** — Surface cards that "pay for themselves" via recurring credits (2026-07-19). Added `pays_for_itself` flag in orchestrator/serializer when allocated credits value >= annual fee. Added client-side filter checkbox and sort selector in results UI with non-scrolling re-renders. Fixed pre-sort gap in `calculate_smart_card_value`.
 
 Detail archived — see pointers under "Where everything else went."
 
 ### Open
-
-- [ ] **Phase O — Category-less "easy mode" spending**
-      GREENFIELD. Let a user enter total monthly OR yearly spend without
-      picking categories ("$4k/month"), for a quick low-effort estimate.
-      New builder toggle + input (`templates/index.html`), scratch field in
-      `roadmaps/serializers.py`, and engine fallback that values a flat total
-      at base/uncategorized rates. Complements, not replaces, the category grid.
-- [ ] **Phase P — Surface cards that "pay for themselves" via recurring credits**
-      MOSTLY ALREADY COMPUTED — surface it + one real fix. The engine already
-      annualizes recurring credits and nets them against the annual fee in
-      keep/select decisions (`_counted_card_credits`,
-      `_allocate_portfolio_credits`, `_calculate_card_allocated_breakdown`), so
-      a high-fee card whose credits cover the fee is already kept without a
-      signup bonus. New work: (1) an explicit "pays for itself via credits"
-      flag/label when `credits_value >= annual_fee`, surfaced in the
-      recommendation payload + UI; (2) optional filter/sort for self-funding
-      cards; (3) FIX the pre-sort gap where `_calculate_smart_card_value`
-      (~recommendation_engine.py:1751) omits credits, so credit-heavy cards
-      aren't under-ranked before the portfolio comparison (which does count
-      them). Guard the reconciliation invariant — the label is display-only.
 
 ### Technical Debt & Refactoring
 - [x] **Frontend cleanup — Phases 1–3** (dedup, bug fix, HTML partials;

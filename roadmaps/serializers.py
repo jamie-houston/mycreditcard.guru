@@ -118,6 +118,9 @@ class GenerateRoadmapSerializer(serializers.Serializer):
     # entirely as a parallel, read-only computation; see
     # `roadmaps.engine.calculators.expense.ExpenseRecommender`.
     expense = serializers.DictField(required=False)
+    # Phase O: category-less "easy mode" spending.
+    # Handled by mapping a single flat amount at base/uncategorized rates.
+    easy_mode_spending = serializers.DictField(required=False, allow_null=True)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -153,6 +156,28 @@ class GenerateRoadmapSerializer(serializers.Serializer):
                 raise serializers.ValidationError(f"Unknown category_id {category_id}")
 
         return {'amount': amount, 'category_id': category_id}
+
+    def validate_easy_mode_spending(self, value):
+        if not value:
+            return None
+        if not isinstance(value, dict):
+            raise serializers.ValidationError("easy_mode_spending must be a dictionary")
+        
+        amount_raw = value.get('amount')
+        if amount_raw is None:
+            raise serializers.ValidationError("easy_mode_spending.amount is required")
+        try:
+            amount = float(amount_raw)
+        except (TypeError, ValueError):
+            raise serializers.ValidationError("easy_mode_spending.amount must be a number")
+        if amount < 0:
+            raise serializers.ValidationError("easy_mode_spending.amount must be non-negative")
+            
+        interval = value.get('interval', 'monthly')
+        if interval not in ('monthly', 'yearly'):
+            raise serializers.ValidationError("easy_mode_spending.interval must be 'monthly' or 'yearly'")
+            
+        return {'amount': amount, 'interval': interval}
 
     def generate_recommendations(self):
         """Generate recommendations without persisting anything.
@@ -197,7 +222,25 @@ class GenerateRoadmapSerializer(serializers.Serializer):
             profile, created = UserSpendingProfile.objects.get_or_create(session_key=session_key)
         
         # Update spending amounts if provided
-        if 'spending_amounts' in validated_data:
+        if 'easy_mode_spending' in validated_data and validated_data['easy_mode_spending']:
+            from cards.models import SpendingCategory
+            profile.spending_amounts.all().delete()
+            easy_data = validated_data['easy_mode_spending']
+            amount = easy_data['amount']
+            interval = easy_data['interval']
+            monthly_amount = amount if interval == 'monthly' else amount / 12
+            
+            other_category = SpendingCategory.objects.filter(slug='other').first()
+            if not other_category:
+                other_category = SpendingCategory.objects.first()
+                
+            if other_category and monthly_amount > 0:
+                SpendingAmount.objects.create(
+                    profile=profile,
+                    category=other_category,
+                    monthly_amount=monthly_amount
+                )
+        elif 'spending_amounts' in validated_data:
             from cards.models import SpendingCategory
             profile.spending_amounts.all().delete()
             # Get valid category IDs to prevent foreign key errors
@@ -378,6 +421,7 @@ class RecommendationItemSerializer(serializers.Serializer):
     signup_bonus_value = serializers.SerializerMethodField()
     eligibility_note = serializers.CharField(required=False, default='')
     bonus_deferred = serializers.BooleanField(required=False, default=False)
+    pays_for_itself = serializers.BooleanField(required=False, default=False)
     recommended_month = serializers.IntegerField(required=False, allow_null=True)
     bonus_months_needed = serializers.FloatField(required=False, allow_null=True)
     priority = serializers.IntegerField()

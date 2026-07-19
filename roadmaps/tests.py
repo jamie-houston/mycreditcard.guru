@@ -741,6 +741,69 @@ class CreditAllocationTests(TestCase):
         self.assertEqual(allocation[cancel_candidate.id][0], 0.0)
         self.assertEqual(allocation[held_high.id][0], 550.0)
 
+    def test_calculate_smart_card_value_includes_credits(self):
+        # Create a card with an annual fee and a credit
+        card = self._card('Smart Card')
+        card.annual_fee = Decimal('250.00')
+        card.save()
+        self._credit(card, self.lounge, 300)
+
+        # Create the engine
+        engine = self._engine()
+
+        val_no_bonus = engine.optimizer.calculate_smart_card_value(card, signup_bonus=False)
+        # Category rewards: 0, Credits: 300.0
+        self.assertEqual(val_no_bonus, 300.0)
+
+    def test_pays_for_itself_flag_in_recommendations(self):
+        from cards.models import SpendingAmount, SpendingCategory
+        from roadmaps.models import Roadmap
+
+        travel = SpendingCategory.objects.get(slug='travel')
+        SpendingAmount.objects.create(
+            profile=self.profile, category=travel,
+            monthly_amount=Decimal('2000'))
+
+        # Set up a card that pays for itself (credits >= fee)
+        card_pays = self._card('Pays Card')
+        card_pays.annual_fee = Decimal('200.00')
+        card_pays.signup_bonus_amount = 50000
+        card_pays.metadata = {
+            'signup_bonus': {
+                'spending_requirement': 1000,
+                'time_limit_months': 3,
+                'bonus_value': 500.0,
+            }
+        }
+        card_pays.save()
+        self._credit(card_pays, self.lounge, 250)
+
+        # Set up a card that does NOT pay for itself (credits < fee)
+        card_not_pays = self._card('Not Pays Card')
+        card_not_pays.annual_fee = Decimal('300.00')
+        card_not_pays.signup_bonus_amount = 50000
+        card_not_pays.metadata = {
+            'signup_bonus': {
+                'spending_requirement': 1000,
+                'time_limit_months': 3,
+                'bonus_value': 500.0,
+            }
+        }
+        card_not_pays.save()
+        self._credit(card_not_pays, self.uber_eats, 100)
+
+        roadmap = Roadmap.objects.create(profile=self.profile, max_recommendations=5)
+        engine = self._engine()
+        recs = engine.generate_quick_recommendations(roadmap)
+
+        rec_pays = next((r for r in recs if r['card'].id == card_pays.id), None)
+        rec_not_pays = next((r for r in recs if r['card'].id == card_not_pays.id), None)
+
+        self.assertIsNotNone(rec_pays)
+        self.assertIsNotNone(rec_not_pays)
+        self.assertTrue(rec_pays['pays_for_itself'])
+        self.assertFalse(rec_not_pays['pays_for_itself'])
+
 
 class QuickRecommendationSafetyTests(TestCase):
     """The quick-rec endpoint must never mutate stored profile data
@@ -1552,3 +1615,71 @@ class ExpenseRecommendationResponseTests(TestCase):
             top['value_for_expense'],
             top['signup_bonus_value'] + top['category_rewards'] - top['effective_annual_fee'],
             places=2)
+
+
+class EasyModeSpendingTests(TestCase):
+    """Tests for Phase O: Category-less 'easy mode' spending"""
+
+    def setUp(self):
+        from cards.models import SpendingCategory, RewardCategory
+        self.user = User.objects.create_user(
+            username='easymoder', email='easymoder@example.com', password='x')
+        self.points = RewardType.objects.create(name='Points', slug='points')
+        self.issuer = Issuer.objects.create(name='Easy Bank', slug='easy-bank')
+        
+        # 'other' category is used for fallback
+        self.other = SpendingCategory.objects.create(name='Other Spending', slug='other')
+        
+        self.card = CreditCard.objects.create(
+            name='Flat Rate Card', slug='flat-rate-card', issuer=self.issuer,
+            signup_bonus_type=self.points, primary_reward_type=self.points,
+            metadata={'reward_value_multiplier': 0.01}
+        )
+        RewardCategory.objects.create(
+            card=self.card, category=self.other, reward_rate=Decimal('2.00'),
+            reward_type=self.points)
+
+    def test_monthly_easy_mode_spending(self):
+        self.client.force_login(self.user)
+        response = self.client.post(
+            '/api/roadmaps/quick-recommendation/',
+            {
+                'easy_mode_spending': {'amount': 3000.0, 'interval': 'monthly'},
+                'user_cards': [],
+                'max_recommendations': 1
+            },
+            content_type='application/json'
+        )
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        
+        # Verify total estimated rewards reconciles to:
+        # $3000/mo * 12 mo = $36000 annual spend
+        # $36000 * 2% reward rate = 72000 points
+        # 72000 points * 0.01 reward value multiplier = $720.00
+        # Since it is a newly applied card, total value = signup bonus + annual rewards - fee.
+        # But this card has 0 signup bonus, so estimated value = $720.00.
+        self.assertEqual(len(data['recommendations']), 1)
+        rec = data['recommendations'][0]
+        self.assertAlmostEqual(float(rec['estimated_rewards']), 720.00, places=2)
+
+    def test_yearly_easy_mode_spending(self):
+        self.client.force_login(self.user)
+        response = self.client.post(
+            '/api/roadmaps/quick-recommendation/',
+            {
+                'easy_mode_spending': {'amount': 48000.0, 'interval': 'yearly'},
+                'user_cards': [],
+                'max_recommendations': 1
+            },
+            content_type='application/json'
+        )
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        
+        # $48000/yr annual spend
+        # $48000 * 2% reward rate = 96000 points
+        # 96000 points * 0.01 multiplier = $960.00
+        self.assertEqual(len(data['recommendations']), 1)
+        rec = data['recommendations'][0]
+        self.assertAlmostEqual(float(rec['estimated_rewards']), 960.00, places=2)
