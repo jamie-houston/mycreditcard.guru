@@ -53,16 +53,45 @@
         </div>
     </nav>
 
-    <!-- Mobile top bar: brand + auth only -->
+    <!-- Mobile top bar: brand + auth + menu -->
     <div class="mobile-topbar">
         <a href="/" class="topnav-brand"><span class="ico">credit_card</span> Card Guru</a>
-        <div class="topnav-auth" id="navAuthMobile">
-            {% if user.is_authenticated %}
-                <a href="{% url 'account_logout' %}" class="nav-logout" onclick="handleLogout()">Logout</a>
-            {% else %}
-                <a href="{% provider_login_url 'google' %}" class="nav-login" onclick="handleLogin()">Sign in</a>
-            {% endif %}
+        <div class="mobile-topbar-actions">
+            <button class="mobile-menu-toggle" onclick="toggleMobileMenu()" aria-label="Menu">
+                <span class="ico">menu</span>
+            </button>
+            <div class="topnav-auth" id="navAuthMobile">
+                {% if user.is_authenticated %}
+                    <a href="{% url 'account_logout' %}" class="nav-logout" onclick="handleLogout()">Logout</a>
+                {% else %}
+                    <a href="{% provider_login_url 'google' %}" class="nav-login" onclick="handleLogin()">Sign in</a>
+                {% endif %}
+            </div>
         </div>
+    </div>
+
+    <!-- Mobile menu drawer (all navigation) -->
+    <div class="mobile-menu-drawer" id="mobileMenuDrawer">
+        <nav class="mobile-menu-content">
+            <a href="/" class="mobile-menu-item {% if request.resolver_match.url_name == 'landing' %}active{% endif %}">
+                <span class="ico">home</span> Home
+            </a>
+            <a href="/roadmap/" class="mobile-menu-item {% if request.resolver_match.url_name == 'roadmap' %}active{% endif %}">
+                <span class="ico">route</span> Roadmap
+            </a>
+            <a href="/profile/" class="mobile-menu-item {% if request.resolver_match.url_name == 'profile' %}active{% endif %}">
+                <span class="ico">style</span> My Cards
+            </a>
+            <a href="/cards/" class="mobile-menu-item {% if request.resolver_match.url_name == 'cards_list' %}active{% endif %}">
+                <span class="ico">search</span> Browse
+            </a>
+            <a href="/help/" class="mobile-menu-item {% if request.resolver_match.url_name == 'help' %}active{% endif %}">
+                <span class="ico">help</span> Help
+            </a>
+            <a href="/resources/" class="mobile-menu-item {% if request.resolver_match.url_name == 'resources' %}active{% endif %}">
+                <span class="ico">library_books</span> Resources
+            </a>
+        </nav>
     </div>
 
     <div class="container">
@@ -1848,6 +1877,32 @@
             console.log('Manual login triggered');
             await initUserState();
         };
+
+        // Mobile menu toggle
+        window.toggleMobileMenu = function() {
+            const drawer = document.getElementById('mobileMenuDrawer');
+            drawer.classList.toggle('open');
+        };
+
+        // Close mobile menu when clicking a link or outside
+        document.addEventListener('DOMContentLoaded', function() {
+            const menuItems = document.querySelectorAll('.mobile-menu-item');
+            const drawer = document.getElementById('mobileMenuDrawer');
+            const menuToggle = document.querySelector('.mobile-menu-toggle');
+
+            menuItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    drawer.classList.remove('open');
+                });
+            });
+
+            // Close menu when clicking outside
+            document.addEventListener('click', function(event) {
+                if (!drawer.contains(event.target) && !menuToggle.contains(event.target)) {
+                    drawer.classList.remove('open');
+                }
+            });
+        });
 
         // Test function to manually trigger logout
         window.testLogout = function() {
