@@ -72,6 +72,11 @@
 let allCategoryCards = [];
 let userCards = new Set();
 
+window.onCardOwnershipToggled = function(cardId, hasCard) {
+    if (hasCard) userCards.add(cardId); else userCards.delete(cardId);
+    filterCards();
+};
+
 async function loadCategoryDetail() {
     try {
         // Get category slug from URL
@@ -114,8 +119,7 @@ async function loadCategoryDetail() {
 
 async function loadUserCards() {
     try {
-        const cards = await UserDataManager.getCards();
-        userCards = new Set(cards);
+        userCards = await loadOwnedCardIds();
     } catch (error) {
         console.error('Error loading user cards:', error);
     }
@@ -264,36 +268,6 @@ function displayCards(cards) {
     `;
     
     container.innerHTML = html;
-}
-
-async function toggleCardOwnership(cardId, button) {
-    try {
-        const hasCard = userCards.has(cardId);
-        
-        button.disabled = true;
-        button.textContent = '...';
-        
-        if (hasCard) {
-            userCards.delete(cardId);
-            button.textContent = '✅ I have this';
-            button.className = 'success';
-        } else {
-            userCards.add(cardId);
-            button.textContent = '❌ Remove';
-            button.className = 'danger';
-        }
-        
-        await UserDataManager.saveCards([...userCards]);
-        
-        // Refresh the display to apply ownership filter
-        filterCards();
-        
-    } catch (error) {
-        console.error('Error:', error);
-        alert('Error updating card ownership');
-    } finally {
-        button.disabled = false;
-    }
 }
 
 // Load category details when page loads

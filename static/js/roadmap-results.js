@@ -3,9 +3,10 @@
 // page (readOnly: true — no ownership/apply actions).
 //
 // Depends on globals defined in base.html: API_BASE, isAuthenticated,
-// getCookie(), showNotification(), UserDataManager, LocalStorage. Depends
-// on CATEGORY_ICONS, toggleSection(), openCardModal(), openCardOwnershipModal()
-// being defined on the page that calls renderRoadmapResults() (index.html).
+// getCookie(), showNotification(), escapeHtml(), UserDataManager, LocalStorage.
+// Depends on CATEGORY_ICONS, toggleSection(), openCardModal(),
+// openCardOwnershipModal() being defined on the page that calls
+// renderRoadmapResults() (index.html).
 
 function _roadmapTopCategoriesLabel(rec) {
     const items = (rec.rewards_breakdown || []).filter(b =>
@@ -20,18 +21,6 @@ function _roadmapFormatSigned(value) {
     return v < 0 ? `−$${Math.abs(v).toFixed(0)}` : `$${v.toFixed(0)}`;
 }
 
-// Phase K3: household entity names are user input (ProfileEntity.name) —
-// escape before interpolating into HTML.
-function _roadmapEscapeHtml(str) {
-    if (str === null || str === undefined) return '';
-    return String(str)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#39;');
-}
-
 // Phase K3: "as {name}" suffix for apply recommendations attributed to a
 // specific household entity (rec.apply_as, set by the engine only when the
 // profile has >1 entity — see roadmaps/recommendation_engine.py). Absent
@@ -40,7 +29,7 @@ function _roadmapApplyAsLabel(rec) {
     if (!rec.apply_as || !rec.apply_as.name) {
         return '';
     }
-    return ` · as ${_roadmapEscapeHtml(rec.apply_as.name)}`;
+    return ` · as ${escapeHtml(rec.apply_as.name)}`;
 }
 
 // Phase E timing label. `recommendedMonth` is the engine's month offset
@@ -202,11 +191,11 @@ function _roadmapCategoryMatrixHtml(matrix) {
         <tr class="roadmap-summary-row">
             <td class="roadmap-summary-card">
                 <span class="ico" style="font-size:16px; vertical-align:-3px; color:var(--accent);">${(typeof CATEGORY_ICONS !== 'undefined' && CATEGORY_ICONS[group.slug]) || 'category'}</span>
-                ${_roadmapEscapeHtml(group.category_name)}
+                ${escapeHtml(group.category_name)}
             </td>
             <td>${group.rows.map(r => r.uncovered
                 ? `<div style="color:var(--muted);">Uncovered — no portfolio card rates this</div>`
-                : `<div>${_roadmapEscapeHtml(r.card_name)} <span style="color:var(--muted);">(${r.rate.toFixed(1)}x)</span></div>`
+                : `<div>${escapeHtml(r.card_name)} <span style="color:var(--muted);">(${r.rate.toFixed(1)}x)</span></div>`
             ).join('')}</td>
             <td class="roadmap-summary-num">${group.rows.map(r => `$${r.annual_spend.toFixed(0)}`).join('<br>')}</td>
             <td class="roadmap-summary-num">$${group.total_rewards.toFixed(0)}</td>
@@ -265,21 +254,21 @@ function _roadmapRedemptionHtml(rec) {
     }
     const headlineParts = [];
     if (redemption.program_label) {
-        headlineParts.push(_roadmapEscapeHtml(redemption.program_label));
+        headlineParts.push(escapeHtml(redemption.program_label));
     }
     if (redemption.value_per_point) {
         headlineParts.push(`~${(redemption.value_per_point * 100).toFixed(1)}¢/pt`);
     }
     const headline = headlineParts.length ? `${headlineParts.join(' · ')} — ` : '';
     const partners = (redemption.transfer_partners && redemption.transfer_partners.length)
-        ? `<div style="margin-top:2px;">Transfer partners: ${redemption.transfer_partners.map(_roadmapEscapeHtml).join(', ')}</div>`
+        ? `<div style="margin-top:2px;">Transfer partners: ${redemption.transfer_partners.map(escapeHtml).join(', ')}</div>`
         : '';
     const link = redemption.portal_url
-        ? ` <a href="${_roadmapEscapeHtml(redemption.portal_url)}" target="_blank" rel="noopener" onclick="event.stopPropagation();">Redeem &rarr;</a>`
+        ? ` <a href="${escapeHtml(redemption.portal_url)}" target="_blank" rel="noopener" onclick="event.stopPropagation();">Redeem &rarr;</a>`
         : '';
     return `
         <div class="breakdown-item" style="opacity: 0.85; font-size: 0.8em; display:block;">
-            <span class="item-name">\u{1F4B3} ${headline}${_roadmapEscapeHtml(redemption.note)}${link}</span>
+            <span class="item-name">\u{1F4B3} ${headline}${escapeHtml(redemption.note)}${link}</span>
             ${partners}
         </div>
     `;
@@ -312,16 +301,16 @@ function _roadmapExpensePanelHtml(expenseReco) {
     }
     const amountLabel = `$${(expenseReco.amount || 0).toLocaleString()}`;
     const categoryLabel = expenseReco.category_name && expenseReco.category_name !== 'General purchase'
-        ? ` on ${_roadmapEscapeHtml(expenseReco.category_name)}`
+        ? ` on ${escapeHtml(expenseReco.category_name)}`
         : '';
 
     const applyRows = (expenseReco.apply || []).map((item, idx) => `
         <div class="grouped-card" style="margin-bottom:8px;">
             <div class="category-card-body" style="padding:10px 14px; display:flex; justify-content:space-between; align-items:center; gap:10px; cursor:pointer;" onclick="openCardModal(${item.card.id})">
                 <div>
-                    <div style="font-weight:600;">${idx + 1}. ${_roadmapEscapeHtml(item.card.name)}</div>
+                    <div style="font-weight:600;">${idx + 1}. ${escapeHtml(item.card.name)}</div>
                     <div style="font-size:12px; color:var(--muted);">${_roadmapExpenseLineText(item)}</div>
-                    ${item.bonus_note ? `<div style="font-size:11px; color:var(--muted); margin-top:2px;">${_roadmapEscapeHtml(item.bonus_note)}</div>` : ''}
+                    ${item.bonus_note ? `<div style="font-size:11px; color:var(--muted); margin-top:2px;">${escapeHtml(item.bonus_note)}</div>` : ''}
                 </div>
                 <div class="apply-card-value" style="font-weight:700; white-space:nowrap;">${_roadmapFormatSigned(item.value_for_expense)}</div>
             </div>
@@ -333,7 +322,7 @@ function _roadmapExpensePanelHtml(expenseReco) {
         <div class="grouped-card">
             <div class="category-card-body" style="padding:10px 14px; display:flex; justify-content:space-between; align-items:center; gap:10px; cursor:pointer;" onclick="openCardModal(${expenseReco.best_owned.card.id})">
                 <div>
-                    <div style="font-weight:600;">${_roadmapEscapeHtml(expenseReco.best_owned.card.name)}</div>
+                    <div style="font-weight:600;">${escapeHtml(expenseReco.best_owned.card.name)}</div>
                     <div style="font-size:12px; color:var(--muted);">${_roadmapExpenseLineText(expenseReco.best_owned)}</div>
                 </div>
                 <div class="apply-card-value" style="font-weight:700; white-space:nowrap;">${_roadmapFormatSigned(expenseReco.best_owned.value_for_expense)}</div>

@@ -8,18 +8,22 @@ const fs = require('fs');
 const path = require('path');
 const vm = require('vm');
 
+const utilsSource = fs.readFileSync(
+    path.join(__dirname, '..', 'static', 'js', 'utils.js'), 'utf8');
 const source = fs.readFileSync(
     path.join(__dirname, '..', 'static', 'js', 'roadmap-results.js'), 'utf8');
 
 // The file also defines renderRoadmapResults(), which touches `document` —
-// harmless to load into the sandbox since we never call it here.
+// harmless to load into the sandbox since we never call it here. utils.js
+// is loaded first since roadmap-results.js depends on its escapeHtml().
 const sandbox = {};
 vm.createContext(sandbox);
+vm.runInContext(utilsSource, sandbox);
 vm.runInContext(source, sandbox);
 
 const { _roadmapTimingLabel, _roadmapFormatSigned, _roadmapBenefitsValue,
         _roadmapRewardsValue, _roadmapBonusShiftAggregate,
-        _roadmapApplyAsLabel, _roadmapEscapeHtml,
+        _roadmapApplyAsLabel, escapeHtml,
         _roadmapCategoryMatrix, _roadmapCategoryMatrixHtml,
         _roadmapValueOverTime, _roadmapValueOverTimeHtml,
         _roadmapRedemptionHtml, _roadmapExpenseLineText,
@@ -117,12 +121,12 @@ test('_roadmapApplyAsLabel: entity name is HTML-escaped', () => {
         ' · as &lt;script&gt;alert(1)&lt;/script&gt;');
 });
 
-test('_roadmapEscapeHtml: escapes the standard HTML-sensitive characters', () => {
+test('escapeHtml: escapes the standard HTML-sensitive characters', () => {
     assert.strictEqual(
-        _roadmapEscapeHtml(`<a href="x">it's & "fun"</a>`),
+        escapeHtml(`<a href="x">it's & "fun"</a>`),
         '&lt;a href=&quot;x&quot;&gt;it&#39;s &amp; &quot;fun&quot;&lt;/a&gt;');
-    assert.strictEqual(_roadmapEscapeHtml(null), '');
-    assert.strictEqual(_roadmapEscapeHtml(undefined), '');
+    assert.strictEqual(escapeHtml(null), '');
+    assert.strictEqual(escapeHtml(undefined), '');
 });
 
 test('_roadmapCategoryMatrix: groups allocation entries by category, sums rewards', () => {

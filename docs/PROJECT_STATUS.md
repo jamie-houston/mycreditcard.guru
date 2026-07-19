@@ -74,6 +74,37 @@ Detail archived — see pointers under "Where everything else went."
       them). Guard the reconciliation invariant — the label is display-only.
 
 ### Technical Debt & Refactoring
+- [x] **Frontend cleanup — Phases 1–3** (dedup, bug fix, HTML partials;
+      2026-07-19). `static/js/utils.js` now holds `escapeHtml`, `getCookie`,
+      `showNotification`, `showError`, `loadOwnedCardIds` — removed from
+      `base.html`, `cards_list.html`, `profile.html`, `index.html`,
+      `shared_profile.html`; `categories_list.html`/`category_detail.html`/
+      `issuers_list.html`'s `loadUserCards()` are now thin wrappers over
+      `loadOwnedCardIds()`. `roadmap-results.js`'s `_roadmapEscapeHtml`
+      replaced by the shared `escapeHtml` (11 call sites);
+      `scripts/test_roadmap_results.js` updated to load `utils.js` into its
+      sandbox first. Fixed the live `toggleCardOwnership` shadowing bug:
+      deleted `index.html`'s dead cluster (unreachable
+      `toggleCardOwnership`/`showCardDetailsPopupRoadmap`/
+      `closeCardDetailsPopupRoadmap`/`saveCardDetailsPopupRoadmap`), added a
+      `window.onCardOwnershipToggled` hook to `base.html`'s canonical
+      `toggleCardOwnership`, and wired `category_detail.html` to it so its
+      card list now re-filters immediately after a toggle. Extracted the two
+      byte-identical HTML blocks into `templates/partials/
+      card_ownership_modal.html` (used by `index.html` + `cards_list.html`)
+      and `templates/partials/profile_stat_grid.html` (used by `profile.html`
+      + `shared_profile.html`); standardized the JS-generated "Local Mode"
+      badge to the plain `#5C6675` style (no emoji) while touching the
+      modal. Verified: `node scripts/test_roadmap_results.js` (28/28),
+      `venv/bin/python manage.py test` (174/174), full scenario sweep clean,
+      `manage.py check` clean. **Phase 4 (full inline-`<script>` extraction
+      into `static/js/pages/*.js`) deliberately deferred** — larger blast
+      radius, needs a manual browser pass per template; not started. CSS
+      reorg / CSS-framework adoption remain out of scope (recommendation
+      only). Detail: `docs/plans/phase-frontend-cleanup.md`. **Still
+      needed: the Phase 1–3 manual browser checklists** (toast/escaping,
+      ownership toggle + re-filter, modal + stat grid rendering) — add to
+      the manual-passes list below.
 - [ ] **Standardize Card Metadata & Rule Representation**
       Implement validation schemas (e.g. via Pydantic or Django JSON schemas) for `CreditCard.metadata` to prevent typos (like `once_per_life_time`) during imports. Refactor the static `ISSUER_RULES` dict in `roadmaps/eligibility.py` into structured classes (`BaseIssuerRule`, `WindowRule`, etc.) to plug in velocity limits cleanly.
 - [ ] **Decouple Test Suite from Database Operations**
@@ -84,6 +115,17 @@ Detail archived — see pointers under "Where everything else went."
 - [ ] **Manual browser passes** — code has shipped but nothing's been
       eyeballed in a real browser (Jamie runs the dev server himself).
       Checklists already written in `docs/MANUAL_TEST_PLAN.md`:
+  - [ ] Frontend cleanup Phases 1–3 (`docs/plans/phase-frontend-cleanup.md`)
+        — P1: `/roadmap/` entity name with an apostrophe still escapes in
+        the "as {name}" label; `/cards/`, `/profile/` a toast still appears
+        and clears; `/categories/`, `/cards/` ownership filter reflects
+        owned cards. P2: `/categories/<slug>/` ownership toggle updates the
+        button AND re-filters immediately with a filter active (the actual
+        bug fix), persists on reload; `/roadmap/` "I have this card" modal
+        flow still works; console clean on both. P3: `/roadmap/` and
+        `/cards/` ownership modal opens/renders/submits, each page's
+        positioning unaffected; `/profile/` and a shared-profile URL — 4
+        stat tiles render correct numbers.
   - [ ] Phase E timing labels (`static/js/roadmap-results.js`
         `_roadmapTimingLabel`) on live generation, reload-restore, and the
         shared read-only page — check "Apply in ~N months (Mon YYYY)"

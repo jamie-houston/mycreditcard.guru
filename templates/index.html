@@ -1377,21 +1377,6 @@
             }
         }
 
-        function getCookie(name) {
-            let cookieValue = null;
-            if (document.cookie && document.cookie !== '') {
-                const cookies = document.cookie.split(';');
-                for (let i = 0; i < cookies.length; i++) {
-                    const cookie = cookies[i].trim();
-                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                        break;
-                    }
-                }
-            }
-            return cookieValue;
-        }
-
         // Apply mobile-specific classes based on screen size
         function applyMobileClasses() {
             const isMobile = window.innerWidth <= 480;
@@ -1489,140 +1474,6 @@
             });
         }
         
-        // Card ownership functions for roadmap page
-        async function toggleCardOwnership(cardId, button) {
-            try {
-                button.disabled = true;
-                button.textContent = '...';
-                
-                // Show nickname/opening date popup
-                const cardDetails = await showCardDetailsPopupRoadmap(cardId);
-                if (cardDetails === null) {
-                    // User cancelled
-                    button.disabled = false;
-                    button.textContent = '✅ I have this card';
-                    return;
-                }
-                
-                // Add card with details
-                const success = await UserDataManager.addCardWithDetails(cardId, cardDetails.nickname, cardDetails.openingDate);
-                if (success) {
-                    button.textContent = '✅ Added!';
-                    button.disabled = true;
-                    alert(`Added ${cardDetails.nickname} to your collection!`);
-                } else {
-                    throw new Error('Failed to add card');
-                }
-                
-            } catch (error) {
-                console.error('Error:', error);
-                alert('Error adding card');
-                button.disabled = false;
-                button.textContent = '✅ I have this card';
-            }
-        }
-        
-        function showCardDetailsPopupRoadmap(cardId) {
-            return new Promise((resolve) => {
-                // Clean up any existing modal first
-                const existingModal = document.getElementById('cardDetailsModalRoadmap');
-                if (existingModal) {
-                    existingModal.remove();
-                }
-                
-                // Create modal HTML  
-                const modalHtml = `
-                    <div id="cardDetailsModalRoadmap" class="modal" style="display: block;">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h2>Add Card to Your Collection</h2>
-                                <span class="close" onclick="closeCardDetailsPopupRoadmap()">&times;</span>
-                            </div>
-                            <div class="modal-body">
-                                <form id="cardDetailsFormRoadmap">
-                                    <div class="form-group">
-                                        <label for="cardNicknameRoadmap">Nickname (required):</label>
-                                        <input type="text" id="cardNicknameRoadmap" name="nickname" 
-                                               placeholder="e.g., My Travel Card, Personal Card, etc." 
-                                               required maxlength="100">
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="cardOpeningDateRoadmap">Opening Date (optional):</label>
-                                        <input type="date" id="cardOpeningDateRoadmap" name="openingDate">
-                                    </div>
-                                </form>
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn secondary" onclick="closeCardDetailsPopupRoadmap()">Cancel</button>
-                                <button type="button" class="btn primary" onclick="saveCardDetailsPopupRoadmap()">Add Card</button>
-                            </div>
-                        </div>
-                    </div>
-                `;
-                
-                // Add modal to page
-                document.body.insertAdjacentHTML('beforeend', modalHtml);
-                
-                // Store resolve function for callbacks first
-                window.cardDetailsResolveRoadmap = resolve;
-                
-                // Focus on nickname input with delay
-                setTimeout(() => {
-                    const nicknameInput = document.getElementById('cardNicknameRoadmap');
-                    if (nicknameInput) {
-                        nicknameInput.focus();
-                    }
-                }, 100);
-            });
-        }
-
-        function closeCardDetailsPopupRoadmap() {
-            const modal = document.getElementById('cardDetailsModalRoadmap');
-            if (modal) {
-                modal.remove();
-            }
-            if (window.cardDetailsResolveRoadmap) {
-                window.cardDetailsResolveRoadmap(null); // Return null for cancelled
-            }
-        }
-
-        function saveCardDetailsPopupRoadmap() {
-            // Use multiple fallback methods to ensure we get the input value
-            const nicknameInput = document.getElementById('cardNicknameRoadmap') || document.querySelector('#cardNicknameRoadmap') || document.querySelector('input[name="nickname"]');
-            const openingDateInput = document.getElementById('cardOpeningDateRoadmap');
-            
-            if (!nicknameInput) {
-                alert('Error: Could not find nickname input field');
-                return;
-            }
-            
-            const nickname = (nicknameInput.value || '').trim();
-            const openingDate = openingDateInput ? openingDateInput.value : '';
-            
-            if (!nickname) {
-                alert('Please enter a nickname for this card');
-                nicknameInput.focus();
-                return;
-            }
-            
-            // Store the values before removing modal
-            const cardDetails = {
-                nickname: nickname,
-                openingDate: openingDate || null
-            };
-            
-            // Remove modal
-            const modal = document.getElementById('cardDetailsModalRoadmap');
-            if (modal) {
-                modal.remove();
-            }
-            
-            // Resolve with the stored values
-            if (window.cardDetailsResolveRoadmap) {
-                window.cardDetailsResolveRoadmap(cardDetails);
-            }
-        }
-
         // Card Ownership Modal Functions (copied from cards_list.html)
         async function openCardOwnershipModal(cardId, existingUserCard = null, cardType = 'personal') {
             const modal = document.getElementById('cardOwnershipModal');
@@ -1634,8 +1485,8 @@
                 modalTitle.textContent = existingUserCard ? 'Edit Card Details' : 'Add Card to Collection';
             } else {
                 modalTitle.innerHTML = existingUserCard ?
-                    'Edit Card Details <span style="background: #f59e0b; color: white; padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: 500; margin-left: 8px;">📱 Local Mode</span>' :
-                    'Add Card to Collection <span style="background: #f59e0b; color: white; padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: 500; margin-left: 8px;">📱 Local Mode</span>';
+                    'Edit Card Details <span style="background: #5C6675; color: white; padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: 500; margin-left: 8px;">Local Mode</span>' :
+                    'Add Card to Collection <span style="background: #5C6675; color: white; padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: 500; margin-left: 8px;">Local Mode</span>';
             }
 
             // Store card ID in form
@@ -1789,102 +1640,10 @@
             }
         }
 
-        function showNotification(message, type = 'info') {
-            // Create notification element
-            const notification = document.createElement('div');
-            const bg = type === 'success' ? '#3FCF8E' : type === 'error' ? '#F87171' : '#5C6675';
-            const fg = type === 'success' ? '#06251A' : '#FFFFFF';
-            notification.style.cssText = `
-                position: fixed;
-                top: 20px;
-                right: 20px;
-                background: ${bg};
-                color: ${fg};
-                padding: 16px 24px;
-                border-radius: 12px;
-                box-shadow: 0 10px 25px rgba(0,0,0,0.4);
-                z-index: 10000;
-                max-width: 400px;
-                font-weight: 500;
-                font-family: 'Space Grotesk', sans-serif;
-                animation: slideIn 0.3s ease-out;
-            `;
-            notification.textContent = message;
-            
-            document.body.appendChild(notification);
-            
-            // Remove after 4 seconds
-            setTimeout(() => {
-                notification.style.animation = 'slideOut 0.3s ease-in';
-                setTimeout(() => notification.remove(), 300);
-            }, 4000);
-        }
-        
     </script>
 
 <!-- Card Ownership Modal -->
-<div id="cardOwnershipModal" class="modal" style="display: none;">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h2 id="modalTitle">Add Card to Collection</h2>
-            <span class="close" onclick="closeCardOwnershipModal()">&times;</span>
-        </div>
-        
-        <!-- Local Storage Notice -->
-        <div id="localStorageNotice" style="display: none; background: var(--accent-soft); border: 1px solid var(--accent); color: var(--text); padding: 12px 24px; margin: 0; border-radius: 0;">
-            <div style="display: flex; align-items: center; gap: 8px;">
-                <span class="ico" style="color:var(--accent);">smartphone</span>
-                <span><strong>Local Mode:</strong> This card will be saved to your device. <a href="/accounts/login/" style="color: var(--accent); text-decoration: underline;">Log in</a> to sync with your account.</span>
-            </div>
-        </div>
-        
-        <form id="cardOwnershipForm" onsubmit="saveCardOwnership(event)">
-            <div class="form-group">
-                <label for="nickname">Nickname (Optional)</label>
-                <input type="text" id="nickname" name="nickname" 
-                       placeholder="e.g., My Travel Card, Grocery Card">
-                <small>Give this card a memorable name</small>
-            </div>
-
-            <!-- Phase K: owner selector — shown only for authed households
-                 with more than one entity of this card's own kind (personal
-                 vs. business). See openCardOwnershipModal(). -->
-            <div class="form-group" id="cardOwnershipOwnerGroup" style="display: none;">
-                <label for="ownershipOwner">Held By</label>
-                <select id="ownershipOwner" name="owner"></select>
-            </div>
-
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="opened_date">Opened Date</label>
-                    <input type="date" id="opened_date" name="opened_date">
-                    <small>When did you get approved/open this card?</small>
-                </div>
-                
-                <div class="form-group">
-                    <label for="closed_date">Closed Date (Optional)</label>
-                    <input type="date" id="closed_date" name="closed_date">
-                    <small>Leave blank if card is still active</small>
-                </div>
-            </div>
-            
-            <div class="form-group">
-                <label for="notes">Notes (Optional)</label>
-                <textarea id="notes" name="notes" rows="3" 
-                          placeholder="Any notes about this card (signup bonus received, annual fee paid, etc.)"></textarea>
-            </div>
-            
-            <div class="form-actions">
-                <button type="button" onclick="closeCardOwnershipModal()" class="btn-secondary">
-                    Cancel
-                </button>
-                <button type="submit" class="btn-primary">
-                    Add Card
-                </button>
-            </div>
-        </form>
-    </div>
-</div>
+{% include 'partials/card_ownership_modal.html' %}
 
 <style>
 #cardOwnershipModal.modal {
@@ -2024,15 +1783,6 @@
     background: var(--bg);
 }
 
-@keyframes slideIn {
-    from { transform: translateX(100%); opacity: 0; }
-    to { transform: translateX(0); opacity: 1; }
-}
-
-@keyframes slideOut {
-    from { transform: translateX(0); opacity: 1; }
-    to { transform: translateX(100%); opacity: 0; }
-}
 </style>
 
 {% endblock %}

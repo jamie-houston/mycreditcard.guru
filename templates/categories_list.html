@@ -126,8 +126,7 @@ async function loadCategories() {
 
 async function loadUserCards() {
     try {
-        const cards = await UserDataManager.getCards();
-        userCards = new Set(cards);
+        userCards = await loadOwnedCardIds();
     } catch (error) {
         console.error('Error loading user cards:', error);
     }
