@@ -285,6 +285,75 @@ function _roadmapRedemptionHtml(rec) {
     `;
 }
 
+// Phase N: per-card line for the one-off expense panel below. Pure — the
+// three terms always sum to value_for_expense by construction (see
+// roadmaps/engine/calculators/expense.py), so this never diverges from the
+// number it's explaining.
+function _roadmapExpenseLineText(item) {
+    const segments = [];
+    if (item.signup_bonus_value > 0) segments.push(`bonus $${item.signup_bonus_value.toFixed(0)}`);
+    segments.push(`rewards $${(item.category_rewards || 0).toFixed(0)}`);
+    let text = segments.join(' + ');
+    if (item.effective_annual_fee > 0) {
+        text += ` − $${item.effective_annual_fee.toFixed(0)} fee`;
+    }
+    return `${text} = ${_roadmapFormatSigned(item.value_for_expense)}`;
+}
+
+// Phase N: "Best card for your purchase" panel from
+// data.expense_recommendation (see roadmaps/engine/calculators/expense.py
+// and GenerateRoadmapSerializer's 'expense' field). A parallel computation
+// to the portfolio roadmap — present only when the user posted an
+// 'expense', so this returns '' on every payload from before this feature
+// existed and on any generation where the field was left blank.
+function _roadmapExpensePanelHtml(expenseReco) {
+    if (!expenseReco) {
+        return '';
+    }
+    const amountLabel = `$${(expenseReco.amount || 0).toLocaleString()}`;
+    const categoryLabel = expenseReco.category_name && expenseReco.category_name !== 'General purchase'
+        ? ` on ${_roadmapEscapeHtml(expenseReco.category_name)}`
+        : '';
+
+    const applyRows = (expenseReco.apply || []).map((item, idx) => `
+        <div class="grouped-card" style="margin-bottom:8px;">
+            <div class="category-card-body" style="padding:10px 14px; display:flex; justify-content:space-between; align-items:center; gap:10px; cursor:pointer;" onclick="openCardModal(${item.card.id})">
+                <div>
+                    <div style="font-weight:600;">${idx + 1}. ${_roadmapEscapeHtml(item.card.name)}</div>
+                    <div style="font-size:12px; color:var(--muted);">${_roadmapExpenseLineText(item)}</div>
+                    ${item.bonus_note ? `<div style="font-size:11px; color:var(--muted); margin-top:2px;">${_roadmapEscapeHtml(item.bonus_note)}</div>` : ''}
+                </div>
+                <div class="apply-card-value" style="font-weight:700; white-space:nowrap;">${_roadmapFormatSigned(item.value_for_expense)}</div>
+            </div>
+        </div>
+    `).join('');
+
+    const ownedHtml = expenseReco.best_owned ? `
+        <div class="result-section-header" style="margin-top:14px;"><span class="ico">wallet</span><span class="result-section-header-title">Or use a card you already have</span></div>
+        <div class="grouped-card">
+            <div class="category-card-body" style="padding:10px 14px; display:flex; justify-content:space-between; align-items:center; gap:10px; cursor:pointer;" onclick="openCardModal(${expenseReco.best_owned.card.id})">
+                <div>
+                    <div style="font-weight:600;">${_roadmapEscapeHtml(expenseReco.best_owned.card.name)}</div>
+                    <div style="font-size:12px; color:var(--muted);">${_roadmapExpenseLineText(expenseReco.best_owned)}</div>
+                </div>
+                <div class="apply-card-value" style="font-weight:700; white-space:nowrap;">${_roadmapFormatSigned(expenseReco.best_owned.value_for_expense)}</div>
+            </div>
+        </div>
+    ` : '';
+
+    const applySection = applyRows
+        ? `<div class="result-section-header"><span class="ico">shopping_cart</span><span class="result-section-header-title">Best card to apply for</span></div>${applyRows}`
+        : `<div style="color:var(--muted); font-size:13px;">No eligible new-card matches found for this purchase.</div>`;
+
+    return `
+        <div class="result-section-header"><span class="ico">payments</span><span class="result-section-header-title">Best card for your ${amountLabel}${categoryLabel} purchase</span></div>
+        <div style="margin-bottom:14px;">
+            ${applySection}
+            ${ownedHtml}
+        </div>
+    `;
+}
+
 async function removeCardOwnership(cardId, cardName, buttonEl) {
     if (buttonEl) {
         buttonEl.disabled = true;
@@ -334,6 +403,11 @@ function renderRoadmapResults(data, opts = {}) {
             ${opts.banner ? `<p style="text-align: center; color: var(--muted); margin: -10px 0 20px 0;">${opts.banner}</p>` : ''}
             ${opts.strategyLabel ? `<p style="text-align: center; color: var(--muted); margin: -10px 0 20px 0;">Strategy: <strong style="color:var(--text);">${opts.strategyLabel}</strong>${opts.poolLabel ? ` — ${opts.poolLabel}` : ''}</p>` : ''}
     `;
+
+    // Phase N: independent of the portfolio recommendations below — renders
+    // whenever the request posted an 'expense', even if there are no
+    // apply/keep/cancel recommendations to show otherwise.
+    html += _roadmapExpensePanelHtml(data.expense_recommendation);
 
     // Add portfolio summary if we have recommendations
     if (recommendations.length > 0 && portfolioSummary.card_count > 0) {

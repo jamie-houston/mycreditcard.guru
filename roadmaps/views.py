@@ -12,7 +12,7 @@ from .models import (
 from .serializers import (
     RoadmapFilterSerializer, RoadmapSerializer,
     CreateRoadmapSerializer, GenerateRoadmapSerializer,
-    RoadmapRecommendationResponseSerializer
+    RoadmapRecommendationResponseSerializer, ExpenseRecommendationSerializer
 )
 from .recommendation_engine import RecommendationEngine
 from .redemption import redemption_guidance_for
@@ -200,6 +200,13 @@ def quick_recommendation_view(request):
             # a base date on every path, so set it here once and persist
             # the SAME value (see _persist_current_roadmap).
             response_data['generated_at'] = timezone.now().isoformat()
+
+            # Phase N: only present when the request posted an 'expense' —
+            # key stays ABSENT (not null) otherwise, so payloads without an
+            # expense stay byte-identical to before this feature existed.
+            if serializer.expense_recommendation is not None:
+                response_data['expense_recommendation'] = ExpenseRecommendationSerializer(
+                    serializer.expense_recommendation).data
 
             _persist_current_roadmap(request, response_data)
 

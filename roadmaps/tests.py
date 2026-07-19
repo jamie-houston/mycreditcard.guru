@@ -1346,3 +1346,203 @@ class RedemptionGuidanceTests(TestCase):
         # Test authenticated user guidance returns user override (0.020)
         guidance_user = redemption_guidance_for(card, user=user)
         self.assertEqual(guidance_user['value_per_point'], 0.020)
+
+
+class ExpenseRecommenderTests(TestCase):
+    """Phase N: one-off upcoming-expense mode
+    (roadmaps/engine/calculators/expense.py) — a parallel, read-only path
+    that never touches spending_amounts or the portfolio reconciliation
+    guard. Its value for every card is a visible sum (signup_bonus_value +
+    category_rewards - effective_annual_fee), so the core assertion across
+    these tests is that the sum always holds exactly."""
+
+    def setUp(self):
+        from cards.models import SpendingCategory
+        self.user = User.objects.create_user(
+            username='expense', email='expense@example.com', password='x')
+        self.profile = UserSpendingProfile.objects.create(user=self.user)
+        self.points = RewardType.objects.create(name='Points', slug='points')
+        self.issuer = Issuer.objects.create(name='Generic Bank', slug='generic-bank')
+        self.travel = SpendingCategory.objects.create(name='Travel', slug='travel')
+        self.other = SpendingCategory.objects.create(name='Other', slug='other')
+        # No SpendingAmount rows -> $0/mo recurring spend for every test here
+        # unless a test creates one explicitly.
+
+    def _card(self, name, requirement=0, time_months=3, bonus_amount=500,
+              rate=Decimal('3.00'), max_annual_spend=None, category=None):
+        from django.utils.text import slugify
+        from cards.models import RewardCategory
+        card = CreditCard.objects.create(
+            name=name, slug=slugify(name), issuer=self.issuer,
+            signup_bonus_type=self.points, primary_reward_type=self.points,
+            signup_bonus_amount=bonus_amount,
+            metadata={'reward_value_multiplier': 0.01,
+                      'signup_bonus': {'bonus_amount': bonus_amount,
+                                        'spending_requirement': requirement,
+                                        'time_limit_months': time_months}})
+        RewardCategory.objects.create(
+            card=card, category=category or self.travel, reward_rate=rate,
+            reward_type=self.points, max_annual_spend=max_annual_spend)
+        return card
+
+    def _roadmap(self, max_recommendations=5):
+        return Roadmap.objects.create(
+            profile=self.profile, name='Expense Test', max_recommendations=max_recommendations)
+
+    def _engine(self):
+        from .recommendation_engine import RecommendationEngine
+        return RecommendationEngine(self.profile)
+
+    def test_lump_sum_makes_bonus_reachable_with_zero_monthly_spend(self):
+        """The core new behavior: a $10k expense satisfies a $4k minimum
+        spend even though the household has no recurring spending at all —
+        something the existing monthly-projection check can't do."""
+        card = self._card('Travel Card', requirement=4000, time_months=3)
+        engine = self._engine()
+
+        reachable, required, months = engine.bonus_capacity_manager \
+            .can_meet_signup_requirement_with_expense(card, 10000)
+        self.assertTrue(reachable)
+        self.assertEqual(required, 4000.0)
+        self.assertEqual(months, 3.0)
+
+        # The existing monthly-projection reachability check would say no —
+        # confirms this is genuinely new behavior, not already covered.
+        self.assertFalse(engine._can_meet_signup_requirement(card))
+
+        result = engine._recommend_for_expense(10000, 'travel', self._roadmap())
+        self.assertTrue(result['apply'])
+        top = result['apply'][0]
+        self.assertEqual(top['card'].id, card.id)
+        self.assertGreater(top['signup_bonus_value'], 0)
+
+    def test_expense_below_requirement_does_not_reach_bonus(self):
+        card = self._card('Unreachable Card', requirement=20000, time_months=3)
+        engine = self._engine()
+        reachable, required, months = engine.bonus_capacity_manager \
+            .can_meet_signup_requirement_with_expense(card, 5000)
+        self.assertFalse(reachable)
+        self.assertEqual(
+            engine.bonus_capacity_manager.get_signup_bonus_value_for_expense(card, 5000),
+            0.0)
+
+    def test_value_for_expense_reconciles(self):
+        self._card('Reconcile Card', requirement=1000, time_months=3)
+        engine = self._engine()
+        result = engine._recommend_for_expense(5000, 'travel', self._roadmap())
+        self.assertTrue(result['apply'])
+        for item in result['apply']:
+            self.assertAlmostEqual(
+                item['value_for_expense'],
+                item['signup_bonus_value'] + item['category_rewards'] - item['effective_annual_fee'],
+                places=6)
+
+    def test_max_annual_spend_caps_the_lump_then_spills_to_base_rate(self):
+        """$3,000 on a card with a 5x travel rate capped at $1,000: the
+        capped $1,000 earns 5x, the remaining $2,000 spills to the 1x base
+        rate — not 5x on the full amount, not 0 on the overflow."""
+        from cards.models import RewardCategory
+        card = self._card('Capped Travel Card', rate=Decimal('5.00'),
+                           max_annual_spend=Decimal('1000'))
+        RewardCategory.objects.create(
+            card=card, category=self.other, reward_rate=Decimal('1.00'),
+            reward_type=self.points)
+
+        engine = self._engine()
+        rewards, rate, multiplier = engine.expense_recommender._category_rewards_for_expense(
+            card, 3000, 'travel', None)
+
+        self.assertEqual(rate, 5.0)
+        self.assertAlmostEqual(rewards, (1000 * 5 * 0.01) + (2000 * 1 * 0.01))
+
+    def test_best_owned_picks_highest_category_rate_with_no_bonus_or_fee(self):
+        from datetime import date
+        from cards.models import UserCard
+        low_card = self._card('Low Rate Card', rate=Decimal('1.00'))
+        high_card = self._card('High Rate Card', rate=Decimal('4.00'))
+        UserCard.objects.create(user=self.user, card=low_card, opened_date=date(2023, 1, 1))
+        UserCard.objects.create(user=self.user, card=high_card, opened_date=date(2023, 1, 1))
+
+        engine = self._engine()
+        result = engine._recommend_for_expense(2000, 'travel', self._roadmap())
+
+        self.assertIsNotNone(result['best_owned'])
+        self.assertEqual(result['best_owned']['card'].id, high_card.id)
+        self.assertEqual(result['best_owned']['signup_bonus_value'], 0.0)
+        self.assertEqual(result['best_owned']['effective_annual_fee'], 0.0)
+        # Already-owned cards must not also appear in the apply list
+        applied_ids = [c['card'].id for c in result['apply']]
+        self.assertNotIn(high_card.id, applied_ids)
+        self.assertNotIn(low_card.id, applied_ids)
+
+    def test_no_category_falls_back_to_base_rate_only(self):
+        """category_slug=None ('general purchase') must not match a card's
+        specific-category rate — only its base rate counts."""
+        from cards.models import RewardCategory
+        card = self._card('Base Only Card', rate=Decimal('5.00'))  # travel-only, 5x
+        RewardCategory.objects.create(
+            card=card, category=self.other, reward_rate=Decimal('2.00'),
+            reward_type=self.points)
+
+        engine = self._engine()
+        rewards, rate, _ = engine.expense_recommender._category_rewards_for_expense(
+            card, 1000, None, None)
+        self.assertEqual(rate, 2.0)
+        self.assertAlmostEqual(rewards, 1000 * 2 * 0.01)
+
+
+class ExpenseRecommendationResponseTests(TestCase):
+    """The API surface for Phase N: expense_recommendation is present only
+    when the request actually posted an 'expense' — old/plain payloads must
+    stay byte-identical."""
+
+    def setUp(self):
+        from cards.models import SpendingCategory
+        self.user = User.objects.create_user(
+            username='expenseapi', email='expenseapi@example.com', password='x')
+        self.profile = UserSpendingProfile.objects.create(user=self.user)
+        self.points = RewardType.objects.create(name='Points', slug='points')
+        self.issuer = Issuer.objects.create(name='Generic Bank', slug='generic-bank')
+        self.travel = SpendingCategory.objects.create(name='Travel', slug='travel')
+
+    def test_response_omits_expense_key_when_not_requested(self):
+        self.client.force_login(self.user)
+        response = self.client.post(
+            '/api/roadmaps/quick-recommendation/',
+            {'max_recommendations': 1},
+            content_type='application/json')
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn('expense_recommendation', response.json())
+
+    def test_response_includes_expense_recommendation_when_requested(self):
+        from django.utils.text import slugify
+        from cards.models import RewardCategory
+        card = CreditCard.objects.create(
+            name='API Expense Card', slug=slugify('API Expense Card'), issuer=self.issuer,
+            signup_bonus_type=self.points, primary_reward_type=self.points,
+            signup_bonus_amount=500,
+            metadata={'reward_value_multiplier': 0.01,
+                      'signup_bonus': {'bonus_amount': 500, 'spending_requirement': 1000,
+                                        'time_limit_months': 3}})
+        RewardCategory.objects.create(
+            card=card, category=self.travel, reward_rate=Decimal('3.00'), reward_type=self.points)
+
+        self.client.force_login(self.user)
+        response = self.client.post(
+            '/api/roadmaps/quick-recommendation/',
+            {'max_recommendations': 1,
+             'expense': {'amount': 5000, 'category_id': self.travel.id}},
+            content_type='application/json')
+        self.assertEqual(response.status_code, 200)
+
+        data = response.json()
+        self.assertIn('expense_recommendation', data)
+        expense = data['expense_recommendation']
+        self.assertEqual(expense['amount'], 5000.0)
+        self.assertEqual(expense['category_slug'], 'travel')
+        self.assertTrue(expense['apply'])
+        top = expense['apply'][0]
+        self.assertAlmostEqual(
+            top['value_for_expense'],
+            top['signup_bonus_value'] + top['category_rewards'] - top['effective_annual_fee'],
+            places=2)

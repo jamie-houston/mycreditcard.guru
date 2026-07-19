@@ -177,6 +177,53 @@ Key modules:
   an engine-cleanup pass planned soon. Wired into
   `_build_quick_rec_response`'s `card` dict as `card.redemption`
   (`roadmaps/views.py`).
+- `roadmaps/engine/calculators/expense.py` `ExpenseRecommender` (Phase N) —
+  one-off upcoming-expense mode ("I have a $10k purchase coming up"), a
+  **parallel, read-only path** alongside the portfolio roadmap above, not a
+  replacement — it never writes to `spending_amounts` (monthly-only,
+  annualized `× 12` everywhere else in the engine) and never touches
+  `_calculate_portfolio_allocation` or the reconciliation guard. Every
+  card's `value_for_expense` is a visible three-term sum (`signup_bonus_value
+  + category_rewards − effective_annual_fee`) that reconciles by
+  construction. `recommend_for_expense(amount, category_slug, eligible_cards,
+  max_results)` ranks new-card `apply` candidates and picks one `best_owned`
+  card (highest category rate among currently-held cards, `signup_bonus_value`
+  and `effective_annual_fee` forced to `0` — the fee is a sunk cost,
+  irrelevant to which already-owned card to swipe). Category rewards use each
+  card's OWN multiplier only (no points-pooling — same scope call already
+  made for the other summary/legacy paths); signup-bonus valuation still
+  pools against held cards via `program_multipliers`, matching Phase J.
+  New reachability logic lives on `BonusCapacityManager`
+  (`roadmaps/engine/calculators/bonus.py`):
+  `can_meet_signup_requirement_with_expense(card, expense_amount)` checks
+  `expense_amount + total_monthly_spending × time_limit_months ≥
+  spending_requirement` — no projection buffer, since the expense is a
+  known concrete amount, unlike the existing 1.2×-buffered
+  `can_meet_signup_requirement` (monthly-only, used by the regular roadmap)
+  which this deliberately does NOT touch. `get_signup_bonus_value_for_expense`
+  mirrors `get_signup_bonus_value` but swaps in that reachability check —
+  kept as its own method rather than parameterizing the original, so the
+  well-exercised portfolio-scoring path is untouched. Wired in via
+  `RecommendationEngineOrchestrator._recommend_for_expense(amount,
+  category_slug, roadmap)`, `GenerateRoadmapSerializer`'s optional `expense`
+  field (`{amount, category_id}` — never written to `SpendingAmount`;
+  computed inside the same rolled-back transaction as everything else, with
+  the result stashed on `serializer.expense_recommendation` rather than
+  changing `generate_recommendations()`'s return shape, so the OTHER caller
+  of that method, `cards/views.py` `card_recommendations_preview`, is
+  untouched), and `quick_recommendation_view` (`roadmaps/views.py`), which
+  attaches `response_data['expense_recommendation']` only when the field was
+  posted — **key absent, not null**, on every other payload, so old/plain
+  generations stay byte-identical. Rides along into `_persist_current_roadmap`
+  and both read-only GET paths (`current_roadmap_view`, the shared-roadmap
+  view) for free, since they spread the whole persisted `response` dict.
+  Frontend: an optional "Upcoming large purchase" collapsible section in
+  `templates/index.html` (mirrors the existing `toggleSpendingProfile()`
+  accordion pattern) posts `requestData.expense` only when an amount is
+  entered; `static/js/roadmap-results.js` `_roadmapExpensePanelHtml()` +
+  `_roadmapExpenseLineText()` render the "Best card for your purchase" panel
+  above the Card summary table, independent of whether there are any
+  apply/keep/cancel recommendations to show.
 - `static/js/roadmap-results.js` `_roadmapTimingLabel(recommendedMonth,
   baseDate)` — Phase E Step 6: renders "Apply now" (falsy month) or "Apply
   in ~N month(s) (Mon YYYY)" from `rec.recommended_month` and the roadmap's

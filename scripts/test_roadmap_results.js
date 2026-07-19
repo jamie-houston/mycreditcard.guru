@@ -22,7 +22,8 @@ const { _roadmapTimingLabel, _roadmapFormatSigned, _roadmapBenefitsValue,
         _roadmapApplyAsLabel, _roadmapEscapeHtml,
         _roadmapCategoryMatrix, _roadmapCategoryMatrixHtml,
         _roadmapValueOverTime, _roadmapValueOverTimeHtml,
-        _roadmapRedemptionHtml } = sandbox;
+        _roadmapRedemptionHtml, _roadmapExpenseLineText,
+        _roadmapExpensePanelHtml } = sandbox;
 
 function test(name, fn) {
     try {
@@ -221,6 +222,53 @@ test('_roadmapRedemptionHtml: issuer-supplied note text is HTML-escaped', () => 
     const html = _roadmapRedemptionHtml(rec);
     assert.ok(!html.includes('<script>alert(1)</script>'));
     assert.ok(html.includes('&lt;script&gt;'));
+});
+
+test('_roadmapExpenseLineText: sums bonus + rewards − fee to the shown total', () => {
+    const item = { signup_bonus_value: 900, category_rewards: 200, effective_annual_fee: 95, value_for_expense: 1005 };
+    assert.strictEqual(_roadmapExpenseLineText(item), 'bonus $900 + rewards $200 − $95 fee = $1005');
+});
+
+test('_roadmapExpenseLineText: no bonus and no fee omits both segments', () => {
+    const item = { signup_bonus_value: 0, category_rewards: 40, effective_annual_fee: 0, value_for_expense: 40 };
+    assert.strictEqual(_roadmapExpenseLineText(item), 'rewards $40 = $40');
+});
+
+test('_roadmapExpensePanelHtml: absent expense_recommendation renders nothing', () => {
+    assert.strictEqual(_roadmapExpensePanelHtml(null), '');
+    assert.strictEqual(_roadmapExpensePanelHtml(undefined), '');
+});
+
+test('_roadmapExpensePanelHtml: renders amount, category, apply list and best-owned card', () => {
+    const expenseReco = {
+        amount: 10000,
+        category_slug: 'travel',
+        category_name: 'Travel',
+        apply: [
+            { card: { id: 1, name: 'Travel Card' }, action: 'apply',
+              signup_bonus_value: 900, category_rewards: 200, effective_annual_fee: 95,
+              value_for_expense: 1005, reward_rate: 3, bonus_note: 'Your $10,000 purchase covers the $4,000 minimum spend in 3 months' },
+        ],
+        best_owned: { card: { id: 2, name: 'Existing Card' }, action: 'keep',
+              signup_bonus_value: 0, category_rewards: 150, effective_annual_fee: 0,
+              value_for_expense: 150, reward_rate: 1.5, bonus_note: '' },
+    };
+    const html = _roadmapExpensePanelHtml(expenseReco);
+    assert.ok(html.includes('$10,000'));
+    assert.ok(html.includes('Travel'));
+    assert.ok(html.includes('Travel Card'));
+    assert.ok(html.includes('minimum spend'));
+    assert.ok(html.includes('Existing Card'));
+    assert.ok(html.includes('Or use a card you already have'));
+});
+
+test('_roadmapExpensePanelHtml: no owned card omits the "already have" section', () => {
+    const html = _roadmapExpensePanelHtml({
+        amount: 500, category_slug: null, category_name: 'General purchase',
+        apply: [], best_owned: null,
+    });
+    assert.ok(!html.includes('Or use a card you already have'));
+    assert.ok(html.includes('No eligible new-card matches'));
 });
 
 if (process.exitCode) {

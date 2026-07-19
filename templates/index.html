@@ -157,6 +157,31 @@
             </div>
         </div>
 
+        <!-- Upcoming Expense Section (Phase N, optional, collapsible) -->
+        <div class="section expense-section">
+            <h2 onclick="toggleUpcomingExpense()" style="cursor: pointer; display: flex; justify-content: space-between; align-items: center;">
+                Upcoming large purchase (optional)
+                <span id="expenseToggle" class="ico" style="font-size: 20px; color: var(--muted);">expand_more</span>
+            </h2>
+            <div id="expenseContent" style="display: none;">
+                <p style="font-size: 13px; color: var(--muted); margin: 0 0 12px;">
+                    Have a big one-time purchase coming up? We'll suggest the best card to use
+                    or get for it — separate from your regular monthly roadmap above.
+                </p>
+                <div class="input-group">
+                    <span class="input-group-text" style="min-width: 160px;">Purchase amount</span>
+                    <span class="input-group-text" style="border-left: none;">$</span>
+                    <input type="number" id="expenseAmount" placeholder="e.g. 10000" min="0" step="100" class="form-control">
+                </div>
+                <div class="input-group" style="margin-top: 8px;">
+                    <span class="input-group-text" style="min-width: 160px;">Category (optional)</span>
+                    <select id="expenseCategory" class="form-control">
+                        <option value="">General / any category</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
         <!-- Sticky footer: total + submit -->
         <div class="roadmap-sticky-footer">
             <div class="roadmap-sticky-total">
@@ -278,6 +303,19 @@
         function toggleSpendingProfile() {
             const content = document.getElementById('spendingProfileContent');
             const toggle = document.getElementById('spendingToggle');
+
+            if (content.style.display === 'none') {
+                content.style.display = 'block';
+                toggle.textContent = 'expand_less';
+            } else {
+                content.style.display = 'none';
+                toggle.textContent = 'expand_more';
+            }
+        }
+
+        function toggleUpcomingExpense() {
+            const content = document.getElementById('expenseContent');
+            const toggle = document.getElementById('expenseToggle');
 
             if (content.style.display === 'none') {
                 content.style.display = 'block';
@@ -459,6 +497,7 @@
                     
                     // Render spending categories in the UI
                     renderSpendingCategories(categories);
+                    renderExpenseCategoryOptions(categories);
                 } else {
                     console.error('Categories response is not an array:', typeof categories);
                 }
@@ -672,6 +711,25 @@
             }).join('');
             
             container.innerHTML = html;
+        }
+
+        // Phase N: flat parent + indented-subcategory option list for the
+        // "Upcoming large purchase" category picker, sharing the same
+        // categories payload as renderSpendingCategories() above.
+        function renderExpenseCategoryOptions(categories) {
+            const select = document.getElementById('expenseCategory');
+            if (!select) return;
+
+            const options = ['<option value="">General / any category</option>'];
+            categories.filter(cat => !cat.parent).forEach(category => {
+                const displayName = category.display_name || category.name;
+                options.push(`<option value="${category.id}">${displayName}</option>`);
+                (category.subcategories || []).forEach(subcat => {
+                    const subDisplayName = subcat.display_name || subcat.name;
+                    options.push(`<option value="${subcat.id}">&nbsp;&nbsp;↳ ${subDisplayName}</option>`);
+                });
+            });
+            select.innerHTML = options.join('');
         }
 
         function handleSpendingCreditChange(checkbox) {
@@ -1090,6 +1148,19 @@
                     spending_credit_preferences: selectedSpendingCredits,
                     strategy: selectedStrategy
                 };
+
+                // Phase N: optional one-off upcoming expense — omitted
+                // entirely (not sent as 0/null) when the amount is blank,
+                // so the response's expense_recommendation panel only
+                // appears when the user actually asked for one.
+                const expenseAmountValue = parseFloat(document.getElementById('expenseAmount').value);
+                if (expenseAmountValue > 0) {
+                    const expenseCategoryId = document.getElementById('expenseCategory').value;
+                    requestData.expense = {
+                        amount: expenseAmountValue,
+                        category_id: expenseCategoryId ? parseInt(expenseCategoryId) : null
+                    };
+                }
 
                 const response = await fetch(`${API_BASE}/roadmaps/quick-recommendation/`, {
                     method: 'POST',

@@ -113,6 +113,22 @@ class GenerateRoadmapSerializer(serializers.Serializer):
         default=list
     )
     strategy = serializers.CharField(required=False, allow_blank=True, default='')
+    # Phase N: an optional one-off upcoming expense ({amount, category_id}).
+    # Not spending — never written to SpendingAmount (monthly-only). Handled
+    # entirely as a parallel, read-only computation; see
+    # `roadmaps.engine.calculators.expense.ExpenseRecommender`.
+    expense = serializers.DictField(required=False)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Populated by _generate_with_scratch_data() when an 'expense' was
+        # posted; stays None otherwise (and for the other caller of
+        # generate_recommendations(), cards/views.py's preview endpoint,
+        # which never sets 'expense'). A separate attribute rather than a
+        # second return value from generate_recommendations() so that
+        # existing caller's `recommendations = serializer.generate_recommendations()`
+        # unpacking keeps working unchanged.
+        self.expense_recommendation = None
 
     def validate_strategy(self, value):
         from .strategies import get_strategy, STRATEGIES
@@ -121,6 +137,22 @@ class GenerateRoadmapSerializer(serializers.Serializer):
                 f"Unknown strategy '{value}'. Choices: {', '.join(sorted(STRATEGIES))}"
             )
         return value
+
+    def validate_expense(self, value):
+        try:
+            amount = float(value.get('amount'))
+        except (TypeError, ValueError):
+            raise serializers.ValidationError("expense.amount must be a number")
+        if amount <= 0:
+            raise serializers.ValidationError("expense.amount must be greater than 0")
+
+        category_id = value.get('category_id')
+        if category_id is not None:
+            from cards.models import SpendingCategory
+            if not SpendingCategory.objects.filter(id=category_id).exists():
+                raise serializers.ValidationError(f"Unknown category_id {category_id}")
+
+        return {'amount': amount, 'category_id': category_id}
 
     def generate_recommendations(self):
         """Generate recommendations without persisting anything.
@@ -264,10 +296,24 @@ class GenerateRoadmapSerializer(serializers.Serializer):
         user_cards_data = validated_data.get('user_cards', []) if not profile.user else None
         engine = RecommendationEngine(profile, user_cards_data=user_cards_data, strategy=strategy)
         recommendations = engine.generate_quick_recommendations(roadmap)
-        
+
+        # Phase N: one-off upcoming expense — a parallel, read-only
+        # computation, not part of the portfolio roadmap above. Runs before
+        # the temp roadmap is deleted since it reuses the same filters.
+        if 'expense' in validated_data:
+            expense_data = validated_data['expense']
+            category_slug = None
+            category_id = expense_data.get('category_id')
+            if category_id:
+                from cards.models import SpendingCategory
+                category_slug = SpendingCategory.objects.filter(
+                    id=category_id).values_list('slug', flat=True).first()
+            self.expense_recommendation = engine._recommend_for_expense(
+                expense_data['amount'], category_slug, roadmap)
+
         # Clean up temporary roadmap
         roadmap.delete()
-        
+
         return recommendations
 
 
@@ -371,6 +417,33 @@ class PortfolioSummarySerializer(serializers.Serializer):
     total_credits_value = serializers.FloatField(required=False, default=0.0)
     total_annual_spending = serializers.FloatField(required=False, default=0.0)
     bonus_capacity = serializers.DictField(required=False, default=dict)
+
+
+class ExpenseCardResultSerializer(serializers.Serializer):
+    """One card's fit for a Phase N one-off expense. `value_for_expense`
+    reconciles by construction: signup_bonus_value + category_rewards -
+    effective_annual_fee (best_owned always has signup_bonus_value=0 and
+    effective_annual_fee=0 — the fee is a sunk cost, irrelevant to which
+    already-owned card to swipe)."""
+    card = serializers.SerializerMethodField()
+    action = serializers.CharField()
+    signup_bonus_value = serializers.FloatField()
+    category_rewards = serializers.FloatField()
+    effective_annual_fee = serializers.FloatField()
+    value_for_expense = serializers.FloatField()
+    reward_rate = serializers.FloatField()
+    bonus_note = serializers.CharField(allow_blank=True)
+
+    def get_card(self, obj):
+        return RecommendationItemCardSerializer(obj).data
+
+
+class ExpenseRecommendationSerializer(serializers.Serializer):
+    amount = serializers.FloatField()
+    category_slug = serializers.CharField(allow_null=True)
+    category_name = serializers.CharField()
+    apply = ExpenseCardResultSerializer(many=True)
+    best_owned = ExpenseCardResultSerializer(allow_null=True)
 
 
 class RoadmapRecommendationResponseSerializer(serializers.Serializer):

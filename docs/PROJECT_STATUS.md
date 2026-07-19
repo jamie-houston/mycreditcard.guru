@@ -12,10 +12,11 @@ Last updated: 2026-07-18
 E–I planned in `.claude/plans/look-at-any-outstanding-wild-wirth.md`;
 J–M planned in `.claude/plans/plan-out-the-following-sharded-nest.md`
 (scoping decisions with Jamie, 2026-07-17); N–Q added 2026-07-18 from
-Jamie's backlog. Recommended order for what's left: **L → M → N → O →
-P → Q** — N is mostly verification (see below) so it's cheap to clear
-early; O/P (spending-input modes) before Q (surfacing existing credit
-math) since they touch the same builder UI.
+Jamie's backlog. Phase N built ahead of M (2026-07-18, Jamie's call —
+greenfield feature over a verify-and-document pass). Recommended order for
+what's left: **M → O → P → Q** — M is mostly verification (see below) so
+it's cheap to clear; O/P (spending-input modes) before Q (surfacing
+existing credit math) since they touch the same builder UI.
 
 ### Completed
 
@@ -30,6 +31,10 @@ math) since they touch the same builder UI.
       guidance per card (2026-07-18).
 - [x] **Phase L** — Benefit/credit usage tracking: Current period check-offs
       and expiring-soon grouping on profile and modal (2026-07-18).
+- [x] **Phase N** — One-off upcoming-expense mode: "Best card for your
+      purchase" panel, ranking new-card applies (lump-sum-aware signup-bonus
+      reachability + category rate − fee) and the best already-owned card,
+      independent of and alongside the regular monthly roadmap (2026-07-18).
 
 Detail archived — see pointers under "Where everything else went."
 
@@ -47,15 +52,6 @@ Detail archived — see pointers under "Where everything else went."
       (c) no cross-issuer velocity throttle. Also confirm the "10 Chase cards
       in 24mo for 2 people" example behaves right via a scenario. Likely a
       small verify-and-document phase unless a specific gap is prioritized.
-- [ ] **Phase N — One-off upcoming-expense mode**
-      GREENFIELD. Let a user say "I have a $10k expense coming up" (instead of,
-      or alongside, monthly spending) and recommend the best card to use/get
-      for it (signup-bonus minimum-spend fit + best category rate). Today
-      spending is only per-category monthly `SpendingAmount` (cards/models.py).
-      New input on the roadmap builder (`templates/index.html`), a scratch
-      field threaded through `roadmaps/serializers.py`, and engine handling
-      that treats the lump sum as spend directed at one card. Interacts with
-      bonus-capacity/min-spend logic (`_bonus_capacity_plan`).
 - [ ] **Phase O — Category-less "easy mode" spending**
       GREENFIELD. Let a user enter total monthly OR yearly spend without
       picking categories ("$4k/month"), for a quick low-effort estimate.
@@ -113,6 +109,12 @@ Detail archived — see pointers under "Where everything else went."
         profile.html, Owner column + owner selector in the edit-card
         modal, second-copy apply_as attribution, household summary line
         on index.html) — checklist in `docs/MANUAL_TEST_PLAN.md`
+  - [ ] Phase N one-off upcoming-expense mode (`index.html` "Upcoming large
+        purchase" collapsible input, with and without a category selected)
+        — confirm the "Best card for your purchase" panel ranks sensibly,
+        each row's line items sum to the shown total, the panel survives
+        reload-restore (Current Roadmap) and the public shared-roadmap
+        page, and it's absent entirely when no expense is entered
 - [ ] **Deploy loose ends** — after Jamie's first Google login on
       production, promote his user to staff/superuser via the
       PythonAnywhere console; consider revoking the PythonAnywhere API
@@ -134,15 +136,17 @@ sync with production's automated monthly refresh if this also runs locally
 ## Verification quick reference
 
 ```bash
-venv/bin/python manage.py test                                                # standard suite (156 tests)
+venv/bin/python manage.py test                                                # standard suite (170 tests)
 RUN_ALL_SCENARIOS=1 venv/bin/python manage.py test cards.test_json_scenarios   # full sweep must pass clean
 venv/bin/python manage.py run_scenario "Jamie Real" --explain                  # every line item reconciles
 node scripts/test_roadmap_results.js                                          # roadmap-results.js pure-helper smoke test
 ```
 
-Baseline as of 2026-07-18 (post Phase I): 156 standard tests green (151 +
-5 from Phase I), scenario sweep clean, "Jamie Real" reconciles, JS smoke
-test green. Any failure is a regression.
+Baseline as of 2026-07-18 (post Phase N): 170 standard tests green (162 +
+8 from Phase N: `ExpenseRecommenderTests`, `ExpenseRecommendationResponseTests`),
+scenario sweep clean, "Jamie Real" reconciles, JS smoke test green (+5 new
+cases for `_roadmapExpenseLineText`/`_roadmapExpensePanelHtml`). Any failure
+is a regression.
 
 ## Where everything else went
 
@@ -163,6 +167,8 @@ test green. Any failure is a regression.
 - **Phases G, H, J detail** (no standalone plan doc) → git history + the
   originating plans in `.claude/plans/look-at-any-outstanding-wild-wirth.md`
   and `.claude/plans/plan-out-the-following-sharded-nest.md`
+- **Phase N design** (one-off upcoming-expense mode) →
+  `.claude/plans/cantinue-with-next-phase-foamy-dragonfly.md`
 - **Feature backlog / future ideas** → mybrain
   `Requirements/Backlog/Review.md`
 - **Architecture, working rules** → `CLAUDE.md` (this repo)

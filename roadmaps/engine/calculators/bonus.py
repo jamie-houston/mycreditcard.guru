@@ -194,6 +194,69 @@ class BonusCapacityManager:
         user_spending_in_period = total_monthly_spending * time_months
         return user_spending_in_period * 1.2 >= required_amount
 
+    def can_meet_signup_requirement_with_expense(self, card: CreditCard, expense_amount: float) -> tuple:
+        """Reachability for the one-off expense recommender (Phase N): does a
+        one-time `expense_amount`, on top of normal monthly spend within the
+        bonus's time window, cover this card's signup-bonus minimum spend?
+
+        Unlike `can_meet_signup_requirement` (which projects recurring
+        monthly spend forward with a 1.2x buffer), this checks a known,
+        concrete lump sum — no buffer needed. Returns
+        (reachable, required_amount, time_months) so callers can build a
+        human-facing note without re-deriving the structured requirement.
+        """
+        signup_bonus = card.metadata.get('signup_bonus') or {}
+        required_amount = float(signup_bonus.get('spending_requirement') or 0)
+        time_months = float(signup_bonus.get('time_limit_months') or 0)
+
+        if not required_amount:
+            if not card.signup_bonus_requirement:
+                return True, 0.0, 0.0
+            match = re.search(r'\$([\d,]+).*?(\d+)\s*months?', card.signup_bonus_requirement)
+            if not match:
+                return True, 0.0, 0.0
+            required_amount = float(match.group(1).replace(',', ''))
+            time_months = float(match.group(2))
+
+        if required_amount <= 0:
+            return True, 0.0, 0.0
+        if time_months <= 0:
+            time_months = 3.0
+
+        monthly_spend_in_window = self.engine._total_monthly_spending() * time_months
+        reachable = (expense_amount + monthly_spend_in_window) >= required_amount
+        return reachable, required_amount, time_months
+
+    def get_signup_bonus_value_for_expense(self, card: CreditCard, expense_amount: float,
+                                            program_multipliers: dict = None) -> float:
+        """Signup bonus value for the expense recommender: same valuation as
+        `get_signup_bonus_value`, but reachability is decided by
+        `can_meet_signup_requirement_with_expense` instead of projected
+        monthly spend. Kept as its own method (rather than parameterizing
+        `get_signup_bonus_value`) so the well-exercised portfolio path is
+        untouched.
+        """
+        if self.engine._bonus_ineligibility_note(card):
+            return 0.0
+        if not card.signup_bonus_amount:
+            return 0.0
+        reachable, _, _ = self.can_meet_signup_requirement_with_expense(card, expense_amount)
+        if not reachable:
+            return 0.0
+
+        signup_bonus_type = getattr(card, 'signup_bonus_type', None)
+        if signup_bonus_type and hasattr(signup_bonus_type, 'name'):
+            bonus_type_name = signup_bonus_type.name.lower()
+        elif signup_bonus_type:
+            bonus_type_name = str(signup_bonus_type).lower()
+        else:
+            bonus_type_name = 'unknown'
+
+        if bonus_type_name in ['cashback', 'cash', 'cash back']:
+            return float(card.signup_bonus_amount)
+        reward_value_multiplier = self.engine._effective_multiplier(card, program_multipliers)
+        return float(card.signup_bonus_amount) * reward_value_multiplier
+
     def get_best_signup_bonus_card(self, eligible_cards: List[CreditCard]) -> dict:
         """Get the best signup bonus card as a fallback recommendation for high spenders."""
         owned_card_ids = {uc.card.id for uc in self.engine.user_cards}

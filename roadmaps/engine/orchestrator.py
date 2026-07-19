@@ -100,6 +100,9 @@ class RecommendationEngineOrchestrator:
         from roadmaps.engine.optimizer import PortfolioOptimizer
         self.optimizer = PortfolioOptimizer(self)
 
+        from roadmaps.engine.calculators.expense import ExpenseRecommender
+        self.expense_recommender = ExpenseRecommender(self)
+
     def generate_quick_recommendations(self, roadmap: Roadmap) -> List[dict]:
         """Generate recommendations without saving to database (includes breakdowns)"""
         self.spending_amounts = {
@@ -702,6 +705,14 @@ class RecommendationEngineOrchestrator:
                                 program_multipliers: dict = None) -> float:
         """Get signup bonus value using card's specific reward value multiplier."""
         return self.bonus_capacity_manager.get_signup_bonus_value(card, program_multipliers)
+
+    def _recommend_for_expense(self, amount: float, category_slug: str, roadmap: Roadmap) -> dict:
+        """One-off upcoming-expense recommendation (Phase N) — a parallel
+        path to the portfolio roadmap, not a replacement. See
+        `ExpenseRecommender` for the valuation shape."""
+        eligible_cards = self._get_filtered_cards(roadmap)
+        return self.expense_recommender.recommend_for_expense(
+            amount, category_slug, eligible_cards, max_results=roadmap.max_recommendations)
 
     def _counted_card_credits(self, card: CreditCard) -> list:
         """Credits on this card that count for THIS user."""
