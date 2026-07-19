@@ -25,6 +25,7 @@ phases complete or requirements change.
   hook + `deploy.sh`).
 - When you change code or requirements: update `docs/PROJECT_STATUS.md`
   (status/backlog) and this file (architecture) in the same commit.
+- When adding or modifying user-facing features (roadmap settings, math logic, multiplayer support, credit rules, etc.), always update the help documentation (`templates/help.html`) and relevant resources (`templates/resources.html`) to match.
 
 ## Verification gates (run before calling anything done)
 

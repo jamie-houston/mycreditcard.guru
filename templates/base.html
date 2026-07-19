@@ -39,6 +39,8 @@
                 <li><a href="/roadmap/" class="{% if request.resolver_match.url_name == 'roadmap' %}active{% endif %}"><span class="ico">route</span> Roadmap</a></li>
                 <li><a href="/profile/" class="{% if request.resolver_match.url_name == 'profile' %}active{% endif %}"><span class="ico">style</span> My Cards</a></li>
                 <li><a href="/cards/" class="{% if request.resolver_match.url_name == 'cards_list' %}active{% endif %}"><span class="ico">search</span> Browse</a></li>
+                <li><a href="/help/" class="{% if request.resolver_match.url_name == 'help' %}active{% endif %}"><span class="ico">help</span> Help</a></li>
+                <li><a href="/resources/" class="{% if request.resolver_match.url_name == 'resources' %}active{% endif %}"><span class="ico">library_books</span> Resources</a></li>
             </ul>
             <div class="topnav-auth" id="navAuth">
                 {% if user.is_authenticated %}
@@ -94,6 +96,8 @@
                     <li><a href="/roadmap/">Roadmap</a></li>
                     <li><a href="/profile/">My Cards</a></li>
                     <li><a href="/cards/">Browse</a></li>
+                    <li><a href="/help/">Help &amp; Docs</a></li>
+                    <li><a href="/resources/">Resources</a></li>
                 </ul>
             </div>
 

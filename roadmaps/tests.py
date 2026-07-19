@@ -1140,7 +1140,10 @@ class LandingRedirectTests(TestCase):
             content_type='application/json')
 
         response = self.client.get('/')
-        self.assertRedirects(response, '/roadmap/')
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'landing.html')
+        self.assertTrue(response.context['has_roadmap'])
+        self.assertTrue(response.context['user_authenticated'])
 
     def test_landing_redirects_for_anon_session_with_current_roadmap(self):
         self.client.post(
@@ -1148,7 +1151,10 @@ class LandingRedirectTests(TestCase):
             content_type='application/json')
 
         response = self.client.get('/')
-        self.assertRedirects(response, '/roadmap/')
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'landing.html')
+        self.assertTrue(response.context['has_roadmap'])
+        self.assertFalse(response.context['user_authenticated'])
 
     def test_roadmap_page_has_current_roadmap_flag_false_for_new_visitor(self):
         response = self.client.get('/roadmap/')

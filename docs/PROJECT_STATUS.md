@@ -35,6 +35,7 @@ existing credit math) since they touch the same builder UI.
       purchase" panel, ranking new-card applies (lump-sum-aware signup-bonus
       reachability + category rate − fee) and the best already-owned card,
       independent of and alongside the regular monthly roadmap (2026-07-18).
+- [x] **Help & Resources** — Created a user-friendly, Ledger-themed Help & Docs page, an external Resources page recommending high-quality points/rewards sites, and restored start page landing features grid for all users (2026-07-19).
 
 Detail archived — see pointers under "Where everything else went."
 

@@ -1,0 +1,151 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}External Resources &amp; Guides - Credit Card Guru{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/pages/resources.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="resources-container">
+    <div style="margin-top: 20px; text-align: center;">
+        <h1>📚 External Resources &amp; Guides</h1>
+        <p style="color: var(--muted); margin-bottom: 30px; font-size: 16px; max-width: 600px; margin-left: auto; margin-right: auto;">
+            Learn from the experts. We recommend these high-quality external blogs, websites, and community spaces to help you master credit card rewards and point redemptions.
+        </p>
+    </div>
+
+    <div class="resources-grid">
+        <!-- Resource 1: Doctor of Credit -->
+        <a href="https://www.doctorofcredit.com" target="_blank" rel="noopener noreferrer" class="resource-card">
+            <div class="resource-header">
+                <div class="resource-title-wrapper">
+                    <div class="resource-title">
+                        <span class="ico">travel_explore</span> Doctor of Credit
+                    </div>
+                    <span class="resource-url">doctorofcredit.com</span>
+                </div>
+                <div class="resource-badges">
+                    <span class="resource-badge badge-beginner">Beginner</span>
+                    <span class="resource-badge badge-biasfree">No Affiliate Links</span>
+                </div>
+            </div>
+            <p class="resource-desc">
+                Widely regarded as the most reliable, objective, and unbiased credit card news site. Doctor of Credit does not use credit card affiliate referral links, meaning their recommendations are entirely free of financial bias.
+            </p>
+            <div class="resource-focus">
+                <span class="ico">star</span> <strong>Best For:</strong> Real-time updates on the highest signup bonuses, bank promotions, and leak alerts.
+            </div>
+        </a>
+
+        <!-- Resource 2: Frequent Miler -->
+        <a href="https://frequentmiler.com" target="_blank" rel="noopener noreferrer" class="resource-card">
+            <div class="resource-header">
+                <div class="resource-title-wrapper">
+                    <div class="resource-title">
+                        <span class="ico">flight_takeoff</span> Frequent Miler
+                    </div>
+                    <span class="resource-url">frequentmiler.com</span>
+                </div>
+                <div class="resource-badges">
+                    <span class="resource-badge badge-intermediate">Intermediate</span>
+                    <span class="resource-badge badge-advanced">Advanced</span>
+                </div>
+            </div>
+            <p class="resource-desc">
+                An excellent blog that covers points and miles optimization with high integrity. They provide deep-dive analyses, spreadsheet-backed comparisons, and strategy guides for complex loyalty programs and airline transfer partners.
+            </p>
+            <div class="resource-focus">
+                <span class="ico">star</span> <strong>Best For:</strong> Points valuations, transfer partner strategies, sweet spots, and automated tracking tools.
+            </div>
+        </a>
+
+        <!-- Resource 3: The Points Guy (TPG) -->
+        <a href="https://thepointsguy.com" target="_blank" rel="noopener noreferrer" class="resource-card">
+            <div class="resource-header">
+                <div class="resource-title-wrapper">
+                    <div class="resource-title">
+                        <span class="ico">explore</span> The Points Guy
+                    </div>
+                    <span class="resource-url">thepointsguy.com</span>
+                </div>
+                <div class="resource-badges">
+                    <span class="resource-badge badge-beginner">Beginner</span>
+                </div>
+            </div>
+            <p class="resource-desc">
+                The largest and most mainstream points and miles publication on the web. While heavily monetized via affiliate links, it remains a fantastic starting point for beginners to read about credit card basics, lounge guides, and reviews.
+            </p>
+            <div class="resource-focus">
+                <span class="ico">star</span> <strong>Best For:</strong> Beginner tutorial series, airport lounge guides, card news, and hotel/airline reviews.
+            </div>
+        </a>
+
+        <!-- Resource 4: r/CreditCards on Reddit -->
+        <a href="https://www.reddit.com/r/CreditCards/" target="_blank" rel="noopener noreferrer" class="resource-card">
+            <div class="resource-header">
+                <div class="resource-title-wrapper">
+                    <div class="resource-title">
+                        <span class="ico">forum</span> Reddit: r/CreditCards
+                    </div>
+                    <span class="resource-url">reddit.com/r/CreditCards</span>
+                </div>
+                <div class="resource-badges">
+                    <span class="resource-badge badge-beginner">Beginner</span>
+                    <span class="resource-badge badge-intermediate">Intermediate</span>
+                </div>
+            </div>
+            <p class="resource-desc">
+                A friendly, community-run forum with hundreds of thousands of members discussing everyday credit card strategies. Users frequently share recommendations, setup designs (e.g. Chase Trifecta vs. Amex Quadfecta), and application results.
+            </p>
+            <div class="resource-focus">
+                <span class="ico">star</span> <strong>Best For:</strong> Getting answers to specific card questions and browsing community recommendations.
+            </div>
+        </a>
+
+        <!-- Resource 5: r/churning on Reddit -->
+        <a href="https://www.reddit.com/r/churning/" target="_blank" rel="noopener noreferrer" class="resource-card">
+            <div class="resource-header">
+                <div class="resource-title-wrapper">
+                    <div class="resource-title">
+                        <span class="ico">psychology</span> Reddit: r/churning
+                    </div>
+                    <span class="resource-url">reddit.com/r/churning</span>
+                </div>
+                <div class="resource-badges">
+                    <span class="resource-badge badge-advanced">Advanced</span>
+                </div>
+            </div>
+            <p class="resource-desc">
+                A highly structured, fast-paced community for advanced users focused strictly on maximizing credit card signup bonuses. Warning: The community has strict rules and a low tolerance for basic questions, so be sure to read their wiki and sidebar before posting.
+            </p>
+            <div class="resource-focus">
+                <span class="ico">star</span> <strong>Best For:</strong> Detailed application flowcharts, velocity rules, and advanced methods for meeting signup minimum spends.
+            </div>
+        </a>
+
+        <!-- Resource 6: AwardWallet & Point.me -->
+        <a href="https://awardwallet.com" target="_blank" rel="noopener noreferrer" class="resource-card">
+            <div class="resource-header">
+                <div class="resource-title-wrapper">
+                    <div class="resource-title">
+                        <span class="ico">inventory</span> AwardWallet &amp; Point.me
+                    </div>
+                    <span class="resource-url">awardwallet.com | point.me</span>
+                </div>
+                <div class="resource-badges">
+                    <span class="resource-badge badge-beginner">Beginner</span>
+                    <span class="resource-badge badge-intermediate">Intermediate</span>
+                </div>
+            </div>
+            <p class="resource-desc">
+                Utility services that help you manage and redeem the points you earn. AwardWallet tracks your loyalty account balances and expiration dates, while Point.me acts as a search engine for finding award flight seat availability.
+            </p>
+            <div class="resource-focus">
+                <span class="ico">star</span> <strong>Best For:</strong> Tracking points balances, flight search engines, and preventing point expiration.
+            </div>
+        </a>
+    </div>
+</div>
+{% endblock %}

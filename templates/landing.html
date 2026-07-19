@@ -8,6 +8,15 @@
 {% endblock %}
 
 {% block content %}
+{% if has_roadmap or user_authenticated %}
+<div class="home-hero">
+    <h1 class="home-h1">Welcome back.</h1>
+    <p class="home-sub">Your personalized credit card portfolio optimization is ready. Choose an option below to proceed.</p>
+
+    <a href="/roadmap/" class="home-cta-primary"><span class="ico">route</span> Go to my roadmap <span class="ico">arrow_forward</span></a>
+    <a href="/profile/" class="home-cta-secondary"><span class="ico">style</span> Manage my cards</a>
+</div>
+{% else %}
 <div class="home-hero">
     <h1 class="home-h1">Your cards, optimized.</h1>
     <p class="home-sub">A plan for what to keep, cancel, and apply for — built around what you actually spend.</p>
@@ -15,9 +24,10 @@
     <a href="/roadmap/" class="home-cta-primary"><span class="ico">route</span> Create my roadmap <span class="ico">arrow_forward</span></a>
     <a href="/profile/" class="home-cta-secondary">Add my cards first</a>
 </div>
+{% endif %}
 
 <div class="home-features">
-    <div class="eyebrow">What you get</div>
+    <div class="eyebrow">Explore features</div>
 
     <a href="/roadmap/" class="surface-row">
         <span class="icon-chip"><span class="ico">route</span></span>
@@ -27,11 +37,11 @@
         </div>
     </a>
 
-    <a href="/roadmap/" class="surface-row">
-        <span class="icon-chip"><span class="ico">grid_view</span></span>
+    <a href="/profile/" class="surface-row">
+        <span class="icon-chip"><span class="ico">style</span></span>
         <div>
-            <div class="surface-row-title">Best card per category</div>
-            <div class="surface-row-sub">Dining, travel, groceries…</div>
+            <div class="surface-row-title">My cards &amp; profile</div>
+            <div class="surface-row-sub">Manage holdings, players, settings</div>
         </div>
     </a>
 
@@ -39,7 +49,23 @@
         <span class="icon-chip"><span class="ico">search</span></span>
         <div>
             <div class="surface-row-title">Browse 200+ cards</div>
-            <div class="surface-row-sub">Compare fees &amp; rewards</div>
+            <div class="surface-row-sub">Compare fees, rewards, &amp; rules</div>
+        </div>
+    </a>
+
+    <a href="/help/" class="surface-row">
+        <span class="icon-chip"><span class="ico">help</span></span>
+        <div>
+            <div class="surface-row-title">Help &amp; documentation</div>
+            <div class="surface-row-sub">Learn how the engine &amp; math work</div>
+        </div>
+    </a>
+
+    <a href="/resources/" class="surface-row">
+        <span class="icon-chip"><span class="ico">library_books</span></span>
+        <div>
+            <div class="surface-row-title">Resources &amp; guides</div>
+            <div class="surface-row-sub">Curated points &amp; miles advice</div>
         </div>
     </a>
 </div>

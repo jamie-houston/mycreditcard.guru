@@ -311,3 +311,45 @@ class CreditUsageTests(TestCase):
             str(self.credit_monthly.id): True
         })
 
+
+class TemplatePagesTests(TestCase):
+    def setUp(self):
+        from django.contrib.sites.models import Site
+        from allauth.socialaccount.models import SocialApp
+        app = SocialApp.objects.create(
+            provider='google', name='Google', client_id='test', secret='test'
+        )
+        app.sites.add(Site.objects.get_current())
+
+    def test_help_page_renders_successfully(self):
+        response = self.client.get('/help/')
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'help.html')
+
+    def test_resources_page_renders_successfully(self):
+        response = self.client.get('/resources/')
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'resources.html')
+
+    def test_landing_page_without_roadmap_renders_standard_hero(self):
+        response = self.client.get('/')
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'landing.html')
+        self.assertContains(response, 'Your cards, optimized.')
+        self.assertNotContains(response, 'Welcome back.')
+
+    def test_landing_page_with_roadmap_renders_welcome_back_hero(self):
+        user = User.objects.create_user(username='testuser', password='password')
+        profile = UserSpendingProfile.objects.create(user=user)
+        
+        from roadmaps.models import Roadmap, RoadmapCalculation
+        roadmap = Roadmap.objects.create(profile=profile, name="Current Roadmap")
+        RoadmapCalculation.objects.create(roadmap=roadmap, total_estimated_rewards=100.0, calculation_data={})
+        
+        self.client.force_login(user)
+        response = self.client.get('/')
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'landing.html')
+        self.assertContains(response, 'Welcome back.')
+        self.assertNotContains(response, 'Your cards, optimized.')
+

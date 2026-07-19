@@ -391,15 +391,23 @@ def card_recommendations_preview(request):
 def landing_view(request):
     """Landing page - welcome and feature overview.
 
-    Skips straight to /roadmap/ for visitors (auth or anon-via-session) who
-    already have a persisted Current Roadmap — Home is meant as an entry
-    point into the roadmap, not a page returning users need to pass through.
-    Read-only check: never creates a session for a fresh anonymous visitor.
+    We no longer redirect users with existing roadmaps or logged in users;
+    they land on the homepage and see a personalized navigation panel to all features.
     """
     from roadmaps.models import get_current_roadmap
-    if get_current_roadmap(request):
-        return redirect('roadmap')
-    return render(request, 'landing.html')
+    context = {
+        'has_roadmap': get_current_roadmap(request) is not None,
+        'user_authenticated': request.user.is_authenticated,
+    }
+    return render(request, 'landing.html', context)
+
+def help_view(request):
+    """Help & documentation page"""
+    return render(request, 'help.html')
+
+def resources_view(request):
+    """External resources and guides page"""
+    return render(request, 'resources.html')
 
 def index_view(request):
     """Roadmap creation page"""
