@@ -246,6 +246,15 @@ class UserCardCreateUpdateSerializer(serializers.ModelSerializer):
                 profile__user=request.user
             )
 
+    def validate_owner(self, value):
+        """Ensure owner belongs to the current user's household"""
+        request = self.context.get('request')
+        if value and request and hasattr(request, 'user') and request.user.is_authenticated:
+            # Check that the owner belongs to this user's profile
+            if not ProfileEntity.objects.filter(profile__user=request.user, id=value.id).exists():
+                raise serializers.ValidationError("This entity does not belong to your household.")
+        return value
+
 
 class UserSpendingCreditPreferenceSerializer(serializers.Serializer):
     def to_representation(self, instance):

@@ -55,6 +55,11 @@ Frontend JavaScript:
 - Templates import these using `{% static 'js/...' %}`.
 - Any dynamic context values (e.g., `share_uuid`) are declared globally inline prior to loading the external scripts.
 
+Frontend CSS:
+- Template-specific CSS is extracted from Django templates into static files located in `static/css/pages/` (e.g., `cards.css`, `roadmap.css`, `profile.css`, `wallet.css`, `landing.css`, `help.css`, `resources.css`, `shared-profile.css`, `account.css`).
+- Shared component styles (like toggle switches, Google OAuth buttons, and the card ownership modal) are kept in `static/css/components.css`, which is loaded globally in `base.html` after `base.css`.
+- Templates import their specific stylesheets using `{% block extra_css %}<link rel="stylesheet" href="{% static 'css/pages/...' %}">{% endblock %}`.
+
 Key modules:
 
 - `roadmaps/recommendation_engine.py` — the engine. Portfolio selection

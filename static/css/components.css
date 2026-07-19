@@ -53,3 +53,165 @@ a[href*="google"]:focus {
     outline: none;
     box-shadow: 0 0 0 4px var(--accent-soft);
 }
+
+/* ========== Modal ========== */
+
+.modal.show {
+    display: flex !important;
+}
+
+/* Card Ownership Modal specific styling (shared by index.html and cards_list.html) */
+#cardOwnershipModal {
+    /* Center modal in viewport when shown */
+    display: none;
+    align-items: center;
+    justify-content: center;
+}
+
+#cardOwnershipModal.show {
+    display: flex !important;
+}
+
+#cardOwnershipModal .modal-content {
+    max-width: 600px;
+    flex-shrink: 0;
+}
+
+#cardOwnershipModal .modal-header h2 {
+    margin: 0;
+    color: var(--text-strong);
+    font-family: var(--font-ui);
+    font-size: 1.35rem;
+}
+
+#cardOwnershipModal .close {
+    color: var(--muted);
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    line-height: 1;
+    transition: color 0.2s;
+}
+
+#cardOwnershipModal .close:hover {
+    color: var(--text);
+}
+
+#cardOwnershipForm {
+    padding: 22px 26px 26px;
+}
+
+#cardOwnershipModal .form-group {
+    margin-bottom: 20px;
+}
+
+#cardOwnershipModal .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+#cardOwnershipModal .form-group label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 500;
+    color: var(--text);
+}
+
+#cardOwnershipModal .form-group input,
+#cardOwnershipModal .form-group textarea {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    transition: border-color 0.2s;
+    box-sizing: border-box;
+    background: var(--bg);
+    color: var(--text);
+}
+
+#cardOwnershipModal .form-group input:focus,
+#cardOwnershipModal .form-group textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+}
+
+#cardOwnershipModal .form-group small {
+    display: block;
+    margin-top: 4px;
+    color: var(--muted);
+    font-size: 12px;
+}
+
+#cardOwnershipModal .form-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    margin-top: 32px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+}
+
+#cardOwnershipModal .btn-primary,
+#cardOwnershipModal .btn-secondary {
+    padding: 12px 24px;
+    border-radius: var(--radius-sm);
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+    font-family: var(--font-ui);
+}
+
+#cardOwnershipModal .btn-primary {
+    background: var(--accent);
+    color: var(--accent-ink);
+}
+
+#cardOwnershipModal .btn-primary:hover {
+    filter: brightness(1.08);
+}
+
+#cardOwnershipModal .btn-primary:disabled {
+    background: var(--muted-2);
+    cursor: not-allowed;
+}
+
+#cardOwnershipModal .btn-secondary {
+    background: var(--surface);
+    color: var(--text);
+    border: 1px solid var(--border);
+}
+
+#cardOwnershipModal .btn-secondary:hover {
+    background: var(--bg);
+}
+
+@media (max-width: 768px) {
+    #cardOwnershipModal .modal-content {
+        width: 95%;
+        margin: 10% auto;
+    }
+
+    #cardOwnershipModal .modal-header,
+    #cardOwnershipForm {
+        padding-left: 20px;
+        padding-right: 20px;
+    }
+
+    #cardOwnershipModal .form-row {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    #cardOwnershipModal .form-actions {
+        flex-direction: column-reverse;
+    }
+
+    #cardOwnershipModal .btn-primary,
+    #cardOwnershipModal .btn-secondary {
+        width: 100%;
+    }
+}

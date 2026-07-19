@@ -1406,11 +1406,14 @@ async function openCardOwnershipModal(cardId, existingUserCard = null, cardType 
         localNotice.style.display = isAuthenticated ? 'none' : 'block';
     }
 
-    modal.style.display = 'flex';
+    modal.classList.add('show');
+    document.body.style.overflow = 'hidden';
 }
 
 function closeCardOwnershipModal() {
-    document.getElementById('cardOwnershipModal').style.display = 'none';
+    const modal = document.getElementById('cardOwnershipModal');
+    modal.classList.remove('show');
+    document.body.style.overflow = '';
 }
 
 async function saveCardOwnership(event) {

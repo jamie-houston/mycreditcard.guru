@@ -517,14 +517,6 @@ async function openCardOwnershipModal(cardId, existingUserCard = null, cardType 
         localNotice.style.display = isAuthenticated ? 'none' : 'block';
     }
 
-    // Position modal at current scroll position
-    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-    const viewportHeight = window.innerHeight;
-    
-    // Set modal to cover the current viewport
-    modal.style.top = scrollTop + 'px';
-    modal.style.height = viewportHeight + 'px';
-    
     modal.classList.add('show');
     
     // Prevent background scrolling

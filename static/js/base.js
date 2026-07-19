@@ -1413,11 +1413,10 @@
                     cardDetails?.bonus_override === true ? 'true' :
                     cardDetails?.bonus_override === false ? 'false' : '';
 
-                // Phase K: owner selector — only shown for authed households
-                // with more than one entity of THIS card's own kind (single-
-                // player accounts, and households with just one candidate
-                // for this kind, see no change — a card auto-assigns by
-                // kind on add, see addCardWithDetails/_resolve_owner_entity).
+                // Phase K: owner selector — shown for authed households with:
+                // - more than one entity of THIS card's own kind, OR
+                // - exactly one entity whose ID doesn't match the card's current owner
+                //   (so you can fix a misattributed card even with just one candidate)
                 // Note: if this card has multiple copies (different owners),
                 // this still edits the first matching row — the same
                 // longstanding ambiguity the other fields above already have.
@@ -1426,12 +1425,16 @@
                 const entities = await UserDataManager.getEntities();
                 const isBusinessCard = currentModalCard.card_type === 'business';
                 const candidates = entities.filter(e => (e.kind === 'business') === isBusinessCard);
-                if (isAuthenticated && candidates.length > 1) {
+                const currentOwnerId = cardDetails?.owner;
+                const shouldShowOwnerPicker = isAuthenticated && candidates.length > 0 && (
+                    candidates.length > 1 || (candidates.length === 1 && currentOwnerId !== candidates[0].id)
+                );
+                if (shouldShowOwnerPicker) {
                     ownerSelect.innerHTML = candidates.map(e =>
                         `<option value="${e.id}">${escapeHtml(e.name)}${e.is_primary ? ' (Primary)' : ''}</option>`
                     ).join('');
                     const defaultId = candidates.find(e => e.is_primary)?.id || candidates[0].id;
-                    ownerSelect.value = cardDetails?.owner ?? defaultId;
+                    ownerSelect.value = currentOwnerId ?? defaultId;
                     ownerGroup.style.display = 'block';
                 } else {
                     ownerGroup.style.display = 'none';
