@@ -1624,24 +1624,24 @@
         }
 
         // Card Ownership Modal Functions (copied from cards_list.html)
-        function openCardOwnershipModal(cardId, existingUserCard = null) {
+        async function openCardOwnershipModal(cardId, existingUserCard = null, cardType = 'personal') {
             const modal = document.getElementById('cardOwnershipModal');
             const form = document.getElementById('cardOwnershipForm');
             const modalTitle = document.getElementById('modalTitle');
-            
+
             // Set modal title and add auth status indicator
             if (isAuthenticated) {
                 modalTitle.textContent = existingUserCard ? 'Edit Card Details' : 'Add Card to Collection';
             } else {
-                modalTitle.innerHTML = existingUserCard ? 
+                modalTitle.innerHTML = existingUserCard ?
                     'Edit Card Details <span style="background: #f59e0b; color: white; padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: 500; margin-left: 8px;">📱 Local Mode</span>' :
                     'Add Card to Collection <span style="background: #f59e0b; color: white; padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: 500; margin-left: 8px;">📱 Local Mode</span>';
             }
-            
+
             // Store card ID in form
             form.dataset.cardId = cardId;
             form.dataset.userCardId = existingUserCard ? existingUserCard.id : '';
-            
+
             // Pre-fill form if editing existing card
             if (existingUserCard) {
                 form.nickname.value = existingUserCard.nickname || '';
@@ -1651,13 +1651,34 @@
             } else {
                 form.reset();
             }
-            
+
+            // Phase K: owner selector — mirrors base.html's edit-card modal.
+            // Only shown for authed households with more than one entity of
+            // THIS card's own kind; otherwise the backend auto-assigns by
+            // card_type on add (see _resolve_owner_entity), so there's
+            // nothing to pick.
+            const ownerGroup = document.getElementById('cardOwnershipOwnerGroup');
+            const ownerSelect = document.getElementById('ownershipOwner');
+            const entities = await UserDataManager.getEntities();
+            const isBusinessCard = cardType === 'business';
+            const candidates = entities.filter(e => (e.kind === 'business') === isBusinessCard);
+            if (isAuthenticated && candidates.length > 1) {
+                ownerSelect.innerHTML = candidates.map(e =>
+                    `<option value="${e.id}">${escapeHtml(e.name)}${e.is_primary ? ' (Primary)' : ''}</option>`
+                ).join('');
+                const defaultId = candidates.find(e => e.is_primary)?.id || candidates[0].id;
+                ownerSelect.value = (existingUserCard && existingUserCard.owner) ?? defaultId;
+                ownerGroup.style.display = 'block';
+            } else {
+                ownerGroup.style.display = 'none';
+            }
+
             // Show/hide local storage notice
             const localNotice = document.getElementById('localStorageNotice');
             if (localNotice) {
                 localNotice.style.display = isAuthenticated ? 'none' : 'block';
             }
-            
+
             modal.style.display = 'flex';
         }
 
@@ -1673,6 +1694,7 @@
             const userCardId = form.dataset.userCardId;
             const submitBtn = form.querySelector('button[type="submit"]');
             
+            const ownerGroupVisible = document.getElementById('cardOwnershipOwnerGroup').style.display !== 'none';
             const formData = {
                 card_id: parseInt(cardId),
                 nickname: form.nickname.value,
@@ -1680,11 +1702,14 @@
                 closed_date: form.closed_date.value || null,
                 notes: form.notes.value
             };
-            
+            if (ownerGroupVisible) {
+                formData.owner = form.owner.value;
+            }
+
             try {
                 submitBtn.disabled = true;
                 submitBtn.textContent = 'Saving...';
-                
+
                 if (isAuthenticated) {
                     // For authenticated users, save to server
                     let response;
@@ -1820,7 +1845,15 @@
                        placeholder="e.g., My Travel Card, Grocery Card">
                 <small>Give this card a memorable name</small>
             </div>
-            
+
+            <!-- Phase K: owner selector — shown only for authed households
+                 with more than one entity of this card's own kind (personal
+                 vs. business). See openCardOwnershipModal(). -->
+            <div class="form-group" id="cardOwnershipOwnerGroup" style="display: none;">
+                <label for="ownershipOwner">Held By</label>
+                <select id="ownershipOwner" name="owner"></select>
+            </div>
+
             <div class="form-row">
                 <div class="form-group">
                     <label for="opened_date">Opened Date</label>

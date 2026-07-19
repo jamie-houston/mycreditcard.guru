@@ -571,11 +571,25 @@ def shared_profile_data_view(request, share_uuid):
         )
 
 
-def _resolve_owner_entity(profile, owner_id):
-    """Resolve an 'owner' request param to a ProfileEntity, or the profile's
-    primary entity if none was given. Returns (entity, error_response) —
-    error_response is None on success. Phase K owner-CRUD helper."""
+def _resolve_owner_entity(profile, owner_id, card=None):
+    """Resolve an 'owner' request param to a ProfileEntity, or an auto-picked
+    default if none was given. Returns (entity, error_response) —
+    error_response is None on success. Phase K owner-CRUD helper.
+
+    Default-by-kind: a business card defaults to the household's business
+    entity (falling back to the personal primary for sole proprietors with
+    no declared business entity); a personal card — or a card whose kind we
+    weren't told — defaults to the personal primary. This mirrors
+    roadmaps/engine/eligibility_manager.py's eligible_entity_for_card(),
+    which prefers a business entity for business cards and falls back to
+    the primary when no business entity exists, so write-time ownership and
+    engine attribution agree.
+    """
     if owner_id in (None, ''):
+        if card is not None and card.card_type == 'business':
+            business_entity = profile.entities.filter(kind='business').first()
+            if business_entity is not None:
+                return business_entity, None
         return profile.primary_entity(), None
     entity = ProfileEntity.objects.filter(id=owner_id, profile=profile).first()
     if entity is None:
@@ -706,7 +720,7 @@ def add_user_card(request):
             )
 
         profile, _ = UserSpendingProfile.objects.get_or_create(user=request.user)
-        owner_entity, error = _resolve_owner_entity(profile, request.data.get('owner'))
+        owner_entity, error = _resolve_owner_entity(profile, request.data.get('owner'), card=card)
         if error:
             return error
 
@@ -836,7 +850,7 @@ def toggle_user_card(request):
     profile, _ = UserSpendingProfile.objects.get_or_create(user=request.user)
 
     if action == 'add':
-        owner_entity, error = _resolve_owner_entity(profile, request.data.get('owner'))
+        owner_entity, error = _resolve_owner_entity(profile, request.data.get('owner'), card=card)
         if error:
             return error
         user_card, created = _get_or_create_owned_card(

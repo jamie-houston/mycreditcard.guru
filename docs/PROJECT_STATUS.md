@@ -25,6 +25,16 @@ existing credit math) since they touch the same builder UI.
 - [x] **Phase H** — Sortable profile table + inline network marks on card thumbnails (2026-07-11).
 - [x] **Phase J** — Points-program pooled valuation (2026-07-18).
 - [x] **Phase K** — Multi-player households & per-entity eligibility rules (2026-07-18).
+- [x] **Phase K follow-up** — Card ownership now defaults by card kind on
+      add (business → the household's business entity, personal → the
+      primary; `cards/views.py` `_resolve_owner_entity(profile, owner_id,
+      card=None)`), mirroring the engine's existing
+      `eligible_entity_for_card()` preference. The owner picker (edit modal
+      `templates/base.html`, and the add/edit popup shared by
+      `templates/cards_list.html` + `templates/index.html`'s
+      `openCardOwnershipModal()`) now filters candidates to the card's own
+      kind and only appears when there's more than one of that kind — no
+      prompt for the common single-person/single-business case (2026-07-18).
 - [x] **Phase I** — Roadmap analysis views: Cards × categories allocation
       matrix, first-year-vs-ongoing value panel, curated redemption
       guidance per card (2026-07-18).
@@ -100,6 +110,12 @@ Detail archived — see pointers under "Where everything else went."
         profile.html, Owner column + owner selector in the edit-card
         modal, second-copy apply_as attribution, household summary line
         on index.html) — checklist in `docs/MANUAL_TEST_PLAN.md`
+  - [ ] Phase K follow-up owner-by-kind (add a business card with one vs.
+        two business entities declared — auto-assign vs. picker; same for
+        a personal card with two people; confirm the picker on
+        `cards_list.html`'s "I have this card"/"Edit card details" buttons
+        and the roadmap results "I have this card" button agree with the
+        edit-card modal's default/filtering)
   - [ ] Phase N one-off upcoming-expense mode (`index.html` "Upcoming large
         purchase" collapsible input, with and without a category selected)
         — confirm the "Best card for your purchase" panel ranks sensibly,

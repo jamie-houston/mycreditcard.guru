@@ -320,6 +320,7 @@ class GenerateRoadmapSerializer(serializers.Serializer):
 class RecommendationItemCardSerializer(serializers.Serializer):
     id = serializers.IntegerField(source='card.id')
     name = serializers.CharField(source='card.name')
+    card_type = serializers.CharField(source='card.card_type')
     issuer = serializers.CharField(source='card.issuer.name')
     annual_fee = serializers.FloatField(source='card.annual_fee')
     effective_annual_fee = serializers.SerializerMethodField()

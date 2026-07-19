@@ -424,20 +424,45 @@ Key modules:
   `profile-entities/` (`GET`/`POST`) and `profile-entities/<id>/`
   (`PATCH`/`DELETE`) are the CRUD surface (all `IsAuthenticated` — auth-only
   feature, anon stays single-player). `add_user_card`/`toggle_user_card`
-  resolve an `owner` param (or default to the primary) via
-  `_resolve_owner_entity`/`_get_or_create_owned_card` — the latter also
-  matches a legacy NULL-owner row when the target is the primary, since
-  NULL and the primary entity are the same row conceptually but the DB
-  constraint treats them as distinct values. **Security note**: both
-  `add_user_card`'s re-add branch and `update_user_card` instantiate
+  resolve an `owner` param via `_resolve_owner_entity`/
+  `_get_or_create_owned_card` — the latter also matches a legacy NULL-owner
+  row when the target is the primary, since NULL and the primary entity are
+  the same row conceptually but the DB constraint treats them as distinct
+  values. **Default-by-kind (Phase K follow-up)**: when `owner` is blank,
+  `_resolve_owner_entity(profile, owner_id, card=None)` defaults a
+  `card.card_type == 'business'` card to the household's business entity
+  (falling back to the primary for sole proprietors with no declared
+  business entity) and everything else to the primary — mirroring
+  `roadmaps/engine/eligibility_manager.py`'s `eligible_entity_for_card()`,
+  so write-time ownership and engine attribution agree. **Security note**:
+  both `add_user_card`'s re-add branch and `update_user_card` instantiate
   `UserCardCreateUpdateSerializer` with `context={'request': request}` —
   without it, `validate_owner`'s cross-household check silently no-ops
-  (this was a real gap, fixed alongside the K3 owner selector). `base.html`
-  `#editCardDetailsModal` gained a "Held By" `<select>` (`#cardOwnerGroup`),
-  shown only when authenticated with >1 entity; `updateCardDetails()`'s
-  row resolution still targets the FIRST matching `UserCard` for a given
-  `CreditCard` id when multiple copies exist — a longstanding ambiguity
-  (predates Phase K) not fully resolved here. `profile.html` has a new
+  (this was a real gap, fixed alongside the K3 owner selector). The owner
+  picker exists in **two** independent places, each filtering candidate
+  entities to the card's own kind (`kind === 'business'` for business
+  cards, else non-business) and appearing only when there's more than one
+  candidate of that kind — otherwise the backend default above applies with
+  no prompt: (1) `base.html` `#editCardDetailsModal`'s "Held By" `<select>`
+  (`#cardOwnerGroup`, populated in `openEditCardDetailsModal()`); (2) the
+  add/edit popup shared (as near-identical copies, per this repo's
+  no-shared-JS-module pattern) by `templates/cards_list.html` and
+  `templates/index.html` — `openCardOwnershipModal(cardId, existingUserCard,
+  cardType)`'s `#cardOwnershipOwnerGroup`. Callers must pass `cardType`
+  (`cards_list.html`'s card grid has `card.card_type` already; the roadmap
+  results "I have this card" button gets it from the new `card_type` field
+  on `RecommendationItemCardSerializer`, `roadmaps/serializers.py`, since
+  the roadmap rec payload otherwise carries no card-type info).
+  `updateCardDetails()`'s row resolution still targets the FIRST matching
+  `UserCard` for a given `CreditCard` id when multiple copies exist — a
+  longstanding ambiguity (predates Phase K) not fully resolved here.
+  **Known dead/broken add paths, untouched**: `base.html`'s
+  `toggleCardOwnershipModal()` calls `showCardDetailsPopupModal`, which is
+  undefined repo-wide; `base.html`'s own `toggleCardOwnership(cardId,
+  button)` (saveCards + toggle-endpoint dual call) has no live caller —
+  `category_detail.html` defines and uses its own simpler same-named
+  version (bulk `saveCards()` only, always primary-owned, no card-type
+  awareness) which shadows it on that page. `profile.html` has a new
   Household management panel (list/add/rename/remove entities) and an
   Owner column on the card table (`owner_name`, stacked per instance like
   the existing signup-date/renewal columns for multi-copy cards).

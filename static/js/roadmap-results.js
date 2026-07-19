@@ -668,7 +668,7 @@ function renderRoadmapResults(data, opts = {}) {
                                 ${breakdownHtml}
                                 ${!readOnly ? `
                                 <div style="display:flex; gap:8px; margin-top:12px;">
-                                    <button onclick="event.stopPropagation(); openCardOwnershipModal(${rec.card.id})" class="secondary" style="flex:1; padding:8px; font-size:12px;">I have this card</button>
+                                    <button onclick="event.stopPropagation(); openCardOwnershipModal(${rec.card.id}, null, '${rec.card.card_type || 'personal'}')" class="secondary" style="flex:1; padding:8px; font-size:12px;">I have this card</button>
                                     ${rec.card.apply_url ? `<button onclick="event.stopPropagation(); window.open('${rec.card.apply_url}', '_blank')" style="flex:1; padding:8px; font-size:12px;">Apply Now</button>` : ''}
                                 </div>
                                 ` : ''}

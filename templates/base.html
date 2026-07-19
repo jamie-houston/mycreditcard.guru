@@ -1734,20 +1734,25 @@
                     cardDetails?.bonus_override === true ? 'true' :
                     cardDetails?.bonus_override === false ? 'false' : '';
 
-                // Phase K: owner selector — only shown for authed, multi-
-                // entity households (single-player accounts see no change).
+                // Phase K: owner selector — only shown for authed households
+                // with more than one entity of THIS card's own kind (single-
+                // player accounts, and households with just one candidate
+                // for this kind, see no change — a card auto-assigns by
+                // kind on add, see addCardWithDetails/_resolve_owner_entity).
                 // Note: if this card has multiple copies (different owners),
                 // this still edits the first matching row — the same
                 // longstanding ambiguity the other fields above already have.
                 const ownerGroup = document.getElementById('cardOwnerGroup');
                 const ownerSelect = document.getElementById('cardOwner');
                 const entities = await UserDataManager.getEntities();
-                if (isAuthenticated && entities.length > 1) {
-                    ownerSelect.innerHTML = entities.map(e =>
+                const isBusinessCard = currentModalCard.card_type === 'business';
+                const candidates = entities.filter(e => (e.kind === 'business') === isBusinessCard);
+                if (isAuthenticated && candidates.length > 1) {
+                    ownerSelect.innerHTML = candidates.map(e =>
                         `<option value="${e.id}">${escapeHtml(e.name)}${e.is_primary ? ' (Primary)' : ''}</option>`
                     ).join('');
-                    const primaryId = entities.find(e => e.is_primary)?.id || '';
-                    ownerSelect.value = cardDetails?.owner ?? primaryId;
+                    const defaultId = candidates.find(e => e.is_primary)?.id || candidates[0].id;
+                    ownerSelect.value = cardDetails?.owner ?? defaultId;
                     ownerGroup.style.display = 'block';
                 } else {
                     ownerGroup.style.display = 'none';
