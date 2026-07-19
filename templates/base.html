@@ -29,7 +29,7 @@
         const API_BASE = '/api';
     </script>
 </head>
-<body class="{% if request.resolver_match.url_name == 'roadmap' %}hide-bottom-nav{% endif %}">
+<body>
     <!-- Desktop top nav -->
     <nav class="topnav">
         <div class="topnav-container">
@@ -97,14 +97,6 @@
     <div class="container">
         {% block content %}{% endblock %}
     </div>
-
-    <!-- Mobile bottom tab bar -->
-    <nav class="bottom-nav">
-        <a href="/" class="bottom-nav-tab {% if request.resolver_match.url_name == 'landing' %}active{% endif %}"><span class="ico">home</span><span>Home</span></a>
-        <a href="/roadmap/" class="bottom-nav-tab {% if request.resolver_match.url_name == 'roadmap' %}active{% endif %}"><span class="ico">route</span><span>Roadmap</span></a>
-        <a href="/profile/" class="bottom-nav-tab {% if request.resolver_match.url_name == 'profile' %}active{% endif %}"><span class="ico">style</span><span>My Cards</span></a>
-        <a href="/cards/" class="bottom-nav-tab {% if request.resolver_match.url_name == 'cards_list' %}active{% endif %}"><span class="ico">search</span><span>Browse</span></a>
-    </nav>
 
     <!-- Footer -->
     <footer class="site-footer">

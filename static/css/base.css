@@ -184,31 +184,6 @@ body {
 }
 .mobile-topbar .topnav-brand { font-size: 16px; }
 
-/* Mobile bottom tab bar - hidden */
-.bottom-nav {
-    display: none;
-}
-.bottom-nav-tab {
-    flex: 1;
-    text-align: center;
-    color: var(--muted-2);
-    text-decoration: none;
-    font-family: var(--font-ui);
-    font-size: 10px;
-    font-weight: 600;
-}
-.bottom-nav-tab .ico {
-    display: block;
-    font-size: 23px;
-    margin-bottom: 2px;
-}
-.bottom-nav-tab.active {
-    color: var(--accent);
-    font-weight: 700;
-}
-
-body.hide-bottom-nav .bottom-nav { display: none; }
-
 /* Mobile menu button */
 .mobile-menu-toggle {
     background: none;
