@@ -19,7 +19,7 @@
     <title>{% block title %}Credit Card Guru{% endblock %}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@500;600;700;800&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0">
     <link rel="stylesheet" href="{% static 'css/base.css' %}">
     <link rel="stylesheet" href="{% static 'css/components.css' %}">
@@ -34,7 +34,7 @@
     <!-- Desktop top nav -->
     <nav class="topnav">
         <div class="topnav-container">
-            <a href="/" class="topnav-brand"><span class="ico">credit_card</span> Card Guru</a>
+            <a href="/" class="topnav-brand"><span class="brand-logo-badge">💳</span> Card Guru</a>
             <ul class="topnav-menu">
                 <li><a href="/" class="{% if request.resolver_match.url_name == 'landing' %}active{% endif %}"><span class="ico">home</span> Home</a></li>
                 <li><a href="/roadmap/" class="{% if request.resolver_match.url_name == 'roadmap' %}active{% endif %}"><span class="ico">route</span> Roadmap</a></li>
@@ -56,7 +56,7 @@
 
     <!-- Mobile top bar: brand + auth + menu -->
     <div class="mobile-topbar">
-        <a href="/" class="topnav-brand"><span class="ico">credit_card</span> Card Guru</a>
+        <a href="/" class="topnav-brand"><span class="brand-logo-badge">💳</span> Card Guru</a>
         <div class="mobile-topbar-actions">
             <button class="mobile-menu-toggle" onclick="toggleMobileMenu()" aria-label="Menu">
                 <span class="ico">menu</span>
@@ -104,7 +104,7 @@
         <div class="footer-content">
             <div class="footer-section">
                 <div class="footer-logo">
-                    <span class="footer-brand"><span class="ico">credit_card</span> Card Guru</span>
+                    <span class="footer-brand"><span class="brand-logo-badge">💳</span> Card Guru</span>
                 </div>
                 <p class="footer-description">
                     Maximize your rewards with data-driven credit card recommendations tailored to your spending patterns.

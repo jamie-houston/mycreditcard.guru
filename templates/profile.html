@@ -1,133 +1,152 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}My Profile - Credit Card Guru{% endblock %}
+{% block title %}My Cards - Credit Card Guru{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/pages/profile.css' %}">
 {% endblock %}
 
 {% block content %}
-<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-    <h1 style="margin:0;">My cards</h1>
-    <div style="display:flex; align-items:center; gap: 8px;">
-        <span class="ico" onclick="document.getElementById('cardSearch').scrollIntoView({behavior:'smooth', block:'center'}); document.getElementById('cardSearch').focus();" style="font-size:28px; color:var(--accent); cursor:pointer;" title="Add a card">add_circle</span>
-        <span class="ico" onclick="togglePrivacySettings()" style="font-size:24px; color:var(--muted); cursor:pointer;" title="Sharing settings">settings</span>
+<!-- Header Row -->
+<div class="mycards-header-row">
+    <div>
+        <h1 class="mycards-title">My Cards</h1>
+        <p class="mycards-subtitle">Everything you hold, at a glance.</p>
+    </div>
+    <div class="mycards-actions-wrapper">
+        <!-- Personal/Business segmented control -->
+        <div class="segmented-control">
+            <button id="btnProfilePersonal" class="segment-btn active" onclick="setProfileFilterMode('personal')">Personal</button>
+            <button id="btnProfileBusiness" class="segment-btn" onclick="setProfileFilterMode('business')">Business</button>
+        </div>
+        <!-- Settings button -->
+        <button class="settings-toggle-btn" onclick="toggleSettingsPanel()" title="Settings & Household">
+            <span class="ico">settings</span>
+        </button>
     </div>
 </div>
 
-<!-- Privacy / Sharing Settings (tucked away, opened via the settings icon) -->
-<div id="privacySettingsPanel" class="section" style="display:none;">
-    <div class="privacy-toggle-section" style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
-        <label style="color: var(--muted); font-weight: 500; margin:0;">Profile Visibility:</label>
-
-        <div class="toggle-switch">
-            <input type="radio" id="privacy-private" name="privacy" value="private" checked>
-            <label for="privacy-private" class="toggle-option">
-                <span class="ico" style="font-size:14px;vertical-align:-2px;">lock</span> Private
-            </label>
-
-            <input type="radio" id="privacy-public" name="privacy" value="public">
-            <label for="privacy-public" class="toggle-option">
-                <span class="ico" style="font-size:14px;vertical-align:-2px;">public</span> Public
-            </label>
-        </div>
-
-        <!-- Shareable URL Section (hidden by default) -->
-        <div id="shareable-url-section" style="display: none;">
-            <div style="display: flex; align-items: center; gap: 10px;">
-                <label style="color: var(--muted); font-size: 14px; margin:0;">Share URL:</label>
-                <div style="display: flex; align-items: center; gap: 5px;">
-                    <input type="text" id="shareable-url" readonly
-                           style="font-size: 12px; width: 300px;"
-                           placeholder="Generating shareable URL...">
-                    <button id="copy-url-btn" onclick="copyShareableUrl()" style="padding: 8px 12px; font-size: 12px;">
-                        <span class="ico" style="font-size:14px;vertical-align:-2px;">content_copy</span> Copy
-                    </button>
+<!-- Settings & Household Panel (collapsible, hidden by default) -->
+<div id="settingsPanel" class="section settings-panel-box" style="display: none;">
+    <!-- Privacy / Sharing Settings -->
+    <div class="settings-sub-section">
+        <h3 style="margin-top:0; font-family: var(--font-ui); font-size:16px;">Sharing & Visibility</h3>
+        <div class="privacy-toggle-section" style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+            <label style="color: var(--muted); font-weight: 500; margin:0;">Profile Visibility:</label>
+            <div class="toggle-switch">
+                <input type="radio" id="privacy-private" name="privacy" value="private" checked onclick="handlePrivacyRadioClick('private')">
+                <label for="privacy-private" class="toggle-option">
+                    <span class="ico" style="font-size:14px;vertical-align:-2px;">lock</span> Private
+                </label>
+                <input type="radio" id="privacy-public" name="privacy" value="public" onclick="handlePrivacyRadioClick('public')">
+                <label for="privacy-public" class="toggle-option">
+                    <span class="ico" style="font-size:14px;vertical-align:-2px;">public</span> Public
+                </label>
+            </div>
+            <!-- Shareable URL Section -->
+            <div id="shareable-url-section" style="display: none;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <label style="color: var(--muted); font-size: 14px; margin:0;">Share URL:</label>
+                    <div style="display: flex; align-items: center; gap: 5px;">
+                        <input type="text" id="shareable-url" readonly
+                               style="font-size: 12px; width: 300px;"
+                               placeholder="Generating shareable URL...">
+                        <button id="copy-url-btn" onclick="copyShareableUrl()" style="padding: 8px 12px; font-size: 12px;">
+                            <span class="ico" style="font-size:14px;vertical-align:-2px;">content_copy</span> Copy
+                        </button>
+                    </div>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Household Section (Phase K, auth-only) -->
+    <div class="settings-sub-section" id="householdSection" style="display: none; margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border-light);">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <h3 style="margin:0; font-family: var(--font-ui); font-size:16px;">Household Members</h3>
+            <button class="secondary" onclick="showAddHouseholdEntityForm()" style="padding:6px 12px; font-size:13px;">+ Add player/business</button>
+        </div>
+        <div id="householdList" style="margin-top:12px;">
+            <div class="loading">Loading household...</div>
+        </div>
+        <div id="addHouseholdEntityForm" style="display:none; margin-top:15px; padding-top:15px; border-top:1px solid var(--border);">
+            <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+                <input type="text" id="newEntityName" placeholder="Name (e.g. Sam, Acme LLC)" style="flex:1; min-width:180px;">
+                <select id="newEntityKind" style="min-width:120px;">
+                    <option value="personal">Personal</option>
+                    <option value="business">Business</option>
+                </select>
+                <button onclick="submitAddHouseholdEntity()" class="success" style="padding:8px 16px;">Add</button>
+                <button onclick="hideAddHouseholdEntityForm()" class="secondary" style="padding:8px 16px;">Cancel</button>
             </div>
         </div>
     </div>
 </div>
 
-
-<!-- Summary strip -->
-<div class="section">
-    <h2>Portfolio Summary</h2>
+<!-- Portfolio summary -->
+<div class="portfolio-summary-section" style="margin-bottom: 28px;">
     {% include 'partials/profile_stat_grid.html' %}
 </div>
 
-<!-- Household Section (Phase K, auth-only — hidden for anon via JS) -->
-<div class="section" id="householdSection" style="display:none;">
-    <div style="display:flex; justify-content:space-between; align-items:center;">
-        <h2 style="margin:0;">Household</h2>
-        <button class="secondary" onclick="showAddHouseholdEntityForm()" style="padding:6px 12px; font-size:13px;">+ Add player/business</button>
-    </div>
-    <div id="householdList" style="margin-top:12px;">
-        <div class="loading">Loading household...</div>
-    </div>
-    <div id="addHouseholdEntityForm" style="display:none; margin-top:15px; padding-top:15px; border-top:1px solid var(--border);">
-        <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
-            <input type="text" id="newEntityName" placeholder="Name (e.g. Sam, Acme LLC)" style="flex:1; min-width:180px;">
-            <select id="newEntityKind" style="min-width:120px;">
-                <option value="personal">Personal</option>
-                <option value="business">Business</option>
-            </select>
-            <button onclick="submitAddHouseholdEntity()" class="success" style="padding:8px 16px;">Add</button>
-            <button onclick="hideAddHouseholdEntityForm()" class="secondary" style="padding:8px 16px;">Cancel</button>
-        </div>
+<!-- Tabs Row -->
+<div class="tab-row-container">
+    <div class="tab-row" id="profileTabs">
+        <button id="tabBtnCards" class="tab-btn active" onclick="switchProfileTab('cards')">My Cards</button>
+        <button id="tabBtnCategories" class="tab-btn" onclick="switchProfileTab('categories')">Best Card by Category</button>
+        <button id="tabBtnBenefits" class="tab-btn" onclick="switchProfileTab('benefits')">Benefits & Credits</button>
     </div>
 </div>
 
-<!-- Card Collection Section -->
-<div class="section">
-    <h2>Active cards</h2>
-    <div id="cardCollection">
+<!-- Tab Content: My Cards -->
+<div id="tabContentCards" class="tab-content active">
+    <div id="cardCollection" class="cards-list-container">
         <div class="loading">Loading your card collection...</div>
     </div>
-</div>
-
-<!-- Category Optimization Section -->
-<div class="section">
-    <h2><span class="ico" style="vertical-align:-4px;color:var(--accent);">grid_view</span> Best Card Per Category</h2>
-    <div id="categoryOptimization">
-        <div class="loading">Loading category recommendations...</div>
-    </div>
-
-    <!-- Add Card Input - Always Visible -->
-    <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid var(--border);">
-        <h3 style="margin-bottom: 10px; color: var(--text); font-size: 16px;"><span class="ico" style="vertical-align:-3px;">add</span> Add Credit Cards</h3>
-        <div style="margin-bottom: 15px;">
-            <!-- Searchable Card Dropdown -->
-            <div style="position: relative;">
-                <input
-                    type="text"
-                    id="cardSearch"
-                    placeholder="Type card name (e.g., 'Chase Sapphire', 'Blue Cash')..."
-                    autocomplete="off"
-                >
-                <!-- Dropdown will be moved to body dynamically -->
-                <div id="cardSearchResults" style="display: none;">
-                </div>
-            </div>
+    
+    <!-- Add Card search widget inside My Cards Tab -->
+    <div class="add-card-search-section">
+        <h3 class="section-subtitle"><span class="ico">add</span> Add Credit Cards</h3>
+        <div style="position: relative;">
+            <input
+                type="text"
+                id="cardSearch"
+                placeholder="Type card name (e.g., 'Chase Sapphire', 'Blue Cash')..."
+                autocomplete="off"
+            >
+            <div id="cardSearchResults" style="display: none;"></div>
         </div>
     </div>
 </div>
 
-<!-- Credits & Benefits Section -->
-<div class="section">
-    <h2>Your Card Credits &amp; Benefits</h2>
-    <div id="creditsProfile">
+<!-- Tab Content: Best Card by Category -->
+<div id="tabContentCategories" class="tab-content">
+    <p class="tab-intro-text">The single best card in your wallet for each type of spending.</p>
+    <div id="categoryOptimization" class="categories-grid">
+        <div class="loading">Loading category recommendations...</div>
+    </div>
+</div>
+
+<!-- Tab Content: Benefits & Credits -->
+<div id="tabContentBenefits" class="tab-content">
+    <p class="tab-intro-text">Credits you're paying for through annual fees — use them or they're wasted.</p>
+    <div id="creditsProfile" class="benefits-list-container">
         <div class="loading">Loading your benefits...</div>
     </div>
 </div>
 
-<!-- Spending Profile Section -->
-<div class="section">
-    <h2>Your Spending Profile</h2>
-    <div id="spendingProfile">
-        <div class="loading">Loading spending profile...</div>
+<!-- Collapsible Spending Profile Section (at the bottom) -->
+<div class="spending-profile-section-collapsible">
+    <h2 class="collapsible-header" onclick="toggleSpendingProfileSection()">
+        <span>Your Spending Profile</span>
+        <span id="spendingProfileChevron" class="ico">expand_more</span>
+    </h2>
+    <div id="spendingProfileWrapper" style="display: none; padding-top: 15px;">
+        <div id="spendingProfile">
+            <div class="loading">Loading spending profile...</div>
+        </div>
     </div>
 </div>
+
 <script src="{% static 'js/pages/profile.js' %}"></script>
 {% endblock %}

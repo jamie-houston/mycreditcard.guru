@@ -3,6 +3,24 @@ let spendingCategories = {}; // For slug -> ID mapping
 let spendingCategoriesArray = []; // For the actual category objects
 let spendingCredits = [];
 
+window.updateMaxFeeSlider = function(val) {
+    const display = document.getElementById('maxFeeValue');
+    if (display) {
+        if (parseInt(val) >= 750) {
+            display.textContent = 'No limit';
+        } else {
+            display.textContent = `$${val}`;
+        }
+    }
+};
+
+function getMaxFeeValue() {
+    const input = document.getElementById('maxFee');
+    if (!input) return null;
+    const val = parseFloat(input.value);
+    return val >= 750 ? null : val;
+}
+
 // Strategy presets (from roadmaps/strategies.py via the view context)
 const STRATEGY_PRESETS = (() => {
     const el = document.getElementById('strategiesData');
@@ -168,28 +186,60 @@ function togglePreferences() {
 // (the builder form). Driven by loadCurrentRoadmap() on page load and
 // by getRecommendations() after a fresh generation; toggleRoadmapBuilder()
 // is the manual "Update roadmap" / collapse-again entry point.
-function setRoadmapViewMode(mode) {
-    const builder = document.getElementById('roadmapBuilder');
-    const builderToggle = document.getElementById('builderToggle');
-    const heading = document.getElementById('pageHeading');
-    const subtitle = document.getElementById('pageSubtitle');
-    const showBuilder = mode === 'builder';
+let _activeRoadmapPageTab = 'settings';
 
-    builder.style.display = showBuilder ? 'block' : 'none';
-    if (builderToggle) builderToggle.textContent = showBuilder ? 'expand_less' : 'expand_more';
-    if (heading) {
-        heading.innerHTML = `<span class="ico" style="color:var(--accent);vertical-align:-3px;">route</span> ${showBuilder ? 'Create a Roadmap' : 'Your Roadmap'}`;
+window.switchRoadmapPageTab = function(tabId) {
+    _activeRoadmapPageTab = tabId;
+    
+    // Update active tab buttons
+    const btnSettings = document.getElementById('tabRoadmapSettings');
+    const btnResults = document.getElementById('tabRoadmapResults');
+    if (btnSettings) btnSettings.classList.toggle('active', tabId === 'settings');
+    if (btnResults) btnResults.classList.toggle('active', tabId === 'results');
+    
+    // Show/hide containers
+    const builder = document.getElementById('roadmapBuilder');
+    if (builder) builder.style.display = tabId === 'settings' ? 'block' : 'none';
+    
+    const resultsContainer = document.getElementById('results');
+    if (resultsContainer) {
+        resultsContainer.style.display = tabId === 'results' ? 'block' : 'none';
     }
-    if (subtitle) subtitle.style.display = showBuilder ? '' : 'none';
+    
+    // Only show share button if on results tab and we have results
+    const shareBtn = document.getElementById('btnRoadmapShare');
+    if (shareBtn) {
+        const hasResults = resultsContainer && resultsContainer.children.length > 0;
+        shareBtn.style.display = (tabId === 'results' && hasResults) ? 'flex' : 'none';
+    }
+    
+    // Hide share panel if switching away
+    if (tabId !== 'results') {
+        const sharePanel = document.getElementById('roadmapSharePanel');
+        if (sharePanel) sharePanel.style.display = 'none';
+    }
+};
+
+function setRoadmapViewMode(mode) {
+    const isResults = mode === 'results';
+    
+    // Switch the tab
+    switchRoadmapPageTab(isResults ? 'results' : 'settings');
+    
+    // Set page subtitle visibility
+    const subtitle = document.getElementById('pageSubtitle');
+    if (subtitle) subtitle.style.display = isResults ? 'none' : 'block';
+    
+    // Update heading
+    const heading = document.getElementById('pageHeading');
+    if (heading) {
+        heading.innerHTML = `<span class="ico" style="color:var(--accent);vertical-align:-3px;">route</span> ${isResults ? 'Your Roadmap' : 'Create a Roadmap'}`;
+    }
 }
 
 function toggleRoadmapBuilder() {
-    const builder = document.getElementById('roadmapBuilder');
-    const builderOpen = builder.style.display !== 'none';
-    setRoadmapViewMode(builderOpen ? 'results' : 'builder');
-    if (!builderOpen) {
-        builder.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
+    const currentTab = _activeRoadmapPageTab;
+    setRoadmapViewMode(currentTab === 'results' ? 'builder' : 'results');
 }
 
 // Roadmap Sharing — mirrors profile.html's privacy toggle
@@ -751,9 +801,11 @@ async function loadSavedData() {
             const rewardTypeSelect = document.getElementById('rewardType');
             if (rewardTypeSelect) rewardTypeSelect.value = savedPreferences.default_reward_type_filter;
         }
-        if (savedPreferences.default_max_fee_filter) {
-            const maxFeeInput = document.getElementById('maxFee');
-            if (maxFeeInput) maxFeeInput.value = savedPreferences.default_max_fee_filter;
+        const maxFeeInput = document.getElementById('maxFee');
+        if (maxFeeInput) {
+            const savedFee = savedPreferences.default_max_fee_filter ?? 750;
+            maxFeeInput.value = savedFee;
+            updateMaxFeeSlider(savedFee);
         }
         if (savedPreferences.default_max_recommendations) {
             const maxRecsSelect = document.getElementById('maxRecs');
@@ -834,7 +886,7 @@ async function saveCurrentData() {
         const preferencesData = {
             default_issuer_filter: document.getElementById('issuer')?.value || '',
             default_reward_type_filter: document.getElementById('rewardType')?.value || '',
-            default_max_fee_filter: parseFloat(document.getElementById('maxFee')?.value) || null,
+            default_max_fee_filter: getMaxFeeValue(),
             default_max_recommendations: parseInt(document.getElementById('maxRecs')?.value) || 1
         };
 
@@ -1126,7 +1178,7 @@ function getFilters() {
         cardType: document.getElementById('cardType')?.value || 'personal',
         issuer: document.getElementById('issuer')?.value || null,
         rewardType: document.getElementById('rewardType')?.value || 'Points',
-        maxFee: parseFloat(document.getElementById('maxFee')?.value) || null,
+        maxFee: getMaxFeeValue(),
         maxRecommendations: parseInt(document.getElementById('maxRecommendations')?.value) || 1
     };
 }
@@ -1298,7 +1350,7 @@ window.addEventListener('beforeunload', function(e) {
         const preferencesData = {
             default_issuer_filter: document.getElementById('issuer')?.value || '',
             default_reward_type_filter: document.getElementById('rewardType')?.value || '',
-            default_max_fee_filter: parseFloat(document.getElementById('maxFee')?.value) || null,
+            default_max_fee_filter: getMaxFeeValue(),
             default_max_recommendations: parseInt(document.getElementById('maxRecs')?.value) || 1
         };
 

@@ -181,15 +181,15 @@
 /* ============ Result screen ============ */
 
 .result-hero {
-    background: linear-gradient(160deg, #1B2A24, #141C19);
-    border: 1px solid #2A3A32;
+    background: linear-gradient(160deg, oklch(95% 0.02 175), oklch(98% 0.01 175));
+    border: 1px solid oklch(90% 0.04 175);
     border-radius: var(--radius-xl);
     padding: 20px;
 }
 .result-hero-label {
     font-size: 13px;
-    color: var(--muted);
-    font-weight: 500;
+    color: oklch(40% 0.04 175);
+    font-weight: 600;
 }
 .result-hero-figure-row {
     display: flex;
@@ -200,13 +200,13 @@
 .result-hero-figure {
     font-family: var(--font-mono);
     font-size: 40px;
-    font-weight: 600;
+    font-weight: 800;
     letter-spacing: -0.02em;
-    color: var(--text-strong);
+    color: oklch(25% 0.08 175);
 }
 .result-hero-delta {
-    background: var(--accent-soft-strong);
-    color: var(--accent);
+    background: oklch(88% 0.06 175);
+    color: oklch(25% 0.08 175);
     padding: 4px 10px;
     border-radius: 999px;
     font-size: 13px;
@@ -215,7 +215,7 @@
 }
 .result-hero-sub {
     font-size: 13px;
-    color: var(--muted);
+    color: oklch(40% 0.03 250);
     margin-top: 6px;
 }
 .result-hero-stats {

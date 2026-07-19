@@ -1,65 +1,51 @@
-/* Base styles - Ledger redesign */
+/* Base styles - Card Guru redesign */
 
 :root {
-    /* Ledger palette */
-    --bg: #0F1319;
-    --surface: #171C24;
-    --border: #232A34;
-    --border-danger: #3A2A2A;
-    --text: #E7EBF1;
-    --text-strong: #FFFFFF;
-    --muted: #8B95A4;
-    --muted-2: #5C6675;
-    --accent: #3FCF8E;
-    --accent-ink: #06251A;
-    --accent-soft: rgba(63, 207, 142, 0.14);
-    --accent-soft-strong: rgba(63, 207, 142, 0.16);
-    --danger: #F87171;
-    --danger-soft: rgba(248, 113, 113, 0.14);
+    /* Card Guru light palette */
+    --bg: oklch(98% 0.005 250);
+    --surface: #ffffff;
+    --border: oklch(91% 0.01 250);
+    --border-light: oklch(94% 0.008 250);
+    --text: oklch(22% 0.02 250);
+    --text-strong: oklch(22% 0.02 250);
+    --muted: oklch(50% 0.02 250);
+    --muted-2: oklch(65% 0.02 250);
+    
+    /* Brand Colors */
+    --accent: oklch(55% 0.12 175);
+    --accent-dark: oklch(30% 0.1 175);
+    --accent-soft: oklch(94% 0.04 175);
+    --accent-ink: #ffffff;
+    
+    /* Semantic Colors */
+    --success: oklch(38% 0.1 145);
+    --success-soft: oklch(93% 0.05 145);
+    --danger: oklch(45% 0.13 25);
+    --danger-soft: oklch(93% 0.06 25);
+    --warning: oklch(42% 0.1 85);
+    --warning-soft: oklch(94% 0.06 85);
+    --info: oklch(55% 0.13 250);
+    --info-soft: oklch(94% 0.04 250);
 
-    --font-ui: 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    --font-body: 'Hanken Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    /* Fonts */
+    --font-ui: 'Libre Franklin', sans-serif;
+    --font-body: 'Source Sans 3', sans-serif;
     --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
 
-    /* Back-compat aliases so page-specific stylesheets keep working */
-    --color-primary: var(--accent);
-    --color-primary-dark: var(--accent);
-    --color-success: var(--accent);
-    --color-success-dark: var(--accent);
-    --color-danger: var(--danger);
-    --color-danger-dark: var(--danger);
-    --color-warning: #f59e0b;
-    --color-warning-dark: #d97706;
-    --color-info: var(--accent);
-    --color-info-dark: var(--accent);
-    --color-neutral-50: var(--bg);
-    --color-neutral-100: var(--surface);
-    --color-neutral-200: var(--border);
-    --color-neutral-300: var(--border);
-    --color-neutral-400: var(--muted-2);
-    --color-neutral-500: var(--muted);
-    --color-neutral-600: var(--muted);
-    --color-neutral-700: var(--text);
-    --color-neutral-800: var(--text-strong);
-    --gradient-primary: var(--accent);
-    --gradient-success: var(--accent);
-    --gradient-danger: var(--danger);
-    --gradient-info: var(--accent);
+    /* Radii */
     --radius-sm: 8px;
-    --radius-md: 13px;
-    --radius-lg: 16px;
-    --radius-xl: 20px;
-    --radius-2xl: 24px;
-    --shadow-sm: 0 8px 32px rgba(0, 0, 0, 0.35);
-    --shadow-md: 0 12px 40px rgba(0, 0, 0, 0.4);
-    --shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.5);
-    --transition-default: all 0.18s ease;
+    --radius-md: 10px;
+    --radius-lg: 12px;
+    --radius-xl: 12px;
+    --radius-2xl: 100px;
+    
+    --transition-default: all 0.15s ease;
 }
 
 body {
     font-family: var(--font-body);
-    max-width: 1200px;
-    margin: 0 auto;
+    max-width: 100%;
+    margin: 0;
     padding: 0;
     background: var(--bg);
     color: var(--text);
@@ -86,7 +72,7 @@ body {
 /* Desktop top nav */
 .topnav {
     display: none;
-    background: var(--bg);
+    background: var(--surface);
     border-bottom: 1px solid var(--border);
     position: sticky;
     top: 0;
@@ -96,64 +82,66 @@ body {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    max-width: 1200px;
+    max-width: 1180px;
     margin: 0 auto;
-    padding: 14px 24px;
-    gap: 24px;
+    padding: 14px 20px;
 }
 .topnav-brand {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
     font-family: var(--font-ui);
-    font-size: 16px;
-    font-weight: 700;
-    letter-spacing: -0.01em;
-    color: var(--text-strong);
+    font-weight: 800;
+    font-size: 19px;
+    color: oklch(30% 0.03 250);
     text-decoration: none;
-    white-space: nowrap;
 }
-.topnav-brand .ico {
-    color: var(--accent);
-    font-size: 22px;
+.brand-logo-badge {
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    background: var(--accent);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 16px;
 }
 .topnav-menu {
     display: flex;
     list-style: none;
     margin: 0;
     padding: 0;
-    gap: 4px;
+    gap: 28px;
     flex: 1;
     justify-content: center;
 }
 .topnav-menu a {
     display: flex;
     align-items: center;
-    gap: 6px;
     text-decoration: none;
-    color: var(--muted);
+    color: oklch(45% 0.02 250);
     font-weight: 600;
-    font-size: 14px;
-    padding: 8px 14px;
-    border-radius: var(--radius-sm);
+    font-size: 15px;
+    padding-bottom: 2px;
+    border-bottom: 2px solid transparent;
     transition: var(--transition-default);
     white-space: nowrap;
 }
 .topnav-menu a .ico {
-    font-size: 18px;
+    display: none; /* Hide icons in menu links */
 }
 .topnav-menu a:hover {
-    color: var(--text);
-    background: var(--surface);
+    color: var(--accent-dark);
 }
 .topnav-menu a.active {
-    color: var(--accent);
+    color: var(--accent-dark);
+    border-bottom-color: var(--accent);
 }
 .topnav-auth {
     display: flex;
     align-items: center;
     gap: 12px;
-    justify-self: end;
 }
 .nav-user {
     color: var(--muted);
@@ -165,14 +153,21 @@ body {
     white-space: nowrap;
 }
 .nav-login, .nav-logout {
-    color: var(--accent);
-    text-decoration: none;
+    background: var(--accent);
+    color: white !important;
+    border: none;
+    padding: 9px 18px;
+    border-radius: 8px;
     font-weight: 600;
-    font-size: 13px;
-    white-space: nowrap;
+    font-size: 14px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: var(--transition-default);
+    display: inline-block;
 }
 .nav-login:hover, .nav-logout:hover {
-    text-decoration: underline;
+    filter: brightness(0.95);
+    text-decoration: none;
 }
 
 /* Mobile top bar (brand + auth only, page renders its own header) */
@@ -180,15 +175,19 @@ body {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 14px 18px 6px;
+    padding: 14px 20px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
 }
-.mobile-topbar .topnav-brand { font-size: 16px; }
 
 /* Mobile menu button */
 .mobile-menu-toggle {
     background: none;
     border: none;
-    color: var(--text);
+    color: oklch(30% 0.02 250);
     padding: 6px;
     cursor: pointer;
     display: flex;
@@ -197,57 +196,46 @@ body {
 }
 .mobile-menu-toggle .ico {
     font-size: 24px;
-    color: var(--text);
-}
-.mobile-menu-toggle:hover {
-    color: var(--accent);
 }
 
 /* Mobile menu drawer */
 .mobile-menu-drawer {
     display: none;
     position: fixed;
-    top: 56px;
+    top: 59px;
     left: 0;
     right: 0;
     background: var(--surface);
     border-bottom: 1px solid var(--border);
     z-index: 999;
-    animation: slideDown 0.2s ease;
+    padding: 8px 20px 16px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
 }
 .mobile-menu-drawer.open {
-    display: block;
-}
-@keyframes slideDown {
-    from { transform: translateY(-10px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
+    display: flex;
+    flex-direction: column;
 }
 .mobile-menu-content {
     display: flex;
     flex-direction: column;
-    padding: 12px 0;
+    gap: 2px;
 }
 .mobile-menu-item {
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 12px 18px;
-    color: var(--muted);
+    padding: 10px 4px;
+    color: oklch(30% 0.02 250);
     text-decoration: none;
     font-weight: 600;
-    font-size: 14px;
+    font-size: 15px;
     transition: var(--transition-default);
 }
 .mobile-menu-item .ico {
-    font-size: 20px;
+    display: none;
 }
-.mobile-menu-item:active,
 .mobile-menu-item.active {
-    background: var(--bg);
-    color: var(--accent);
-}
-.mobile-menu-item:active {
-    background: rgba(63, 207, 142, 0.08);
+    color: var(--accent-dark);
+    font-weight: 700;
 }
 
 /* Mobile topbar layout adjustment */
@@ -270,8 +258,8 @@ body {
     flex: 1;
     margin: 0 auto;
     width: 100%;
-    max-width: 1200px;
-    padding: 24px;
+    max-width: 1180px;
+    padding: 20px;
     box-sizing: border-box;
 }
 

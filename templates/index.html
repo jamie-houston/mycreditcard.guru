@@ -9,41 +9,43 @@
             Get personalized credit card recommendations based on your spending patterns
         </p>
 
-        <!-- "Update roadmap" toggle: reveals #roadmapBuilder below, same accordion
-             pattern as Preferences/Monthly spending. Hidden until a Current Roadmap
-             exists (see setRoadmapViewMode/loadCurrentRoadmap). -->
-        <div id="resultsHeader" class="section" style="{% if not has_current_roadmap %}display:none;{% endif %}">
-            <h2 style="cursor: pointer; display: flex; justify-content: space-between; align-items: center; margin-bottom:0;">
-                <span onclick="toggleRoadmapBuilder()" style="flex:1;">Update roadmap</span>
-                <span class="ico" onclick="toggleRoadmapSharePanel()" style="font-size: 20px; color: var(--muted); margin-right:4px;" title="Share this roadmap">share</span>
-                <span onclick="toggleRoadmapBuilder()" id="builderToggle" class="ico" style="font-size: 20px; color: var(--muted);">expand_more</span>
-            </h2>
-            <!-- Roadmap sharing panel: mirrors profile.html's privacy toggle
-                 (16-45), but anon-capable (see current_roadmap_share_view). -->
-            <div id="roadmapSharePanel" style="display:none; margin-top:16px; padding-top:16px; border-top:1px solid var(--border);">
-                <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
-                    <label style="color: var(--muted); font-weight: 500; margin:0;">Roadmap Visibility:</label>
-                    <div class="toggle-switch">
-                        <input type="radio" id="roadmap-privacy-private" name="roadmap-privacy" value="private" checked onclick="updateRoadmapPrivacySetting('private')">
-                        <label for="roadmap-privacy-private" class="toggle-option">
-                            <span class="ico" style="font-size:14px;vertical-align:-2px;">lock</span> Private
-                        </label>
-                        <input type="radio" id="roadmap-privacy-public" name="roadmap-privacy" value="public" onclick="updateRoadmapPrivacySetting('public')">
-                        <label for="roadmap-privacy-public" class="toggle-option">
-                            <span class="ico" style="font-size:14px;vertical-align:-2px;">public</span> Public
-                        </label>
-                    </div>
-                    <div id="roadmap-shareable-url-section" style="display: none;">
-                        <div style="display: flex; align-items: center; gap: 10px;">
-                            <label style="color: var(--muted); font-size: 14px; margin:0;">Share URL:</label>
-                            <div style="display: flex; align-items: center; gap: 5px;">
-                                <input type="text" id="roadmap-shareable-url" readonly
-                                       style="font-size: 12px; width: 300px;"
-                                       placeholder="Generating shareable URL...">
-                                <button id="roadmap-copy-url-btn" onclick="copyRoadmapShareableUrl()" style="padding: 8px 12px; font-size: 12px;">
-                                    <span class="ico" style="font-size:14px;vertical-align:-2px;">content_copy</span> Copy
-                                </button>
-                            </div>
+        <!-- Roadmap Page Tab switching system -->
+        <div class="tab-row-container" id="roadmapPageTabs" style="margin-bottom: 24px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; width: 100%; gap: 12px;">
+                <div class="tab-row" style="border: none; margin-bottom: 0;">
+                    <button id="tabRoadmapSettings" class="tab-btn active" onclick="switchRoadmapPageTab('settings')">Roadmap Settings</button>
+                    <button id="tabRoadmapResults" class="tab-btn" onclick="switchRoadmapPageTab('results')">Roadmap Results</button>
+                </div>
+                <button class="settings-toggle-btn" id="btnRoadmapShare" onclick="toggleRoadmapSharePanel()" title="Share Roadmap" style="display: none;">
+                    <span class="ico">share</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Roadmap sharing panel -->
+        <div id="roadmapSharePanel" class="section settings-panel-box" style="display: none;">
+            <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+                <label style="color: var(--muted); font-weight: 500; margin:0;">Roadmap Visibility:</label>
+                <div class="toggle-switch">
+                    <input type="radio" id="roadmap-privacy-private" name="roadmap-privacy" value="private" checked onclick="updateRoadmapPrivacySetting('private')">
+                    <label for="roadmap-privacy-private" class="toggle-option">
+                        <span class="ico" style="font-size:14px;vertical-align:-2px;">lock</span> Private
+                    </label>
+                    <input type="radio" id="roadmap-privacy-public" name="roadmap-privacy" value="public" onclick="updateRoadmapPrivacySetting('public')">
+                    <label for="roadmap-privacy-public" class="toggle-option">
+                        <span class="ico" style="font-size:14px;vertical-align:-2px;">public</span> Public
+                    </label>
+                </div>
+                <div id="roadmap-shareable-url-section" style="display: none;">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <label style="color: var(--muted); font-size: 14px; margin:0;">Share URL:</label>
+                        <div style="display: flex; align-items: center; gap: 5px;">
+                            <input type="text" id="roadmap-shareable-url" readonly
+                                   style="font-size: 12px; width: 300px;"
+                                   placeholder="Generating shareable URL...">
+                            <button id="roadmap-copy-url-btn" onclick="copyRoadmapShareableUrl()" style="padding: 8px 12px; font-size: 12px;">
+                                <span class="ico" style="font-size:14px;vertical-align:-2px;">content_copy</span> Copy
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -120,8 +122,8 @@
                     </select>
                 </div>
                 <div class="preferences-tile">
-                    <label for="maxFee">Max annual fee</label>
-                    <input type="number" id="maxFee" placeholder="No limit" min="0" step="25">
+                    <label for="maxFee">Max annual fee: <span id="maxFeeValue" style="font-weight: 700; color: var(--accent-dark);">No limit</span></label>
+                    <input type="range" id="maxFee" min="0" max="750" step="25" value="750" oninput="updateMaxFeeSlider(this.value)" style="width:100%; margin-top: 8px;">
                 </div>
                 <div class="preferences-tile">
                     <label for="maxRecs">Max new cards</label>

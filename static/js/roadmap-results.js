@@ -510,39 +510,59 @@ function renderRoadmapResults(data, opts = {}) {
             </div>
         `;
 
-        html += _roadmapSummaryTableHtml(filteredRecs);
+        const activeTab = renderRoadmapResults.state.activeTab || 'actions';
 
-        // Phase I: the full allocation matrix supersedes the older
-        // single-winner "Best card per category" block — but fall back to
-        // the old block for payloads persisted/shared before
-        // category_allocation existed.
-        const categoryAllocation = portfolioSummary.category_allocation || [];
-        if (categoryAllocation.length > 0) {
-            html += _roadmapCategoryMatrixHtml(_roadmapCategoryMatrix(categoryAllocation));
-        } else if (categoryOptimizationEntries.length > 0) {
-            html += `
-                <div class="result-section-header"><span class="ico">grid_view</span><span class="result-section-header-title">Best card per category</span></div>
-                <div class="grouped-card"><div class="category-card-body">
-                    ${categoryOptimizationEntries.map(([slug, catData]) => `
-                        <div class="category-row">
-                            <span class="ico">${(typeof CATEGORY_ICONS !== 'undefined' && CATEGORY_ICONS[slug]) || 'category'}</span>
-                            <span class="category-row-name">${catData.category_name}</span>
-                            <span class="category-row-card">${catData.best_card}</span>
-                            <span class="category-row-rate">${catData.best_rate}x</span>
-                        </div>
-                    `).join('')}
-                </div></div>
-            `;
+        // Add the clean tabs row just like on the My Cards page
+        html += `
+            <div class="tab-row-container" style="margin-top: 24px; margin-bottom: 18px;">
+                <div class="tab-row" id="roadmapResultsTabs">
+                    <button id="roadmapTabActions" class="tab-btn ${activeTab === 'actions' ? 'active' : ''}" onclick="window.switchRoadmapTab('actions')">Roadmap Actions</button>
+                    <button id="roadmapTabSummary" class="tab-btn ${activeTab === 'summary' ? 'active' : ''}" onclick="window.switchRoadmapTab('summary')">Card Summary</button>
+                    <button id="roadmapTabCategory" class="tab-btn ${activeTab === 'category' ? 'active' : ''}" onclick="window.switchRoadmapTab('category')">Cards by Category</button>
+                    <button id="roadmapTabValue" class="tab-btn ${activeTab === 'value' ? 'active' : ''}" onclick="window.switchRoadmapTab('value')">Value over Time</button>
+                </div>
+            </div>
+        `;
+
+        if (activeTab === 'summary') {
+            html += `<div class="roadmap-tab-content">`;
+            html += _roadmapSummaryTableHtml(filteredRecs);
+            html += `</div>`;
+        } else if (activeTab === 'category') {
+            html += `<div class="roadmap-tab-content">`;
+            const categoryAllocation = portfolioSummary.category_allocation || [];
+            if (categoryAllocation.length > 0) {
+                html += _roadmapCategoryMatrixHtml(_roadmapCategoryMatrix(categoryAllocation));
+            } else if (categoryOptimizationEntries.length > 0) {
+                html += `
+                    <div class="result-section-header"><span class="ico">grid_view</span><span class="result-section-header-title">Best card per category</span></div>
+                    <div class="grouped-card"><div class="category-card-body">
+                        ${categoryOptimizationEntries.map(([slug, catData]) => `
+                            <div class="category-row">
+                                <span class="ico">${(typeof CATEGORY_ICONS !== 'undefined' && CATEGORY_ICONS[slug]) || 'category'}</span>
+                                <span class="category-row-name">${catData.category_name}</span>
+                                <span class="category-row-card">${catData.best_card}</span>
+                                <span class="category-row-rate">${catData.best_rate}x</span>
+                            </div>
+                        `).join('')}
+                    </div></div>
+                `;
+            } else {
+                html += `<p style="text-align:center; color:var(--muted); padding:20px;">No category recommendations computed yet.</p>`;
+            }
+            html += `</div>`;
+        } else if (activeTab === 'value') {
+            html += `<div class="roadmap-tab-content">`;
+            html += _roadmapValueOverTimeHtml(_roadmapValueOverTime(recommendations));
+            html += `</div>`;
         }
-
-        html += _roadmapValueOverTimeHtml(_roadmapValueOverTime(recommendations));
     }
 
     if (recommendations.length === 0) {
         html += '<p style="text-align:center;color:var(--muted);">No recommendations found with your current criteria. Try adjusting your filters.</p>';
     } else if (filteredRecs.length === 0) {
         html += '<p style="text-align:center;color:var(--muted);margin-top:20px;margin-bottom:20px;">No self-funding cards found in this roadmap. Try clearing the filter.</p>';
-    } else {
+    } else if ((renderRoadmapResults.state.activeTab || 'actions') === 'actions') {
         // Group recommendations by action type with sort mode applied
         const groupedRecs = {
             keep: filteredRecs.filter(rec => rec.action === 'keep')
@@ -820,4 +840,18 @@ function renderRoadmapResults(data, opts = {}) {
             }
         }, 100);
     }
+}
+
+if (typeof window !== 'undefined') {
+    window.switchRoadmapTab = function(tabId) {
+        if (renderRoadmapResults.state) {
+            renderRoadmapResults.state.activeTab = tabId;
+        }
+        if (renderRoadmapResults.lastData) {
+            renderRoadmapResults(renderRoadmapResults.lastData, {
+                ...renderRoadmapResults.lastOpts,
+                noScroll: true
+            });
+        }
+    };
 }

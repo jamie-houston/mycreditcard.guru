@@ -1,7 +1,140 @@
-function togglePrivacySettings() {
-    const panel = document.getElementById('privacySettingsPanel');
-    panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+// New Global State for redesign
+let _activeProfileTab = 'cards';
+let _profileFilterMode = 'personal';
+let _expandedCards = {};
+let _recommendationsMap = {};
+
+window.switchProfileTab = function(tabId) {
+    _activeProfileTab = tabId;
+    
+    // Update active tab buttons
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+    const activeBtn = document.getElementById('tabBtn' + tabId.charAt(0).toUpperCase() + tabId.slice(1));
+    if (activeBtn) activeBtn.classList.add('active');
+    
+    // Update active content
+    document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+    const activeContent = document.getElementById('tabContent' + tabId.charAt(0).toUpperCase() + tabId.slice(1));
+    if (activeContent) activeContent.classList.add('active');
+};
+
+window.setProfileFilterMode = function(mode) {
+    _profileFilterMode = mode;
+    
+    // Update active button state
+    document.querySelectorAll('.segment-btn').forEach(btn => btn.classList.remove('active'));
+    const activeBtn = document.getElementById('btnProfile' + mode.charAt(0).toUpperCase() + mode.slice(1));
+    if (activeBtn) activeBtn.classList.add('active');
+    
+    // Re-render holdings list
+    renderCardCollectionTable();
+};
+
+window.toggleSettingsPanel = function() {
+    const panel = document.getElementById('settingsPanel');
+    if (panel) {
+        panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+    }
+};
+
+window.toggleSpendingProfileSection = function() {
+    const wrapper = document.getElementById('spendingProfileWrapper');
+    const chevron = document.getElementById('spendingProfileChevron');
+    if (wrapper) {
+        const isHidden = wrapper.style.display === 'none';
+        wrapper.style.display = isHidden ? 'block' : 'none';
+        if (chevron) {
+            chevron.style.transform = isHidden ? 'rotate(180deg)' : 'rotate(0deg)';
+        }
+    }
+};
+
+window.toggleCardRowExpansion = function(cardId) {
+    _expandedCards[cardId] = !_expandedCards[cardId];
+    renderCardCollectionTable();
+};
+
+window.handlePrivacyRadioClick = function(value) {
+    updatePrivacySetting(value);
+};
+
+window.filterCards = function() {
+    loadProfileData();
+};
+
+function getIssuerStyle(issuerName) {
+    const name = (issuerName || '').toLowerCase();
+    if (name.includes('chase')) {
+        return { initials: 'CS', bg: 'oklch(45% 0.14 260)' };
+    } else if (name.includes('american express') || name.includes('amex')) {
+        return { initials: 'AX', bg: 'oklch(58% 0.14 85)' };
+    } else if (name.includes('citi')) {
+        return { initials: 'CI', bg: 'oklch(48% 0.03 250)' };
+    } else if (name.includes('capital one') || name.includes('capitol one')) {
+        return { initials: 'CO', bg: 'oklch(50% 0.13 25)' };
+    } else if (name.includes('discover')) {
+        return { initials: 'DI', bg: 'oklch(48% 0.15 45)' };
+    } else if (name.includes('bank of america') || name.includes('bofa')) {
+        return { initials: 'BA', bg: 'oklch(45% 0.14 15)' };
+    } else if (name.includes('wellsfargo') || name.includes('wells fargo')) {
+        return { initials: 'WF', bg: 'oklch(52% 0.15 75)' };
+    }
+    return { initials: (issuerName || 'CG').substring(0, 2).toUpperCase(), bg: 'oklch(55% 0.12 175)' };
 }
+
+function getCardInitialsAndColor(cardName, issuerName) {
+    const cName = (cardName || '').toLowerCase();
+    if (cName.includes('sapphire')) return { initials: 'CS', bg: 'oklch(45% 0.14 260)' };
+    if (cName.includes('freedom unlimited')) return { initials: 'FU', bg: 'oklch(45% 0.14 260)' };
+    if (cName.includes('gold')) return { initials: 'AG', bg: 'oklch(58% 0.14 85)' };
+    if (cName.includes('platinum')) return { initials: 'AP', bg: 'oklch(62% 0.02 250)' };
+    if (cName.includes('double cash')) return { initials: 'DC', bg: 'oklch(48% 0.03 250)' };
+    if (cName.includes('venture x')) return { initials: 'VX', bg: 'oklch(50% 0.13 25)' };
+    
+    return getIssuerStyle(issuerName);
+}
+
+window.windowEditCardDetails = async function(cardId, cardName, cardType) {
+    currentModalCard = { id: cardId, name: cardName, card_type: cardType };
+    await openEditCardDetailsModal();
+};
+
+window.removeCardOwnership = async function(cardId, cardName, buttonEl) {
+    if (!confirm(`Are you sure you want to remove ${cardName || 'this card'}?`)) {
+        return;
+    }
+    if (buttonEl) {
+        buttonEl.disabled = true;
+        buttonEl.textContent = '⏳ ...';
+    }
+    try {
+        if (isAuthenticated) {
+            const response = await fetch(`${API_BASE}/cards/user-cards/toggle/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({ card_id: cardId, action: 'remove' })
+            });
+            if (!response.ok) {
+                throw new Error('Failed to remove card');
+            }
+        } else {
+            const cards = (await UserDataManager.getCards()).filter(id => id !== cardId);
+            await UserDataManager.saveCards(cards);
+        }
+        showNotification(`Removed ${cardName || 'card'}`, 'success');
+        await loadProfileData();
+    } catch (error) {
+        console.error('Error removing card:', error);
+        showNotification('Error removing card. Please try again.', 'error');
+        if (buttonEl) {
+            buttonEl.disabled = false;
+            buttonEl.textContent = 'Remove card';
+        }
+    }
+};
 
 document.addEventListener('DOMContentLoaded', async function() {
     await loadProfileData();
@@ -348,6 +481,22 @@ function renderCardCollectionTable() {
         .filter(([cardId]) => cardDetails[cardId])
         .map(([cardId, group]) => ({ cardId, group, cardInfo: cardDetails[cardId] }));
 
+    // Filter by personal vs business mode
+    rows = rows.filter(({ cardInfo }) => {
+        const cardType = (cardInfo.card_type || 'personal').toLowerCase();
+        return cardType === _profileFilterMode;
+    });
+
+    if (rows.length === 0) {
+        cardCollectionContainer.innerHTML = `
+            <div style="text-align:center; padding: 40px; color: var(--muted); border: 1px dashed var(--border); border-radius: 12px; background: white;">
+                No ${_profileFilterMode} cards in your collection yet.
+            </div>
+        `;
+        return;
+    }
+
+    // Sort by name or open date if sorted
     if (_cardSort.key) {
         rows.sort((a, b) => {
             const va = cardSortValue(_cardSort.key, a.group, a.cardInfo);
@@ -362,29 +511,117 @@ function renderCardCollectionTable() {
         });
     }
 
-    const headerHtml = CARD_SORT_COLUMNS.map(col => {
-        if (!col.key) {
-            return `<th>${col.label}</th>`;
+    const rowsHtml = rows.map(({ cardId, group, cardInfo }) => {
+        const instances = group.instances;
+        const hasMultiple = instances.length > 1;
+        const isExpanded = !!_expandedCards[cardId];
+        
+        // Calculate annual fee
+        const annualFee = parseFloat(cardInfo.annual_fee || 0);
+        const feeText = annualFee === 0 ? '$0' : `$${annualFee}`;
+        
+        // Get recommendation and status
+        const rec = _recommendationsMap[cardId];
+        let status = 'keep';
+        let reason = 'Holds ongoing rewards value or has no annual fee.';
+        let estValue = '$0/yr';
+        let bestFor = 'General spend';
+        
+        if (rec) {
+            status = rec.action || 'keep';
+            reason = rec.reason || reason;
+            estValue = rec.estimated_rewards ? `$${rec.estimated_rewards.toFixed(0)}/yr` : estValue;
+            
+            // Get best category from breakdown
+            if (rec.rewards_breakdown && rec.rewards_breakdown.length > 0) {
+                const categories = rec.rewards_breakdown
+                    .filter(item => item.type !== 'credit' && item.type !== 'info' && item.type !== 'bonus_shift' && item.category_rewards > 0)
+                    .map(item => item.category_name);
+                if (categories.length > 0) {
+                    bestFor = categories.slice(0, 2).join(', ');
+                }
+            }
+        } else {
+            if (annualFee === 0) {
+                reason = 'No annual fee. Safe to keep to maintain credit history length.';
+            } else {
+                reason = 'Review annual fee vs ongoing rewards category value.';
+                status = 'review';
+            }
         }
-        const isActive = _cardSort.key === col.key;
-        const caretClass = isActive ? (_cardSort.dir === 1 ? 'asc' : 'desc') : '';
-        return `<th class="sortable${isActive ? ' active' : ''}" onclick="sortCardCollection('${col.key}')">
-            ${col.label}<span class="sort-caret ${caretClass}"></span>
-        </th>`;
+        
+        const statusLabel = status.charAt(0).toUpperCase() + status.slice(1);
+        const cardStyle = getCardInitialsAndColor(cardInfo.name, cardInfo.issuer?.name);
+        
+        // Formatted dates/instances
+        let openedDateDisplay = '';
+        if (instances.length > 0 && instances[0].opened_date) {
+            openedDateDisplay = new Date(instances[0].opened_date).toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+        } else {
+            openedDateDisplay = 'unknown date';
+        }
+        
+        const rewardType = cardInfo.primary_reward_type?.name || 'Points';
+
+        // Details drawer content
+        let detailsHtml = '';
+        if (isExpanded) {
+            const instancesHtml = instances.map(inst => {
+                const nicknameStr = inst.nickname ? `"${inst.nickname}" · ` : '';
+                const ownerStr = inst.owner_name ? `Held by ${escapeHtml(inst.owner_name)}` : '';
+                const renewsStr = inst.opened_date ? ` · Renews ${nextAnniversary(inst.opened_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}` : '';
+                return `<div style="font-size:13px; color:var(--muted); margin-bottom:4px;">${nicknameStr}${ownerStr}${renewsStr}</div>`;
+            }).join('');
+            
+            detailsHtml = `
+                <div class="card-row-expanded">
+                    <div class="card-expanded-grid">
+                        <div class="card-expanded-grid-item">
+                            <span class="card-expanded-grid-label">Reward type</span>
+                            <span class="card-expanded-grid-value">${rewardType}</span>
+                        </div>
+                        <div class="card-expanded-grid-item">
+                            <span class="card-expanded-grid-label">Est. annual value</span>
+                            <span class="card-expanded-grid-value">${estValue}</span>
+                        </div>
+                        <div class="card-expanded-grid-item">
+                            <span class="card-expanded-grid-label">Best for</span>
+                            <span class="card-expanded-grid-value">${bestFor}</span>
+                        </div>
+                    </div>
+                    ${instancesHtml ? `<div style="margin-top: 6px;">${instancesHtml}</div>` : ''}
+                    <div class="card-expanded-reason-box" style="margin-top: 8px;">
+                        <strong>Why ${statusLabel.toLowerCase()}:</strong> ${reason}
+                    </div>
+                    <div class="card-expanded-actions" style="margin-top: 10px;">
+                        <button onclick="event.stopPropagation(); windowEditCardDetails(${cardId}, '${cardInfo.name.replace(/'/g, "\\'")}', '${cardInfo.card_type || 'personal'}')" class="card-action-btn-outline">Edit details</button>
+                        <button onclick="event.stopPropagation(); removeCardOwnership(${cardId}, '${cardInfo.name.replace(/'/g, "\\'")}', this)" class="card-action-btn-outline remove-btn">Remove card</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        return `
+            <div class="card-row-box" id="cardRowBox_${cardId}">
+                <button onclick="toggleCardRowExpansion(${cardId})" class="card-row-header-btn">
+                    <div class="issuer-initials-badge" style="background: ${cardStyle.bg};">${cardStyle.initials}</div>
+                    <div class="card-row-info">
+                        <div class="card-row-name">${cardInfo.name}</div>
+                        <div class="card-row-meta">${cardInfo.issuer?.name || 'Unknown'} · Opened ${openedDateDisplay}</div>
+                    </div>
+                    <div class="card-row-fee-block">
+                        <div class="card-row-fee-label">Annual fee</div>
+                        <div class="card-row-fee-value">${feeText}</div>
+                    </div>
+                    <div class="status-pill ${status.toLowerCase()}">${statusLabel}</div>
+                    <div class="card-row-chevron">${isExpanded ? '▲' : '▼'}</div>
+                </button>
+                ${detailsHtml}
+            </div>
+        `;
     }).join('');
 
-    const rowsHtml = rows.map(({ cardId, group, cardInfo }) => buildCardRow(cardId, group, cardInfo)).join('');
-
-    cardCollectionContainer.innerHTML = `
-        <div class="card-table-container">
-            <table class="cards-table">
-                <thead>
-                    <tr>${headerHtml}</tr>
-                </thead>
-                <tbody>${rowsHtml}</tbody>
-            </table>
-        </div>
-    `;
+    cardCollectionContainer.innerHTML = rowsHtml;
 }
 
 async function loadCardCollection() {
@@ -488,6 +725,17 @@ async function loadCardCollection() {
     }
 }
 
+function formatRewardRate(rateValue, rewardTypeName) {
+    const rType = (rewardTypeName || '').toLowerCase();
+    if (rType.includes('cash')) {
+        return `${parseFloat(rateValue).toFixed(1).replace('.0', '')}% cash back`;
+    } else if (rType.includes('mile')) {
+        return `${parseFloat(rateValue).toFixed(0)}x miles`;
+    } else {
+        return `${parseFloat(rateValue).toFixed(0)}x points`;
+    }
+}
+
 async function loadCategoryOptimization() {
     try {
         const userCards = await UserDataManager.getCards();
@@ -541,6 +789,8 @@ async function loadCategoryOptimization() {
             const card = cardDetails[cardId];
             if (!card || !card.reward_categories) continue;
             
+            const rewardType = card.primary_reward_type?.name || 'Points';
+            
             for (const rewardCategory of card.reward_categories) {
                 if (!rewardCategory.is_active) continue;
                 
@@ -555,6 +805,8 @@ async function loadCategoryOptimization() {
                         categoryName: categoryName,
                         rate: rewardRate,
                         cardName: cardName,
+                        rewardType: rewardType,
+                        card: card,
                         maxSpend: rewardCategory.max_annual_spend
                     };
                 }
@@ -577,24 +829,26 @@ async function loadCategoryOptimization() {
         let optimizationHtml = '';
         
         for (const [categorySlug, categoryData] of sortedCategories) {
-            const { categoryName, rate, cardName, maxSpend } = categoryData;
+            const { categoryName, rate, cardName, rewardType, card, maxSpend } = categoryData;
             
             // Skip general/catch-all categories at 1x rate
             if (rate <= 1.0 && ['other', 'general', 'everything-else'].includes(categorySlug)) {
                 continue;
             }
             
-            let spendingCapText = '';
-            if (maxSpend) {
-                spendingCapText = ` (up to $${parseFloat(maxSpend).toLocaleString()}/year)`;
-            }
+            const cardStyle = getCardInitialsAndColor(cardName, card.issuer?.name);
+            const formattedRate = formatRewardRate(rate, rewardType);
             
             optimizationHtml += `
-                <div class="category-optimization-simple">
-                    <div class="category-simple-name">${categoryName}</div>
-                    <div class="rate-simple">${rate}%</div>
-                    <div class="card-simple-name">${cardName}</div>
-                    ${spendingCapText ? `<div class="spending-cap-simple">${spendingCapText}</div>` : ''}
+                <div class="category-card-cell">
+                    <div class="category-cell-name">${categoryName}</div>
+                    <div class="category-cell-body">
+                        <div class="category-cell-badge" style="background: ${cardStyle.bg};">${cardStyle.initials}</div>
+                        <div class="category-cell-info">
+                            <div class="category-cell-cardname">${cardName}</div>
+                            <div class="category-cell-rate">${formattedRate}</div>
+                        </div>
+                    </div>
                 </div>
             `;
         }
@@ -828,143 +1082,80 @@ async function loadCreditsProfile() {
             }
         });
 
-        const unusedCredits = trackableCredits.filter(c => !c.isUsedThisPeriod);
-        const usedCredits = trackableCredits.filter(c => c.isUsedThisPeriod);
-
-        let trackerHtml = '';
-        if (trackableCredits.length > 0) {
-            trackerHtml = `
-                <div class="credit-tracker-card" style="background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--accent); border-radius: var(--radius-md); padding: 15px; margin-bottom: 20px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);">
-                    <h3 style="margin-top: 0; color: var(--text-strong); display: flex; align-items: center; gap: 8px; font-size: 16px; font-weight: 600;">
-                        📅 Track Benefits for This Period
-                    </h3>
-                    <p style="font-size: 13px; color: var(--muted); margin-bottom: 15px;">
-                        Check off the benefits you have used. Unused monthly/quarterly/annual credits are highlighted below to help you maximize their value before they expire.
-                    </p>
-            `;
-
-            // Unused group
-            if (unusedCredits.length > 0) {
-                trackerHtml += `
-                    <div id="unusedCreditsGroup" style="margin-bottom: 15px;">
-                        <h4 style="margin: 0 0 10px 0; font-size: 11px; color: #ef4444; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">
-                            ⚠️ Unused / Expiring Soon (${unusedCredits.length})
-                        </h4>
-                        <div class="unused-list" style="display: flex; flex-direction: column; gap: 8px;">
-                `;
-                unusedCredits.forEach(c => {
-                    const periodLabel = getCurrentPeriodLabel(c.timesPerYear);
-                    const formattedValue = parseFloat(c.value) > 0 ? `$${parseFloat(c.value).toFixed(0)}` : 'Benefit';
-                    const freqLabel = c.timesPerYear === 12 ? '/mo' : c.timesPerYear === 4 ? '/qtr' : c.timesPerYear === 2 ? '/half' : '/yr';
-                    trackerHtml += `
-                        <div style="display: flex; align-items: center; justify-content: space-between; background: var(--bg); border: 1px solid var(--border); padding: 10px 12px; border-radius: var(--radius-sm); border-left: 3px solid #ef4444;">
-                            <div style="display: flex; align-items: center; gap: 10px; width: 100%;">
-                                <input type="checkbox" id="trackerUse_${c.creditId}"
-                                       onchange="toggleCreditUsagePeriod(${c.creditId}, this.checked)"
-                                       style="cursor: pointer; width: 16px; height: 16px;">
-                                <label for="trackerUse_${c.creditId}" style="cursor: pointer; margin: 0; font-size: 13px; color: var(--text-strong); display: flex; flex-direction: column; line-height: 1.3;">
-                                    <span><strong>${c.cardName}</strong> &middot; ${c.benefitName}</span>
-                                    <span style="font-size: 11px; color: var(--muted); font-weight: normal;">${c.description || ''}</span>
-                                </label>
-                            </div>
-                            <span style="font-family: var(--font-mono); font-size: 11px; background: #fee2e2; color: #b91c1c; padding: 2px 8px; border-radius: 9999px; font-weight: 600; white-space: nowrap; margin-left: 10px;">
-                                ${formattedValue}${freqLabel} (${periodLabel})
-                            </span>
-                        </div>
-                    `;
-                });
-                trackerHtml += `
-                        </div>
-                    </div>
-                `;
-            } else {
-                trackerHtml += `
-                    <div id="unusedCreditsGroup" style="margin-bottom: 15px; padding: 10px; background: var(--accent-soft); border-radius: var(--radius-sm); border: 1px dashed var(--accent);">
-                        <h4 style="margin: 0; font-size: 13px; color: var(--accent); font-weight: 600; text-align: center; display: flex; align-items: center; justify-content: center; gap: 6px;">
-                            🎉 All benefits checked off for this period!
-                        </h4>
-                    </div>
-                `;
-            }
-
-            // Used group
-            if (usedCredits.length > 0) {
-                trackerHtml += `
-                    <div id="usedCreditsGroup" style="border-top: 1px solid var(--border); padding-top: 15px;">
-                        <h4 style="margin: 0 0 10px 0; font-size: 11px; color: #10b981; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">
-                            ✅ Used This Period (${usedCredits.length})
-                        </h4>
-                        <div class="used-list" style="display: flex; flex-direction: column; gap: 8px; opacity: 0.7;">
-                `;
-                usedCredits.forEach(c => {
-                    const periodLabel = getCurrentPeriodLabel(c.timesPerYear);
-                    const formattedValue = parseFloat(c.value) > 0 ? `$${parseFloat(c.value).toFixed(0)}` : 'Benefit';
-                    const freqLabel = c.timesPerYear === 12 ? '/mo' : c.timesPerYear === 4 ? '/qtr' : c.timesPerYear === 2 ? '/half' : '/yr';
-                    trackerHtml += `
-                        <div style="display: flex; align-items: center; justify-content: space-between; background: var(--bg); border: 1px solid var(--border); padding: 8px 12px; border-radius: var(--radius-sm); border-left: 3px solid #10b981;">
-                            <div style="display: flex; align-items: center; gap: 10px;">
-                                <input type="checkbox" id="trackerUse_${c.creditId}" checked
-                                       onchange="toggleCreditUsagePeriod(${c.creditId}, this.checked)"
-                                       style="cursor: pointer; width: 16px; height: 16px;">
-                                <label for="trackerUse_${c.creditId}" style="cursor: pointer; margin: 0; font-size: 13px; color: var(--muted); text-decoration: line-through; display: flex; flex-direction: column; line-height: 1.3;">
-                                    <span><strong>${c.cardName}</strong> &middot; ${c.benefitName}</span>
-                                    <span style="font-size: 11px; color: var(--muted-2); font-weight: normal; text-decoration: line-through;">${c.description || ''}</span>
-                                </label>
-                            </div>
-                            <span style="font-family: var(--font-mono); font-size: 11px; color: var(--muted); font-weight: 600; white-space: nowrap; margin-left: 10px;">
-                                Used (${periodLabel})
-                            </span>
-                        </div>
-                    `;
-                });
-                trackerHtml += `
-                        </div>
-                    </div>
-                `;
-            }
-
-            trackerHtml += `</div>`;
-        }
-
-        // Sort by effective (counted) amount, highest first
-        creditEntries.sort((a, b) => b.effectiveAmount - a.effectiveAmount);
-
-        // Add total summary (compact version) — only counts benefits the
-        // user has opted into, same as the roadmap engine
+        let creditsHtml = '';
+        
+        // Total summary box at the top of the tab
         const totalCreditsValue = creditEntries.reduce((sum, credit) => sum + credit.effectiveAmount, 0);
-        let creditsHtml = trackerHtml;
         creditsHtml += `
-            <div style="background: var(--accent-soft); border: 1px solid var(--border); color: var(--text); padding: 15px; border-radius: var(--radius-md); margin-bottom: 15px; text-align: center;">
-                <div style="font-size: 13px; font-weight: 500; color: var(--muted); margin-bottom: 4px;">Total Annual Benefits</div>
-                <div style="font-size: 28px; font-weight: 700; font-family: var(--font-mono); color: var(--accent);">$${totalCreditsValue.toFixed(0)}</div>
-                <div style="font-size: 12px; color: var(--muted); margin-top: 2px;">${creditEntries.length} benefit${creditEntries.length !== 1 ? 's' : ''} from ${Object.keys(cardDetails).length} card${Object.keys(cardDetails).length !== 1 ? 's' : ''} &mdash; check the ones you actually use</div>
+            <div style="background: oklch(95% 0.008 250); border: 1px solid var(--border); color: var(--text); padding: 16px 20px; border-radius: 12px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+                <div>
+                    <div style="font-size: 13px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.03em;">Total Annual Benefits</div>
+                    <div style="font-size: 12px; color: var(--muted); margin-top: 2px;">Based on benefits you use across ${Object.keys(cardDetails).length} card${Object.keys(cardDetails).length !== 1 ? 's' : ''}</div>
+                </div>
+                <div style="font-size: 30px; font-weight: 800; color: var(--accent-dark); font-family: var(--font-ui);">$${totalCreditsValue.toFixed(0)}<span style="font-size:14px; font-weight: 500; color: var(--muted);">/yr</span></div>
             </div>
         `;
+        
+        if (trackableCredits.length > 0) {
+            creditsHtml += `
+                <div style="margin-bottom: 24px;">
+                    <h3 style="font-family: var(--font-ui); font-size: 15px; font-weight: 700; color: var(--text-strong); margin-bottom: 6px;">📅 Track Benefits for This Period</h3>
+                    <p style="font-size: 13.5px; color: var(--muted); margin-top: 0; margin-bottom: 14px;">Toggle benefits to mark them as used. Helps track monthly or annual credits.</p>
+                    <div class="benefits-list-container">
+            `;
+            
+            trackableCredits.forEach(c => {
+                const formattedValue = parseFloat(c.value) > 0 ? `$${parseFloat(c.value).toFixed(0)}` : 'Benefit';
+                const freqLabel = c.timesPerYear === 12 ? '/mo' : c.timesPerYear === 4 ? '/qtr' : c.timesPerYear === 2 ? '/half' : '/yr';
+                const statusClass = c.isUsedThisPeriod ? 'used' : 'unused';
+                const statusText = c.isUsedThisPeriod ? 'Used' : 'Unused';
+                
+                creditsHtml += `
+                    <div class="benefit-row-card" onclick="toggleCreditUsagePeriod(${c.creditId}, ${!c.isUsedThisPeriod})" style="cursor: pointer; user-select: none;">
+                        <div class="benefit-row-info">
+                            <div class="benefit-row-name">${c.benefitName}</div>
+                            <div class="benefit-row-meta">${c.cardName} · worth ${formattedValue}${freqLabel}</div>
+                        </div>
+                        <div class="benefit-status-pill ${statusClass}">${statusText}</div>
+                    </div>
+                `;
+            });
+            
+            creditsHtml += `</div></div>`;
+        }
 
-
-        creditsHtml += '<div class="credits-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px;">';
+        // Add the global opted-in manage checklist at the bottom of the tab
+        creditsHtml += `
+            <div style="margin-top: 30px; border-top: 1px solid var(--border); padding-top: 20px;">
+                <h3 style="font-family: var(--font-ui); font-size: 15px; font-weight: 700; color: var(--text-strong); margin-bottom: 6px;">Manage Opted-In Benefits</h3>
+                <p style="font-size: 13.5px; color: var(--muted); margin-top: 0; margin-bottom: 16px;">Only check benefits you realistically expect to use. The math will automatically adjust to reflect these values.</p>
+                <div class="credits-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px;">
+        `;
+        
+        // Sort by effective amount, highest first
+        creditEntries.sort((a, b) => b.effectiveAmount - a.effectiveAmount);
 
         creditEntries.forEach(credit => {
             const notStacking = !credit.stackable && credit.cards.length > 1;
             const winnerName = credit.cards.find(c => c.cardId === credit.winnerCardId)?.name;
 
             creditsHtml += `
-                <div style="background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: var(--radius-sm); padding: 12px; ${credit.isUsed ? '' : 'opacity: 0.55;'}">
+                <div style="background: white; border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: 12px; padding: 14px 16px; ${credit.isUsed ? '' : 'opacity: 0.65;'}">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                         <div style="display: flex; align-items: center; gap: 8px;">
                             <input type="checkbox" id="creditUse_${credit.slug}" ${credit.isUsed ? 'checked' : ''}
                                    onchange="toggleCreditUsage('${credit.slug}', this.checked)"
-                                   title="I use this benefit" style="cursor: pointer;">
-                            <label for="creditUse_${credit.slug}" style="cursor: pointer; margin: 0;">
-                                <h3 style="margin: 0; color: var(--text-strong); font-size: 15px; font-weight: 600;">${credit.name}</h3>
+                                   title="I use this benefit" style="cursor: pointer; width:16px; height:16px;">
+                            <label for="creditUse_${credit.slug}" style="cursor: pointer; margin: 0; font-weight: 600; font-size: 14.5px; color: var(--text-strong);">
+                                ${credit.name}
                             </label>
                         </div>
-                        <span style="background: var(--accent-soft); color: var(--accent); padding: 3px 8px; border-radius: 8px; font-size: 12px; font-weight: 600; white-space: nowrap; font-family: var(--font-mono);">
-                             $${credit.effectiveAmount.toFixed(0)}/yr
+                        <span style="background: var(--accent-soft); color: var(--accent-dark); padding: 4px 8px; border-radius: 8px; font-size: 12.5px; font-weight: 700; white-space: nowrap; font-family: var(--font-ui);">
+                             +$${credit.effectiveAmount.toFixed(0)}/yr
                         </span>
                     </div>
-                    ${notStacking ? `<div style="font-size: 11px; color: var(--muted); margin-bottom: 6px;">Doesn't stack across cards — counted once, on ${winnerName}</div>` : ''}
-                    <div style="margin-top: 8px;">
+                    ${notStacking ? `<div style="font-size: 11.5px; color: var(--muted); margin-bottom: 6px; line-height:1.35;">Doesn't stack across cards — counted once, on ${winnerName}</div>` : ''}
+                    <div style="margin-top: 10px; display:flex; flex-direction:column; gap:6px;">
                         ${credit.cards.map(card => {
                             const isWinner = credit.stackable || card.cardId === credit.winnerCardId;
                             const amountLabel = !credit.isUsed
@@ -973,9 +1164,9 @@ async function loadCreditsProfile() {
                                     ? `$${parseFloat(card.annualValue).toFixed(0)}/year${card.timesPerYear > 1 ? ` ($${parseFloat(card.value).toFixed(0)} × ${card.timesPerYear})` : ''}`
                                     : `counted once — on ${winnerName}`);
                             return `
-                                <div style="background: var(--bg); padding: 8px; border-radius: 6px; margin-bottom: 6px; font-size: 13px;">
-                                    <div style="font-weight: 600; color: var(--text); margin-bottom: 2px;">${card.name}</div>
-                                    <div style="color: ${isWinner ? 'var(--accent)' : 'var(--muted)'}; font-weight: 600; font-size: 12px; font-family: var(--font-mono);">${amountLabel}</div>
+                                <div style="background: oklch(98% 0.005 250); padding: 8px 10px; border-radius: 8px; border: 1px solid var(--border-light); font-size: 12.5px; display:flex; justify-content:space-between; align-items:center;">
+                                    <div style="font-weight: 500; color: var(--text); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:160px;">${card.name}</div>
+                                    <div style="color: ${isWinner ? 'var(--accent-dark)' : 'var(--muted)'}; font-weight: 700; font-size: 12px; font-family: var(--font-ui);">${amountLabel}</div>
                                 </div>
                             `;
                         }).join('')}
@@ -983,9 +1174,8 @@ async function loadCreditsProfile() {
                 </div>
             `;
         });
-
-        creditsHtml += '</div>';
-
+        
+        creditsHtml += `</div></div>`;
         creditsContainer.innerHTML = creditsHtml;
 
     } catch (error) {
@@ -1066,6 +1256,15 @@ async function calculatePortfolioSummary() {
                         const data = await response.json();
                         const portfolioSummary = data.portfolio_summary;
                         
+                        _recommendationsMap = {};
+                        if (data.recommendations && Array.isArray(data.recommendations)) {
+                            for (const rec of data.recommendations) {
+                                if (rec.card && rec.card.id) {
+                                    _recommendationsMap[rec.card.id] = rec;
+                                }
+                            }
+                        }
+                        
                         if (portfolioSummary) {
                             totalAnnualRewards = portfolioSummary.total_portfolio_rewards || 0;
                             netPortfolioValue = portfolioSummary.net_portfolio_value || 0;
@@ -1074,6 +1273,9 @@ async function calculatePortfolioSummary() {
                                 totalAnnualFees = portfolioSummary.total_annual_fees;
                             }
                         }
+                        
+                        // Re-render to show keep/cancel statuses and live reasoning
+                        renderCardCollectionTable();
                     }
                 } catch (error) {
                     console.error('Error calculating portfolio optimization:', error);
