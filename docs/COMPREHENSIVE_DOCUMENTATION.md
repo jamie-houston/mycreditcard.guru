@@ -32,13 +32,16 @@ User (Django Auth)
 ├── UserSpendingProfile
 │   ├── SpendingAmount (monthly spending by category)
 │   ├── UserSpendingCreditPreference (valued benefits)
+│   ├── ProfileEntity (players or business entities in household)
+│   ├── UserCreditUsage (tracks benefit check-offs per period)
 │   └── Roadmap (saved recommendation scenarios)
-└── UserCard (owned credit cards with personal details)
+└── UserCard (owned credit cards with personal details and owners)
 
 Issuer (Chase, Amex, etc.)
 ├── CreditCard
 │   ├── RewardCategory (earning rates by spending category)
-│   └── CardCredit (benefits like airport lounge, travel credits)
+│   ├── CardCredit (benefits like airport lounge, travel credits)
+│   └── PointsProgram ( Chase Ultimate Rewards, Amex Membership Rewards, etc. )
 └── Policies (5/24 rules, etc.)
 
 SpendingCategory (hierarchical)
@@ -53,16 +56,13 @@ SpendingCategory (hierarchical)
 class CreditCard(models.Model):
     name = models.CharField(max_length=200)
     issuer = models.ForeignKey(Issuer)
+    card_type = models.CharField(max_length=20, choices=[('personal', 'Personal'), ('business', 'Business')])
     annual_fee = models.DecimalField(max_digits=8, decimal_places=2)
     signup_bonus_amount = models.IntegerField()
     primary_reward_type = models.ForeignKey(RewardType)  # Points, Miles, Cashback
+    points_program = models.ForeignKey(PointsProgram, null=True, blank=True)
+    reward_value_multiplier = models.DecimalField(max_digits=6, decimal_places=4, default=0.01)
     metadata = models.JSONField(default=dict)  # Flexible data storage
-    
-    # Key Properties:
-    @property
-    def reward_value_multiplier(self):
-        """Point/mile value (e.g., 0.02 = 2¢ per point)"""
-        return self.metadata.get('reward_value_multiplier', 0.01)
 ```
 
 #### UserSpendingProfile Model
@@ -75,7 +75,40 @@ class UserSpendingProfile(models.Model):
     # Related models:
     # - spending_amounts: Monthly spending by category
     # - spending_credit_preferences: Which benefits user values
+    # - entities: Profile entities (household players/businesses)
+    # - credit_usages: Used benefit check-offs
     # - roadmaps: Saved recommendation scenarios
+```
+
+#### ProfileEntity Model (Phase K Multiplayer)
+```python
+class ProfileEntity(models.Model):
+    profile = models.ForeignKey(UserSpendingProfile, related_name='entities')
+    name = models.CharField(max_length=100)
+    kind = models.CharField(max_length=10, choices=[('personal', 'Personal'), ('business', 'Business')])
+    is_primary = models.BooleanField(default=False)
+```
+
+#### UserCard Model (Phase F & K Ownership)
+```python
+class UserCard(models.Model):
+    user = models.ForeignKey(User, related_name='owned_cards')
+    card = models.ForeignKey(CreditCard)
+    nickname = models.CharField(max_length=100, blank=True)
+    opened_date = models.DateField(null=True, blank=True)
+    closed_date = models.DateField(null=True, blank=True)
+    bonus_earned_date = models.DateField(null=True, blank=True)
+    bonus_override = models.BooleanField(null=True, blank=True)  # Override auto eligibility check
+    owner = models.ForeignKey(ProfileEntity, on_delete=models.RESTRICT, null=True, blank=True)
+```
+
+#### UserCreditUsage Model (Phase L Benefit Tracking)
+```python
+class UserCreditUsage(models.Model):
+    profile = models.ForeignKey(UserSpendingProfile, related_name='credit_usages')
+    card_credit = models.ForeignKey(CardCredit, related_name='usages')
+    period_key = models.CharField(max_length=20)  # YYYY-MM, YYYY-QX, YYYY-HY, or YYYY
+    used = models.BooleanField(default=True)
 ```
 
 #### SpendingCategory Model (Hierarchical)
@@ -89,122 +122,23 @@ class SpendingCategory(models.Model):
 ```
 
 ### Data Relationships
-- **1:N**: User → UserCards, Issuer → CreditCards, CreditCard → RewardCategories
+- **1:N**: User → UserCards, Issuer → CreditCards, CreditCard → RewardCategories, UserSpendingProfile → ProfileEntities
 - **M:N**: CreditCard ↔ SpendingCategory (via RewardCategory), UserProfile ↔ SpendingCredit (preferences)
 - **Hierarchical**: SpendingCategory self-reference for parent/child relationships
 
 ## 🤖 Recommendation Engine Logic
 
-### Core Algorithm: `RecommendationEngine` Class
+The core recommendation logic is located in [roadmaps/recommendation_engine.py](file:///Users/jamiehouston/src/jamie-houston/mycreditcard.guru/roadmaps/recommendation_engine.py) (and the supporting `roadmaps/engine/` modules). 
 
-Located in: `roadmaps/recommendation_engine.py`
+For a complete and detailed breakdown of the engine, please refer to the dedicated **[docs/ENGINE.md](file:///Users/jamiehouston/src/jamie-houston/mycreditcard.guru/docs/ENGINE.md)** file.
 
-#### Initialization
-```python
-def __init__(self, profile: UserSpendingProfile):
-    self.profile = profile
-    self.user_cards = profile.user.owned_cards.filter(closed_date__isnull=True)
-    self.spending_amounts = {
-        sa.category.slug: sa.monthly_amount 
-        for sa in profile.spending_amounts.all()
-    }
-```
-
-#### Recommendation Generation Process
-
-1. **Card Filtering**: Apply roadmap filters (issuer, card type, fees, etc.)
-2. **Portfolio Optimization**: Select optimal card combinations avoiding double-counting
-3. **Value Calculation**: Calculate annual rewards + signup bonuses - fees
-4. **Action Assignment**: Determine apply/keep/cancel actions based on value
-5. **Smart Prioritization**: Balance high-value cards with user preferences
-
-#### Key Methods
-
-##### `generate_quick_recommendations(roadmap)` → List[dict]
-Main entry point for generating recommendations without database persistence.
-
-**Returns recommendation dict:**
-```python
-{
-    'card': CreditCard,
-    'action': 'apply|keep|cancel|upgrade|downgrade',
-    'priority': int,  # Lower = higher priority
-    'estimated_rewards': float,
-    'reasoning': str,
-    'rewards_breakdown': [
-        {
-            'category_name': 'Travel',
-            'monthly_spend': 1000,
-            'annual_spend': 12000,
-            'reward_rate': 3.0,
-            'reward_multiplier': 0.02,  # 2¢ per point
-            'points_earned': 36000,
-            'category_rewards': 720.00,
-            'calculation': '$12,000 × 3.0x × 0.020 = $720.00'
-        }
-    ],
-    'first_year_value': float,
-    'annual_value': float
-}
-```
-
-##### `_calculate_smart_card_value(card, signup_bonus=True)` → float
-Sophisticated value calculation considering:
-- **Spending Allocation**: Maps user spending to card's reward categories
-- **Rate Optimization**: Finds best earning rates across user's portfolio
-- **Credit Benefits**: Includes valued benefits (airport lounge, travel credits)
-- **Signup Bonuses**: First-year bonus calculations
-- **Fee Considerations**: Handles first-year fee waivers
-
-##### `_calculate_card_credits_value(card)` → (float, list)
-Calculates annual value of card benefits:
-```python
-def _calculate_card_credits_value(self, card):
-    """
-    Examples:
-    - Travel credit: $150 × 2/year = $300 (if user spends on travel)
-    - Airport lounge: $469 × 1/year = $469 (if user values this benefit)
-    """
-    for card_credit in card.credits.filter(is_active=True):
-        if credit_matches_user_preferences(card_credit):
-            annual_value = card_credit.value * card_credit.times_per_year
-            credits_value += annual_value
-```
-
-### Recommendation Rules & Logic
-
-#### 1. Portfolio Optimization
-- **No Double Counting**: Each dollar of spending allocated to best card only
-- **Category Competition**: Higher reward rates take precedence
-- **Spending Caps**: Respects annual maximums on bonus categories
-
-#### 2. Action Logic
-```python
-if card.id in current_card_ids:
-    action = 'keep' if (annual_rewards - annual_fee) > 0 else 'cancel'
-else:
-    if self._is_eligible_for_card(card):
-        action = 'apply'
-    else:
-        continue  # Skip ineligible cards
-```
-
-#### 3. Eligibility Rules
-- **Issuer Policies**: Respects Chase 5/24, etc. (expandable)
-- **Card Limits**: Prevents recommending owned cards
-- **Business vs Personal**: Considers card type preferences
-
-#### 4. Priority Scoring
-```python
-priority_score = base_net_value + efficiency_boost + signup_bonus_boost
-# Lower score = higher priority in recommendations
-```
-
-#### 5. Smart Filtering
-- **Zero-Fee Keeps**: Always include $0 annual fee cards to keep
-- **High-Value Applies**: Prioritize new cards with best ROI
-- **Strategic Cancels**: Remove negative-value cards
-- **Balance**: Limit recommendations to prevent overwhelm
+### High-Level Summary
+1. **Card Filtering**: Filters candidate cards based on roadmap parameters (issuers, maximum annual fees).
+2. **Greedy Optimization**: Selects the optimal combination of cards that yields the highest net portfolio value without double-counting spending.
+3. **Reconciliation Guard**: Verifies that the headline value of every recommendation matches the sum of its displayed terms.
+4. **Sequencing (12-Month Capacity)**: Schedules new card applications across a 12-month timeline, deferring signup bonuses that exceed the user's spending capacity.
+5. **Multiplayer History & Routing**: Checks rules (like Chase 5/24) per player and assigns business cards to business entities.
+6. **Points Pooling**: Values points at the highest redemption rate among cards currently held in the portfolio for Chase Ultimate Rewards and Amex Membership Rewards.
 
 ## 🌐 API Endpoints
 
@@ -221,16 +155,22 @@ priority_score = base_net_value + efficiency_boost + signup_bonus_boost
 - `GET /cards/{id}/` - Individual card with reward categories and credits
 - `GET /cards/search/` - Advanced search with filtering
 
-#### User Profiles
+#### User Profiles & Preferences
 - `GET /profile/` - Current user's spending profile
 - `POST /profile/` - Create/update spending profile
 - `GET /recommendations/preview/` - Quick recommendations without saving
+- `GET/PUT /credit-preferences/` - Get or update credit preference checkboxes (opt-in/out of specific benefits)
+- `GET/PUT /credit-usage/` - Get or update benefit usage check-offs for the current period (month, quarter, half, year)
+
+#### Household Multiplayer Entities
+- `GET/POST /profile-entities/` - List or create players/business entities in the household
+- `PATCH/DELETE /profile-entities/{id}/` - Update or delete specific players/business entities
 
 #### Card Ownership
-- `GET /user-cards/` - User's owned cards with personal details
-- `POST /user-cards/add/` - Add card to user's collection
-- `PATCH /user-cards/{id}/` - Update card details (nickname, dates, notes)
-- `DELETE /user-cards/{id}/delete/` - Remove card from collection
+- `GET /user-cards/` - User's owned cards with personal details (nickname, dates, owner)
+- `POST /user-cards/add/` - Add a card to user's collection
+- `PATCH /user-cards/{id}/` - Update card details (nickname, dates, override, owner)
+- `DELETE /user-cards/{id}/delete/` - Remove card from collection (sets closed date)
 
 ### Roadmaps App (`/api/roadmaps/`)
 
@@ -239,6 +179,8 @@ priority_score = base_net_value + efficiency_boost + signup_bonus_boost
 - `POST /create/` - Create new roadmap with filters
 - `GET /{id}/` - Roadmap details with recommendations
 - `POST /{id}/generate/` - Generate recommendations for roadmap
+- `GET/POST /current/share/` - Toggle and share the current roadmap publicly
+- `GET /shared/{uuid}/` - Read-only public shared roadmap payload
 
 #### Quick Operations
 - `POST /quick-recommendation/` - Generate recommendations without saving
