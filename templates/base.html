@@ -216,6 +216,10 @@
                             <div class="modal-info-label">Signup Bonus Status</div>
                             <div class="modal-info-value" id="modalUserBonusOverride">Auto (inferred from issuer rules)</div>
                         </div>
+                        <div class="modal-info-item" id="modalUserOwnerItem" style="display: none;">
+                            <div class="modal-info-label">Held By</div>
+                            <div class="modal-info-value" id="modalUserOwner">—</div>
+                        </div>
                     </div>
                     <div style="margin-top: 15px;">
                         <button onclick="openEditCardDetailsModal()" class="secondary" style="background: #10b981; color: white;">
@@ -1300,6 +1304,16 @@
                         bonusOverrideEl.textContent = 'Confirmed not earned';
                     } else {
                         bonusOverrideEl.textContent = 'Auto (inferred from issuer rules)';
+                    }
+
+                    // Show owner name (multi-player households)
+                    const ownerItem = document.getElementById('modalUserOwnerItem');
+                    const ownerEl = document.getElementById('modalUserOwner');
+                    if (cardDetails?.owner_name) {
+                        ownerEl.textContent = cardDetails.owner_name;
+                        ownerItem.style.display = 'block';
+                    } else {
+                        ownerItem.style.display = 'none';
                     }
 
                     userDetailsSection.style.display = 'block';

@@ -223,21 +223,28 @@ class CreateSpendingProfileSerializer(serializers.Serializer):
 
 class UserCardCreateUpdateSerializer(serializers.ModelSerializer):
     """Simplified serializer for creating/updating UserCard"""
+    owner = serializers.PrimaryKeyRelatedField(
+        queryset=ProfileEntity.objects.none(),  # Set dynamically in __init__
+        required=False,
+        allow_null=True
+    )
 
     class Meta:
         model = UserCard
-        fields = ['card', 'nickname', 'opened_date', 'closed_date', 'notes', 'owner']
-        extra_kwargs = {'owner': {'required': False}}
+        fields = ['nickname', 'opened_date', 'closed_date', 'bonus_earned_date', 'bonus_override', 'notes', 'owner']
+        extra_kwargs = {
+            'owner': {'required': False},
+            'bonus_earned_date': {'required': False},
+            'bonus_override': {'required': False},
+        }
 
-    def validate_owner(self, owner):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         request = self.context.get('request')
-        if owner is not None and request is not None:
-            if not ProfileEntity.objects.filter(
-                pk=owner.pk, profile__user=request.user
-            ).exists():
-                raise serializers.ValidationError(
-                    "owner must be one of your own household entities")
-        return owner
+        if request and hasattr(request, 'user') and request.user.is_authenticated:
+            self.fields['owner'].queryset = ProfileEntity.objects.filter(
+                profile__user=request.user
+            )
 
 
 class UserSpendingCreditPreferenceSerializer(serializers.Serializer):
