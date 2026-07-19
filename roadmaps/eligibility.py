@@ -51,6 +51,13 @@ An issuer's 'application_rules' entries come in two shapes: a window rule
 that window; a cap rule ('max_open_cards') counts cards currently OPEN,
 uncapped by time (e.g. Amex's 5-card limit) — both keyed on 'counts' (see
 _counts_toward).
+
+Known-unmodeled gaps (Phase M verification, 2026-07-19 — deliberately out
+of scope, not bugs): no aggregate cross-issuer open-card cap; Amex's
+5-card rule is one flat counter (doesn't split charge vs. credit or
+business vs. personal sub-limits issuers sometimes apply); no cross-issuer
+new-account velocity throttle. If one of these becomes a real complaint,
+add a new ISSUER_RULES shape (or a household-wide rule alongside it) here.
 """
 
 import calendar

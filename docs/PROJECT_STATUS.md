@@ -14,8 +14,7 @@ J–M planned in `.claude/plans/plan-out-the-following-sharded-nest.md`
 (scoping decisions with Jamie, 2026-07-17); N–Q added 2026-07-18 from
 Jamie's backlog. Phase N built ahead of M (2026-07-18, Jamie's call —
 greenfield feature over a verify-and-document pass). Recommended order for
-what's left: **M → O → P → Q** — M is mostly verification (see below) so
-it's cheap to clear; O/P (spending-input modes) before Q (surfacing
+what's left: **O → P → Q** — O/P (spending-input modes) before Q (surfacing
 existing credit math) since they touch the same builder UI.
 
 ### Completed
@@ -36,23 +35,14 @@ existing credit math) since they touch the same builder UI.
       reachability + category rate − fee) and the best already-owned card,
       independent of and alongside the regular monthly roadmap (2026-07-18).
 - [x] **Help & Resources** — Created a user-friendly, Ledger-themed Help & Docs page, an external Resources page recommending high-quality points/rewards sites, and restored start page landing features grid for all users (2026-07-19).
+- [x] **Phase M** — Verified max-cards-per-lifetime/per-issuer enforcement
+      (2026-07-19). No code changes — closed as verify-and-document per
+      Jamie's call. See below.
 
 Detail archived — see pointers under "Where everything else went."
 
 ### Open
 
-- [ ] **Phase M — Enforce max cards per lifetime & per issuer (business/personal)**
-      Largely ALREADY DONE in Phase K — verify then close gaps. Existing
-      (`roadmaps/eligibility.py`): Chase 5/24, BofA 2/3/4, CapOne 1/6mo
-      (window rules), Amex 5-card open cap (`max_open_cards`), once-per-lifetime
-      bonus (Amex) + application (`application_eligibility`, Sapphire family)
-      blocks, business-vs-personal card routing, and PER-ENTITY headroom
-      (2 players ⇒ 2× 5/24; each can hold a personal Sapphire, business gets
-      the business card). Gaps to decide/scope: (a) no aggregate cross-issuer
-      open-card cap, (b) coarse Amex business/charge sub-limit modeling,
-      (c) no cross-issuer velocity throttle. Also confirm the "10 Chase cards
-      in 24mo for 2 people" example behaves right via a scenario. Likely a
-      small verify-and-document phase unless a specific gap is prioritized.
 - [ ] **Phase O — Category-less "easy mode" spending**
       GREENFIELD. Let a user enter total monthly OR yearly spend without
       picking categories ("$4k/month"), for a quick low-effort estimate.
@@ -143,11 +133,27 @@ venv/bin/python manage.py run_scenario "Jamie Real" --explain                  #
 node scripts/test_roadmap_results.js                                          # roadmap-results.js pure-helper smoke test
 ```
 
-Baseline as of 2026-07-18 (post Phase N): 170 standard tests green (162 +
-8 from Phase N: `ExpenseRecommenderTests`, `ExpenseRecommendationResponseTests`),
-scenario sweep clean, "Jamie Real" reconciles, JS smoke test green (+5 new
-cases for `_roadmapExpenseLineText`/`_roadmapExpensePanelHtml`). Any failure
-is a regression.
+Baseline as of 2026-07-19 (post Phase M verification): 174 standard tests
+green, scenario sweep clean (`test_all_scenarios`, 77/77), "Jamie Real"
+reconciles, JS smoke test green. Any failure is a regression.
+
+**Phase M verification (2026-07-19)**: confirmed existing `roadmaps/
+eligibility.py` rules — Chase 5/24, BofA 2/3/4, CapOne 1/6mo (window
+rules), Amex 5-card open cap (`max_open_cards`), once-per-lifetime bonus
+(Amex) + application (`application_eligibility`, Sapphire family) blocks,
+business-vs-personal card routing, and per-entity headroom (2 players ⇒ 2×
+5/24 budget) — all pass the standard suite and full scenario sweep with no
+code changes needed. `data/tests/scenarios/multi_player.json`'s "both
+players at 5/24, card excluded" scenario (5 cards × 2 entities = 10 Chase
+cards total) is the "10 Chase cards in 24mo for 2 people" case from the
+phase's own description — confirmed passing. Closed as verify-and-document
+per Jamie's call (2026-07-19); three related gaps remain deliberately
+unscoped, not bugs: (a) no aggregate cross-issuer open-card cap, (b) Amex's
+per-rule counter is flat (doesn't split charge vs. credit or business vs.
+personal sub-limits), (c) no cross-issuer new-account velocity throttle.
+Revisit only if a specific gap becomes a real complaint — `roadmaps/
+eligibility.py`'s module docstring is the place to extend `ISSUER_RULES`
+if so.
 
 ## Where everything else went
 
