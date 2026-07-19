@@ -13,8 +13,8 @@
         <div class="tab-row-container" id="roadmapPageTabs" style="margin-bottom: 24px;">
             <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; width: 100%; gap: 12px;">
                 <div class="tab-row" style="border: none; margin-bottom: 0;">
-                    <button id="tabRoadmapSettings" class="tab-btn active" onclick="switchRoadmapPageTab('settings')">Roadmap Settings</button>
-                    <button id="tabRoadmapResults" class="tab-btn" onclick="switchRoadmapPageTab('results')">Roadmap Results</button>
+                    <button id="tabRoadmapResults" class="tab-btn{% if has_current_roadmap %} active{% endif %}" onclick="switchRoadmapPageTab('results')">Results</button>
+                    <button id="tabRoadmapSettings" class="tab-btn{% if not has_current_roadmap %} active{% endif %}" onclick="switchRoadmapPageTab('settings')">Settings</button>
                 </div>
                 <button class="settings-toggle-btn" id="btnRoadmapShare" onclick="toggleRoadmapSharePanel()" title="Share Roadmap" style="display: none;">
                     <span class="ico">share</span>

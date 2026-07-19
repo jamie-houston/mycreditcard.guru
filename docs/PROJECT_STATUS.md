@@ -5,7 +5,7 @@ detail have been archived to mybrain — see the pointers at the bottom. Check
 items off here as they land; when a phase's own detail doc is done, archive
 it the same way and trim this file back down.
 
-Last updated: 2026-07-18
+Last updated: 2026-07-19
 
 ## Phases (E–Q)
 
@@ -56,6 +56,7 @@ Detail archived — see pointers under "Where everything else went."
 ### Open
 
 ### Technical Debt & Refactoring
+- [x] **Global Tab Design Alignment** (2026-07-19). Aligned the tabs component styles across all pages with the clean, bottom-bordered style of the profile page and moved styling rules to `components.css`. Reordered and shortened top-level and results tabs on the roadmap page.
 - [x] **Frontend cleanup — Phases 1–3** (dedup, bug fix, HTML partials;
       2026-07-19). `static/js/utils.js` now holds `escapeHtml`, `getCookie`,
       `showNotification`, `showError`, `loadOwnedCardIds` — removed from

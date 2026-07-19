@@ -215,3 +215,52 @@ a[href*="google"]:focus {
         width: 100%;
     }
 }
+
+/* ========== Tabs ========== */
+.tab-row-container {
+    border-bottom: 1px solid oklch(90% 0.01 250);
+    margin-bottom: 22px;
+}
+
+.tab-row {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    scrollbar-width: none; /* Firefox */
+}
+
+.tab-row::-webkit-scrollbar {
+    display: none; /* Safari/Chrome */
+}
+
+.tab-btn {
+    border: none;
+    background: none;
+    padding: 12px 18px;
+    font-weight: 700;
+    font-size: 15px;
+    cursor: pointer;
+    white-space: nowrap;
+    color: var(--muted);
+    border-bottom: 3px solid transparent;
+    margin-bottom: -1px;
+    transition: var(--transition-default);
+}
+
+.tab-btn.active {
+    color: var(--accent-dark);
+    border-bottom: 3px solid var(--accent);
+}
+
+.tab-btn:hover:not(.active) {
+    color: var(--text-strong);
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+

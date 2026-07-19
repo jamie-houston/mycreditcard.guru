@@ -510,16 +510,16 @@ function renderRoadmapResults(data, opts = {}) {
             </div>
         `;
 
-        const activeTab = renderRoadmapResults.state.activeTab || 'actions';
+        const activeTab = renderRoadmapResults.state.activeTab || 'summary';
 
         // Add the clean tabs row just like on the My Cards page
         html += `
             <div class="tab-row-container" style="margin-top: 24px; margin-bottom: 18px;">
                 <div class="tab-row" id="roadmapResultsTabs">
-                    <button id="roadmapTabActions" class="tab-btn ${activeTab === 'actions' ? 'active' : ''}" onclick="window.switchRoadmapTab('actions')">Roadmap Actions</button>
-                    <button id="roadmapTabSummary" class="tab-btn ${activeTab === 'summary' ? 'active' : ''}" onclick="window.switchRoadmapTab('summary')">Card Summary</button>
-                    <button id="roadmapTabCategory" class="tab-btn ${activeTab === 'category' ? 'active' : ''}" onclick="window.switchRoadmapTab('category')">Cards by Category</button>
-                    <button id="roadmapTabValue" class="tab-btn ${activeTab === 'value' ? 'active' : ''}" onclick="window.switchRoadmapTab('value')">Value over Time</button>
+                    <button id="roadmapTabSummary" class="tab-btn ${activeTab === 'summary' ? 'active' : ''}" onclick="window.switchRoadmapTab('summary')">Summary</button>
+                    <button id="roadmapTabActions" class="tab-btn ${activeTab === 'actions' ? 'active' : ''}" onclick="window.switchRoadmapTab('actions')">Actions</button>
+                    <button id="roadmapTabCategory" class="tab-btn ${activeTab === 'category' ? 'active' : ''}" onclick="window.switchRoadmapTab('category')">Categories</button>
+                    <button id="roadmapTabValue" class="tab-btn ${activeTab === 'value' ? 'active' : ''}" onclick="window.switchRoadmapTab('value')">Value</button>
                 </div>
             </div>
         `;
@@ -562,7 +562,7 @@ function renderRoadmapResults(data, opts = {}) {
         html += '<p style="text-align:center;color:var(--muted);">No recommendations found with your current criteria. Try adjusting your filters.</p>';
     } else if (filteredRecs.length === 0) {
         html += '<p style="text-align:center;color:var(--muted);margin-top:20px;margin-bottom:20px;">No self-funding cards found in this roadmap. Try clearing the filter.</p>';
-    } else if ((renderRoadmapResults.state.activeTab || 'actions') === 'actions') {
+    } else if ((renderRoadmapResults.state.activeTab || 'summary') === 'actions') {
         // Group recommendations by action type with sort mode applied
         const groupedRecs = {
             keep: filteredRecs.filter(rec => rec.action === 'keep')
