@@ -158,19 +158,22 @@ def _persist_current_roadmap(request, response_data):
             'max_recommendations': len(response_data['recommendations']) or 1,
         }
     )
-    RoadmapCalculation.objects.update_or_create(
+
+    # Delete any stale calculation and create a fresh one to ensure the
+    # latest data is always persisted (fixes race condition where old
+    # calculation could be returned on reload).
+    RoadmapCalculation.objects.filter(roadmap=roadmap).delete()
+    RoadmapCalculation.objects.create(
         roadmap=roadmap,
-        defaults={
-            'total_estimated_rewards': response_data['total_estimated_rewards'],
-            'calculation_data': {
-                'response': response_data,
-                'request': request.data,
-                # Reuse the SAME timestamp shown in the live response (set
-                # on response_data by the caller) rather than computing a
-                # fresh one here — Phase E's calendar-month rendering needs
-                # what the user saw and what got persisted to agree exactly.
-                'generated_at': response_data.get('generated_at') or timezone.now().isoformat(),
-            }
+        total_estimated_rewards=response_data['total_estimated_rewards'],
+        calculation_data={
+            'response': response_data,
+            'request': request.data,
+            # Reuse the SAME timestamp shown in the live response (set
+            # on response_data by the caller) rather than computing a
+            # fresh one here — Phase E's calendar-month rendering needs
+            # what the user saw and what got persisted to agree exactly.
+            'generated_at': response_data.get('generated_at') or timezone.now().isoformat(),
         }
     )
 
