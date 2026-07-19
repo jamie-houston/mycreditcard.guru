@@ -56,6 +56,25 @@ Detail archived — see pointers under "Where everything else went."
 ### Open
 
 ### Technical Debt & Refactoring
+- [x] **Consistent card detail/edit modal everywhere** (2026-07-19). Every
+      card listing now opens the shared `#cardModal` (`templates/base.html`,
+      `openCardModal()` in `base.js`) on click, matching the Roadmap →
+      Summary behavior. My Cards' inline accordion (`toggleCardRowExpansion`,
+      the expand drawer, `windowEditCardDetails`, `profile.js`'s local
+      `removeCardOwnership`, and the already-dead `buildCardRow`) was removed
+      in favor of click-to-modal; Edit Details/remove are reached from inside
+      the modal instead. The "Renews" anniversary warning the drawer used to
+      show was kept, just moved onto the visible (non-expanded) row. Wired up
+      previously inert card names: profile's "Best Card by Category" cells,
+      the roadmap "Cards by category" matrix, and the roadmap "Best card per
+      category" fallback (added `best_card_id` to
+      `roadmaps/engine/orchestrator.py`'s `category_optimization` payload —
+      passes through `roadmaps/serializers.py`'s `DictField` unchanged).
+      Shared-profile's category optimization was left as plain text: its
+      `recommended_card` values are hardcoded fallback names
+      (`cards/serializers.py`) with no reliable card id to look up. Also
+      removed leftover debug `console.log`/`console.trace` from
+      `openCardModal`.
 - [x] **Global Tab Design Alignment** (2026-07-19). Aligned the tabs component styles across all pages with the clean, bottom-bordered style of the profile page and moved styling rules to `components.css`. Reordered and shortened top-level and results tabs on the roadmap page.
 - [x] **Frontend cleanup — Phases 1–3** (dedup, bug fix, HTML partials;
       2026-07-19). `static/js/utils.js` now holds `escapeHtml`, `getCookie`,

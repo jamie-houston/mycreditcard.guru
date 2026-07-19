@@ -839,6 +839,7 @@ class RecommendationEngineOrchestrator:
                         'category_name': entry['category_name'],
                         'best_rate': rate,
                         'best_card': card.name,
+                        'best_card_id': card.id,
                         'annual_spend': annual_spend,
                         'annual_rewards': category_rewards,
                         'max_annual_spend': entry['max_spend']

@@ -835,9 +835,6 @@
 
         async function openCardModal(cardId) {
             try {
-                console.log('🐛 DEBUG: openCardModal called with cardId:', cardId);
-                console.trace('🐛 DEBUG: Call stack for openCardModal');
-
                 // Show loading modal first
                 const modal = document.getElementById('cardModal');
                 document.getElementById('modalCardName').textContent = 'Loading...';

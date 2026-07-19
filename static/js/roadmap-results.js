@@ -207,7 +207,7 @@ function _roadmapCategoryMatrixHtml(matrix) {
             </td>
             <td>${group.rows.map(r => r.uncovered
                 ? `<div style="color:var(--muted);">Uncovered — no portfolio card rates this</div>`
-                : `<div>${escapeHtml(r.card_name)} <span style="color:var(--muted);">(${r.rate.toFixed(1)}x)</span></div>`
+                : `<div class="modal-card-clickable" style="display:inline-block;" onclick="event.stopPropagation(); openCardModal(${r.card_id})" title="Click to view details">${escapeHtml(r.card_name)} <span style="color:var(--muted);">(${r.rate.toFixed(1)}x)</span></div>`
             ).join('')}</td>
             <td class="roadmap-summary-num">${group.rows.map(r => `$${r.annual_spend.toFixed(0)}`).join('<br>')}</td>
             <td class="roadmap-summary-num">$${group.total_rewards.toFixed(0)}</td>
@@ -541,7 +541,7 @@ function renderRoadmapResults(data, opts = {}) {
                             <div class="category-row">
                                 <span class="ico">${(typeof CATEGORY_ICONS !== 'undefined' && CATEGORY_ICONS[slug]) || 'category'}</span>
                                 <span class="category-row-name">${catData.category_name}</span>
-                                <span class="category-row-card">${catData.best_card}</span>
+                                <span class="category-row-card${catData.best_card_id ? ' modal-card-clickable' : ''}"${catData.best_card_id ? ` onclick="openCardModal(${catData.best_card_id})" title="Click to view details"` : ''}>${catData.best_card}</span>
                                 <span class="category-row-rate">${catData.best_rate}x</span>
                             </div>
                         `).join('')}

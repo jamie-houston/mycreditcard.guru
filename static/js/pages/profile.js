@@ -1,7 +1,6 @@
 // New Global State for redesign
 let _activeProfileTab = 'cards';
 let _profileFilterMode = 'personal';
-let _expandedCards = {};
 let _recommendationsMap = {};
 
 window.switchProfileTab = function(tabId) {
@@ -49,11 +48,6 @@ window.toggleSpendingProfileSection = function() {
     }
 };
 
-window.toggleCardRowExpansion = function(cardId) {
-    _expandedCards[cardId] = !_expandedCards[cardId];
-    renderCardCollectionTable();
-};
-
 window.handlePrivacyRadioClick = function(value) {
     updatePrivacySetting(value);
 };
@@ -93,48 +87,6 @@ function getCardInitialsAndColor(cardName, issuerName) {
     
     return getIssuerStyle(issuerName);
 }
-
-window.windowEditCardDetails = async function(cardId, cardName, cardType) {
-    currentModalCard = { id: cardId, name: cardName, card_type: cardType };
-    await openEditCardDetailsModal();
-};
-
-window.removeCardOwnership = async function(cardId, cardName, buttonEl) {
-    if (!confirm(`Are you sure you want to remove ${cardName || 'this card'}?`)) {
-        return;
-    }
-    if (buttonEl) {
-        buttonEl.disabled = true;
-        buttonEl.textContent = '⏳ ...';
-    }
-    try {
-        if (isAuthenticated) {
-            const response = await fetch(`${API_BASE}/cards/user-cards/toggle/`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': getCookie('csrftoken')
-                },
-                body: JSON.stringify({ card_id: cardId, action: 'remove' })
-            });
-            if (!response.ok) {
-                throw new Error('Failed to remove card');
-            }
-        } else {
-            const cards = (await UserDataManager.getCards()).filter(id => id !== cardId);
-            await UserDataManager.saveCards(cards);
-        }
-        showNotification(`Removed ${cardName || 'card'}`, 'success');
-        await loadProfileData();
-    } catch (error) {
-        console.error('Error removing card:', error);
-        showNotification('Error removing card. Please try again.', 'error');
-        if (buttonEl) {
-            buttonEl.disabled = false;
-            buttonEl.textContent = 'Remove card';
-        }
-    }
-};
 
 document.addEventListener('DOMContentLoaded', async function() {
     await loadProfileData();
@@ -350,127 +302,6 @@ function sortCardCollection(key) {
     renderCardCollectionTable();
 }
 
-function buildCardRow(cardId, group, cardInfo) {
-    const instances = group.instances;
-    const hasMultiple = instances.length > 1;
-
-    // Calculate annual fee
-    const annualFee = parseFloat(cardInfo.annual_fee || 0);
-    const feeClass = annualFee === 0 ? 'fee-zero' : 'fee-paid';
-    const feeText = annualFee === 0 ? 'No Fee' : `$${annualFee}/year`;
-
-    // Get reward type and value
-    const rewardType = cardInfo.primary_reward_type?.name || 'Unknown';
-    const rewardMultiplier = cardInfo.metadata?.reward_value_multiplier || 0.01;
-    const pointValue = `${(rewardMultiplier * 100).toFixed(1)}¢`;
-
-    // Get signup bonus
-    const signupBonus = cardInfo.signup_bonus_amount ?
-        `${cardInfo.signup_bonus_amount.toLocaleString()} ${rewardType}` : 'None';
-
-    // Create nicknames display for table
-    let nicknamesDisplay = '';
-    if (hasMultiple) {
-        const nicknames = instances.filter(i => i.nickname).map(i => i.nickname);
-        nicknamesDisplay = nicknames.length > 0 ?
-            `<small class="card-nicknames">${nicknames.join(', ')}</small>` : '';
-    } else {
-        const instance = instances[0];
-        nicknamesDisplay = instance.nickname ?
-            `<small class="card-nicknames">${instance.nickname}</small>` : '';
-    }
-
-    // Signup date display (plain — the "renews soon" highlight lives on
-    // the Renews column below, computed from the anniversary, not this).
-    let signupDateDisplay = '';
-    if (hasMultiple) {
-        const dates = instances
-            .filter(i => i.opened_date)
-            .map(i => new Date(i.opened_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }));
-        signupDateDisplay = dates.length > 0 ? dates.map(d => `<div>${d}</div>`).join('') : '<span style="color: var(--muted-2);">-</span>';
-    } else {
-        const instance = instances[0];
-        signupDateDisplay = instance.opened_date
-            ? new Date(instance.opened_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-            : '<span style="color: var(--muted-2);">-</span>';
-    }
-
-    // Renewal date display: the next anniversary of opened_date, highlighted
-    // when it's within 2 months and the card carries an annual fee.
-    const today = new Date();
-    const twoMonthsFromNow = new Date(today);
-    twoMonthsFromNow.setMonth(twoMonthsFromNow.getMonth() + 2);
-
-    let renewalDateDisplay = '';
-    if (hasMultiple) {
-        const renewals = instances
-            .filter(i => i.opened_date)
-            .map(i => {
-                const anniversary = nextAnniversary(i.opened_date);
-                const formattedDate = anniversary.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-                const shouldHighlight = annualFee > 0 && anniversary <= twoMonthsFromNow;
-                const style = shouldHighlight ? 'color: var(--color-warning); font-weight: 600;' : '';
-                return `<div style="${style}">${formattedDate}</div>`;
-            });
-        renewalDateDisplay = renewals.length > 0 ? renewals.join('') : '<span style="color: var(--muted-2);">-</span>';
-    } else {
-        const instance = instances[0];
-        if (instance.opened_date) {
-            const anniversary = nextAnniversary(instance.opened_date);
-            const formattedDate = anniversary.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-            const shouldHighlight = annualFee > 0 && anniversary <= twoMonthsFromNow;
-            const style = shouldHighlight ? 'color: var(--color-warning); font-weight: 600;' : '';
-            renewalDateDisplay = `<span style="${style}">${formattedDate}</span>`;
-        } else {
-            renewalDateDisplay = '<span style="color: var(--muted-2);">-</span>';
-        }
-    }
-
-    // Owner display (Phase K): one name per instance, stacked like the
-    // signup-date/renewal columns above — this is exactly the "two owners,
-    // same card" shape the multi-instance stacking already supports.
-    let ownerDisplay;
-    if (hasMultiple) {
-        const names = instances.map(i => i.owner_name).filter(Boolean);
-        ownerDisplay = names.length > 0
-            ? names.map(n => `<div>${escapeHtml(n)}</div>`).join('')
-            : '<span style="color: var(--muted-2);">-</span>';
-    } else {
-        ownerDisplay = instances[0].owner_name
-            ? escapeHtml(instances[0].owner_name)
-            : '<span style="color: var(--muted-2);">-</span>';
-    }
-
-    return `
-        <tr class="card-row modal-card-clickable" onclick="openCardModal(${cardId})" title="Click to view details">
-            <td class="card-name-cell">
-                <div class="card-name-wrapper">
-                    <strong>${cardInfo.name}</strong>
-                    ${nicknamesDisplay ? `<br>${nicknamesDisplay}` : ''}
-                </div>
-            </td>
-            <td>${cardInfo.issuer?.name || 'Unknown'}</td>
-            <td>${signupDateDisplay}</td>
-            <td><span class="${feeClass}">${feeText}</span></td>
-            <td>${rewardType}</td>
-            <td>${pointValue}</td>
-            <td>${signupBonus}</td>
-            <td>${cardInfo.card_type ? cardInfo.card_type.charAt(0).toUpperCase() + cardInfo.card_type.slice(1) : 'Personal'}</td>
-            <td>${ownerDisplay}</td>
-            <td class="card-count-cell">
-                <span class="card-count">${instances.length}</span>
-                ${hasMultiple ? ' <span class="multiple-indicator" title="Multiple cards">📚</span>' : ''}
-            </td>
-            <td>${renewalDateDisplay}</td>
-            <td class="actions-cell">
-                <button class="table-action-btn" onclick="event.stopPropagation(); openCardModal(${cardId})" title="View Details">
-                    👁️
-                </button>
-            </td>
-        </tr>
-    `;
-}
-
 function renderCardCollectionTable() {
     const cardCollectionContainer = document.getElementById('cardCollection');
     const cardGroups = _cardCollectionGroups || {};
@@ -513,46 +344,18 @@ function renderCardCollectionTable() {
 
     const rowsHtml = rows.map(({ cardId, group, cardInfo }) => {
         const instances = group.instances;
-        const hasMultiple = instances.length > 1;
-        const isExpanded = !!_expandedCards[cardId];
-        
+
         // Calculate annual fee
         const annualFee = parseFloat(cardInfo.annual_fee || 0);
         const feeText = annualFee === 0 ? '$0' : `$${annualFee}`;
-        
-        // Get recommendation and status
+
+        // Get recommendation and status (drives the status pill only —
+        // the "why" reasoning lives on the Roadmap page, not here).
         const rec = _recommendationsMap[cardId];
-        let status = 'keep';
-        let reason = 'Holds ongoing rewards value or has no annual fee.';
-        let estValue = '$0/yr';
-        let bestFor = 'General spend';
-        
-        if (rec) {
-            status = rec.action || 'keep';
-            reason = rec.reason || reason;
-            estValue = rec.estimated_rewards ? `$${rec.estimated_rewards.toFixed(0)}/yr` : estValue;
-            
-            // Get best category from breakdown
-            if (rec.rewards_breakdown && rec.rewards_breakdown.length > 0) {
-                const categories = rec.rewards_breakdown
-                    .filter(item => item.type !== 'credit' && item.type !== 'info' && item.type !== 'bonus_shift' && item.category_rewards > 0)
-                    .map(item => item.category_name);
-                if (categories.length > 0) {
-                    bestFor = categories.slice(0, 2).join(', ');
-                }
-            }
-        } else {
-            if (annualFee === 0) {
-                reason = 'No annual fee. Safe to keep to maintain credit history length.';
-            } else {
-                reason = 'Review annual fee vs ongoing rewards category value.';
-                status = 'review';
-            }
-        }
-        
+        let status = rec ? (rec.action || 'keep') : (annualFee === 0 ? 'keep' : 'review');
         const statusLabel = status.charAt(0).toUpperCase() + status.slice(1);
         const cardStyle = getCardInitialsAndColor(cardInfo.name, cardInfo.issuer?.name);
-        
+
         // Formatted dates/instances
         let openedDateDisplay = '';
         if (instances.length > 0 && instances[0].opened_date) {
@@ -560,63 +363,37 @@ function renderCardCollectionTable() {
         } else {
             openedDateDisplay = 'unknown date';
         }
-        
-        const rewardType = cardInfo.primary_reward_type?.name || 'Points';
 
-        // Details drawer content
-        let detailsHtml = '';
-        if (isExpanded) {
-            const instancesHtml = instances.map(inst => {
-                const nicknameStr = inst.nickname ? `"${inst.nickname}" · ` : '';
-                const ownerStr = inst.owner_name ? `Held by ${escapeHtml(inst.owner_name)}` : '';
-                const renewsStr = inst.opened_date ? ` · Renews ${nextAnniversary(inst.opened_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}` : '';
-                return `<div style="font-size:13px; color:var(--muted); margin-bottom:4px;">${nicknameStr}${ownerStr}${renewsStr}</div>`;
-            }).join('');
-            
-            detailsHtml = `
-                <div class="card-row-expanded">
-                    <div class="card-expanded-grid">
-                        <div class="card-expanded-grid-item">
-                            <span class="card-expanded-grid-label">Reward type</span>
-                            <span class="card-expanded-grid-value">${rewardType}</span>
-                        </div>
-                        <div class="card-expanded-grid-item">
-                            <span class="card-expanded-grid-label">Est. annual value</span>
-                            <span class="card-expanded-grid-value">${estValue}</span>
-                        </div>
-                        <div class="card-expanded-grid-item">
-                            <span class="card-expanded-grid-label">Best for</span>
-                            <span class="card-expanded-grid-value">${bestFor}</span>
-                        </div>
-                    </div>
-                    ${instancesHtml ? `<div style="margin-top: 6px;">${instancesHtml}</div>` : ''}
-                    <div class="card-expanded-reason-box" style="margin-top: 8px;">
-                        <strong>Why ${statusLabel.toLowerCase()}:</strong> ${reason}
-                    </div>
-                    <div class="card-expanded-actions" style="margin-top: 10px;">
-                        <button onclick="event.stopPropagation(); windowEditCardDetails(${cardId}, '${cardInfo.name.replace(/'/g, "\\'")}', '${cardInfo.card_type || 'personal'}')" class="card-action-btn-outline">Edit details</button>
-                        <button onclick="event.stopPropagation(); removeCardOwnership(${cardId}, '${cardInfo.name.replace(/'/g, "\\'")}', this)" class="card-action-btn-outline remove-btn">Remove card</button>
-                    </div>
-                </div>
-            `;
+        // Renewal reminder: highlight when the next anniversary is within 2
+        // months and the card carries an annual fee — same "review before it
+        // posts" warning the old expanded drawer surfaced, kept here so it's
+        // visible without opening anything.
+        let renewalMeta = '';
+        if (instances.length > 0 && instances[0].opened_date) {
+            const anniversary = nextAnniversary(instances[0].opened_date);
+            const twoMonthsFromNow = new Date();
+            twoMonthsFromNow.setMonth(twoMonthsFromNow.getMonth() + 2);
+            const shouldHighlight = annualFee > 0 && anniversary <= twoMonthsFromNow;
+            const renewalText = anniversary.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+            renewalMeta = shouldHighlight
+                ? ` · <span style="color: var(--color-warning); font-weight: 600;">Renews ${renewalText}</span>`
+                : ` · Renews ${renewalText}`;
         }
 
         return `
-            <div class="card-row-box" id="cardRowBox_${cardId}">
-                <button onclick="toggleCardRowExpansion(${cardId})" class="card-row-header-btn">
+            <div class="card-row-box modal-card-clickable" id="cardRowBox_${cardId}">
+                <button onclick="openCardModal(${cardId})" class="card-row-header-btn" title="Click to view details">
                     <div class="issuer-initials-badge" style="background: ${cardStyle.bg};">${cardStyle.initials}</div>
                     <div class="card-row-info">
                         <div class="card-row-name">${cardInfo.name}</div>
-                        <div class="card-row-meta">${cardInfo.issuer?.name || 'Unknown'} · Opened ${openedDateDisplay}</div>
+                        <div class="card-row-meta">${cardInfo.issuer?.name || 'Unknown'} · Opened ${openedDateDisplay}${renewalMeta}</div>
                     </div>
                     <div class="card-row-fee-block">
                         <div class="card-row-fee-label">Annual fee</div>
                         <div class="card-row-fee-value">${feeText}</div>
                     </div>
                     <div class="status-pill ${status.toLowerCase()}">${statusLabel}</div>
-                    <div class="card-row-chevron">${isExpanded ? '▲' : '▼'}</div>
                 </button>
-                ${detailsHtml}
             </div>
         `;
     }).join('');
@@ -840,7 +617,7 @@ async function loadCategoryOptimization() {
             const formattedRate = formatRewardRate(rate, rewardType);
             
             optimizationHtml += `
-                <div class="category-card-cell">
+                <div class="category-card-cell modal-card-clickable" onclick="openCardModal(${card.id})" title="Click to view details">
                     <div class="category-cell-name">${categoryName}</div>
                     <div class="category-cell-body">
                         <div class="category-cell-badge" style="background: ${cardStyle.bg};">${cardStyle.initials}</div>
