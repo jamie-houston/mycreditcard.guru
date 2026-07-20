@@ -173,6 +173,10 @@
         "reward_rate": 3
       },
       {
+        "category": "gas",
+        "reward_rate": 3
+      },
+      {
         "category": "travel",
         "reward_rate": 2
       },
@@ -189,7 +193,12 @@
     "credits": [
       {
         "category": "hotels",
-        "value": 50
+        "value": 100
+      },
+      {
+        "description": "Global Entry / TSA PreCheck / NEXUS Credit",
+        "credit_type": "precheck",
+        "value": 120
       }
     ],
     "verified": true,
