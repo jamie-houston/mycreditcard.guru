@@ -1,6 +1,7 @@
 import logging
 from typing import List
 from cards.models import CreditCard
+from cards.valuations import credit_currency_rate
 from ..utils import info_item
 
 logger = logging.getLogger(__name__)
@@ -13,6 +14,17 @@ class CreditsCalculator:
 
     def __init__(self, engine):
         self.engine = engine
+        self._currency_rate_cache = {}
+
+    def _currency_rate(self, currency: str) -> float:
+        """Dollars per unit for a credit's currency, memoized per-engine so hot
+        optimizer loops don't re-query PointsValuation. 1.0 for USD/blank."""
+        cached = self._currency_rate_cache.get(currency)
+        if cached is not None:
+            return cached
+        rate = credit_currency_rate(currency, getattr(self.engine.profile, 'user', None))
+        self._currency_rate_cache[currency] = rate
+        return rate
 
     def counted_card_credits(self, card: CreditCard) -> list:
         """Credits on this card that count for THIS user."""
@@ -50,14 +62,23 @@ class CreditsCalculator:
             else:
                 continue
 
-            annual_value = float(card_credit.value) * card_credit.times_per_year
+            currency = card_credit.currency or 'USD'
+            is_usd = currency.upper() == 'USD'
+            rate = 1.0 if is_usd else self._currency_rate(currency)
+            value = float(card_credit.value)
+            annual_value = value * card_credit.times_per_year * rate
+
             frequency_text = ""
             if card_credit.times_per_year > 1:
-                frequency_text = f" (${card_credit.value} × {card_credit.times_per_year}/year)"
+                if is_usd:
+                    frequency_text = f" (${value:.0f} × {card_credit.times_per_year}/year)"
+                else:
+                    frequency_text = (f" ({value:,.0f} {currency} pts × "
+                                       f"{card_credit.times_per_year}/year → ${annual_value:.0f})")
 
             entries.append({
                 'name': credit_name or card_credit.description,
-                'value': float(card_credit.value),
+                'value': value,
                 'times_per_year': card_credit.times_per_year,
                 'annual_value': annual_value,
                 'type': credit_type,
@@ -65,6 +86,9 @@ class CreditsCalculator:
                 'frequency_display': frequency_text,
                 'dedup_key': dedup_key,
                 'stackable': stackable,
+                'currency': currency,
+                'is_usd': is_usd,
+                'rate': rate,
             })
 
         self.engine._card_credits_cache[card.id] = entries
@@ -77,11 +101,28 @@ class CreditsCalculator:
 
     @staticmethod
     def credit_breakdown_item(credit: dict) -> dict:
-        """Breakdown line for a counted credit (same shape as reward lines)."""
-        if credit['times_per_year'] > 1:
-            credit_display = f"{credit['name']} (${credit['value']:.0f}×{credit['times_per_year']})"
+        """Breakdown line for a counted credit (same shape as reward lines).
+
+        USD credits render the face `$` value throughout. Points-denominated
+        credits (non-USD `currency`) render the point amount and per-point
+        rate alongside the discounted dollar total, so the line item still
+        reconciles to the dollars that flow into totals (trustworthy math)."""
+        is_usd = credit.get('is_usd', True)
+        if is_usd:
+            if credit['times_per_year'] > 1:
+                credit_display = f"{credit['name']} (${credit['value']:.0f}×{credit['times_per_year']})"
+            else:
+                credit_display = f"{credit['name']} (${credit['value']:.0f})"
+            calculation = f"Card benefit: ${credit['annual_value']:.0f} annually"
         else:
-            credit_display = f"{credit['name']} (${credit['value']:.0f})"
+            currency = credit['currency']
+            qty_text = f"{credit['value']:,.0f} {currency} pts"
+            if credit['times_per_year'] > 1:
+                qty_text += f" × {credit['times_per_year']}/year"
+                credit_display = f"{credit['name']} ({credit['value']:,.0f} {currency} pts×{credit['times_per_year']} → ${credit['annual_value']:.0f})"
+            else:
+                credit_display = f"{credit['name']} ({credit['value']:,.0f} {currency} pts → ${credit['annual_value']:.0f})"
+            calculation = f"Card benefit: {qty_text} × ${credit['rate']:.4f}/pt → ${credit['annual_value']:.0f} annually"
         return {
             'category_name': credit_display,
             'monthly_spend': 0,
@@ -90,7 +131,7 @@ class CreditsCalculator:
             'reward_multiplier': 1.0,
             'points_earned': credit['annual_value'],
             'category_rewards': credit['annual_value'],
-            'calculation': f"Card benefit: ${credit['annual_value']:.0f} annually",
+            'calculation': calculation,
             'type': 'credit',
             'credit_detail': credit,
         }

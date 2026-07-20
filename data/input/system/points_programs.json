@@ -28,5 +28,41 @@
     ],
     "note": "Best value transferring to airline/hotel partners; Pay With Points and Amex Travel redemptions run well below that.",
     "default_valuation": 0.0100
+  },
+  {
+    "name": "Southwest Rapid Rewards",
+    "slug": "southwest_rapid_rewards",
+    "portal_url": "https://www.southwest.com/rapidrewards/",
+    "transfer_partners": [],
+    "note": "No cash-out option; value here reflects typical redemption for Southwest flights. Used to discount points-denominated card credits (e.g. anniversary point bonuses) to real dollars.",
+    "default_valuation": 0.0140,
+    "currency_code": "SOUTHWEST"
+  },
+  {
+    "name": "Wyndham Rewards",
+    "slug": "wyndham_rewards",
+    "portal_url": "https://www.wyndhamrewards.com/",
+    "transfer_partners": [],
+    "note": "Fixed-category hotel award chart; conservative per-point estimate. Used to discount points-denominated card credits to real dollars.",
+    "default_valuation": 0.0110,
+    "currency_code": "WYNDHAM"
+  },
+  {
+    "name": "United MileagePlus",
+    "slug": "united_mileageplus",
+    "portal_url": "https://www.united.com/en/us/fly/mileageplus.html",
+    "transfer_partners": [],
+    "note": "Conservative per-mile estimate for United award redemptions. Used to discount points-denominated card credits to real dollars.",
+    "default_valuation": 0.0120,
+    "currency_code": "UNITED"
+  },
+  {
+    "name": "JetBlue TrueBlue",
+    "slug": "jetblue_trueblue",
+    "portal_url": "https://www.jetblue.com/trueblue",
+    "transfer_partners": [],
+    "note": "Revenue-based program; per-point estimate for typical JetBlue redemptions. Used to discount points-denominated card credits to real dollars.",
+    "default_valuation": 0.0130,
+    "currency_code": "JETBLUE"
   }
 ]

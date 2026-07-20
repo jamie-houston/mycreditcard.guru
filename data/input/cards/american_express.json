@@ -809,8 +809,7 @@
       {
         "description": "$60 Hilton credit per quarter.",
         "value": 240,
-        "weight": 0.5,
-        "currency": "HILTON"
+        "weight": 0.5
       }
     ],
     "slug": "hilton-honors-business"

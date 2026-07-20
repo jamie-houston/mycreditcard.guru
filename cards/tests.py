@@ -353,3 +353,61 @@ class TemplatePagesTests(TestCase):
         self.assertContains(response, 'Welcome back.')
         self.assertNotContains(response, 'Your cards, optimized.')
 
+
+class CreditCurrencyValuationTests(TestCase):
+    """CardCredit.currency must discount points-denominated credits to real
+    dollars instead of being counted at face value (docs/PROJECT_STATUS.md's
+    former 'Open' item / docs/plans/points-currency-credit-valuation.md)."""
+
+    def setUp(self):
+        from .models import PointsProgram, PointsValuation
+        self.PointsProgram = PointsProgram
+        self.PointsValuation = PointsValuation
+        self.program = PointsProgram.objects.create(
+            name='Southwest Rapid Rewards', slug='southwest_rapid_rewards',
+            currency_code='SOUTHWEST')
+        PointsValuation.objects.create(
+            points_program=self.program, user=None, value=0.0140)
+
+    def test_usd_and_blank_currency_rate_to_one(self):
+        from .valuations import credit_currency_rate
+        self.assertEqual(credit_currency_rate('USD'), 1.0)
+        self.assertEqual(credit_currency_rate(''), 1.0)
+        self.assertEqual(credit_currency_rate(None), 1.0)
+
+    def test_seeded_currency_resolves_to_its_default_valuation(self):
+        from .valuations import credit_currency_rate
+        self.assertEqual(credit_currency_rate('SOUTHWEST'), 0.0140)
+
+    def test_user_override_wins_over_system_default(self):
+        from .valuations import credit_currency_rate
+        user = User.objects.create_user(username='pointer', email='p@example.com')
+        self.PointsValuation.objects.create(
+            points_program=self.program, user=user, value=0.0200)
+        self.assertEqual(credit_currency_rate('SOUTHWEST', user), 0.0200)
+        # A different (anonymous) user still gets the system default.
+        self.assertEqual(credit_currency_rate('SOUTHWEST'), 0.0140)
+
+    def test_unmapped_non_usd_currency_falls_back_to_safety_net(self):
+        from .valuations import credit_currency_rate, UNMAPPED_CURRENCY_RATE
+        with self.assertLogs('cards.valuations', level='WARNING'):
+            rate = credit_currency_rate('ALASKA')
+        self.assertEqual(rate, UNMAPPED_CURRENCY_RATE)
+
+    def test_card_credit_annual_value_discounts_points_currency(self):
+        from .models import CardCredit, CreditCard, Issuer, RewardType
+        cashback = RewardType.objects.create(name='Cashback2', slug='cashback2')
+        issuer = Issuer.objects.create(name='Test Bank', slug='test-bank')
+        card = CreditCard.objects.create(
+            name='Southwest Test Card', slug='southwest-test-card', issuer=issuer,
+            signup_bonus_type=cashback, primary_reward_type=cashback)
+        credit = CardCredit.objects.create(
+            card=card, description='Anniversary Points', value=7500,
+            times_per_year=1, currency='SOUTHWEST')
+        # 7,500 pts x $0.014/pt = $105, not $7,500 face value.
+        self.assertEqual(credit.annual_value, 105.0)
+
+        usd_credit = CardCredit.objects.create(
+            card=card, description='Statement Credit', value=300, times_per_year=1)
+        self.assertEqual(usd_credit.annual_value, 300.0)
+

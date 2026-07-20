@@ -29,6 +29,10 @@ class PointsProgram(models.Model):
     portal_url = models.URLField(max_length=500, blank=True, null=True)
     transfer_partners = models.JSONField(default=list, blank=True)
     note = models.TextField(blank=True)
+    currency_code = models.CharField(
+        max_length=20, blank=True, default='',
+        help_text="Matches CardCredit.currency (e.g. 'SOUTHWEST') so credits denominated "
+                   "in this program's points can be valued via PointsValuation.")
 
     def __str__(self):
         return self.name
@@ -238,8 +242,11 @@ class CardCredit(models.Model):
     
     @property
     def annual_value(self):
-        """Calculate the total annual value of this credit"""
-        return float(self.value) * self.times_per_year
+        """Calculate the total annual value of this credit, discounted to real
+        dollars if denominated in a non-USD points/miles currency."""
+        from cards.valuations import credit_currency_rate
+        rate = credit_currency_rate(self.currency)
+        return float(self.value) * self.times_per_year * rate
 
     def get_period_key(self, date_obj=None):
         """Derive the period key based on times_per_year and a date"""

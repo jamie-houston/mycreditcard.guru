@@ -1422,8 +1422,7 @@
       {
         "description": "FNC @ Category 1-4 Property",
         "value": 225,
-        "weight": 0.7,
-        "currency": "HYATT"
+        "weight": 0.7
       }
     ],
     "slug": "world-of-hyatt"

@@ -125,6 +125,7 @@ class Command(BaseCommand):
                     'portal_url': program_data.get('portal_url'),
                     'transfer_partners': program_data.get('transfer_partners', []),
                     'note': program_data.get('note', ''),
+                    'currency_code': program_data.get('currency_code', ''),
                 }
             )
             if not created:
@@ -133,6 +134,7 @@ class Command(BaseCommand):
                 program.portal_url = program_data.get('portal_url')
                 program.transfer_partners = program_data.get('transfer_partners', [])
                 program.note = program_data.get('note', '')
+                program.currency_code = program_data.get('currency_code', '')
                 program.save()
                 self.stdout.write(f'Updated points program: {program.name}')
             else:

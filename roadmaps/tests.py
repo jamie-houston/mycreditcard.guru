@@ -648,11 +648,12 @@ class CreditAllocationTests(TestCase):
             name=name, slug=slugify(name), issuer=self.issuer,
             signup_bonus_type=self.cashback, primary_reward_type=self.cashback)
 
-    def _credit(self, card, spending_credit, value):
+    def _credit(self, card, spending_credit, value, currency='USD', times_per_year=1):
         from cards.models import CardCredit
         return CardCredit.objects.create(
             card=card, spending_credit=spending_credit,
-            description=spending_credit.display_name, value=Decimal(str(value)))
+            description=spending_credit.display_name, value=Decimal(str(value)),
+            currency=currency, times_per_year=times_per_year)
 
     def _engine(self):
         from .recommendation_engine import RecommendationEngine
@@ -754,6 +755,38 @@ class CreditAllocationTests(TestCase):
         val_no_bonus = engine.optimizer.calculate_smart_card_value(card, signup_bonus=False)
         # Category rewards: 0, Credits: 300.0
         self.assertEqual(val_no_bonus, 300.0)
+
+    def test_points_denominated_credit_discounted_not_face_value(self):
+        """A 7,500-pt SOUTHWEST credit must value at its ~$105 redemption
+        worth, not the raw $7,500 point count (the currency-valuation bug)."""
+        from cards.models import PointsProgram, PointsValuation
+        PointsProgram.objects.create(
+            name='Southwest Rapid Rewards', slug='southwest_rapid_rewards',
+            currency_code='SOUTHWEST')
+        PointsValuation.objects.create(
+            points_program=PointsProgram.objects.get(slug='southwest_rapid_rewards'),
+            user=None, value=Decimal('0.0140'))
+
+        card = self._card('Southwest Points Card')
+        self._credit(card, self.lounge, 7500, currency='SOUTHWEST')
+
+        engine = self._engine()
+        entries = engine._counted_card_credits(card)
+        self.assertEqual(len(entries), 1)
+        self.assertEqual(entries[0]['annual_value'], 105.0)
+
+        allocation = engine._allocate_portfolio_credits([card])
+        self.assertEqual(allocation[card.id][0], 105.0)
+
+    def test_usd_credit_still_equals_face_value(self):
+        """Regression guard: rate must be exactly 1.0 for USD, unaffected by
+        the currency-valuation change."""
+        card = self._card('USD Credit Card')
+        self._credit(card, self.lounge, 300)
+
+        engine = self._engine()
+        entries = engine._counted_card_credits(card)
+        self.assertEqual(entries[0]['annual_value'], 300.0)
 
     def test_pays_for_itself_flag_in_recommendations(self):
         from cards.models import SpendingAmount, SpendingCategory

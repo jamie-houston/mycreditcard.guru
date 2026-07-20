@@ -5,7 +5,7 @@ detail have been archived to mybrain — see the pointers at the bottom. Check
 items off here as they land; when a phase's own detail doc is done, archive
 it the same way and trim this file back down.
 
-Last updated: 2026-07-19
+Last updated: 2026-07-20
 
 ## Phases (E–Q)
 
@@ -50,30 +50,32 @@ existing credit math) since they touch the same builder UI.
       Jamie's call. See below.
 - [x] **Phase O** — Category-less "easy mode" spending (2026-07-19). Added builder toggle and Easy Mode input, scratch field in serializer, engine fallback mapping to uncategorized base rate.
 - [x] **Phase P** — Surface cards that "pay for themselves" via recurring credits (2026-07-19). Added `pays_for_itself` flag in orchestrator/serializer when allocated credits value >= annual fee. Added client-side filter checkbox and sort selector in results UI with non-scrolling re-renders. Fixed pre-sort gap in `calculate_smart_card_value`.
+- [x] **Points-currency credit valuation** (2026-07-20). `CardCredit.currency`
+      is now applied at the engine's single valuation chokepoint
+      (`CreditsCalculator.counted_card_credits`,
+      `roadmaps/engine/calculators/credits.py`) and mirrored in
+      `CardCredit.annual_value` (`cards/models.py`) — a 7,500-point Southwest
+      anniversary bonus now values at ~$105, not $7,500. Added
+      `PointsProgram.currency_code` (migration `0013`) so a credit's
+      free-text currency resolves to a `PointsValuation` (admin/user
+      overridable, same user-override → system-default pattern as reward
+      redemption); new `cards/valuations.py` holds the shared
+      `value_per_point`/`credit_currency_rate` helpers. Seeded 4 programs
+      (Southwest, Wyndham, United, JetBlue) in
+      `data/input/system/points_programs.json`; an unmapped non-USD currency
+      falls back to a conservative 0.01/pt + logged warning rather than face
+      value. Retagged 2 mislabeled entries (`hilton-honors-business`,
+      `world-of-hyatt`) that were actually USD amounts miscoded with a points
+      currency. Non-USD breakdown lines now show the point-quantity ×
+      rate derivation (e.g. "5,000 SOUTHWEST pts × $0.014 → $70") instead of
+      a misleading `$5000`. Plan: `docs/plans/points-currency-credit-valuation.md`.
 
 Detail archived — see pointers under "Where everything else went."
 
 ### Open
 
-- [ ] **`CardCredit.currency` is never valued — non-USD credits are counted
-      as raw dollars.** `annual_value` (`cards/models.py`) and
-      `CreditsCalculator` (`roadmaps/engine/calculators/credits.py`) compute
-      `value * times_per_year` unconditionally; `currency` is read nowhere
-      in the valuation pipeline (`orchestrator.py`/`optimizer.py` included)
-      — it's purely cosmetic (admin filter, serializer passthrough). 13
-      credits across 8 cards are denominated in points (JETBLUE, HILTON,
-      WYNDHAM, SOUTHWEST, UNITED, HYATT) and are being counted at full face
-      value — e.g. a 7,500-point Southwest/Wyndham anniversary bonus adds
-      $7,500 to that card's "Estimated Annual Value" instead of its real
-      redemption worth (~$75-150 depending on the program). Some of these
-      predate the andenacitelli sync (hand-curated United/Hyatt entries), so
-      this isn't sync-introduced. Found 2026-07-19 auditing `credits[]` data
-      after the Disney credit_type fix; not yet scoped. Fixing it properly
-      means deciding how to value arbitrary points currencies for card
-      *credits* specifically — the existing `PointsProgram`/`PointsValuation`
-      mechanism only converts reward-*earning* rates today, and there's no
-      test coverage for credit currency valuation to build against. Scoped
-      and ready to execute: `docs/plans/points-currency-credit-valuation.md`.
+None — see `docs/plans/` and mybrain `Requirements/Backlog/Review.md` for
+future/candidate work.
 
 ### Technical Debt & Refactoring
 - [x] **Consistent card detail/edit modal everywhere** (2026-07-19). Every
@@ -232,9 +234,9 @@ venv/bin/python manage.py run_scenario "Jamie Real" --explain                  #
 node scripts/test_roadmap_results.js                                          # roadmap-results.js pure-helper smoke test
 ```
 
-Baseline as of 2026-07-19 (post Phase M verification): 174 standard tests
-green, scenario sweep clean (`test_all_scenarios`, 77/77), "Jamie Real"
-reconciles, JS smoke test green. Any failure is a regression.
+Baseline as of 2026-07-20 (post points-currency credit valuation): 228
+standard tests green, scenario sweep clean (`test_all_scenarios`), "Jamie
+Real" reconciles, JS smoke test green (28/28). Any failure is a regression.
 
 **Phase M verification (2026-07-19)**: confirmed existing `roadmaps/
 eligibility.py` rules — Chase 5/24, BofA 2/3/4, CapOne 1/6mo (window
