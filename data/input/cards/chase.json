@@ -931,7 +931,8 @@
     ],
     "_sources": {
       "credits": "andenacitelli"
-    }
+    },
+    "verified": true
   },
   {
     "name": "Southwest Premier Business",
@@ -1298,17 +1299,13 @@
         "value": 120,
         "weight": 0.4,
         "currency": "USD"
-      },
-      {
-        "description": "Global Entry, TSA PreCheck, NEXUS Credit",
-        "value": 100,
-        "weight": 0.4
       }
     ],
     "slug": "united-explorer",
     "metadata": {
       "annual_fee_waived_first_year": true
-    }
+    },
+    "verified": true
   },
   {
     "name": "United Gateway",
@@ -1394,7 +1391,8 @@
         "weight": 0.8
       }
     ],
-    "slug": "united-quest"
+    "slug": "united-quest",
+    "verified": true
   },
   {
     "name": "World of Hyatt",
