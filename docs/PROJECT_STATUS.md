@@ -9,13 +9,15 @@ Last updated: 2026-07-20
 
 ## Phases (E–Q)
 
-E–I planned in `.claude/plans/look-at-any-outstanding-wild-wirth.md`;
-J–M planned in `.claude/plans/plan-out-the-following-sharded-nest.md`
-(scoping decisions with Jamie, 2026-07-17); N–Q added 2026-07-18 from
-Jamie's backlog. Phase N built ahead of M (2026-07-18, Jamie's call —
-greenfield feature over a verify-and-document pass). Recommended order for
-what's left: **O → P → Q** — O/P (spending-input modes) before Q (surfacing
-existing credit math) since they touch the same builder UI.
+Scoping decisions with Jamie: E–I on 2026-07-17, J–M on 2026-07-17, N–Q
+added 2026-07-18 from Jamie's backlog. (The original per-phase planning
+scratch files lived under `.claude/plans/`, which is gitignored and doesn't
+persist across sessions — decisions and implementation detail live here and
+in the mybrain archives linked below instead.) Phase N was built ahead of M
+(2026-07-18, Jamie's call — greenfield feature over a verify-and-document
+pass). O and P are done; **Phase Q** (surfacing existing credit math in the
+spending-input builder UI) is the only phase left unstarted — see Open
+below.
 
 ### Completed
 
@@ -50,30 +52,21 @@ existing credit math) since they touch the same builder UI.
       Jamie's call. See below.
 - [x] **Phase O** — Category-less "easy mode" spending (2026-07-19). Added builder toggle and Easy Mode input, scratch field in serializer, engine fallback mapping to uncategorized base rate.
 - [x] **Phase P** — Surface cards that "pay for themselves" via recurring credits (2026-07-19). Added `pays_for_itself` flag in orchestrator/serializer when allocated credits value >= annual fee. Added client-side filter checkbox and sort selector in results UI with non-scrolling re-renders. Fixed pre-sort gap in `calculate_smart_card_value`.
-- [x] **Points-currency credit valuation** (2026-07-20). `CardCredit.currency`
-      is now applied at the engine's single valuation chokepoint
-      (`CreditsCalculator.counted_card_credits`,
-      `roadmaps/engine/calculators/credits.py`) and mirrored in
-      `CardCredit.annual_value` (`cards/models.py`) — a 7,500-point Southwest
-      anniversary bonus now values at ~$105, not $7,500. Added
-      `PointsProgram.currency_code` (migration `0013`) so a credit's
-      free-text currency resolves to a `PointsValuation` (admin/user
-      overridable, same user-override → system-default pattern as reward
-      redemption); new `cards/valuations.py` holds the shared
-      `value_per_point`/`credit_currency_rate` helpers. Seeded 4 programs
-      (Southwest, Wyndham, United, JetBlue) in
-      `data/input/system/points_programs.json`; an unmapped non-USD currency
-      falls back to a conservative 0.01/pt + logged warning rather than face
-      value. Retagged 2 mislabeled entries (`hilton-honors-business`,
-      `world-of-hyatt`) that were actually USD amounts miscoded with a points
-      currency. Non-USD breakdown lines now show the point-quantity ×
-      rate derivation (e.g. "5,000 SOUTHWEST pts × $0.014 → $70") instead of
-      a misleading `$5000`. Plan: `docs/plans/points-currency-credit-valuation.md`.
+- [x] **Points-currency credit valuation** (2026-07-20). Points-denominated
+      credits (e.g. a 7,500-point Southwest anniversary bonus) now value at
+      real redemption worth (~$105) instead of face value ($7,500), via a
+      new `PointsProgram.currency_code` and shared `cards/valuations.py`
+      helpers applied at the engine's single valuation chokepoint. Full
+      design + implementation log archived to mybrain
+      `Requirements/Complete/PLAN_POINTS_CURRENCY_CREDIT_VALUATION_complete.md`.
 
 Detail archived — see pointers under "Where everything else went."
 
 ### Open
 
+- [ ] **Phase Q** — Surface existing credit math in the spending-input
+      builder UI. Not started; scoping only so far (see "Phases (E–Q)"
+      above). No plan doc written yet.
 - [ ] **Card catalog verification backlog**. A full `import_cards` sweep
       across every issuer file (2026-07-20) found roughly 130 cards still
       `verified: false` and sitting out of the DB entirely — most of
@@ -104,56 +97,22 @@ future/candidate work.
 
 ### Technical Debt & Refactoring
 - [x] **Consistent card detail/edit modal everywhere** (2026-07-19). Every
-      card listing now opens the shared `#cardModal` (`templates/base.html`,
-      `openCardModal()` in `base.js`) on click, matching the Roadmap →
-      Summary behavior. My Cards' inline accordion (`toggleCardRowExpansion`,
-      the expand drawer, `windowEditCardDetails`, `profile.js`'s local
-      `removeCardOwnership`, and the already-dead `buildCardRow`) was removed
-      in favor of click-to-modal; Edit Details/remove are reached from inside
-      the modal instead. The "Renews" anniversary warning the drawer used to
-      show was kept, just moved onto the visible (non-expanded) row. Wired up
-      previously inert card names: profile's "Best Card by Category" cells,
-      the roadmap "Cards by category" matrix, and the roadmap "Best card per
-      category" fallback (added `best_card_id` to
-      `roadmaps/engine/orchestrator.py`'s `category_optimization` payload —
-      passes through `roadmaps/serializers.py`'s `DictField` unchanged).
-      Shared-profile's category optimization was left as plain text: its
-      `recommended_card` values are hardcoded fallback names
-      (`cards/serializers.py`) with no reliable card id to look up. Also
-      removed leftover debug `console.log`/`console.trace` from
-      `openCardModal`.
+      card listing now opens the shared `#cardModal` on click instead of My
+      Cards' old inline accordion, and wired up several previously inert
+      card-name links (profile, roadmap category matrix) along the way.
+      Full detail archived to mybrain
+      `Requirements/Complete/TASK_MODAL_CONSOLIDATION_complete.md`.
 - [x] **Global Tab Design Alignment** (2026-07-19). Aligned the tabs component styles across all pages with the clean, bottom-bordered style of the profile page and moved styling rules to `components.css`. Reordered and shortened top-level and results tabs on the roadmap page.
-- [x] **Frontend cleanup — Phases 1–3** (dedup, bug fix, HTML partials;
-      2026-07-19). `static/js/utils.js` now holds `escapeHtml`, `getCookie`,
-      `showNotification`, `showError`, `loadOwnedCardIds` — removed from
-      `base.html`, `cards_list.html`, `profile.html`, `index.html`,
-      `shared_profile.html`; `categories_list.html`/`category_detail.html`/
-      `issuers_list.html`'s `loadUserCards()` are now thin wrappers over
-      `loadOwnedCardIds()`. `roadmap-results.js`'s `_roadmapEscapeHtml`
-      replaced by the shared `escapeHtml` (11 call sites);
-      `scripts/test_roadmap_results.js` updated to load `utils.js` into its
-      sandbox first. Fixed the live `toggleCardOwnership` shadowing bug:
-      deleted `index.html`'s dead cluster (unreachable
-      `toggleCardOwnership`/`showCardDetailsPopupRoadmap`/
-      `closeCardDetailsPopupRoadmap`/`saveCardDetailsPopupRoadmap`), added a
-      `window.onCardOwnershipToggled` hook to `base.html`'s canonical
-      `toggleCardOwnership`, and wired `category_detail.html` to it so its
-      card list now re-filters immediately after a toggle. Extracted the two
-      byte-identical HTML blocks into `templates/partials/
-      card_ownership_modal.html` (used by `index.html` + `cards_list.html`)
-      and `templates/partials/profile_stat_grid.html` (used by `profile.html`
-      + `shared_profile.html`); standardized the JS-generated "Local Mode"
-      badge to the plain `#5C6675` style (no emoji) while touching the
-      modal. Verified: `node scripts/test_roadmap_results.js` (28/28),
-      `venv/bin/python manage.py test` (178/178), full scenario sweep clean,
-      `manage.py check` clean. **Phase 4 (full inline-`<script>` extraction
-      into `static/js/pages/*.js` and `static/js/base.js`) completed** on
-      2026-07-19. Extracted script blocks from all HTML templates and
-      updated template files. Verified via Django test suite (all 178 tests
-      passed). CSS reorg / CSS-framework adoption remain out of scope (recommendation
-      only). Detail: `docs/plans/phase-frontend-cleanup.md`. **Still
-      needed: Phase 1-4 manual browser checklists** — add to the manual-passes
-      list below.
+- [x] **Frontend cleanup — Phases 1–4** (dedup, bug fix, HTML partials, full
+      JS extraction; 2026-07-19). Shared JS utilities deduped into
+      `static/js/utils.js`, a live `toggleCardOwnership` shadowing bug
+      fixed, byte-identical HTML extracted into `templates/partials/`, and
+      all inline `<script>` blocks extracted into `static/js/pages/*.js` +
+      `static/js/base.js`. CSS reorg / CSS-framework adoption remain
+      recommendation-only, out of scope. Verified: JS smoke test (28/28),
+      standard suite (178/178), full scenario sweep clean, `manage.py check`
+      clean. Full plan + verification log: `docs/plans/phase-frontend-cleanup.md`
+      (kept live — manual browser checklists below still need to run).
 - [ ] **Standardize Card Metadata & Rule Representation**
       Implement validation schemas (e.g. via Pydantic or Django JSON schemas) for `CreditCard.metadata` to prevent typos (like `once_per_life_time`) during imports. Refactor the static `ISSUER_RULES` dict in `roadmaps/eligibility.py` into structured classes (`BaseIssuerRule`, `WindowRule`, etc.) to plug in velocity limits cleanly.
 - [ ] **Decouple Test Suite from Database Operations**
@@ -264,7 +223,7 @@ picked up.
 ## Verification quick reference
 
 ```bash
-venv/bin/python manage.py test                                                # standard suite (170 tests)
+venv/bin/python manage.py test                                                # standard suite (228 tests)
 RUN_ALL_SCENARIOS=1 venv/bin/python manage.py test cards.test_json_scenarios   # full sweep must pass clean
 venv/bin/python manage.py run_scenario "Jamie Real" --explain                  # every line item reconciles
 node scripts/test_roadmap_results.js                                          # roadmap-results.js pure-helper smoke test
@@ -308,11 +267,14 @@ if so.
 - **Full Phase K design + step-by-step progress log** (multi-player
   households & per-entity rules) → mybrain
   `Requirements/Complete/PLAN_PHASE_K_HOUSEHOLDS_complete.md`
-- **Phases G, H, J detail** (no standalone plan doc) → git history + the
-  originating plans in `.claude/plans/look-at-any-outstanding-wild-wirth.md`
-  and `.claude/plans/plan-out-the-following-sharded-nest.md`
-- **Phase N design** (one-off upcoming-expense mode) →
-  `.claude/plans/cantinue-with-next-phase-foamy-dragonfly.md`
+- **Phases G, H, J, N detail** (no standalone plan docs) → git history; the
+  original planning-session scratch files under `.claude/plans/` are
+  gitignored and don't persist, but each phase's implementation summary is
+  captured inline in the Completed section above.
+- **Points-currency credit valuation design + session log** → mybrain
+  `Requirements/Complete/PLAN_POINTS_CURRENCY_CREDIT_VALUATION_complete.md`
+- **Modal consolidation task detail** → mybrain
+  `Requirements/Complete/TASK_MODAL_CONSOLIDATION_complete.md`
 - **Feature backlog / future ideas** → mybrain
   `Requirements/Backlog/Review.md`
 - **Architecture, working rules** → `CLAUDE.md` (this repo)

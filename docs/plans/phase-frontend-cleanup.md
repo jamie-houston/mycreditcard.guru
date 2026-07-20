@@ -1,7 +1,8 @@
 # Frontend Cleanup — Dedup + JS Extraction
 
-Status: **Phases 1–3 done (2026-07-19).** Phase 4 (full inline-`<script>`
-extraction into `static/js/pages/*.js`) not started — pick up here later.
+Status: **Phases 1–4 done (2026-07-19).** All code work landed; only the
+manual browser checklists below remain (tracked in `docs/PROJECT_STATUS.md`
+under "Operational to-do").
 
 ## Context
 
