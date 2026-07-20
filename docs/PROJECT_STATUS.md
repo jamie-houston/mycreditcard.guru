@@ -74,7 +74,32 @@ Detail archived — see pointers under "Where everything else went."
 
 ### Open
 
-None — see `docs/plans/` and mybrain `Requirements/Backlog/Review.md` for
+- [ ] **Card catalog verification backlog**. A full `import_cards` sweep
+      across every issuer file (2026-07-20) found roughly 130 cards still
+      `verified: false` and sitting out of the DB entirely — most of
+      American Express, and all of Bank of America, Barclays, Citi, US
+      Bank, Wells Fargo, PenFed, First, FNBO. Only a small "headline"
+      subset (Chase, a handful of Amex/Capital One) is actually live.
+      Barclays specifically has zero verified cards, including the 5
+      points-denominated ones already reviewed (`data/input/cards/
+      barclays.json`: JetBlue, JetBlue Premier, Wyndham Rewards Earner,
+      Earner Business, Earner Plus). No plan yet for clearing this at
+      scale — each card needs the same kind of sanity pass that caught
+      the united-explorer duplicate-credit bug (2026-07-19) and the
+      missing/stale Amex Platinum hotel credits (2026-07-20) before
+      bulk-verifying, since `verified: true` is what puts a card's math in
+      front of users.
+- [ ] **Amex Gold 5x hotel-booking-channel rate not modeled**. The
+      April 2026 refresh raised prepaid-hotel-via-Amex-Travel earn from 2x
+      to 5x, but `data/input/cards/american_express.json`'s Gold entry only
+      has a blanket `hotels` category — no portal-specific split like
+      Chase's `chase_travel` or Capital One's `capital_one_travel`. Bumping
+      the blanket rate to 5x would overstate value for anyone who books
+      hotels directly. Needs a new `amex_travel`-style category in
+      `data/input/system/spending_categories.json` before this can be
+      applied correctly.
+
+See `docs/plans/` and mybrain `Requirements/Backlog/Review.md` for other
 future/candidate work.
 
 ### Technical Debt & Refactoring
@@ -224,6 +249,17 @@ disagrees, a `PendingCardUpdate` row is queued instead. After each sync run,
 check Django admin → **Pending Card Updates** and approve/reject any
 conflicts (approving writes into the JSON and re-imports; reject suppresses
 identical future proposals). Detail in `docs/CARD_IMPORT_GUIDE.md`.
+
+andenacitelli only reflects what its own maintainers have entered, so it
+can lag real issuer refreshes by months (e.g. it still showed Chase
+Sapphire Preferred's old $50 hotel credit in July 2026, weeks after
+Chase's own June 2026 announcement of $100). For the small set of
+premium/high-fee cards, it's worth periodically web-searching the issuer's
+own announcements directly rather than relying solely on the sync — that
+pass on 2026-07-20 caught the Sapphire Preferred refresh, a brand-new
+Chase Sapphire Reserve "Edit" hotel credit, and missing/stale Amex
+Platinum FHR hotel credits across 4 variants, none of which the API had
+picked up.
 
 ## Verification quick reference
 
