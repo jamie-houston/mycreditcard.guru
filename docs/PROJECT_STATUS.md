@@ -72,7 +72,8 @@ Detail archived — see pointers under "Where everything else went."
       means deciding how to value arbitrary points currencies for card
       *credits* specifically — the existing `PointsProgram`/`PointsValuation`
       mechanism only converts reward-*earning* rates today, and there's no
-      test coverage for credit currency valuation to build against.
+      test coverage for credit currency valuation to build against. Scoped
+      and ready to execute: `docs/plans/points-currency-credit-valuation.md`.
 
 ### Technical Debt & Refactoring
 - [x] **Consistent card detail/edit modal everywhere** (2026-07-19). Every
