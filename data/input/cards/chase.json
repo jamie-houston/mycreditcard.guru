@@ -48,6 +48,11 @@
         "times_per_year": 2
       },
       {
+        "description": "The Edit by Chase Travel hotel credit",
+        "value": 250,
+        "times_per_year": 2
+      },
+      {
         "credit_type": "airport_lounge",
         "value": 469,
         "times_per_year": 1
@@ -258,6 +263,11 @@
       {
         "category": "travel",
         "value": 150,
+        "times_per_year": 2
+      },
+      {
+        "description": "The Edit by Chase Travel hotel credit",
+        "value": 250,
         "times_per_year": 2
       },
       {

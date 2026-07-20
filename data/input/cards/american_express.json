@@ -22,6 +22,11 @@
     ],
     "credits": [
       {
+        "description": "Hotel Credit (Fine Hotels + Resorts / The Hotel Collection, 2x/yr $300)",
+        "value": 300,
+        "times_per_year": 2
+      },
+      {
         "credit_type": "disney_plus",
         "value": 20,
         "times_per_year": 12
@@ -393,6 +398,11 @@
         "description": "Hilton credit ($50/qtr)",
         "value": 200,
         "weight": 0.75
+      },
+      {
+        "description": "Hotel Credit (Fine Hotels + Resorts / The Hotel Collection, 2x/yr $300)",
+        "value": 600,
+        "weight": 0.9
       }
     ],
     "slug": "business-platinum"
@@ -545,8 +555,8 @@
     "discontinued": false,
     "credits": [
       {
-        "description": "Hotel Credit",
-        "value": 200,
+        "description": "Delta Stays Hotel Credit",
+        "value": 150,
         "weight": 0.9
       },
       {
@@ -913,8 +923,8 @@
     "discontinued": false,
     "credits": [
       {
-        "description": "Hotel Credit",
-        "value": 200,
+        "description": "Hotel Credit (Fine Hotels + Resorts / The Hotel Collection, 2x/yr $300)",
+        "value": 600,
         "weight": 0.9
       },
       {
@@ -969,8 +979,8 @@
     "discontinued": false,
     "credits": [
       {
-        "description": "Hotel Credit",
-        "value": 200,
+        "description": "Hotel Credit (Fine Hotels + Resorts / The Hotel Collection, 2x/yr $300)",
+        "value": 600,
         "weight": 0.9
       },
       {
