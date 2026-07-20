@@ -69,6 +69,17 @@
     "url": "https://www.penfed.org/credit-cards/pathfinder-rewards",
     "image_url": "/images/penfed/pathfinder.webp",
     "discontinued": false,
-    "slug": "pathfinder"
+    "slug": "pathfinder",
+    "credits": [
+      {
+        "description": "Incidental travel credit (yearly)",
+        "value": 100,
+        "times_per_year": 1,
+        "weight": 0.6
+      }
+    ],
+    "_sources": {
+      "credits": "andenacitelli"
+    }
   }
 ]

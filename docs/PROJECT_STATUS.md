@@ -55,6 +55,25 @@ Detail archived — see pointers under "Where everything else went."
 
 ### Open
 
+- [ ] **`CardCredit.currency` is never valued — non-USD credits are counted
+      as raw dollars.** `annual_value` (`cards/models.py`) and
+      `CreditsCalculator` (`roadmaps/engine/calculators/credits.py`) compute
+      `value * times_per_year` unconditionally; `currency` is read nowhere
+      in the valuation pipeline (`orchestrator.py`/`optimizer.py` included)
+      — it's purely cosmetic (admin filter, serializer passthrough). 13
+      credits across 8 cards are denominated in points (JETBLUE, HILTON,
+      WYNDHAM, SOUTHWEST, UNITED, HYATT) and are being counted at full face
+      value — e.g. a 7,500-point Southwest/Wyndham anniversary bonus adds
+      $7,500 to that card's "Estimated Annual Value" instead of its real
+      redemption worth (~$75-150 depending on the program). Some of these
+      predate the andenacitelli sync (hand-curated United/Hyatt entries), so
+      this isn't sync-introduced. Found 2026-07-19 auditing `credits[]` data
+      after the Disney credit_type fix; not yet scoped. Fixing it properly
+      means deciding how to value arbitrary points currencies for card
+      *credits* specifically — the existing `PointsProgram`/`PointsValuation`
+      mechanism only converts reward-*earning* rates today, and there's no
+      test coverage for credit currency valuation to build against.
+
 ### Technical Debt & Refactoring
 - [x] **Consistent card detail/edit modal everywhere** (2026-07-19). Every
       card listing now opens the shared `#cardModal` (`templates/base.html`,
@@ -172,6 +191,12 @@ Detail archived — see pointers under "Where everything else went."
       production, promote his user to staff/superuser via the
       PythonAnywhere console; consider revoking the PythonAnywhere API
       token used during deployment.
+- [ ] **Verify/reschedule the production monthly card-sync cron** — the
+      PythonAnywhere scheduled task described in `docs/DEPLOYMENT_GUIDE.md`
+      (daily 09:15 UTC, acts only on the 1st of the month) is believed to
+      not actually be firing. Confirm in the PythonAnywhere console and fix
+      or recreate it once the provenance-aware `import_external_cards`
+      workflow below has been used locally a few times and is trusted.
 
 See mybrain `Requirements/Backlog/Review.md` for the larger feature backlog
 (referral/affiliate links, hotel/airline-specific modes, ecosystem presets,
@@ -185,6 +210,17 @@ review `git diff data/input/cards/`, commit, push — the repo only stays in
 sync with production's automated monthly refresh if this also runs locally
 (production resets its own JSON edits before each refresh). Full detail in
 `CLAUDE.md`.
+
+The sync now also pulls **credits** from andenacitelli and is
+**provenance-aware**: each card JSON carries a `_sources` map tagging which
+side owns each section (`annual_fee`, `signup_bonus`, `discontinued`,
+`annual_fee_waived`, `credits`). Sections tagged (or defaulted to)
+`"andenacitelli"` auto-update as before; sections tagged `"manual"` (e.g.
+hand-curated credits) are never overwritten — if andenacitelli's data
+disagrees, a `PendingCardUpdate` row is queued instead. After each sync run,
+check Django admin → **Pending Card Updates** and approve/reject any
+conflicts (approving writes into the JSON and re-imports; reject suppresses
+identical future proposals). Detail in `docs/CARD_IMPORT_GUIDE.md`.
 
 ## Verification quick reference
 

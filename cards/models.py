@@ -433,6 +433,50 @@ class UserSpendingCreditPreference(models.Model):
         return f"{self.profile} - {self.spending_credit.display_name}: {self.values_credit}"
 
 
+class PendingCardUpdate(models.Model):
+    """A conflict between a hand-edited (manual) card section and a newer
+    andenacitelli value, surfaced for review instead of silently overwritten.
+
+    Created by `import_external_cards` when a section's `_sources` tag is
+    "manual" but the API proposes a different value. Approve/reject via the
+    Django admin (list actions) — see cards/admin.py. This is a local-dev
+    workflow: approving writes straight into the working-tree JSON under
+    data/input/cards/, so review `git diff` and commit/push afterward.
+    Production resets its own JSON before each scheduled refresh, so
+    approvals must happen locally (see docs/PROJECT_STATUS.md "Recurring
+    maintenance").
+    """
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('approved', 'Approved'),
+        ('rejected', 'Rejected'),
+    ]
+
+    card = models.ForeignKey(CreditCard, on_delete=models.CASCADE, null=True, blank=True, related_name='pending_updates')
+    source_file = models.CharField(max_length=100, help_text="e.g. chase.json")
+    external_card_id = models.CharField(max_length=100, help_text="andenacitelli cardId")
+    card_label = models.CharField(max_length=200, help_text="'{issuer} {name}' at proposal time")
+    section = models.CharField(max_length=50, help_text="e.g. annual_fee, signup_bonus, credits")
+    current_value = models.JSONField(help_text="The manually-curated value currently in the JSON")
+    proposed_value = models.JSONField(help_text="What andenacitelli's data suggests instead")
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
+    created_at = models.DateTimeField(auto_now_add=True)
+    resolved_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['source_file', 'card_label', 'section'],
+                condition=models.Q(status='pending'),
+                name='uniq_open_pending_update',
+            ),
+        ]
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.card_label} - {self.section} ({self.status})"
+
+
 class UserCreditUsage(models.Model):
     """Tracks which card credits were actually used in a given period (month, quarter, half, year)"""
     profile = models.ForeignKey(UserSpendingProfile, on_delete=models.CASCADE, related_name='credit_usages')

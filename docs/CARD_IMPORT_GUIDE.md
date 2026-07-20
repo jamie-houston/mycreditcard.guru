@@ -4,10 +4,11 @@
 
 The credit card import system uses the `import_cards` management command to load credit card data from JSON files. **Only cards marked with `"verified": true`** are imported into the database.
 
-## Keeping Bonuses & Fees Current (import_external_cards)
+## Keeping Bonuses, Fees & Credits Current (import_external_cards)
 
-Signup bonus offers and annual fees churn constantly; reward categories and credits don't.
-The `import_external_cards` command refreshes only the churning fields from the
+Signup bonus offers, annual fees, and per-card credits churn; reward categories don't (the
+API has no per-category earn-rate data at all — earning rates stay 100% hand-curated).
+The `import_external_cards` command refreshes the churning fields from the
 [andenacitelli community API](https://github.com/andenacitelli/credit-card-bonuses-api):
 
 ```bash
@@ -20,16 +21,81 @@ How it works:
 - Fetches the API export (cached to `data/external/andenacitelli.json` as a fallback).
 - Matches API cards to entries in `data/input/cards/*.json` by normalized name + issuer;
   renamed cards are pinned in `data/input/overrides/external_card_map.json`.
-- Updates `signup_bonus` (amount, spending requirement, time limit), `annual_fee`,
-  `discontinued`, and first-year fee waivers **in the JSON files** — they remain the
-  source of truth, and `git diff data/input/cards/` shows exactly what offers changed.
+- Updates `annual_fee`, `signup_bonus` (amount, spending requirement, time limit),
+  `discontinued`, first-year fee waivers, and `credits` — but only for sections not
+  protected by provenance (below). Changes land **in the JSON files** — they remain the
+  source of truth, and `git diff data/input/cards/` shows exactly what changed.
 - Re-imports changed files via `import_cards` (so only `verified: true` cards hit the DB).
 - Reports API cards missing from the catalog (new product launches) and never clobbers a
   curated bonus when the API shows no current offer — it warns instead.
 
+### Provenance: `_sources` and the review queue
+
+Each card can carry a `"_sources"` map tagging which side owns each section:
+
+```json
+"_sources": {
+  "annual_fee": "andenacitelli",
+  "signup_bonus": "andenacitelli",
+  "credits": "manual"
+}
+```
+
+- **`"andenacitelli"`** (or untagged, for `annual_fee`/`signup_bonus`/`discontinued`/
+  `annual_fee_waived`) — auto-updates silently on every sync, same as before.
+- **`"manual"`** (or untagged with an already non-empty `credits` list — protects existing
+  curation without needing to hand-add the tag everywhere) — **never overwritten**. If
+  andenacitelli's data disagrees, a `PendingCardUpdate` row is queued instead of applied.
+- An untagged, currently-empty `credits` list is treated as `"andenacitelli"`-owned and
+  gets filled in automatically the first time the API has data for that card — the
+  section is then tagged `"andenacitelli"` explicitly so it keeps auto-updating.
+
+Andenacitelli credits import as plain `{description, value, times_per_year: 1, weight,
+currency}` entries — no `category`/`credit_type`/`offer_type`, since the API doesn't have
+that structure. (`value` is already annualized on their side, e.g. a "$60/quarter" credit
+is reported as `240`, hence `times_per_year: 1` on our side rather than re-splitting it.)
+Hand-upgrading an imported credit with a `category` or `credit_type` and re-tagging its
+`_sources` entry `"manual"` protects it from being clobbered on the next sync.
+
+Alternatively, `data/input/overrides/external_credit_map.json` normalizes specific
+andenacitelli credits into the taxonomy shape automatically, keyed by the API's exact
+`description` string:
+
+```json
+"credits": {
+  "$7/mo Disney Bundle Credit": {"credit_type": "disney_plus", "times_per_year": 12}
+}
+```
+
+The sync derives the per-period `value` by dividing andenacitelli's annualized total by
+`times_per_year` (`$84 / 12 → $7`) and links the entry to that `credit_type` (or `category`)
+— the same normalization Jamie would do by hand, applied automatically to every card that
+carries that exact description. This matters for `"andenacitelli"`-owned cards specifically:
+unlike the manual-conflict comparison below, an andenacitelli-owned `credits` proposal is
+flagged on any structural difference (not just a total change), so once you add an override
+entry, the next sync rewrites any already-auto-filled flat credit into the linked shape.
+Add an entry here only when a sync reports a `credits` change you'd rather have normalized
+than left flat — it's opt-in, not a bulk migration.
+
+Because a `manual`-owned card's curated shape (`credit_type`/`category`,
+`times_per_year: 12/4/2`) never matches andenacitelli's flattened shape, a `credits`
+conflict is only raised when the **total annualized value actually differs** — not
+whenever the shapes don't match, which would flag every curated card on every sync.
+
+**Reviewing conflicts:** after a sync, check Django admin → **Pending Card Updates**.
+Each row shows the card, section, your current value, and andenacitelli's proposed value.
+- **Approve** writes the proposed value into the card's JSON, tags that section `"manual"`
+  (you're curating by accepting it), and re-imports — same local-dev flow as the sync
+  itself: review `git diff data/input/cards/`, commit, push. **Exception: `credits`.**
+  There's no reliable way to map andenacitelli's one flattened entry onto your possibly
+  several structured entries, so approving a `credits` update only marks it resolved — it
+  never writes JSON. Apply the new dollar amount to the right line item yourself.
+- **Reject** marks it resolved; an identical proposal won't reopen a new row next sync
+  (this suppression applies to approved `credits` rows too, so an acknowledged amount
+  doesn't nag again until the API's number changes further).
+
 It's idempotent and safe to run monthly (PythonAnywhere scheduled task after deploy).
-Curated detail — reward categories, credits, `reward_value_multiplier`, referral URLs —
-is never touched.
+Reward categories, `reward_value_multiplier`, and referral URLs are never touched.
 
 ## Key Import Rule
 

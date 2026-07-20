@@ -340,7 +340,32 @@
     "url": "https://cards.barclaycardus.com/banking/cards/jetblue-premier-card/",
     "image_url": "/images/barclays/jetblue-premier.png",
     "discontinued": false,
-    "slug": "jetblue-premier"
+    "slug": "jetblue-premier",
+    "credits": [
+      {
+        "description": "PreCheck Credit",
+        "credit_type": "precheck",
+        "value": 100,
+        "times_per_year": 1,
+        "weight": 0.4
+      },
+      {
+        "description": "$300 credit for Paisly, JetBlue's portal.",
+        "value": 300,
+        "times_per_year": 1,
+        "weight": 0.7
+      },
+      {
+        "description": "5k yearly anniversary credit",
+        "value": 5000,
+        "times_per_year": 1,
+        "weight": 1,
+        "currency": "JETBLUE"
+      }
+    ],
+    "_sources": {
+      "credits": "andenacitelli"
+    }
   },
   {
     "name": "Lufthansa Miles & More",
@@ -476,7 +501,19 @@
     "url": "https://www.wyndhamrewardscreditcard.com/#earnerplus",
     "image_url": "/images/barclays/wyndham-rewards-earner-plus.png",
     "discontinued": false,
-    "slug": "wyndham-rewards-earner-plus"
+    "slug": "wyndham-rewards-earner-plus",
+    "credits": [
+      {
+        "description": "Anniversary bonus points",
+        "value": 7500,
+        "times_per_year": 1,
+        "weight": 1,
+        "currency": "WYNDHAM"
+      }
+    ],
+    "_sources": {
+      "credits": "andenacitelli"
+    }
   },
   {
     "name": "Hawaiian Airlines World Elite Business",

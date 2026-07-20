@@ -262,6 +262,24 @@
     "url": "https://www.expedia.com/one-key-cards",
     "image_url": "/images/wellsfargo/one-key.png",
     "discontinued": false,
-    "slug": "expedia-one-key-1"
+    "slug": "expedia-one-key-1",
+    "credits": [
+      {
+        "description": "PreCheck Credit",
+        "credit_type": "precheck",
+        "value": 100,
+        "times_per_year": 1,
+        "weight": 0.4
+      },
+      {
+        "description": "$100 anniversary bonus",
+        "value": 100,
+        "times_per_year": 1,
+        "weight": 0.9
+      }
+    ],
+    "_sources": {
+      "credits": "andenacitelli"
+    }
   }
 ]

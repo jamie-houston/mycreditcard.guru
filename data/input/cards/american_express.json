@@ -279,6 +279,18 @@
     "slug": "blue-cash-preferred-morgan-stanley",
     "metadata": {
       "annual_fee_waived_first_year": true
+    },
+    "credits": [
+      {
+        "description": "$7/mo Disney Bundle Credit",
+        "credit_type": "disney_plus",
+        "value": 7,
+        "times_per_year": 12,
+        "weight": 0.25
+      }
+    ],
+    "_sources": {
+      "credits": "andenacitelli"
     }
   },
   {
@@ -758,7 +770,18 @@
     "url": "https://www.hilton.com/en/hilton-honors/credit-cards/",
     "image_url": "/images/amex/hilton-honors-aspire.png",
     "discontinued": false,
-    "slug": "hilton-honors-aspire"
+    "slug": "hilton-honors-aspire",
+    "credits": [
+      {
+        "description": "Hilton Resort Credit",
+        "value": 250,
+        "times_per_year": 1,
+        "weight": 0.8
+      }
+    ],
+    "_sources": {
+      "credits": "andenacitelli"
+    }
   },
   {
     "name": "Hilton Honors Business",

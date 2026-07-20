@@ -863,7 +863,25 @@
     "image_url": "/images/chase/southwest-rapid-rewards-plus.png",
     "discontinued": false,
     "verified": true,
-    "slug": "southwest-rapid-rewards-plus-credit-card"
+    "slug": "southwest-rapid-rewards-plus-credit-card",
+    "credits": [
+      {
+        "description": "Free Checked Bag",
+        "value": 100,
+        "times_per_year": 1,
+        "weight": 0.75
+      },
+      {
+        "description": "Anniversary Points",
+        "value": 3000,
+        "times_per_year": 1,
+        "weight": 1,
+        "currency": "SOUTHWEST"
+      }
+    ],
+    "_sources": {
+      "credits": "andenacitelli"
+    }
   },
   {
     "name": "Southwest Premier",
@@ -895,7 +913,25 @@
     "url": "https://creditcards.chase.com/travel-credit-cards/southwest/premier",
     "image_url": "/images/chase/southwest-rapid-rewards-premier.png",
     "discontinued": false,
-    "slug": "southwest-premier"
+    "slug": "southwest-premier",
+    "credits": [
+      {
+        "description": "Free Checked Bag",
+        "value": 100,
+        "times_per_year": 1,
+        "weight": 0.75
+      },
+      {
+        "description": "Anniversary Points",
+        "value": 6000,
+        "times_per_year": 1,
+        "weight": 1,
+        "currency": "SOUTHWEST"
+      }
+    ],
+    "_sources": {
+      "credits": "andenacitelli"
+    }
   },
   {
     "name": "Southwest Premier Business",
@@ -926,7 +962,25 @@
     "image_url": "/images/chase/southwest-rapid-rewards-premier-business.png",
     "discontinued": false,
     "verified": true,
-    "slug": "southwest-premier-business"
+    "slug": "southwest-premier-business",
+    "credits": [
+      {
+        "description": "Free Checked Bag",
+        "value": 100,
+        "times_per_year": 1,
+        "weight": 0.75
+      },
+      {
+        "description": "Anniversary Points",
+        "value": 6000,
+        "times_per_year": 1,
+        "weight": 1,
+        "currency": "SOUTHWEST"
+      }
+    ],
+    "_sources": {
+      "credits": "andenacitelli"
+    }
   },
   {
     "name": "Southwest Rapid Rewards Priority Credit Card",
@@ -969,7 +1023,25 @@
     "image_url": "/images/chase/southwest-rapid-rewards-priority.png",
     "discontinued": false,
     "verified": true,
-    "slug": "southwest-rapid-rewards-priority-credit-card"
+    "slug": "southwest-rapid-rewards-priority-credit-card",
+    "credits": [
+      {
+        "description": "Free Checked Bag",
+        "value": 100,
+        "times_per_year": 1,
+        "weight": 0.75
+      },
+      {
+        "description": "Anniversary Points",
+        "value": 7500,
+        "times_per_year": 1,
+        "weight": 1,
+        "currency": "SOUTHWEST"
+      }
+    ],
+    "_sources": {
+      "credits": "andenacitelli"
+    }
   },
   {
     "name": "United Business",

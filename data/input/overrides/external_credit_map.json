@@ -1,0 +1,8 @@
+{
+  "_comment": "andenacitelli credit description -> curated shape, for credits that map onto an existing SpendingCredit taxonomy entry (see data/input/system/spending_credits.json) or category, but whose cadence/credit_type andenacitelli's flat {description, value, weight} can't express. value is derived by dividing andenacitelli's annualized value by times_per_year here. Add an entry only when import_external_cards reports a 'credits' change you want normalized instead of left flat.",
+  "credits": {
+    "$7/mo Disney Bundle Credit": {"credit_type": "disney_plus", "times_per_year": 12},
+    "PreCheck Credit": {"credit_type": "precheck", "times_per_year": 1},
+    "Incidental Airline Statement Credits": {"credit_type": "airlines", "times_per_year": 1}
+  }
+}

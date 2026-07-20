@@ -289,6 +289,7 @@ class Command(BaseCommand):
                         'reward_value_multiplier': card_data.get('reward_value_multiplier', 0.01),
                         'discontinued': card_data.get('discontinued', False),
                         'signup_bonus': card_data.get('signup_bonus', {}),  # Include signup_bonus in metadata
+                        '_sources': card_data.get('_sources', {}),  # Provenance: andenacitelli vs. manual per section
                         **card_data.get('metadata', {})
                     }
                     # Ensure card has a slug
@@ -335,6 +336,7 @@ class Command(BaseCommand):
                             'reward_value_multiplier': card_data.get('reward_value_multiplier', 0.01),
                             'discontinued': card_data.get('discontinued', False),
                             'signup_bonus': card_data.get('signup_bonus', {}),  # Include signup_bonus in metadata
+                            '_sources': card_data.get('_sources', {}),  # Provenance: andenacitelli vs. manual per section
                             **card_data.get('metadata', {})
                         }
                     )

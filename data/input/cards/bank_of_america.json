@@ -177,7 +177,32 @@
     "url": "https://www.bankofamerica.com/credit-cards/products/premium-rewards-elite-credit-card/",
     "image_url": "/images/bankofamerica/premium-rewards-elite.png",
     "discontinued": false,
-    "slug": "premium-rewards-elite"
+    "slug": "premium-rewards-elite",
+    "credits": [
+      {
+        "description": "PreCheck Credit",
+        "credit_type": "precheck",
+        "value": 100,
+        "times_per_year": 1,
+        "weight": 0.4
+      },
+      {
+        "description": "Incidental Airline Statement Credits",
+        "credit_type": "airlines",
+        "value": 300,
+        "times_per_year": 1,
+        "weight": 0.3
+      },
+      {
+        "description": "Annaul $150 streaming, delivery, fitness, and transit credit",
+        "value": 150,
+        "times_per_year": 1,
+        "weight": 0.8
+      }
+    ],
+    "_sources": {
+      "credits": "andenacitelli"
+    }
   },
   {
     "name": "Travel Rewards",

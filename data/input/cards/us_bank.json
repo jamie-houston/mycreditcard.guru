@@ -270,7 +270,31 @@
     "url": "https://www.skypassvisa.com/credit/visaSelectCard.do",
     "image_url": "/images/usbank/skypass-select.png",
     "discontinued": false,
-    "slug": "skypass-select"
+    "slug": "skypass-select",
+    "credits": [
+      {
+        "description": "PreCheck Credit",
+        "credit_type": "precheck",
+        "value": 100,
+        "times_per_year": 1,
+        "weight": 0.4
+      },
+      {
+        "description": "$200 travel credit",
+        "value": 200,
+        "times_per_year": 1,
+        "weight": 0.8
+      },
+      {
+        "description": "Korean Air credit",
+        "value": 50,
+        "times_per_year": 1,
+        "weight": 0.8
+      }
+    ],
+    "_sources": {
+      "credits": "andenacitelli"
+    }
   },
   {
     "name": "Skypass Business",
