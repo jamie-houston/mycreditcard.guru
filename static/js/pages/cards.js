@@ -141,11 +141,11 @@ async function saveUserCards() {
     }
 }
 
-// Global variable definition used in click handlers
+// Global variable definition used in click handlers. saveCardOwnership,
+// openCardOwnershipModal, and closeCardOwnershipModal live in base.js, which
+// already exposes them on window itself — cards.js only needs to expose the
+// one it actually defines.
 window.removeUserCard = removeUserCard;
-window.saveCardOwnership = saveCardOwnership;
-window.openCardOwnershipModal = openCardOwnershipModal;
-window.closeCardOwnershipModal = closeCardOwnershipModal;
 
 function loadURLFilters() {
     const urlParams = new URLSearchParams(window.location.search);
@@ -624,5 +624,8 @@ async function loadCardsWithOwnership() {
     }
 }
 
-// Load cards when page loads
-loadCards();
+// Load cards when page loads. Deferred to DOMContentLoaded (rather than
+// running inline) because base.js — which defines isAuthenticated and
+// UserDataManager, both required deep inside loadCards() — is included
+// after this page's content block and hasn't executed yet at parse time.
+document.addEventListener('DOMContentLoaded', loadCards);

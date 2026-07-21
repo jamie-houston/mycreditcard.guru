@@ -865,6 +865,19 @@ button.danger {
     color: var(--muted);
     font-style: italic;
 }
+.loading-spinner {
+    display: block;
+    margin: 0 auto 14px;
+    width: 28px;
+    height: 28px;
+    border: 3px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spinner-rotate 0.8s linear infinite;
+}
+@keyframes spinner-rotate {
+    to { transform: rotate(360deg); }
+}
 .error {
     background: var(--danger-soft);
     border: 1px solid var(--border-danger);
