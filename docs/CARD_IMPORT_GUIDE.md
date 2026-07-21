@@ -306,6 +306,12 @@ The `verified` flag ensures:
 - **Gradual Rollout**: Cards can be prepared and verified before going live
 - **Data Integrity**: Prevents importing incomplete or placeholder cards
 
+Before flipping a card to `verified: true`, run the sanity-pass checklist in
+[CARD_VERIFICATION.md](CARD_VERIFICATION.md) — the import command itself only
+warns on bad category/credit_type references (and silently drops them) rather
+than rejecting them, so `validate_cards` plus a manual reconciliation against
+the issuer's page is what actually catches bad data before it ships.
+
 ## Import Order & Dependencies
 
 **Important**: Import in this order to avoid errors:

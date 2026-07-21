@@ -206,6 +206,7 @@
     "url": "https://www.americanexpress.com/en-us/business/credit-cards/blue-business-cash/",
     "image_url": "/images/amex/blue-business-cash.webp",
     "discontinued": false,
+    "verified": true,
     "slug": "blue-business-cash"
   },
   {
@@ -230,6 +231,7 @@
     "url": "https://www.americanexpress.com/us/credit-cards/business/business-credit-cards/american-express-blue-business-plus-credit-card-amex/",
     "image_url": "/images/amex/blue-business-plus.webp",
     "discontinued": false,
+    "verified": true,
     "slug": "blue-business-plus",
     "metadata": {
       "points_program": "amex_membership_rewards"
@@ -257,6 +259,7 @@
     "url": "https://www.americanexpress.com/us/credit-cards/card/blue-cash-everyday/",
     "image_url": "/images/amex/blue-cash-everyday.webp",
     "discontinued": false,
+    "verified": true,
     "slug": "blue-cash-everyday"
   },
   {
@@ -264,7 +267,7 @@
     "issuer": "American Express",
     "annual_fee": 95,
     "signup_bonus": {
-      "bonus_amount": 250,
+      "bonus_amount": 350,
       "spending_requirement": 3000,
       "time_limit_months": 6
     },
@@ -281,6 +284,7 @@
     "url": "https://apply.americanexpress.com/amex-morgan-stanley-credit-cards/",
     "image_url": "/images/amex/blue-cash-preferred-morgan-stanley.png",
     "discontinued": false,
+    "verified": true,
     "slug": "blue-cash-preferred-morgan-stanley",
     "metadata": {
       "annual_fee_waived_first_year": true
@@ -320,7 +324,25 @@
     "url": "https://www.americanexpress.com/us/credit-cards/business/business-credit-cards/american-express-business-gold-card-amex/",
     "image_url": "/images/amex/business-gold.webp",
     "discontinued": false,
-    "slug": "business-gold"
+    "verified": true,
+    "slug": "business-gold",
+    "credits": [
+      {
+        "description": "$20/mo credit for FedEx, Grubhub, and U.S. office supply store purchases (up to $240/yr)",
+        "value": 240,
+        "weight": 0.3
+      },
+      {
+        "description": "Walmart+ Credit",
+        "value": 155,
+        "weight": 0.2
+      },
+      {
+        "description": "ChatGPT Business credit (up to $300/yr)",
+        "value": 300,
+        "weight": 0.2
+      }
+    ]
   },
   {
     "name": "Business Green",
@@ -344,12 +366,16 @@
     "url": "https://www.americanexpress.com/us/credit-cards/business/business-credit-cards/american-express-business-green-card-amex/",
     "image_url": "/images/amex/business-green.webp",
     "discontinued": false,
-    "slug": "business-green"
+    "verified": true,
+    "slug": "business-green",
+    "metadata": {
+      "annual_fee_waived_first_year": true
+    }
   },
   {
     "name": "Business Platinum",
     "issuer": "American Express",
-    "annual_fee": 695,
+    "annual_fee": 895,
     "signup_bonus": {
       "bonus_amount": 200000,
       "spending_requirement": 20000,
@@ -386,7 +412,7 @@
       },
       {
         "description": "CLEAR credit",
-        "value": 189,
+        "value": 219,
         "weight": 0.4
       },
       {
@@ -405,6 +431,7 @@
         "weight": 0.9
       }
     ],
+    "verified": true,
     "slug": "business-platinum"
   },
   {
@@ -428,7 +455,8 @@
     "network": "American Express",
     "url": "https://www.americanexpress.com/us/credit-cards/card/cash-magnet/",
     "image_url": "/images/amex/cash-magnet.webp",
-    "discontinued": false,
+    "discontinued": true,
+    "verified": true,
     "slug": "cash-magnet"
   },
   {
@@ -453,6 +481,7 @@
     "url": "https://www.americanexpress.com/us/credit-cards/card/delta-skymiles-blue-american-express-card/",
     "image_url": "/images/amex/delta-skymiles-blue.jpg",
     "discontinued": false,
+    "verified": true,
     "slug": "delta-skymiles-blue"
   },
   {
@@ -460,8 +489,8 @@
     "issuer": "American Express",
     "annual_fee": 150,
     "signup_bonus": {
-      "bonus_amount": 50000,
-      "spending_requirement": 2000,
+      "bonus_amount": 90000,
+      "spending_requirement": 5000,
       "time_limit_months": 6
     },
     "reward_type": "Miles",
@@ -477,26 +506,17 @@
     "url": "https://www.americanexpress.com/us/credit-cards/card/delta-skymiles-gold-american-express-card/",
     "image_url": "/images/amex/delta-skymiles-gold.jpg",
     "discontinued": false,
+    "verified": true,
     "credits": [
       {
-        "description": "$10/mo credit for Uber",
+        "description": "$10/mo Rideshare Credit",
         "value": 120,
         "weight": 0.4
       },
       {
-        "description": "$10/mo credit for Grubhub, Cheesecake Factory, Gold Belly, Wine.com, Milk, Shake Shack",
-        "value": 120,
-        "weight": 0.5
-      },
-      {
-        "description": "$7/mo credit for Dunkin",
-        "value": 84,
-        "weight": 0.4
-      },
-      {
-        "description": "Semi-annual $50 Resy credit",
-        "value": 100,
-        "weight": 0.8
+        "description": "$200 Delta Flight Credit after $10,000 calendar-year spend",
+        "value": 200,
+        "weight": 0.2
       }
     ],
     "slug": "delta-skymiles-gold",
@@ -509,8 +529,8 @@
     "issuer": "American Express",
     "annual_fee": 150,
     "signup_bonus": {
-      "bonus_amount": 60000,
-      "spending_requirement": 4000,
+      "bonus_amount": 90000,
+      "spending_requirement": 6000,
       "time_limit_months": 6
     },
     "reward_type": "Miles",
@@ -526,6 +546,19 @@
     "url": "https://www.americanexpress.com/en-us/business/credit-cards/delta-skymiles-gold/",
     "image_url": "/images/amex/delta-skymiles-gold-business.webp",
     "discontinued": false,
+    "verified": true,
+    "credits": [
+      {
+        "description": "Delta Stays hotel credit",
+        "value": 150,
+        "weight": 0.3
+      },
+      {
+        "description": "$200 Delta Flight Credit after $10,000 calendar-year spend",
+        "value": 200,
+        "weight": 0.2
+      }
+    ],
     "slug": "delta-skymiles-gold-business",
     "metadata": {
       "annual_fee_waived_first_year": true
@@ -536,8 +569,8 @@
     "issuer": "American Express",
     "annual_fee": 350,
     "signup_bonus": {
-      "bonus_amount": 60000,
-      "spending_requirement": 3000,
+      "bonus_amount": 100000,
+      "spending_requirement": 6000,
       "time_limit_months": 6
     },
     "reward_type": "Miles",
@@ -553,6 +586,7 @@
     "url": "https://www.americanexpress.com/us/credit-cards/card/delta-skymiles-platinum-american-express-card/",
     "image_url": "/images/amex/delta-skymiles-platinum.webp",
     "discontinued": false,
+    "verified": true,
     "credits": [
       {
         "description": "Delta Stays Hotel Credit",
@@ -586,7 +620,7 @@
       },
       {
         "description": "CLEAR Credit",
-        "value": 189,
+        "value": 219,
         "weight": 0.4
       }
     ],
@@ -597,8 +631,8 @@
     "issuer": "American Express",
     "annual_fee": 350,
     "signup_bonus": {
-      "bonus_amount": 70000,
-      "spending_requirement": 6000,
+      "bonus_amount": 100000,
+      "spending_requirement": 8000,
       "time_limit_months": 6
     },
     "reward_type": "Miles",
@@ -614,6 +648,7 @@
     "url": "https://www.americanexpress.com/en-us/business/credit-cards/delta-skymiles-platinum/",
     "image_url": "/images/amex/delta-skymiles-platinum-business.webp",
     "discontinued": false,
+    "verified": true,
     "credits": [
       {
         "description": "$100 Global Entry / $85 TSA PreCheck Credit",
@@ -629,6 +664,11 @@
         "description": "First checked bag free",
         "value": 50,
         "weight": 0.5
+      },
+      {
+        "description": "Delta Stays annual hotel credit",
+        "value": 200,
+        "weight": 0.3
       }
     ],
     "slug": "delta-skymiles-platinum-business"
@@ -638,8 +678,8 @@
     "issuer": "American Express",
     "annual_fee": 650,
     "signup_bonus": {
-      "bonus_amount": 70000,
-      "spending_requirement": 5000,
+      "bonus_amount": 100000,
+      "spending_requirement": 6000,
       "time_limit_months": 6
     },
     "reward_type": "Miles",
@@ -655,11 +695,17 @@
     "url": "https://www.americanexpress.com/us/credit-cards/card/delta-skymiles-reserve-american-express-card/",
     "image_url": "/images/amex/delta-skymiles-reserve.webp",
     "discontinued": false,
+    "verified": true,
     "credits": [
       {
-        "description": "Resy Credit",
+        "description": "Resy Credit ($20/mo)",
         "value": 240,
         "weight": 0.8
+      },
+      {
+        "description": "$200 Delta Flight Credit after $10,000 calendar-year spend",
+        "value": 200,
+        "weight": 0.2
       }
     ],
     "slug": "delta-skymiles-reserve"
@@ -669,8 +715,8 @@
     "issuer": "American Express",
     "annual_fee": 550,
     "signup_bonus": {
-      "bonus_amount": 80000,
-      "spending_requirement": 10000,
+      "bonus_amount": 125000,
+      "spending_requirement": 15000,
       "time_limit_months": 6
     },
     "reward_type": "Miles",
@@ -686,6 +732,24 @@
     "url": "https://www.americanexpress.com/en-us/business/credit-cards/delta-skymiles-reserve/",
     "image_url": "/images/amex/delta-skymiles-reserve-business.webp",
     "discontinued": false,
+    "verified": true,
+    "credits": [
+      {
+        "description": "Delta Stays hotel credit",
+        "value": 250,
+        "weight": 0.3
+      },
+      {
+        "description": "$10/mo Rideshare Credit",
+        "value": 120,
+        "weight": 0.4
+      },
+      {
+        "description": "Resy Credit ($20/mo)",
+        "value": 240,
+        "weight": 0.6
+      }
+    ],
     "slug": "delta-skymiles-reserve-business"
   },
   {
@@ -713,15 +777,11 @@
     "credits": [
       {
         "description": "CLEAR Credit",
-        "value": 100,
+        "value": 219,
         "weight": 0.4
-      },
-      {
-        "description": "Lounge Access Credit",
-        "value": 100,
-        "weight": 0.25
       }
     ],
+    "verified": true,
     "slug": "green",
     "metadata": {
       "points_program": "amex_membership_rewards"
@@ -732,7 +792,7 @@
     "issuer": "American Express",
     "annual_fee": 0,
     "signup_bonus": {
-      "bonus_amount": 80000,
+      "bonus_amount": 100000,
       "spending_requirement": 2000,
       "time_limit_months": 6
     },
@@ -749,13 +809,7 @@
     "url": "https://www.hilton.com/en/hilton-honors/credit-cards/",
     "image_url": "/images/amex/hilton-honors.png",
     "discontinued": false,
-    "credits": [
-      {
-        "description": "Hilton Resort Credit",
-        "value": 250,
-        "weight": 0.8
-      }
-    ],
+    "verified": true,
     "slug": "hilton-honors"
   },
   {
@@ -763,7 +817,7 @@
     "issuer": "American Express",
     "annual_fee": 550,
     "signup_bonus": {
-      "bonus_amount": 150000,
+      "bonus_amount": 175000,
       "spending_requirement": 6000,
       "time_limit_months": 6
     },
@@ -780,13 +834,24 @@
     "url": "https://www.hilton.com/en/hilton-honors/credit-cards/",
     "image_url": "/images/amex/hilton-honors-aspire.png",
     "discontinued": false,
+    "verified": true,
     "slug": "hilton-honors-aspire",
     "credits": [
       {
-        "description": "Hilton Resort Credit",
-        "value": 250,
-        "times_per_year": 1,
+        "description": "Hilton Resort Credit (2x/yr $200)",
+        "value": 200,
+        "times_per_year": 2,
         "weight": 0.8
+      },
+      {
+        "description": "Airline Fee Credit ($50/qtr)",
+        "value": 200,
+        "weight": 0.3
+      },
+      {
+        "description": "CLEAR+ Credit",
+        "value": 209,
+        "weight": 0.4
       }
     ],
     "_sources": {
@@ -796,10 +861,10 @@
   {
     "name": "Hilton Honors Business",
     "issuer": "American Express",
-    "annual_fee": 175,
+    "annual_fee": 195,
     "signup_bonus": {
       "bonus_amount": 130000,
-      "spending_requirement": 6000,
+      "spending_requirement": 8000,
       "time_limit_months": 6
     },
     "reward_type": "Points",
@@ -815,6 +880,7 @@
     "url": "https://www.hilton.com/en/hilton-honors/credit-cards/",
     "image_url": "/images/amex/hilton-honors-business.png",
     "discontinued": false,
+    "verified": true,
     "credits": [
       {
         "description": "$60 Hilton credit per quarter.",
@@ -822,12 +888,15 @@
         "weight": 0.5
       }
     ],
-    "slug": "hilton-honors-business"
+    "slug": "hilton-honors-business",
+    "metadata": {
+      "annual_fee_waived_first_year": true
+    }
   },
   {
     "name": "Hilton Honors Surpass",
     "issuer": "American Express",
-    "annual_fee": 95,
+    "annual_fee": 150,
     "signup_bonus": {
       "bonus_amount": 130000,
       "spending_requirement": 3000,
@@ -846,15 +915,26 @@
     "url": "https://www.hilton.com/en/hilton-honors/credit-cards/",
     "image_url": "/images/amex/hilton-honors-surpass.jpg",
     "discontinued": false,
-    "slug": "hilton-honors-surpass"
+    "verified": true,
+    "slug": "hilton-honors-surpass",
+    "credits": [
+      {
+        "description": "Hilton Resort Credit ($50/qtr)",
+        "value": 200,
+        "weight": 0.7
+      }
+    ],
+    "metadata": {
+      "annual_fee_waived_first_year": true
+    }
   },
   {
     "name": "Marriott Bonvoy Brilliant",
     "issuer": "American Express",
     "annual_fee": 650,
     "signup_bonus": {
-      "bonus_amount": 200000,
-      "spending_requirement": 6000,
+      "bonus_amount": 150000,
+      "spending_requirement": 8000,
       "time_limit_months": 6
     },
     "reward_type": "Points",
@@ -870,11 +950,17 @@
     "url": "https://www.americanexpress.com/us/credit-cards/card/marriott-bonvoy-brilliant/",
     "image_url": "/images/amex/marriott-bonvoy-brilliant.webp",
     "discontinued": false,
+    "verified": true,
     "credits": [
       {
         "description": "$25/mo Dining Credit",
         "value": 300,
         "weight": 0.8
+      },
+      {
+        "description": "Ritz-Carlton / St. Regis $100 property credit (2-night min stay)",
+        "value": 100,
+        "weight": 0.3
       }
     ],
     "slug": "marriott-bonvoy-brilliant"
@@ -883,9 +969,13 @@
     "name": "Marriott Bonvoy Business",
     "issuer": "American Express",
     "annual_fee": 125,
-    "signup_bonus": null,
-    "reward_type": "Cashback",
-    "reward_value_multiplier": 0.01,
+    "signup_bonus": {
+      "bonus_amount": 125000,
+      "spending_requirement": 9000,
+      "time_limit_months": 6
+    },
+    "reward_type": "Points",
+    "reward_value_multiplier": 0.007,
     "reward_categories": [
       {
         "category": "other",
@@ -897,6 +987,7 @@
     "url": "https://www.americanexpress.com/us/credit-cards/business/business-credit-cards/amex-marriott-bonvoy-business-credit-card/",
     "image_url": "/images/amex/marriott-bonvoy-business.webp",
     "discontinued": false,
+    "verified": true,
     "slug": "marriott-bonvoy-business"
   },
   {
@@ -904,8 +995,8 @@
     "issuer": "American Express",
     "annual_fee": 895,
     "signup_bonus": {
-      "bonus_amount": 80000,
-      "spending_requirement": 8000,
+      "bonus_amount": 150000,
+      "spending_requirement": 12000,
       "time_limit_months": 6
     },
     "reward_type": "Points",
@@ -949,10 +1040,11 @@
       },
       {
         "description": "CLEAR Credit",
-        "value": 189,
+        "value": 219,
         "weight": 0.4
       }
     ],
+    "verified": true,
     "slug": "platinum-schwab"
   },
   {
@@ -960,8 +1052,8 @@
     "issuer": "American Express",
     "annual_fee": 895,
     "signup_bonus": {
-      "bonus_amount": 80000,
-      "spending_requirement": 8000,
+      "bonus_amount": 150000,
+      "spending_requirement": 12000,
       "time_limit_months": 6
     },
     "reward_type": "Cashback",
@@ -1005,10 +1097,11 @@
       },
       {
         "description": "CLEAR Credit",
-        "value": 189,
+        "value": 219,
         "weight": 0.4
       }
     ],
+    "verified": true,
     "slug": "platinum-morgan-stanley"
   },
   {
@@ -1016,8 +1109,8 @@
     "issuer": "American Express",
     "annual_fee": 250,
     "signup_bonus": {
-      "bonus_amount": 175000,
-      "spending_requirement": 5000,
+      "bonus_amount": 135000,
+      "spending_requirement": 7000,
       "time_limit_months": 6
     },
     "reward_type": "Points",
@@ -1033,6 +1126,7 @@
     "url": "https://www.americanexpress.com/us/credit-cards/card/marriott-bonvoy-bevy/",
     "image_url": "/images/amex/marriott-bonvoy-bevy.png",
     "discontinued": false,
+    "verified": true,
     "slug": "marriott-bonvoy-bevy"
   },
   {
@@ -1081,6 +1175,7 @@
     "url": "https://www.schwab.com/public/schwab/investing/accounts_products/credit_cards",
     "image_url": "/images/amex/schwab-investor.webp",
     "discontinued": false,
+    "verified": true,
     "slug": "schwab-investor"
   },
   {
@@ -1104,7 +1199,8 @@
     "network": "American Express",
     "url": "https://www.americanexpress.com/us/credit-cards/business/business-credit-cards/amazon-business-card/",
     "image_url": "/images/amex/amazon-business.avif",
-    "discontinued": false,
+    "discontinued": true,
+    "verified": true,
     "slug": "amazon-business"
   }
 ]

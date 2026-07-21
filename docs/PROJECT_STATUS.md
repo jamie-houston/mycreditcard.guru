@@ -67,21 +67,48 @@ Detail archived — see pointers under "Where everything else went."
 - [ ] **Phase Q** — Surface existing credit math in the spending-input
       builder UI. Not started; scoping only so far (see "Phases (E–Q)"
       above). No plan doc written yet.
-- [ ] **Card catalog verification backlog**. A full `import_cards` sweep
-      across every issuer file (2026-07-20) found roughly 130 cards still
-      `verified: false` and sitting out of the DB entirely — most of
-      American Express, and all of Bank of America, Barclays, Citi, US
-      Bank, Wells Fargo, PenFed, First, FNBO. Only a small "headline"
-      subset (Chase, a handful of Amex/Capital One) is actually live.
-      Barclays specifically has zero verified cards, including the 5
-      points-denominated ones already reviewed (`data/input/cards/
-      barclays.json`: JetBlue, JetBlue Premier, Wyndham Rewards Earner,
-      Earner Business, Earner Plus). No plan yet for clearing this at
-      scale — each card needs the same kind of sanity pass that caught
-      the united-explorer duplicate-credit bug (2026-07-19) and the
-      missing/stale Amex Platinum hotel credits (2026-07-20) before
-      bulk-verifying, since `verified: true` is what puts a card's math in
-      front of users.
+- [x] **Card verification tooling + Amex tranche** (2026-07-20). Built
+      `manage.py validate_cards` — a read-only audit command mirroring
+      `import_cards`'s exact lookup semantics (issuer/reward-type/
+      category-by-name-vs-slug/credit_type/points_program/currency) to
+      catch duplicate credit line items and broken references before
+      `verified: true` is flipped; it found 0 fails across all 162 cards
+      at baseline (just 10 non-blocking "credits look high vs. the fee"
+      heuristic warnings) — the whole backlog was gated purely on the
+      missing flag, not on data defects this tool can catch. Wrote
+      `docs/CARD_VERIFICATION.md`, the
+      sanity-pass checklist (validator → issuer-page reconciliation →
+      re-validate → flip flag → full verification suite), linked from
+      `docs/README.md` and `docs/CARD_IMPORT_GUIDE.md`. Verified 30/31
+      American Express cards (28 newly flipped): corrected several stale
+      figures found via issuer-page web search (Business Platinum's
+      annual fee was stale at $695, should be $895; several bonuses
+      dated back to pre-refresh amounts) and two real mislabeling bugs in
+      the `61b11ce` family — Hilton Honors' no-fee card was carrying a
+      $250 resort credit that only Surpass/Aspire actually offer, and the
+      Green Card had a fabricated "Lounge Access Credit" it doesn't have.
+      Also fixed Marriott Bonvoy Business's `reward_type`, which was
+      `Cashback` instead of `Points` (a structural bug, not just a stale
+      number) and had a null signup bonus. `Cash Magnet` and `Amazon
+      Business` are marked `discontinued: true` (closed to new
+      applicants / winding down to US Bank Aug 2026) so existing owners
+      still get correct math but the engine won't recommend applying;
+      `Lowes` stays unverified — its current welcome-offer structure
+      couldn't be pinned down with confidence and needs a follow-up look
+      rather than a guess. Full suite verified clean after: 228 tests,
+      full scenario sweep, "Jamie Real" reconciles, JS smoke test 28/28.
+      Catalog-wide unverified count: ~132 → ~105.
+- [ ] **Card catalog verification backlog (remaining ~105)**. Bank of
+      America (13), Barclays (21, including the 5 points-denominated
+      cards already reviewed — JetBlue, JetBlue Premier, Wyndham Rewards
+      Earner, Earner Business, Earner Plus), US Bank (12), Wells Fargo
+      (6), Citi (9), Capital One (5), First (7), FNBO (4), PenFed (3),
+      Synchrony (2), PNC (1), Web Bank (1), Brex (1), plus Amex's one
+      remaining card (Lowes). Use `docs/CARD_VERIFICATION.md`'s checklist
+      for each tranche — `validate_cards` catches duplicate/broken-
+      reference defects automatically, but stale dollar values and
+      mislabeling (the `61b11ce`/Green-card/Hilton class of bug) still
+      need a human pass against the issuer's own page.
 - [ ] **Amex Gold 5x hotel-booking-channel rate not modeled**. The
       April 2026 refresh raised prepaid-hotel-via-Amex-Travel earn from 2x
       to 5x, but `data/input/cards/american_express.json`'s Gold entry only
@@ -223,15 +250,17 @@ picked up.
 ## Verification quick reference
 
 ```bash
+venv/bin/python manage.py validate_cards                                      # card catalog audit — 0 fails before verifying any card
 venv/bin/python manage.py test                                                # standard suite (228 tests)
 RUN_ALL_SCENARIOS=1 venv/bin/python manage.py test cards.test_json_scenarios   # full sweep must pass clean
 venv/bin/python manage.py run_scenario "Jamie Real" --explain                  # every line item reconciles
 node scripts/test_roadmap_results.js                                          # roadmap-results.js pure-helper smoke test
 ```
 
-Baseline as of 2026-07-20 (post points-currency credit valuation): 228
+Baseline as of 2026-07-20 (post Amex card-verification tranche): 228
 standard tests green, scenario sweep clean (`test_all_scenarios`), "Jamie
-Real" reconciles, JS smoke test green (28/28). Any failure is a regression.
+Real" reconciles, JS smoke test green (28/28), `validate_cards` clean
+(162/162 cards, 0 fails). Any failure is a regression.
 
 **Phase M verification (2026-07-19)**: confirmed existing `roadmaps/
 eligibility.py` rules — Chase 5/24, BofA 2/3/4, CapOne 1/6mo (window

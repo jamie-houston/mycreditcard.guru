@@ -15,6 +15,9 @@ This folder contains detailed documentation for the Credit Card Guru project.
 - **[../RUNNING.md](../RUNNING.md)** - Complete setup and troubleshooting guide
 - **[../QUICKSTART.md](../QUICKSTART.md)** - Quick reference for common tasks
 - **[CARD_IMPORT_GUIDE.md](CARD_IMPORT_GUIDE.md)** - **How credit card imports work (which cards get imported)**
+- **[CARD_VERIFICATION.md](CARD_VERIFICATION.md)** - Sanity-pass checklist for
+  flipping a card to `verified: true` (run `validate_cards`, then reconcile
+  credits/fee/bonus against the issuer's page)
 
 ### 🔧 Deployment
 - **[DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md)** - Comprehensive PythonAnywhere deployment instructions
