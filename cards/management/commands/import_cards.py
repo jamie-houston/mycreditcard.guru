@@ -130,13 +130,22 @@ class Command(BaseCommand):
             )
             if not created:
                 # Update existing program
+                before = (
+                    program.name, program.portal_url, program.transfer_partners,
+                    program.note, program.currency_code,
+                )
                 program.name = program_data['name']
                 program.portal_url = program_data.get('portal_url')
                 program.transfer_partners = program_data.get('transfer_partners', [])
                 program.note = program_data.get('note', '')
                 program.currency_code = program_data.get('currency_code', '')
+                after = (
+                    program.name, program.portal_url, program.transfer_partners,
+                    program.note, program.currency_code,
+                )
                 program.save()
-                self.stdout.write(f'Updated points program: {program.name}')
+                if before != after:
+                    self.stdout.write(f'Updated points program: {program.name}')
             else:
                 self.stdout.write(f'Created points program: {program.name}')
 
@@ -248,6 +257,46 @@ class Command(BaseCommand):
                             subcategory.save()
                             self.stdout.write(f'Updated subcategory: {subcategory.display_name or subcategory.name}')
 
+    def _card_snapshot(self, card):
+        """Comparable snapshot of a card's fields and related rows, used to
+        detect whether an import actually changed anything."""
+        card.refresh_from_db()
+        reward_categories = sorted(
+            (
+                (
+                    rc.category_id, str(rc.reward_rate), rc.reward_type_id,
+                    rc.start_date, rc.end_date,
+                    str(rc.max_annual_spend) if rc.max_annual_spend is not None else None,
+                )
+                for rc in card.reward_categories.all()
+            ),
+            key=lambda t: tuple(str(x) for x in t),
+        )
+        credits = sorted(
+            (
+                (
+                    cr.category_id, cr.spending_credit_id, cr.description,
+                    str(cr.value), cr.times_per_year, str(cr.weight),
+                    cr.currency, cr.offer_type,
+                )
+                for cr in card.credits.all()
+            ),
+            key=lambda t: tuple(str(x) for x in t),
+        )
+        return (
+            str(card.annual_fee),
+            str(card.signup_bonus_amount) if card.signup_bonus_amount is not None else None,
+            card.signup_bonus_type_id,
+            card.signup_bonus_requirement,
+            card.primary_reward_type_id,
+            card.card_type,
+            card.url,
+            card.metadata,
+            card.slug,
+            tuple(reward_categories),
+            tuple(credits),
+        )
+
     def import_credit_cards(self, cards):
         for card_data in cards:
             # Only import cards with verified=true flag
@@ -279,6 +328,7 @@ class Command(BaseCommand):
                 # Find existing card by name and issuer
                 try:
                     card = CreditCard.objects.get(name=card_data['name'], issuer=issuer)
+                    before_snapshot = self._card_snapshot(card)
                     # Update existing card with imported data
                     card.annual_fee = card_data.get('annual_fee', 0)
                     card.signup_bonus_amount = signup_bonus_amount
@@ -309,10 +359,10 @@ class Command(BaseCommand):
                     # Clear existing reward categories and credits to replace with imported data
                     card.reward_categories.all().delete()
                     card.credits.all().delete()
-                    
-                    self.stdout.write(f'Updated card: {card}')
+
                     created = False
                 except CreditCard.DoesNotExist:
+                    before_snapshot = None
                     # Generate slug for the card
                     from django.utils.text import slugify
                     base_slug = slugify(card_data['name'])
@@ -352,7 +402,10 @@ class Command(BaseCommand):
                 # Import credits (for both new and updated cards)
                 if 'credits' in card_data:
                     self.import_card_credits(card, card_data['credits'])
-                        
+
+                if not created and before_snapshot != self._card_snapshot(card):
+                    self.stdout.write(f'Updated card: {card}')
+
             except (Issuer.DoesNotExist, RewardType.DoesNotExist) as e:
                 self.stdout.write(
                     self.style.ERROR(f'Skipping card {card_data["name"]}: {e}')

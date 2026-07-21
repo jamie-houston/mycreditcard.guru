@@ -38,9 +38,10 @@ class Command(BaseCommand):
             with open(file_path, 'r') as file:
                 spending_credits_data = json.load(file)
             
+            processed_count = 0
             created_count = 0
             updated_count = 0
-            
+
             for credit_data in spending_credits_data:
                 name = credit_data['name']
                 slug = slugify(name)
@@ -70,24 +71,36 @@ class Command(BaseCommand):
                     }
                 )
 
+                processed_count += 1
+
                 if not created:
                     # Update existing credit
+                    before = (
+                        credit.slug, credit.display_name, credit.description,
+                        credit.category_id, credit.stackable,
+                    )
                     credit.slug = slug
                     credit.display_name = display_name
                     credit.description = description
                     credit.category = category
                     credit.stackable = stackable
+                    after = (
+                        credit.slug, credit.display_name, credit.description,
+                        credit.category_id, credit.stackable,
+                    )
                     credit.save()
-                    updated_count += 1
+                    if before != after:
+                        updated_count += 1
+                        self.stdout.write(f'Updated spending credit: {display_name}')
                 else:
                     created_count += 1
-                
-                self.stdout.write(f'{"Created" if created else "Updated"} spending credit: {display_name}')
+                    self.stdout.write(f'Created spending credit: {display_name}')
             
             self.stdout.write(
                 self.style.SUCCESS(
-                    f'Successfully processed {created_count + updated_count} spending credits '
-                    f'({created_count} created, {updated_count} updated)'
+                    f'Successfully processed {processed_count} spending credits '
+                    f'({created_count} created, {updated_count} updated, '
+                    f'{processed_count - created_count - updated_count} unchanged)'
                 )
             )
             
