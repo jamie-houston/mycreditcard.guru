@@ -1020,11 +1020,14 @@ async function calculatePortfolioSummary() {
             // If we have spending data, calculate optimized rewards
             if (spending && Object.keys(spending).length > 0) {
                 try {
+                    const userPrefs = await UserDataManager.getPreferences();
+                    const maxRecs = userPrefs.default_max_recommendations || userPrefs.max_recommendations || 5;
                     const requestData = {
                         spending: spending,
                         cards: userCards,
-                        preferences: await UserDataManager.getPreferences(),
-                        max_recommendations: 10
+                        preferences: userPrefs,
+                        max_recommendations: maxRecs,
+                        persist: false
                     };
                     
                     const response = await fetch(`${API_BASE}/roadmaps/quick-recommendation/`, {

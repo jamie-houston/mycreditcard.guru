@@ -211,7 +211,9 @@ def quick_recommendation_view(request):
                 response_data['expense_recommendation'] = ExpenseRecommendationSerializer(
                     serializer.expense_recommendation).data
 
-            _persist_current_roadmap(request, response_data)
+            should_persist = request.data.get('persist', True) if isinstance(request.data, dict) else True
+            if should_persist:
+                _persist_current_roadmap(request, response_data)
 
             return Response(response_data)
 
