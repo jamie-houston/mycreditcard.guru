@@ -54,6 +54,23 @@ pip install -q -r requirements.txt
 echo "==> manage.py migrate"
 python manage.py migrate --noinput
 
+# --- import system data & credit cards ---
+echo "==> Importing system data and credit cards"
+python manage.py import_cards data/input/system/spending_categories.json
+python manage.py import_cards data/input/system/issuers.json
+python manage.py import_cards data/input/system/reward_types.json
+if [ -f "data/input/system/points_programs.json" ]; then
+    python manage.py import_cards data/input/system/points_programs.json
+fi
+
+for file in data/input/cards/*.json; do
+    if [[ "$file" != *"personal.json" ]]; then
+        python manage.py import_cards "$file"
+    fi
+done
+
+python manage.py import_spending_credits
+
 # --- version file ---
 echo "==> Generating VERSION file"
 cd "$PROJECT_ROOT"
