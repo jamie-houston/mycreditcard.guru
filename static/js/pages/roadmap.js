@@ -932,7 +932,6 @@ async function loadCurrentRoadmap() {
             // 404 = nothing generated yet: first-time-user path, builder
             // open, nothing to "update" yet.
             setRoadmapViewMode('builder');
-            document.getElementById('resultsHeader').style.display = 'none';
             return;
         }
         const data = await response.json();
@@ -946,7 +945,6 @@ async function loadCurrentRoadmap() {
             noScroll: true
         });
         setRoadmapViewMode('results');
-        document.getElementById('resultsHeader').style.display = 'block';
         initializeRoadmapSharePanel();
     } catch (error) {
         console.error('Error loading current roadmap:', error);
@@ -1116,7 +1114,6 @@ async function getRecommendations() {
         // Settle into results mode — matches what a reload will show now
         // that this roadmap is persisted as the Current Roadmap.
         setRoadmapViewMode('results');
-        document.getElementById('resultsHeader').style.display = 'block';
         initializeRoadmapSharePanel();
 
     } catch (error) {

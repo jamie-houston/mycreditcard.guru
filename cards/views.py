@@ -7,6 +7,7 @@ from django.db.models import Q, ProtectedError, RestrictedError
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import Http404
 from django.utils import timezone
+from django.views.decorators.csrf import ensure_csrf_cookie
 
 from .models import (
     Issuer, RewardType, SpendingCategory, CreditCard,
@@ -388,11 +389,19 @@ def card_recommendations_preview(request):
 
 
 # Template Views
+@ensure_csrf_cookie
 def landing_view(request):
     """Landing page - welcome and feature overview.
 
     We no longer redirect users with existing roadmaps or logged in users;
     they land on the homepage and see a personalized navigation panel to all features.
+
+    Google OAuth (django-allauth) is the only login method and its templates
+    never render {% csrf_token %}, so without this decorator the browser
+    never receives a csrftoken cookie. Anonymous POSTs still work (DRF's
+    SessionAuthentication only enforces CSRF for authenticated sessions),
+    but every POST from a logged-in user — including "Get my roadmap" —
+    fails with 403 CSRF Failed: CSRF cookie not set.
     """
     from roadmaps.models import get_current_roadmap
     context = {
@@ -409,6 +418,7 @@ def resources_view(request):
     """External resources and guides page"""
     return render(request, 'resources.html')
 
+@ensure_csrf_cookie
 def index_view(request):
     """Roadmap creation page"""
     from roadmaps.strategies import ui_presets
