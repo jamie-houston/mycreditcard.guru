@@ -588,7 +588,7 @@
                                 card_id: cardId,
                                 action: 'add',
                                 nickname: nickname,
-                                opened_date: openedDate
+                                opened_date: openedDate || null
                             })
                         });
                         const data = await response.json();
@@ -602,7 +602,7 @@
                     const cards = await this.getCards();
                     cards.push(cardId);
                     await this.saveCards(cards);
-                    LocalStorage.setCardDetails(cardId, { nickname, opened_date: openedDate });
+                    LocalStorage.setCardDetails(cardId, { nickname, opened_date: openedDate || null });
                     return true;
                 }
             }
@@ -622,7 +622,7 @@
                         }
                         const body = {
                             nickname: nickname,
-                            opened_date: openedDate,
+                            opened_date: openedDate || null,
                             bonus_earned_date: bonusEarnedDate || null,
                             bonus_override: bonusOverride
                         };
@@ -645,7 +645,7 @@
                 } else {
                     // For anonymous users, store in localStorage
                     LocalStorage.setCardDetails(cardId, {
-                        nickname, opened_date: openedDate,
+                        nickname, opened_date: openedDate || null,
                         bonus_earned_date: bonusEarnedDate || null,
                         bonus_override: bonusOverride
                     });
@@ -880,7 +880,8 @@
             document.getElementById('modalRewardType').textContent = card.primary_reward_type?.name || 'Unknown';
 
             // Point value
-            const rewardMultiplier = card.metadata?.reward_value_multiplier || 0.01;
+            let rewardMultiplier = card.metadata?.reward_value_multiplier || 0.01;
+            if (rewardMultiplier >= 0.5) rewardMultiplier /= 100.0;
             document.getElementById('modalPointValue').textContent = `${(rewardMultiplier * 100).toFixed(1)}¢ each`;
 
             // Network (if available in metadata)
@@ -1255,46 +1256,35 @@
             }
         }
 
+        function refreshPageDisplay() {
+            if (typeof filterCards === 'function') {
+                filterCards();
+            } else if (typeof displayCards === 'function' && typeof allCards !== 'undefined') {
+                displayCards(allCards);
+            } else if (typeof loadRoadmap === 'function') {
+                loadRoadmap();
+            } else if (typeof loadProfileData === 'function') {
+                loadProfileData();
+            }
+        }
+
         async function addAnotherCardModal() {
             if (!currentModalCard) return;
-
-            const button = document.getElementById('modalAddAnotherButton');
             const cardId = currentModalCard.id;
+            const cardType = currentModalCard.card_type;
 
             try {
-                button.disabled = true;
-                button.textContent = '...';
+                // Close detail modal
+                closeCardModal();
 
-                // Show nickname/opening date popup
-                const cardDetails = await showCardDetailsPopupModal(cardId);
-                if (cardDetails === null) {
-                    // User cancelled
-                    button.disabled = false;
-                    button.textContent = '➕ Add another card';
-                    return;
-                }
-
-                // Add another instance of the card with details
-                const success = await UserDataManager.addCardWithDetails(cardId, cardDetails.nickname, cardDetails.openingDate);
-                if (success) {
-                    alert(`Added another ${cardDetails.nickname} to your collection!`);
-
-                    // Refresh displays
-                    if (typeof filterCards === 'function') {
-                        filterCards();
-                    } else if (typeof displayCards === 'function' && typeof allCards !== 'undefined') {
-                        displayCards(allCards);
-                    }
+                // Open ownership modal for adding another instance
+                if (typeof window.openCardOwnershipModal === 'function') {
+                    window.openCardOwnershipModal(cardId, null, cardType);
                 } else {
-                    throw new Error('Failed to add another card');
+                    console.error('window.openCardOwnershipModal is not defined');
                 }
-
             } catch (error) {
                 console.error('Error adding another card:', error);
-                alert('Error adding another card');
-            } finally {
-                button.disabled = false;
-                button.textContent = '➕ Add another card';
             }
         }
 
@@ -1316,11 +1306,7 @@
                 await updateModalOwnershipButton(cardId);
 
                 // Refresh displays
-                if (typeof filterCards === 'function') {
-                    filterCards();
-                } else if (typeof displayCards === 'function' && typeof allCards !== 'undefined') {
-                    displayCards(allCards);
-                }
+                refreshPageDisplay();
 
             } catch (error) {
                 console.error('Error removing card:', error);
@@ -1335,48 +1321,31 @@
 
             const button = document.getElementById('modalOwnershipButton');
             const cardId = currentModalCard.id;
+            const cardType = currentModalCard.card_type;
 
             try {
                 const userCards = await UserDataManager.getCards();
                 const hasCard = userCards.includes(cardId);
 
-                button.disabled = true;
-                button.textContent = '...';
-
                 if (hasCard) {
-                    // Remove card
-                    const index = userCards.indexOf(cardId);
-                    if (index > -1) userCards.splice(index, 1);
-
-                    await UserDataManager.saveCards(userCards);
+                    await removeLastCardModal();
                 } else {
-                    // Show nickname/opening date popup before adding card
-                    const cardDetails = await showCardDetailsPopupModal(cardId);
-                    if (cardDetails === null) {
-                        // User cancelled
-                        button.disabled = false;
-                        return;
+                    closeCardModal();
+                    if (typeof window.openCardOwnershipModal === 'function') {
+                        window.openCardOwnershipModal(cardId, null, cardType);
+                    } else {
+                        // Fallback simple add if the ownership modal is not loaded on this page
+                        button.disabled = true;
+                        button.textContent = '...';
+                        const success = await UserDataManager.addCardWithDetails(cardId, '', null);
+                        if (success) {
+                            alert('Card added to your collection!');
+                            refreshPageDisplay();
+                        } else {
+                            alert('Error adding card. Please try again.');
+                        }
                     }
-
-                    // Add card with details
-                    const success = await UserDataManager.addCardWithDetails(cardId, cardDetails.nickname, cardDetails.openingDate);
-                    if (!success) {
-                        throw new Error('Failed to add card');
-                    }
-
-                    // Update local userCards array for immediate UI feedback
-                    userCards.push(cardId);
                 }
-
-                await updateModalOwnershipButton(cardId);
-
-                // If there's a global filterCards or similar function, refresh the display
-                if (typeof filterCards === 'function') {
-                    filterCards();
-                } else if (typeof displayCards === 'function' && typeof allCards !== 'undefined') {
-                    displayCards(allCards);
-                }
-
             } catch (error) {
                 console.error('Error updating card ownership:', error);
                 alert('Error updating card ownership');
@@ -1385,141 +1354,243 @@
             }
         }
 
-
-
         function closeCardModal() {
             document.getElementById('cardModal').style.display = 'none';
             currentModalCard = null;
         }
 
-        // Edit Card Details Modal Functions
         async function openEditCardDetailsModal() {
-            console.log('🐛 DEBUG: openEditCardDetailsModal called');
-            console.trace('🐛 DEBUG: Call stack for openEditCardDetailsModal');
             if (!currentModalCard) return;
+            const cardId = currentModalCard.id;
+            const cardType = currentModalCard.card_type;
+            const existingUserCard = await UserDataManager.getCardDetails(cardId);
+            const isOwned = (existingUserCard && existingUserCard.id) ? existingUserCard : null;
+            closeCardModal();
+            openCardOwnershipModal(cardId, isOwned, cardType);
+        }
 
-            try {
-                const cardDetails = await UserDataManager.getCardDetails(currentModalCard.id);
+        // Card Ownership Modal Functions
+        async function openCardOwnershipModal(cardId, existingUserCard = null, cardType = 'personal') {
+            const modal = document.getElementById('cardOwnershipModal');
+            if (!modal) return;
 
-                // Populate form with current values
-                document.getElementById('editModalCardName').textContent = currentModalCard.name;
-                document.getElementById('cardNickname').value = cardDetails?.nickname || '';
-                document.getElementById('cardOpeningDate').value = cardDetails?.opened_date || '';
-                document.getElementById('cardBonusEarnedDate').value = cardDetails?.bonus_earned_date || '';
-                document.getElementById('cardBonusOverride').value =
-                    cardDetails?.bonus_override === true ? 'true' :
-                    cardDetails?.bonus_override === false ? 'false' : '';
+            const form = document.getElementById('cardOwnershipForm');
+            const modalTitle = document.getElementById('modalTitle');
 
-                // Phase K: owner selector — shown for authed households with:
-                // - more than one entity of THIS card's own kind, OR
-                // - exactly one entity whose ID doesn't match the card's current owner
-                //   (so you can fix a misattributed card even with just one candidate)
-                // Note: if this card has multiple copies (different owners),
-                // this still edits the first matching row — the same
-                // longstanding ambiguity the other fields above already have.
-                const ownerGroup = document.getElementById('cardOwnerGroup');
-                const ownerSelect = document.getElementById('cardOwner');
-                const entities = await UserDataManager.getEntities();
-                const isBusinessCard = currentModalCard.card_type === 'business';
-                const candidates = entities.filter(e => (e.kind === 'business') === isBusinessCard);
-                const currentOwnerId = cardDetails?.owner;
-                const shouldShowOwnerPicker = isAuthenticated && candidates.length > 0 && (
-                    candidates.length > 1 || (candidates.length === 1 && currentOwnerId !== candidates[0].id)
-                );
-                if (shouldShowOwnerPicker) {
-                    ownerSelect.innerHTML = candidates.map(e =>
-                        `<option value="${e.id}">${escapeHtml(e.name)}${e.is_primary ? ' (Primary)' : ''}</option>`
-                    ).join('');
-                    const defaultId = candidates.find(e => e.is_primary)?.id || candidates[0].id;
-                    ownerSelect.value = currentOwnerId ?? defaultId;
-                    ownerGroup.style.display = 'block';
-                } else {
-                    ownerGroup.style.display = 'none';
-                }
+            const hasExistingId = Boolean(existingUserCard && existingUserCard.id);
 
-                // Show edit modal
-                document.getElementById('editCardDetailsModal').style.display = 'block';
-            } catch (error) {
-                console.error('Error loading card details for editing:', error);
-                alert('Error loading card details for editing');
+            // Set modal title and add auth status indicator
+            if (isAuthenticated) {
+                modalTitle.textContent = hasExistingId ? 'Edit Card Details' : 'Add Card to Collection';
+            } else {
+                modalTitle.innerHTML = hasExistingId ?
+                    'Edit Card Details <span style="background: #5C6675; color: white; padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: 500; margin-left: 8px;">Local Mode</span>' :
+                    'Add Card to Collection <span style="background: #5C6675; color: white; padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: 500; margin-left: 8px;">Local Mode</span>';
             }
+
+            // Store card ID in form
+            form.dataset.cardId = cardId;
+            form.dataset.userCardId = hasExistingId ? existingUserCard.id : '';
+
+            // Pre-fill form if editing existing card
+            if (hasExistingId) {
+                form.nickname.value = existingUserCard.nickname || '';
+                form.opened_date.value = existingUserCard.opened_date || '';
+                form.closed_date.value = existingUserCard.closed_date || '';
+                if (form.bonus_earned_date) form.bonus_earned_date.value = existingUserCard.bonus_earned_date || '';
+                if (form.bonus_override) {
+                    form.bonus_override.value =
+                        existingUserCard.bonus_override === true ? 'true' :
+                        existingUserCard.bonus_override === false ? 'false' : '';
+                }
+                form.notes.value = existingUserCard.notes || '';
+            } else {
+                form.reset();
+            }
+
+            // Phase K: owner selector — shown when authed and there are > 1 entities of matching kind (personal vs. business)
+            const ownerGroup = document.getElementById('cardOwnershipOwnerGroup');
+            const ownerSelect = document.getElementById('ownershipOwner');
+            const entities = await UserDataManager.getEntities();
+            
+            let resolvedCardType = cardType;
+            let cardObj = (typeof allCards !== 'undefined' && Array.isArray(allCards) ? allCards.find(c => c.id === parseInt(cardId)) : null) || existingUserCard?.card;
+            if (cardObj && cardObj.card_type) {
+                resolvedCardType = cardObj.card_type;
+            } else if (isAuthenticated && (!cardObj || !cardObj.card_type)) {
+                try {
+                    const res = await fetch(`${API_BASE}/cards/cards/${cardId}/`);
+                    if (res.ok) {
+                        const fetchedCard = await res.json();
+                        if (fetchedCard && fetchedCard.card_type) {
+                            resolvedCardType = fetchedCard.card_type;
+                        }
+                    }
+                } catch (e) {
+                    console.error('Error fetching card details for card type:', e);
+                }
+            }
+
+            const isBusinessCard = resolvedCardType === 'business';
+            const candidates = entities.filter(e => (e.kind === 'business') === isBusinessCard);
+
+            if (isAuthenticated && candidates.length > 1) {
+                ownerSelect.innerHTML = candidates.map(e =>
+                    `<option value="${e.id}">${escapeHtml(e.name)}${e.is_primary ? ' (Primary)' : ''}</option>`
+                ).join('');
+                const defaultId = candidates.find(e => e.is_primary)?.id || candidates[0].id;
+                const currentOwnerId = existingUserCard?.owner?.id || existingUserCard?.owner;
+                ownerSelect.value = currentOwnerId ?? defaultId;
+                ownerGroup.style.display = 'block';
+            } else {
+                ownerGroup.style.display = 'none';
+            }
+
+            // Show/hide local storage notice
+            const localNotice = document.getElementById('localStorageNotice');
+            if (localNotice) {
+                localNotice.style.display = isAuthenticated ? 'none' : 'block';
+            }
+
+            modal.classList.add('show');
+            document.body.style.overflow = 'hidden';
         }
 
-        function closeEditCardDetailsModal() {
-            document.getElementById('editCardDetailsModal').style.display = 'none';
-            // Clear form
-            document.getElementById('cardNickname').value = '';
-            document.getElementById('cardOpeningDate').value = '';
-            document.getElementById('cardBonusEarnedDate').value = '';
-            document.getElementById('cardBonusOverride').value = '';
-            document.getElementById('cardOwnerGroup').style.display = 'none';
+        function closeCardOwnershipModal() {
+            const modal = document.getElementById('cardOwnershipModal');
+            if (modal) {
+                modal.classList.remove('show');
+            }
+            document.body.style.overflow = '';
         }
 
-        async function saveCardDetails(event) {
+        async function saveCardOwnership(event) {
             event.preventDefault();
 
-            if (!currentModalCard) return;
+            const form = event.target;
+            const cardId = form.dataset.cardId;
+            const userCardId = form.dataset.userCardId;
+            const submitBtn = form.querySelector('button[type="submit"]');
+
+            const ownerGroupVisible = document.getElementById('cardOwnershipOwnerGroup').style.display !== 'none';
+            const bonusOverrideRaw = form.bonus_override ? form.bonus_override.value : '';
+            const bonusOverride = bonusOverrideRaw === '' ? null : bonusOverrideRaw === 'true';
+
+            const formData = {
+                card_id: parseInt(cardId),
+                nickname: form.nickname.value,
+                opened_date: form.opened_date.value || null,
+                closed_date: form.closed_date.value || null,
+                bonus_earned_date: form.bonus_earned_date ? (form.bonus_earned_date.value || null) : null,
+                bonus_override: bonusOverride,
+                notes: form.notes.value
+            };
+            if (ownerGroupVisible) {
+                formData.owner = form.owner.value;
+            }
 
             try {
-                const nickname = document.getElementById('cardNickname').value.trim();
-                const openingDate = document.getElementById('cardOpeningDate').value;
-                const bonusEarnedDate = document.getElementById('cardBonusEarnedDate').value;
-                const bonusOverrideRaw = document.getElementById('cardBonusOverride').value;
-                const bonusOverride = bonusOverrideRaw === '' ? null : bonusOverrideRaw === 'true';
-                const ownerGroupVisible = document.getElementById('cardOwnerGroup').style.display !== 'none';
-                const owner = ownerGroupVisible ? document.getElementById('cardOwner').value : null;
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Saving...';
 
-                const success = await UserDataManager.updateCardDetails(
-                    currentModalCard.id,
-                    nickname,
-                    openingDate,
-                    bonusEarnedDate,
-                    bonusOverride,
-                    owner
-                );
+                let success = false;
 
-                if (success) {
-                    // Close edit modal
-                    closeEditCardDetailsModal();
+                if (isAuthenticated) {
+                    let response;
+                    if (userCardId) {
+                        response = await fetch(`${API_BASE}/cards/user-cards/${userCardId}/`, {
+                            method: 'PATCH',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRFToken': getCookie('csrftoken')
+                            },
+                            body: JSON.stringify(formData)
+                        });
+                    } else {
+                        response = await fetch(`${API_BASE}/cards/user-cards/add/`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRFToken': getCookie('csrftoken')
+                            },
+                            body: JSON.stringify(formData)
+                        });
+                    }
 
-                    // Refresh the main modal display
-                    await populateUserCardDetails(currentModalCard.id);
-
-                    // Also refresh the card list display if needed
-                    if (typeof filterCards === 'function') {
-                        filterCards();
+                    if (response.ok) {
+                        success = true;
+                    } else {
+                        const errorData = await response.json();
+                        console.error('API Error:', errorData);
+                        showNotification(errorData.error || 'Failed to save card details', 'error');
                     }
                 } else {
-                    alert('Error saving card details. Please try again.');
+                    // Local storage mode
+                    const cards = await UserDataManager.getCards();
+                    if (!cards.includes(parseInt(cardId))) {
+                        cards.push(parseInt(cardId));
+                        await UserDataManager.saveCards(cards);
+                    }
+
+                    LocalStorage.setCardDetails(parseInt(cardId), {
+                        nickname: formData.nickname,
+                        opened_date: formData.opened_date,
+                        closed_date: formData.closed_date,
+                        bonus_earned_date: formData.bonus_earned_date,
+                        bonus_override: formData.bonus_override,
+                        notes: formData.notes,
+                        owner: formData.owner || null
+                    });
+
+                    success = true;
+                }
+
+                if (success) {
+                    closeCardOwnershipModal();
+                    showNotification(userCardId ? 'Card details updated!' : 'Card added to your collection!', 'success');
+                    refreshPageDisplay();
                 }
             } catch (error) {
-                console.error('Error saving card details:', error);
-                alert('Error saving card details. Please try again.');
+                console.error('Error saving card ownership:', error);
+                showNotification('An error occurred while saving', 'error');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = userCardId ? 'Save Details' : 'Add Card';
             }
         }
+
+        window.openCardOwnershipModal = openCardOwnershipModal;
+        window.closeCardOwnershipModal = closeCardOwnershipModal;
+        window.saveCardOwnership = saveCardOwnership;
 
         // Close modal when clicking outside of it
         window.onclick = function(event) {
             const cardModal = document.getElementById('cardModal');
             const editModal = document.getElementById('editCardDetailsModal');
+            const ownershipModal = document.getElementById('cardOwnershipModal');
 
             if (event.target === cardModal) {
                 closeCardModal();
             } else if (event.target === editModal) {
                 closeEditCardDetailsModal();
+            } else if (event.target === ownershipModal) {
+                if (typeof closeCardOwnershipModal === 'function') closeCardOwnershipModal();
             }
-        }
+        };
 
         // Close modal with Escape key
         document.addEventListener('keydown', function(event) {
             if (event.key === 'Escape') {
                 const editModal = document.getElementById('editCardDetailsModal');
                 const cardModal = document.getElementById('cardModal');
+                const ownershipModal = document.getElementById('cardOwnershipModal');
 
-                if (editModal.style.display === 'block') {
+                if (editModal && editModal.style.display === 'block') {
                     closeEditCardDetailsModal();
-                } else if (cardModal.style.display === 'block') {
+                } else if (cardModal && cardModal.style.display === 'block') {
                     closeCardModal();
+                } else if (ownershipModal && (ownershipModal.classList.contains('show') || ownershipModal.style.display === 'block')) {
+                    if (typeof closeCardOwnershipModal === 'function') closeCardOwnershipModal();
                 }
             }
         });

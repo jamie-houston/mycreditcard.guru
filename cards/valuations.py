@@ -30,7 +30,12 @@ def value_per_point(program, user=None):
         val = PointsValuation.objects.filter(points_program=program, user=user).first()
     if not val:
         val = PointsValuation.objects.filter(points_program=program, user=None).first()
-    return float(val.value) if val else None
+    if not val:
+        return None
+    rate = float(val.value)
+    if rate >= 0.5:
+        rate = rate / 100.0
+    return rate
 
 
 def credit_currency_rate(currency, user=None):

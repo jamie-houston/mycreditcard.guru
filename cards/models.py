@@ -129,9 +129,14 @@ class CreditCard(models.Model):
         
         # Extract reward_value_multiplier from metadata if not explicitly set or if metadata has updated
         if self.metadata and 'reward_value_multiplier' in self.metadata:
-            self.reward_value_multiplier = self.metadata['reward_value_multiplier']
+            val = float(self.metadata['reward_value_multiplier'])
+            if val >= 0.5:
+                val = val / 100.0
+            self.reward_value_multiplier = val
         elif not self.reward_value_multiplier:
             self.reward_value_multiplier = 0.01
+        elif float(self.reward_value_multiplier) >= 0.5:
+            self.reward_value_multiplier = float(self.reward_value_multiplier) / 100.0
 
         super().save(*args, **kwargs)
     

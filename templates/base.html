@@ -29,6 +29,7 @@
     <script>
         const API_BASE = '/api';
     </script>
+    <script src="{% static 'js/utils.js' %}"></script>
 </head>
 <body>
     <!-- Desktop top nav -->
@@ -273,65 +274,9 @@
         </div>
     </div>
 
-    <!-- Edit Card Details Modal -->
-    <div id="editCardDetailsModal" class="modal" style="display: none;">
-        <div class="modal-content" style="max-width: 500px;">
-            <div class="modal-header">
-                <button class="modal-close" onclick="closeEditCardDetailsModal()">&times;</button>
-                <h2 class="modal-title">Edit Card Details</h2>
-                <p class="modal-subtitle" id="editModalCardName">Card Name</p>
-            </div>
-            <div class="modal-body">
-                <form onsubmit="saveCardDetails(event)">
-                    <div class="form-group" style="margin-bottom: 20px;">
-                        <label for="cardNickname" style="display: block; margin-bottom: 8px; font-weight: 600;">Nickname (Optional)</label>
-                        <input
-                            type="text"
-                            id="cardNickname"
-                            placeholder="e.g., My Travel Card, Daily Driver..."
-                            style="width: 100%;"
-                        >
-                    </div>
-                    <div class="form-group" style="margin-bottom: 20px;">
-                        <label for="cardOpeningDate" style="display: block; margin-bottom: 8px; font-weight: 600;">Opening Date (Optional)</label>
-                        <input
-                            type="date"
-                            id="cardOpeningDate"
-                            style="width: 100%; color-scheme: dark;"
-                        >
-                    </div>
-                    <div class="form-group" style="margin-bottom: 20px;">
-                        <label for="cardBonusEarnedDate" style="display: block; margin-bottom: 8px; font-weight: 600;">Bonus Earned Date (Optional)</label>
-                        <input
-                            type="date"
-                            id="cardBonusEarnedDate"
-                            style="width: 100%; color-scheme: dark;"
-                        >
-                    </div>
-                    <div class="form-group" style="margin-bottom: 30px;">
-                        <label for="cardBonusOverride" style="display: block; margin-bottom: 8px; font-weight: 600;">Signup Bonus Status</label>
-                        <select id="cardBonusOverride" style="width: 100%; color-scheme: dark;">
-                            <option value="">Auto (infer from issuer rules)</option>
-                            <option value="true">I earned this bonus</option>
-                            <option value="false">I did not earn this bonus</option>
-                        </select>
-                    </div>
-                    <div class="form-group" id="cardOwnerGroup" style="margin-bottom: 30px; display: none;">
-                        <label for="cardOwner" style="display: block; margin-bottom: 8px; font-weight: 600;">Held By</label>
-                        <select id="cardOwner" style="width: 100%; color-scheme: dark;"></select>
-                    </div>
-                    <div style="display: flex; gap: 15px; justify-content: center;">
-                        <button type="submit" class="success" style="padding: 12px 24px;">
-                            💾 Save Details
-                        </button>
-                        <button type="button" onclick="closeEditCardDetailsModal()" class="secondary" style="padding: 12px 24px;">
-                            Cancel
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
+
+
+    {% include 'partials/card_ownership_modal.html' %}
 
     <script src="{% static 'js/base.js' %}"></script>
 

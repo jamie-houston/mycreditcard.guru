@@ -43,6 +43,23 @@
                 </div>
             </div>
 
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="bonus_earned_date">Bonus Earned Date (Optional)</label>
+                    <input type="date" id="bonus_earned_date" name="bonus_earned_date">
+                    <small>When did you receive the welcome bonus?</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="bonus_override">Signup Bonus Status</label>
+                    <select id="bonus_override" name="bonus_override">
+                        <option value="">Auto (infer from issuer rules)</option>
+                        <option value="true">I earned this bonus</option>
+                        <option value="false">I did not earn this bonus</option>
+                    </select>
+                </div>
+            </div>
+
             <div class="form-group">
                 <label for="notes">Notes (Optional)</label>
                 <textarea id="notes" name="notes" rows="3"

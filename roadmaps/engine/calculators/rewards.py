@@ -21,8 +21,12 @@ class RewardsCalculator:
     def own_multiplier(self, card: CreditCard) -> float:
         """This card's own points/miles value, ignoring any points program it belongs to."""
         if hasattr(card, 'reward_value_multiplier') and card.reward_value_multiplier is not None:
-            return float(card.reward_value_multiplier)
-        return float(card.metadata.get('reward_value_multiplier', 0.01))
+            mult = float(card.reward_value_multiplier)
+        else:
+            mult = float((card.metadata or {}).get('reward_value_multiplier', 0.01))
+        if mult >= 0.5:
+            mult = mult / 100.0
+        return mult
 
     def program_multipliers(self, portfolio_cards: List[CreditCard]) -> dict:
         """{points_program slug: best own multiplier among held cards in that program}."""

@@ -274,7 +274,11 @@ function cardSortValue(key, group, cardInfo) {
         }
         case 'annual_fee': return parseFloat(cardInfo.annual_fee || 0);
         case 'reward_type': return cardInfo.primary_reward_type?.name || '';
-        case 'point_value': return cardInfo.metadata?.reward_value_multiplier || 0.01;
+        case 'point_value': {
+            let mult = cardInfo.metadata?.reward_value_multiplier || 0.01;
+            if (mult >= 0.5) mult /= 100.0;
+            return mult;
+        }
         case 'signup_bonus': return cardInfo.signup_bonus_amount || 0;
         case 'card_type': return cardInfo.card_type || '';
         case 'owner': {
@@ -312,16 +316,18 @@ function renderCardCollectionTable() {
         .filter(([cardId]) => cardDetails[cardId])
         .map(([cardId, group]) => ({ cardId, group, cardInfo: cardDetails[cardId] }));
 
-    // Filter by personal vs business mode
+    // Filter by personal vs business vs all mode
     rows = rows.filter(({ cardInfo }) => {
+        if (_profileFilterMode === 'all') return true;
         const cardType = (cardInfo.card_type || 'personal').toLowerCase();
         return cardType === _profileFilterMode;
     });
 
     if (rows.length === 0) {
+        const filterText = _profileFilterMode === 'all' ? '' : `${_profileFilterMode} `;
         cardCollectionContainer.innerHTML = `
             <div style="text-align:center; padding: 40px; color: var(--muted); border: 1px dashed var(--border); border-radius: 12px; background: white;">
-                No ${_profileFilterMode} cards in your collection yet.
+                No ${filterText}cards in your collection yet.
             </div>
         `;
         return;
@@ -353,6 +359,7 @@ function renderCardCollectionTable() {
         // the "why" reasoning lives on the Roadmap page, not here).
         const rec = _recommendationsMap[cardId];
         let status = rec ? (rec.action || 'keep') : (annualFee === 0 ? 'keep' : 'review');
+        if (status === 'apply') status = 'keep';
         const statusLabel = status.charAt(0).toUpperCase() + status.slice(1);
         const cardStyle = getCardInitialsAndColor(cardInfo.name, cardInfo.issuer?.name);
 
@@ -1043,12 +1050,14 @@ async function calculatePortfolioSummary() {
                         }
                         
                         if (portfolioSummary) {
-                            totalAnnualRewards = portfolioSummary.total_portfolio_rewards || 0;
-                            netPortfolioValue = portfolioSummary.net_portfolio_value || 0;
-                            // Use the optimized fees from the portfolio summary if available
+                            totalAnnualRewards = (portfolioSummary.total_annual_rewards !== undefined) 
+                                ? portfolioSummary.total_annual_rewards 
+                                : (portfolioSummary.total_portfolio_rewards || 0);
+                            // Use optimized fees from portfolio summary if available
                             if (portfolioSummary.total_annual_fees !== undefined) {
                                 totalAnnualFees = portfolioSummary.total_annual_fees;
                             }
+                            netPortfolioValue = totalAnnualRewards - totalAnnualFees;
                         }
                         
                         // Re-render to show keep/cancel statuses and live reasoning
@@ -1057,7 +1066,7 @@ async function calculatePortfolioSummary() {
                 } catch (error) {
                     console.error('Error calculating portfolio optimization:', error);
                     // Fall back to simple calculation
-                    netPortfolioValue = Math.max(0, totalAnnualRewards - totalAnnualFees);
+                    netPortfolioValue = totalAnnualRewards - totalAnnualFees;
                 }
             } else {
                 // No spending data, so no rewards
@@ -1072,7 +1081,10 @@ async function calculatePortfolioSummary() {
         
         // Color code the net value
         const netValueElement = document.getElementById('netPortfolioValue');
-        netValueElement.textContent = `$${netPortfolioValue.toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
+        const formattedNet = netPortfolioValue < 0 
+            ? `-$${Math.abs(netPortfolioValue).toLocaleString('en-US', { maximumFractionDigits: 0 })}` 
+            : `$${netPortfolioValue.toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
+        netValueElement.textContent = formattedNet;
         
         if (netPortfolioValue > 0) {
             netValueElement.style.color = '#3FCF8E'; // Green for positive
@@ -1283,7 +1295,7 @@ function displaySearchResults(cards) {
     const html = cards.map(card => `
         <div
             class="search-result-item"
-            onclick="selectCard(${card.id}, '${card.name.replace(/'/g, '\\\'')}')"
+            onclick="selectCard(${card.id}, '${card.name.replace(/'/g, '\\\'')}', '${card.card_type}')"
             style="padding: 12px; cursor: pointer; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; transition: background-color 0.2s;"
             onmouseover="this.style.backgroundColor='var(--bg)'"
             onmouseout="this.style.backgroundColor='transparent'"
@@ -1309,7 +1321,7 @@ function hideSearchResults() {
 }
 
 // Select a card from search results
-async function selectCard(cardId, cardName) {
+async function selectCard(cardId, cardName, cardType) {
     selectedCard = cardId;
     
     // Update input value
@@ -1317,86 +1329,24 @@ async function selectCard(cardId, cardName) {
     
     // Hide results and clean up positioning
     const resultsDiv = document.getElementById('cardSearchResults');
-    resultsDiv.style.display = 'none';
+    if (resultsDiv) {
+        resultsDiv.style.display = 'none';
+    }
     
-    // Since there's no button, automatically add the card
-    await addSelectedCardToCollection();
+    // Retrieve existing card details if they already own it
+    const existingUserCard = await UserDataManager.getCardDetails(cardId);
+    const isOwned = (existingUserCard && existingUserCard.id) ? existingUserCard : null;
+    
+    // Open the card ownership modal to let the user configure details (start date, etc.)
+    await openCardOwnershipModal(cardId, isOwned, cardType);
+    
+    // Clear search
+    document.getElementById('cardSearch').value = '';
+    selectedCard = null;
 }
 
-// Add selected card to collection
-async function addSelectedCardToCollection() {
-    if (!selectedCard) {
-        showNotification('Please select a card first', 'error');
-        return;
-    }
-    
-    const addButton = document.getElementById('addSelectedCard');
-    let originalText = '';
-    if (addButton) {
-        originalText = addButton.innerHTML;
-        addButton.innerHTML = '⏳ Adding...';
-        addButton.disabled = true;
-    }
-    
-    try {
-        if (isAuthenticated) {
-            // For authenticated users, save to server
-            const response = await fetch('/api/cards/user-cards/add/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': getCookie('csrftoken')
-                },
-                body: JSON.stringify({
-                    card_id: selectedCard
-                })
-            });
-            
-            if (response.ok) {
-                const data = await response.json();
-                showNotification(data.message || 'Card added successfully!', 'success');
-                
-                // Reload the page data to show the new card
-                loadProfileData();
-            } else {
-                const errorData = await response.json();
-                showNotification(errorData.error || 'Failed to add card', 'error');
-                return;
-            }
-        } else {
-            // For unauthenticated users, save to local storage
-            const currentCards = LocalStorage.getCards();
-            if (!currentCards.includes(selectedCard)) {
-                currentCards.push(selectedCard);
-                LocalStorage.setCards(currentCards);
-                
-                showNotification('Card added to your local collection! Log in to sync with your account.', 'success');
-                
-                // Reload the page data to show the new card
-                loadProfileData();
-            } else {
-                showNotification('Card is already in your collection', 'info');
-            }
-        }
-        
-        // Clear search
-        document.getElementById('cardSearch').value = '';
-        selectedCard = null;
-        if (addButton) {
-            addButton.disabled = true;
-            addButton.style.opacity = '0.5';
-        }
-        
-    } catch (error) {
-        console.error('Error adding card:', error);
-        showNotification('Error adding card. Please try again.', 'error');
-    } finally {
-        if (addButton) {
-            addButton.innerHTML = originalText;
-            addButton.disabled = selectedCard === null;
-        }
-    }
-}
+// Bind modal functions to window so they are globally accessible to the form handlers in templates
+window.selectCard = selectCard;
 
 // Hide search results when clicking outside
 document.addEventListener('click', function(event) {

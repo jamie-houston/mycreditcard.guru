@@ -455,6 +455,7 @@ class RecommendationItemSerializer(serializers.Serializer):
 class PortfolioSummarySerializer(serializers.Serializer):
     total_annual_fees = serializers.FloatField(required=False, default=0.0)
     total_portfolio_rewards = serializers.FloatField(required=False, default=0.0)
+    total_annual_rewards = serializers.FloatField(required=False, default=0.0)
     net_portfolio_value = serializers.FloatField(required=False, default=0.0)
     category_optimization = serializers.DictField(required=False, default=dict)
     category_allocation = serializers.ListField(child=serializers.DictField(), required=False, default=list)

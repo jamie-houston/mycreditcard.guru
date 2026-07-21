@@ -850,27 +850,28 @@ class RecommendationEngineOrchestrator:
         credit_allocation = self._allocate_portfolio_credits(portfolio_cards)
         total_credits_value = sum(value for value, _ in credit_allocation.values())
 
-        total_portfolio_rewards += total_credits_value
-        
+        total_annual_rewards = total_portfolio_rewards + total_credits_value
+
         total_signup_bonuses = 0
         for card_data in all_portfolio_cards:
             if card_data['action'] == 'apply':
                 signup_bonus = self._get_signup_bonus_value(card_data['card'])
                 total_signup_bonuses += signup_bonus
-        
-        total_portfolio_rewards += total_signup_bonuses
+
+        total_portfolio_rewards = total_annual_rewards + total_signup_bonuses
         logger.debug(f"Portfolio Summary - signup bonuses: ${total_signup_bonuses:.2f}")
-        
+
         net_portfolio_value = total_portfolio_rewards - total_annual_fees
-        
+
         if net_portfolio_value < 0:
             logger.warning(f"Portfolio optimization resulted in negative value: ${net_portfolio_value:.2f}")
             logger.debug(f"Total rewards: ${total_portfolio_rewards:.2f}, Total fees: ${total_annual_fees:.2f}")
             logger.debug(f"Portfolio cards: {len(all_portfolio_cards)}")
-        
+
         result = {
             'total_annual_fees': total_annual_fees,
             'total_portfolio_rewards': total_portfolio_rewards,
+            'total_annual_rewards': total_annual_rewards,
             'net_portfolio_value': net_portfolio_value,
             'category_optimization': category_optimization,
             'category_allocation': category_allocation,
