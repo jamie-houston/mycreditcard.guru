@@ -2,6 +2,7 @@
 let spendingCategories = {}; // For slug -> ID mapping
 let spendingCategoriesArray = []; // For the actual category objects
 let spendingCredits = [];
+let ownedCreditsBySlug = {}; // Phase Q: populated non-blockingly by loadOwnedCreditsForBuilder()
 
 window.updateMaxFeeSlider = function(val) {
     const display = document.getElementById('maxFeeValue');
@@ -390,10 +391,34 @@ async function loadData() {
 
         // Restore the last generated roadmap, if any, so it survives a reload
         await loadCurrentRoadmap();
+
+        // Phase Q: personalize credit values with owned-card data. Runs
+        // non-blockingly — the builder must render and stay usable without
+        // it (anonymous users / no cards ⇒ ownedCreditsBySlug stays empty
+        // and every credit just shows its typical value).
+        loadOwnedCreditsForBuilder();
     } catch (error) {
         console.error('Error loading data:', error);
-        document.getElementById('spendingCategories').innerHTML = 
+        document.getElementById('spendingCategories').innerHTML =
             '<div class="error">Error loading spending categories. Please try again.</div>';
+    }
+}
+
+async function loadOwnedCreditsForBuilder() {
+    try {
+        const cardIds = await UserDataManager.getCards();
+        if (!cardIds || cardIds.length === 0) return;
+
+        const [cardDetails, preferences] = await Promise.all([
+            fetchOwnedCardDetails(cardIds),
+            UserDataManager.getCreditPreferences()
+        ]);
+
+        ownedCreditsBySlug = aggregateOwnedCredits(cardDetails, preferences);
+        updateCreditLabels();
+        updateSelectedCreditsTotal();
+    } catch (error) {
+        console.error('Error loading owned credit values:', error);
     }
 }
 
@@ -563,6 +588,7 @@ function renderSpendingCategories(categories) {
                     `<span class="tooltip-icon" title="${credit.description}" style="margin-left: 4px;">❓</span>` : '';
                 const stackabilityHint = credit.stackable === false ?
                     `<span style="color: var(--muted); font-size: 11px; margin-left: 4px;" title="If you hold more than one card with this credit, it only counts once toward your total">(counted once across cards)</span>` : '';
+                const valueLabel = formatCreditValueLabel(resolveCreditValue(credit.slug, credit.typical_value));
 
                 categoryHtml += `
                     <div class="spending-credit-item" style="display: flex !important; align-items: center !important; gap: 6px; font-size: 12px; width: 100% !important; margin-bottom: 8px; flex-wrap: nowrap !important;">
@@ -571,20 +597,83 @@ function renderSpendingCategories(categories) {
                         <label for="credit_${credit.slug}" style="cursor: pointer; color: var(--text); font-weight: normal; margin: 0;">
                             ${credit.icon ? `${credit.icon} ` : ''}${credit.display_name}${creditDescription}${stackabilityHint}
                         </label>
+                        <span class="credit-value-label" data-credit-slug="${credit.slug}" style="color: var(--muted); font-size: 11px; white-space: nowrap;">${valueLabel}</span>
                     </div>
                 `;
             });
-            
+
             categoryHtml += `
                     </div>
                 </div>
             `;
         }
-        
+
         return categoryHtml;
     }).join('');
-    
-    container.innerHTML = html;
+
+    container.innerHTML = html + `
+        <div id="creditsValueSummary" style="margin-top: 14px; padding: 10px 14px; background: var(--accent-soft, oklch(95% 0.03 250)); border-radius: 8px; font-size: 13px; font-weight: 600; color: var(--text); display: none;"></div>
+    `;
+    updateSelectedCreditsTotal();
+}
+
+// Phase Q: resolve a catalog credit's display value — the user's real
+// owned-card value when they hold a carrying card (reconciles with the
+// engine and the profile Benefits tab), else the catalog's typical_value
+// (median across active cards), clearly labelled as an estimate.
+function resolveCreditValue(slug, typicalValue) {
+    const owned = ownedCreditsBySlug[slug];
+    if (owned) {
+        return { amount: owned.rawAmount, isTypical: false };
+    }
+    if (typicalValue != null) {
+        return { amount: typicalValue, isTypical: true };
+    }
+    return null;
+}
+
+function formatCreditValueLabel(resolved) {
+    if (!resolved) return '';
+    return resolved.isTypical
+        ? `~$${resolved.amount.toFixed(0)}/yr (typical)`
+        : `$${resolved.amount.toFixed(0)}/yr`;
+}
+
+// Refreshes every credit's value label once owned-card data arrives
+// (it loads after the initial render, so labels start typical/blank).
+function updateCreditLabels() {
+    document.querySelectorAll('.credit-value-label[data-credit-slug]').forEach(span => {
+        const slug = span.dataset.creditSlug;
+        const credit = spendingCredits.find(c => c.slug === slug);
+        const resolved = resolveCreditValue(slug, credit ? credit.typical_value : null);
+        span.textContent = formatCreditValueLabel(resolved);
+    });
+}
+
+// Running total of the credits the user has checked — a straight sum,
+// since ownedCreditsBySlug's rawAmount already resolved stackability
+// dedup per catalog slug (one checkbox per slug).
+function updateSelectedCreditsTotal() {
+    const summaryEl = document.getElementById('creditsValueSummary');
+    if (!summaryEl) return;
+
+    const checkboxes = document.querySelectorAll('input[name="spending_credit_preferences"]');
+    if (checkboxes.length === 0) {
+        summaryEl.style.display = 'none';
+        return;
+    }
+
+    let total = 0;
+    checkboxes.forEach(checkbox => {
+        if (!checkbox.checked) return;
+        const slug = checkbox.value;
+        const credit = spendingCredits.find(c => c.slug === slug);
+        const resolved = resolveCreditValue(slug, credit ? credit.typical_value : null);
+        if (resolved) total += resolved.amount;
+    });
+
+    summaryEl.textContent = `Credits you value: ~$${Math.round(total).toLocaleString()}/yr`;
+    summaryEl.style.display = 'block';
 }
 
 // Phase N: flat parent + indented-subcategory option list for the
@@ -609,6 +698,7 @@ function renderExpenseCategoryOptions(categories) {
 function handleSpendingCreditChange(checkbox) {
     // Save spending credit preferences
     saveSpendingCreditPreferences();
+    updateSelectedCreditsTotal();
 }
 
 function setupTotalCalculation() {
@@ -691,7 +781,8 @@ function resetSpendingProfile() {
         spendingCreditCheckboxes.forEach(checkbox => {
             checkbox.checked = false;
         });
-        
+        updateSelectedCreditsTotal();
+
         // Clear easy mode inputs as well
         const easyAmountInput = document.getElementById('easySpendingAmount');
         if (easyAmountInput) easyAmountInput.value = '';
@@ -853,6 +944,7 @@ async function loadSpendingCreditPreferences() {
                 checkbox.checked = valuesCredit;
             }
         });
+        updateSelectedCreditsTotal();
     } catch (error) {
         console.error('Error loading spending credit preferences:', error);
     }

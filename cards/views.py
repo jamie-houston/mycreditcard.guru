@@ -50,6 +50,28 @@ class SpendingCreditListView(generics.ListAPIView):
     serializer_class = SpendingCreditSerializer
     pagination_class = None  # Disable pagination for reference data
 
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['typical_values'] = self._typical_values()
+        return context
+
+    def _typical_values(self):
+        """Median CardCredit.annual_value per spending_credit, across active
+        credits on active cards — a robust "typical" value (unlike mean/max,
+        not skewed by one premium outlier) for users who don't own a card
+        carrying the credit yet."""
+        import statistics
+        values_by_credit = {}
+        card_credits = CardCredit.objects.filter(
+            is_active=True, card__is_active=True, spending_credit__isnull=False
+        ).select_related('card')
+        for card_credit in card_credits:
+            values_by_credit.setdefault(card_credit.spending_credit_id, []).append(card_credit.annual_value)
+        return {
+            credit_id: statistics.median(values)
+            for credit_id, values in values_by_credit.items()
+        }
+
 
 class CreditCardListView(generics.ListAPIView):
     queryset = CreditCard.objects.filter(is_active=True).select_related(

@@ -15,9 +15,7 @@ scratch files lived under `.claude/plans/`, which is gitignored and doesn't
 persist across sessions — decisions and implementation detail live here and
 in the mybrain archives linked below instead.) Phase N was built ahead of M
 (2026-07-18, Jamie's call — greenfield feature over a verify-and-document
-pass). O and P are done; **Phase Q** (surfacing existing credit math in the
-spending-input builder UI) is the only phase left unstarted — see Open
-below.
+pass). O, P, and Q are done — no lettered phases remain open.
 
 ### Completed
 
@@ -52,6 +50,20 @@ below.
       Jamie's call. See below.
 - [x] **Phase O** — Category-less "easy mode" spending (2026-07-19). Added builder toggle and Easy Mode input, scratch field in serializer, engine fallback mapping to uncategorized base rate.
 - [x] **Phase P** — Surface cards that "pay for themselves" via recurring credits (2026-07-19). Added `pays_for_itself` flag in orchestrator/serializer when allocated credits value >= annual fee. Added client-side filter checkbox and sort selector in results UI with non-scrolling re-renders. Fixed pre-sort gap in `calculate_smart_card_value`.
+- [x] **Phase Q** — Surface existing credit math in the spending-input
+      builder UI (2026-07-21). Plan: `docs/plans/phase-q-builder-credit-math.md`.
+      Each "Credits You Use" checkbox now shows a `$N/yr` (owned) or
+      `~$N/yr (typical)` value plus a live "Credits you value" running
+      total. Exposed `CardCredit.annual_value` on `CardCreditSerializer`
+      (also quietly fixes the profile Benefits tab, which previously fell
+      back to face value for points-denominated credits since this field
+      was missing) and added a median-based `typical_value` to
+      `SpendingCreditListView`/`SpendingCreditSerializer`. Extracted the
+      profile tab's owned-card credit aggregation + stackability dedup
+      into a shared `static/js/credits.js` (`fetchOwnedCardDetails`,
+      `aggregateOwnedCredits`), consumed by both `profile.js` and the new
+      `roadmap.js` wiring (`loadOwnedCreditsForBuilder`, non-blocking so
+      the builder still renders instantly with no cards).
 - [x] **Points-currency credit valuation** (2026-07-20). Points-denominated
       credits (e.g. a 7,500-point Southwest anniversary bonus) now value at
       real redemption worth (~$105) instead of face value ($7,500), via a
@@ -64,9 +76,9 @@ Detail archived — see pointers under "Where everything else went."
 
 ### Open
 
-- [ ] **Phase Q** — Surface existing credit math in the spending-input
-      builder UI. Not started; scoping only so far (see "Phases (E–Q)"
-      above). No plan doc written yet.
+No lettered phases open. Remaining items below are completed maintenance
+work kept for reference.
+
 - [x] **Card verification tooling + Amex tranche** (2026-07-20). Built
       `manage.py validate_cards` — a read-only audit command mirroring
       `import_cards`'s exact lookup semantics (issuer/reward-type/

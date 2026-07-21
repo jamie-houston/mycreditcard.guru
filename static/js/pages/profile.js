@@ -763,80 +763,16 @@ async function loadCreditsProfile() {
         // Fetch detailed card information to get credits, and which credits
         // this user actually values (server-persisted, same source the
         // engine reads — a credit only counts if explicitly opted in).
-        const cardDetails = {};
-        const allCredits = {};
-        const [_, preferences, usages] = await Promise.all([
-            (async () => {
-                for (const cardId of userCards) {
-                    try {
-                        const response = await fetch(`${API_BASE}/cards/cards/${cardId}/`);
-                        if (response.ok) {
-                            const card = await response.json();
-                            cardDetails[cardId] = card;
-
-                            // Collect all credits from this card
-                            if (card.credits && card.credits.length > 0) {
-                                card.credits.forEach(credit => {
-                                    const creditType = credit.spending_credit;
-                                    if (creditType) {
-                                        const creditKey = creditType.slug;
-                                        if (!allCredits[creditKey]) {
-                                            allCredits[creditKey] = {
-                                                name: creditType.display_name || creditType.name,
-                                                slug: creditType.slug,
-                                                stackable: creditType.stackable !== false,
-                                                cards: []
-                                            };
-                                        }
-                                        // Use annual_value if available, otherwise calculate
-                                        const annualValue = credit.annual_value || (parseFloat(credit.value || 0) * (credit.times_per_year || 1));
-                                        allCredits[creditKey].cards.push({
-                                            creditId: credit.id,
-                                            cardId: cardId,
-                                            name: card.name,
-                                            value: credit.value,
-                                            annualValue: annualValue,
-                                            timesPerYear: credit.times_per_year,
-                                            description: credit.description
-                                        });
-                                    }
-                                });
-                            }
-                        }
-                    } catch (error) {
-                        console.error(`Error fetching card ${cardId}:`, error);
-                    }
-                }
-            })(),
+        // Aggregation + stackability dedup is shared with the roadmap
+        // builder via static/js/credits.js.
+        const [cardDetails, preferences, usages] = await Promise.all([
+            fetchOwnedCardDetails(userCards),
             UserDataManager.getCreditPreferences(),
             UserDataManager.getCreditUsages()
         ]);
 
-        // Resolve stackability: a non-stackable credit only counts once,
-        // on whichever card carries it for the most value — mirrors the
-        // engine's _allocate_portfolio_credits dedup rule. An opted-out
-        // credit (or one never opted into) counts $0, same as the engine.
-        const creditEntries = Object.values(allCredits).map(credit => {
-            const isUsed = preferences[credit.slug] === true;
-            let winnerCardId = null;
-            let rawAmount = 0;
-
-            if (credit.stackable) {
-                rawAmount = credit.cards.reduce((sum, c) => sum + c.annualValue, 0);
-            } else {
-                const winner = credit.cards.reduce(
-                    (best, c) => (c.annualValue > best.annualValue ? c : best), credit.cards[0]);
-                winnerCardId = winner.cardId;
-                rawAmount = winner.annualValue;
-            }
-
-            return {
-                ...credit,
-                isUsed,
-                winnerCardId,
-                effectiveAmount: isUsed ? rawAmount : 0
-            };
-        });
+        const aggregatedCredits = aggregateOwnedCredits(cardDetails, preferences);
+        const creditEntries = Object.values(aggregatedCredits);
 
         if (creditEntries.length === 0) {
             creditsContainer.innerHTML = `

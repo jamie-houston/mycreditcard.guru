@@ -411,3 +411,67 @@ class CreditCurrencyValuationTests(TestCase):
             card=card, description='Statement Credit', value=300, times_per_year=1)
         self.assertEqual(usd_credit.annual_value, 300.0)
 
+
+class CreditMathBuilderAPITests(TestCase):
+    """Phase Q (docs/plans/phase-q-builder-credit-math.md): the spending
+    builder needs `annual_value` on card credits and a `typical_value` on
+    the spending-credit catalog so it can show real dollar figures next to
+    the "Credits You Use" checkboxes instead of none at all."""
+
+    def setUp(self):
+        from .models import CardCredit, PointsProgram, PointsValuation
+        self.category = SpendingCategory.objects.create(name='Travel2', slug='travel2')
+        self.lounge = SpendingCredit.objects.create(
+            name='Lounge2', slug='lounge2', display_name='Lounge Access 2',
+            category=self.category)
+        self.no_card_credit = SpendingCredit.objects.create(
+            name='Unclaimed', slug='unclaimed', display_name='Unclaimed Credit',
+            category=self.category)
+
+        cashback = RewardType.objects.create(name='CashbackQ', slug='cashback-q')
+        issuer = Issuer.objects.create(name='Test Bank Q', slug='test-bank-q')
+
+        program = PointsProgram.objects.create(
+            name='Test Points Program', slug='test-points-program-q',
+            currency_code='TESTPTSQ')
+        PointsValuation.objects.create(points_program=program, user=None, value=0.01)
+
+        self.card_a = CreditCard.objects.create(
+            name='Card A', slug='card-a-q', issuer=issuer,
+            signup_bonus_type=cashback, primary_reward_type=cashback)
+        self.card_b = CreditCard.objects.create(
+            name='Card B', slug='card-b-q', issuer=issuer,
+            signup_bonus_type=cashback, primary_reward_type=cashback)
+
+        # Points-denominated credit: 10,000 pts x $0.01 = $100, not $10,000.
+        self.points_credit = CardCredit.objects.create(
+            card=self.card_a, spending_credit=self.lounge,
+            description='Lounge points credit', value=10000, times_per_year=1,
+            currency='TESTPTSQ')
+        # A second, cheaper carrying card so the median (typical_value) of
+        # [100, 50] is 75 — distinct from either individual card's value,
+        # proving it's really a median and not just "the first card found".
+        CardCredit.objects.create(
+            card=self.card_b, spending_credit=self.lounge,
+            description='Lounge USD credit', value=50, times_per_year=1)
+
+    def test_card_credit_serializer_exposes_discounted_annual_value(self):
+        response = self.client.get(f'/api/cards/cards/{self.card_a.id}/')
+        self.assertEqual(response.status_code, 200)
+        credits = response.json()['credits']
+        credit_data = next(c for c in credits if c['id'] == self.points_credit.id)
+        self.assertIn('annual_value', credit_data)
+        self.assertEqual(credit_data['annual_value'], 100.0)
+
+    def test_spending_credits_endpoint_returns_typical_value(self):
+        response = self.client.get('/api/cards/spending-credits/')
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()
+        results = payload.get('results', payload) if isinstance(payload, dict) else payload
+
+        lounge_data = next(c for c in results if c['slug'] == 'lounge2')
+        self.assertEqual(lounge_data['typical_value'], 75.0)
+
+        unclaimed_data = next(c for c in results if c['slug'] == 'unclaimed')
+        self.assertIsNone(unclaimed_data['typical_value'])
+

@@ -44,10 +44,15 @@ class SpendingCategorySerializer(serializers.ModelSerializer):
 
 class SpendingCreditSerializer(serializers.ModelSerializer):
     category = SpendingCategorySerializer(read_only=True)
-    
+    typical_value = serializers.SerializerMethodField()
+
     class Meta:
         model = SpendingCredit
-        fields = ['id', 'name', 'slug', 'display_name', 'description', 'category', 'icon', 'sort_order', 'stackable']
+        fields = ['id', 'name', 'slug', 'display_name', 'description', 'category', 'icon', 'sort_order', 'stackable', 'typical_value']
+
+    def get_typical_value(self, obj):
+        typical_values = self.context.get('typical_values', {})
+        return typical_values.get(obj.id)
 
 
 class RewardCategorySerializer(serializers.ModelSerializer):
@@ -65,12 +70,13 @@ class RewardCategorySerializer(serializers.ModelSerializer):
 class CardCreditSerializer(serializers.ModelSerializer):
     spending_credit = SpendingCreditSerializer(read_only=True)
     category = SpendingCategorySerializer(read_only=True)
-    
+    annual_value = serializers.ReadOnlyField()
+
     class Meta:
         model = CardCredit
         fields = [
             'id', 'description', 'value', 'times_per_year', 'weight', 'currency',
-            'spending_credit', 'category', 'is_active', 'offer_type'
+            'spending_credit', 'category', 'is_active', 'offer_type', 'annual_value'
         ]
 
 
