@@ -139,7 +139,8 @@
     "signup_bonus": {
       "bonus_amount": 250,
       "spending_requirement": 3000,
-      "time_limit_months": 6
+      "time_limit_months": 6,
+      "referral_url": "https://americanexpress.com/en-us/referral/blue-cash-preferred-credit-card?ref=JAMIEH2w29&xl=cp15"
     },
     "reward_type": "Cashback",
     "reward_value_multiplier": 0.01,
