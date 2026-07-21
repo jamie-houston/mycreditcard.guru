@@ -20,6 +20,9 @@ venv/bin/python manage.py run_scenario "Jamie Real" --explain
 
 # Run JavaScript rendering smoke tests (Node.js)
 node scripts/test_roadmap_results.js
+
+# Run Playwright E2E UI test suite
+venv/bin/pytest tests/e2e/ -v
 ```
 
 ## 📋 General Development Rules

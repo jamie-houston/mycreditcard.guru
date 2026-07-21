@@ -263,15 +263,16 @@ picked up.
 
 ```bash
 venv/bin/python manage.py validate_cards                                      # card catalog audit — 0 fails before verifying any card
-venv/bin/python manage.py test                                                # standard suite (228 tests)
+venv/bin/python manage.py test                                                # standard suite (230 tests)
 RUN_ALL_SCENARIOS=1 venv/bin/python manage.py test cards.test_json_scenarios   # full sweep must pass clean
 venv/bin/python manage.py run_scenario "Jamie Real" --explain                  # every line item reconciles
 node scripts/test_roadmap_results.js                                          # roadmap-results.js pure-helper smoke test
+venv/bin/pytest tests/e2e/ -v                                                 # Playwright E2E UI test suite (10 tests)
 ```
 
-Baseline as of 2026-07-20 (post Amex card-verification tranche): 228
+Baseline as of 2026-07-21 (post E2E UI test suite addition): 230
 standard tests green, scenario sweep clean (`test_all_scenarios`), "Jamie
-Real" reconciles, JS smoke test green (28/28), `validate_cards` clean
+Real" reconciles, JS smoke test green (28/28), Playwright E2E UI test suite green (10/10), `validate_cards` clean
 (162/162 cards, 0 fails). Any failure is a regression.
 
 **Phase M verification (2026-07-19)**: confirmed existing `roadmaps/

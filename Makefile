@@ -1,4 +1,4 @@
-.PHONY: help run migrate test clean setup shell lint format install
+.PHONY: help install run run-port setup migrate superuser test test-all test-e2e test-acceptance import-data import-external shell clean db-info reset check version status
 
 VENV := venv/bin
 PYTHON := $(VENV)/python
@@ -18,20 +18,27 @@ help:
 	@echo "$(GREEN)Setup & Installation:$(NC)"
 	@echo "  make install         Install/upgrade dependencies from requirements.txt"
 	@echo "  make setup           Initialize database with fresh data (one-time setup)"
-	@echo "  make migrate         Run database migrations\n"
+	@echo "  make migrate         Run database migrations"
+	@echo "  make superuser       Create a Django superuser\n"
 	@echo "$(GREEN)Running:$(NC)"
 	@echo "  make run             Start development server at http://localhost:8000"
-	@echo "  make run-shell       Run interactive Django shell\n"
+	@echo "  make run-port        Start development server on a custom port"
+	@echo "  make shell           Run interactive Django shell\n"
 	@echo "$(GREEN)Testing:$(NC)"
-	@echo "  make test            Run test suite (85 tests)"
-	@echo "  make test-all        Run full scenario suite (64/64 scenarios)\n"
+	@echo "  make test            Run standard backend test suite (230 tests)"
+	@echo "  make test-all        Run full scenario suite (61 scenarios)"
+	@echo "  make test-e2e        Run Playwright E2E UI test suite (10 tests)"
+	@echo "  make test-acceptance Run acceptance scenario ('Jamie Real' --explain)\n"
 	@echo "$(GREEN)Data:$(NC)"
 	@echo "  make import-data     Import all card data"
-	@echo "  make import-external Refresh card data from external API\n"
-	@echo "$(GREEN)Maintenance:$(NC)"
-	@echo "  make clean           Remove database and cache files"
-	@echo "  make lint            Check code style (if available)"
-	@echo "  make format          Format code (if available)\n"
+	@echo "  make import-external Refresh card data from external API"
+	@echo "  make db-info         Display summary database record counts\n"
+	@echo "$(GREEN)Maintenance & Status:$(NC)"
+	@echo "  make status          Check environment and pending migrations"
+	@echo "  make check           Check Python environment and configuration files"
+	@echo "  make version         Show software version"
+	@echo "  make clean           Remove database, cache, and compiled files"
+	@echo "  make reset           Full database reset and reimport\n"
 
 # Install dependencies
 install:
@@ -65,15 +72,20 @@ superuser:
 	@echo "$(BLUE)Creating superuser...$(NC)"
 	$(MANAGE) createsuperuser
 
-# Run tests
+# Run standard test suite
 test:
-	@echo "$(GREEN)Running test suite (85 tests)...$(NC)"
+	@echo "$(GREEN)Running test suite (230 tests)...$(NC)"
 	$(MANAGE) test
 
 # Run full scenario suite
 test-all:
-	@echo "$(GREEN)Running full scenario suite (64/64 scenarios)...$(NC)"
+	@echo "$(GREEN)Running full scenario suite (61 scenarios)...$(NC)"
 	RUN_ALL_SCENARIOS=1 $(MANAGE) test cards.test_json_scenarios
+
+# Run Playwright E2E UI test suite
+test-e2e:
+	@echo "$(GREEN)Running Playwright E2E UI test suite (10 tests)...$(NC)"
+	$(VENV)/pytest tests/e2e/ -v
 
 # Run acceptance test
 test-acceptance:
@@ -107,7 +119,7 @@ clean:
 # Show database info
 db-info:
 	@echo "$(BLUE)Database Information:$(NC)"
-	$(MANAGE) shell -c "from cards.models import Card, CardIssuer, SpendingCategory; from users.models import User; from roadmaps.models import Roadmap; print(f'Credit Cards: {Card.objects.count()}'); print(f'Issuers: {CardIssuer.objects.count()}'); print(f'Categories: {SpendingCategory.objects.count()}'); print(f'Users: {User.objects.count()}'); print(f'Roadmaps: {Roadmap.objects.count()}')"
+	$(MANAGE) shell -c "from cards.models import CreditCard, Issuer, SpendingCategory; from django.contrib.auth.models import User; print(f'Credit Cards: {CreditCard.objects.count()}'); print(f'Issuers: {Issuer.objects.count()}'); print(f'Categories: {SpendingCategory.objects.count()}'); print(f'Users: {User.objects.count()}')"
 
 # Check if venv exists
 venv-check:
