@@ -306,11 +306,17 @@ class CategoryWithRewardsSerializer(serializers.ModelSerializer):
 
     def get_top_reward_rate(self, obj):
         from django.db.models import Max
-        top_rate = obj.reward_categories.filter(is_active=True).aggregate(max_rate=Max('reward_rate'))['max_rate'] or 0
+        rel = getattr(obj, 'reward_categories', None) or getattr(obj, 'rewardcategory_set', None)
+        if rel is None:
+            return 0.0
+        top_rate = rel.filter(is_active=True).aggregate(max_rate=Max('reward_rate'))['max_rate'] or 0
         return float(top_rate)
 
     def get_cards_with_rewards_count(self, obj):
-        return obj.reward_categories.filter(is_active=True, reward_rate__gt=1.0).count()
+        rel = getattr(obj, 'reward_categories', None) or getattr(obj, 'rewardcategory_set', None)
+        if rel is None:
+            return 0
+        return rel.filter(is_active=True, reward_rate__gt=1.0).count()
 
 
 class RecommendationPreviewItemSerializer(serializers.Serializer):

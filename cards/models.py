@@ -178,7 +178,7 @@ class RewardCategoryQuerySet(models.QuerySet):
 
 class RewardCategory(models.Model):
     card = models.ForeignKey(CreditCard, on_delete=models.CASCADE, related_name='reward_categories')
-    category = models.ForeignKey(SpendingCategory, on_delete=models.CASCADE)
+    category = models.ForeignKey(SpendingCategory, on_delete=models.CASCADE, related_name='reward_categories')
     reward_rate = models.DecimalField(max_digits=5, decimal_places=2)  # e.g., 5.00 for 5x points
     reward_type = models.ForeignKey(RewardType, on_delete=models.CASCADE)
     start_date = models.DateField(null=True, blank=True)
