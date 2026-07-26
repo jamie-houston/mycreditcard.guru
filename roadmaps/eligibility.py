@@ -1,7 +1,7 @@
 """
 Issuer eligibility rules: like strategy presets, a rule is data, not code.
 
-Two distinct rule types (research + sources in docs/PROJECT_STATUS.md, S3):
+Two distinct rule types (research + sources in Obsidian side-projects/mycreditcard.guru/progress.md, S3):
 
 - Application rules (ISSUER_RULES[slug]['application_rules']): can the user
   get approved for a new card from this issuer at all. A blocked card is

@@ -192,5 +192,5 @@ Edit `.env` file for configuration:
 ## Additional Resources
 
 - **Project Overview:** See [CLAUDE.md](CLAUDE.md)
-- **Product Requirements:** See [PRD.md](PRD.md)
+- **Product Requirements:** `Obsidian side-projects/mycreditcard.guru/Requirements/Complete/MyCreditCard.Guru PRD.md`
 - **Full Documentation:** See [README.md](README.md)

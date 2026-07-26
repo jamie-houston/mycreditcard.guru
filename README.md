@@ -91,7 +91,7 @@ The core engine (`roadmaps/recommendation_engine.py`, 1,923 lines) implements:
 - **[RUNNING.md](RUNNING.md)** - Comprehensive setup and troubleshooting guide
 - **[QUICKSTART.md](QUICKSTART.md)** - Quick reference for common tasks
 - **[CLAUDE.md](CLAUDE.md)** - Project overview and architecture for AI assistants
-- **[PRD.md](PRD.md)** - Product requirements and specifications
+- **Product requirements** - `Obsidian side-projects/mycreditcard.guru/Requirements/Complete/MyCreditCard.Guru PRD.md`
 - **[docs/](docs/)** - Additional documentation (deployment, testing)
 
 ## Development

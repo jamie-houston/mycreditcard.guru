@@ -274,5 +274,5 @@ Once your server is running:
 
 - **Project Overview:** [CLAUDE.md](CLAUDE.md)
 - **Quick Reference:** [QUICKSTART.md](QUICKSTART.md)
-- **Product Requirements:** [PRD.md](PRD.md)
+- **Product Requirements:** `Obsidian side-projects/mycreditcard.guru/Requirements/Complete/MyCreditCard.Guru PRD.md`
 - **Full Documentation:** [README.md](README.md)

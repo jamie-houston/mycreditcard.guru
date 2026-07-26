@@ -188,7 +188,7 @@ class GenerateRoadmapSerializer(serializers.Serializer):
         Before this, every quick run deleted and recreated the user's
         stored UserCards/spending/credit preferences from the form payload,
         which would destroy real users' saved profiles (see
-        docs/PROJECT_STATUS.md backlog: "quick-recommendation serializer
+        Obsidian side-projects/mycreditcard.guru/progress.md backlog: "quick-recommendation serializer
         footgun"). Saving the profile is the /users/data/ endpoint's job.
         """
         from django.db import transaction

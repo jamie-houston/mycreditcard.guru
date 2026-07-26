@@ -2,7 +2,7 @@
 
 This guide explains how to use the JSON-based scenario test suite for credit
 card recommendations. For day-to-day verification commands (what to run
-before calling anything done), see `docs/PROJECT_STATUS.md`'s "Verification
+before calling anything done), see `Obsidian side-projects/mycreditcard.guru/progress.md`'s "Verification
 quick reference" and `CLAUDE.md`'s "Verification gates" — this doc is about
 how the scenario system itself works and how to add to it.
 

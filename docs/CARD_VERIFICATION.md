@@ -65,7 +65,7 @@ actual page would catch.
    node scripts/test_roadmap_results.js
    ```
 
-   Any failure here is a regression — see PROJECT_STATUS.md's "Verification
+   Any failure here is a regression — see OPERATIONS.md's "Verification
    quick reference" for the current green baseline.
 
 ## What the validator does and doesn't cover
@@ -95,4 +95,4 @@ the April 2026 refresh, but `american_express.json`'s Gold entry only has a
 blanket `hotels` category with no portal-specific split (unlike Chase's
 `chase_travel` or Capital One's `capital_one_travel`). Bumping the blanket
 rate to 5x would overstate value for direct hotel bookings. See
-PROJECT_STATUS.md's open items for tracking.
+Obsidian side-projects/mycreditcard.guru/progress.md's open items for tracking.

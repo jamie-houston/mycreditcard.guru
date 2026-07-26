@@ -17,7 +17,7 @@ get a clean session.
 
 Covers: `landing_view`'s `/` → `/roadmap/` redirect, and `/roadmap/`'s
 results-first default view with the "Update roadmap" toggle. See
-`docs/PROJECT_STATUS.md` phase table and `CLAUDE.md` (`landing_view`/
+`Obsidian side-projects/mycreditcard.guru/progress.md` phase table and `CLAUDE.md` (`landing_view`/
 `index_view`, `templates/index.html`) for the implementation.
 
 ### 1. First-time visitor (anonymous, no roadmap yet)

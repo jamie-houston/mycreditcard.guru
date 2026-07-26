@@ -356,8 +356,8 @@ class TemplatePagesTests(TestCase):
 
 class CreditCurrencyValuationTests(TestCase):
     """CardCredit.currency must discount points-denominated credits to real
-    dollars instead of being counted at face value (docs/PROJECT_STATUS.md's
-    former 'Open' item / docs/plans/points-currency-credit-valuation.md)."""
+    dollars instead of being counted at face value (Obsidian side-projects/mycreditcard.guru/progress.md's
+    former 'Open' item / Obsidian side-projects/mycreditcard.guru/Requirements/Complete/PLAN_POINTS_CURRENCY_CREDIT_VALUATION_complete.md)."""
 
     def setUp(self):
         from .models import PointsProgram, PointsValuation
@@ -413,7 +413,7 @@ class CreditCurrencyValuationTests(TestCase):
 
 
 class CreditMathBuilderAPITests(TestCase):
-    """Phase Q (docs/plans/phase-q-builder-credit-math.md): the spending
+    """Phase Q (Obsidian side-projects/mycreditcard.guru/stories/02-builder-credit-math.md): the spending
     builder needs `annual_value` on card credits and a `typical_value` on
     the spending-credit catalog so it can show real dollar figures next to
     the "Credits You Use" checkboxes instead of none at all."""

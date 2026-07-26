@@ -5,11 +5,13 @@ This folder contains detailed documentation for the Credit Card Guru project.
 ## 📄 Documentation Index
 
 ### 📍 Start here
-- **[PROJECT_STATUS.md](PROJECT_STATUS.md)** - **Active to-do tracker**: only
-  what's in progress or still to do, as checkboxes. Completed phase history
-  and design docs are archived to mybrain (pointers at the bottom of the
-  file) once a phase finishes, to keep this doc lean.
-- **[../CLAUDE.md](../CLAUDE.md)** - Architecture map and working rules for Claude Code
+- **[../CLAUDE.md](../CLAUDE.md)** - Architecture map and working rules. For a
+  one-off task this is the whole context.
+- **[OPERATIONS.md](OPERATIONS.md)** - Verification gates and recurring maintenance
+- **Status, planning, and stories live in Obsidian**, not this repo:
+  `areas/work/coding/side-projects/mycreditcard.guru/` — start at
+  `stories/README.md`, which carries the current position. Jamie names the
+  story file when there's planned work.
 
 ### 🚀 Getting Started
 - **[../RUNNING.md](../RUNNING.md)** - Complete setup and troubleshooting guide
@@ -49,14 +51,14 @@ This folder contains detailed documentation for the Credit Card Guru project.
 - Use [DEPLOYMENT_CHECKLIST.md](DEPLOYMENT_CHECKLIST.md) to ensure nothing is missed
 
 ### For Understanding the Algorithm
-- See `docs/PROJECT_STATUS.md`'s "Verification quick reference" for the current
+- See `docs/OPERATIONS.md`'s "Verification quick reference" for the current
   scenario-sweep baseline and how recommendations are proven correct
 
 ## 💡 Common Questions
 
 **"Which credit cards will be imported?"**
 → See [CARD_IMPORT_GUIDE.md](CARD_IMPORT_GUIDE.md) - Only cards with `"verified": true` are imported
-(count drifts as the watchlist grows — see PROJECT_STATUS.md/CLAUDE.md for the current figure)
+(count drifts as the watchlist grows — see `CLAUDE.md` for the current figure)
 
 **"How do I import more cards?"**
 → Edit the JSON files in `data/input/cards/` and set `"verified": true`, then run import
@@ -69,10 +71,9 @@ This folder contains detailed documentation for the Credit Card Guru project.
 
 ## 📝 Documentation Status
 
-Last reviewed 2026-07-07: PROJECT_STATUS.md and the PLAN doc are the living
-sources of truth (start there); README_TESTING.md was rewritten to match the
-current scenario system; the stale FINAL_TEST_ANALYSIS.md snapshot was
-removed (fully superseded by PROJECT_STATUS.md's verification baseline).
+Last reviewed 2026-07-26: status and planning moved to Obsidian; this folder now
+holds only operational and reference docs. `OPERATIONS.md` carries the
+verification baseline that `PROJECT_STATUS.md` used to.
 
 ---
 
