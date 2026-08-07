@@ -37,6 +37,10 @@ signup bonuses/fees; output appends to `~/import_external.log`.
 make deploy          # or: ./scripts/promote.sh
 ```
 
+**The live site is https://foresterh.pythonanywhere.com.** There is no custom
+domain configured — `mycreditcard.guru` does not resolve, despite Step 10 below
+describing how to set one up.
+
 It pushes `main`, SSHes into PythonAnywhere, pulls, runs `scripts/deploy.sh`
 there (migrate → import → collectstatic → reload), and then confirms the server
 is on the commit you just pushed. It refuses to start on a dirty tree or off
