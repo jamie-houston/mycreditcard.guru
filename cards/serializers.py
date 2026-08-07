@@ -274,6 +274,7 @@ class CategoryDetailCardSerializer(serializers.Serializer):
     id = serializers.IntegerField(source='card.id')
     name = serializers.CharField(source='card.name')
     issuer = serializers.CharField(source='card.issuer.name')
+    card_type = serializers.CharField(source='card.card_type')
     reward_rate = serializers.FloatField()
     annual_fee = serializers.FloatField(source='card.annual_fee')
     max_annual_spend = serializers.FloatField(required=False, allow_null=True)
