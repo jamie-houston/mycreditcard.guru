@@ -812,6 +812,10 @@
 
                 updateButtonState(button, hasCard);
 
+                if (typeof window.onCardOwnershipToggled === 'function') {
+                    window.onCardOwnershipToggled(cardId, hasCard);
+                }
+
             } catch (error) {
                 console.error('Error:', error);
                 alert('Error updating card ownership');
