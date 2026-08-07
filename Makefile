@@ -1,4 +1,4 @@
-.PHONY: help install run run-port setup migrate superuser test test-all test-e2e test-acceptance import-data import-external shell clean db-info reset check version status
+.PHONY: help install run run-port setup migrate superuser test test-all test-e2e test-acceptance import-data import-external shell clean db-info reset check version status deploy
 
 VENV := venv/bin
 PYTHON := $(VENV)/python
@@ -33,6 +33,8 @@ help:
 	@echo "  make import-data     Import all card data"
 	@echo "  make import-external Refresh card data from external API"
 	@echo "  make db-info         Display summary database record counts\n"
+	@echo "$(GREEN)Deploy:$(NC)"
+	@echo "  make deploy          Push main and deploy it to PythonAnywhere\n"
 	@echo "$(GREEN)Maintenance & Status:$(NC)"
 	@echo "  make status          Check environment and pending migrations"
 	@echo "  make check           Check Python environment and configuration files"
@@ -143,6 +145,10 @@ check:
 	@[ -f "requirements.txt" ] && echo "$(GREEN)✓ requirements.txt found$(NC)" || echo "$(RED)✗ requirements.txt not found$(NC)"
 	@[ -f "manage.py" ] && echo "$(GREEN)✓ manage.py found$(NC)" || echo "$(RED)✗ manage.py not found$(NC)"
 	@[ -f ".env" ] && echo "$(GREEN)✓ .env file exists$(NC)" || echo "$(BLUE)ℹ .env file not found (may need .env.example)$(NC)"
+
+# Deploy main to PythonAnywhere (run from this laptop)
+deploy:
+	@./scripts/promote.sh
 
 # Display version
 version:

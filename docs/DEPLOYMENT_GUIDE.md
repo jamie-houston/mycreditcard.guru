@@ -29,6 +29,35 @@ A PythonAnywhere scheduled task (daily 09:15 UTC, acts only on the 1st of the mo
 resets `data/input/cards/`, pulls main, and runs `import_external_cards` to refresh
 signup bonuses/fees; output appends to `~/import_external.log`.
 
+## Deploying: `make deploy`
+
+**This is the normal way to ship.** Run it on your laptop, from a clean `main`:
+
+```bash
+make deploy          # or: ./scripts/promote.sh
+```
+
+It pushes `main`, SSHes into PythonAnywhere, pulls, runs `scripts/deploy.sh`
+there (migrate → import → collectstatic → reload), and then confirms the server
+is on the commit you just pushed. It refuses to start on a dirty tree or off
+`main`, so a half-finished change can't go out by accident.
+
+Overrides, only if auto-detection fails:
+
+```bash
+PA_VENV=$HOME/.virtualenvs/creditcard_guru make deploy   # deploy.sh can't find the venv
+PA_DIR=/home/foresterh/mycreditcard.guru make deploy     # repo moved on the server
+```
+
+**Make it passwordless once:** add your laptop's public key at
+[PythonAnywhere → Account → SSH keys](https://www.pythonanywhere.com/account/#ssh_keys).
+Without it, SSH prompts for your PythonAnywhere password on each deploy.
+
+Everything below is the manual equivalent — kept for bootstrapping a new server
+and for when a deploy fails partway and you need to drive the steps by hand.
+
+---
+
 ## Quick Reference: Updating After Git Pull
 
 **Looking for update instructions?** Jump to:
