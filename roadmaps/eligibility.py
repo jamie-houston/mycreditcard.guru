@@ -52,12 +52,22 @@ that window; a cap rule ('max_open_cards') counts cards currently OPEN,
 uncapped by time (e.g. Amex's 5-card limit) — both keyed on 'counts' (see
 _counts_toward).
 
-Known-unmodeled gaps (Phase M verification, 2026-07-19 — deliberately out
-of scope, not bugs): no aggregate cross-issuer open-card cap; Amex's
-5-card rule is one flat counter (doesn't split charge vs. credit or
-business vs. personal sub-limits issuers sometimes apply); no cross-issuer
-new-account velocity throttle. If one of these becomes a real complaint,
-add a new ISSUER_RULES shape (or a household-wide rule alongside it) here.
+Deliberate non-goals (Phase M, Jamie's call 2026-07-18 — out of scope, not
+bugs). The per-issuer application rules above plus 5/24 are the intended
+fidelity ceiling; these three are knowingly unmodeled and should not be
+re-litigated: (a) no aggregate cross-issuer open-card cap — issuers don't
+publish one and guessing would silently suppress real recommendations;
+(b) Amex's 5-card rule is one flat counter, not split by charge vs. credit
+or business vs. personal as Amex sometimes applies it — the sub-limits are
+unpublished and vary by applicant; (c) no cross-issuer new-account velocity
+throttle — that's underwriting judgement, not a stated rule. If one becomes
+a real complaint, add a new ISSUER_RULES shape (or a household-wide rule
+alongside it) here.
+
+The window rules are locked in by scenario, not just by unit test: see
+data/tests/scenarios/eligibility.json (BofA 2/30, CapOne 1/6mo, each with
+an "allows" companion proving value isn't the reason a card is excluded)
+and multi_player.json's per-entity 5/24 headroom case.
 """
 
 import calendar

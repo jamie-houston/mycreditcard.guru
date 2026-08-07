@@ -9,7 +9,7 @@ Credit Card Guru is a Django-based optimization platform recommending card portf
 Ensure all test suites pass cleanly after any changes:
 
 ```bash
-# Standard test suite (230 tests as of 2026-07-26; must be OK, 0 failures)
+# Standard test suite (233 tests as of 2026-08-06; must be OK, 0 failures)
 venv/bin/python manage.py test
 
 # Full scenario sweep (all scenarios in data/tests/scenarios/*.json must pass)
@@ -31,6 +31,7 @@ venv/bin/pytest tests/e2e/ -v
 - **Git Branch**: All work is committed directly to the `main` branch.
 - **Status Updates**: Status and planning live in Obsidian, **not this repo** — `areas/work/coding/side-projects/mycreditcard.guru/`. Update the story file and `stories/README.md`'s CURRENT POSITION block there, not a doc in this repo. For a one-off task, this file is the whole context; don't go looking for planning docs.
 - **Help Updates**: When adding/modifying user-facing features (roadmap settings, math logic, multiplayer support, credits), always update `templates/help.html` to match.
+- **Eligibility Non-Goals**: Three issuer-rule gaps are *deliberately* unmodeled (aggregate cross-issuer open-card cap, Amex charge/business sub-limits, cross-issuer velocity throttle) — see `roadmaps/eligibility.py`'s module docstring. Don't build them without Jamie re-deciding.
 
 ## 🗂️ Core Documentation Map
 For deep dives into the application architecture, models, and logic, refer to:

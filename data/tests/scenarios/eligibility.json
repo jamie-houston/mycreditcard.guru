@@ -155,6 +155,120 @@
           "Alpha (density 500/5=100) sorts ahead of Beta (450/5=90) — no tie-break needed here"
         ]
       }
+    },
+    {
+      "name": "Eligibility - BofA 2/30 blocks a third card in 30 days",
+      "description": "Phase M lock-in. Two BofA cards opened inside 30 days trip the issuer's 2/30 application rule, so the BofA candidate must not be recommended even though it doubles the general-spend rate. Same spending profile as the Chase 5/24 pair so value is never the reason a card is in or out.",
+      "user_profile": {
+        "spending": {
+          "dining": 500,
+          "groceries": 700,
+          "gas": 300,
+          "general": 1500
+        }
+      },
+      "owned_cards": [
+        {"card": "bofa-test-1", "opened_days_ago": 10},
+        {"card": "bofa-test-2", "opened_days_ago": 20}
+      ],
+      "available_cards": [
+        "bofa-test-1",
+        "bofa-test-2",
+        "bofa-test-candidate"
+      ],
+      "expected_recommendations": {
+        "actions": ["keep"],
+        "must_not_include_cards": ["bofa-test-candidate"],
+        "test_conditions": [
+          "2 same-issuer cards opened in the last 30 days hit max_new_cards=2 on the 2/30 rule",
+          "bofa-test-candidate is silently excluded from apply recommendations",
+          "Only BofA's own cards count (counts=same_issuer), unlike Chase 5/24"
+        ]
+      }
+    },
+    {
+      "name": "Eligibility - BofA past the 30-day window allows a new card",
+      "description": "Phase M lock-in, companion to the 2/30 block. The same two BofA cards were opened 40 and 200 days ago: nothing inside the 30-day window, and 2 inside 12 months is under the 3/12 rule, so the candidate is recommendable.",
+      "user_profile": {
+        "spending": {
+          "dining": 500,
+          "groceries": 700,
+          "gas": 300,
+          "general": 1500
+        }
+      },
+      "owned_cards": [
+        {"card": "bofa-test-1", "opened_days_ago": 40},
+        {"card": "bofa-test-2", "opened_days_ago": 200}
+      ],
+      "available_cards": [
+        "bofa-test-1",
+        "bofa-test-2",
+        "bofa-test-candidate"
+      ],
+      "expected_recommendations": {
+        "actions": ["apply"],
+        "must_include_cards": ["bofa-test-candidate"],
+        "test_conditions": [
+          "0 BofA cards opened in the last 30 days — 2/30 does not trip",
+          "2 in 12 months is under 3/12, and 2 in 24 months is under 4/24",
+          "The 2x candidate beats the owned 1x cards for general spending"
+        ]
+      }
+    },
+    {
+      "name": "Eligibility - Capital One 1/6mo blocks a new card",
+      "description": "Phase M lock-in. One Capital One card opened 60 days ago trips the issuer's one-card-per-6-months application rule, so the C1 candidate must not be recommended.",
+      "user_profile": {
+        "spending": {
+          "dining": 500,
+          "groceries": 700,
+          "gas": 300,
+          "general": 1500
+        }
+      },
+      "owned_cards": [
+        {"card": "capone-test-1", "opened_days_ago": 60}
+      ],
+      "available_cards": [
+        "capone-test-1",
+        "capone-test-candidate"
+      ],
+      "expected_recommendations": {
+        "actions": ["keep"],
+        "must_not_include_cards": ["capone-test-candidate"],
+        "test_conditions": [
+          "1 same-issuer card opened inside 6 months hits max_new_cards=1 on the 1/6mo rule",
+          "capone-test-candidate is silently excluded from apply recommendations"
+        ]
+      }
+    },
+    {
+      "name": "Eligibility - Capital One past 6mo allows a new card",
+      "description": "Phase M lock-in, companion to the 1/6mo block. The owned Capital One card was opened 200 days ago — outside the 6-month window — so the candidate is recommendable.",
+      "user_profile": {
+        "spending": {
+          "dining": 500,
+          "groceries": 700,
+          "gas": 300,
+          "general": 1500
+        }
+      },
+      "owned_cards": [
+        {"card": "capone-test-1", "opened_days_ago": 200}
+      ],
+      "available_cards": [
+        "capone-test-1",
+        "capone-test-candidate"
+      ],
+      "expected_recommendations": {
+        "actions": ["apply"],
+        "must_include_cards": ["capone-test-candidate"],
+        "test_conditions": [
+          "200 days ago is outside the calendar-accurate 6-month window — 1/6mo does not trip",
+          "The 2x candidate beats the owned 1x card for general spending"
+        ]
+      }
     }
   ]
 }

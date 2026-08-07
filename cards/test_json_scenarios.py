@@ -128,6 +128,34 @@ class JSONScenarioTest(JSONScenarioTestBase):
                       "Recommendation must carry the eligibility note")
         self.print_scenario_results(scenario, recommendations)
 
+    def test_eligibility_bofa_230_blocks(self):
+        """Phase M: two BofA cards inside 30 days block a third."""
+        if not self.scenarios:
+            self.skipTest("No scenarios found in JSON file")
+        scenario = self.get_scenario(
+            'Eligibility - BofA 2/30 blocks a third card in 30 days')
+        recommendations = self.run_scenario_test(scenario)
+        self.print_scenario_results(scenario, recommendations)
+
+    def test_eligibility_capone_16mo_blocks(self):
+        """Phase M: one Capital One card inside 6 months blocks the next."""
+        if not self.scenarios:
+            self.skipTest("No scenarios found in JSON file")
+        scenario = self.get_scenario(
+            'Eligibility - Capital One 1/6mo blocks a new card')
+        recommendations = self.run_scenario_test(scenario)
+        self.print_scenario_results(scenario, recommendations)
+
+    def test_multi_player_524_headroom(self):
+        """Phase M: 5/24 is per entity — Sam's one remaining slot is used
+        even though the household holds 9 cards between them."""
+        if not self.scenarios:
+            self.skipTest("No scenarios found in JSON file")
+        scenario = self.get_scenario(
+            'Multi-Player - per-entity 5/24 headroom across a 2-person household')
+        recommendations = self.run_scenario_test(scenario)
+        self.print_scenario_results(scenario, recommendations)
+
     def test_bonus_capacity_defers_third_card(self):
         """Phase E: two $10K bonuses fit a $2K/mo year. Selection is now
         capacity-aware (_bonus_capacity_plan), so the third card's bonus is
@@ -326,7 +354,7 @@ class JSONScenarioTest(JSONScenarioTestBase):
     #   RUN_ALL_SCENARIOS=1 python manage.py test cards.test_json_scenarios
     # and recalibrate expectations via `run_scenario "<name>" --explain`.
     @unittest.skipUnless(os.environ.get('RUN_ALL_SCENARIOS'),
-                         'set RUN_ALL_SCENARIOS=1 to audit all 71 scenarios')
+                         'set RUN_ALL_SCENARIOS=1 to audit all 82 scenarios')
     def test_all_scenarios(self):
         """Run every JSON scenario against its expectations.
 

@@ -214,6 +214,53 @@
           "Sam holds none -> eligible, gets the apply_as attribution"
         ]
       }
+    },
+    {
+      "name": "Multi-Player - per-entity 5/24 headroom across a 2-person household",
+      "description": "Phase M lock-in. Unlike the P1-at-5/24 scenario (where Sam has a clean history), Sam here already holds 4 of the same cards — asymmetric but non-zero headroom. Jamie is at 5/24 and blocked; Sam is at 4/24 with exactly one slot left, so the Chase candidate is still recommended and attributed to Sam. Proves 5/24 is counted per entity, not pooled into one household bucket.",
+      "entities": [
+        {"name": "Sam", "kind": "personal"}
+      ],
+      "user_profile": {
+        "spending": {
+          "dining": 500,
+          "groceries": 700,
+          "gas": 300,
+          "general": 1500
+        }
+      },
+      "owned_cards": [
+        {"card": "basic-card-1", "opened_days_ago": 60},
+        {"card": "low-reward-card", "opened_days_ago": 150},
+        {"card": "dining-card", "opened_days_ago": 300},
+        {"card": "warehouse-card", "opened_days_ago": 450},
+        {"card": "better-card-1", "opened_days_ago": 600},
+        {"card": "basic-card-1", "opened_days_ago": 60, "owner": "Sam"},
+        {"card": "low-reward-card", "opened_days_ago": 150, "owner": "Sam"},
+        {"card": "dining-card", "opened_days_ago": 300, "owner": "Sam"},
+        {"card": "warehouse-card", "opened_days_ago": 450, "owner": "Sam"}
+      ],
+      "available_cards": [
+        "basic-card-1",
+        "low-reward-card",
+        "dining-card",
+        "warehouse-card",
+        "better-card-1",
+        "chase-test-rewards"
+      ],
+      "expected_recommendations": {
+        "actions": ["apply"],
+        "must_include_cards": ["chase-test-rewards"],
+        "apply_as": {
+          "chase-test-rewards": "Sam"
+        },
+        "test_conditions": [
+          "Jamie owns 5 personal cards in-window -> at 5/24, blocked",
+          "Sam owns 4 of the same cards -> 4/24, exactly one slot of headroom left",
+          "Had 5/24 pooled the household (9 cards between them) no entity would be eligible",
+          "_eligible_entity_for_card picks Sam; apply_as.name == 'Sam'"
+        ]
+      }
     }
   ]
 }

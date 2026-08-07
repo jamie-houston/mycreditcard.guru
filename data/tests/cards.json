@@ -1211,5 +1211,125 @@
       }
     ],
     "slug": "amex-test-candidate"
+  },
+  {
+    "name": "BofA Test 1",
+    "issuer": "Bank of America",
+    "annual_fee": 0,
+    "signup_bonus_amount": 100,
+    "signup_bonus_type": "Cashback",
+    "primary_reward_type": "Cashback",
+    "metadata": {
+      "reward_value_multiplier": 0.01,
+      "discontinued": false,
+      "signup_bonus": {
+        "bonus_amount": 100,
+        "spending_requirement": 500,
+        "time_limit_months": 3
+      }
+    },
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1.0
+      }
+    ],
+    "slug": "bofa-test-1"
+  },
+  {
+    "name": "BofA Test 2",
+    "issuer": "Bank of America",
+    "annual_fee": 0,
+    "signup_bonus_amount": 100,
+    "signup_bonus_type": "Cashback",
+    "primary_reward_type": "Cashback",
+    "metadata": {
+      "reward_value_multiplier": 0.01,
+      "discontinued": false,
+      "signup_bonus": {
+        "bonus_amount": 100,
+        "spending_requirement": 500,
+        "time_limit_months": 3
+      }
+    },
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1.0
+      }
+    ],
+    "slug": "bofa-test-2"
+  },
+  {
+    "name": "BofA Test Candidate",
+    "issuer": "Bank of America",
+    "annual_fee": 0,
+    "signup_bonus_amount": 300,
+    "signup_bonus_type": "Cashback",
+    "primary_reward_type": "Cashback",
+    "metadata": {
+      "reward_value_multiplier": 0.01,
+      "discontinued": false,
+      "signup_bonus": {
+        "bonus_amount": 300,
+        "spending_requirement": 500,
+        "time_limit_months": 3
+      }
+    },
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 2.0
+      }
+    ],
+    "slug": "bofa-test-candidate"
+  },
+  {
+    "name": "CapOne Test 1",
+    "issuer": "Capital One",
+    "annual_fee": 0,
+    "signup_bonus_amount": 100,
+    "signup_bonus_type": "Cashback",
+    "primary_reward_type": "Cashback",
+    "metadata": {
+      "reward_value_multiplier": 0.01,
+      "discontinued": false,
+      "signup_bonus": {
+        "bonus_amount": 100,
+        "spending_requirement": 500,
+        "time_limit_months": 3
+      }
+    },
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1.0
+      }
+    ],
+    "slug": "capone-test-1"
+  },
+  {
+    "name": "CapOne Test Candidate",
+    "issuer": "Capital One",
+    "annual_fee": 0,
+    "signup_bonus_amount": 300,
+    "signup_bonus_type": "Cashback",
+    "primary_reward_type": "Cashback",
+    "metadata": {
+      "reward_value_multiplier": 0.01,
+      "discontinued": false,
+      "signup_bonus": {
+        "bonus_amount": 300,
+        "spending_requirement": 500,
+        "time_limit_months": 3
+      }
+    },
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 2.0
+      }
+    ],
+    "slug": "capone-test-candidate"
   }
 ]
