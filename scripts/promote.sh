@@ -18,7 +18,7 @@ set -euo pipefail
 PA_USER="${PA_USER:-foresterh}"
 PA_HOST="${PA_HOST:-ssh.pythonanywhere.com}"
 PA_DIR="${PA_DIR:-/home/foresterh/mycreditcard.guru}"
-PA_SITE_URL="${PA_SITE_URL:-https://www.mycreditcard.guru}"
+PA_SITE_URL="${PA_SITE_URL:-https://foresterh.pythonanywhere.com}"
 BRANCH="main"
 
 die() { echo "promote: $*" >&2; exit 1; }
