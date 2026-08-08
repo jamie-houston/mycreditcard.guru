@@ -111,9 +111,9 @@ class SoftCloseSurvivesBulkSaveTests(TestCase):
         user_card.refresh_from_db()
         self.assertIsNotNone(user_card.closed_date)
 
-    def test_bulk_save_still_removes_active_cards_not_in_list(self):
+    def test_bulk_save_closes_active_cards_not_in_list(self):
         from datetime import date
-        UserCard.objects.create(
+        user_card = UserCard.objects.create(
             user=self.user, card=self.card, opened_date=date(2024, 1, 1))
 
         response = self.client.post(
@@ -121,7 +121,84 @@ class SoftCloseSurvivesBulkSaveTests(TestCase):
             {'spending': {}, 'cards': [], 'preferences': {}},
             content_type='application/json')
         self.assertEqual(response.status_code, 200)
-        self.assertFalse(UserCard.objects.filter(user=self.user).exists())
+
+        # Soft-close, not delete — the row is eligibility history.
+        self.assertTrue(UserCard.objects.filter(id=user_card.id).exists())
+        user_card.refresh_from_db()
+        self.assertIsNotNone(user_card.closed_date)
+        self.assertEqual(user_card.opened_date, date(2024, 1, 1))
+
+    def test_bulk_save_reopens_a_closed_card_back_in_the_list(self):
+        from datetime import date
+        user_card = UserCard.objects.create(
+            user=self.user, card=self.card, opened_date=date(2024, 1, 1),
+            closed_date=date(2025, 6, 1))
+
+        response = self.client.post(
+            '/api/users/data/',
+            {'spending': {}, 'cards': [self.card.id], 'preferences': {}},
+            content_type='application/json')
+        self.assertEqual(response.status_code, 200)
+
+        # Reopened in place, keeping its original opened_date — not
+        # replaced by a fresh row with a fresh 5/24 clock.
+        self.assertEqual(UserCard.objects.filter(user=self.user, card=self.card).count(), 1)
+        user_card.refresh_from_db()
+        self.assertIsNone(user_card.closed_date)
+        self.assertEqual(user_card.opened_date, date(2024, 1, 1))
+
+
+class BulkSaveEligibilityHistoryTests(TestCase):
+    """Story 07: the bulk save used to hard-delete cards absent from the
+    posted list, which handed the user back approval eligibility they
+    should not have. This is the test that ties the serializer fix to the
+    promise it exists to keep — assert the eligibility verdict, not just
+    the row."""
+
+    def setUp(self):
+        from datetime import date
+        self.today = date(2026, 8, 8)
+        self.user = User.objects.create_user(username='lifetime', password='x')
+        points = RewardType.objects.create(name='Points', slug='points')
+        chase = Issuer.objects.create(name='Chase', slug='chase')
+        family_meta = {'application_eligibility': {
+            'once_per_lifetime': True, 'family': 'chase-sapphire-personal',
+            'label': 'Chase Sapphire application rule'}}
+        self.reserve = CreditCard.objects.create(
+            name='Sapphire Reserve', slug='sapphire-reserve', issuer=chase,
+            signup_bonus_type=points, primary_reward_type=points,
+            metadata=family_meta)
+        self.preferred = CreditCard.objects.create(
+            name='Sapphire Preferred', slug='sapphire-preferred', issuer=chase,
+            signup_bonus_type=points, primary_reward_type=points,
+            metadata=family_meta)
+        self.client.force_login(self.user)
+
+    def test_removing_a_card_by_bulk_save_still_blocks_its_lifetime_sibling(self):
+        from datetime import date
+        from roadmaps.eligibility import application_block
+
+        held = UserCard.objects.create(
+            user=self.user, card=self.reserve, opened_date=date(2024, 1, 1))
+        history = list(UserCard.objects.filter(user=self.user).select_related('card'))
+        self.assertIsNotNone(application_block(self.preferred, history, self.today))
+
+        # The user removes the Reserve from the browse page, which posts the
+        # whole card list back without it.
+        response = self.client.post(
+            '/api/users/data/',
+            {'spending': {}, 'cards': [], 'preferences': {}},
+            content_type='application/json')
+        self.assertEqual(response.status_code, 200)
+
+        held.refresh_from_db()
+        self.assertIsNotNone(held.closed_date)
+
+        # Closing is not forgetting: the once-per-lifetime block must survive.
+        history = list(UserCard.objects.filter(user=self.user).select_related('card'))
+        note = application_block(self.preferred, history, self.today)
+        self.assertIsNotNone(note)
+        self.assertIn('Chase Sapphire application rule', note)
 
 
 class HouseholdBulkSaveOwnerScopingTests(TestCase):
@@ -176,7 +253,7 @@ class HouseholdBulkSaveOwnerScopingTests(TestCase):
         sam_card.refresh_from_db()
         self.assertEqual(sam_card.owner, self.sam)
 
-    def test_primarys_active_card_removed_when_absent_from_list(self):
+    def test_primarys_active_card_closed_when_absent_from_list(self):
         primary_card = UserCard.objects.create(
             user=self.user, card=self.other_card, owner=self.primary)
 
@@ -186,9 +263,50 @@ class HouseholdBulkSaveOwnerScopingTests(TestCase):
             content_type='application/json')
         self.assertEqual(response.status_code, 200)
 
-        # This path hard-deletes (existing behavior, unchanged by Phase K)
-        # — unlike remove_user_card/toggle_user_card, which soft-close.
-        self.assertFalse(UserCard.objects.filter(id=primary_card.id).exists())
+        # Soft-closes, like remove_user_card/toggle_user_card — this path
+        # used to hard-delete, which destroyed eligibility history.
+        primary_card.refresh_from_db()
+        self.assertIsNotNone(primary_card.closed_date)
+
+    def test_sams_closed_card_is_not_reopened_by_the_primarys_bulk_save(self):
+        """The reopen half of the flat list is owner-scoped too: Sam's
+        closed row must not spring back open just because the household-wide
+        list carries its card id."""
+        from datetime import date
+        sam_card = UserCard.objects.create(
+            user=self.user, card=self.card, owner=self.sam,
+            closed_date=date(2025, 6, 1))
+
+        response = self.client.post(
+            '/api/users/data/',
+            {'spending': {}, 'cards': [self.card.id], 'preferences': {}},
+            content_type='application/json')
+        self.assertEqual(response.status_code, 200)
+
+        sam_card.refresh_from_db()
+        self.assertEqual(sam_card.closed_date, date(2025, 6, 1))
+        self.assertEqual(
+            UserCard.objects.filter(user=self.user, card=self.card).count(), 1)
+
+    def test_sams_open_card_does_not_reopen_the_primarys_closed_one(self):
+        """to_representation() builds the posted list household-wide and
+        unscoped by owner, so Sam holding a card OPEN is enough to put its
+        id in a save the primary posts. That must not resurrect the row the
+        primary deliberately closed."""
+        from datetime import date
+        UserCard.objects.create(user=self.user, card=self.card, owner=self.sam)
+        primary_card = UserCard.objects.create(
+            user=self.user, card=self.card, owner=self.primary,
+            opened_date=date(2024, 1, 1), closed_date=date(2025, 6, 1))
+
+        response = self.client.post(
+            '/api/users/data/',
+            {'spending': {}, 'cards': [self.card.id], 'preferences': {}},
+            content_type='application/json')
+        self.assertEqual(response.status_code, 200)
+
+        primary_card.refresh_from_db()
+        self.assertEqual(primary_card.closed_date, date(2025, 6, 1))
 
     def test_new_card_in_list_created_for_primary(self):
         response = self.client.post(

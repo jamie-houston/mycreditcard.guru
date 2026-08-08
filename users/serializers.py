@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
 from django.db.models import Q
+from django.utils import timezone
 from .models import UserProfile, UserPreferences
 from cards.models import UserCard, UserSpendingProfile, SpendingAmount
 from cards.serializers import CreditCardListSerializer, SpendingCategorySerializer
@@ -74,35 +75,55 @@ class UserDataSerializer(serializers.Serializer):
         
         # Update cards
         from cards.models import CreditCard
-        # Remove active cards not in the new list. Only touch active
-        # (closed_date__isnull=True) rows owned by the primary entity (or
-        # legacy NULL-owner rows, which read as the primary) — this flat
-        # list is the browse page's view of the PRIMARY's cards only, so
-        # other household members' cards (Phase K) must survive untouched.
-        # Soft-closed cards (e.g. via /api/cards/user-cards/toggle/ remove)
-        # must also survive untouched, since eligibility rules (5/24, Amex
-        # lifetime, etc.) read full history including closed cards.
-        UserCard.objects.filter(
-            user=user, closed_date__isnull=True
-        ).filter(
+        # This flat list is the browse page's view of the PRIMARY's OPEN
+        # cards, and it is applied in both directions: cards absent from it
+        # are closed, cards present in it are opened. Only rows owned by the
+        # primary entity (or legacy NULL-owner rows, which read as the
+        # primary) are touched either way, so other household members' cards
+        # (Phase K) survive untouched.
+        primary_rows = UserCard.objects.filter(user=user).filter(
             Q(owner__isnull=True) | Q(owner=primary)
-        ).exclude(card_id__in=cards_data).delete()
+        )
 
-        # Add new cards. Skip if ANY household member already has a row for
-        # this card (any owner, open or closed) — matches the existing
-        # no-reopen-on-bulk-save semantics and avoids spawning a duplicate
-        # primary-owned row for a card another entity already holds.
+        # Close cards not in the new list. Never delete: eligibility rules
+        # (5/24, Amex lifetime, etc.) read full history including closed
+        # cards, so destroying a row silently hands back approval
+        # eligibility the user should not have.
+        primary_rows.filter(closed_date__isnull=True).exclude(
+            card_id__in=cards_data
+        ).update(closed_date=timezone.now().date())
+
+        # Add cards in the list, reopening the primary's own soft-closed row
+        # rather than spawning a second one.
         for card_id in cards_data:
             try:
                 card = CreditCard.objects.get(id=card_id)
-                if UserCard.objects.filter(user=user, card=card).exists():
-                    continue
-                UserCard.objects.create(
-                    user=user, card=card, owner=primary,
-                    opened_date='2023-01-01'  # Default date
-                )
             except CreditCard.DoesNotExist:
                 continue
+            household_rows = UserCard.objects.filter(user=user, card=card)
+            # Already open for SOMEONE in the household: the id's presence in
+            # the list is fully explained, so there is nothing to do. This is
+            # the guard that keeps the reopen honest — to_representation()
+            # builds the list household-wide and unscoped by owner, so Sam
+            # holding a card open is enough to put its id here, and that must
+            # not resurrect a row the primary deliberately closed.
+            if household_rows.filter(closed_date__isnull=True).exists():
+                continue
+            own_closed = household_rows.filter(
+                Q(owner__isnull=True) | Q(owner=primary),
+                closed_date__isnull=False)
+            if own_closed.exists():
+                own_closed.update(closed_date=None)
+                continue
+            # Only another entity's closed row: not ours to reopen, and
+            # spawning a parallel primary-owned row would double-count the
+            # card in eligibility math.
+            if household_rows.exists():
+                continue
+            UserCard.objects.create(
+                user=user, card=card, owner=primary,
+                opened_date='2023-01-01'  # Default date
+            )
         
         # Update preferences
         if preferences_data:
