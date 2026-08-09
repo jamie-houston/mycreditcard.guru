@@ -59,6 +59,83 @@ function showNotification(message, type = 'info') {
     }, 3000);
 }
 
+// Promise-returning replacements for native confirm()/prompt(). Native dialogs
+// hard-freeze browser automation until a human dismisses them, which is what
+// made the confirm paths untestable. Builds its own overlay rather than reusing
+// .modal, which is display:none until the .modal[style*="block"] hack fires.
+function openDialog({message, confirmLabel, cancelLabel, cancelValue, withInput = false, defaultValue = ''}) {
+    return new Promise(resolve => {
+        const previouslyFocused = document.activeElement;
+
+        const overlay = document.createElement('div');
+        overlay.className = 'confirm-dialog-overlay';
+        overlay.setAttribute('data-testid', 'confirm-dialog');
+        overlay.setAttribute('role', 'dialog');
+        overlay.setAttribute('aria-modal', 'true');
+        overlay.innerHTML = `
+            <div class="modal-content confirm-dialog-content">
+                <div class="modal-body">
+                    <p class="confirm-dialog-message"></p>
+                    ${withInput ? '<input type="text" class="confirm-dialog-input" data-testid="confirm-dialog-input">' : ''}
+                    <div class="confirm-dialog-actions">
+                        <button type="button" class="btn-secondary" data-testid="confirm-dialog-cancel"></button>
+                        <button type="button" class="btn-primary" data-testid="confirm-dialog-accept"></button>
+                    </div>
+                </div>
+            </div>`;
+
+        // Set every caller-supplied string as text, never as markup — the rename
+        // dialog's default value is ProfileEntity.name, which is user input.
+        overlay.querySelector('.confirm-dialog-message').textContent = message;
+        const cancelButton = overlay.querySelector('[data-testid="confirm-dialog-cancel"]');
+        const acceptButton = overlay.querySelector('[data-testid="confirm-dialog-accept"]');
+        cancelButton.textContent = cancelLabel;
+        acceptButton.textContent = confirmLabel;
+        const input = overlay.querySelector('.confirm-dialog-input');
+        if (input) input.value = defaultValue;
+
+        function close(value) {
+            document.removeEventListener('keydown', onKeydown, true);
+            overlay.remove();
+            if (previouslyFocused && previouslyFocused.focus) previouslyFocused.focus();
+            resolve(value);
+        }
+
+        function onKeydown(event) {
+            if (event.key === 'Escape') {
+                // Capture phase + stopPropagation so dismissing this dialog does
+                // not also close a #cardModal underneath it.
+                event.stopPropagation();
+                close(cancelValue);
+            } else if (event.key === 'Enter' && input) {
+                event.preventDefault();
+                close(input.value);
+            }
+        }
+
+        acceptButton.addEventListener('click', () => close(input ? input.value : true));
+        cancelButton.addEventListener('click', () => close(cancelValue));
+        overlay.addEventListener('click', event => {
+            if (event.target === overlay) close(cancelValue);
+        });
+        document.addEventListener('keydown', onKeydown, true);
+
+        document.body.appendChild(overlay);
+        (input || acceptButton).focus();
+    });
+}
+
+function confirmDialog(message, {confirmLabel = 'OK', cancelLabel = 'Cancel'} = {}) {
+    return openDialog({message, confirmLabel, cancelLabel, cancelValue: false});
+}
+
+function promptDialog(message, defaultValue = '') {
+    return openDialog({
+        message, confirmLabel: 'OK', cancelLabel: 'Cancel',
+        cancelValue: null, withInput: true, defaultValue,
+    });
+}
+
 function showError(message) {
     const sections = ['cardCollection', 'categoryOptimization', 'spendingProfile'];
     sections.forEach(sectionId => {

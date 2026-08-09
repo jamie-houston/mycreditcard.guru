@@ -226,7 +226,7 @@ async function submitAddHouseholdEntity() {
 }
 
 async function renameHouseholdEntity(entityId, currentName) {
-    const name = prompt('Rename to:', currentName);
+    const name = await promptDialog('Rename to:', currentName);
     if (!name || !name.trim() || name.trim() === currentName) {
         return;
     }
@@ -239,7 +239,7 @@ async function renameHouseholdEntity(entityId, currentName) {
 }
 
 async function removeHouseholdEntity(entityId) {
-    if (!confirm('Remove this household member?')) {
+    if (!await confirmDialog('Remove this household member?')) {
         return;
     }
     const result = await UserDataManager.removeEntity(entityId);

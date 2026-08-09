@@ -471,7 +471,7 @@ async function removeUserCard(userCardId, cardId = null) {
         return;
     }
     
-    if (!confirm('Are you sure you want to remove this card from your collection?')) {
+    if (!await confirmDialog('Are you sure you want to remove this card from your collection?')) {
         return;
     }
     

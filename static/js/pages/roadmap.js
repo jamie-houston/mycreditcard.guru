@@ -762,8 +762,8 @@ function updateParentCategoryTotals() {
     });
 }
 
-function resetSpendingProfile() {
-    if (confirm('Are you sure you want to reset all spending amounts and spending credit preferences? This action cannot be undone.')) {
+async function resetSpendingProfile() {
+    if (await confirmDialog('Are you sure you want to reset all spending amounts and spending credit preferences? This action cannot be undone.')) {
         // Clear all spending inputs (only editable ones)
         const spendingInputs = document.querySelectorAll('.spending-input:not([readonly])');
         spendingInputs.forEach(input => {
@@ -1345,7 +1345,7 @@ async function exportToScenario() {
         const apiResult = await response.json();
         
         if (apiResult.error) {
-            alert(`❌ Export failed: ${apiResult.error}`);
+            showNotification(`Export failed: ${apiResult.error}`, 'error');
             return;
         }
         
@@ -1370,7 +1370,8 @@ async function exportToScenario() {
         
         // Show success message with debug info
         console.log('Exported scenario:', processedScenario);
-        alert(`✅ Test scenario exported successfully!\n\nThe JSON file contains your current spending profile, cards, and preferences.\n\nYou can add this to data/tests/scenarios.json for testing and debugging.\n\nCheck the browser console for the full scenario data.`);
+        showNotification('Test scenario exported successfully!', 'success');
+        console.info('The JSON file contains your current spending profile, cards, and preferences.\nYou can add this to data/tests/scenarios.json for testing and debugging.\nThe full scenario data is logged above.');
         
     } catch (error) {
         console.error('Export error:', error);
@@ -1390,7 +1391,8 @@ async function exportToScenario() {
         
         URL.revokeObjectURL(url);
         
-        alert(`✅ Test scenario exported (offline mode)\n\nAPI was unavailable, but the scenario file was still created.\nError: ${error.message}`);
+        showNotification('Test scenario exported (offline mode)', 'success');
+        console.info(`API was unavailable, but the scenario file was still created.\nError: ${error.message}`);
     }
 }
 

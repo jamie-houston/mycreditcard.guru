@@ -801,7 +801,7 @@
                                 }
                             }
                             await UserDataManager.saveCards(revertCards);
-                            alert('Error updating card ownership');
+                            showNotification('Error updating card ownership', 'error');
                             return;
                         }
                     } catch (apiError) {
@@ -818,7 +818,7 @@
 
             } catch (error) {
                 console.error('Error:', error);
-                alert('Error updating card ownership');
+                showNotification('Error updating card ownership', 'error');
             } finally {
                 button.disabled = false;
             }
@@ -859,7 +859,7 @@
             } catch (error) {
                 console.error('Error loading card details:', error);
                 closeCardModal();
-                alert('Error loading card details. Please try again.');
+                showNotification('Error loading card details. Please try again.', 'error');
             }
         }
 
@@ -1314,7 +1314,7 @@
 
             } catch (error) {
                 console.error('Error removing card:', error);
-                alert('Error removing card');
+                showNotification('Error removing card', 'error');
             } finally {
                 button.disabled = false;
             }
@@ -1343,16 +1343,16 @@
                         button.textContent = '...';
                         const success = await UserDataManager.addCardWithDetails(cardId, '', null);
                         if (success) {
-                            alert('Card added to your collection!');
+                            showNotification('Card added to your collection!', 'success');
                             refreshPageDisplay();
                         } else {
-                            alert('Error adding card. Please try again.');
+                            showNotification('Error adding card. Please try again.', 'error');
                         }
                     }
                 }
             } catch (error) {
                 console.error('Error updating card ownership:', error);
-                alert('Error updating card ownership');
+                showNotification('Error updating card ownership', 'error');
             } finally {
                 button.disabled = false;
             }
