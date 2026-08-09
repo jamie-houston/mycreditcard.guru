@@ -48,6 +48,28 @@ Revisit only if a specific gap becomes a real complaint — `roadmaps/
 eligibility.py`'s module docstring is the place to extend `ISSUER_RULES`
 if so.
 
+## Local dev fixture: a seeded household
+
+Manual browser passes need a logged-in household with several entities,
+business cards and closed cards. Build one instead of clicking it in:
+
+```bash
+venv/bin/python manage.py seed_profile                                   # real portfolio (gitignored)
+venv/bin/python manage.py seed_profile --file data/local/seed/example.json --username demo
+```
+
+Refuses unless `DEBUG` — it creates a login and overwrites profile data.
+Idempotent: re-running rebuilds entities/cards/spending under the same user.
+Password comes from `--password`, else the `SEED_PASSWORD` env var, else one
+is generated and printed; it is a local-only var and is set in no hosted
+environment.
+
+`data/local/seed/` is gitignored except `example.json`, which is the format's
+documentation — this repo is public, so the real portfolio stays out of it.
+Spending is not stored in the seed file at all: it is read from the named
+scenario in `data/tests/scenarios/`, so the fixture can't drift from the
+suite.
+
 ## Recurring maintenance
 
 Run `venv/bin/python manage.py import_external_cards` locally ~monthly,
