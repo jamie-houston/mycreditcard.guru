@@ -28,6 +28,17 @@ function getCookie(name) {
     return cookieValue;
 }
 
+// Date-only values ('YYYY-MM-DD', every DateField on UserCard) parse as UTC
+// midnight through `new Date(str)`, so toLocaleDateString() renders the day
+// before anywhere behind UTC. Build the Date from local components instead.
+// Returns null for an empty value so callers' `if (date)` guards still work.
+function parseDateOnly(str) {
+    if (!str) return null;
+    const match = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(str));
+    if (!match) return new Date(str);
+    return new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]));
+}
+
 function showNotification(message, type = 'info') {
     // Create notification element
     const notification = document.createElement('div');

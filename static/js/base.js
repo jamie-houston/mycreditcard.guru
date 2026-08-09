@@ -948,7 +948,7 @@
                     // Show opening date
                     const openingDateEl = document.getElementById('modalUserOpeningDate');
                     if (cardDetails?.opened_date) {
-                        const date = new Date(cardDetails.opened_date);
+                        const date = parseDateOnly(cardDetails.opened_date);
                         openingDateEl.textContent = date.toLocaleDateString();
                     } else {
                         openingDateEl.textContent = 'Not set';
@@ -957,7 +957,7 @@
                     // Show bonus earned date
                     const bonusEarnedDateEl = document.getElementById('modalUserBonusEarnedDate');
                     if (cardDetails?.bonus_earned_date) {
-                        const date = new Date(cardDetails.bonus_earned_date);
+                        const date = parseDateOnly(cardDetails.bonus_earned_date);
                         bonusEarnedDateEl.textContent = date.toLocaleDateString();
                     } else {
                         bonusEarnedDateEl.textContent = 'Not set';
@@ -1261,7 +1261,12 @@
         }
 
         function refreshPageDisplay() {
-            if (typeof filterCards === 'function') {
+            // The browse page must refetch: filterCards() there re-renders from
+            // an allCards whose hasCard/user_card fields were computed once at
+            // load, so ownership changes would redraw the stale state.
+            if (typeof loadCardsWithOwnership === 'function') {
+                loadCardsWithOwnership();
+            } else if (typeof filterCards === 'function') {
                 filterCards();
             } else if (typeof displayCards === 'function' && typeof allCards !== 'undefined') {
                 displayCards(allCards);
@@ -1391,6 +1396,11 @@
                     'Edit Card Details <span style="background: #5C6675; color: white; padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: 500; margin-left: 8px;">Local Mode</span>' :
                     'Add Card to Collection <span style="background: #5C6675; color: white; padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: 500; margin-left: 8px;">Local Mode</span>';
             }
+
+            // The submit label was only ever set in saveCardOwnership's finally,
+            // so before the first save it showed the *previous* open's mode.
+            const submitBtn = form.querySelector('button[type="submit"]');
+            if (submitBtn) submitBtn.textContent = hasExistingId ? 'Save Details' : 'Add Card';
 
             // Store card ID in form
             form.dataset.cardId = cardId;

@@ -23,7 +23,7 @@ vm.runInContext(source, sandbox);
 
 const { _roadmapTimingLabel, _roadmapFormatSigned, _roadmapBenefitsValue,
         _roadmapRewardsValue, _roadmapBonusShiftAggregate,
-        _roadmapApplyAsLabel, escapeHtml,
+        _roadmapApplyAsLabel, escapeHtml, parseDateOnly,
         _roadmapCategoryMatrix, _roadmapCategoryMatrixHtml,
         _roadmapValueOverTime, _roadmapValueOverTimeHtml,
         _roadmapRedemptionHtml, _roadmapExpenseLineText,
@@ -127,6 +127,32 @@ test('escapeHtml: escapes the standard HTML-sensitive characters', () => {
         '&lt;a href=&quot;x&quot;&gt;it&#39;s &amp; &quot;fun&quot;&lt;/a&gt;');
     assert.strictEqual(escapeHtml(null), '');
     assert.strictEqual(escapeHtml(undefined), '');
+});
+
+// `new Date('2026-09-15')` is UTC midnight, so this assertion only fails —
+// and only catches a regression — when the process runs behind UTC. Pin the
+// zone rather than trusting the machine's, or a UTC box passes it vacuously.
+// (Node honours a runtime process.env.TZ change; restored after, so the
+// TZ-independent tests around it are unaffected.)
+test('parseDateOnly: a YYYY-MM-DD string is local midnight, not UTC midnight', () => {
+    const originalTZ = process.env.TZ;
+    process.env.TZ = 'America/Chicago';
+    try {
+        const date = parseDateOnly('2026-09-15');
+        assert.strictEqual(date.getFullYear(), 2026);
+        assert.strictEqual(date.getMonth(), 8);
+        assert.strictEqual(date.getDate(), 15);
+
+        // The bug this replaces, asserted so the pin above stays honest:
+        // if this ever reads 15 the zone stopped applying and the test is vacuous.
+        assert.strictEqual(new Date('2026-09-15').getDate(), 14);
+
+        assert.strictEqual(parseDateOnly(''), null);
+        assert.strictEqual(parseDateOnly(null), null);
+        assert.strictEqual(parseDateOnly(undefined), null);
+    } finally {
+        if (originalTZ === undefined) delete process.env.TZ; else process.env.TZ = originalTZ;
+    }
 });
 
 test('_roadmapCategoryMatrix: groups allocation entries by category, sums rewards', () => {

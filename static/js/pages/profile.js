@@ -254,7 +254,7 @@ async function removeHouseholdEntity(entityId) {
 // passed yet, otherwise next year) of the card's opened_date.
 function nextAnniversary(openedDateStr) {
     if (!openedDateStr) return null;
-    const opened = new Date(openedDateStr);
+    const opened = parseDateOnly(openedDateStr);
     const todayMidnight = new Date();
     todayMidnight.setHours(0, 0, 0, 0);
     const anniversary = new Date(todayMidnight.getFullYear(), opened.getMonth(), opened.getDate());
@@ -269,7 +269,7 @@ function cardSortValue(key, group, cardInfo) {
         case 'name': return cardInfo.name || '';
         case 'issuer': return cardInfo.issuer?.name || '';
         case 'signup_date': {
-            const dates = group.instances.filter(i => i.opened_date).map(i => new Date(i.opened_date).getTime());
+            const dates = group.instances.filter(i => i.opened_date).map(i => parseDateOnly(i.opened_date).getTime());
             return dates.length > 0 ? Math.min(...dates) : Infinity; // no date sorts last (ascending)
         }
         case 'annual_fee': return parseFloat(cardInfo.annual_fee || 0);
@@ -366,7 +366,7 @@ function renderCardCollectionTable() {
         // Formatted dates/instances
         let openedDateDisplay = '';
         if (instances.length > 0 && instances[0].opened_date) {
-            openedDateDisplay = new Date(instances[0].opened_date).toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+            openedDateDisplay = parseDateOnly(instances[0].opened_date).toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
         } else {
             openedDateDisplay = 'unknown date';
         }

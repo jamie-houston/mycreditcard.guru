@@ -3,11 +3,17 @@
 .shared-profile-header {
     background: linear-gradient(160deg, #1B2A24, #141C19);
     border: 1px solid #2A3A32;
-    color: var(--text);
+    color: var(--accent-ink);
     padding: 30px;
     border-radius: var(--radius-xl);
     margin-bottom: 30px;
     text-align: center;
+}
+
+/* The global `h1` rule sets --text-strong, which overrides the header's
+   inherited color — so the heading needs its own rule to stay legible. */
+.shared-profile-header h1 {
+    color: var(--accent-ink);
 }
 
 .shared-profile-badge {
