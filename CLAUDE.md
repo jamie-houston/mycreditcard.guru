@@ -31,6 +31,7 @@ venv/bin/pytest tests/e2e/ -v
 - **Git Branch**: All work is committed directly to the `main` branch.
 - **Status Updates**: Status and planning live in Obsidian, **not this repo** — `areas/work/coding/side-projects/mycreditcard.guru/`. Update the story file and `stories/README.md`'s CURRENT POSITION block there, not a doc in this repo. For a one-off task, this file is the whole context; don't go looking for planning docs.
 - **Help Updates**: When adding/modifying user-facing features (roadmap settings, math logic, multiplayer support, credits), always update `templates/help.html` to match.
+- **No native browser dialogs**: `alert()`, `confirm()` and `prompt()` are banned in `static/js/` — each one hard-freezes Playwright until a human dismisses it, making the whole page untestable. Use `showNotification(msg, type)` for messages, or `confirmDialog(msg)` / `promptDialog(msg, default)` from `static/js/utils.js` when you need an answer back. Enforced by `cards/test_no_native_dialogs.py`.
 - **Eligibility Non-Goals**: Three issuer-rule gaps are *deliberately* unmodeled (aggregate cross-issuer open-card cap, Amex charge/business sub-limits, cross-issuer velocity throttle) — see `roadmaps/eligibility.py`'s module docstring. Don't build them without Jamie re-deciding.
 
 ## 🗂️ Core Documentation Map
