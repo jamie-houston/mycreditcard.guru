@@ -757,6 +757,11 @@
                 const hasCard = button.textContent.includes('I have this');
                 const action = hasCard ? 'add' : 'remove';
 
+                if (action === 'remove' &&
+                    !await confirmDialog('Are you sure you want to remove this card from your collection?')) {
+                    return;
+                }
+
                 button.disabled = true;
                 button.textContent = '...';
 
@@ -1302,6 +1307,10 @@
 
             const button = document.getElementById('modalOwnershipButton');
             const cardId = currentModalCard.id;
+
+            if (!await confirmDialog('Are you sure you want to remove this card from your collection?')) {
+                return;
+            }
 
             try {
                 const userCards = await UserDataManager.getCards();

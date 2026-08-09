@@ -356,6 +356,9 @@ function _roadmapExpensePanelHtml(expenseReco) {
 }
 
 async function removeCardOwnership(cardId, cardName, buttonEl) {
+    if (!await confirmDialog(`Remove ${cardName || 'this card'} from your cards?`)) {
+        return;
+    }
     if (buttonEl) {
         buttonEl.disabled = true;
         buttonEl.textContent = '...';
