@@ -1,0 +1,69 @@
+{
+  "_readme": [
+    "Format documentation for `manage.py seed_profile`, and a runnable fictional",
+    "household. The real portfolio lives beside this file as jamie.json, which is",
+    "gitignored — this repo is public.",
+    "",
+    "Run it with:  venv/bin/python manage.py seed_profile --file data/local/seed/example.json --username demo",
+    "",
+    "Rules the command enforces:",
+    "  - `card` must be a slug in the imported catalog; unknown slugs are skipped",
+    "    and reported by name, never dropped silently.",
+    "  - `owner` must name an entity declared below. Exactly one entity is primary.",
+    "  - Dates are ISO YYYY-MM-DD. An UNKNOWN opened_date must stay null — do not",
+    "    invent one; a wrong open date silently corrupts every 5/24 number.",
+    "  - A non-null closed_date is what makes a card read as closed.",
+    "  - `note` lands in UserCard.notes, and is where a judgement call gets recorded.",
+    "  - Spending is never copied here. `spending_from_scenario` names a scenario in",
+    "    data/tests/scenarios/*.json, which already owns the real monthly numbers and",
+    "    is exercised by the test suite, so the two cannot drift.",
+    "  - `skipped_cards` is purely for reporting: cards deliberately left out, so the",
+    "    summary says so rather than the portfolio just being quietly short."
+  ],
+
+  "username": "demo",
+  "spending_from_scenario": "Jamie Real",
+
+  "entities": [
+    {"name": "Alex Rivera", "kind": "personal", "primary": true},
+    {"name": "Sam Rivera", "kind": "personal"},
+    {"name": "Bright Fig Studio, LLC", "kind": "business"}
+  ],
+
+  "cards": [
+    {
+      "nickname": "Personal 1001",
+      "card": "chase-freedom-legacy",
+      "owner": "Alex Rivera",
+      "opened_date": "2011-03-14"
+    },
+    {
+      "nickname": "Personal 1002",
+      "card": "chase-sapphire-preferred-card",
+      "owner": "Sam Rivera",
+      "opened_date": "2023-06-01",
+      "bonus_earned_date": "2023-09-01"
+    },
+    {
+      "nickname": "Business 1003",
+      "card": "ink-business-cash-credit-card",
+      "owner": "Bright Fig Studio, LLC",
+      "opened_date": "2024-02-20"
+    },
+    {
+      "nickname": "Personal 1004",
+      "card": "blue-cash-preferred-card-from-american-express",
+      "owner": "Alex Rivera",
+      "opened_date": "2019-11-05",
+      "closed_date": "2024-11-30",
+      "note": "Closed after the fee rose — an example of a closed card in the fixture."
+    }
+  ],
+
+  "skipped_cards": [
+    {
+      "nickname": "Credit Union 1005",
+      "reason": "example of the skip channel — a card with no catalog slug"
+    }
+  ]
+}

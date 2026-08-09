@@ -120,3 +120,10 @@ data/external/
 
 # Version file (generated during deployment)
 VERSION
+
+# Local seed data for `manage.py seed_profile` — the real portfolio stays out of
+# this public repo; example.json is the committed format documentation.
+data/local/*
+!data/local/seed/
+data/local/seed/*
+!data/local/seed/example.json
