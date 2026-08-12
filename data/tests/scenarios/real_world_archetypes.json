@@ -1,0 +1,188 @@
+{
+  "description": "Story 06: real-world archetype profiles, used to compare the engine's *advice* against community card-strategy guidance. These are expectation-recording scenarios — plausible people rather than math edge cases — so their expectations are deliberately weak (an action, plus cards whose absence is structurally guaranteed by an eligibility rule the engine already models). What the engine actually output when each was recorded lives in the story's session log; that text is the evidence the gap list cites, not an assertion. All four share one candidate pool, so the only thing that varies between them is the person. The pool is 15 cards and every one of them is `verified: true` in data/input/cards/ — import_cards skips unverified cards, so an unverified slug here fails the scenario outright. That is why Citi Double Cash and Custom Cash, both flowchart staples, are absent: they are still in the verification backlog.",
+  "category": "real_world_archetypes",
+  "scenarios": [
+    {
+      "name": "Archetype - Three Chase cards under 5/24",
+      "description": "Jamie's stated case: someone already holding three Chase cards, all opened inside 24 months, so they are at 3/24 with headroom for two more personal cards. A human following the community flowchart answers 'a fourth Chase card, now, while you still can'. Records what a value-first engine answers instead.",
+      "max_recommendations": 3,
+      "user_profile": {
+        "spending": {
+          "dining": 600,
+          "groceries": 800,
+          "gas": 200,
+          "travel": 400,
+          "hotels": 150,
+          "shopping": 500,
+          "general": 900
+        }
+      },
+      "owned_cards": [
+        {"card": "chase-freedom-unlimited", "opened_days_ago": 700},
+        {"card": "chase-freedom-flex", "opened_days_ago": 420},
+        {"card": "chase-sapphire-preferred-card", "opened_days_ago": 200}
+      ],
+      "available_cards": [
+        "chase-freedom-unlimited",
+        "chase-freedom-flex",
+        "chase-sapphire-preferred-card",
+        "chase-sapphire-reserve",
+        "ink-business-preferred-credit-card",
+        "american-express-gold-card",
+        "the-platinum-card-from-american-express",
+        "blue-cash-preferred-card-from-american-express",
+        "blue-cash-everyday",
+        "capital-one-venture-rewards-credit-card",
+        "capital-one-venture-x-rewards-credit-card",
+        "capital-one-savor-cash-rewards-credit-card",
+        "citi-strata-card",
+        "wells-fargo-active-cash-card",
+        "discover-it"
+      ],
+      "expected_recommendations": {
+        "actions": ["keep"],
+        "test_conditions": [
+          "3 personal cards inside 24 months: 5/24 does not trip, so every Chase candidate is eligible and nothing here is excluded by eligibility",
+          "Chase Sapphire Reserve is unavailable for a different reason — the held Sapphire Preferred trips Chase's one-Sapphire-at-a-time application rule, which the engine does model",
+          "The scenario's job is to record which issuer the engine reaches for when the rest of them are open to it"
+        ]
+      }
+    },
+    {
+      "name": "Archetype - Blank slate average spend",
+      "description": "No cards at all, average US household spending. The flowchart's answer for this person is a no-fee base card and (if they can carry the strategy) a Chase card first. Records what the engine says to get first.",
+      "max_recommendations": 3,
+      "user_profile": {
+        "spending": {
+          "dining": 350,
+          "groceries": 650,
+          "gas": 200,
+          "travel": 150,
+          "shopping": 400,
+          "general": 800
+        }
+      },
+      "owned_cards": [],
+      "available_cards": [
+        "chase-freedom-unlimited",
+        "chase-freedom-flex",
+        "chase-sapphire-preferred-card",
+        "chase-sapphire-reserve",
+        "ink-business-preferred-credit-card",
+        "american-express-gold-card",
+        "the-platinum-card-from-american-express",
+        "blue-cash-preferred-card-from-american-express",
+        "blue-cash-everyday",
+        "capital-one-venture-rewards-credit-card",
+        "capital-one-venture-x-rewards-credit-card",
+        "capital-one-savor-cash-rewards-credit-card",
+        "citi-strata-card",
+        "wells-fargo-active-cash-card",
+        "discover-it"
+      ],
+      "expected_recommendations": {
+        "actions": ["apply"],
+        "test_conditions": [
+          "Nothing owned, so no eligibility rule is in play at all — the first pick is pure value",
+          "Recorded output is in the story's session log"
+        ]
+      }
+    },
+    {
+      "name": "Archetype - Over 5/24 with recent approvals",
+      "description": "Five personal cards opened inside 24 months, none of them Chase. The community answer is to stop applying to Chase and spend the wait at issuers that will still approve. Tests whether the engine pivots on its own — eligibility should drop the Chase personal candidates without being asked to.",
+      "max_recommendations": 3,
+      "user_profile": {
+        "spending": {
+          "dining": 600,
+          "groceries": 800,
+          "gas": 200,
+          "travel": 400,
+          "hotels": 150,
+          "shopping": 500,
+          "general": 900
+        }
+      },
+      "owned_cards": [
+        {"card": "citi-strata-card", "opened_days_ago": 80},
+        {"card": "wells-fargo-active-cash-card", "opened_days_ago": 160},
+        {"card": "capital-one-savor-cash-rewards-credit-card", "opened_days_ago": 300},
+        {"card": "discover-it", "opened_days_ago": 480},
+        {"card": "blue-cash-preferred-card-from-american-express", "opened_days_ago": 640}
+      ],
+      "available_cards": [
+        "chase-freedom-unlimited",
+        "chase-freedom-flex",
+        "chase-sapphire-preferred-card",
+        "chase-sapphire-reserve",
+        "ink-business-preferred-credit-card",
+        "american-express-gold-card",
+        "the-platinum-card-from-american-express",
+        "blue-cash-preferred-card-from-american-express",
+        "blue-cash-everyday",
+        "capital-one-venture-rewards-credit-card",
+        "capital-one-venture-x-rewards-credit-card",
+        "capital-one-savor-cash-rewards-credit-card",
+        "citi-strata-card",
+        "wells-fargo-active-cash-card",
+        "discover-it"
+      ],
+      "expected_recommendations": {
+        "must_not_include_cards": [
+          "chase-freedom-unlimited",
+          "chase-freedom-flex",
+          "chase-sapphire-preferred-card",
+          "chase-sapphire-reserve"
+        ],
+        "test_conditions": [
+          "5 personal cards inside 24 months trip Chase 5/24, so all four Chase personal candidates must be excluded — this half IS an assertion, it restates a rule the engine already models",
+          "The Chase business card (ink-business-preferred) is not asserted either way: business cards are outside 5/24, so whether it appears is a value question",
+          "The Capital One card was opened 300 days ago, outside the 1/6mo window, so C1 candidates are not blocked",
+          "Recorded output — including which issuer it pivots to — is in the story's session log"
+        ]
+      }
+    },
+    {
+      "name": "Archetype - Heavy travel fee averse",
+      "description": "High travel and dining spend, no cards yet, and a person who dislikes annual fees. Nothing in the engine or the scenario format expresses fee-aversion, so this records what the unconstrained annual-fee math does for a heavy traveller — the question being whether the fee-versus-value tradeoff reads as sane to a human who would have said 'not a $795 card, thanks'.",
+      "max_recommendations": 3,
+      "user_profile": {
+        "spending": {
+          "dining": 1200,
+          "travel": 1500,
+          "hotels": 800,
+          "groceries": 500,
+          "gas": 150,
+          "shopping": 300,
+          "general": 600
+        }
+      },
+      "owned_cards": [],
+      "available_cards": [
+        "chase-freedom-unlimited",
+        "chase-freedom-flex",
+        "chase-sapphire-preferred-card",
+        "chase-sapphire-reserve",
+        "ink-business-preferred-credit-card",
+        "american-express-gold-card",
+        "the-platinum-card-from-american-express",
+        "blue-cash-preferred-card-from-american-express",
+        "blue-cash-everyday",
+        "capital-one-venture-rewards-credit-card",
+        "capital-one-venture-x-rewards-credit-card",
+        "capital-one-savor-cash-rewards-credit-card",
+        "citi-strata-card",
+        "wells-fargo-active-cash-card",
+        "discover-it"
+      ],
+      "expected_recommendations": {
+        "actions": ["apply"],
+        "test_conditions": [
+          "No fee ceiling exists to set — recorded so a later 'fee-averse' setting has a before/after",
+          "Every recommended card's fee is netted inside its own estimated value, so a fee-paying card being recommended is not by itself a divergence",
+          "Recorded output is in the story's session log"
+        ]
+      }
+    }
+  ]
+}

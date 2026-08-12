@@ -347,6 +347,52 @@ class JSONScenarioTest(JSONScenarioTestBase):
             "No pooling means no 'points valued via' info line")
         self.print_scenario_results(scenario, recommendations)
 
+    # Story 06: real-world archetypes. These record what the engine advises
+    # a plausible person, so their scenario expectations are weak by design
+    # (see the file's own description). The one real assertion lives here:
+    # the over-5/24 archetype must pivot off Chase without being asked to.
+    def test_archetype_three_chase_cards_under_524(self):
+        """Story 06: 3 Chase cards at 3/24 — nothing is eligibility-blocked,
+        so the pick is whatever the value walk prefers."""
+        if not self.scenarios:
+            self.skipTest("No scenarios found in JSON file")
+        scenario = self.get_scenario('Archetype - Three Chase cards under 5/24')
+        recommendations = self.run_scenario_test(scenario)
+        self.print_scenario_results(scenario, recommendations)
+
+    def test_archetype_blank_slate(self):
+        """Story 06: no cards, average spend — what to get first."""
+        if not self.scenarios:
+            self.skipTest("No scenarios found in JSON file")
+        scenario = self.get_scenario('Archetype - Blank slate average spend')
+        recommendations = self.run_scenario_test(scenario)
+        self.print_scenario_results(scenario, recommendations)
+
+    def test_archetype_over_524_pivots_off_chase(self):
+        """Story 06: at 5/24 every Chase *personal* candidate must be gone
+        from the applies, and the engine must still find something to
+        recommend at another issuer rather than returning nothing."""
+        if not self.scenarios:
+            self.skipTest("No scenarios found in JSON file")
+        scenario = self.get_scenario('Archetype - Over 5/24 with recent approvals')
+        recommendations = self.run_scenario_test(scenario)
+        applies = [rec for rec in recommendations if rec['action'] == 'apply']
+        self.assertTrue(applies, "Being at 5/24 must not empty the applies list")
+        self.assertFalse(
+            [rec for rec in applies
+             if rec['card'].issuer.name == 'Chase'
+             and rec['card'].card_type == 'personal'],
+            "No Chase personal card may be recommended at 5/24")
+        self.print_scenario_results(scenario, recommendations)
+
+    def test_archetype_heavy_travel_fee_averse(self):
+        """Story 06: heavy travel spend — records the annual-fee tradeoff."""
+        if not self.scenarios:
+            self.skipTest("No scenarios found in JSON file")
+        scenario = self.get_scenario('Archetype - Heavy travel fee averse')
+        recommendations = self.run_scenario_test(scenario)
+        self.print_scenario_results(scenario, recommendations)
+
     # The broad scenario suite has ~22 stale expectations (card counts and
     # keep/cancel policies written for an older engine; baseline was 27
     # failures before the allocation rework). Math-integrity checks
@@ -354,7 +400,7 @@ class JSONScenarioTest(JSONScenarioTestBase):
     #   RUN_ALL_SCENARIOS=1 python manage.py test cards.test_json_scenarios
     # and recalibrate expectations via `run_scenario "<name>" --explain`.
     @unittest.skipUnless(os.environ.get('RUN_ALL_SCENARIOS'),
-                         'set RUN_ALL_SCENARIOS=1 to audit all 82 scenarios')
+                         'set RUN_ALL_SCENARIOS=1 to audit all 86 scenarios')
     def test_all_scenarios(self):
         """Run every JSON scenario against its expectations.
 

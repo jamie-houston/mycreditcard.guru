@@ -1,6 +1,6 @@
 {
   "description": "Index of all scenario test files (informational — the loader globs *.json, so a missing entry here doesn't skip a file)",
-  "total_scenarios": 77,
+  "total_scenarios": 86,
   "files": [
     {
       "filename": "basic_profiles.json",
@@ -79,6 +79,12 @@
       "category": "points_pooling",
       "scenario_count": 3,
       "description": "Phase J: same-program points pooling — a held premium card lifts an earner's points value, different programs don't cross-pool, a card without points_program never pools"
+    },
+    {
+      "filename": "real_world_archetypes.json",
+      "category": "real_world_archetypes",
+      "scenario_count": 4,
+      "description": "Story 06: real-world archetypes — 3 Chase cards under 5/24, blank slate, over 5/24, heavy travel. Expectation-recording, one shared verified-card pool"
     },
     {
       "filename": "multi_player.json",
