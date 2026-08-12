@@ -1,5 +1,6 @@
 from django.test import TestCase
 from django.contrib.auth.models import User
+from django.db import IntegrityError, transaction
 
 from .models import (
     SpendingCategory, SpendingCredit, UserSpendingProfile,
@@ -133,6 +134,97 @@ class UserCardOwnershipSoftCloseTests(TestCase):
         user_card.refresh_from_db()
         self.assertEqual(user_card.id, UserCard.objects.get(user=self.user, card=self.card).id)
         self.assertIsNone(user_card.closed_date)
+
+
+class UserCardReappliedHistoryTests(TestCase):
+    """Story 13: a closed holding and a later re-applied one can coexist as
+    two rows under one (user, card, owner) — the partial unique constraint
+    only forbids two *open* rows. /user-cards/add/ with new_holding=true is
+    the one write path that creates the second row; every other path
+    (plain add, toggle, bulk save) keeps reopening the existing row, which
+    is covered by the reopen tests above and in users/tests.py."""
+
+    def setUp(self):
+        from datetime import date
+        self.date = date
+        self.user = User.objects.create_user(username='reapplier', password='x')
+        cashback = RewardType.objects.create(name='Cashback', slug='cashback')
+        issuer = Issuer.objects.create(name='Generic Bank', slug='generic-bank')
+        self.card = CreditCard.objects.create(
+            name='Reappliable Card', slug='reappliable-card', issuer=issuer,
+            signup_bonus_type=cashback, primary_reward_type=cashback)
+        self.client.force_login(self.user)
+
+    def test_new_holding_creates_a_second_row_leaving_the_old_one_closed(self):
+        closed = UserCard.objects.create(
+            user=self.user, card=self.card,
+            opened_date=self.date(2021, 1, 1), closed_date=self.date(2022, 1, 1))
+
+        response = self.client.post(
+            '/api/cards/user-cards/add/',
+            {'card_id': self.card.id, 'new_holding': True, 'opened_date': '2026-08-01'},
+            content_type='application/json')
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.json()['created'])
+
+        rows = UserCard.objects.filter(user=self.user, card=self.card).order_by('opened_date')
+        self.assertEqual(rows.count(), 2)
+        self.assertEqual(rows[0].id, closed.id)
+        self.assertEqual(rows[0].closed_date, self.date(2022, 1, 1))
+        self.assertIsNone(rows[1].closed_date)
+        self.assertEqual(rows[1].opened_date, self.date(2026, 8, 1))
+
+    def test_new_holding_rejected_when_an_open_row_already_exists(self):
+        UserCard.objects.create(user=self.user, card=self.card, opened_date=self.date(2024, 1, 1))
+
+        response = self.client.post(
+            '/api/cards/user-cards/add/',
+            {'card_id': self.card.id, 'new_holding': True, 'opened_date': '2026-08-01'},
+            content_type='application/json')
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(UserCard.objects.filter(user=self.user, card=self.card).count(), 1)
+
+    def test_plain_add_without_new_holding_still_reopens_the_closed_row(self):
+        """Regression: the default behavior stays reopen-not-duplicate,
+        same as story 07 — new_holding is opt-in."""
+        closed = UserCard.objects.create(
+            user=self.user, card=self.card,
+            opened_date=self.date(2021, 1, 1), closed_date=self.date(2022, 1, 1))
+
+        response = self.client.post(
+            '/api/cards/user-cards/add/',
+            {'card_id': self.card.id},
+            content_type='application/json')
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(response.json()['created'])
+
+        self.assertEqual(UserCard.objects.filter(user=self.user, card=self.card).count(), 1)
+        closed.refresh_from_db()
+        self.assertIsNone(closed.closed_date)
+
+    def test_partial_constraint_still_rejects_two_open_rows(self):
+        # A non-NULL owner is required to exercise this: NULL is distinct
+        # from NULL under SQL, so two owner=NULL rows never collide even
+        # under the partial index — the pre-existing leak documented in
+        # story 13 and guarded against separately by
+        # _get_or_create_owned_card.
+        profile, _ = UserSpendingProfile.objects.get_or_create(user=self.user)
+        primary = profile.primary_entity()
+        UserCard.objects.create(
+            user=self.user, card=self.card, owner=primary, opened_date=self.date(2024, 1, 1))
+        with self.assertRaises(IntegrityError):
+            with transaction.atomic():
+                UserCard.objects.create(
+                    user=self.user, card=self.card, owner=primary, opened_date=self.date(2026, 1, 1))
+
+    def test_two_closed_rows_for_the_same_product_are_allowed(self):
+        UserCard.objects.create(
+            user=self.user, card=self.card,
+            opened_date=self.date(2021, 1, 1), closed_date=self.date(2022, 1, 1))
+        UserCard.objects.create(
+            user=self.user, card=self.card,
+            opened_date=self.date(2023, 1, 1), closed_date=self.date(2024, 1, 1))
+        self.assertEqual(UserCard.objects.filter(user=self.user, card=self.card).count(), 2)
 
 
 class UserCardToggleEndpointTests(TestCase):

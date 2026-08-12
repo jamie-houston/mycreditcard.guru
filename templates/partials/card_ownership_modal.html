@@ -14,65 +14,85 @@
         </div>
 
         <form id="cardOwnershipForm" onsubmit="saveCardOwnership(event)">
-            <div class="form-group">
-                <label for="nickname">Nickname (Optional)</label>
-                <input type="text" id="nickname" name="nickname"
-                       placeholder="e.g., My Travel Card, Grocery Card">
-                <small>Give this card a memorable name</small>
-            </div>
-
-            <!-- Phase K: owner selector — shown only for authed households
-                 with more than one entity of this card's own kind (personal
-                 vs. business). See openCardOwnershipModal(). -->
-            <div class="form-group" id="cardOwnershipOwnerGroup" style="display: none;">
-                <label for="ownershipOwner">Held By</label>
-                <select id="ownershipOwner" name="owner"></select>
-            </div>
-
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="opened_date">Opened Date</label>
-                    <input type="date" id="opened_date" name="opened_date">
-                    <small>When did you get approved/open this card?</small>
-                </div>
-
-                <div class="form-group">
-                    <label for="closed_date">Closed Date (Optional)</label>
-                    <input type="date" id="closed_date" name="closed_date">
-                    <small>Leave blank if card is still active</small>
+            <!-- Story 13: shown instead of the fields below when a closed
+                 holding already exists for this card and there's no open
+                 one — the user has to say whether this is a fresh
+                 application or a correction to the old record, since
+                 guessing produces junk eligibility history. -->
+            <div id="cardReapplyChoice" class="form-group" style="display: none;">
+                <p>You previously held this card and it's now closed. Is this
+                   a new application, or are you fixing that record?</p>
+                <div class="form-actions" style="justify-content: flex-start;">
+                    <button type="button" class="btn-primary" onclick="chooseReapplyMode('new')">
+                        I re-applied for this card
+                    </button>
+                    <button type="button" class="btn-secondary" onclick="chooseReapplyMode('fix')">
+                        Fix the existing record
+                    </button>
                 </div>
             </div>
 
-            <div class="form-row">
+            <div id="cardOwnershipFields">
                 <div class="form-group">
-                    <label for="bonus_earned_date">Bonus Earned Date (Optional)</label>
-                    <input type="date" id="bonus_earned_date" name="bonus_earned_date">
-                    <small>When did you receive the welcome bonus?</small>
+                    <label for="nickname">Nickname (Optional)</label>
+                    <input type="text" id="nickname" name="nickname"
+                           placeholder="e.g., My Travel Card, Grocery Card">
+                    <small>Give this card a memorable name</small>
+                </div>
+
+                <!-- Phase K: owner selector — shown only for authed households
+                     with more than one entity of this card's own kind (personal
+                     vs. business). See openCardOwnershipModal(). -->
+                <div class="form-group" id="cardOwnershipOwnerGroup" style="display: none;">
+                    <label for="ownershipOwner">Held By</label>
+                    <select id="ownershipOwner" name="owner"></select>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="opened_date">Opened Date</label>
+                        <input type="date" id="opened_date" name="opened_date">
+                        <small>When did you get approved/open this card?</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="closed_date">Closed Date (Optional)</label>
+                        <input type="date" id="closed_date" name="closed_date">
+                        <small>Leave blank if card is still active</small>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="bonus_earned_date">Bonus Earned Date (Optional)</label>
+                        <input type="date" id="bonus_earned_date" name="bonus_earned_date">
+                        <small>When did you receive the welcome bonus?</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="bonus_override">Signup Bonus Status</label>
+                        <select id="bonus_override" name="bonus_override">
+                            <option value="">Auto (infer from issuer rules)</option>
+                            <option value="true">I earned this bonus</option>
+                            <option value="false">I did not earn this bonus</option>
+                        </select>
+                    </div>
                 </div>
 
                 <div class="form-group">
-                    <label for="bonus_override">Signup Bonus Status</label>
-                    <select id="bonus_override" name="bonus_override">
-                        <option value="">Auto (infer from issuer rules)</option>
-                        <option value="true">I earned this bonus</option>
-                        <option value="false">I did not earn this bonus</option>
-                    </select>
+                    <label for="notes">Notes (Optional)</label>
+                    <textarea id="notes" name="notes" rows="3"
+                              placeholder="Any notes about this card (signup bonus received, annual fee paid, etc.)"></textarea>
                 </div>
-            </div>
 
-            <div class="form-group">
-                <label for="notes">Notes (Optional)</label>
-                <textarea id="notes" name="notes" rows="3"
-                          placeholder="Any notes about this card (signup bonus received, annual fee paid, etc.)"></textarea>
-            </div>
-
-            <div class="form-actions">
-                <button type="button" onclick="closeCardOwnershipModal()" class="btn-secondary">
-                    Cancel
-                </button>
-                <button type="submit" class="btn-primary">
-                    Add Card
-                </button>
+                <div class="form-actions">
+                    <button type="button" onclick="closeCardOwnershipModal()" class="btn-secondary">
+                        Cancel
+                    </button>
+                    <button type="submit" class="btn-primary">
+                        Add Card
+                    </button>
+                </div>
             </div>
         </form>
     </div>

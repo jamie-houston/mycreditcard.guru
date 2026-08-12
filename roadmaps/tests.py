@@ -263,6 +263,39 @@ class EligibilityRuleTests(TestCase):
         biz_held = self._held(business, opened_days_ago=3000)
         self.assertIsNone(application_block(preferred, [biz_held], self.today))
 
+    def test_reapplied_card_history_counts_the_new_holdings_own_date(self):
+        """Story 13: closing a card and re-applying is two history rows for
+        the same product (a stale closed one + a fresh open one), not one
+        row with an overwritten opened_date. 5/24 must count the fresh
+        holding's own opened_date — under the old single-row reopen
+        behavior the stale date meant the re-application counted toward no
+        window at all. Amex-lifetime bonus ineligibility must still see the
+        old holding either way, since it matches by card id regardless of
+        open/closed."""
+        from .eligibility import application_block, bonus_ineligibility
+        candidate = self._card('Chase Candidate', self.chase)
+        product = self._card('Sapphire Preferred', self.chase)
+        old_holding = self._held(product, opened_days_ago=1500, closed_days_ago=800)
+        new_holding = self._held(product, opened_days_ago=100)
+        others = [self._card(f'Card {i}', self.generic) for i in range(3)]
+        recent_others = [self._held(c, opened_days_ago=100 + i * 60) for i, c in enumerate(others)]
+
+        # The stale closed holding alone is outside the 24-month window and
+        # doesn't count: 3/24.
+        self.assertIsNone(application_block(candidate, recent_others + [old_holding], self.today))
+        # The fresh holding is inside the window and does count: 4/24, still under.
+        self.assertIsNone(application_block(candidate, recent_others + [new_holding], self.today))
+        # Both rows present (the real post-re-apply shape): still just 4/24 —
+        # add one more recent card to cross the threshold.
+        fifth = self._held(self._card('Card 5', self.generic), opened_days_ago=100)
+        self.assertIsNotNone(application_block(
+            candidate, recent_others + [old_holding, new_holding, fifth], self.today))
+
+        amex_gold = self._card('Amex Gold', self.amex)
+        old_gold = self._held(amex_gold, opened_days_ago=1200, closed_days_ago=800)
+        new_gold = self._held(amex_gold, opened_days_ago=100)
+        self.assertIsNotNone(bonus_ineligibility(amex_gold, [old_gold, new_gold], self.today))
+
     def test_southwest_family_rules(self):
         from .eligibility import application_block, bonus_ineligibility
         family_meta = {

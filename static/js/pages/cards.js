@@ -599,9 +599,13 @@ async function loadCardsWithOwnership() {
             }
         }
         
-        // Create a map of owned cards by card ID
+        // Create a map of owned cards by card ID. /cards/user-cards/ returns
+        // every row including closed ones (story 13 can leave a closed row
+        // alongside an open one, or a closed row with no open one at all) —
+        // only an open holding counts as "owned" here, matching every other
+        // ownership-derived view in the app.
         const ownedCardsMap = {};
-        userCards.forEach(userCard => {
+        userCards.filter(userCard => !userCard.closed_date).forEach(userCard => {
             ownedCardsMap[userCard.card.id] = userCard;
         });
         

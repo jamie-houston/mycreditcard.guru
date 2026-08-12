@@ -775,17 +775,40 @@ def add_user_card(request):
         if error:
             return error
 
-        # Check if user already owns this card (as this owner)
-        user_card, created = _get_or_create_owned_card(
-            request.user, card, owner_entity,
-            defaults={
-                'nickname': request.data.get('nickname', ''),
-                'opened_date': request.data.get('opened_date'),
-                'closed_date': request.data.get('closed_date'),
-                'notes': request.data.get('notes', '')
-            }
-        )
-        
+        if request.data.get('new_holding'):
+            # A closed holding already exists for this (user, card, owner)
+            # and the caller has said this is a fresh application, not an
+            # edit to the old one — see story 13. Reject if an open row
+            # already exists rather than silently reopening it; that's a
+            # client bug and the partial unique constraint would raise
+            # anyway.
+            open_lookup = Q(user=request.user, card=card, owner=owner_entity, closed_date__isnull=True)
+            if owner_entity.is_primary:
+                open_lookup |= Q(user=request.user, card=card, owner__isnull=True, closed_date__isnull=True)
+            if UserCard.objects.filter(open_lookup).exists():
+                return Response(
+                    {'error': 'an open holding for this card already exists — use the "fix the existing record" option instead'},
+                    status=status.HTTP_400_BAD_REQUEST)
+            user_card = UserCard.objects.create(
+                user=request.user, card=card, owner=owner_entity,
+                nickname=request.data.get('nickname', ''),
+                opened_date=request.data.get('opened_date'),
+                closed_date=request.data.get('closed_date'),
+                notes=request.data.get('notes', '')
+            )
+            created = True
+        else:
+            # Check if user already owns this card (as this owner)
+            user_card, created = _get_or_create_owned_card(
+                request.user, card, owner_entity,
+                defaults={
+                    'nickname': request.data.get('nickname', ''),
+                    'opened_date': request.data.get('opened_date'),
+                    'closed_date': request.data.get('closed_date'),
+                    'notes': request.data.get('notes', '')
+                }
+            )
+
         if not created:
             # Found an existing row for this user+card (unique_together) —
             # this happens for genuine edits, but also when re-adding a

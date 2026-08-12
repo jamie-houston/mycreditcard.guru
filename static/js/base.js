@@ -1394,6 +1394,69 @@
             openCardOwnershipModal(cardId, isOwned, cardType);
         }
 
+        // Story 13: the one closed holding (if any) found for the card/owner
+        // being added, stashed between openCardOwnershipModal's detection and
+        // chooseReapplyMode's "fix the record" prefill.
+        let _pendingClosedHolding = null;
+
+        // Story 13: does this card have a closed-but-not-reopened holding for
+        // the given owner (or the primary entity, when owner is null)? Used
+        // only on the "add" path — getUserCardsDetails() already filters
+        // closed rows out, so this re-fetches unfiltered.
+        async function findClosedHolding(cardId, ownerId) {
+            try {
+                const response = await fetch(`${API_BASE}/cards/user-cards/`);
+                if (!response.ok) return null;
+                const data = await response.json();
+                const matches = (data || []).filter(uc => uc.card.id === cardId && uc.closed_date);
+                if (matches.length === 0) return null;
+                const byOwner = ownerId != null
+                    ? matches.find(uc => uc.owner === ownerId)
+                    : matches.find(uc => !uc.owner);
+                return byOwner || matches[0];
+            } catch (error) {
+                console.error('Error checking for a closed card holding:', error);
+                return null;
+            }
+        }
+
+        function chooseReapplyMode(mode) {
+            const form = document.getElementById('cardOwnershipForm');
+            const choice = document.getElementById('cardReapplyChoice');
+            const fields = document.getElementById('cardOwnershipFields');
+            const submitBtn = form.querySelector('button[type="submit"]');
+
+            form.dataset.reapplyMode = mode;
+            choice.style.display = 'none';
+            fields.style.display = 'block';
+
+            if (mode === 'new') {
+                form.reset();
+                form.dataset.userCardId = '';
+                if (submitBtn) submitBtn.textContent = 'Add Card';
+            } else {
+                // "Fix the existing record" means the old closed_date was
+                // wrong, not that this is a new application — same as
+                // today's reopen behavior, so closed_date is left blank
+                // here for the user to leave clear (reopen) or re-set.
+                const closed = _pendingClosedHolding;
+                form.dataset.userCardId = closed ? closed.id : '';
+                if (closed) {
+                    form.nickname.value = closed.nickname || '';
+                    form.opened_date.value = closed.opened_date || '';
+                    form.closed_date.value = '';
+                    if (form.bonus_earned_date) form.bonus_earned_date.value = closed.bonus_earned_date || '';
+                    if (form.bonus_override) {
+                        form.bonus_override.value =
+                            closed.bonus_override === true ? 'true' :
+                            closed.bonus_override === false ? 'false' : '';
+                    }
+                    form.notes.value = closed.notes || '';
+                }
+                if (submitBtn) submitBtn.textContent = 'Save Details';
+            }
+        }
+
         // Card Ownership Modal Functions
         async function openCardOwnershipModal(cardId, existingUserCard = null, cardType = 'personal') {
             const modal = document.getElementById('cardOwnershipModal');
@@ -1403,6 +1466,8 @@
             const modalTitle = document.getElementById('modalTitle');
 
             const hasExistingId = Boolean(existingUserCard && existingUserCard.id);
+            form.dataset.reapplyMode = '';
+            _pendingClosedHolding = null;
 
             // Set modal title and add auth status indicator
             if (isAuthenticated) {
@@ -1482,6 +1547,26 @@
                 localNotice.style.display = isAuthenticated ? 'none' : 'block';
             }
 
+            // Story 13: on the add path, check whether a closed holding
+            // already exists for this card/owner — if so, make the user say
+            // whether this is a re-application or a correction before
+            // showing the regular fields.
+            const reapplyChoice = document.getElementById('cardReapplyChoice');
+            const ownershipFields = document.getElementById('cardOwnershipFields');
+            if (!hasExistingId && isAuthenticated) {
+                const ownerId = ownerGroup.style.display !== 'none' ? parseInt(ownerSelect.value) : null;
+                _pendingClosedHolding = await findClosedHolding(parseInt(cardId), ownerId);
+            } else {
+                _pendingClosedHolding = null;
+            }
+            if (_pendingClosedHolding) {
+                reapplyChoice.style.display = 'block';
+                ownershipFields.style.display = 'none';
+            } else {
+                reapplyChoice.style.display = 'none';
+                ownershipFields.style.display = 'block';
+            }
+
             modal.classList.add('show');
             document.body.style.overflow = 'hidden';
         }
@@ -1517,6 +1602,9 @@
             };
             if (ownerGroupVisible) {
                 formData.owner = form.owner.value;
+            }
+            if (form.dataset.reapplyMode === 'new') {
+                formData.new_holding = true;
             }
 
             try {
@@ -1592,6 +1680,7 @@
         window.openCardOwnershipModal = openCardOwnershipModal;
         window.closeCardOwnershipModal = closeCardOwnershipModal;
         window.saveCardOwnership = saveCardOwnership;
+        window.chooseReapplyMode = chooseReapplyMode;
 
         // Close modal when clicking outside of it
         window.onclick = function(event) {

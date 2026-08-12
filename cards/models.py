@@ -416,7 +416,10 @@ class UserCard(models.Model):
 
     class Meta:
         constraints = [
-            models.UniqueConstraint(fields=['user', 'card', 'owner'], name='uniq_usercard_user_card_owner'),
+            models.UniqueConstraint(
+                fields=['user', 'card', 'owner'],
+                condition=models.Q(closed_date__isnull=True),
+                name='uniq_open_usercard_user_card_owner'),
         ]
         ordering = ['-opened_date', '-created_at']
     

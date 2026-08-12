@@ -61,6 +61,7 @@ The system supports multi-player household profiles (e.g., Player 1, Player 2, a
 ### Entity Setup
 - **Entities**: Managed under `self.entities`. Anonymous users default to a single mock entity.
 - **Card History**: Tracked separately for each entity under `self.entity_histories` by `owner_id`.
+- **History is per-holding, not per-product**: `card_history` is the full list of `UserCard` rows — open and closed — for an entity, and a `(user, card, owner)` triple can have more than one row: a closed holding from a prior application plus a later, separately-dated re-application. The uniqueness constraint only forbids two *open* rows at once. Eligibility rules (`roadmaps/eligibility.py`) read every row's own `opened_date`/`closed_date`/`bonus_earned_date`, so a re-applied card counts toward velocity windows (e.g. Chase 5/24) using the date it was actually re-applied for, not the original holding's date.
 
 ### Eligibility Routing
 - **Eligibility Checks**: Rule evaluations (like Chase 5/24 or Amex limits) run against the history of the *applying entity*, not the household as a whole.
