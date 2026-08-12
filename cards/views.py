@@ -440,6 +440,25 @@ def resources_view(request):
     """External resources and guides page"""
     return render(request, 'resources.html')
 
+def redemptions_view(request):
+    """Best-to-worst redemption ladder for every points program.
+
+    Advisory content only — the `cpp` figures here are curated estimates and
+    never reach engine math (see roadmaps/redemption.py's module docstring).
+    Programs with no curated ladder are omitted rather than shown empty.
+    """
+    from .models import PointsProgram
+    programs = [
+        {
+            'program': program,
+            'methods': [m for m in program.redemption_methods if isinstance(m, dict) and m.get('method')],
+        }
+        for program in PointsProgram.objects.order_by('name')
+    ]
+    return render(request, 'redemptions.html', {
+        'programs': [p for p in programs if p['methods']],
+    })
+
 @ensure_csrf_cookie
 def index_view(request):
     """Roadmap creation page"""

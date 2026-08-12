@@ -23,6 +23,13 @@ _CHASE_UR_FALLBACK = {
     'note': ('Best value transferring to airline/hotel partners or booking travel '
               'through the Chase portal (Sapphire Reserve/Preferred or Ink Business '
               'Preferred cardholders get the boosted portal rate).'),
+    'redemption_methods': [
+        {'method': 'Transfer to World of Hyatt', 'cpp': 2.0, 'verdict': 'best'},
+        {'method': 'Transfer to airline partners', 'cpp': 1.6, 'verdict': 'good'},
+        {'method': 'Book travel through the Chase portal', 'cpp': 1.5, 'verdict': 'good'},
+        {'method': 'Statement credit or direct deposit', 'cpp': 1.0, 'verdict': 'poor'},
+        {'method': 'Pay with points at Amazon or PayPal', 'cpp': 0.8, 'verdict': 'worst'},
+    ],
 }
 
 _AMEX_MR_FALLBACK = {
@@ -35,7 +42,52 @@ _AMEX_MR_FALLBACK = {
     ],
     'note': ('Best value transferring to airline/hotel partners; Pay With Points '
               'and Amex Travel redemptions run well below that.'),
+    'redemption_methods': [
+        {'method': 'Transfer to airline partners', 'cpp': 1.8, 'verdict': 'best'},
+        {'method': 'Book flights on Amex Travel', 'cpp': 1.0, 'verdict': 'good'},
+        {'method': 'Transfer to hotel partners', 'cpp': 0.7, 'verdict': 'poor'},
+        {'method': 'Statement credit', 'cpp': 0.6, 'verdict': 'poor'},
+        {'method': 'Pay With Points at checkout, or gift cards', 'cpp': 0.5, 'verdict': 'worst'},
+    ],
 }
+
+
+VERDICTS = ('best', 'good', 'poor', 'worst')
+
+
+def _endpoint(methods, verdict, fallback_index):
+    """The `{method, cpp}` pair for one end of a ladder, or None.
+
+    Prefers an explicit verdict and falls back to position, because the ladder
+    is stored ordered best -> worst. Curated JSON is not schema-validated at
+    read time, so anything malformed degrades to None rather than raising —
+    a half-rendered line is a display bug, a 500 on every roadmap is not.
+    """
+    if not isinstance(methods, list):
+        return None
+    entries = [m for m in methods if isinstance(m, dict) and m.get('method')]
+    if not entries:
+        return None
+
+    match = next((m for m in entries if m.get('verdict') == verdict), None)
+    if match is None:
+        match = entries[fallback_index]
+
+    cpp = match.get('cpp')
+    return {
+        'method': match['method'],
+        'cpp': cpp if isinstance(cpp, (int, float)) and not isinstance(cpp, bool) else None,
+    }
+
+
+def _ladder_endpoints(methods):
+    """(best, worst) for the per-card line. `worst` is None when it would just
+    repeat `best` — a one-rung ladder has no spread to warn about."""
+    best = _endpoint(methods, 'best', 0)
+    worst = _endpoint(methods, 'worst', -1)
+    if best and worst and best['method'] == worst['method']:
+        worst = None
+    return best, worst
 
 
 def redemption_guidance_for(card, user=None):
@@ -89,12 +141,19 @@ def redemption_guidance_for(card, user=None):
         if fallback and (not name or name == points_program.slug.replace('_', ' ').title()):
             name = fallback['program_label']
 
+        methods = points_program.redemption_methods
+        if not methods and fallback:
+            methods = fallback.get('redemption_methods')
+        best_method, worst_method = _ladder_endpoints(methods)
+
         return {
             'program_label': name,
             'portal_url': portal_url,
             'value_per_point': value_per_point,
             'transfer_partners': transfer_partners or [],
             'note': note,
+            'best_method': best_method,
+            'worst_method': worst_method,
         }
 
     reward_type_name = card.primary_reward_type.name.lower() if card.primary_reward_type_id else ''
@@ -106,4 +165,6 @@ def redemption_guidance_for(card, user=None):
         'value_per_point': None,
         'transfer_partners': [],
         'note': note,
+        'best_method': None,
+        'worst_method': None,
     }

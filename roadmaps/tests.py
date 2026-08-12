@@ -1450,6 +1450,117 @@ class RedemptionGuidanceTests(TestCase):
         self.assertEqual(guidance_user['value_per_point'], 0.020)
 
 
+class RedemptionLadderTests(TestCase):
+    """Story 12: the best/worst endpoints the per-card line renders.
+
+    The ladder is curated JSON with no read-time schema, so the contract that
+    matters is that malformed data degrades to None instead of raising — a
+    half-rendered advisory line beats a 500 on every roadmap.
+    """
+
+    def _endpoints(self, methods):
+        from .redemption import _ladder_endpoints
+        return _ladder_endpoints(methods)
+
+    def test_verdict_wins_over_position(self):
+        best, worst = self._endpoints([
+            {'method': 'Middling door', 'cpp': 1.0, 'verdict': 'good'},
+            {'method': 'The good one', 'cpp': 2.0, 'verdict': 'best'},
+            {'method': 'The bad one', 'cpp': 0.5, 'verdict': 'worst'},
+            {'method': 'Another middling door', 'cpp': 0.9, 'verdict': 'poor'},
+        ])
+        self.assertEqual(best, {'method': 'The good one', 'cpp': 2.0})
+        self.assertEqual(worst, {'method': 'The bad one', 'cpp': 0.5})
+
+    def test_falls_back_to_first_and_last_without_verdicts(self):
+        best, worst = self._endpoints([
+            {'method': 'Top', 'cpp': 2.0},
+            {'method': 'Middle', 'cpp': 1.0},
+            {'method': 'Bottom', 'cpp': 0.5},
+        ])
+        self.assertEqual(best['method'], 'Top')
+        self.assertEqual(worst['method'], 'Bottom')
+
+    def test_single_rung_has_no_worst(self):
+        """One door is not a spread — naming it both best and worst would be
+        advice that says nothing."""
+        best, worst = self._endpoints([{'method': 'The only door', 'cpp': 1.0}])
+        self.assertEqual(best['method'], 'The only door')
+        self.assertIsNone(worst)
+
+    def test_empty_and_malformed_ladders_yield_none(self):
+        for methods in ([], None, 'not a list', {}, [None], ['a string'],
+                        [{'cpp': 1.0}], [{'method': ''}]):
+            with self.subTest(methods=methods):
+                self.assertEqual(self._endpoints(methods), (None, None))
+
+    def test_non_numeric_cpp_degrades_to_none(self):
+        best, _ = self._endpoints([{'method': 'Door', 'cpp': 'two cents'}])
+        self.assertEqual(best, {'method': 'Door', 'cpp': None})
+
+    def test_boolean_cpp_is_not_treated_as_a_number(self):
+        """bool is a subclass of int in Python, so `True` would otherwise
+        render as ~1¢."""
+        best, _ = self._endpoints([{'method': 'Door', 'cpp': True}])
+        self.assertIsNone(best['cpp'])
+
+    def test_guidance_carries_endpoints_for_a_curated_program(self):
+        from .redemption import redemption_guidance_for
+        from cards.models import PointsProgram
+        from django.utils.text import slugify
+
+        program = PointsProgram.objects.create(
+            name='Ladder Program', slug='ladder_program',
+            redemption_methods=[
+                {'method': 'Transfer out', 'cpp': 2.0, 'verdict': 'best'},
+                {'method': 'Cash out', 'cpp': 0.6, 'verdict': 'worst'},
+            ])
+        issuer = Issuer.objects.create(name='Ladder Bank', slug='ladder-bank')
+        points = RewardType.objects.create(name='Ladder Points', slug='ladder-points')
+        card = CreditCard.objects.create(
+            name='Ladder Card', slug=slugify('Ladder Card'), issuer=issuer,
+            signup_bonus_type=points, primary_reward_type=points,
+            points_program=program)
+
+        guidance = redemption_guidance_for(card)
+        self.assertEqual(guidance['best_method']['method'], 'Transfer out')
+        self.assertEqual(guidance['worst_method']['method'], 'Cash out')
+
+    def test_program_without_a_ladder_reports_no_endpoints(self):
+        from .redemption import redemption_guidance_for
+        from cards.models import PointsProgram
+        from django.utils.text import slugify
+
+        program = PointsProgram.objects.create(
+            name='Bare Program', slug='bare_program', note='No ladder here.')
+        issuer = Issuer.objects.create(name='Bare Bank', slug='bare-bank')
+        points = RewardType.objects.create(name='Bare Points', slug='bare-points')
+        card = CreditCard.objects.create(
+            name='Bare Card', slug=slugify('Bare Card'), issuer=issuer,
+            signup_bonus_type=points, primary_reward_type=points,
+            points_program=program)
+
+        guidance = redemption_guidance_for(card)
+        self.assertIsNone(guidance['best_method'])
+        self.assertIsNone(guidance['worst_method'])
+
+    def test_uncurated_card_still_reports_no_endpoints(self):
+        """The generic no-program branch must carry the keys too, so the JS
+        never sees a payload missing them."""
+        from .redemption import redemption_guidance_for
+        from django.utils.text import slugify
+
+        issuer = Issuer.objects.create(name='Generic Bank', slug='generic-bank')
+        cashback = RewardType.objects.create(name='Generic Cashback', slug='generic-cashback')
+        card = CreditCard.objects.create(
+            name='Generic Card', slug=slugify('Generic Card'), issuer=issuer,
+            signup_bonus_type=cashback, primary_reward_type=cashback)
+
+        guidance = redemption_guidance_for(card)
+        self.assertIsNone(guidance['best_method'])
+        self.assertIsNone(guidance['worst_method'])
+
+
 class ExpenseRecommenderTests(TestCase):
     """Phase N: one-off upcoming-expense mode
     (roadmaps/engine/calculators/expense.py) — a parallel, read-only path

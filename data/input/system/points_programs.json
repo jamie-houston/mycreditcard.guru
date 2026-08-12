@@ -12,6 +12,38 @@
       "Air Canada Aeroplan"
     ],
     "note": "Best value transferring to airline/hotel partners or booking travel through the Chase portal (Sapphire Reserve/Preferred or Ink Business Preferred cardholders get the boosted portal rate).",
+    "redemption_methods": [
+      {
+        "method": "Transfer to World of Hyatt",
+        "cpp": 2.0,
+        "verdict": "best",
+        "note": "Hyatt is the reliable outlier — category 1-4 award nights routinely beat their own cash rate by roughly double."
+      },
+      {
+        "method": "Transfer to airline partners",
+        "cpp": 1.6,
+        "verdict": "good",
+        "note": "United, Aeroplan and Flying Blue shine on long-haul and premium cabins; domestic economy often lands no better than the portal."
+      },
+      {
+        "method": "Book travel through the Chase portal",
+        "cpp": 1.5,
+        "verdict": "good",
+        "note": "Sapphire Reserve and Preferred holders get the boosted rate, and there is no award availability to hunt for."
+      },
+      {
+        "method": "Statement credit or direct deposit",
+        "cpp": 1.0,
+        "verdict": "poor",
+        "note": "The flat floor. Fine if you genuinely need cash, but it hands back the entire transfer premium."
+      },
+      {
+        "method": "Pay with points at Amazon or PayPal",
+        "cpp": 0.8,
+        "verdict": "worst",
+        "note": "The easiest button in the portal and the worst rate in the program — barely half what a Hyatt transfer returns."
+      }
+    ],
     "default_valuation": 0.0150
   },
   {
@@ -27,6 +59,38 @@
       "Hilton Honors"
     ],
     "note": "Best value transferring to airline/hotel partners; Pay With Points and Amex Travel redemptions run well below that.",
+    "redemption_methods": [
+      {
+        "method": "Transfer to airline partners",
+        "cpp": 1.8,
+        "verdict": "best",
+        "note": "Where nearly all Membership Rewards value lives — Flying Blue, Aeroplan and ANA premium-cabin awards are the sweet spots."
+      },
+      {
+        "method": "Book flights on Amex Travel",
+        "cpp": 1.0,
+        "verdict": "good",
+        "note": "The one Amex Travel rate that is not bad, and it applies to flights only."
+      },
+      {
+        "method": "Transfer to hotel partners",
+        "cpp": 0.7,
+        "verdict": "poor",
+        "note": "Marriott and especially Hilton dilute Membership Rewards badly. Price the cash rate before transferring."
+      },
+      {
+        "method": "Statement credit",
+        "cpp": 0.6,
+        "verdict": "poor",
+        "note": "Amex prices its cash-equivalent redemptions well below the industry norm."
+      },
+      {
+        "method": "Pay With Points at checkout, or gift cards",
+        "cpp": 0.5,
+        "verdict": "worst",
+        "note": "Amex's most visible redemption and its worst — under a third of what a transfer returns."
+      }
+    ],
     "default_valuation": 0.0100
   },
   {
@@ -35,6 +99,32 @@
     "portal_url": "https://www.southwest.com/rapidrewards/",
     "transfer_partners": [],
     "note": "No cash-out option; value here reflects typical redemption for Southwest flights. Used to discount points-denominated card credits (e.g. anniversary point bonuses) to real dollars.",
+    "redemption_methods": [
+      {
+        "method": "Wanna Get Away fares",
+        "cpp": 1.5,
+        "verdict": "best",
+        "note": "Southwest prices points against the cash fare, so the rate barely moves — the cheapest fares are where it lands best."
+      },
+      {
+        "method": "Anytime or Business Select fares",
+        "cpp": 1.3,
+        "verdict": "good",
+        "note": "Same peg, higher fare bucket; you are buying flexibility rather than extra point value."
+      },
+      {
+        "method": "Hotel and car bookings through Southwest",
+        "cpp": 0.7,
+        "verdict": "poor",
+        "note": "Roughly half what a fare returns, for a booking you could make anywhere."
+      },
+      {
+        "method": "Gift cards and merchandise in the Rapid Rewards store",
+        "cpp": 0.5,
+        "verdict": "worst",
+        "note": "There is no cash-out door in this program, so the store is the bottom rung — about a third of what a fare gets you."
+      }
+    ],
     "default_valuation": 0.0140,
     "currency_code": "SOUTHWEST"
   },
@@ -44,6 +134,32 @@
     "portal_url": "https://www.wyndhamrewards.com/",
     "transfer_partners": [],
     "note": "Fixed-category hotel award chart; conservative per-point estimate. Used to discount points-denominated card credits to real dollars.",
+    "redemption_methods": [
+      {
+        "method": "Free night at a top-tier property",
+        "cpp": 1.6,
+        "verdict": "best",
+        "note": "The flat 30,000-point tier is not capped by the cash rate, so expensive properties are where it pays."
+      },
+      {
+        "method": "Free night at a standard property",
+        "cpp": 1.1,
+        "verdict": "good",
+        "note": "The 15,000-point tier — the everyday case, and what this program's default valuation reflects."
+      },
+      {
+        "method": "Vacasa vacation rental bookings",
+        "cpp": 0.9,
+        "verdict": "poor",
+        "note": "Priced per bedroom rather than per night; occasionally good, usually not."
+      },
+      {
+        "method": "Gift cards or cash back",
+        "cpp": 0.5,
+        "verdict": "worst",
+        "note": "Under half the value of even a standard free night."
+      }
+    ],
     "default_valuation": 0.0110,
     "currency_code": "WYNDHAM"
   },
@@ -53,6 +169,32 @@
     "portal_url": "https://www.united.com/en/us/fly/mileageplus.html",
     "transfer_partners": [],
     "note": "Conservative per-mile estimate for United award redemptions. Used to discount points-denominated card credits to real dollars.",
+    "redemption_methods": [
+      {
+        "method": "Star Alliance partner awards in business class",
+        "cpp": 1.8,
+        "verdict": "best",
+        "note": "Partner premium cabins are the best use of MileagePlus by a wide margin."
+      },
+      {
+        "method": "United economy saver awards",
+        "cpp": 1.2,
+        "verdict": "good",
+        "note": "Dynamic pricing moves this around, but saver-level economy is the dependable everyday case."
+      },
+      {
+        "method": "Hotel and car awards through United",
+        "cpp": 0.8,
+        "verdict": "poor",
+        "note": "A third less than a saver flight, for something no award chart protects."
+      },
+      {
+        "method": "Gift cards and merchandise",
+        "cpp": 0.6,
+        "verdict": "worst",
+        "note": "United's non-travel redemptions are half the value of flying on the same miles."
+      }
+    ],
     "default_valuation": 0.0120,
     "currency_code": "UNITED"
   },
@@ -62,7 +204,80 @@
     "portal_url": "https://www.jetblue.com/trueblue",
     "transfer_partners": [],
     "note": "Revenue-based program; per-point estimate for typical JetBlue redemptions. Used to discount points-denominated card credits to real dollars.",
+    "redemption_methods": [
+      {
+        "method": "Low-fare Blue and Blue Basic redemptions",
+        "cpp": 1.5,
+        "verdict": "best",
+        "note": "TrueBlue is revenue-based, so the rate is best on already-cheap fares."
+      },
+      {
+        "method": "Typical TrueBlue flight redemption",
+        "cpp": 1.3,
+        "verdict": "good",
+        "note": "The everyday case across most routes and fare buckets."
+      },
+      {
+        "method": "JetBlue Vacations packages",
+        "cpp": 1.0,
+        "verdict": "poor",
+        "note": "Points cover the flight portion at a worse rate than booking that flight on its own."
+      },
+      {
+        "method": "Merchandise and gift cards",
+        "cpp": 0.6,
+        "verdict": "worst",
+        "note": "Less than half a flight redemption — the default bad door."
+      }
+    ],
     "default_valuation": 0.0130,
     "currency_code": "JETBLUE"
+  },
+  {
+    "name": "Bilt Rewards",
+    "slug": "bilt_rewards",
+    "portal_url": "https://www.biltrewards.com/",
+    "transfer_partners": [
+      "World of Hyatt",
+      "American Airlines AAdvantage",
+      "Alaska Mileage Plan",
+      "Air Canada Aeroplan",
+      "Air France-KLM Flying Blue",
+      "IHG One Rewards"
+    ],
+    "note": "Transfers 1:1 to an unusually strong partner list for a no-annual-fee card; the rent-credit and cash-equivalent doors are priced far below that, so the transfer premium is effectively the whole program.",
+    "redemption_methods": [
+      {
+        "method": "Transfer to World of Hyatt",
+        "cpp": 2.0,
+        "verdict": "best",
+        "note": "The same Hyatt sweet spot Chase points reach, at the same 1:1 ratio."
+      },
+      {
+        "method": "Transfer to airline partners",
+        "cpp": 1.5,
+        "verdict": "good",
+        "note": "AAdvantage, Alaska and Aeroplan all transfer 1:1 — a strong list for a card with no annual fee."
+      },
+      {
+        "method": "Book through the Bilt travel portal",
+        "cpp": 1.25,
+        "verdict": "good",
+        "note": "A fixed rate with no award availability to chase, but well under what transfers return."
+      },
+      {
+        "method": "Put points toward your rent",
+        "cpp": 1.0,
+        "verdict": "poor",
+        "note": "The redemption the card is named for is not the one it rewards — it gives up a third of the value versus transferring."
+      },
+      {
+        "method": "Statement credit or merchandise",
+        "cpp": 0.55,
+        "verdict": "worst",
+        "note": "Bilt prices its cash-equivalent door deliberately low — barely a quarter of a Hyatt transfer."
+      }
+    ],
+    "default_valuation": 0.0150
   }
 ]

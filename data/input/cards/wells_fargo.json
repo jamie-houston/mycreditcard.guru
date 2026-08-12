@@ -202,7 +202,10 @@
     "image_url": "/images/wellsfargo/bilt.png",
     "discontinued": false,
     "verified": true,
-    "slug": "bilt-mastercard"
+    "slug": "bilt-mastercard",
+    "metadata": {
+      "points_program": "bilt_rewards"
+    }
   },
   {
     "name": "Expedia One Key",

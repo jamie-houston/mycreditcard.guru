@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}How to Redeem Your Points - Credit Card Guru{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/pages/redemptions.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="redemptions-container">
+    <div class="redemptions-intro">
+        <h1>💳 How to Redeem Your Points</h1>
+        <p class="redemptions-lede">
+            The same point is worth wildly different amounts depending on which door you walk
+            through. Cashing out is almost always the worst one &mdash; and it is usually the
+            easiest button to find. Here is the ladder for every program we track, best to worst.
+        </p>
+        <p class="redemptions-caveat">
+            <span class="ico">info</span>
+            These cents-per-point figures are <strong>curated estimates</strong>, gathered from
+            published valuations like Frequent Miler and Doctor of Credit. They are here to rank
+            the options against each other, not to predict what you will get on a given booking
+            &mdash; and they never affect your roadmap's math.
+        </p>
+    </div>
+
+    {% for entry in programs %}
+    <section class="program-card">
+        <div class="program-header">
+            <h2 class="program-name">{{ entry.program.name }}</h2>
+            {% if entry.program.portal_url %}
+            <a href="{{ entry.program.portal_url }}" target="_blank" rel="noopener noreferrer" class="program-portal">
+                <span class="ico">open_in_new</span> Rewards portal
+            </a>
+            {% endif %}
+        </div>
+
+        {% if entry.program.note %}
+        <p class="program-note">{{ entry.program.note }}</p>
+        {% endif %}
+
+        {% if entry.program.transfer_partners %}
+        <div class="program-partners">
+            <strong>Transfer partners:</strong>
+            {{ entry.program.transfer_partners|join:", " }}
+        </div>
+        {% endif %}
+
+        <ol class="ladder">
+            {% for method in entry.methods %}
+            <li class="ladder-rung verdict-{{ method.verdict|default:'unrated' }}">
+                <div class="rung-head">
+                    <span class="rung-method">{{ method.method }}</span>
+                    {% if method.cpp %}
+                    <span class="rung-cpp">~{{ method.cpp|floatformat:"-2" }}&cent;/pt</span>
+                    {% endif %}
+                    {% if method.verdict %}
+                    <span class="rung-verdict">{{ method.verdict }}</span>
+                    {% endif %}
+                </div>
+                {% if method.note %}
+                <div class="rung-note">{{ method.note }}</div>
+                {% endif %}
+            </li>
+            {% endfor %}
+        </ol>
+    </section>
+    {% empty %}
+    <p class="redemptions-empty">
+        No redemption guidance has been curated yet. Check back once the card data has been imported.
+    </p>
+    {% endfor %}
+</div>
+{% endblock %}

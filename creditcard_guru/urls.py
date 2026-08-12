@@ -18,7 +18,7 @@ from django.contrib import admin
 from django.urls import path, include
 from django.http import JsonResponse
 from django.shortcuts import render
-from cards.views import landing_view, index_view, cards_list_view, categories_list_view, category_detail_page_view, issuers_list_view, profile_view, shared_profile_view, help_view, resources_view
+from cards.views import landing_view, index_view, cards_list_view, categories_list_view, category_detail_page_view, issuers_list_view, profile_view, shared_profile_view, help_view, resources_view, redemptions_view
 from cards.wallet import wallet_view
 from roadmaps.views import shared_roadmap_view
 
@@ -55,6 +55,7 @@ urlpatterns = [
     path('wallet/', wallet_view, name='wallet'),
     path('help/', help_view, name='help'),
     path('resources/', resources_view, name='resources'),
+    path('redemptions/', redemptions_view, name='redemptions'),
     path('profile/shared/<uuid:share_uuid>/', shared_profile_view, name='shared_profile'),
     path('roadmap/shared/<uuid:share_uuid>/', shared_roadmap_view, name='shared_roadmap'),
 

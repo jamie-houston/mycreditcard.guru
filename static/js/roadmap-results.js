@@ -278,12 +278,40 @@ function _roadmapRedemptionHtml(rec) {
     const link = redemption.portal_url
         ? ` <a href="${escapeHtml(redemption.portal_url)}" target="_blank" rel="noopener" onclick="event.stopPropagation();">Redeem &rarr;</a>`
         : '';
+    // Best/worst come from the program's curated ladder (roadmaps/redemption.py).
+    // Absent on programs with no ladder, and on payloads generated before the
+    // field existed — both must render exactly as they did before.
+    const ladder = _roadmapRedemptionLadderHtml(redemption);
     return `
         <div class="breakdown-item" style="opacity: 0.85; font-size: 0.8em; display:block;">
             <span class="item-name">\u{1F4B3} ${headline}${escapeHtml(redemption.note)}${link}</span>
+            ${ladder}
             ${partners}
         </div>
     `;
+}
+
+// One clause naming the best and worst door on the program's ladder, linked to
+// the full guide. Returns '' unless at least one end is present.
+function _roadmapRedemptionLadderHtml(redemption) {
+    const rung = (entry, label) => {
+        if (!entry || !entry.method) {
+            return '';
+        }
+        const rate = (typeof entry.cpp === 'number')
+            ? ` ~${entry.cpp.toFixed(2).replace(/0$/, '')}¢`
+            : '';
+        return `${label}: ${escapeHtml(entry.method)}${rate}`;
+    };
+    const parts = [
+        rung(redemption.best_method, 'Best'),
+        rung(redemption.worst_method, 'Worst'),
+    ].filter(Boolean);
+    if (!parts.length) {
+        return '';
+    }
+    return `<div style="margin-top:2px;">${parts.join(' · ')} · `
+        + `<a href="/redemptions/" onclick="event.stopPropagation();">How to redeem &rarr;</a></div>`;
 }
 
 // Phase N: per-card line for the one-off expense panel below. Pure — the

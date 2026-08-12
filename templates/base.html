@@ -43,6 +43,7 @@
                 <li><a href="/profile/" class="{% if request.resolver_match.url_name == 'profile' %}active{% endif %}"><span class="ico">style</span> My Cards</a></li>
                 <li><a href="/cards/" class="{% if request.resolver_match.url_name == 'cards_list' %}active{% endif %}"><span class="ico">search</span> Browse</a></li>
                 <li><a href="/help/" class="{% if request.resolver_match.url_name == 'help' %}active{% endif %}"><span class="ico">help</span> Help</a></li>
+                <li><a href="/redemptions/" class="{% if request.resolver_match.url_name == 'redemptions' %}active{% endif %}"><span class="ico">redeem</span> Redeem</a></li>
                 <li><a href="/resources/" class="{% if request.resolver_match.url_name == 'resources' %}active{% endif %}"><span class="ico">library_books</span> Resources</a></li>
             </ul>
             <div class="topnav-auth" id="navAuth">
@@ -91,6 +92,9 @@
             <a href="/help/" class="mobile-menu-item {% if request.resolver_match.url_name == 'help' %}active{% endif %}">
                 <span class="ico">help</span> Help
             </a>
+            <a href="/redemptions/" class="mobile-menu-item {% if request.resolver_match.url_name == 'redemptions' %}active{% endif %}">
+                <span class="ico">redeem</span> Redeem
+            </a>
             <a href="/resources/" class="mobile-menu-item {% if request.resolver_match.url_name == 'resources' %}active{% endif %}">
                 <span class="ico">library_books</span> Resources
             </a>
@@ -121,6 +125,7 @@
                     <li><a href="/profile/">My Cards</a></li>
                     <li><a href="/cards/">Browse</a></li>
                     <li><a href="/help/">Help &amp; Docs</a></li>
+                    <li><a href="/redemptions/">Redeem Points</a></li>
                     <li><a href="/resources/">Resources</a></li>
                 </ul>
             </div>

@@ -29,6 +29,11 @@ class PointsProgram(models.Model):
     portal_url = models.URLField(max_length=500, blank=True, null=True)
     transfer_partners = models.JSONField(default=list, blank=True)
     note = models.TextField(blank=True)
+    redemption_methods = models.JSONField(
+        default=list, blank=True,
+        help_text="Ordered best to worst. Each entry: {method, cpp, verdict, note}, where "
+                  "verdict is one of best/good/poor/worst. Display-only curated content — "
+                  "cpp never feeds engine math (PointsValuation is the number the engine uses).")
     currency_code = models.CharField(
         max_length=20, blank=True, default='',
         help_text="Matches CardCredit.currency (e.g. 'SOUTHWEST') so credits denominated "

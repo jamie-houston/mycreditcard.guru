@@ -125,6 +125,7 @@ class Command(BaseCommand):
                     'portal_url': program_data.get('portal_url'),
                     'transfer_partners': program_data.get('transfer_partners', []),
                     'note': program_data.get('note', ''),
+                    'redemption_methods': program_data.get('redemption_methods', []),
                     'currency_code': program_data.get('currency_code', ''),
                 }
             )
@@ -132,16 +133,17 @@ class Command(BaseCommand):
                 # Update existing program
                 before = (
                     program.name, program.portal_url, program.transfer_partners,
-                    program.note, program.currency_code,
+                    program.note, program.redemption_methods, program.currency_code,
                 )
                 program.name = program_data['name']
                 program.portal_url = program_data.get('portal_url')
                 program.transfer_partners = program_data.get('transfer_partners', [])
                 program.note = program_data.get('note', '')
+                program.redemption_methods = program_data.get('redemption_methods', [])
                 program.currency_code = program_data.get('currency_code', '')
                 after = (
                     program.name, program.portal_url, program.transfer_partners,
-                    program.note, program.currency_code,
+                    program.note, program.redemption_methods, program.currency_code,
                 )
                 program.save()
                 if before != after:

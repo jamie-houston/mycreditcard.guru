@@ -57,3 +57,11 @@ def test_resources_page_loads_without_js_errors(live_server, page_with_js_error_
 
     expect(page.locator("body")).to_be_visible()
     assert len(page.js_errors) == 0, f"Uncaught JS exceptions on Resources page: {page.js_errors}"
+
+
+def test_redemptions_page_loads_without_js_errors(live_server, page_with_js_error_tracker):
+    page = page_with_js_error_tracker
+    page.goto(live_server.url + "/redemptions/")
+
+    expect(page.locator("body")).to_be_visible()
+    assert len(page.js_errors) == 0, f"Uncaught JS exceptions on Redemptions page: {page.js_errors}"

@@ -82,6 +82,7 @@ class PageRouteSmokeTests(TestCase):
             'wallet': {},
             'help': {},
             'resources': {},
+            'redemptions': {},
             'shared_profile': {'share_uuid': self.profile.share_uuid},
             'shared_roadmap': {'share_uuid': self.roadmap.share_uuid},
         }

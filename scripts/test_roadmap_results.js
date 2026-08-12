@@ -254,6 +254,94 @@ test('_roadmapRedemptionHtml: issuer-supplied note text is HTML-escaped', () => 
     assert.ok(html.includes('&lt;script&gt;'));
 });
 
+test('_roadmapRedemptionHtml: ladder names best and worst and links the guide', () => {
+    const rec = {
+        card: {
+            redemption: {
+                program_label: 'Chase Ultimate Rewards',
+                portal_url: null,
+                value_per_point: 0.015,
+                transfer_partners: [],
+                note: 'Best value transferring to partners.',
+                best_method: { method: 'Transfer to World of Hyatt', cpp: 2.0 },
+                worst_method: { method: 'Pay with points at Amazon', cpp: 0.8 },
+            },
+        },
+    };
+    const html = _roadmapRedemptionHtml(rec);
+    assert.ok(html.includes('Best: Transfer to World of Hyatt ~2.0¢'));
+    assert.ok(html.includes('Worst: Pay with points at Amazon ~0.8¢'));
+    assert.ok(html.includes('/redemptions/'));
+});
+
+test('_roadmapRedemptionHtml: a program with no ladder renders as it did before', () => {
+    // Pins the story-12 promise that empty-ladder output is unchanged: no
+    // stray separator, no dangling link, no "Best:" with nothing after it.
+    const base = {
+        program_label: 'Southwest Rapid Rewards',
+        portal_url: null,
+        value_per_point: 0.014,
+        transfer_partners: [],
+        note: 'No cash-out option.',
+    };
+    const withoutField = _roadmapRedemptionHtml({ card: { redemption: base } });
+    const withNulls = _roadmapRedemptionHtml({
+        card: { redemption: { ...base, best_method: null, worst_method: null } },
+    });
+    assert.strictEqual(withoutField, withNulls);
+    assert.ok(!withoutField.includes('Best:'));
+    assert.ok(!withoutField.includes('/redemptions/'));
+});
+
+test('_roadmapRedemptionHtml: one end of the ladder alone still renders', () => {
+    const rec = {
+        card: {
+            redemption: {
+                program_label: 'Bilt Rewards', portal_url: null, value_per_point: 0.015,
+                transfer_partners: [], note: 'Transfers 1:1.',
+                best_method: { method: 'Transfer to World of Hyatt', cpp: 2.0 },
+                worst_method: null,
+            },
+        },
+    };
+    const html = _roadmapRedemptionHtml(rec);
+    assert.ok(html.includes('Best: Transfer to World of Hyatt'));
+    assert.ok(!html.includes('Worst:'));
+});
+
+test('_roadmapRedemptionHtml: a method with no rate renders the name alone', () => {
+    const rec = {
+        card: {
+            redemption: {
+                program_label: 'Chase Ultimate Rewards', portal_url: null,
+                value_per_point: 0.015, transfer_partners: [], note: 'A note.',
+                best_method: { method: 'Transfer to World of Hyatt', cpp: null },
+                worst_method: null,
+            },
+        },
+    };
+    const html = _roadmapRedemptionHtml(rec);
+    assert.ok(html.includes('Best: Transfer to World of Hyatt ·'));
+    // The headline still carries the program's ~1.5¢/pt; only the rung is bare.
+    assert.ok(!html.includes('Hyatt ~'));
+});
+
+test('_roadmapRedemptionHtml: curated method names are HTML-escaped', () => {
+    const rec = {
+        card: {
+            redemption: {
+                program_label: null, portal_url: null, value_per_point: null,
+                transfer_partners: [], note: 'A note.',
+                best_method: { method: '<img src=x onerror=alert(1)>', cpp: 2.0 },
+                worst_method: null,
+            },
+        },
+    };
+    const html = _roadmapRedemptionHtml(rec);
+    assert.ok(!html.includes('<img src=x'));
+    assert.ok(html.includes('&lt;img'));
+});
+
 test('_roadmapExpenseLineText: sums bonus + rewards − fee to the shown total', () => {
     const item = { signup_bonus_value: 900, category_rewards: 200, effective_annual_fee: 95, value_for_expense: 1005 };
     assert.strictEqual(_roadmapExpenseLineText(item), 'bonus $900 + rewards $200 − $95 fee = $1005');
