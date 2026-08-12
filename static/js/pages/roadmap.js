@@ -1140,18 +1140,15 @@ async function getRecommendations() {
             });
         }
 
-        // Get selected spending credit preferences
-        const selectedSpendingCredits = [];
-        const spendingCreditCheckboxes = document.querySelectorAll('input[name="spending_credit_preferences"]:checked');
-        spendingCreditCheckboxes.forEach(checkbox => {
-            selectedSpendingCredits.push(checkbox.value);
-        });
-
+        // Deliberately no spending_credit_preferences: sending it makes this
+        // list the complete set, so every preference the checkboxes don't know
+        // about (e.g. one just enabled in a card modal) comes back unvalued.
+        // The form already PUTs its full state to the merge endpoint on every
+        // change, so the engine reads the persisted rows instead.
         const requestData = {
             user_cards: userCards,
             filters: filters,
             max_recommendations: parseInt(document.getElementById('maxRecs').value) || 1,
-            spending_credit_preferences: selectedSpendingCredits,
             strategy: selectedStrategy
         };
 

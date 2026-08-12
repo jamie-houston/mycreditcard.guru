@@ -1222,6 +1222,13 @@
                 if (currentModalCard) {
                     await populateCardCredits(currentModalCard.credits || []);
                 }
+                // The roadmap form renders its own checkbox for this credit and
+                // populates it only once, so re-read it here or it keeps showing
+                // the pre-toggle state. Absent on /cards/, /wallet/ and the
+                // category pages, which open the same modal.
+                if (typeof loadSpendingCreditPreferences === 'function') {
+                    await loadSpendingCreditPreferences();
+                }
             } catch (error) {
                 console.error('Error updating credit preference:', error);
             }

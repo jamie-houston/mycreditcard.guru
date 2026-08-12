@@ -107,10 +107,12 @@ class GenerateRoadmapSerializer(serializers.Serializer):
         required=False
     )
     max_recommendations = serializers.IntegerField(default=1, min_value=1, max_value=20)
+    # No default: an omitted field must stay out of validated_data, or the
+    # complete-set semantics below read it as "no credits" and every one of
+    # the user's valued credits goes unvalued in the result.
     spending_credit_preferences = serializers.ListField(
         child=serializers.CharField(),
-        required=False,
-        default=list
+        required=False
     )
     strategy = serializers.CharField(required=False, allow_blank=True, default='')
     # Phase N: an optional one-off upcoming expense ({amount, category_id}).
@@ -279,7 +281,15 @@ class GenerateRoadmapSerializer(serializers.Serializer):
                             closed_date=None if card_data.get('is_active', True) else card_data['opened_date']
                         )
         
-        # Update spending credit preferences if provided
+        # Update spending credit preferences if provided.
+        # API-only: sending this field declares the *complete* set of valued
+        # credits for this computation, so anything omitted goes unvalued.
+        # (These writes are scratch — the caller's transaction is rolled back.)
+        # The roadmap UI deliberately does NOT send it: its checkboxes are
+        # populated once and go stale the moment the card modal writes to
+        # /api/cards/credit-preferences/, so a stale list silently dropped
+        # credits the user had just enabled. Omitting it makes the engine read
+        # the persisted rows instead.
         if 'spending_credit_preferences' in validated_data:
             from cards.models import SpendingCredit, UserSpendingCreditPreference
             # Clear existing spending credit preferences

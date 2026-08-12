@@ -1016,6 +1016,101 @@ class RoadmapPersistenceTests(TestCase):
         self.assertNotEqual(profile_a.id, profile_b.id)
 
 
+class CreditPreferenceSurvivesGenerateTests(TestCase):
+    """A credit enabled in the card modal must still be valued by the next
+    Generate.
+
+    Sending `spending_credit_preferences` makes that list the complete set for
+    the computation, and the roadmap form's checkboxes are populated once, so
+    they are a stale snapshot of the table the card modal writes to. The UI
+    therefore no longer sends the field. The stored row was never at risk —
+    the scratch writes are rolled back (see `generate_recommendations`) — but
+    the roadmap came back without the credit's value, which is the part the
+    core promise cares about.
+    """
+
+    def setUp(self):
+        from cards.models import SpendingCategory, SpendingCredit, CardCredit
+        self.user = User.objects.create_user(
+            username='creditpref', email='creditpref@example.com', password='x')
+        self.cashback = RewardType.objects.create(name='Cashback', slug='cashback')
+        self.issuer = Issuer.objects.create(name='Benefit Bank', slug='benefit-bank')
+        self.dining = SpendingCategory.objects.create(name='Dining', slug='dining')
+        self.uber_eats = SpendingCredit.objects.create(
+            name='Uber Eats', slug='uber_eats', display_name='Uber Eats',
+            category=self.dining, stackable=True)
+        self.card = CreditCard.objects.create(
+            name='Benefit Card', slug='benefit-card', issuer=self.issuer,
+            signup_bonus_type=self.cashback, primary_reward_type=self.cashback)
+        CardCredit.objects.create(
+            card=self.card, spending_credit=self.uber_eats,
+            description='Uber Eats', value=Decimal('120.00'), times_per_year=1)
+        self.client.force_login(self.user)
+
+    def _enable_credit_in_modal(self):
+        """What toggleModalCreditUsage does: a per-slug merge, not a full set."""
+        response = self.client.put(
+            '/api/cards/credit-preferences/',
+            {'preferences': {self.uber_eats.slug: True}},
+            content_type='application/json')
+        self.assertEqual(response.status_code, 200)
+
+    def _generate(self, **extra):
+        payload = {
+            'spending_amounts': {str(self.dining.id): '500.00'},
+            'user_cards': [],
+            'max_recommendations': 1,
+        }
+        payload.update(extra)
+        response = self.client.post(
+            '/api/roadmaps/quick-recommendation/', payload,
+            content_type='application/json')
+        self.assertEqual(response.status_code, 200)
+        return response.json()
+
+    def _credit_lines(self, data):
+        """Credit line items for the card, or [] if it wasn't recommended at
+        all — with its credit unvalued it has nothing else to offer."""
+        rec = next((r for r in data['recommendations']
+                    if r['card']['id'] == self.card.id), None)
+        if rec is None:
+            return []
+        return [b for b in rec['rewards_breakdown'] if b['type'] == 'credit']
+
+    def test_preference_survives_generate_and_credit_stays_valued(self):
+        from cards.models import UserSpendingCreditPreference
+        self._enable_credit_in_modal()
+
+        data = self._generate()
+
+        profile = UserSpendingProfile.objects.get(user=self.user)
+        self.assertTrue(
+            UserSpendingCreditPreference.objects.filter(
+                profile=profile, spending_credit=self.uber_eats,
+                values_credit=True).exists())
+        credit_lines = self._credit_lines(data)
+        self.assertEqual(len(credit_lines), 1)
+        self.assertAlmostEqual(credit_lines[0]['category_rewards'], 120.0)
+
+    def test_sending_a_stale_list_is_what_dropped_the_credit(self):
+        """The API contract is unchanged: a caller that sends the field owns
+        the whole set for that computation. This is exactly what the UI used
+        to do with a stale checkbox snapshot — and why the credit vanished
+        from the roadmap. The stored row survives it either way.
+        """
+        from cards.models import UserSpendingCreditPreference
+        self._enable_credit_in_modal()
+
+        data = self._generate(spending_credit_preferences=[])
+
+        self.assertEqual(self._credit_lines(data), [])
+        profile = UserSpendingProfile.objects.get(user=self.user)
+        self.assertTrue(
+            UserSpendingCreditPreference.objects.filter(
+                profile=profile, spending_credit=self.uber_eats,
+                values_credit=True).exists())
+
+
 class RoadmapSharingTests(TestCase):
     """C1-C4: sharing a Current Roadmap mirrors profile sharing
     (UserSpendingProfile.share_uuid), but is anon-capable — a session-owned
