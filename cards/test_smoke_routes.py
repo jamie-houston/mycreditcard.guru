@@ -59,16 +59,6 @@ class PageRouteSmokeTests(TestCase):
 
         cls.user = User.objects.create_user(username='smoke', password='smoke-pw')
 
-        # base.html:53 calls {% provider_login_url 'google' %} for logged-out
-        # visitors, and that tag raises SocialApp.DoesNotExist if no Google
-        # SocialApp row exists — taking down every page that extends base.html.
-        # Real deployments have this row (it is what makes Google login work);
-        # a fresh test DB does not, so create it.
-        social_app = SocialApp.objects.create(
-            provider='google', name='Google',
-            client_id='smoke-test-client-id', secret='smoke-test-secret')
-        social_app.sites.add(Site.objects.get(pk=settings.SITE_ID))
-
     def covered_routes(self):
         """{route name: reverse() args} — the set this test class covers."""
         return {
@@ -120,6 +110,18 @@ class PageRouteSmokeTests(TestCase):
             with self.subTest(route=name):
                 response = self.client.get(reverse(name, kwargs=kwargs))
                 self.assertTemplateUsed(response, template)
+
+    def test_google_login_link_appears_when_socialapp_configured(self):
+        """The other half of the `{% if socialaccount_providers %}` guard in
+        base.html: with a Google SocialApp configured, the real Google login
+        link still renders instead of the fallback."""
+        social_app = SocialApp.objects.create(
+            provider='google', name='Google',
+            client_id='smoke-test-client-id', secret='smoke-test-secret')
+        social_app.sites.add(Site.objects.get(pk=settings.SITE_ID))
+
+        response = self.client.get(reverse('landing'))
+        self.assertContains(response, '/accounts/google/login/')
 
     def test_route_list_is_not_stale(self):
         """An explicit list stops covering the app the moment someone adds a

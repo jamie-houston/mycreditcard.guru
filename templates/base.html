@@ -33,6 +33,7 @@
     <script src="{% static 'js/credits.js' %}"></script>
 </head>
 <body>
+    {% get_providers as socialaccount_providers %}
     <!-- Desktop top nav -->
     <nav class="topnav">
         <div class="topnav-container">
@@ -50,8 +51,10 @@
                 {% if user.is_authenticated %}
                     <span class="nav-user">{{ user.email }}</span>
                     <a href="{% url 'account_logout' %}" class="nav-logout" onclick="handleLogout()">Logout</a>
-                {% else %}
+                {% elif socialaccount_providers %}
                     <a href="{% provider_login_url 'google' %}" class="nav-login" onclick="handleLogin()">Sign in</a>
+                {% else %}
+                    <a href="{% url 'account_login' %}" class="nav-login">Sign in</a>
                 {% endif %}
             </div>
         </div>
@@ -67,8 +70,10 @@
             <div class="topnav-auth" id="navAuthMobile">
                 {% if user.is_authenticated %}
                     <a href="{% url 'account_logout' %}" class="nav-logout" onclick="handleLogout()">Logout</a>
-                {% else %}
+                {% elif socialaccount_providers %}
                     <a href="{% provider_login_url 'google' %}" class="nav-login" onclick="handleLogin()">Sign in</a>
+                {% else %}
+                    <a href="{% url 'account_login' %}" class="nav-login">Sign in</a>
                 {% endif %}
             </div>
         </div>
@@ -135,8 +140,10 @@
                 <ul class="footer-links">
                     {% if user.is_authenticated %}
                         <li><a href="{% url 'account_logout' %}">Logout</a></li>
-                    {% else %}
+                    {% elif socialaccount_providers %}
                         <li><a href="{% provider_login_url 'google' %}">Sign In</a></li>
+                    {% else %}
+                        <li><a href="{% url 'account_login' %}">Sign In</a></li>
                     {% endif %}
                 </ul>
             </div>
