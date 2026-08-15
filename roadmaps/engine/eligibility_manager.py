@@ -8,6 +8,14 @@ class EligibilityManager:
     """
     Manages issuer rules eligibility checks, caching, and entity lookup
     for multi-player households or session-based users.
+
+    Eligibility is a function of `(card, the plan so far)`, not of `card`
+    alone: a roadmap that applies for several cards must be legal against
+    its own earlier applications, not just against the portfolio the user
+    walked in with. Callers building a multi-card plan pass the applies
+    already committed to as `planned_cards`; single-card paths (the expense
+    recommender's alternatives, the high-spender fallback) can't conflict
+    with themselves and pass nothing.
     """
 
     def __init__(self, engine):
@@ -15,11 +23,46 @@ class EligibilityManager:
         self.entity_eligibility_cache = {}
         self.bonus_notes = {}
 
-    def eligible_entity_for_card(self, card: CreditCard):
-        """Which household entity (if any) could apply for `card`."""
-        if card.id in self.entity_eligibility_cache:
-            return self.entity_eligibility_cache[card.id]
+    def _provisional_user_card(self, card: CreditCard):
+        """A card the plan commits to applying for, shaped like a UserCard.
 
+        `opened_date = today` is the honest reading: an application made
+        inside the 12-month plan horizon is a card opened now as far as the
+        window rules are concerned. It is slightly conservative for a
+        month-10 apply against a 24-month window, and conservative is the
+        established direction here (see eligibility.py on unknown dates).
+        """
+        return type('ProvisionalUserCard', (), {
+            'card': card,
+            'opened_date': self.engine.today,
+            'closed_date': None,
+            'bonus_earned_date': None,
+            'bonus_override': None,
+            'owner_id': None,
+        })()
+
+    def _histories_with(self, planned_cards):
+        """Per-entity history extended with the plan's own earlier applies.
+
+        Resolved in order: which entity a provisional would be applied as
+        itself depends on the provisionals before it, so this can't be a
+        single pass over the list.
+        """
+        if not planned_cards:
+            return self.engine.entity_histories
+
+        histories = {entity_id: list(history)
+                     for entity_id, history in self.engine.entity_histories.items()}
+        for planned in planned_cards:
+            entity = self._entity_for_card(planned, histories)
+            if entity is None:
+                continue
+            histories.setdefault(entity.id, []).append(
+                self._provisional_user_card(planned))
+        return histories
+
+    def _entity_for_card(self, card: CreditCard, histories):
+        """Which entity could apply for `card` given these histories."""
         if card.card_type == 'business':
             candidates = [e for e in self.engine.entities if e.kind == 'business'] \
                 or [self.engine._primary_entity]
@@ -27,19 +70,26 @@ class EligibilityManager:
             candidates = [e for e in self.engine.entities if e.kind != 'business'] \
                 or [self.engine._primary_entity]
 
-        result = None
         for entity in candidates:
-            history = self.engine.entity_histories.get(entity.id, [])
+            history = histories.get(entity.id, [])
             already_holds = any(
                 uc.card.id == card.id for uc in history if uc.closed_date is None)
             if already_holds:
                 continue
             if application_block(card, history, self.engine.today) is not None:
                 continue
-            result = entity
-            break
+            return entity
+        return None
 
-        self.entity_eligibility_cache[card.id] = result
+    def eligible_entity_for_card(self, card: CreditCard, planned_cards=()):
+        """Which household entity (if any) could apply for `card`, given a
+        plan that already commits to applying for `planned_cards`."""
+        cache_key = (card.id, tuple(c.id for c in planned_cards))
+        if cache_key in self.entity_eligibility_cache:
+            return self.entity_eligibility_cache[cache_key]
+
+        result = self._entity_for_card(card, self._histories_with(planned_cards))
+        self.entity_eligibility_cache[cache_key] = result
         return result
 
     def holding_entity_for_card(self, card: CreditCard):
@@ -51,9 +101,9 @@ class EligibilityManager:
                 return entity
         return None
 
-    def is_eligible_for_card(self, card: CreditCard) -> bool:
+    def is_eligible_for_card(self, card: CreditCard, planned_cards=()) -> bool:
         """Application eligibility: can ANY household entity get approved?"""
-        return self.eligible_entity_for_card(card) is not None
+        return self.eligible_entity_for_card(card, planned_cards) is not None
 
     def bonus_ineligibility_note(self, card: CreditCard):
         """User-facing reason this card's signup bonus is valued at $0."""

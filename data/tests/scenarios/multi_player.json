@@ -172,7 +172,8 @@
         },
         "test_conditions": [
           "Jamie's once-per-lifetime application_eligibility family blocks him from A or B forever, even closed",
-          "Sam has a clean history -> eligible, gets the apply_as attribution for card B"
+          "Sam has a clean history -> eligible, gets the apply_as attribution for card B",
+          "Sam gets ONE of the family, not both (story 16) — B's larger bonus makes it deterministically the one"
         ]
       }
     },

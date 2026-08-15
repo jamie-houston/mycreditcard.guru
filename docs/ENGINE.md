@@ -25,6 +25,11 @@ The engine uses a **Greedy Search Optimization** strategy to find the highest-va
    - **First-Year Net Value** includes the signup bonus and waives first-year annual fees if applicable.
    - **Ongoing Net Value (Annual Value)** reflects the recurring category rewards and benefit values minus the recurring annual fee.
 3. **Greedy Iteration**: Starting with the user's currently held cards as the baseline, the engine iteratively evaluates portfolios with one additional card, selecting the step that yields the highest net portfolio value. It stops when it reaches the limit set by the user's selected **Effort-Tolerance Preset**.
+4. **Plan-Internal Eligibility**: **A plan must be legal against its own applications, not just against the portfolio the user walked in with.** Eligibility is a function of `(card, the applies the plan already commits to)`: each provisional apply is attributed to a household entity and added to that entity's history as a card opened today, and the issuer rules are re-run against it. So a plan can never recommend Sapphire Reserve *and* Sapphire Preferred, a sixth open Amex, or two Capital One cards inside six months.
+
+   A card the user cannot be approved for is worth **$0** — it is **excluded**, never scored down. Selection stays value-pure, so this is not an ordering preference: because both optimizer paths walk candidates in descending value order, the higher-value card keeps the slot and the conflicting one drops out, with no tiebreak rule of its own.
+
+   Single-card paths are deliberately exempt — the expense recommender returns ranked *alternatives* for one purchase and the high-spender fallback picks one card, and neither is a sequence that can conflict with itself.
 
 ---
 

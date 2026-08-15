@@ -1123,7 +1123,7 @@
     "name": "Lifetime App Test B",
     "issuer": "Chase",
     "annual_fee": 0,
-    "signup_bonus_amount": 600,
+    "signup_bonus_amount": 900,
     "signup_bonus_type": "Cashback",
     "primary_reward_type": "Cashback",
     "metadata": {
@@ -1135,7 +1135,7 @@
         "label": "Test lifetime application rule"
       },
       "signup_bonus": {
-        "bonus_amount": 600,
+        "bonus_amount": 900,
         "spending_requirement": 1000,
         "time_limit_months": 3
       }

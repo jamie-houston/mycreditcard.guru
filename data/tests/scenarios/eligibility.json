@@ -269,6 +269,94 @@
           "The 2x candidate beats the owned 1x card for general spending"
         ]
       }
+    },
+    {
+      "name": "Eligibility - a plan can't apply twice in one lifetime family",
+      "description": "Story 16. Clean history, so both once-per-lifetime family cards look eligible against the starting portfolio. Approval for the first permanently blocks the second, so a plan holding both is internally impossible — exactly one may be recommended, and descending value order means it's B (the larger bonus).",
+      "user_profile": {
+        "spending": {
+          "travel": 1500,
+          "general": 500
+        }
+      },
+      "owned_cards": [],
+      "available_cards": [
+        "lifetime-app-test-a",
+        "lifetime-app-test-b"
+      ],
+      "expected_recommendations": {
+        "actions": ["apply"],
+        "must_include_cards": ["lifetime-app-test-b"],
+        "must_not_include_cards": ["lifetime-app-test-a"],
+        "test_conditions": [
+          "Both cards share application_eligibility family lifetime-app-test-family",
+          "Eligibility is answered against the plan's own earlier applies, not just the starting portfolio",
+          "B's larger bonus takes the one slot; A is dropped as illegal, not as worthless"
+        ]
+      }
+    },
+    {
+      "name": "Eligibility - a plan can't exceed the Amex open-card cap",
+      "description": "Story 16. Four open Amex cards leaves exactly one slot under the 5-card cap, so a plan may add one candidate, not two. The stronger candidate (4x dining, larger bonus) takes the slot and the weaker one drops out.",
+      "user_profile": {
+        "spending": {
+          "dining": 1500,
+          "general": 500
+        }
+      },
+      "owned_cards": [
+        {"card": "amex-test-2", "opened_days_ago": 800},
+        {"card": "amex-test-3", "opened_days_ago": 700},
+        {"card": "amex-test-4", "opened_days_ago": 600},
+        {"card": "amex-test-5", "opened_days_ago": 500}
+      ],
+      "available_cards": [
+        "amex-test-2",
+        "amex-test-3",
+        "amex-test-4",
+        "amex-test-5",
+        "amex-test-candidate",
+        "amex-test-gold"
+      ],
+      "expected_recommendations": {
+        "actions": ["apply"],
+        "must_include_cards": ["amex-test-candidate"],
+        "must_not_include_cards": ["amex-test-gold"],
+        "test_conditions": [
+          "4 open same-issuer cards + 1 provisional apply hits max_open_cards=5 for the second candidate",
+          "Descending value order means the 4x candidate wins the slot, not the 3x gold"
+        ]
+      }
+    },
+    {
+      "name": "Eligibility - one Amex slot fewer used allows both candidates",
+      "description": "Story 16 'allows' companion to the cap scenario, proving amex-test-gold vanished there because it was illegal and not because it was worthless. Three open Amex cards leaves two slots, so both candidates are recommended.",
+      "user_profile": {
+        "spending": {
+          "dining": 1500,
+          "general": 500
+        }
+      },
+      "owned_cards": [
+        {"card": "amex-test-2", "opened_days_ago": 800},
+        {"card": "amex-test-3", "opened_days_ago": 700},
+        {"card": "amex-test-4", "opened_days_ago": 600}
+      ],
+      "available_cards": [
+        "amex-test-2",
+        "amex-test-3",
+        "amex-test-4",
+        "amex-test-candidate",
+        "amex-test-gold"
+      ],
+      "expected_recommendations": {
+        "actions": ["apply"],
+        "must_include_cards": ["amex-test-candidate", "amex-test-gold"],
+        "test_conditions": [
+          "3 open + 2 provisional applies reaches 5 open, which is at the cap but never over it",
+          "Both candidates carry positive value, so neither is dropped for value"
+        ]
+      }
     }
   ]
 }

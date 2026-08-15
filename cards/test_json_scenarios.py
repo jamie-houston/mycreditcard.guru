@@ -146,6 +146,44 @@ class JSONScenarioTest(JSONScenarioTestBase):
         recommendations = self.run_scenario_test(scenario)
         self.print_scenario_results(scenario, recommendations)
 
+    def test_plan_internal_lifetime_family(self):
+        """Story 16: a plan must be legal against its own earlier applies.
+        Both family cards look eligible against the empty starting
+        portfolio, so before the fix the roadmap applied for both."""
+        if not self.scenarios:
+            self.skipTest("No scenarios found in JSON file")
+        scenario = self.get_scenario(
+            "Eligibility - a plan can't apply twice in one lifetime family")
+        recommendations = self.run_scenario_test(scenario)
+        family = {'lifetime-app-test-a', 'lifetime-app-test-b'}
+        applied = [rec['card'].slug for rec in recommendations
+                   if rec['action'] == 'apply' and rec['card'].slug in family]
+        self.assertEqual(
+            len(applied), 1,
+            f"A plan may hold at most one card in a once-per-lifetime "
+            f"application family; got {applied}")
+        self.print_scenario_results(scenario, recommendations)
+
+    def test_plan_internal_amex_open_card_cap(self):
+        """Story 16: four open Amex cards leave one slot, so the plan may
+        add one candidate — the stronger one — not both."""
+        if not self.scenarios:
+            self.skipTest("No scenarios found in JSON file")
+        scenario = self.get_scenario(
+            "Eligibility - a plan can't exceed the Amex open-card cap")
+        recommendations = self.run_scenario_test(scenario)
+        self.print_scenario_results(scenario, recommendations)
+
+    def test_plan_internal_amex_cap_allows_both(self):
+        """Story 16 'allows' companion: with a slot to spare, the card the
+        cap scenario drops is recommended — it was illegal, not worthless."""
+        if not self.scenarios:
+            self.skipTest("No scenarios found in JSON file")
+        scenario = self.get_scenario(
+            "Eligibility - one Amex slot fewer used allows both candidates")
+        recommendations = self.run_scenario_test(scenario)
+        self.print_scenario_results(scenario, recommendations)
+
     def test_multi_player_524_headroom(self):
         """Phase M: 5/24 is per entity — Sam's one remaining slot is used
         even though the household holds 9 cards between them."""

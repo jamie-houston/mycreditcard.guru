@@ -381,7 +381,12 @@ class RecommendationEngineOrchestrator:
             if card_action['action'] != 'keep':
                 continue
             card = card_action['card']
-            second_entity = self._eligible_entity_for_card(card)
+            # A second copy is another application, so it has to be legal
+            # against the plan's other applies — including duplicate copies
+            # appended by earlier passes of this loop.
+            planned_applies = tuple(ca['card'] for ca in best_portfolio
+                                    if ca['action'] == 'apply')
+            second_entity = self._eligible_entity_for_card(card, planned_applies)
             if second_entity is None:
                 continue
             best_portfolio.append({
@@ -669,17 +674,18 @@ class RecommendationEngineOrchestrator:
         """Build parent category spending map."""
         return self.rewards_calculator.build_parent_category_spending()
 
-    def _eligible_entity_for_card(self, card: CreditCard):
-        """Which household entity (if any) could apply for `card`."""
-        return self.eligibility_manager.eligible_entity_for_card(card)
+    def _eligible_entity_for_card(self, card: CreditCard, planned_cards=()):
+        """Which household entity (if any) could apply for `card`, given a
+        plan that already commits to applying for `planned_cards`."""
+        return self.eligibility_manager.eligible_entity_for_card(card, planned_cards)
 
     def _holding_entity_for_card(self, card: CreditCard):
         """Which entity currently holds an OPEN copy of `card`, or None."""
         return self.eligibility_manager.holding_entity_for_card(card)
 
-    def _is_eligible_for_card(self, card: CreditCard) -> bool:
+    def _is_eligible_for_card(self, card: CreditCard, planned_cards=()) -> bool:
         """Application eligibility: can ANY household entity get approved?"""
-        return self.eligibility_manager.is_eligible_for_card(card)
+        return self.eligibility_manager.is_eligible_for_card(card, planned_cards)
 
     def _bonus_ineligibility_note(self, card: CreditCard):
         """User-facing reason this card's signup bonus is valued at $0."""

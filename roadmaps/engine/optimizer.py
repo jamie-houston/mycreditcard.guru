@@ -315,8 +315,21 @@ class PortfolioOptimizer:
         while len(current_combination) < max_cards and available_cards:
             best_addition = None
             best_addition_value = current_value
+            # Eligibility is re-asked against the applies this plan already
+            # commits to, not just the starting portfolio — otherwise the
+            # greedy walk can build a sequence the issuer rules forbid (two
+            # cards in a once-per-lifetime family, a sixth open Amex).
+            planned_applies = tuple(cd['card'] for cd in current_combination
+                                    if cd['action'] == 'apply')
 
             for card_to_add in available_cards:
+                if (card_to_add['action'] == 'apply'
+                        and not self.engine._is_eligible_for_card(
+                            card_to_add['card'], planned_applies)):
+                    # Not a worse option — not an option. A skip, never a
+                    # score penalty, so selection stays value-pure.
+                    continue
+
                 test_combination = current_combination + [card_to_add]
                 test_actions = [{'card': cd['card'], 'action': cd['action']} for cd in test_combination]
                 test_value = self.calculate_scenario_portfolio_value(test_actions)
@@ -398,7 +411,22 @@ class PortfolioOptimizer:
 
         card_scores.sort(key=lambda x: x['total_value'], reverse=True)
 
-        for i, card_data in enumerate(card_scores[:max_new_cards]):
+        # Walk the list accumulating a legal set rather than slicing the top
+        # N: each candidate is re-checked against the applies already taken,
+        # so the plan can't recommend a sequence its own rules forbid.
+        # Descending value order means the better card keeps the slot.
+        selected = []
+        planned_applies = []
+        for card_data in card_scores:
+            if len(selected) >= max_new_cards:
+                break
+            if not self.engine._is_eligible_for_card(
+                    card_data['card'], tuple(planned_applies)):
+                continue
+            planned_applies.append(card_data['card'])
+            selected.append(card_data)
+
+        for i, card_data in enumerate(selected):
             reasoning = f"Apply - ${card_data['total_value']:.0f} total value (${card_data['net_annual_value']:.0f} annual + ${card_data['signup_bonus']:.0f} signup bonus)"
             actions.append({
                 'card': card_data['card'],
