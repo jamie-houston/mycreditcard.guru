@@ -62,7 +62,12 @@ class EligibilityManager:
         return histories
 
     def _entity_for_card(self, card: CreditCard, histories):
-        """Which entity could apply for `card` given these histories."""
+        """Which entity could apply for `card` given these histories.
+
+        Among the entities that can legally apply, prefer one that can also
+        earn the signup bonus — a tiebreak over who applies, never over
+        which cards are recommended. With none, the first legal one.
+        """
         if card.card_type == 'business':
             candidates = [e for e in self.engine.entities if e.kind == 'business'] \
                 or [self.engine._primary_entity]
@@ -70,6 +75,7 @@ class EligibilityManager:
             candidates = [e for e in self.engine.entities if e.kind != 'business'] \
                 or [self.engine._primary_entity]
 
+        legal = []
         for entity in candidates:
             history = histories.get(entity.id, [])
             already_holds = any(
@@ -78,8 +84,13 @@ class EligibilityManager:
                 continue
             if application_block(card, history, self.engine.today) is not None:
                 continue
-            return entity
-        return None
+            legal.append(entity)
+
+        for entity in legal:
+            if bonus_ineligibility(
+                    card, histories.get(entity.id, []), self.engine.today) is None:
+                return entity
+        return legal[0] if legal else None
 
     def eligible_entity_for_card(self, card: CreditCard, planned_cards=()):
         """Which household entity (if any) could apply for `card`, given a
@@ -106,10 +117,18 @@ class EligibilityManager:
         return self.eligible_entity_for_card(card, planned_cards) is not None
 
     def bonus_ineligibility_note(self, card: CreditCard):
-        """User-facing reason this card's signup bonus is valued at $0."""
-        if card.id not in self.bonus_notes:
-            entity = self.eligible_entity_for_card(card) or self.engine._primary_entity
+        """User-facing reason this card's signup bonus is valued at $0.
+
+        Answered for the entity the household would apply as, so the note
+        and `apply_as` agree. In a multi-member household the note names
+        that member — "you've had this card before" is ambiguous there.
+        """
+        entity = self.eligible_entity_for_card(card) or self.engine._primary_entity
+        key = (card.id, entity.id)
+        if key not in self.bonus_notes:
             history = self.engine.entity_histories.get(entity.id, self.engine.card_history)
-            self.bonus_notes[card.id] = bonus_ineligibility(
-                card, history, self.engine.today)
-        return self.bonus_notes[card.id]
+            note = bonus_ineligibility(card, history, self.engine.today)
+            if note and len(self.engine.entities) > 1:
+                note = f"{entity.name}: {note}"
+            self.bonus_notes[key] = note
+        return self.bonus_notes[key]

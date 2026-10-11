@@ -72,6 +72,7 @@ The system supports multi-player household profiles (e.g., Player 1, Player 2, a
 - **Eligibility Checks**: Rule evaluations (like Chase 5/24 or Amex limits) run against the history of the *applying entity*, not the household as a whole.
 - **Business Cards**: The engine routes business cards to a business entity first, falling back to the primary player (as a sole proprietor) if no business entity is declared.
 - **Personal Cards**: Considers personal entities, primary-first.
+- **Bonus Rules Route Too**: Among the entities that may legally *apply*, the household applies as the first one that can still *earn* the signup bonus (e.g. Amex once-per-lifetime, Citi 48-month — bonus rules with no application block behind them). Only when none can does it fall back to the first legal entity, with the bonus valued at $0. This is a tiebreak over who applies, never over which cards are recommended. In a multi-entity household the bonus note is prefixed with that entity's name, and it is computed for the same entity `apply_as` names.
 
 ### Second-Copy Applies
 To allow a household to hold multiple copies of the same high-value card (e.g., both players applying for their own Chase Sapphire card):

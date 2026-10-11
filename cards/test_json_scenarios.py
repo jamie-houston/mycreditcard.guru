@@ -194,6 +194,38 @@ class JSONScenarioTest(JSONScenarioTestBase):
         recommendations = self.run_scenario_test(scenario)
         self.print_scenario_results(scenario, recommendations)
 
+    def test_multi_player_bonus_routes_to_earnable_member(self):
+        """Story 17: Jamie can apply for the Amex card but never earn its
+        bonus; Sam can. The apply must go to Sam with the bonus valued —
+        before the fix it went to Jamie, the first legal member, at $0."""
+        if not self.scenarios:
+            self.skipTest("No scenarios found in JSON file")
+        scenario = self.get_scenario(
+            'Multi-Player - bonus-blocked member yields the apply to one who can earn it')
+        recommendations = self.run_scenario_test(scenario)
+        amex = next(rec for rec in recommendations
+                    if rec['card'].slug == 'amex-test-candidate')
+        self.assertGreater(float(amex['signup_bonus_value']), 0.0,
+                           "Sam can earn the bonus, so it must be valued")
+        self.assertFalse(amex.get('eligibility_note'),
+                         "No bonus note when the applying member can earn it")
+        self.print_scenario_results(scenario, recommendations)
+
+    def test_multi_player_bonus_blocked_everywhere_falls_back(self):
+        """Story 17 fallback: when no member can earn the bonus the card is
+        still recommended at $0, with a note that says whose history it is."""
+        if not self.scenarios:
+            self.skipTest("No scenarios found in JSON file")
+        scenario = self.get_scenario(
+            'Multi-Player - both members bonus-blocked still apply at $0 bonus')
+        recommendations = self.run_scenario_test(scenario)
+        amex = next(rec for rec in recommendations
+                    if rec['card'].slug == 'amex-test-candidate')
+        self.assertEqual(float(amex['signup_bonus_value']), 0.0)
+        self.assertIn('Jamie', amex['eligibility_note'] or '',
+                      "A household's bonus note must name the member")
+        self.print_scenario_results(scenario, recommendations)
+
     def test_bonus_capacity_defers_third_card(self):
         """Phase E: two $10K bonuses fit a $2K/mo year. Selection is now
         capacity-aware (_bonus_capacity_plan), so the third card's bonus is
