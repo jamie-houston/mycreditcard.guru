@@ -101,6 +101,9 @@
 
 <!-- Tab Content: My Cards -->
 <div id="tabContentCards" class="tab-content active">
+    {% if user.is_authenticated %}
+    <p class="tab-intro-text"><a href="{% url 'scorecard' %}">Is each card paying for its fee? See the scorecard &rarr;</a></p>
+    {% endif %}
     <div id="cardCollection" class="cards-list-container">
         <div class="loading">Loading your card collection...</div>
     </div>

@@ -358,9 +358,10 @@ class Command(BaseCommand):
                         card.slug = slug
                     card.save()
                     
-                    # Clear existing reward categories and credits to replace with imported data
+                    # Clear existing reward categories to replace with imported data.
+                    # Credits are updated in place below: UserCreditUsage cascades
+                    # from CardCredit, so a delete would wipe recorded usage.
                     card.reward_categories.all().delete()
-                    card.credits.all().delete()
 
                     created = False
                 except CreditCard.DoesNotExist:
@@ -401,9 +402,9 @@ class Command(BaseCommand):
                 if 'reward_categories' in card_data:
                     self.import_reward_categories(card, card_data['reward_categories'])
                 
-                # Import credits (for both new and updated cards)
-                if 'credits' in card_data:
-                    self.import_card_credits(card, card_data['credits'])
+                # Import credits (for both new and updated cards); a card with
+                # no credits section ends with none, as it always has.
+                self.import_card_credits(card, card_data.get('credits', []))
 
                 if not created and before_snapshot != self._card_snapshot(card):
                     self.stdout.write(f'Updated card: {card}')
@@ -453,7 +454,23 @@ class Command(BaseCommand):
                     self.style.WARNING(f'Skipping reward category "{category_data["category"]}": {e}')
                 )
 
+    @staticmethod
+    def _credit_identity(category_id, spending_credit_id, description):
+        """What makes an imported credit "the same" credit as an existing row:
+        its type, or its description when it has no type."""
+        if category_id or spending_credit_id:
+            return (category_id, spending_credit_id, '')
+        return (None, None, description)
+
     def import_card_credits(self, card, credits):
+        # Match incoming credits to existing rows and update them in place, so
+        # UserCreditUsage (which cascades from CardCredit) survives a re-import.
+        existing = {}
+        for card_credit in card.credits.order_by('id'):
+            key = self._credit_identity(
+                card_credit.category_id, card_credit.spending_credit_id, card_credit.description)
+            existing.setdefault(key, []).append(card_credit)
+
         for credit_data in credits:
             # Determine if this is a category-based credit or spending_credit-based credit
             category = None
@@ -479,18 +496,32 @@ class Command(BaseCommand):
                     )
                     continue
             
-            # Create new card credit (existing ones were already deleted)
-            CardCredit.objects.create(
-                card=card,
-                category=category,
-                spending_credit=spending_credit,
-                description=credit_data.get('description', ''),
-                value=credit_data.get('value', 0),
-                times_per_year=credit_data.get('times_per_year', 1),
-                weight=credit_data.get('weight', 1.0),
-                currency=credit_data.get('currency', 'USD'),
-                offer_type=credit_data.get('offer_type', ''),
-            )
+            fields = {
+                'category': category,
+                'spending_credit': spending_credit,
+                'description': credit_data.get('description', ''),
+                'value': credit_data.get('value', 0),
+                'times_per_year': credit_data.get('times_per_year', 1),
+                'weight': credit_data.get('weight', 1.0),
+                'currency': credit_data.get('currency', 'USD'),
+                'offer_type': credit_data.get('offer_type', ''),
+            }
+            key = self._credit_identity(
+                category.id if category else None,
+                spending_credit.id if spending_credit else None,
+                fields['description'])
+            matches = existing.get(key)
+            if matches:
+                card_credit = matches.pop(0)
+                for name, value in fields.items():
+                    setattr(card_credit, name, value)
+                card_credit.save()
+            else:
+                CardCredit.objects.create(card=card, **fields)
+
+        # Credits no longer in the file go, taking their usage with them.
+        stale_ids = [cc.id for rows in existing.values() for cc in rows]
+        CardCredit.objects.filter(id__in=stale_ids).delete()
 
     def import_personal_cards(self, data):
         """

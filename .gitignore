@@ -127,3 +127,4 @@ data/local/*
 !data/local/seed/
 data/local/seed/*
 !data/local/seed/example.json
+!data/local/seed/example-credits.json

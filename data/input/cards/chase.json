@@ -44,8 +44,8 @@
     "credits": [
       {
         "category": "travel",
-        "value": 150,
-        "times_per_year": 2
+        "value": 300,
+        "times_per_year": 1
       },
       {
         "description": "The Edit by Chase Travel hotel credit",
@@ -55,7 +55,8 @@
       {
         "credit_type": "airport_lounge",
         "value": 469,
-        "times_per_year": 1
+        "times_per_year": 1,
+        "offer_type": "membership"
       },
       {
         "description": "Global Entry / TSA PreCheck Credit",
@@ -89,7 +90,10 @@
       }
     ],
     "verified": true,
-    "slug": "chase-sapphire-reserve"
+    "slug": "chase-sapphire-reserve",
+    "_sources": {
+      "credits": "manual"
+    }
   },
   {
     "name": "Chase Freedom Unlimited",
@@ -262,8 +266,8 @@
     "credits": [
       {
         "category": "travel",
-        "value": 150,
-        "times_per_year": 2
+        "value": 300,
+        "times_per_year": 1
       },
       {
         "description": "The Edit by Chase Travel hotel credit",
@@ -273,7 +277,8 @@
       {
         "credit_type": "airport_lounge",
         "value": 469,
-        "times_per_year": 1
+        "times_per_year": 1,
+        "offer_type": "membership"
       },
       {
         "credit_type": "precheck",
@@ -301,8 +306,8 @@
       },
       {
         "credit_type": "google_workspace",
-        "value": 20,
-        "times_per_year": 12
+        "value": 200,
+        "times_per_year": 1
       },
       {
         "credit_type": "ziprecruiter",
@@ -316,11 +321,15 @@
       {
         "description": "Gift Card Credit",
         "credit_type": "shopping",
-        "value": 100
+        "value": 50,
+        "times_per_year": 2
       }
     ],
     "verified": true,
-    "slug": "chase-sapphire-reserve-for-business"
+    "slug": "chase-sapphire-reserve-for-business",
+    "_sources": {
+      "credits": "manual"
+    }
   },
   {
     "name": "Marriott Bonvoy Bountiful",
@@ -748,7 +757,8 @@
     "url": "https://creditcards.chase.com/business-credit-cards/ink/premier",
     "image_url": "/images/chase/ink-business-premier.png",
     "discontinued": false,
-    "slug": "ink-business-premier"
+    "slug": "ink-business-premier",
+    "verified": true
   },
   {
     "name": "Marriott Bonvoy Bold",
@@ -888,18 +898,20 @@
         "description": "Free Checked Bag",
         "value": 100,
         "times_per_year": 1,
-        "weight": 0.75
+        "weight": 0.75,
+        "offer_type": "other"
       },
       {
         "description": "Anniversary Points",
         "value": 3000,
         "times_per_year": 1,
         "weight": 1,
-        "currency": "SOUTHWEST"
+        "currency": "SOUTHWEST",
+        "offer_type": "points_miles"
       }
     ],
     "_sources": {
-      "credits": "andenacitelli"
+      "credits": "manual"
     }
   },
   {
@@ -938,18 +950,20 @@
         "description": "Free Checked Bag",
         "value": 100,
         "times_per_year": 1,
-        "weight": 0.75
+        "weight": 0.75,
+        "offer_type": "other"
       },
       {
         "description": "Anniversary Points",
         "value": 6000,
         "times_per_year": 1,
         "weight": 1,
-        "currency": "SOUTHWEST"
+        "currency": "SOUTHWEST",
+        "offer_type": "points_miles"
       }
     ],
     "_sources": {
-      "credits": "andenacitelli"
+      "credits": "manual"
     },
     "verified": true
   },
@@ -988,18 +1002,20 @@
         "description": "Free Checked Bag",
         "value": 100,
         "times_per_year": 1,
-        "weight": 0.75
+        "weight": 0.75,
+        "offer_type": "other"
       },
       {
         "description": "Anniversary Points",
         "value": 6000,
         "times_per_year": 1,
         "weight": 1,
-        "currency": "SOUTHWEST"
+        "currency": "SOUTHWEST",
+        "offer_type": "points_miles"
       }
     ],
     "_sources": {
-      "credits": "andenacitelli"
+      "credits": "manual"
     }
   },
   {
@@ -1049,18 +1065,20 @@
         "description": "Free Checked Bag",
         "value": 100,
         "times_per_year": 1,
-        "weight": 0.75
+        "weight": 0.75,
+        "offer_type": "other"
       },
       {
         "description": "Anniversary Points",
         "value": 7500,
         "times_per_year": 1,
         "weight": 1,
-        "currency": "SOUTHWEST"
+        "currency": "SOUTHWEST",
+        "offer_type": "points_miles"
       }
     ],
     "_sources": {
-      "credits": "andenacitelli"
+      "credits": "manual"
     }
   },
   {

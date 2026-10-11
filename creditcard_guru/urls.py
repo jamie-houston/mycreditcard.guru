@@ -20,6 +20,7 @@ from django.http import JsonResponse
 from django.shortcuts import render
 from cards.views import landing_view, index_view, cards_list_view, categories_list_view, category_detail_page_view, issuers_list_view, profile_view, shared_profile_view, help_view, resources_view, redemptions_view
 from cards.wallet import wallet_view
+from cards.scorecard import scorecard_view
 from roadmaps.views import shared_roadmap_view
 
 def home_view(request):
@@ -53,6 +54,7 @@ urlpatterns = [
     path('issuers/', issuers_list_view, name='issuers_list'),
     path('profile/', profile_view, name='profile'),
     path('wallet/', wallet_view, name='wallet'),
+    path('scorecard/', scorecard_view, name='scorecard'),
     path('help/', help_view, name='help'),
     path('resources/', resources_view, name='resources'),
     path('redemptions/', redemptions_view, name='redemptions'),

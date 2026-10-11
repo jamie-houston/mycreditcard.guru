@@ -226,6 +226,16 @@ For each verified card, the following is imported:
 }
 ```
 
+**Re-importing keeps credit usage.** Users' recorded credit usage
+(`UserCreditUsage`, and so the `/scorecard/`) cascades from `CardCredit`, so
+credits are updated in place, not deleted and recreated. An incoming credit
+matches an existing row by its `credit_type` / `category`, or by
+`description` when it has neither. Changing a value, cadence, `offer_type` or
+a typed credit's description keeps its usage. Changing a credit's type, or an
+untyped credit's description, makes it a new credit: the old row and its usage
+are deleted. `offer_type` other than `statement_credit` (or blank) — lounge
+access, free bags, anniversary points — keeps a credit off the scorecard.
+
 ## Import Commands
 
 ### Using the Interactive Script (Recommended)

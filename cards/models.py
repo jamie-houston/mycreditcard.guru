@@ -506,6 +506,9 @@ class UserCreditUsage(models.Model):
         help_text="Derived from times_per_year: YYYY-MM, YYYY-QX, YYYY-HY, or YYYY"
     )
     used = models.BooleanField(default=True)
+    amount_used = models.DecimalField(
+        max_digits=10, decimal_places=2, null=True, blank=True,
+        help_text="Dollars used this period; null with used=True means the full period value")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

@@ -30,10 +30,10 @@ from roadmaps.models import Roadmap
 # and has to be named explicitly.
 NON_PAGE_ROUTE_NAMES = {'api_home'}
 
-# `wallet` is the one page route that requires a login. It has no
-# `login_required` decorator — cards/wallet.py:94 redirects by hand — which is
-# why a grep for the decorator says every page is anonymous.
-LOGIN_REQUIRED_ROUTE_NAMES = {'wallet'}
+# `wallet` and `scorecard` are the page routes that require a login. Neither has
+# a `login_required` decorator — cards/wallet.py and cards/scorecard.py redirect
+# by hand — which is why a grep for the decorator says every page is anonymous.
+LOGIN_REQUIRED_ROUTE_NAMES = {'wallet', 'scorecard'}
 
 
 class PageRouteSmokeTests(TestCase):
@@ -70,6 +70,7 @@ class PageRouteSmokeTests(TestCase):
             'issuers_list': {},
             'profile': {},
             'wallet': {},
+            'scorecard': {},
             'help': {},
             'resources': {},
             'redemptions': {},

@@ -24,6 +24,7 @@
             <li class="help-nav-item"><a href="#roadmaps"><span class="ico">route</span> Roadmap Choices</a></li>
             <li class="help-nav-item"><a href="#options"><span class="ico">settings</span> Strategy Options</a></li>
             <li class="help-nav-item"><a href="#cardinfo"><span class="ico">style</span> Card Information</a></li>
+            <li class="help-nav-item"><a href="#scorecard"><span class="ico">balance</span> Card Scorecard</a></li>
             <li class="help-nav-item"><a href="#engine"><span class="ico">calculate</span> How the Engine Works</a></li>
         </ul>
     </aside>
@@ -244,6 +245,41 @@
                 </summary>
                 <div class="help-card-body">
                     <p>Many credit cards provide monthly, quarterly, semi-annual, or annual credits (e.g. $10 monthly dining credits). Under the **My Cards** page, you can check off benefits as you use them. The system groups credits into `Unused / Expiring Soon` and `Used This Period`, ensuring you don't leave money on the table.</p>
+                </div>
+            </details>
+        </section>
+
+        <!-- Section: Card Scorecard -->
+        <section id="scorecard" class="help-section">
+            <h2 class="help-section-title"><span class="ico">balance</span> Card Scorecard</h2>
+            <p class="help-section-desc">The <a href="{% url 'scorecard' %}">scorecard</a> asks one question per open card: did its statement credits cover its annual fee over the last 12 months?</p>
+
+            <details class="help-card">
+                <summary>
+                    <span class="help-card-title"><span class="ico">calculate</span> What each number counts</span>
+                </summary>
+                <div class="help-card-body">
+                    <ul>
+                        <li><strong>Fee</strong> is the card's current annual fee. <strong>Next</strong> is your opening-date anniversary, an estimate: issuers often post the fee on the statement after it.</li>
+                        <li><strong>Used</strong> adds up the credits you've marked used, in every credit period that overlaps the last 12 months, including the period you're in now. A period marked used with no dollar amount counts its full value.</li>
+                        <li><strong>Net</strong> is used minus fee. &#x2705; means it covered its fee, &#x2796; within $100 of it, &#x274C; more than $100 short.</li>
+                        <li><strong>Unused this period</strong> lists each credit with money left in the current period. On a &#x274C; card, the ones that would close the gap are shown first.</li>
+                    </ul>
+                </div>
+            </details>
+
+            <details class="help-card">
+                <summary>
+                    <span class="help-card-title"><span class="ico">block</span> What it leaves out</span>
+                </summary>
+                <div class="help-card-body">
+                    <ul>
+                        <li><strong>Cash back and points you earn.</strong> A card that pays for itself by earning, like 6% on groceries, reads short here. The roadmap is where earning is valued.</li>
+                        <li><strong>Perks that aren't statement credits</strong>: lounge access, free checked bags, anniversary points.</li>
+                        <li><strong>Closed cards.</strong></li>
+                        <li>Credit usage is recorded once per household. If two members hold the same card, the usage shows on one of them.</li>
+                        <li>A yearly credit used in two calendar years both inside the last 12 months counts twice.</li>
+                    </ul>
                 </div>
             </details>
         </section>

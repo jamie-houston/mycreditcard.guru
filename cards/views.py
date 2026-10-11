@@ -233,9 +233,32 @@ def credit_usage_view(request):
     usages = request.data.get('usages')
     if not isinstance(usages, dict):
         return Response(
-            {'error': 'usages must be an object of {card_credit_id: bool}'},
+            {'error': 'usages must be an object of {card_credit_id: bool | {used, amount}}'},
             status=status.HTTP_400_BAD_REQUEST
         )
+
+    # Each value is a bool (the modal's checkbox) or {used, amount}. The bool
+    # form leaves amount_used alone so a tick can't wipe an imported partial.
+    from decimal import Decimal, InvalidOperation
+    parsed = {}
+    for credit_id_str, used_val in usages.items():
+        if isinstance(used_val, dict):
+            defaults = {'used': bool(used_val.get('used', True))}
+            amount = used_val.get('amount')
+            if amount is not None:
+                try:
+                    amount = Decimal(str(amount))
+                except InvalidOperation:
+                    amount = None
+                if amount is None or not amount.is_finite() or amount < 0:
+                    return Response(
+                        {'error': f'amount for credit {credit_id_str} must be a non-negative number'},
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+            defaults['amount_used'] = amount
+        else:
+            defaults = {'used': bool(used_val)}
+        parsed[credit_id_str] = defaults
 
     if request.user.is_authenticated:
         profile, _created = UserSpendingProfile.objects.get_or_create(user=request.user)
@@ -250,17 +273,17 @@ def credit_usage_view(request):
     today = date.today()
     
     valid_credits = {str(c.id): c for c in CardCredit.objects.filter(is_active=True)}
-    for credit_id_str, used_val in usages.items():
+    for credit_id_str, defaults in parsed.items():
         credit = valid_credits.get(credit_id_str)
         if not credit:
             continue
-        
+
         period_key = credit.get_period_key(today)
         UserCreditUsage.objects.update_or_create(
             profile=profile,
             card_credit=credit,
             period_key=period_key,
-            defaults={'used': bool(used_val)}
+            defaults=defaults
         )
 
     return Response({'usages': _serialize_credit_usages(profile)})

@@ -289,6 +289,7 @@ class UserCardToggleEndpointTests(TestCase):
 
 
 from datetime import date
+from decimal import Decimal
 from .models import CardCredit, UserCreditUsage
 
 class CreditUsageTests(TestCase):
@@ -402,6 +403,172 @@ class CreditUsageTests(TestCase):
         self.assertEqual(response.json()['usages'], {
             str(self.credit_monthly.id): True
         })
+
+    def test_put_object_form_stores_partial_amount(self):
+        user = User.objects.create_user(username='u', password='x')
+        self.client.force_login(user)
+
+        response = self.client.put(
+            '/api/cards/credit-usage/',
+            {'usages': {str(self.credit_quarterly.id): {'used': True, 'amount': 12.5}}},
+            content_type='application/json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()['usages'], {str(self.credit_quarterly.id): True})
+
+        usage = UserCreditUsage.objects.get(card_credit=self.credit_quarterly)
+        self.assertEqual(usage.amount_used, Decimal('12.50'))
+
+    def test_put_bool_form_keeps_an_existing_amount(self):
+        # The modal still sends the bool form; ticking the box must not wipe
+        # a partial amount that came in through import_credit_usage.
+        user = User.objects.create_user(username='u', password='x')
+        self.client.force_login(user)
+        profile = UserSpendingProfile.objects.create(user=user)
+        UserCreditUsage.objects.create(
+            profile=profile, card_credit=self.credit_quarterly,
+            period_key=self.credit_quarterly.get_period_key(date.today()),
+            used=True, amount_used=Decimal('12.50'))
+
+        self.client.put(
+            '/api/cards/credit-usage/',
+            {'usages': {str(self.credit_quarterly.id): True}},
+            content_type='application/json')
+
+        usage = UserCreditUsage.objects.get(card_credit=self.credit_quarterly)
+        self.assertEqual(usage.amount_used, Decimal('12.50'))
+
+    def test_put_rejects_a_non_numeric_amount(self):
+        response = self.client.put(
+            '/api/cards/credit-usage/',
+            {'usages': {str(self.credit_quarterly.id): {'used': True, 'amount': 'lots'}}},
+            content_type='application/json')
+        self.assertEqual(response.status_code, 400)
+        self.assertFalse(UserCreditUsage.objects.exists())
+
+
+class ImportCreditUsageCommandTests(TestCase):
+    def setUp(self):
+        import tempfile
+        from .models import ProfileEntity
+        cashback = RewardType.objects.create(name='Cashback', slug='cashback')
+        issuer = Issuer.objects.create(name='Generic Bank', slug='generic-bank')
+        self.card = CreditCard.objects.create(
+            name='Test Card', slug='test-card', issuer=issuer,
+            signup_bonus_type=cashback, primary_reward_type=cashback)
+        self.dining = CardCredit.objects.create(
+            card=self.card, description='Resy Credit', value=100, times_per_year=4)
+        self.monthly = CardCredit.objects.create(
+            card=self.card, description='Digital Entertainment Credit', value=25, times_per_year=12)
+        self.user = User.objects.create_user(username='u', password='x')
+        self.profile = UserSpendingProfile.objects.create(user=self.user)
+        self.owner = ProfileEntity.objects.create(profile=self.profile, name='Alex', is_primary=True)
+        self.holding = UserCard.objects.create(user=self.user, card=self.card, owner=self.owner)
+        self.tmpdir = tempfile.mkdtemp()
+
+    def _run(self, rows):
+        import io, json, os
+        from django.core.management import call_command
+        path = os.path.join(self.tmpdir, 'usage.json')
+        with open(path, 'w') as f:
+            json.dump(rows, f)
+        out = io.StringIO()
+        call_command('import_credit_usage', file=path, username='u', stdout=out)
+        return out.getvalue()
+
+    def _row(self, **kw):
+        row = {'card': 'test-card', 'owner': 'Alex', 'credit': 'resy',
+               'period': '2026-Q4', 'amount': 61.73}
+        row.update(kw)
+        return row
+
+    def test_partial_amount_lands_on_the_period(self):
+        self._run([self._row()])
+        usage = UserCreditUsage.objects.get(card_credit=self.dining, period_key='2026-Q4')
+        self.assertTrue(usage.used)
+        self.assertEqual(usage.amount_used, Decimal('61.73'))
+
+    def test_rows_sharing_a_period_are_summed_and_a_rerun_is_idempotent(self):
+        rows = [self._row(credit='digital', period='2026-05', amount=19.99),
+                self._row(credit='digital', period='2026-05', amount=5.01)]
+        self._run(rows)
+        self._run(rows)
+        usage = UserCreditUsage.objects.get(card_credit=self.monthly, period_key='2026-05')
+        self.assertEqual(usage.amount_used, Decimal('25.00'))
+        self.assertEqual(UserCreditUsage.objects.count(), 1)
+
+    def test_unresolved_rows_are_named_not_dropped(self):
+        out = self._run([
+            self._row(credit='lululemon'),
+            self._row(owner='Nobody'),
+            self._row(period='2026-H2'),
+            self._row(credit='credit'),  # matches both descriptions
+            self._row(),
+        ])
+        self.assertIn('1 rows imported', out)
+        self.assertIn("no credit 'lululemon' on test-card", out)
+        self.assertIn("no open test-card owned by 'Nobody'", out)
+        self.assertIn("period '2026-H2' is not in this credit's scheme", out)
+        self.assertIn("matches 2 credit descriptions", out)
+
+    def test_a_closed_holding_does_not_resolve(self):
+        self.holding.closed_date = date(2026, 1, 1)
+        self.holding.save()
+        out = self._run([self._row()])
+        self.assertIn("no open test-card owned by 'Alex'", out)
+        self.assertFalse(UserCreditUsage.objects.exists())
+
+
+class ImportCardsKeepsCreditUsageTests(TestCase):
+    """Re-importing a card file must not cascade-delete recorded credit usage."""
+
+    def setUp(self):
+        import tempfile
+        Issuer.objects.create(name='Generic Bank', slug='generic-bank')
+        RewardType.objects.create(name='Cashback', slug='cashback')
+        SpendingCredit.objects.create(
+            name='clear', display_name='Clear Plus', slug='clear',
+            category=SpendingCategory.objects.create(name='Airlines', slug='airlines'))
+        self.tmpdir = tempfile.mkdtemp()
+        self.user = User.objects.create_user(username='u', password='x')
+        self.profile = UserSpendingProfile.objects.create(user=self.user)
+
+    def _import(self, credits):
+        import io, json, os
+        from django.core.management import call_command
+        path = os.path.join(self.tmpdir, 'generic.json')
+        with open(path, 'w') as f:
+            json.dump([{'name': 'Test Card', 'issuer': 'Generic Bank', 'annual_fee': 95,
+                        'reward_type': 'Cashback', 'verified': True,
+                        'credits': credits}], f)
+        call_command('import_cards', path, stdout=io.StringIO())
+        return CreditCard.objects.get(name='Test Card')
+
+    def test_value_and_description_changes_keep_usage(self):
+        card = self._import([
+            {'credit_type': 'clear', 'value': 100},
+            {'description': 'Resy Credit', 'value': 100, 'times_per_year': 4},
+            {'description': 'Retired Credit', 'value': 50},
+        ])
+        clear = card.credits.get(spending_credit__name='clear')
+        resy = card.credits.get(description='Resy Credit')
+        for credit in (clear, resy):
+            UserCreditUsage.objects.create(
+                profile=self.profile, card_credit=credit, period_key='2026', used=True)
+
+        card = self._import([
+            {'credit_type': 'clear', 'value': 219, 'description': 'CLEAR Plus'},
+            {'description': 'Resy Credit', 'value': 100, 'times_per_year': 4,
+             'offer_type': 'statement_credit'},
+            {'description': 'Equinox Credit', 'value': 300},
+        ])
+
+        self.assertEqual(UserCreditUsage.objects.count(), 2)
+        clear.refresh_from_db()
+        self.assertEqual(clear.value, Decimal('219.00'))
+        self.assertEqual(clear.description, 'CLEAR Plus')
+        self.assertEqual(
+            sorted(card.credits.values_list('description', flat=True)),
+            ['CLEAR Plus', 'Equinox Credit', 'Resy Credit'])
 
 
 class TemplatePagesTests(TestCase):

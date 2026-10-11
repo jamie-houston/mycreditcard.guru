@@ -28,8 +28,9 @@
       },
       {
         "credit_type": "disney_plus",
-        "value": 20,
-        "times_per_year": 12
+        "value": 25,
+        "times_per_year": 12,
+        "description": "Digital Entertainment Credit"
       },
       {
         "credit_type": "walmart_plus",
@@ -38,7 +39,8 @@
       },
       {
         "credit_type": "airport_lounge",
-        "value": 100
+        "value": 100,
+        "offer_type": "membership"
       },
       {
         "credit_type": "airlines",
@@ -51,11 +53,38 @@
       },
       {
         "credit_type": "clear",
-        "value": 100
+        "value": 219
       },
       {
         "credit_type": "precheck",
         "value": 120
+      },
+      {
+        "description": "Resy Credit",
+        "value": 100,
+        "times_per_year": 4,
+        "offer_type": "statement_credit"
+      },
+      {
+        "description": "lululemon Credit",
+        "value": 75,
+        "times_per_year": 4,
+        "offer_type": "statement_credit"
+      },
+      {
+        "description": "Uber One Credit",
+        "value": 120,
+        "offer_type": "statement_credit"
+      },
+      {
+        "description": "Oura Ring Credit",
+        "value": 200,
+        "offer_type": "statement_credit"
+      },
+      {
+        "description": "Equinox Credit",
+        "value": 300,
+        "offer_type": "statement_credit"
       }
     ],
     "card_type": "personal",
@@ -67,6 +96,9 @@
     "slug": "the-platinum-card-from-american-express",
     "metadata": {
       "points_program": "amex_membership_rewards"
+    },
+    "_sources": {
+      "credits": "manual"
     }
   },
   {
@@ -175,7 +207,7 @@
     "credits": [
       {
         "credit_type": "disney_plus",
-        "value": 7,
+        "value": 10,
         "times_per_year": 12
       }
     ],
@@ -183,6 +215,9 @@
     "slug": "blue-cash-preferred-card-from-american-express",
     "metadata": {
       "annual_fee_waived_first_year": true
+    },
+    "_sources": {
+      "credits": "manual"
     }
   },
   {
