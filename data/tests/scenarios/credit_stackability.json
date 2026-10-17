@@ -83,6 +83,33 @@
           "Lounge Card Low's breakdown has no Airport Lounge credit or info line"
         ]
       }
+    },
+    {
+      "name": "Credit Stackability - Expired And Status Credits Count Nothing",
+      "description": "Story 19: the card carries a live $15/mo Uber Eats credit, a $20/mo one that ended 12/31/2020, and a status perk. Only the live credit counts: $180, not $420 or $470.",
+      "user_profile": {
+        "spending": {
+          "general": 500
+        },
+        "spending_credit_preferences": [
+          "uber_eats"
+        ]
+      },
+      "owned_cards": [
+        "dated-credit-card-test"
+      ],
+      "available_cards": [
+        "dated-credit-card-test"
+      ],
+      "expected_recommendations": {
+        "actions": ["keep"],
+        "must_include_cards": ["dated-credit-card-test"],
+        "test_conditions": [
+          "The 2020 credit adds $0",
+          "The status perk adds $0",
+          "Credit lines total exactly $180"
+        ]
+      }
     }
   ]
 }

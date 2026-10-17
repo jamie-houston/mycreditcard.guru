@@ -103,6 +103,23 @@ class BuildScorecardTests(ScorecardTestCase):
         self.assertEqual(row['gap_closers'], row['unused'])
         self.assertFalse(row['gap_closed'])
 
+    def test_an_expired_credit_still_counts_usage_but_not_available(self):
+        self.clear.end_date = date(2026, 6, 30)
+        self.clear.save()
+        self.use(self.clear, '2026')
+        row = self.row()
+        self.assertEqual(row['available'], 400)
+        self.assertEqual(row['used'], 219)
+        self.assertNotIn('CLEAR Credit', [u['name'] for u in row['unused']])
+
+    def test_a_credit_that_has_not_started_is_left_out(self):
+        CardCredit.objects.create(
+            card=self.card, description='The Edit', value=250, times_per_year=4,
+            start_date=date(2027, 1, 1))
+        row = self.row()
+        self.assertEqual(row['available'], 400 + 219)
+        self.assertNotIn('The Edit', [u['name'] for u in row['unused']])
+
     def test_closed_card_is_excluded(self):
         self.holding.closed_date = date(2026, 1, 1)
         self.holding.save()

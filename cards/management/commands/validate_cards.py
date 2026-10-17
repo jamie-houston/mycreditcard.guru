@@ -400,6 +400,8 @@ class Command(BaseCommand):
                     continue
                 if not self._values_match(a.get('value', 0), b.get('value', 0)):
                     continue
+                if not self._dates_overlap(a, b):
+                    continue  # a dated successor, e.g. The Edit at 4 × $250 from 2027
 
                 reasons = []
                 if 'credit_type' in a and 'credit_type' in b and a['credit_type'] == b['credit_type']:
@@ -413,6 +415,12 @@ class Command(BaseCommand):
                 if reasons:
                     dups.append((i, j, ', '.join(reasons)))
         return dups
+
+    @staticmethod
+    def _dates_overlap(a: Dict[str, Any], b: Dict[str, Any]) -> bool:
+        # ISO dates compare correctly as strings; a missing date is open-ended.
+        return (a.get('start_date') or '') <= (b.get('end_date') or '9999') \
+            and (b.get('start_date') or '') <= (a.get('end_date') or '9999')
 
     @staticmethod
     def _credit_value_sum(credits_list: List[Dict[str, Any]]) -> float:

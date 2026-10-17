@@ -1,3 +1,4 @@
+from datetime import date
 from rest_framework import serializers
 from .models import (
     Issuer, RewardType, SpendingCategory, CreditCard,
@@ -85,7 +86,7 @@ class CreditCardSerializer(serializers.ModelSerializer):
     primary_reward_type = RewardTypeSerializer(read_only=True)
     signup_bonus_type = RewardTypeSerializer(read_only=True)
     reward_categories = RewardCategorySerializer(many=True, read_only=True)
-    credits = CardCreditSerializer(many=True, read_only=True)
+    credits = serializers.SerializerMethodField()
     
     # Add referral URL fields
     referral_url = serializers.ReadOnlyField()
@@ -99,6 +100,13 @@ class CreditCardSerializer(serializers.ModelSerializer):
             'reward_categories', 'credits', 'is_active', 'created_at', 'metadata',
             'url', 'referral_url', 'apply_url'
         ]
+
+    def get_credits(self, obj):
+        # Only what's in effect today: next year's dated successor and an
+        # expired credit both stay out of the modal and the owned-credit math.
+        today = date.today()
+        active = [c for c in obj.credits.all() if c.is_active_on(today)]
+        return CardCreditSerializer(active, many=True, context=self.context).data
 
 
 class CreditCardListSerializer(serializers.ModelSerializer):

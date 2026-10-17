@@ -86,6 +86,21 @@
         "description": "Equinox Credit",
         "value": 300,
         "offer_type": "statement_credit"
+      },
+      {
+        "description": "Hilton Honors Gold",
+        "value": 0,
+        "offer_type": "status"
+      },
+      {
+        "description": "Marriott Bonvoy Gold Elite",
+        "value": 0,
+        "offer_type": "status"
+      },
+      {
+        "description": "Leaders Club Sterling",
+        "value": 0,
+        "offer_type": "status"
       }
     ],
     "card_type": "personal",

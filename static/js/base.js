@@ -1119,9 +1119,12 @@
                 return;
             }
 
-            const activeCredits = credits.filter(credit => credit.is_active);
+            // Status perks (IHG Platinum, A-List) carry no dollars, so they
+            // get their own section instead of a value column.
+            const statusPerks = credits.filter(credit => credit.is_active && credit.offer_type === 'status');
+            const activeCredits = credits.filter(credit => credit.is_active && credit.offer_type !== 'status');
 
-            if (activeCredits.length === 0) {
+            if (activeCredits.length === 0 && statusPerks.length === 0) {
                 creditsList.innerHTML = '<div style="text-align: center; color: #6b7280; padding: 20px;">No active benefits or credits</div>';
                 creditsSection.style.display = 'block';
                 return;
@@ -1212,7 +1215,17 @@
                 `;
             }).join('');
 
-            creditsList.innerHTML = `<div class="modal-credits-list">${creditsHtml}</div>`;
+            const statusHtml = statusPerks.length === 0 ? '' : `
+                <div class="modal-credit-name" style="margin: 16px 0 8px;">Status &amp; access</div>
+                <div class="modal-credits-list">${statusPerks.map(perk => `
+                    <div class="modal-credit-item">
+                        <div class="modal-credit-content">
+                            <div class="modal-credit-name">${perk.description}</div>
+                        </div>
+                    </div>`).join('')}
+                </div>`;
+
+            creditsList.innerHTML = `<div class="modal-credits-list">${creditsHtml}</div>${statusHtml}`;
             creditsSection.style.display = 'block';
         }
 

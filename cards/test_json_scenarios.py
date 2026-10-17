@@ -302,6 +302,18 @@ class JSONScenarioTest(JSONScenarioTestBase):
             "Un-opted-in credit must not appear in the breakdown at all")
         self.print_scenario_results(scenario, recommendations)
 
+    def test_credit_stackability_expired_and_status_count_nothing(self):
+        """Story 19: an expired credit and a status perk add $0; only the
+        live $15/mo credit counts."""
+        if not self.scenarios:
+            self.skipTest("No scenarios found in JSON file")
+        scenario = self.get_scenario('Credit Stackability - Expired And Status Credits Count Nothing')
+        recommendations = self.run_scenario_test(scenario)
+        card = next(rec for rec in recommendations if rec['card'].slug == 'dated-credit-card-test')
+        credits = [b for b in card['rewards_breakdown'] if b.get('type') == 'credit']
+        self.assertAlmostEqual(sum(b['category_rewards'] for b in credits), 180)
+        self.print_scenario_results(scenario, recommendations)
+
     def test_bonus_sequencing_avoids_wasted_selection(self):
         """Phase E: selection is capacity-aware enough to never pick a card
         whose bonus can't coexist with a bigger one already claiming the

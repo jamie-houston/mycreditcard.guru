@@ -871,6 +871,56 @@ class CreditAllocationTests(TestCase):
         self.assertFalse(rec_not_pays['pays_for_itself'])
 
 
+class DatedCreditTests(TestCase):
+    """Story 19: a credit counts in full while active on the engine's date,
+    $0 outside it, and a status perk never counts at all."""
+
+    def setUp(self):
+        from cards.models import SpendingCategory, SpendingCredit, UserSpendingCreditPreference
+        self.profile = UserSpendingProfile.objects.create(
+            user=User.objects.create_user(username='dated'))
+        cashback = RewardType.objects.create(name='Cashback', slug='cashback')
+        self.card = CreditCard.objects.create(
+            name='Dated Card', slug='dated-card',
+            issuer=Issuer.objects.create(name='Generic Bank', slug='generic-bank'),
+            signup_bonus_type=cashback, primary_reward_type=cashback)
+        self.uber_eats = SpendingCredit.objects.create(
+            name='Uber Eats', slug='uber_eats', display_name='Uber Eats',
+            category=SpendingCategory.objects.create(name='Dining', slug='dining'))
+        UserSpendingCreditPreference.objects.create(
+            profile=self.profile, spending_credit=self.uber_eats, values_credit=True)
+
+    def _credit(self, value, times_per_year=1, **fields):
+        from cards.models import CardCredit
+        return CardCredit.objects.create(
+            card=self.card, spending_credit=self.uber_eats, description='Uber Eats',
+            value=Decimal(str(value)), times_per_year=times_per_year, **fields)
+
+    def _value_on(self, on_date):
+        from .recommendation_engine import RecommendationEngine
+        engine = RecommendationEngine(self.profile)
+        engine.today = on_date
+        return engine._calculate_card_credits_value(self.card)[0]
+
+    def test_a_credit_that_ended_yesterday_adds_nothing(self):
+        from datetime import date
+        self._credit(120, end_date=date(2026, 10, 16))
+        self.assertEqual(self._value_on(date(2026, 10, 16)), 120.0)
+        self.assertEqual(self._value_on(date(2026, 10, 17)), 0.0)
+
+    def test_a_dated_successor_takes_over_on_its_start_date(self):
+        from datetime import date
+        self._credit(250, times_per_year=2, end_date=date(2026, 12, 31))
+        self._credit(250, times_per_year=4, start_date=date(2027, 1, 1))
+        self.assertEqual(self._value_on(date(2026, 10, 17)), 500.0)
+        self.assertEqual(self._value_on(date(2027, 1, 1)), 1000.0)
+
+    def test_a_status_perk_is_never_valued(self):
+        from datetime import date
+        self._credit(50, offer_type='status')
+        self.assertEqual(self._value_on(date(2026, 10, 17)), 0.0)
+
+
 class QuickRecommendationSafetyTests(TestCase):
     """The quick-rec endpoint must never mutate stored profile data
     (the old behavior deleted and recreated it from the form payload)."""

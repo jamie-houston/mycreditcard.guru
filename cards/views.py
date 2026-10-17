@@ -62,8 +62,9 @@ class SpendingCreditListView(generics.ListAPIView):
         carrying the credit yet."""
         import statistics
         values_by_credit = {}
-        card_credits = CardCredit.objects.filter(
-            is_active=True, card__is_active=True, spending_credit__isnull=False
+        from datetime import date
+        card_credits = CardCredit.objects.active_on(date.today()).filter(
+            card__is_active=True, spending_credit__isnull=False
         ).select_related('card')
         for card_credit in card_credits:
             values_by_credit.setdefault(card_credit.spending_credit_id, []).append(card_credit.annual_value)
@@ -272,7 +273,7 @@ def credit_usage_view(request):
     from datetime import date
     today = date.today()
     
-    valid_credits = {str(c.id): c for c in CardCredit.objects.filter(is_active=True)}
+    valid_credits = {str(c.id): c for c in CardCredit.objects.active_on(today)}
     for credit_id_str, defaults in parsed.items():
         credit = valid_credits.get(credit_id_str)
         if not credit:

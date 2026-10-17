@@ -98,13 +98,18 @@ def build_scorecard(user, today):
         if shared_with is None:
             usage_shown_on[card.id] = holding
 
+        # Credits that have started. One that has since ended still counts
+        # its trailing-12-month usage, but is no longer available or unused.
         credits = [c for c in card.credits.filter(is_active=True)
                    .select_related('spending_credit', 'category')
-                   if c.offer_type in STATEMENT_CREDIT_TYPES]
+                   if c.offer_type in STATEMENT_CREDIT_TYPES
+                   and (c.start_date is None or c.start_date <= today)]
         available = used = 0.0
         unused = []
         for card_credit in credits:
-            available += card_credit.annual_value
+            current = card_credit.is_active_on(today)
+            if current:
+                available += card_credit.annual_value
             period_value = card_credit.annual_value / card_credit.times_per_year
             if shared_with is not None:
                 continue
@@ -119,7 +124,7 @@ def build_scorecard(user, today):
                 if usage.period_key == current_key:
                     used_now = amount
             left = period_value - used_now
-            if left > 0.005:
+            if current and left > 0.005:
                 unused.append({'name': credit_name(card_credit), 'left': left,
                                'period': current_key})
 

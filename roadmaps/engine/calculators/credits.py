@@ -47,8 +47,10 @@ class CreditsCalculator:
             )
 
         entries = []
-        for card_credit in card.credits.filter(is_active=True).select_related(
-                'spending_credit', 'category'):
+        # A status perk (IHG Platinum, A-List) is display-only and never adds value.
+        for card_credit in (card.credits.active_on(self.engine.today)
+                            .exclude(offer_type='status')
+                            .select_related('spending_credit', 'category')):
             if card_credit.spending_credit and card_credit.spending_credit.slug in self.engine._credit_prefs:
                 credit_type = "benefit"
                 credit_name = card_credit.spending_credit.display_name

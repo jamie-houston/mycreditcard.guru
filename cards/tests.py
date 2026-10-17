@@ -570,6 +570,41 @@ class ImportCardsKeepsCreditUsageTests(TestCase):
             sorted(card.credits.values_list('description', flat=True)),
             ['CLEAR Plus', 'Equinox Credit', 'Resy Credit'])
 
+    def test_a_dated_successor_is_a_second_row_and_usage_survives(self):
+        from datetime import date
+        edit = {'description': 'The Edit', 'value': 250, 'times_per_year': 2}
+        card = self._import([edit])
+        current = card.credits.get()
+        UserCreditUsage.objects.create(
+            profile=self.profile, card_credit=current, period_key='2026-H2', used=True)
+
+        card = self._import([
+            dict(edit, end_date='2026-12-31'),
+            dict(edit, times_per_year=4, start_date='2027-01-01'),
+            {'description': 'IHG Platinum Elite', 'value': 0, 'offer_type': 'status',
+             'end_date': '2027-12-31'},
+        ])
+
+        self.assertEqual(card.credits.count(), 3)
+        current.refresh_from_db()
+        self.assertEqual(current.end_date, date(2026, 12, 31))
+        self.assertTrue(UserCreditUsage.objects.filter(card_credit=current).exists())
+        edit_value = lambda on: sum(
+            c.annual_value for c in card.credits.active_on(on).filter(description='The Edit'))
+        self.assertEqual(edit_value(date(2026, 10, 17)), 500)
+        self.assertEqual(edit_value(date(2027, 1, 1)), 1000)
+
+    def test_card_api_lists_only_credits_active_today(self):
+        from datetime import date, timedelta
+        card = self._import([{'description': 'Current', 'value': 10}])
+        today = date.today()
+        CardCredit.objects.create(card=card, description='Expired', value=10,
+                                  end_date=today - timedelta(days=1))
+        CardCredit.objects.create(card=card, description='Not yet', value=10,
+                                  start_date=today + timedelta(days=1))
+        response = self.client.get(f'/api/cards/cards/{card.id}/')
+        self.assertEqual([c['description'] for c in response.json()['credits']], ['Current'])
+
 
 class TemplatePagesTests(TestCase):
     def setUp(self):
@@ -734,3 +769,14 @@ class CreditMathBuilderAPITests(TestCase):
         unclaimed_data = next(c for c in results if c['slug'] == 'unclaimed')
         self.assertIsNone(unclaimed_data['typical_value'])
 
+
+
+class ValidateCardsDuplicateTests(TestCase):
+    def test_a_dated_successor_is_not_a_duplicate(self):
+        from cards.management.commands.validate_cards import Command
+        edit = {'description': 'The Edit', 'value': 250}
+        find = Command()._find_duplicate_credits
+        self.assertEqual(find([dict(edit, end_date='2026-12-31'),
+                               dict(edit, start_date='2027-01-01')]), [])
+        self.assertEqual(len(find([dict(edit, end_date='2027-06-30'),
+                                   dict(edit, start_date='2027-01-01')])), 1)

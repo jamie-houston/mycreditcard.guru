@@ -958,6 +958,9 @@ class Command(BaseCommand):
                 description=credit_data.get('description', ''),
                 value=credit_data.get('value', 0),
                 times_per_year=credit_data.get('times_per_year', 1),
+                offer_type=credit_data.get('offer_type', ''),
+                start_date=credit_data.get('start_date'),
+                end_date=credit_data.get('end_date'),
             )
 
         return card

@@ -224,6 +224,18 @@ class SpendingCredit(models.Model):
         return self.display_name
 
 
+class CardCreditQuerySet(models.QuerySet):
+    def active_on(self, on_date):
+        """Credits in effect on the given date — the same rule as
+        RewardCategoryQuerySet.active_on. Null dates are open-ended; an
+        expired credit is worth $0, not its old value forever."""
+        return self.filter(
+            models.Q(is_active=True),
+            models.Q(start_date__isnull=True) | models.Q(start_date__lte=on_date),
+            models.Q(end_date__isnull=True) | models.Q(end_date__gte=on_date),
+        )
+
+
 class CardCredit(models.Model):
     OFFER_TYPE_CHOICES = [
         ('statement_credit', 'Statement credit'),
@@ -231,6 +243,7 @@ class CardCredit(models.Model):
         ('points_miles', 'Points / miles'),
         ('membership', 'Membership / subscription'),
         ('companion_pass', 'Companion pass'),
+        ('status', 'Status / access'),
         ('other', 'Other'),
     ]
 
@@ -245,10 +258,22 @@ class CardCredit(models.Model):
     is_active = models.BooleanField(default=True)
     offer_type = models.CharField(
         max_length=20, choices=OFFER_TYPE_CHOICES, blank=True,
-        help_text="How this credit pays out (display only, not read by the engine)")
-    
+        help_text="How this credit pays out. Display only, except 'status', "
+                  "which the engine never values")
+    start_date = models.DateField(null=True, blank=True)
+    end_date = models.DateField(null=True, blank=True)
+
+    objects = CardCreditQuerySet.as_manager()
+
     def __str__(self):
         return f"{self.card} - {self.description}"
+
+    def is_active_on(self, on_date):
+        """In-memory twin of CardCreditQuerySet.active_on, for rows that
+        were already prefetched."""
+        return (self.is_active
+                and (self.start_date is None or self.start_date <= on_date)
+                and (self.end_date is None or self.end_date >= on_date))
     
     @property
     def annual_value(self):

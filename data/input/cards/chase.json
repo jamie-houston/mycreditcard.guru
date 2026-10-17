@@ -75,7 +75,8 @@
       {
         "category": "dining",
         "value": 150,
-        "times_per_year": 2
+        "times_per_year": 2,
+        "end_date": "2030-06-30"
       },
       {
         "credit_type": "apple_tv",
@@ -95,23 +96,41 @@
       {
         "credit_type": "stubhub",
         "value": 150,
-        "times_per_year": 2
+        "times_per_year": 2,
+        "end_date": "2027-12-31"
       },
       {
         "credit_type": "doordash",
         "value": 35,
-        "times_per_year": 12
+        "times_per_year": 12,
+        "end_date": "2029-12-31"
       },
       {
         "category": "lyft",
         "value": 10,
-        "times_per_year": 12
+        "times_per_year": 12,
+        "end_date": "2027-09-30"
       },
       {
         "description": "Peloton membership credit",
         "value": 10,
         "times_per_year": 12,
-        "offer_type": "statement_credit"
+        "offer_type": "statement_credit",
+        "end_date": "2027-12-31"
+      },
+      {
+        "description": "Select-hotel credit (IHG, Omni, Virgin, Montage, Pendry, Minor, Pan Pacific via Chase Travel)",
+        "value": 250,
+        "times_per_year": 1,
+        "offer_type": "statement_credit",
+        "start_date": "2026-01-01",
+        "end_date": "2026-12-31"
+      },
+      {
+        "description": "IHG One Rewards Platinum Elite",
+        "value": 0,
+        "offer_type": "status",
+        "end_date": "2027-12-31"
       }
     ],
     "verified": true,
@@ -248,7 +267,8 @@
       {
         "credit_type": "doordash",
         "value": 10,
-        "times_per_year": 12
+        "times_per_year": 12,
+        "end_date": "2029-12-31"
       }
     ],
     "verified": true,
@@ -309,7 +329,14 @@
       {
         "description": "The Edit by Chase Travel hotel credit",
         "value": 250,
-        "times_per_year": 2
+        "times_per_year": 2,
+        "end_date": "2026-12-31"
+      },
+      {
+        "description": "The Edit by Chase Travel hotel credit",
+        "value": 250,
+        "times_per_year": 4,
+        "start_date": "2027-01-01"
       },
       {
         "credit_type": "airport_lounge",
@@ -329,28 +356,47 @@
       {
         "credit_type": "doordash",
         "value": 25,
-        "times_per_year": 12
+        "times_per_year": 12,
+        "end_date": "2027-12-31"
       },
       {
         "credit_type": "google_workspace",
         "value": 200,
-        "times_per_year": 1
+        "times_per_year": 1,
+        "end_date": "2027-12-31"
       },
       {
         "credit_type": "ziprecruiter",
         "value": 200,
-        "times_per_year": 2
+        "times_per_year": 2,
+        "end_date": "2027-12-31"
       },
       {
         "category": "lyft",
         "value": 10,
-        "times_per_year": 12
+        "times_per_year": 12,
+        "end_date": "2027-09-30"
       },
       {
         "description": "Gift Card Credit",
         "credit_type": "shopping",
         "value": 50,
-        "times_per_year": 2
+        "times_per_year": 2,
+        "end_date": "2028-10-31"
+      },
+      {
+        "description": "Select-hotel credit (IHG, Omni, Virgin, Montage, Pendry, Minor, Pan Pacific via Chase Travel)",
+        "value": 250,
+        "times_per_year": 1,
+        "offer_type": "statement_credit",
+        "start_date": "2026-01-01",
+        "end_date": "2026-12-31"
+      },
+      {
+        "description": "IHG One Rewards Platinum Elite",
+        "value": 0,
+        "offer_type": "status",
+        "end_date": "2027-12-31"
       }
     ],
     "verified": true,
@@ -927,6 +973,11 @@
         "credit_type": "precheck",
         "value": 120,
         "weight": 0.4
+      },
+      {
+        "description": "Southwest A-List progress: 2,500 tier qualifying points per $5,000 spent",
+        "value": 0,
+        "offer_type": "status"
       }
     ],
     "verified": true,
@@ -1103,6 +1154,11 @@
         "weight": 1,
         "currency": "SOUTHWEST",
         "offer_type": "points_miles"
+      },
+      {
+        "description": "Southwest A-List progress: 2,000 tier qualifying points per $5,000 spent",
+        "value": 0,
+        "offer_type": "status"
       }
     ],
     "_sources": {

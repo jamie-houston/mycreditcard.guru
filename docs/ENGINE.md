@@ -13,6 +13,7 @@ $$\text{Headline Value} = \text{Category Rewards} + \text{Counted Signup Bonuses
 A strict reconciliation guard in the engine runs a sanity check on every generated roadmap. If any headline value drifts from the sum of its displayed terms by more than $1, the engine raises a reconciliation exception.
 
 - **Selection vs. Display**: The engine separates portfolio selection (which uses heuristic boosts, strategy weights, and prioritizations to find the best candidate cards) from the display math. The displayed dollars are always calculated via `_calculate_portfolio_allocation` (using category rates and caps) so that the sum of rewards across all categories exactly matches the user's actual spending budget.
+- **Dated credits**: A `CardCredit` counts in full while it is active on the engine's date (`CardCredit.objects.active_on`, the same rule as `RewardCategory`) and as $0 outside it, with no proration. A dated successor (a new amount from a set date) is a second row with its own `start_date`. A credit with `offer_type='status'` (hotel or airline status) is display-only and is never valued.
 
 ---
 

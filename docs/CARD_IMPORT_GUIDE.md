@@ -236,6 +236,14 @@ untyped credit's description, makes it a new credit: the old row and its usage
 are deleted. `offer_type` other than `statement_credit` (or blank) — lounge
 access, free bags, anniversary points — keeps a credit off the scorecard.
 
+**Dated credits and status perks.** A credit takes optional `start_date` /
+`end_date` (`YYYY-MM-DD`, the same spelling as reward categories) and counts
+only while active. `start_date` is part of the match key, so a new amount from
+a set date is a second entry: give the old one an `end_date` and the new one a
+`start_date`. `offer_type: "status"` with `value: 0` records a status perk
+(e.g. `"IHG One Rewards Platinum Elite"`). It shows under "Status & access" in
+the card modal and is never valued.
+
 ## Import Commands
 
 ### Using the Interactive Script (Recommended)

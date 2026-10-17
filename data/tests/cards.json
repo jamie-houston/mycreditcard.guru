@@ -1331,5 +1331,50 @@
       }
     ],
     "slug": "capone-test-candidate"
+  },
+  {
+    "name": "Dated Credit Card",
+    "issuer": "Generic Bank",
+    "annual_fee": 0,
+    "signup_bonus_amount": 200,
+    "signup_bonus_type": "Cashback",
+    "primary_reward_type": "Cashback",
+    "metadata": {
+      "reward_value_multiplier": 0.01,
+      "discontinued": false,
+      "signup_bonus": {
+        "bonus_amount": 200,
+        "spending_requirement": 1000,
+        "time_limit_months": 3
+      }
+    },
+    "reward_categories": [
+      {
+        "category": "other",
+        "reward_rate": 1.0
+      }
+    ],
+    "slug": "dated-credit-card-test",
+    "credits": [
+      {
+        "credit_type": "uber_eats",
+        "value": 15,
+        "times_per_year": 12
+      },
+      {
+        "credit_type": "uber_eats",
+        "value": 20,
+        "times_per_year": 12,
+        "start_date": "2020-01-01",
+        "end_date": "2020-12-31"
+      },
+      {
+        "credit_type": "uber_eats",
+        "description": "Test Hotel Gold",
+        "value": 50,
+        "times_per_year": 1,
+        "offer_type": "status"
+      }
+    ]
   }
 ]

@@ -2,6 +2,7 @@ import json
 import os
 from datetime import datetime
 from django.core.management.base import BaseCommand
+from django.utils.dateparse import parse_date
 from django.utils.text import slugify
 from django.contrib.auth.models import User
 from cards.models import (
@@ -279,7 +280,7 @@ class Command(BaseCommand):
                 (
                     cr.category_id, cr.spending_credit_id, cr.description,
                     str(cr.value), cr.times_per_year, str(cr.weight),
-                    cr.currency, cr.offer_type,
+                    cr.currency, cr.offer_type, cr.start_date, cr.end_date,
                 )
                 for cr in card.credits.all()
             ),
@@ -455,12 +456,13 @@ class Command(BaseCommand):
                 )
 
     @staticmethod
-    def _credit_identity(category_id, spending_credit_id, description):
+    def _credit_identity(category_id, spending_credit_id, description, start_date):
         """What makes an imported credit "the same" credit as an existing row:
-        its type, or its description when it has no type."""
+        its type, or its description when it has no type, plus its start date —
+        a dated successor (The Edit at 4 × $250 from 2027) is a second row."""
         if category_id or spending_credit_id:
-            return (category_id, spending_credit_id, '')
-        return (None, None, description)
+            return (category_id, spending_credit_id, '', start_date)
+        return (None, None, description, start_date)
 
     def import_card_credits(self, card, credits):
         # Match incoming credits to existing rows and update them in place, so
@@ -468,7 +470,8 @@ class Command(BaseCommand):
         existing = {}
         for card_credit in card.credits.order_by('id'):
             key = self._credit_identity(
-                card_credit.category_id, card_credit.spending_credit_id, card_credit.description)
+                card_credit.category_id, card_credit.spending_credit_id, card_credit.description,
+                card_credit.start_date)
             existing.setdefault(key, []).append(card_credit)
 
         for credit_data in credits:
@@ -505,11 +508,13 @@ class Command(BaseCommand):
                 'weight': credit_data.get('weight', 1.0),
                 'currency': credit_data.get('currency', 'USD'),
                 'offer_type': credit_data.get('offer_type', ''),
+                'start_date': parse_date(credit_data['start_date']) if credit_data.get('start_date') else None,
+                'end_date': parse_date(credit_data['end_date']) if credit_data.get('end_date') else None,
             }
             key = self._credit_identity(
                 category.id if category else None,
                 spending_credit.id if spending_credit else None,
-                fields['description'])
+                fields['description'], fields['start_date'])
             matches = existing.get(key)
             if matches:
                 card_credit = matches.pop(0)
