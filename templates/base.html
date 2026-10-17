@@ -42,6 +42,7 @@
                 <li><a href="/" class="{% if request.resolver_match.url_name == 'landing' %}active{% endif %}"><span class="ico">home</span> Home</a></li>
                 <li><a href="/roadmap/" class="{% if request.resolver_match.url_name == 'roadmap' %}active{% endif %}"><span class="ico">route</span> Roadmap</a></li>
                 <li><a href="/profile/" class="{% if request.resolver_match.url_name == 'profile' %}active{% endif %}"><span class="ico">style</span> My Cards</a></li>
+                <li><a href="/scorecard/" class="{% if request.resolver_match.url_name == 'scorecard' %}active{% endif %}"><span class="ico">balance</span> Scorecard</a></li>
                 <li><a href="/cards/" class="{% if request.resolver_match.url_name == 'cards_list' %}active{% endif %}"><span class="ico">search</span> Browse</a></li>
                 <li><a href="/help/" class="{% if request.resolver_match.url_name == 'help' %}active{% endif %}"><span class="ico">help</span> Help</a></li>
                 <li><a href="/redemptions/" class="{% if request.resolver_match.url_name == 'redemptions' %}active{% endif %}"><span class="ico">redeem</span> Redeem</a></li>
@@ -90,6 +91,9 @@
             </a>
             <a href="/profile/" class="mobile-menu-item {% if request.resolver_match.url_name == 'profile' %}active{% endif %}">
                 <span class="ico">style</span> My Cards
+            </a>
+            <a href="/scorecard/" class="mobile-menu-item {% if request.resolver_match.url_name == 'scorecard' %}active{% endif %}">
+                <span class="ico">balance</span> Scorecard
             </a>
             <a href="/cards/" class="mobile-menu-item {% if request.resolver_match.url_name == 'cards_list' %}active{% endif %}">
                 <span class="ico">search</span> Browse

@@ -1,76 +1,73 @@
+{% extends 'base.html' %}
 {% load static %}
-<!DOCTYPE html>
-{# Standalone page like wallet.html: server-rendered, no builder JS. #}
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Scorecard - Credit Card Guru</title>
-    <link rel="stylesheet" href="{% static 'css/pages/scorecard.css' %}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-</head>
-<body>
-    <div class="header">
-        <h1><i class="fas fa-scale-balanced"></i> Is each card paying for itself?</h1>
-        <div class="subhead">Annual fee vs. statement credits used in the 12 months to {{ today|date:"M j, Y" }}</div>
+
+{% block title %}Scorecard - Credit Card Guru{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/pages/scorecard.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="scorecard-container">
+    <div class="scorecard-intro">
+        <h1>⚖️ Is each card paying for itself?</h1>
+        <p class="scorecard-lede">Annual fee vs. statement credits used in the 12 months to {{ today|date:"M j, Y" }}</p>
     </div>
 
-    <div class="cards">
-        {% if not rows %}
-            <div class="empty">
-                <strong>No open cards yet.</strong>
-                <p>Add the cards you own to see whether each one covers its fee.</p>
-                <a href="{% url 'profile' %}">Add my cards</a>
-            </div>
-        {% else %}
-            <div class="totals">
-                <div><span class="label">Fees</span><span class="value">${{ totals.fees|floatformat:"0g" }}</span></div>
-                <div><span class="label">Credits used</span><span class="value">${{ totals.used|floatformat:"0g" }}</span></div>
-                <div><span class="label">Net</span><span class="value {% if totals.net < 0 %}negative{% else %}positive{% endif %}">{% if totals.net < 0 %}&minus;${% widthratio totals.net 1 -1 as neg %}{{ neg|floatformat:"0g" }}{% else %}+${{ totals.net|floatformat:"0g" }}{% endif %}</span></div>
-            </div>
-            <p class="note">Cash back and points earned aren't counted yet, so a card that pays its way by earning (not by credits) reads short here.</p>
-
-            {% for row in rows %}
-                <div class="card verdict-{{ row.verdict }}">
-                    <div class="card-head">
-                        <span class="verdict">{% if row.verdict == 'pays' %}&#x2705;{% elif row.verdict == 'close' %}&#x2796;{% else %}&#x274C;{% endif %}</span>
-                        <div class="name">
-                            <div class="card-name">{{ row.holding.display_name }}</div>
-                            {% if show_owner and row.owner %}<div class="owner">{{ row.owner }}</div>{% endif %}
-                        </div>
-                        <div class="net {% if row.net < 0 %}negative{% else %}positive{% endif %}">
-                            {% if row.net < 0 %}&minus;${% widthratio row.net 1 -1 as neg %}{{ neg|floatformat:"0g" }}{% else %}+${{ row.net|floatformat:"0g" }}{% endif %}
-                        </div>
-                    </div>
-                    <div class="figures">
-                        <span>Fee <strong>${{ row.fee|floatformat:"0g" }}</strong>{% if row.next_fee %} &middot; next &asymp; {{ row.next_fee|date:"M j, Y" }}{% endif %}</span>
-                        {% if row.available %}<span>Used <strong>${{ row.used|floatformat:"2g" }}</strong> of ${{ row.available|floatformat:"0g" }}/yr in credits</span>{% else %}<span>No statement credits</span>{% endif %}
-                    </div>
-                    {% if row.usage_shown_on %}
-                        <div class="shared">Credit usage is recorded once per household and shown on {{ row.usage_shown_on.display_name }}.</div>
-                    {% elif row.unused %}
-                        {% if row.verdict == 'short' and row.gap_closers %}
-                            <div class="unused-label">{% if row.gap_closed %}Using these would close the gap{% else %}Even using all of these leaves it short{% endif %}</div>
-                            <ul class="unused gap">
-                                {% for credit in row.gap_closers %}<li>{{ credit.name }} <span>${{ credit.left|floatformat:"2g" }} left ({{ credit.period }})</span></li>{% endfor %}
-                            </ul>
-                        {% endif %}
-                        <details>
-                            <summary>Unused this period ({{ row.unused|length }})</summary>
-                            <ul class="unused">
-                                {% for credit in row.unused %}<li>{{ credit.name }} <span>${{ credit.left|floatformat:"2g" }} left ({{ credit.period }})</span></li>{% endfor %}
-                            </ul>
-                        </details>
-                    {% endif %}
-                </div>
-            {% endfor %}
-        {% endif %}
-
-        <div class="footer-links">
-            <a href="{% url 'profile' %}">My cards</a>
-            <a href="{% url 'wallet' %}">Wallet</a>
-            <a href="{% url 'help' %}#scorecard">How this is counted</a>
+    {% if not rows %}
+        <div class="empty">
+            <strong>No open cards yet.</strong>
+            <p>Add the cards you own to see whether each one covers its fee.</p>
+            <a href="{% url 'profile' %}">Add my cards</a>
         </div>
+    {% else %}
+        <div class="totals">
+            <div><span class="label">Fees</span><span class="value">${{ totals.fees|floatformat:"0g" }}</span></div>
+            <div><span class="label">Credits used</span><span class="value">${{ totals.used|floatformat:"0g" }}</span></div>
+            <div><span class="label">Net</span><span class="value {% if totals.net < 0 %}negative{% else %}positive{% endif %}">{% if totals.net < 0 %}&minus;${% widthratio totals.net 1 -1 as neg %}{{ neg|floatformat:"0g" }}{% else %}+${{ totals.net|floatformat:"0g" }}{% endif %}</span></div>
+        </div>
+        <p class="note">Cash back and points earned aren't counted yet, so a card that pays its way by earning (not by credits) reads short here.</p>
+
+        {% for row in rows %}
+            <div class="card verdict-{{ row.verdict }}">
+                <div class="card-head">
+                    <span class="verdict">{% if row.verdict == 'pays' %}&#x2705;{% elif row.verdict == 'close' %}&#x2796;{% else %}&#x274C;{% endif %}</span>
+                    <div class="name">
+                        <div class="card-name">{{ row.holding.display_name }}</div>
+                        {% if show_owner and row.owner %}<div class="owner">{{ row.owner }}</div>{% endif %}
+                    </div>
+                    <div class="net {% if row.net < 0 %}negative{% else %}positive{% endif %}">
+                        {% if row.net < 0 %}&minus;${% widthratio row.net 1 -1 as neg %}{{ neg|floatformat:"0g" }}{% else %}+${{ row.net|floatformat:"0g" }}{% endif %}
+                    </div>
+                </div>
+                <div class="figures">
+                    <span>Fee <strong>${{ row.fee|floatformat:"0g" }}</strong>{% if row.next_fee %} &middot; next &asymp; {{ row.next_fee|date:"M j, Y" }}{% endif %}</span>
+                    {% if row.available %}<span>Used <strong>${{ row.used|floatformat:"2g" }}</strong> of ${{ row.available|floatformat:"0g" }}/yr in credits</span>{% else %}<span>No statement credits</span>{% endif %}
+                </div>
+                {% if row.usage_shown_on %}
+                    <div class="shared">Credit usage is recorded once per household and shown on {{ row.usage_shown_on.display_name }}.</div>
+                {% elif row.unused %}
+                    {% if row.verdict == 'short' and row.gap_closers %}
+                        <div class="unused-label">{% if row.gap_closed %}Using these would close the gap{% else %}Even using all of these leaves it short{% endif %}</div>
+                        <ul class="unused gap">
+                            {% for credit in row.gap_closers %}<li>{{ credit.name }} <span>${{ credit.left|floatformat:"2g" }} left ({{ credit.period }})</span></li>{% endfor %}
+                        </ul>
+                    {% endif %}
+                    <details>
+                        <summary>Unused this period ({{ row.unused|length }})</summary>
+                        <ul class="unused">
+                            {% for credit in row.unused %}<li>{{ credit.name }} <span>${{ credit.left|floatformat:"2g" }} left ({{ credit.period }})</span></li>{% endfor %}
+                        </ul>
+                    </details>
+                {% endif %}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="scorecard-links">
+        <a href="{% url 'profile' %}">My cards</a>
+        <a href="{% url 'wallet' %}">Wallet</a>
+        <a href="{% url 'help' %}#scorecard">How this is counted</a>
     </div>
-</body>
-</html>
+</div>
+{% endblock %}
