@@ -12,8 +12,9 @@
     "reward_value_multiplier": 0.02,
     "reward_categories": [
       {
-        "category": "travel",
-        "reward_rate": 5
+        "category": "airlines",
+        "reward_rate": 5,
+        "max_spend": 500000
       },
       {
         "category": "other",
@@ -196,7 +197,7 @@
       },
       {
         "category": "other",
-        "reward_rate": 2
+        "reward_rate": 1
       }
     ],
     "card_type": "personal",

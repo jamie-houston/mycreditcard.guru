@@ -24,6 +24,15 @@
     "reward_value_multiplier": 0.015,
     "reward_categories": [
       {
+        "category": "chase_travel",
+        "reward_rate": 8
+      },
+      {
+        "category": "lyft",
+        "reward_rate": 5,
+        "end_date": "2027-09-30"
+      },
+      {
         "category": "dining",
         "reward_rate": 3
       },
@@ -87,6 +96,22 @@
         "credit_type": "stubhub",
         "value": 150,
         "times_per_year": 2
+      },
+      {
+        "credit_type": "doordash",
+        "value": 35,
+        "times_per_year": 12
+      },
+      {
+        "category": "lyft",
+        "value": 10,
+        "times_per_year": 12
+      },
+      {
+        "description": "Peloton membership credit",
+        "value": 10,
+        "times_per_year": 12,
+        "offer_type": "statement_credit"
       }
     ],
     "verified": true,
@@ -119,6 +144,11 @@
       {
         "category": "dining",
         "reward_rate": 3
+      },
+      {
+        "category": "lyft",
+        "reward_rate": 2,
+        "end_date": "2027-09-30"
       },
       {
         "category": "other",
@@ -167,7 +197,8 @@
       },
       {
         "category": "lyft",
-        "reward_rate": 5
+        "reward_rate": 5,
+        "end_date": "2027-09-30"
       },
       {
         "category": "dining",
@@ -208,6 +239,16 @@
         "description": "Global Entry / TSA PreCheck / NEXUS Credit",
         "credit_type": "precheck",
         "value": 120
+      },
+      {
+        "credit_type": "dashpass",
+        "value": 10,
+        "times_per_year": 12
+      },
+      {
+        "credit_type": "doordash",
+        "value": 10,
+        "times_per_year": 12
       }
     ],
     "verified": true,
@@ -242,10 +283,6 @@
         "end_date": "2027-09-30"
       },
       {
-        "category": "dining",
-        "reward_rate": 3
-      },
-      {
         "category": "travel",
         "reward_rate": 4
       },
@@ -260,7 +297,7 @@
     ],
     "card_type": "business",
     "network": "Visa",
-    "url": "https://creditcards.chase.com/rewards-credit-cards/sapphire/reserve",
+    "url": "https://creditcards.chase.com/business-credit-cards/sapphire/reserve",
     "image_url": "/images/chase/sapphire-reserve.png",
     "discontinued": false,
     "credits": [
@@ -285,16 +322,6 @@
         "value": 120
       },
       {
-        "credit_type": "apple_tv",
-        "value": 10,
-        "times_per_year": 12
-      },
-      {
-        "credit_type": "apple_music",
-        "value": 10,
-        "times_per_year": 12
-      },
-      {
         "credit_type": "dashpass",
         "value": 10,
         "times_per_year": 12
@@ -311,7 +338,8 @@
       },
       {
         "credit_type": "ziprecruiter",
-        "value": 400
+        "value": 200,
+        "times_per_year": 2
       },
       {
         "category": "lyft",
@@ -488,10 +516,17 @@
     "reward_value_multiplier": 0.01,
     "reward_categories": [
       {
-        "category": "amazon",
+        "category": "groceries",
         "reward_rate": 5,
-        "start_date": "2026-04-01",
-        "end_date": "2026-06-30",
+        "start_date": "2026-10-01",
+        "end_date": "2026-12-31",
+        "max_spend": 1500
+      },
+      {
+        "category": "dining",
+        "reward_rate": 5,
+        "start_date": "2026-10-01",
+        "end_date": "2026-12-31",
         "max_spend": 1500
       },
       {
@@ -505,6 +540,11 @@
       {
         "category": "drugstores",
         "reward_rate": 3
+      },
+      {
+        "category": "lyft",
+        "reward_rate": 2,
+        "end_date": "2027-09-30"
       },
       {
         "category": "other",
@@ -682,7 +722,7 @@
         "max_spending": 25000
       },
       {
-        "category": "groceries",
+        "category": "gas",
         "reward_rate": 2,
         "max_spending": 25000
       },
@@ -690,6 +730,11 @@
         "category": "dining",
         "reward_rate": 2,
         "max_spending": 25000
+      },
+      {
+        "category": "lyft",
+        "reward_rate": 5,
+        "end_date": "2027-09-30"
       },
       {
         "category": "other",
@@ -747,6 +792,15 @@
     "reward_type": "Cashback",
     "reward_value_multiplier": 0.01,
     "reward_categories": [
+      {
+        "category": "chase_travel",
+        "reward_rate": 5
+      },
+      {
+        "category": "lyft",
+        "reward_rate": 5,
+        "end_date": "2027-09-30"
+      },
       {
         "category": "other",
         "reward_rate": 2
@@ -827,6 +881,22 @@
     "reward_value_multiplier": 0.01,
     "reward_categories": [
       {
+        "category": "hotels",
+        "reward_rate": 2
+      },
+      {
+        "category": "gas",
+        "reward_rate": 2
+      },
+      {
+        "category": "dining",
+        "reward_rate": 2
+      },
+      {
+        "category": "transportation",
+        "reward_rate": 2
+      },
+      {
         "category": "other",
         "reward_rate": 1
       }
@@ -838,13 +908,24 @@
     "discontinued": false,
     "credits": [
       {
-        "description": "4x Upgraded Boardings",
+        "description": "Free Checked Bag",
         "value": 100,
-        "weight": 0.5
+        "times_per_year": 1,
+        "weight": 0.75,
+        "offer_type": "other"
+      },
+      {
+        "description": "Anniversary Points",
+        "value": 9000,
+        "times_per_year": 1,
+        "weight": 1,
+        "currency": "SOUTHWEST",
+        "offer_type": "points_miles"
       },
       {
         "description": "Global Entry / TSA PreCheck / NEXUS Credit",
-        "value": 100,
+        "credit_type": "precheck",
+        "value": 120,
         "weight": 0.4
       }
     ],
@@ -874,12 +955,12 @@
       {
         "category": "gas",
         "reward_rate": 2,
-        "min_spending": 5000
+        "max_spending": 5000
       },
       {
         "category": "groceries",
         "reward_rate": 2,
-        "min_spending": 5000
+        "max_spending": 5000
       },
       {
         "category": "other",
@@ -985,6 +1066,16 @@
     "reward_type": "Miles",
     "reward_value_multiplier": 0.012,
     "reward_categories": [
+      {
+        "category": "gas",
+        "reward_rate": 2,
+        "max_spending": 8000
+      },
+      {
+        "category": "dining",
+        "reward_rate": 2,
+        "max_spending": 8000
+      },
       {
         "category": "other",
         "reward_rate": 1
@@ -1542,17 +1633,17 @@
     "slug": "chase-freedom-legacy",
     "reward_categories": [
       {
-        "category": "amazon",
+        "category": "groceries",
         "reward_rate": 5,
-        "start_date": "2026-04-01",
-        "end_date": "2026-06-30",
+        "start_date": "2026-10-01",
+        "end_date": "2026-12-31",
         "max_spend": 1500
       },
       {
-        "category": "chase_travel",
+        "category": "dining",
         "reward_rate": 5,
-        "start_date": "2026-04-01",
-        "end_date": "2026-06-30",
+        "start_date": "2026-10-01",
+        "end_date": "2026-12-31",
         "max_spend": 1500
       },
       {
