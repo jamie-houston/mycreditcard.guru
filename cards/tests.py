@@ -780,3 +780,84 @@ class ValidateCardsDuplicateTests(TestCase):
                                dict(edit, start_date='2027-01-01')]), [])
         self.assertEqual(len(find([dict(edit, end_date='2027-06-30'),
                                    dict(edit, start_date='2027-01-01')])), 1)
+
+
+class SeedProfileMergeTests(TestCase):
+    """--merge is the production path, so it must only ever add."""
+
+    def setUp(self):
+        import tempfile
+        from .models import ProfileEntity
+        cashback = RewardType.objects.create(name='Cashback', slug='cashback')
+        issuer = Issuer.objects.create(name='Generic Bank', slug='generic-bank')
+        self.card_a = CreditCard.objects.create(
+            name='Card A', slug='card-a', issuer=issuer,
+            signup_bonus_type=cashback, primary_reward_type=cashback)
+        self.card_b = CreditCard.objects.create(
+            name='Card B', slug='card-b', issuer=issuer,
+            signup_bonus_type=cashback, primary_reward_type=cashback)
+        self.user = User.objects.create_user(username='real', password='keep-me')
+        self.profile = UserSpendingProfile.objects.create(user=self.user)
+        self.alex = ProfileEntity.objects.create(
+            profile=self.profile, name='Alex', is_primary=True)
+        # Added by hand on the site, no open date.
+        UserCard.objects.create(user=self.user, card=self.card_a, owner=self.alex)
+        self.tmpdir = tempfile.mkdtemp()
+        self.seed = {
+            'username': 'jamie',
+            'spending_from_scenario': 'unused',
+            'entities': [
+                {'name': 'Alex', 'kind': 'personal', 'primary': True},
+                {'name': 'Biz, LLC', 'kind': 'business', 'primary': True},
+            ],
+            'cards': [
+                {'card': 'card-a', 'owner': 'Alex', 'opened_date': '2020-01-01'},
+                {'card': 'card-b', 'owner': 'Biz, LLC', 'opened_date': '2024-02-20'},
+                {'card': 'card-b', 'owner': 'Alex', 'opened_date': '2019-01-01',
+                 'closed_date': '2022-01-01'},
+            ],
+        }
+
+    def _run(self, **kw):
+        import io, json, os
+        from django.core.management import call_command
+        path = os.path.join(self.tmpdir, 'seed.json')
+        with open(path, 'w') as f:
+            json.dump(self.seed, f)
+        out = io.StringIO()
+        call_command('seed_profile', file=path, stdout=out, **kw)
+        return out.getvalue()
+
+    def test_adds_only_what_is_missing_and_a_rerun_adds_nothing(self):
+        from .models import ProfileEntity
+        out = self._run(merge=True, username='real')
+        self.assertIn('2 cards added', out)
+        self.assertIn('card-a: already held', out)
+        self.assertEqual(UserCard.objects.filter(user=self.user).count(), 3)
+        # The existing primary wins over the seed file's second claim.
+        self.assertEqual(
+            list(ProfileEntity.objects.filter(profile=self.profile, is_primary=True)
+                 .values_list('name', flat=True)), ['Alex'])
+
+        out = self._run(merge=True, username='real')
+        self.assertIn('0 cards added', out)
+        self.assertEqual(UserCard.objects.filter(user=self.user).count(), 3)
+        self.assertEqual(ProfileEntity.objects.filter(profile=self.profile).count(), 2)
+
+    def test_never_creates_a_login_or_touches_the_password(self):
+        from django.core.management.base import CommandError
+        with self.assertRaisesMessage(CommandError, "No user 'jamie'"):
+            self._run(merge=True, username='jamie')
+        with self.assertRaisesMessage(CommandError, 'needs --username'):
+            self._run(merge=True)
+        with self.assertRaisesMessage(CommandError, 'never sets a password'):
+            self._run(merge=True, username='real', password='x')
+        self.assertFalse(User.objects.filter(username='jamie').exists())
+        self._run(merge=True, username='real')
+        self.user.refresh_from_db()
+        self.assertTrue(self.user.check_password('keep-me'))
+
+    def test_without_merge_production_still_refuses(self):
+        from django.core.management.base import CommandError
+        with self.assertRaisesMessage(CommandError, 'refuses to run with DEBUG=False'):
+            self._run(username='real')

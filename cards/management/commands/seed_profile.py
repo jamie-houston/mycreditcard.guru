@@ -43,14 +43,20 @@ class Command(BaseCommand):
         parser.add_argument(
             '--password', type=str, default=None,
             help='Password for the seeded user (else $SEED_PASSWORD, else generated)')
+        parser.add_argument(
+            '--merge', action='store_true',
+            help='Add entities and cards to an EXISTING login without touching '
+                 'anything it already has. Never creates a user or sets a '
+                 'password, so it is the one mode allowed in production.')
 
     def handle(self, *args, **options):
         # This creates a login and overwrites profile data; it has no business
-        # running against production.
-        if not settings.DEBUG:
+        # running against production. --merge does neither.
+        if not settings.DEBUG and not options['merge']:
             raise CommandError(
                 'seed_profile refuses to run with DEBUG=False — it creates a '
-                'login and overwrites profile data.')
+                'login and overwrites profile data. Use --merge to add cards '
+                'to an existing login instead.')
 
         file_path = options['file']
         if not os.path.exists(file_path):
@@ -61,6 +67,9 @@ class Command(BaseCommand):
 
         with open(file_path) as f:
             seed = json.load(f)
+
+        if options['merge']:
+            return self._merge(seed, options)
 
         username = options['username'] or seed.get('username') or 'jamie'
         password = options['password'] or os.environ.get('SEED_PASSWORD')
@@ -90,6 +99,53 @@ class Command(BaseCommand):
         self._report(username, password, generated, user_created,
                      entities, created, skipped, categories, credits)
 
+    def _merge(self, seed, options):
+        # No default username here: the seed file's 'jamie' must never land
+        # on whichever production login happens to share the name.
+        username = options['username']
+        if not username:
+            raise CommandError('--merge needs --username: the existing login to add cards to.')
+        if options['password']:
+            raise CommandError('--merge never sets a password; drop --password.')
+        user = User.objects.filter(username=username).first()
+        if user is None:
+            raise CommandError(f"No user '{username}' — --merge never creates a login.")
+
+        with transaction.atomic():
+            profile, _ = UserSpendingProfile.objects.get_or_create(user=user)
+            entities, added_entities = self._merge_entities(profile, seed)
+            created, skipped = self._create_cards(user, seed, entities, merge=True)
+
+        out, style = self.stdout, self.style
+        out.write(style.SUCCESS(f"Merged into existing user '{username}'"))
+        out.write(f'  {len(added_entities)} entities added: {", ".join(added_entities) or "none"}')
+        out.write(f'  {len(created)} cards added')
+        out.write('  spending and credit preferences left untouched')
+        if skipped:
+            out.write(style.WARNING(f'  {len(skipped)} cards skipped:'))
+            for label, reason in skipped:
+                out.write(style.WARNING(f'    - {label}: {reason}'))
+
+    def _merge_entities(self, profile, seed):
+        """Match entities by name; create only the missing ones.
+
+        An existing primary stays primary — the seed file's choice only
+        applies to a profile that has none.
+        """
+        entities, added = {}, []
+        has_primary = ProfileEntity.objects.filter(profile=profile, is_primary=True).exists()
+        for spec in seed['entities']:
+            entity = ProfileEntity.objects.filter(profile=profile, name=spec['name']).first()
+            if entity is None:
+                primary = spec.get('primary', False) and not has_primary
+                entity = ProfileEntity.objects.create(
+                    profile=profile, name=spec['name'],
+                    kind=spec.get('kind', 'personal'), is_primary=primary)
+                has_primary = has_primary or primary
+                added.append(spec['name'])
+            entities[spec['name']] = entity
+        return entities, added
+
     def _create_entities(self, profile, seed):
         entities = {}
         for spec in seed['entities']:
@@ -105,7 +161,7 @@ class Command(BaseCommand):
                 'needs "primary": true.')
         return entities
 
-    def _create_cards(self, user, seed, entities):
+    def _create_cards(self, user, seed, entities, merge=False):
         created, skipped = [], []
         for spec in seed['cards']:
             slug = spec['card']
@@ -124,13 +180,26 @@ class Command(BaseCommand):
                     f"Card {label} names owner '{owner_name}', which is not a "
                     f"declared entity (known: {sorted(entities)})")
 
+            owner = entities[owner_name]
+            opened = self._parse_date(spec.get('opened_date'), label, 'opened_date')
+            closed = self._parse_date(spec.get('closed_date'), label, 'closed_date')
+            if merge:
+                # Same holding already there (a rerun), or an open one the
+                # user added by hand — the one-open-per-owner rule forbids a
+                # second either way.
+                held = UserCard.objects.filter(user=user, card=card, owner=owner)
+                if (held.filter(opened_date=opened, closed_date=closed).exists()
+                        or (closed is None and held.filter(closed_date__isnull=True).exists())):
+                    skipped.append((label, 'already held'))
+                    continue
+
             UserCard.objects.create(
                 user=user,
                 card=card,
-                owner=entities[owner_name],
+                owner=owner,
                 nickname=nickname,
-                opened_date=self._parse_date(spec.get('opened_date'), label, 'opened_date'),
-                closed_date=self._parse_date(spec.get('closed_date'), label, 'closed_date'),
+                opened_date=opened,
+                closed_date=closed,
                 bonus_earned_date=self._parse_date(
                     spec.get('bonus_earned_date'), label, 'bonus_earned_date'),
                 notes=spec.get('note', ''),
